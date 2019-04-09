@@ -7,10 +7,10 @@
 
 import CoreImage
 import QuartzCore
-#if os(OSX)
-import AppKit
-#else
+#if canImport(UIKit)
 import UIKit
+#else
+import AppKit
 #endif
 final class VideoOutput: NSObject, FrameOutput {
     private var currentRender: MEFrame?

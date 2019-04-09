@@ -1,7 +1,7 @@
 import CoreMedia
 import GLKit
 
-#if os(OSX)
+#if os(macOS)
 public typealias GLKView = NSOpenGLView
 public typealias EAGLContext = NSOpenGLContext
 #endif
@@ -31,7 +31,7 @@ extension CGSize {
     }
 }
 
-#if !os(OSX)
+#if !os(macOS)
 class OpenGLPlayView: GLKView, PixelRenderView {
     private var drawableSize = CGSize(width: 1, height: 1) {
         didSet {
@@ -153,7 +153,7 @@ class OpenGLPlayView: GLKView, PixelRenderView {
         glUniformMatrix4fv(GLint(uniformModelViewProjectionMatrix), 1, GLboolean(GL_FALSE), matrixWithSize(size: bounds.size))
     }
 
-    #if !os(OSX)
+    #if !os(macOS)
     open override func layoutSubviews() {
         super.layoutSubviews()
         updateViewport()
@@ -168,7 +168,7 @@ class OpenGLPlayView: GLKView, PixelRenderView {
             glDrawArrays(GLenum(GL_TRIANGLE_STRIP), 0, 4)
             //            context.presentRenderbuffer(Int(GL_RENDERBUFFER))
         }
-        #if os(OSX)
+        #if os(macOS)
         setNeedsDisplay = true
         #else
         setNeedsDisplay()

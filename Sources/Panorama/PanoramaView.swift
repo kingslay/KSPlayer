@@ -1,9 +1,9 @@
 import CoreMedia
 import SceneKit
-#if os(OSX)
-import AppKit
-#else
+#if canImport(UIKit)
 import UIKit
+#else
+import AppKit
 #endif
 public final class PanoramaView: UIView {
     private var textureLoad: MetalTexture
@@ -60,7 +60,7 @@ public final class PanoramaView: UIView {
     }
 
     public convenience init(format: MediaFormat) {
-        #if os(OSX)
+        #if os(macOS)
         let metalDevice = MTLCopyAllDevices().first
         #else
         let metalDevice = MTLCreateSystemDefaultDevice()
@@ -69,7 +69,7 @@ public final class PanoramaView: UIView {
     }
 
     public convenience init(frame: CGRect, format: MediaFormat) {
-        #if os(OSX)
+        #if os(macOS)
         let metalDevice = MTLCopyAllDevices().first
         #else
         let metalDevice = MTLCreateSystemDefaultDevice()
@@ -98,7 +98,7 @@ public final class PanoramaView: UIView {
         orientationNode.removeFromParentNode()
     }
 
-    #if os(OSX)
+    #if os(macOS)
     public override func resize(withOldSuperviewSize oldSize: NSSize) {
         super.resize(withOldSuperviewSize: oldSize)
         scnView.frame = bounds

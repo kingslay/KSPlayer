@@ -1,8 +1,8 @@
 import SceneKit
-#if os(OSX)
-import AppKit
-#else
+#if canImport(UIKit)
 import UIKit
+#else
+import AppKit
 #endif
 
 final class PanoramaPanGestureManager {
@@ -31,7 +31,7 @@ final class PanoramaPanGestureManager {
         self.rotationNode = rotationNode
     }
 
-    #if os(OSX)
+    #if os(macOS)
     private func limit(angle: Float) -> CGFloat {
         var angle = angle
         if let minimum = minimumVerticalRotationAngle {

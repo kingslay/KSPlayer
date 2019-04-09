@@ -8,7 +8,7 @@
 import CoreMedia
 import GLKit
 
-#if !os(OSX)
+#if !os(macOS)
 final class OpenGLVRPlayView: OpenGLPlayView {
     private var fingerRotationX: Float = 0
     private var fingerRotationY: Float = 0
@@ -96,7 +96,7 @@ final class OpenGLVRPlayView: OpenGLPlayView {
             texture?.refreshTextureWithPixelBuffer(pixelBuffer: pixelBuffer)
             glDrawElements(GLenum(GL_TRIANGLES), GLsizei(numIndices), GLenum(GL_UNSIGNED_SHORT), nil)
         }
-        #if os(OSX)
+        #if os(macOS)
         setNeedsDisplay = true
         #else
         setNeedsDisplay()

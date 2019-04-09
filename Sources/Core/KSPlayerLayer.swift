@@ -6,10 +6,10 @@
 //
 //
 import AVFoundation
-#if os(OSX)
-import AppKit
-#else
+#if canImport(UIKit)
 import UIKit
+#else
+import AppKit
 #endif
 /**
  Player status emun

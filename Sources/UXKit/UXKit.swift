@@ -4,15 +4,15 @@
 //
 //  Created by kintan on 2018/3/9.
 //
-#if os(OSX)
-import AppKit
-#else
+#if canImport(UIKit)
 import UIKit
+#else
+import AppKit
 #endif
 
 public extension UIView {
     var backingLayer: CALayer? {
-        #if os(OSX)
+        #if os(macOS)
         wantsLayer = true
         #endif
         return layer

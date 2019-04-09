@@ -4,11 +4,10 @@
 //
 //  Created by kintan on 2018/11/14.
 //
-
-#if os(OSX)
-import AppKit
-#else
+#if canImport(UIKit)
 import UIKit
+#else
+import AppKit
 #endif
 public protocol SeekViewProtocol {
     func set(text: String, isAdd: Bool)

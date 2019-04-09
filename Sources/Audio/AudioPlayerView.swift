@@ -5,10 +5,10 @@
 //  Created by kintan on 2018/8/16.
 //
 
-#if os(OSX)
-import AppKit
-#else
+#if canImport(UIKit)
 import UIKit
+#else
+import AppKit
 #endif
 open class AudioPlayerView: PlayerView {
     public override init(frame: CGRect) {

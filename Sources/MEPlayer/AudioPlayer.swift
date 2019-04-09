@@ -84,7 +84,7 @@ final class AudioPlayer {
         var descriptionForOutput = AudioComponentDescription()
         descriptionForOutput.componentType = kAudioUnitType_Output
         descriptionForOutput.componentManufacturer = kAudioUnitManufacturer_Apple
-        #if os(OSX)
+        #if os(macOS)
         descriptionForMixer.componentSubType = kAudioUnitSubType_StereoMixer
         descriptionForOutput.componentSubType = kAudioUnitSubType_DefaultOutput
         #else
