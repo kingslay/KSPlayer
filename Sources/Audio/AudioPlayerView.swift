@@ -1,0 +1,40 @@
+//
+//  AudioPlayerController.swift
+//  VoiceNote
+//
+//  Created by kintan on 2018/8/16.
+//
+
+#if os(OSX)
+import AppKit
+#else
+import UIKit
+#endif
+open class AudioPlayerView: PlayerView {
+    public override init(frame: CGRect) {
+        super.init(frame: frame)
+        toolBar.timeType = .min
+        toolBar.spacing = 5
+        toolBar.addArrangedSubview(toolBar.playButton)
+        toolBar.addArrangedSubview(toolBar.currentTimeLabel)
+        toolBar.addArrangedSubview(toolBar.timeSlider)
+        toolBar.addArrangedSubview(toolBar.totalTimeLabel)
+        toolBar.playButton.tintColor = UIColor(hex: 0x2166FF)
+        toolBar.timeSlider.setThumbImage(UIColor(hex: 0x2980FF).createImage(size: CGSize(width: 2, height: 15)), for: .normal)
+        toolBar.timeSlider.minimumTrackTintColor = UIColor(hex: 0xC8C7CC)
+        toolBar.timeSlider.maximumTrackTintColor = UIColor(hex: 0xEDEDED)
+        toolBar.timeSlider.trackHeigt = 7
+        addSubview(toolBar)
+        toolBar.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            toolBar.leftAnchor.constraint(equalTo: leftAnchor, constant: 7),
+            toolBar.rightAnchor.constraint(equalTo: rightAnchor, constant: -12),
+            toolBar.topAnchor.constraint(equalTo: topAnchor),
+            toolBar.bottomAnchor.constraint(equalTo: bottomAnchor),
+        ])
+    }
+
+    public required init?(coder _: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+}
