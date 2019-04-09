@@ -65,7 +65,9 @@ extension URLSubtitleInfo: MakeSubtitle {
 }
 
 @objc public protocol SubtitletoCache {
+    // swiftlint:disable weak_computed_property
     weak var cache: CacheDataSouce? { get set }
+    // swiftlint:enable weak_computed_property
 }
 
 extension SubtitletoCache {
