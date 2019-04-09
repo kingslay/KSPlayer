@@ -434,7 +434,6 @@ public class AirplayStatusView: UIView {
         airplaymessage.font = .systemFont(ofSize: 14)
         airplaymessage.text = NSLocalizedString("AirPlay 投放中", comment: "")
         airplaymessage.textAlignment = .center
-        airplaymessage.textAlignment = .center
         addSubview(airplaymessage)
         translatesAutoresizingMaskIntoConstraints = false
         airplayicon.translatesAutoresizingMaskIntoConstraints = false
