@@ -125,8 +125,7 @@ open class KSPlayerLayer: UIView {
         self.url = url
         playOptions = options
         if let cookies = playOptions?["Cookie"] as? [HTTPCookie] {
-            #if os(macOS)
-            #else
+            #if !os(macOS)
             playOptions?[AVURLAssetHTTPCookiesKey] = cookies
             #endif
             var cookieStr = "Cookie: "
@@ -330,16 +329,15 @@ extension KSPlayerLayer {
     }
 
     @objc private func playerTimerAction() {
-        if let player = player, player.isPreparedToPlay {
-            let currentPlaybackTime = player.currentPlaybackTime
-            if currentPlaybackTime.isInfinite || currentPlaybackTime.isNaN {
-                return
-            }
-            delegate?.player(layer: self, currentTime: player.currentPlaybackTime, totalTime: player.duration)
-            if player.playbackState == .playing, player.loadState == .playable, state == .buffering {
-                // 一个兜底保护，正常不能走到这里
-                state = .bufferFinished
-            }
+        guard let player = player, player.isPreparedToPlay else { return }
+        let currentPlaybackTime = player.currentPlaybackTime
+        if currentPlaybackTime.isInfinite || currentPlaybackTime.isNaN {
+            return
+        }
+        delegate?.player(layer: self, currentTime: player.currentPlaybackTime, totalTime: player.duration)
+        if player.playbackState == .playing, player.loadState == .playable, state == .buffering {
+            // 一个兜底保护，正常不能走到这里
+            state = .bufferFinished
         }
     }
 }

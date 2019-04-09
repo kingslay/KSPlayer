@@ -365,8 +365,7 @@ extension KSAVPlayer: MediaPlayerProtocol {
             #endif
         }
         set {
-            #if os(macOS)
-            #else
+            #if !os(macOS)
             player.usesExternalPlaybackWhileExternalScreenIsActive = newValue
             #endif
         }
