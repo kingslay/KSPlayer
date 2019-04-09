@@ -131,12 +131,11 @@ open class IOSVideoPlayerView: VideoPlayerView {
         super.onButtonPressed(button)
         if let type = PlayerButtonType(rawValue: button.tag) {
             if type == .lock {
-                button.isSelected = !button.isSelected
+                button.isSelected.toggle()
                 isMaskShow = !button.isSelected
                 button.alpha = 1.0
             } else if type == .landscape {
-                let isLandscape = UIApplication.shared.statusBarOrientation.isLandscape
-                updateUI(isLandscape: !isLandscape)
+                updateUI(isLandscape: !UIApplication.shared.statusBarOrientation.isLandscape)
             } else if type == .rate {
                 changePlaybackRate(button: button)
             } else if type == .definition {
