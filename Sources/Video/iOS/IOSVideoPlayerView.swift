@@ -21,6 +21,7 @@ open class IOSVideoPlayerView: VideoPlayerView {
     public var backButton = UIButton()
     public let tapGesture = UITapGestureRecognizer()
     public let doubleTapGesture = UITapGestureRecognizer()
+    public var airplayStatusView = AirplayStatusView()
     @objc public var routeButton = MPVolumeView()
     /// Image view to show video cover
     @objc public var maskImageView = UIImageView()
@@ -86,6 +87,7 @@ open class IOSVideoPlayerView: VideoPlayerView {
         routeButton.sizeToFit()
         routeButton.isHidden = true
         navigationBar.addArrangedSubview(routeButton)
+        addSubview(airplayStatusView)
         let tmp = MPVolumeView(frame: CGRect(x: -100, y: -100, width: 0, height: 0))
         UIApplication.shared.keyWindow?.addSubview(tmp)
         if let first = (tmp.subviews.first { $0 is UISlider } as? UISlider) {
@@ -110,6 +112,8 @@ open class IOSVideoPlayerView: VideoPlayerView {
             srtControl.view.leftAnchor.constraint(equalTo: leftAnchor),
             srtControl.view.bottomAnchor.constraint(equalTo: bottomAnchor),
             srtControl.view.rightAnchor.constraint(equalTo: rightAnchor),
+            airplayStatusView.centerXAnchor.constraint(equalTo: centerXAnchor),
+            airplayStatusView.centerYAnchor.constraint(equalTo: centerYAnchor),
         ])
         addNotification()
     }
@@ -187,11 +191,7 @@ open class IOSVideoPlayerView: VideoPlayerView {
         }
         if UIApplication.shared.statusBarOrientation.isLandscape != isLandscape {
             UIDevice.current.setValue(UIDevice.current.orientation.rawValue, forKey: "orientation")
-            if isLandscape {
-                UIDevice.current.setValue(UIInterfaceOrientation.landscapeRight.rawValue, forKey: "orientation")
-            } else {
-                UIDevice.current.setValue(UIInterfaceOrientation.portrait.rawValue, forKey: "orientation")
-            }
+            UIDevice.current.setValue((isLandscape ? UIInterfaceOrientation.landscapeRight : UIInterfaceOrientation.portrait).rawValue, forKey: "orientation")
         }
         lockButton.isHidden = !isLandscape
         judgePanGesture()
@@ -208,6 +208,7 @@ open class IOSVideoPlayerView: VideoPlayerView {
     }
 
     open override func player(layer: KSPlayerLayer, currentTime: TimeInterval, totalTime: TimeInterval) {
+        airplayStatusView.isHidden = !(layer.player?.isExternalPlaybackActive ?? false)
         guard !isSliderSliding else { return }
         super.player(layer: layer, currentTime: currentTime, totalTime: totalTime)
     }
@@ -269,10 +270,10 @@ open class IOSVideoPlayerView: VideoPlayerView {
 
 extension IOSVideoPlayerView {
     private func addNotification() {
-        NotificationCenter.default.addObserver(self, selector: #selector(routesAvailableDidChange), name: .MPVolumeViewWirelessRoutesAvailableDidChange, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(orientationChanged), name: UIApplication.didChangeStatusBarOrientationNotification, object: nil)
         orientationChanged()
         NotificationCenter.default.addObserver(self, selector: #selector(applicationDidEnterBackground), name: UIApplication.didEnterBackgroundNotification, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(routesAvailableDidChange), name: .MPVolumeViewWirelessRoutesAvailableDidChange, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(wirelessRouteActiveDidChange(notification:)), name: .MPVolumeViewWirelessRouteActiveDidChange, object: nil)
 
         #if !targetEnvironment(simulator)
@@ -419,5 +420,41 @@ extension IOSVideoPlayerView {
                 panGesture.isEnabled = false
             }
         }
+    }
+}
+
+public class AirplayStatusView: UIView {
+    public override init(frame: CGRect) {
+        super.init(frame: frame)
+        let airplayicon = UIImageView(image: image(named: "airplayicon_play"))
+        addSubview(airplayicon)
+        let airplaymessage = UILabel()
+        airplaymessage.backgroundColor = .clear
+        airplaymessage.textColor = .white
+        airplaymessage.font = .systemFont(ofSize: 14)
+        airplaymessage.text = NSLocalizedString("AirPlay 投放中", comment: "")
+        airplaymessage.textAlignment = .center
+        airplaymessage.textAlignment = .center
+        addSubview(airplaymessage)
+        translatesAutoresizingMaskIntoConstraints = false
+        airplayicon.translatesAutoresizingMaskIntoConstraints = false
+        airplaymessage.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            widthAnchor.constraint(equalToConstant: 100),
+            heightAnchor.constraint(equalToConstant: 115),
+            airplayicon.topAnchor.constraint(equalTo: topAnchor),
+            airplayicon.centerXAnchor.constraint(equalTo: centerXAnchor),
+            airplayicon.widthAnchor.constraint(equalToConstant: 100),
+            airplayicon.heightAnchor.constraint(equalToConstant: 100),
+            airplaymessage.bottomAnchor.constraint(equalTo: bottomAnchor),
+            airplaymessage.leftAnchor.constraint(equalTo: leftAnchor),
+            airplaymessage.rightAnchor.constraint(equalTo: rightAnchor),
+            airplaymessage.heightAnchor.constraint(equalToConstant: 15),
+        ])
+        isHidden = true
+    }
+
+    required init?(coder _: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
     }
 }

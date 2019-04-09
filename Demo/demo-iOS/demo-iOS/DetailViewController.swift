@@ -38,7 +38,7 @@ class DetailViewController: UIViewController {
             if resource.name.contains("全景") {
                 KSPlayerManager.firstPlayerType = KSVRPlayer.self
             } else {
-                KSPlayerManager.firstPlayerType = KSMEPlayer.self
+                KSPlayerManager.firstPlayerType = KSAVPlayer.self
             }
             playerView.set(resource: resource)
         }
