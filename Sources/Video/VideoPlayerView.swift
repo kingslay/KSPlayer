@@ -168,7 +168,6 @@ open class VideoPlayerView: PlayerView {
         titleLabel.font = .systemFont(ofSize: 16)
         // Bottom views
         bottomMaskView.addSubview(toolBar)
-        toolBar.addTarget(self, action: #selector(onButtonPressed(_:)))
         toolBar.timeSlider.delegate = self
         addSubview(seekToView)
         addSubview(replayButton)
@@ -325,7 +324,6 @@ extension VideoPlayerView {
             }
             self.resource?.subtitle = subtitle
         }
-        toolBar.srtButton.addTarget(self, action: #selector(onButtonPressed(_:)), for: .touchUpInside)
     }
 
     /**

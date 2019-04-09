@@ -66,7 +66,7 @@ open class PlayerView: UIView, KSPlayerLayerDelegate, KSSliderDelegate {
         #endif
         playerLayer.delegate = self
         toolBar.timeSlider.delegate = self
-        toolBar.playButton.addTarget(self, action: #selector(onButtonPressed(_:)), for: .touchUpInside)
+        toolBar.addTarget(self, action: #selector(onButtonPressed(_:)))
     }
 
     public required init?(coder _: NSCoder) {

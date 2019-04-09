@@ -106,6 +106,7 @@ public class PlayerToolBar: UIStackView {
         playButton.addTarget(target, action: action, for: .touchUpInside)
         playbackRateButton.addTarget(target, action: action, for: .touchUpInside)
         definitionButton.addTarget(target, action: action, for: .touchUpInside)
+        srtButton.addTarget(target, action: action, for: .touchUpInside)
     }
 
     public func reset() {
