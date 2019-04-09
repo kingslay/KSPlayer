@@ -214,7 +214,6 @@ open class IOSVideoPlayerView: VideoPlayerView {
             isSliderSliding = true
         } else if event == .touchUpInside {
             isSliderSliding = false
-            judgePanGesture()
         }
     }
 

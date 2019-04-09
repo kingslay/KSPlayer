@@ -42,15 +42,6 @@ open class PlayerView: UIView, KSPlayerLayerDelegate, KSSliderDelegate {
     // Closure fired when play time changed
     public var playTimeDidChange: ((TimeInterval, TimeInterval) -> Void)?
     public var backBlock: (() -> Void)?
-    public var totalTime: TimeInterval {
-        get {
-            return toolBar.totalTime
-        }
-        set {
-            toolBar.totalTime = newValue
-        }
-    }
-
     public convenience init() {
         #if os(macOS)
         self.init(frame: .zero)
@@ -133,9 +124,11 @@ open class PlayerView: UIView, KSPlayerLayerDelegate, KSSliderDelegate {
 
     // MARK: - KSPlayerLayerDelegate
 
-    open func player(layer _: KSPlayerLayer, state: KSPlayerState) {
+    open func player(layer: KSPlayerLayer, state: KSPlayerState) {
         delegate?.playerController(state: state)
-        if state == .playedToTheEnd || state == .paused || state == .error {
+        if state == .readyToPlay {
+            totalTime = layer.player?.duration ?? totalTime
+        } else if state == .playedToTheEnd || state == .paused || state == .error {
             toolBar.playButton.isSelected = false
         } else if state.isPlaying {
             toolBar.playButton.isSelected = true
@@ -160,9 +153,16 @@ open class PlayerView: UIView, KSPlayerLayerDelegate, KSSliderDelegate {
     }
 }
 
-// MARK: - private functions
-
 extension PlayerView {
+    public var totalTime: TimeInterval {
+        get {
+            return toolBar.totalTime
+        }
+        set {
+            toolBar.totalTime = newValue
+        }
+    }
+
     #if os(macOS)
     #else
     @objc private func audioInterrupted(notification: Notification) {
