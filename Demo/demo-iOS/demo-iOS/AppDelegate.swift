@@ -15,7 +15,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func application(_: UIApplication, didFinishLaunchingWithOptions _: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         let window = UIWindow()
 //        KSPlayerManager.firstPlayerType = KSAVPlayer.self
-//        KSPlayerManager.firstPlayerType = KSMEPlayer.self
         KSPlayerManager.isLoopPlay = true
         KSPlayerManager.isSecondOpen = true
         KSPlayerManager.isAccurateSeek = true

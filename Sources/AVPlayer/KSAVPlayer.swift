@@ -91,6 +91,7 @@ public class KSAVPlayer {
     private var bufferFullObservation: NSKeyValueObservation?
     private var itemObservation: NSKeyValueObservation?
     private var loopCountObservation: NSKeyValueObservation?
+    private var loopStatusObservation: NSKeyValueObservation?
     private var error: Error? {
         didSet {
             if let error = error {
@@ -262,7 +263,16 @@ extension KSAVPlayer {
                 guard let self = self else { return }
                 self.delegate?.playBack(player: self, loopCount: playerLooper.loopCount)
             }
+            loopStatusObservation?.invalidate()
+            loopStatusObservation = playerLooper.observe(\.status) { [weak self] playerLooper, _ in
+                guard let self = self else { return }
+                if playerLooper.status == .failed {
+                    self.error = playerLooper.error
+                }
+            }
             self.playerLooper = playerLooper
+        } else {
+            error = NSError(domain: AVFoundationErrorDomain, code: -1, userInfo: [NSLocalizedDescriptionKey: "KSAVPlayer not support loop play for iOS 9 and OSX 10.11"])
         }
     }
 
