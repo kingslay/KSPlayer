@@ -176,11 +176,7 @@ open class IOSVideoPlayerView: VideoPlayerView {
             } else {
                 toolBar.srtButton.isHidden = true
                 if let image = maskImageView.image {
-                    if image.size.width < image.size.height {
-                        landscapeButton.isHidden = true
-                    } else {
-                        landscapeButton.isHidden = false
-                    }
+                    landscapeButton.isHidden = image.size.width < image.size.height
                 } else {
                     landscapeButton.isHidden = false
                 }
