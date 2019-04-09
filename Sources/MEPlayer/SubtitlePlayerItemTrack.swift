@@ -8,14 +8,12 @@
 import ffmpeg
 import Foundation
 final class SubtitlePlayerItemTrack: MEPlayerItemTrack<SubtitleFrame> {
+    private let reg = try? NSRegularExpression(pattern: "\\{[^}]+\\}", options: .caseInsensitive)
     private var codecContext: UnsafeMutablePointer<AVCodecContext>?
     private var subtitle = AVSubtitle()
     private var preSubtitleFrame: SubtitleFrame?
-    private var reg: NSRegularExpression?
 
     override func open() -> Bool {
-        reg = try? NSRegularExpression(pattern: "\\{[^}]+\\}", options: .caseInsensitive)
-
         guard super.open(), let codecContext = codecpar.ceateContext() else {
             return false
         }
