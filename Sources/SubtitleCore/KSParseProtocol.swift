@@ -84,7 +84,7 @@ public class AssParse: KSParseProtocol {
             }
         }
         // 归并排序才是稳定排序。系统默认是快排
-        groups = mergeSortBottomUp(groups) { $0 < $1 }
+        groups = groups.mergeSortBottomUp { $0 < $1 }
         if var preGroup = groups.first {
             var newGroups = [SubtitlePart]()
             for i in 1 ..< groups.count {
@@ -101,51 +101,6 @@ public class AssParse: KSParseProtocol {
             groups = newGroups
         }
         return groups
-    }
-
-    private func mergeSortBottomUp<T>(_ array: [T], _ isOrderedBefore: (T, T) -> Bool) -> [T] {
-        let n = array.count
-        var z = [array, array] // the two working arrays
-        var d = 0 // z[d] is used for reading, z[1 - d] for writing
-        var width = 1
-        while width < n {
-            var i = 0
-            while i < n {
-                var j = i
-                var l = i
-                var r = i + width
-
-                let lmax = min(l + width, n)
-                let rmax = min(r + width, n)
-
-                while l < lmax, r < rmax {
-                    if isOrderedBefore(z[d][l], z[d][r]) {
-                        z[1 - d][j] = z[d][l]
-                        l += 1
-                    } else {
-                        z[1 - d][j] = z[d][r]
-                        r += 1
-                    }
-                    j += 1
-                }
-                while l < lmax {
-                    z[1 - d][j] = z[d][l]
-                    j += 1
-                    l += 1
-                }
-                while r < rmax {
-                    z[1 - d][j] = z[d][r]
-                    j += 1
-                    r += 1
-                }
-
-                i += width * 2
-            }
-
-            width *= 2 // in each step, the subarray to merge becomes larger
-            d = 1 - d // swap active array
-        }
-        return z[d]
     }
 }
 
@@ -188,5 +143,52 @@ public class SrtParse: KSParseProtocol {
             }
         }
         return groups
+    }
+}
+
+extension Array {
+    fileprivate func mergeSortBottomUp(isOrderedBefore: (Element, Element) -> Bool) -> [Element] {
+        let n = count
+        var z = [self, self] // the two working arrays
+        var d = 0 // z[d] is used for reading, z[1 - d] for writing
+        var width = 1
+        while width < n {
+            var i = 0
+            while i < n {
+                var j = i
+                var l = i
+                var r = i + width
+
+                let lmax = Swift.min(l + width, n)
+                let rmax = Swift.min(r + width, n)
+
+                while l < lmax, r < rmax {
+                    if isOrderedBefore(z[d][l], z[d][r]) {
+                        z[1 - d][j] = z[d][l]
+                        l += 1
+                    } else {
+                        z[1 - d][j] = z[d][r]
+                        r += 1
+                    }
+                    j += 1
+                }
+                while l < lmax {
+                    z[1 - d][j] = z[d][l]
+                    j += 1
+                    l += 1
+                }
+                while r < rmax {
+                    z[1 - d][j] = z[d][r]
+                    j += 1
+                    r += 1
+                }
+
+                i += width * 2
+            }
+
+            width *= 2 // in each step, the subarray to merge becomes larger
+            d = 1 - d // swap active array
+        }
+        return z[d]
     }
 }
