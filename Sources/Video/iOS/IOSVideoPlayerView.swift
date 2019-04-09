@@ -21,7 +21,7 @@ open class IOSVideoPlayerView: VideoPlayerView {
     public var backButton = UIButton()
     public let tapGesture = UITapGestureRecognizer()
     public let doubleTapGesture = UITapGestureRecognizer()
-    public var airplayStatusView = AirplayStatusView()
+    public var airplayStatusView: UIView = AirplayStatusView()
     @objc public var routeButton = MPVolumeView()
     /// Image view to show video cover
     @objc public var maskImageView = UIImageView()
@@ -241,23 +241,7 @@ open class IOSVideoPlayerView: VideoPlayerView {
 
     open override func set(resource: KSPlayerResource, definitionIndex: Int = 0, isSetUrl: Bool = true) {
         super.set(resource: resource, definitionIndex: definitionIndex, isSetUrl: isSetUrl)
-        showCover(url: resource.cover)
-    }
-
-    public func showCover(url: URL?) {
-        guard let url = url else { return }
-        DispatchQueue.global().async { [weak self] in
-            guard let self = self else { return }
-            let data = try? Data(contentsOf: url)
-            DispatchQueue.main.async { [weak self] in
-                guard let self = self else { return }
-                if let data = data {
-                    self.maskImageView.image = UIImage(data: data)
-                } else {
-                    self.maskImageView.image = nil
-                }
-            }
-        }
+        maskImageView.image(url: resource.cover)
     }
 
     @objc open func doubleGestureAction() {

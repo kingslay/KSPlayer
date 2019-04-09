@@ -408,3 +408,18 @@ extension AVAsset {
         try exportMp4(beginTime: beginTime, endTime: endTime, outputURL: exportURL, blockResult: blockResult)
     }
 }
+
+extension UIImageView {
+    func image(url: URL?) {
+        guard let url = url else { return }
+        DispatchQueue.global().async { [weak self] in
+            guard let self = self else { return }
+            let data = try? Data(contentsOf: url)
+            let image = data.flatMap { UIImage(data: $0) }
+            DispatchQueue.main.async { [weak self] in
+                guard let self = self else { return }
+                self.image = image
+            }
+        }
+    }
+}
