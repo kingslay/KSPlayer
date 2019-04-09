@@ -14,8 +14,8 @@ public protocol SeekViewProtocol {
 }
 
 class SeekView: UIView {
-    private var seekToViewImage = UIImageView()
-    private var seekToLabel = UILabel()
+    private let seekToViewImage = UIImageView()
+    private let seekToLabel = UILabel()
     public override init(frame: CGRect) {
         super.init(frame: frame)
         addSubview(seekToViewImage)
