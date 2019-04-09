@@ -6,10 +6,10 @@
 //
 
 import AVFoundation
-#if os(OSX)
-import AppKit
-#else
+#if canImport(UIKit)
 import UIKit
+#else
+import AppKit
 #endif
 
 public class KSMEPlayer: NSObject {
@@ -108,7 +108,7 @@ extension KSMEPlayer: MEPlayerDelegate {
                 self.play()
             }
             if self.playerItem.rotation != 0.0 {
-                #if os(OSX)
+                #if os(macOS)
                 self.view.backingLayer?.anchorPoint = CGPoint(x: 0.5, y: 0.5)
                 self.view.rotate(byDegrees: CGFloat(-self.playerItem.rotation))
                 #else

@@ -6,10 +6,10 @@
 //
 //
 
-#if os(OSX)
-import AppKit
-#else
+#if canImport(UIKit)
 import UIKit
+#else
+import AppKit
 #endif
 public class PlayerToolBar: UIStackView {
     public var timeType = TimeType.minOrHour {

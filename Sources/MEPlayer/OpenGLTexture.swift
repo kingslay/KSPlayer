@@ -1,5 +1,5 @@
 import GLKit
-#if !os(OSX)
+#if !os(macOS)
 final class OpenGLTexture {
     private var videoTextureCache: CVOpenGLESTextureCache?
     private var glContext: EAGLContext

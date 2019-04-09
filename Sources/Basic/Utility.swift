@@ -7,16 +7,16 @@
 
 import AVFoundation
 import CoreMedia
-#if os(OSX)
-import AppKit
-#else
+#if canImport(UIKit)
 import UIKit
+#else
+import AppKit
 #endif
 #if canImport(MobileCoreServices)
 import MobileCoreServices.UTType
 #endif
 open class LayerContainerView: UIView {
-    #if os(OSX)
+    #if os(macOS)
     public override init(frame: CGRect) {
         super.init(frame: frame)
         layer = CAGradientLayer()
@@ -239,7 +239,7 @@ public extension NSObjectProtocol {
         if let bundleName = bundleName, let resourceURL = bundle.resourceURL, let newBundle = Bundle(url: resourceURL.appendingPathComponent(bundleName + ".bundle")) {
             bundle = newBundle
         }
-        #if os(OSX)
+        #if os(macOS)
         let image = bundle.image(forResource: named)
         #else
         let image = UIImage(named: named, in: bundle, compatibleWith: nil)

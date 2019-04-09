@@ -1,15 +1,15 @@
 import AVFoundation
 
-#if os(OSX)
-import AppKit
-#else
+#if canImport(UIKit)
 import UIKit
+#else
+import AppKit
 #endif
 public final class KSAVPlayerView: UIView {
     public let player = AVQueuePlayer()
     public override init(frame: CGRect) {
         super.init(frame: frame)
-        #if os(OSX)
+        #if os(macOS)
         layer = AVPlayerLayer()
         #endif
         playerLayer.player = player
@@ -22,7 +22,7 @@ public final class KSAVPlayerView: UIView {
         fatalError("init(coder:) has not been implemented")
     }
 
-    #if os(OSX)
+    #if os(macOS)
     override var contentMode: UIViewContentMode {
         get {
             switch playerLayer.videoGravity {
@@ -358,14 +358,14 @@ extension KSAVPlayer: MediaPlayerProtocol {
 
     public var usesExternalPlaybackWhileExternalScreenIsActive: Bool {
         get {
-            #if os(OSX)
+            #if os(macOS)
             return false
             #else
             return player.usesExternalPlaybackWhileExternalScreenIsActive
             #endif
         }
         set {
-            #if os(OSX)
+            #if os(macOS)
             #else
             player.usesExternalPlaybackWhileExternalScreenIsActive = newValue
             #endif

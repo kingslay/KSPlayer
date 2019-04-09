@@ -7,10 +7,10 @@
 
 import AVFoundation
 import CoreMedia
-#if os(OSX)
-import AppKit
-#else
+#if canImport(UIKit)
 import UIKit
+#else
+import AppKit
 #endif
 
 @objc public protocol MediaPlayback: class {
@@ -60,7 +60,7 @@ import UIKit
 
 extension MediaPlayerProtocol {
     func setAudioSession() {
-        #if !os(OSX)
+        #if !os(macOS)
         do {
             if #available(iOS 11.0, tvOS 11.0, *) {
                 try AVAudioSession.sharedInstance().setCategory(.playback, mode: .default, policy: .longForm)

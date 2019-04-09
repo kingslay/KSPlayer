@@ -5,10 +5,10 @@
 //  Created by kintan on 2018/8/16.
 //
 
-#if os(OSX)
-import AppKit
-#else
+#if canImport(UIKit)
 import UIKit
+#else
+import AppKit
 #endif
 import AVFoundation
 
@@ -163,7 +163,7 @@ open class PlayerView: UIView, KSPlayerLayerDelegate, KSSliderDelegate {
 // MARK: - private functions
 
 extension PlayerView {
-    #if os(OSX)
+    #if os(macOS)
     #else
     @objc private func audioInterrupted(notification: Notification) {
         if let callBegin = notification.userInfo?[AVAudioSessionInterruptionTypeKey] as? Bool {

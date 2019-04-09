@@ -5,10 +5,10 @@
 //  Created by kintan on 2018/4/12.
 //
 import AVFoundation
-#if os(OSX)
-import AppKit
-#else
+#if canImport(UIKit)
 import UIKit
+#else
+import AppKit
 #endif
 // AVSampleBufferAudioRenderer AVSampleBufferRenderSynchronizer AVSampleBufferDisplayLayer
 public final class SampleBufferPlayerView: UIView {
@@ -21,7 +21,7 @@ public final class SampleBufferPlayerView: UIView {
 
     public override init(frame: CGRect) {
         super.init(frame: frame)
-        #if os(OSX)
+        #if os(macOS)
         layer = AVSampleBufferDisplayLayer()
         #endif
         var controlTimebase: CMTimebase?
@@ -37,7 +37,7 @@ public final class SampleBufferPlayerView: UIView {
         fatalError("init(coder:) has not been implemented")
     }
 
-    #if !os(OSX)
+    #if !os(macOS)
     public override class var layerClass: AnyClass {
         return AVSampleBufferDisplayLayer.self
     }

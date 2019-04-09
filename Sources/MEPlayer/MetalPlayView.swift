@@ -108,7 +108,7 @@ final class MetalPlayView: MTKView {
 
     init() {
         // Get the default metal device.
-        #if os(OSX)
+        #if os(macOS)
         let metalDevice = MTLCopyAllDevices().first
         #else
         let metalDevice = MTLCreateSystemDefaultDevice()

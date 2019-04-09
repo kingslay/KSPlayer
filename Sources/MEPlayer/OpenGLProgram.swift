@@ -1,5 +1,5 @@
 import GLKit
-#if !os(OSX)
+#if !os(macOS)
 final class OpenGLProgram {
     private var attributes: NSMutableArray = []
     private var uniforms: NSMutableArray = []
