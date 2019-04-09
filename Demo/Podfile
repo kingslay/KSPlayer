@@ -1,0 +1,27 @@
+use_frameworks!
+workspace 'Demo.xcworkspace'
+def common
+  pod 'KSPlayer', :path => '../', :testspecs => ['Tests']
+  pod 'Openssl', :path => '../'
+  pod 'SwiftLint'
+end
+target 'demo-iOS' do
+    project 'demo-iOS/demo-iOS.xcodeproj'
+    platform :ios,9.0
+    common
+end
+#target 'demo-iOSTests' do
+#    project 'demo-iOS/demo-iOS.xcodeproj'
+#    platform :ios,9.0
+#    common
+#end
+target 'demo-tvOS' do
+    project 'demo-tvOS/demo-tvOS.xcodeproj'
+    platform :tvos,10.2
+    common
+end
+target 'demo-macOS' do
+    project 'demo-macOS/demo-macOS.xcodeproj'
+    platform :osx,10.11
+    common
+end

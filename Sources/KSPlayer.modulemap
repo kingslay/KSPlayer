@@ -1,0 +1,6 @@
+framework module KSPlayer {
+  umbrella header "KSPlayer-umbrella.h"
+
+  export *
+  module * { export * }
+}

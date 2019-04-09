@@ -1,0 +1,14 @@
+ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES
+CODE_SIGN_IDENTITY =
+FRAMEWORK_SEARCH_PATHS = $(inherited) "${PODS_CONFIGURATION_BUILD_DIR}/KSPlayer-macOS"
+GCC_PREPROCESSOR_DEFINITIONS = $(inherited) COCOAPODS=1
+HEADER_SEARCH_PATHS = $(inherited) "${PODS_CONFIGURATION_BUILD_DIR}/KSPlayer-macOS/KSPlayer.framework/Headers" ${PODS_ROOT}/KSPlayer/FFmpeg/FFmpeg-macOS/include ${PODS_ROOT}/../../FFmpeg/FFmpeg-macOS/include
+LD_RUNPATH_SEARCH_PATHS = $(inherited) '@executable_path/../Frameworks' '@loader_path/Frameworks'
+LIBRARY_SEARCH_PATHS = $(inherited) "${PODS_ROOT}/../../FFmpeg/FFmpeg-macOS/lib" "${PODS_ROOT}/../../FFmpeg/openssl-macOS/lib"
+OTHER_LDFLAGS = $(inherited) -ObjC -l"avcodec" -l"avformat" -l"avutil" -l"bz2" -l"crypto" -l"ssl" -l"swresample" -l"swscale" -l"z" -framework "AVFoundation" -framework "AppKit" -framework "AudioToolbox" -framework "Foundation" -framework "GLKit" -framework "KSPlayer" -framework "SceneKit" -framework "VideoToolbox" -weak_framework "MetalKit"
+OTHER_SWIFT_FLAGS = $(inherited) -D COCOAPODS
+PODS_BUILD_DIR = ${BUILD_DIR}
+PODS_CONFIGURATION_BUILD_DIR = ${PODS_BUILD_DIR}/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)
+PODS_PODFILE_DIR_PATH = ${SRCROOT}/..
+PODS_ROOT = ${SRCROOT}/../Pods
+SWIFT_INCLUDE_PATHS = ${PODS_ROOT}/KSPlayer/FFmpeg/FFmpeg-macOS/include $(PODS_ROOT)/../../FFmpeg/FFmpeg-macOS/include
