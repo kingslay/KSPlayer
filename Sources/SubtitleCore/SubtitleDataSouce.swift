@@ -46,7 +46,7 @@ extension URLSubtitleInfo: MakeSubtitle {
             block(downloadURL)
         } else if let subtitleDataSouce = subtitleDataSouce {
             subtitleDataSouce.fetchSubtitleDetail(info: self) { [weak self] _, error in
-                guard let `self` = self else { return }
+                guard let self = self else { return }
                 if let error = error {
                     completion(nil, error)
                 } else if let downloadURL = self.downloadURL {
