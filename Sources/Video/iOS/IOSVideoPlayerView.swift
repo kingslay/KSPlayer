@@ -90,7 +90,7 @@ open class IOSVideoPlayerView: VideoPlayerView {
         addSubview(airplayStatusView)
         let tmp = MPVolumeView(frame: CGRect(x: -100, y: -100, width: 0, height: 0))
         UIApplication.shared.keyWindow?.addSubview(tmp)
-        if let first = (tmp.subviews.first { $0 is UISlider } as? UISlider) {
+        if let first = (tmp.subviews.first { $0 is UISlider }) as? UISlider {
             volumeViewSlider = first
         }
         routeButton.translatesAutoresizingMaskIntoConstraints = false
@@ -254,19 +254,18 @@ extension IOSVideoPlayerView {
         NotificationCenter.default.addObserver(self, selector: #selector(applicationDidEnterBackground), name: UIApplication.didEnterBackgroundNotification, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(routesAvailableDidChange), name: .MPVolumeViewWirelessRoutesAvailableDidChange, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(wirelessRouteActiveDidChange(notification:)), name: .MPVolumeViewWirelessRouteActiveDidChange, object: nil)
-
         #if !targetEnvironment(simulator)
-        var isplay = false
+        var isPlaying = false
         callCenter.callEventHandler = { [weak self] call in
             DispatchQueue.main.async { [weak self] in
                 guard let self = self else { return }
                 if call.callState == CTCallStateIncoming {
-                    isplay = self.playerLayer.state.isPlaying
-                    if isplay {
+                    isPlaying = self.playerLayer.state.isPlaying
+                    if isPlaying {
                         self.pause()
                     }
                 } else if call.callState == CTCallStateDisconnected {
-                    if isplay {
+                    if isPlaying {
                         self.play()
                     }
                 }
@@ -306,7 +305,7 @@ extension IOSVideoPlayerView {
     }
 
     @objc private func onTapGestureTapped(_: UITapGestureRecognizer) {
-        isMaskShow = !isMaskShow
+        isMaskShow.toggle()
     }
 
     @objc private func panDirection(_ pan: UIPanGestureRecognizer) {
@@ -336,9 +335,9 @@ extension IOSVideoPlayerView {
         case .changed:
             switch scrollDirection {
             case .horizontal:
-                horizontalMoved(velocityPoint.x)
+                horizontalMoved(value: velocityPoint.x)
             case .vertical:
-                verticalMoved(velocityPoint.y)
+                verticalMoved(value: velocityPoint.y)
             }
 
         case .ended:
@@ -348,7 +347,7 @@ extension IOSVideoPlayerView {
         }
     }
 
-    private func verticalMoved(_ value: CGFloat) {
+    private func verticalMoved(value: CGFloat) {
         if isVolume {
             if KSPlayerManager.enableVolumeGestures {
                 tmpPanValue -= Float(value) / 0x2800
@@ -360,7 +359,7 @@ extension IOSVideoPlayerView {
         }
     }
 
-    private func horizontalMoved(_ value: CGFloat) {
+    private func horizontalMoved(value: CGFloat) {
         if !KSPlayerManager.enablePlaytimeGestures {
             return
         }
