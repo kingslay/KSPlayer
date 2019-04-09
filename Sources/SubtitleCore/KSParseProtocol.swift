@@ -12,10 +12,7 @@ public protocol KSParseProtocol {
 
 extension KSParseProtocol {
     public static func patternReg() -> NSRegularExpression? {
-        do {
-            return try NSRegularExpression(pattern: "\\{[^}]+\\}", options: .caseInsensitive)
-        } catch {}
-        return nil
+        return try? NSRegularExpression(pattern: "\\{[^}]+\\}", options: .caseInsensitive)
     }
 
     public static func parseDuration(_ fromStr: String) -> TimeInterval {

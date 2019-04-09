@@ -72,9 +72,7 @@ class GIFCreator {
     private let frameProperties: CFDictionary
     private(set) var firstImage: UIImage?
     init(savePath: URL, imagesCount: Int) {
-        do {
-            try FileManager.default.removeItem(at: savePath)
-        } catch {}
+        try? FileManager.default.removeItem(at: savePath)
         frameProperties = [kCGImagePropertyGIFDictionary: [kCGImagePropertyGIFDelayTime: 0.25]] as CFDictionary
         destination = CGImageDestinationCreateWithURL(savePath as CFURL, kUTTypeGIF, imagesCount, nil)!
         let fileProperties = [kCGImagePropertyGIFDictionary: [kCGImagePropertyGIFLoopCount: 0]]
@@ -304,9 +302,7 @@ extension AVAsset {
         } catch {
             imageGenerator.requestedTimeToleranceBefore = .positiveInfinity
             imageGenerator.requestedTimeToleranceAfter = .positiveInfinity
-            do {
-                cgImage = try imageGenerator.copyCGImage(at: currentTime, actualTime: nil)
-            } catch {}
+            cgImage = try? imageGenerator.copyCGImage(at: currentTime, actualTime: nil)
         }
         if let cgImage = cgImage {
             return UIImage(cgImage: cgImage)

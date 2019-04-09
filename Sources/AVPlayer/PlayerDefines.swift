@@ -61,16 +61,14 @@ import AppKit
 extension MediaPlayerProtocol {
     func setAudioSession() {
         #if !os(macOS)
-        do {
-            if #available(iOS 11.0, tvOS 11.0, *) {
-                try AVAudioSession.sharedInstance().setCategory(.playback, mode: .default, policy: .longForm)
-            } else if #available(iOS 10.0, *) {
-                try AVAudioSession.sharedInstance().setCategory(.playback, mode: .default)
-            } else {
-                try AVAudioSession.sharedInstance().setCategory(.playback)
-            }
-            try AVAudioSession.sharedInstance().setActive(true)
-        } catch {}
+        if #available(iOS 11.0, tvOS 11.0, *) {
+            try? AVAudioSession.sharedInstance().setCategory(.playback, mode: .default, policy: .longForm)
+        } else if #available(iOS 10.0, *) {
+            try? AVAudioSession.sharedInstance().setCategory(.playback, mode: .default)
+        } else {
+            try? AVAudioSession.sharedInstance().setCategory(.playback)
+        }
+        try? AVAudioSession.sharedInstance().setActive(true)
         #endif
     }
 }

@@ -86,9 +86,7 @@ extension SubtitletoCache {
     private var srtInfoCaches = [String: String]()
     override init() {
         if !FileManager.default.fileExists(atPath: cacheFolder) {
-            do {
-                try FileManager.default.createDirectory(atPath: cacheFolder, withIntermediateDirectories: true, attributes: nil)
-            } catch {}
+            try? FileManager.default.createDirectory(atPath: cacheFolder, withIntermediateDirectories: true, attributes: nil)
         }
         srtCacheInfoPath = (cacheFolder as NSString).appendingPathComponent("KSSrtInfo.plist")
         super.init()
