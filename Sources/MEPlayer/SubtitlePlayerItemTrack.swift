@@ -14,9 +14,8 @@ final class SubtitlePlayerItemTrack: MEPlayerItemTrack<SubtitleFrame> {
     private var reg: NSRegularExpression?
 
     override func open() -> Bool {
-        do {
-            reg = try NSRegularExpression(pattern: "\\{[^}]+\\}", options: .caseInsensitive)
-        } catch {}
+        reg = try? NSRegularExpression(pattern: "\\{[^}]+\\}", options: .caseInsensitive)
+
         guard super.open(), let codecContext = codecpar.ceateContext() else {
             return false
         }

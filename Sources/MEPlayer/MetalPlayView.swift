@@ -22,9 +22,7 @@ final class MetalPlayView: MTKView {
     private lazy var renderPipelineState: MTLRenderPipelineState! = {
         var library: MTLLibrary!
         if #available(iOS 10, OSX 10.12, *) {
-            do {
-                library = try device?.makeDefaultLibrary(bundle: Bundle(for: type(of: self)))
-            } catch {}
+            library = try? device?.makeDefaultLibrary(bundle: Bundle(for: type(of: self)))
         }
         let filepath = Bundle(for: type(of: self))
         if library == nil, let libraryFile = Bundle(for: type(of: self)).path(forResource: "Shaders", ofType: "metal") {
