@@ -87,6 +87,7 @@ public class PlayerToolBar: UIStackView {
         definitionButton.tag = PlayerButtonType.definition.rawValue
         srtButton.setTitle("字幕", for: .normal)
         srtButton.titleFont = .systemFont(ofSize: 14, weight: .medium)
+        srtButton.tag = PlayerButtonType.srt.rawValue
         playButton.translatesAutoresizingMaskIntoConstraints = false
         srtButton.translatesAutoresizingMaskIntoConstraints = false
         translatesAutoresizingMaskIntoConstraints = false
