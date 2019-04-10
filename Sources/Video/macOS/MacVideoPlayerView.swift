@@ -112,9 +112,9 @@ extension MacVideoPlayerView {
     open override func keyDown(with event: NSEvent) {
         if let specialKey = event.specialKey {
             if specialKey == .rightArrow {
-                slider(value: Double(toolBar.timeSlider.value) + 0.01*totalTime, event: .touchUpInside)
+                slider(value: Double(toolBar.timeSlider.value) + 0.01 * totalTime, event: .touchUpInside)
             } else if specialKey == .leftArrow {
-                slider(value: Double(toolBar.timeSlider.value) - 0.01*totalTime, event: .touchUpInside)
+                slider(value: Double(toolBar.timeSlider.value) - 0.01 * totalTime, event: .touchUpInside)
             }
         } else if let character = event.characters?.first {
             if character == " " {
