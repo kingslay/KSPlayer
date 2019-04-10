@@ -2,6 +2,19 @@
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 
 import PackageDescription
+#if os(macOS)
+
+let excludes = ["iOS", "Linux"]
+
+#elseif os(iOS)
+
+let excludes = ["Linux", "macOS"]
+
+#elseif os(Linux)
+
+let excludes = ["iOS", "macOS"]
+
+#endif
 
 let package = Package(
     name: "KSPlayer",
@@ -21,7 +34,8 @@ let package = Package(
         // Targets can depend on other targets in this package, and on products in packages which this package depends on.
         .target(
             name: "UXKit",
-            dependencies: []
+            dependencies: [],
+            exclude: excludes
         ),
         .target(
             name: "Basic",
@@ -33,7 +47,8 @@ let package = Package(
         ),
         .target(
             name: "Subtitle",
-            dependencies: ["SubtitleCore", "Basic"]
+            dependencies: ["SubtitleCore", "Basic", "Resources"],
+            exclude: excludes
         ),
         .target(
             name: "FFmpeg",
@@ -60,20 +75,26 @@ let package = Package(
             dependencies: ["MEPlayer", "Panorama"]
         ),
         .target(
+            name: "Resources",
+            dependencies: []
+        ),
+        .target(
             name: "Core",
-            dependencies: ["AVPlayer"]
+            dependencies: ["AVPlayer", "Resources"]
         ),
         .target(
             name: "Audio",
-            dependencies: ["Core"]
+            dependencies: ["Core", "SubtitleCore"]
         ),
         .target(
             name: "Video",
-            dependencies: ["Core", "SubtitleCore"]
+            dependencies: ["Core", "Subtitle"],
+            exclude: excludes
         ),
         .testTarget(
             name: "KSPlayerTests",
-            dependencies: ["Core"]
+            dependencies: ["Video"],
+            path: "Tests"
         ),
     ]
 )

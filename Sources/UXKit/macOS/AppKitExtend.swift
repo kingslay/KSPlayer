@@ -146,7 +146,7 @@ extension NSView {
 }
 
 extension NSImage {
-    convenience init(cgImage: CGImage) {
+    public convenience init(cgImage: CGImage) {
         self.init(cgImage: cgImage, size: NSSize.zero)
     }
 }
