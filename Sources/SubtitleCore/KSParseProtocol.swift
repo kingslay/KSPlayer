@@ -33,7 +33,7 @@ extension KSParseProtocol {
 
 public class AssParse: KSParseProtocol {
     public func canParse(subtitle: String) -> Bool {
-        return subtitle.hasPrefix("[Script Info]")
+        return subtitle.contains("[Script Info]")
     }
 
     // Dialogue: 0,0:12:37.73,0:12:38.83,Aki Default,,0,0,0,,{\be8}原来如此
