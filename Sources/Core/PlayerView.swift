@@ -139,9 +139,7 @@ open class PlayerView: UIView, KSPlayerLayerDelegate, KSSliderDelegate {
         delegate?.playerController(currentTime: currentTime, totalTime: totalTime)
         playTimeDidChange?(currentTime, totalTime)
         toolBar.currentTime = currentTime
-        if totalTime.isNormal {
-            self.totalTime = totalTime
-        }
+        self.totalTime = totalTime
     }
 
     open func player(layer _: KSPlayerLayer, finish error: Error?) {

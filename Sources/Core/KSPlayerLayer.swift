@@ -286,9 +286,7 @@ extension KSPlayerLayer: MediaPlayerDelegate {
             state = .error
         } else {
             let duration = player.duration
-            if duration.isNormal {
-                delegate?.player(layer: self, currentTime: duration, totalTime: duration)
-            }
+            delegate?.player(layer: self, currentTime: duration, totalTime: duration)
             state = .playedToTheEnd
         }
         timer?.fireDate = Date.distantFuture
@@ -313,10 +311,6 @@ extension KSPlayerLayer {
 
     @objc private func playerTimerAction() {
         guard let player = player, player.isPreparedToPlay else { return }
-        let currentPlaybackTime = player.currentPlaybackTime
-        if currentPlaybackTime.isInfinite || currentPlaybackTime.isNaN {
-            return
-        }
         delegate?.player(layer: self, currentTime: player.currentPlaybackTime, totalTime: player.duration)
         if player.playbackState == .playing, player.loadState == .playable, state == .buffering {
             // 一个兜底保护，正常不能走到这里
