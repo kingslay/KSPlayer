@@ -16,6 +16,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         let window = UIWindow()
 //        KSPlayerManager.firstPlayerType = KSAVPlayer.self
 //        KSPlayerManager.isLoopPlay = true
+        KSPlayerManager.canBackgroundPlay = true
         KSPlayerManager.isSecondOpen = true
         KSPlayerManager.isAccurateSeek = true
         KSPlayerManager.secondPlayerType = KSMEPlayer.self
