@@ -13,9 +13,9 @@ import AppKit
 #endif
 
 /// internal enum to check the pan direction
-enum KSPanDirection: Int {
-    case horizontal = 0
-    case vertical = 1
+enum KSPanDirection {
+    case horizontal
+    case vertical
 }
 
 open class VideoPlayerView: PlayerView {
