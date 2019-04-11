@@ -16,6 +16,7 @@ final class VideoOutput: NSObject, FrameOutput {
     private var currentRender: MEFrame?
     weak var renderSource: OutputRenderSourceDelegate?
     var renderView: PixelRenderView & UIView
+    var isOutput = true
     private lazy var displayLink: CADisplayLink = {
         let displayLink = CADisplayLink(target: self, selector: #selector(readBuffer(_:)))
         displayLink.add(to: .main, forMode: RunLoop.Mode.default)
@@ -38,7 +39,9 @@ final class VideoOutput: NSObject, FrameOutput {
     @objc private func readBuffer(_: CADisplayLink) {
         if let render = renderSource?.getOutputRender(type: .video, isDependent: true) {
             renderSource?.setVideo(time: render.cmtime)
-            renderView.set(render: render)
+            if isOutput {
+                renderView.set(render: render)
+            }
             currentRender = render
         }
     }

@@ -72,7 +72,7 @@ public final class KSAVPlayerView: UIView {
         }
     }
     #endif
-    private var playerLayer: AVPlayerLayer {
+    fileprivate var playerLayer: AVPlayerLayer {
         // swiftlint:disable force_cast
         return layer as! AVPlayerLayer
         // swiftlint:enable force_cast
@@ -470,5 +470,13 @@ extension KSAVPlayer: MediaPlayerProtocol {
         get {
             return view.contentMode
         }
+    }
+
+    public func enterBackground() {
+        playerView.playerLayer.player = nil
+    }
+
+    public func enterForeground() {
+        playerView.playerLayer.player = playerView.player
     }
 }
