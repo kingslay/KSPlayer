@@ -34,6 +34,10 @@ public class PlayerToolBar: UIStackView {
     public var definitionButton = UIButton()
     public var currentTime: TimeInterval = 0 {
         didSet {
+            guard currentTime.isNormal else {
+                currentTime = 0
+                return
+            }
             if currentTime != oldValue {
                 let text = currentTime.toString(for: timeType)
                 currentTimeLabel.text = text
@@ -45,6 +49,10 @@ public class PlayerToolBar: UIStackView {
 
     public var totalTime: TimeInterval = 0 {
         didSet {
+            guard totalTime.isNormal else {
+                totalTime = 0
+                return
+            }
             if totalTime != oldValue {
                 let text = totalTime.toString(for: timeType)
                 totalTimeLabel.text = text
