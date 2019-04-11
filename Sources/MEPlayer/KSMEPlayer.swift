@@ -326,6 +326,14 @@ extension KSMEPlayer: MediaPlayerProtocol {
     public func thumbnailImageAtCurrentTime() -> UIImage? {
         return videoOutput.thumbnailImageAtCurrentTime()
     }
+
+    public func enterBackground() {
+        videoOutput.isOutput = false
+    }
+
+    public func enterForeground() {
+        videoOutput.isOutput = true
+    }
 }
 
 extension KSMEPlayer {

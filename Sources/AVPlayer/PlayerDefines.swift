@@ -46,6 +46,8 @@ import AppKit
     init(url: URL, options: [String: Any]?)
     func replace(url: URL, options: [String: Any]?)
     func pause()
+    func enterBackground()
+    func enterForeground()
     func thumbnailImageAtCurrentTime() -> UIImage?
 }
 
