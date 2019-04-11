@@ -91,14 +91,14 @@ final class MetalPlayView: MTKView {
     }()
 
     private lazy var colorOffsetVideoRangeMatrixBuffer: MTLBuffer? = {
-        var firstColumn = float3(-(16.0 / 255.0), -(128.0 / 255.0), -(128.0 / 255.0))
+        var firstColumn = float3(-(16.0 / 255.0), -0.5, -0.5)
         let buffer = device?.makeBuffer(bytes: &firstColumn, length: MemoryLayout<float3>.size, options: .storageModeShared)
         buffer?.label = "colorOffset"
         return buffer
     }()
 
     private lazy var colorOffsetFullRangeMatrixBuffer: MTLBuffer? = {
-        var firstColumn = float3(-(0 / 255.0), -(128.0 / 255.0), -(128.0 / 255.0))
+        var firstColumn = float3(0, -0.5, -0.5)
         let buffer = device?.makeBuffer(bytes: &firstColumn, length: MemoryLayout<float3>.size, options: .storageModeShared)
         buffer?.label = "colorOffset"
         return buffer
@@ -179,7 +179,7 @@ extension MetalPlayView: PixelRenderView {
                 } else if pixelFormatType == kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange {
                     // WHY
                     buffer = colorConversion601FullRangeMatrixBuffer
-                    // buffer = colorConversion601VideoRangeMatrixBuffer
+//                     buffer = colorConversion601VideoRangeMatrixBuffer
                 }
             } else if colorAttachments == kCVImageBufferYCbCrMatrix_ITU_R_709_2 {
                 if pixelFormatType == kCVPixelFormatType_420YpCbCr8BiPlanarFullRange {
