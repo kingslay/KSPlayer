@@ -75,13 +75,13 @@ extension MediaPlayerProtocol {
     }
 }
 
-public enum KSPlayerTopBarShowCase: Int {
+public enum KSPlayerTopBarShowCase {
     /// 始终显示
-    case always = 0
+    case always
     /// 只在横屏界面显示
-    case horizantalOnly = 1
+    case horizantalOnly
     /// 不显示
-    case none = 2
+    case none
 }
 
 public struct KSPlayerManager {
