@@ -6,6 +6,7 @@
 //
 //
 import AVFoundation
+import MediaPlayer
 #if canImport(UIKit)
 import UIKit
 #else
@@ -92,16 +93,6 @@ open class KSPlayerLayer: UIView {
                 }
                 addSubview(player.view)
                 prepareToPlay()
-                #if os(macOS)
-                layoutSubtreeIfNeeded()
-                #else
-                if player is KSAVPlayer {
-                    UIApplication.shared.beginReceivingRemoteControlEvents()
-                    becomeFirstResponder()
-                } else {
-                    UIApplication.shared.endReceivingRemoteControlEvents()
-                }
-                #endif
                 player.view.frame = bounds
             }
         }
@@ -146,6 +137,7 @@ open class KSPlayerLayer: UIView {
         }
         timer = Timer.scheduledTimer(timeInterval: 0.5, target: self, selector: #selector(playerTimerAction), userInfo: nil, repeats: true)
         timer?.fireDate = Date.distantFuture
+        registerRemoteControllEvent()
     }
 
     open func play() {
@@ -176,9 +168,7 @@ open class KSPlayerLayer: UIView {
 
     open func resetPlayer() {
         KSLog("resetPlayer")
-        #if !os(macOS)
-        UIApplication.shared.endReceivingRemoteControlEvents()
-        #endif
+        unregisterRemoteControllEvent()
         timer?.invalidate()
         timer = nil
         state = .notSetURL
@@ -222,26 +212,6 @@ open class KSPlayerLayer: UIView {
     open override func layoutSubviews() {
         super.layoutSubviews()
         player?.view.frame = bounds
-    }
-
-    open override func remoteControlReceived(with event: UIEvent?) {
-        guard let event = event, event.type == .remoteControl else { return }
-        switch event.subtype {
-        case .remoteControlPlay:
-            play()
-        case .remoteControlPause:
-            pause()
-        case .remoteControlBeginSeekingForward:
-            player?.playbackRate = 10
-        case .remoteControlEndSeekingForward:
-            player?.playbackRate = 1
-        case .remoteControlBeginSeekingBackward:
-            player?.playbackRate = -10
-        case .remoteControlEndSeekingBackward:
-            player?.playbackRate = 1
-        default:
-            break
-        }
     }
     #endif
 }
@@ -338,6 +308,60 @@ extension KSPlayerLayer {
         if player.playbackState == .playing, player.loadState == .playable, state == .buffering {
             // 一个兜底保护，正常不能走到这里
             state = .bufferFinished
+        }
+    }
+
+    private func registerRemoteControllEvent() {
+        if #available(OSX 10.12.2, *) {
+            MPRemoteCommandCenter.shared().playCommand.addTarget(self, action: #selector(remoteCommandAction))
+            MPRemoteCommandCenter.shared().pauseCommand.addTarget(self, action: #selector(remoteCommandAction))
+            MPRemoteCommandCenter.shared().togglePlayPauseCommand.addTarget(self, action: #selector(remoteCommandAction))
+            MPRemoteCommandCenter.shared().seekForwardCommand.addTarget(self, action: #selector(remoteCommandAction))
+            MPRemoteCommandCenter.shared().seekBackwardCommand.addTarget(self, action: #selector(remoteCommandAction))
+            MPRemoteCommandCenter.shared().changePlaybackRateCommand.addTarget(self, action: #selector(remoteCommandAction))
+        }
+        if #available(iOS 9.1, OSX 10.12.2, *) {
+            MPRemoteCommandCenter.shared().changePlaybackPositionCommand.addTarget(self, action: #selector(remoteCommandAction))
+        }
+    }
+
+    private func unregisterRemoteControllEvent() {
+        if #available(OSX 10.12.2, *) {
+            MPRemoteCommandCenter.shared().playCommand.removeTarget(self)
+            MPRemoteCommandCenter.shared().pauseCommand.removeTarget(self)
+            MPRemoteCommandCenter.shared().togglePlayPauseCommand.removeTarget(self)
+            MPRemoteCommandCenter.shared().seekForwardCommand.removeTarget(self)
+            MPRemoteCommandCenter.shared().seekBackwardCommand.removeTarget(self)
+            MPRemoteCommandCenter.shared().changePlaybackRateCommand.removeTarget(self)
+        }
+        if #available(iOS 9.1, OSX 10.12.2, *) {
+            MPRemoteCommandCenter.shared().changePlaybackPositionCommand.removeTarget(self)
+        }
+    }
+
+    @available(OSX 10.12.2, *)
+    @objc private func remoteCommandAction(event: MPRemoteCommandEvent) {
+        guard let player = player else {
+            return
+        }
+        if event.command == MPRemoteCommandCenter.shared().playCommand {
+            play()
+        } else if event.command == MPRemoteCommandCenter.shared().pauseCommand {
+            pause()
+        } else if event.command == MPRemoteCommandCenter.shared().togglePlayPauseCommand {
+            if state.isPlaying {
+                pause()
+            } else {
+                play()
+            }
+        } else if event.command == MPRemoteCommandCenter.shared().seekForwardCommand {
+            seek(time: player.currentPlaybackTime + player.duration * 0.01)
+        } else if event.command == MPRemoteCommandCenter.shared().seekBackwardCommand {
+            seek(time: player.currentPlaybackTime - player.duration * 0.01)
+        } else if let event = event as? MPChangePlaybackPositionCommandEvent {
+            seek(time: event.positionTime)
+        } else if let event = event as? MPChangePlaybackRateCommandEvent {
+            player.playbackRate = event.playbackRate
         }
     }
 }
