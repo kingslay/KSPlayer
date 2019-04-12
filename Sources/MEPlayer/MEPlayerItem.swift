@@ -102,16 +102,16 @@ extension MEPlayerItem {
         var interruptCB = AVIOInterruptCB()
         interruptCB.opaque = Unmanaged.passUnretained(self).toOpaque()
         interruptCB.callback = { ctx -> Int32 in
-            if let ctx = ctx {
-                let formatContext = Unmanaged<MEPlayerItem>.fromOpaque(ctx).takeUnretainedValue()
-                switch formatContext.state {
-                case .finished, .closed, .failed:
-                    return 1
-                default:
-                    return 0
-                }
+            guard let ctx = ctx else {
+                return 0
             }
-            return 0
+            let formatContext = Unmanaged<MEPlayerItem>.fromOpaque(ctx).takeUnretainedValue()
+            switch formatContext.state {
+            case .finished, .closed, .failed:
+                return 1
+            default:
+                return 0
+            }
         }
         formatCtx.pointee.interrupt_callback = interruptCB
         var avOptions: OpaquePointer?
