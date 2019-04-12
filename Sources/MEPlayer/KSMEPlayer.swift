@@ -277,7 +277,7 @@ extension KSMEPlayer: MediaPlayerProtocol {
             guard let self = self else { return }
             self.videoOutput.flush()
             self.audioOutput.flush()
-            DispatchQueue.main.async { [weak self] in
+            runInMainqueue { [weak self] in
                 guard let self = self else { return }
                 self.playbackState = oldPlaybackState
                 handler?(result)

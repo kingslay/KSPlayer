@@ -14,7 +14,7 @@ public final class ObjectQueue<Item: ObjectQueueItem> {
     private var currentIndex = 0
     public let maxCount: Int
     // 视频有可能不是按顺序解码。所以一定要排序下，不然画面会来回抖动
-    public let sortObjects: Bool
+    private let sortObjects: Bool
     //    public var duration: Int64 = 0
     //    public var size: Int64 = 0
     public var count: Int {

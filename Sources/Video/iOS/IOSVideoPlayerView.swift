@@ -257,10 +257,10 @@ extension IOSVideoPlayerView {
         #if !targetEnvironment(simulator)
         var isPlaying = false
         callCenter.callEventHandler = { [weak self] call in
-            DispatchQueue.main.async { [weak self] in
+            runInMainqueue { [weak self] in
                 guard let self = self else { return }
                 if call.callState == CTCallStateIncoming {
-                    isPlaying = self.playerLayer.state.isPlaying
+                    isPlaying = self.toolBar.playButton.isSelected
                     if isPlaying {
                         self.pause()
                     }
@@ -291,6 +291,9 @@ extension IOSVideoPlayerView {
     }
 
     @objc private func enterBackground() {
+        guard toolBar.playButton.isSelected else {
+            return
+        }
         if KSPlayerManager.canBackgroundPlay {
             playerLayer.player?.enterBackground()
             return
