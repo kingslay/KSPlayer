@@ -23,23 +23,23 @@ final class AudioPlayerItemTrack: FFPlayerItemTrack<AudioFrame> {
         return false
     }
 
-    override func fetchReuseFrame() -> (AudioFrame, Int32) {
+    override func fetchReuseFrame() -> Result<AudioFrame, Int32> {
         if inputNumberOfChannels != codecpar.pointee.channels || inputFormat.rawValue != codecpar.pointee.format || inputSampleRate != codecpar.pointee.sample_rate {
             destorySwrContext()
             _ = setupSwrContext()
         }
-        let frame = AudioFrame()
-        frame.timebase = timebase
         let result = avcodec_receive_frame(codecContext, coreFrame)
         if let swrContext = swrContext, result == 0, let coreFrame = coreFrame {
+            // 过滤掉不规范的音频
+            if codecpar.pointee.channels != coreFrame.pointee.channels || codecpar.pointee.format != coreFrame.pointee.format || codecpar.pointee.sample_rate != coreFrame.pointee.sample_rate {
+                return .failure(result)
+            }
+            let frame = AudioFrame()
+            frame.timebase = timebase
             bestEffortTimestamp = max(coreFrame.pointee.best_effort_timestamp, bestEffortTimestamp)
             frame.position = bestEffortTimestamp
             frame.duration = coreFrame.pointee.pkt_duration
             frame.size = Int64(coreFrame.pointee.pkt_size)
-            // 过滤掉不规范的音频
-            if codecpar.pointee.channels != coreFrame.pointee.channels || codecpar.pointee.format != coreFrame.pointee.format || codecpar.pointee.sample_rate != coreFrame.pointee.sample_rate {
-                return (frame, result)
-            }
             var numberOfSamples = coreFrame.pointee.nb_samples
             let nbSamples = swr_get_out_samples(swrContext, numberOfSamples)
             _ = av_samples_get_buffer_size(&frame.bufferSize, KSDefaultParameter.audioPlayerMaximumChannels, nbSamples, AV_SAMPLE_FMT_FLTP, 1)
@@ -52,10 +52,9 @@ final class AudioPlayerItemTrack: FFPlayerItemTrack<AudioFrame> {
             for i in 0 ..< Int(KSDefaultParameter.audioPlayerMaximumChannels) {
                 frame.linesize[i] = linesize
             }
-        } else if IS_AVERROR_EOF(result) {
-            avcodec_flush_buffers(codecContext)
+            return .success(frame)
         }
-        return (frame, result)
+        return .failure(result)
     }
 
     override func seek(time: TimeInterval) {

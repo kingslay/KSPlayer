@@ -47,9 +47,7 @@ final class VideoPlayerItemTrack: FFPlayerItemTrack<VideoVTBFrame>, PixelFormat 
         return true
     }
 
-    override func fetchReuseFrame() -> (VideoVTBFrame, Int32) {
-        let frame = VideoVTBFrame()
-        frame.timebase = timebase
+    override func fetchReuseFrame() -> Result<VideoVTBFrame, Int32> {
         let result = avcodec_receive_frame(codecContext, coreFrame)
         if result == 0, let coreFrame = coreFrame {
             let convertFrame = swsConvert(frame: coreFrame.pointee)
@@ -62,6 +60,8 @@ final class VideoPlayerItemTrack: FFPlayerItemTrack<VideoVTBFrame>, PixelFormat 
                 pool = create(bytesPerRowAlignment: convertFrame.linesize.0)
             }
             if let pool = pool {
+                let frame = VideoVTBFrame()
+                frame.timebase = timebase
                 frame.corePixelBuffer = pool.getPixelBuffer(fromFrame: convertFrame)
                 if let buffer = frame.corePixelBuffer, let aspectRatio = aspectRatio {
                     CVBufferSetAttachment(buffer, kCVImageBufferPixelAspectRatioKey, aspectRatio, .shouldPropagate)
@@ -73,11 +73,10 @@ final class VideoPlayerItemTrack: FFPlayerItemTrack<VideoVTBFrame>, PixelFormat 
                 frame.duration = coreFrame.pointee.pkt_duration
                 frame.size = Int64(coreFrame.pointee.pkt_size)
                 frame.timebase = timebase
+                return .success(frame)
             }
-        } else if IS_AVERROR_EOF(result) {
-            avcodec_flush_buffers(codecContext)
         }
-        return (frame, result)
+        return .failure(result)
     }
 
     override func shutdown() {
