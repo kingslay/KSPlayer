@@ -43,6 +43,8 @@ extension NSError {
     }
 }
 
+extension Int32: Error {}
+
 enum MESourceState {
     case idle
     case opening

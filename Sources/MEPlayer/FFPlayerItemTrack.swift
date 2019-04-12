@@ -55,22 +55,25 @@ class FFPlayerItemTrack<Frame: MEFrame>: AsyncPlayerItemTrack<Frame> {
         }
         var array = [Frame]()
         while true {
-            let (frame, result) = fetchReuseFrame()
-            if result == 0 {
-                array.append(frame)
-            } else {
-                if AVFILTER_EOF(result) {
+            do {
+                array.append(try fetchReuseFrame().get())
+            } catch let code as Int32 {
+                if code == 0 || AVFILTER_EOF(code) {
+                    if IS_AVERROR_EOF(code) {
+                        avcodec_flush_buffers(codecContext)
+                    }
                     break
+                } else {
+                    let error = NSError(result: code, errorCode: mediaType == .audio ? .codecAudioReceiveFrame : .codecVideoReceiveFrame)
+                    KSLog(error)
+                    return .failure(error)
                 }
-                let error = NSError(result: result, errorCode: mediaType == .audio ? .codecAudioReceiveFrame : .codecVideoReceiveFrame)
-                KSLog(error)
-                return .failure(error)
-            }
+            } catch {}
         }
         return .success(array)
     }
 
-    func fetchReuseFrame() -> (Frame, Int32) {
+    func fetchReuseFrame() -> Result<Frame, Int32> {
         fatalError("Abstract method")
     }
 }
