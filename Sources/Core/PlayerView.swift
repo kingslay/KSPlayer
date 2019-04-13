@@ -24,7 +24,7 @@ public enum PlayerButtonType: Int {
     case definition = 109
 }
 
-public protocol PlayerControllerDelegate: class {
+public protocol PlayerControllerDelegate: AnyObject {
     func playerController(state: KSPlayerState)
     func playerController(currentTime: TimeInterval, totalTime: TimeInterval)
     func playerController(finish error: Error?)

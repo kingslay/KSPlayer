@@ -67,7 +67,7 @@ extension SubtitlePart: NumericComparable {
     }
 }
 
-public protocol KSSubtitleProtocol: class {
+public protocol KSSubtitleProtocol: AnyObject {
     func search(for time: TimeInterval) -> NSAttributedString?
 }
 

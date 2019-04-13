@@ -53,7 +53,7 @@ public enum KSPlayerState: CustomStringConvertible {
     }
 }
 
-public protocol KSPlayerLayerDelegate: class {
+public protocol KSPlayerLayerDelegate: AnyObject {
     func player(layer: KSPlayerLayer, state: KSPlayerState)
     func player(layer: KSPlayerLayer, currentTime: TimeInterval, totalTime: TimeInterval)
     func player(layer: KSPlayerLayer, finish error: Error?)

@@ -59,7 +59,7 @@ enum MESourceState {
 
 // MARK: delegate
 
-protocol OutputRenderSourceDelegate: class {
+protocol OutputRenderSourceDelegate: AnyObject {
     var currentPlaybackTime: TimeInterval { get }
     func getOutputRender(type: AVFoundation.AVMediaType, isDependent: Bool) -> MEFrame?
     func setVideo(time: CMTime)
@@ -72,13 +72,13 @@ extension OutputRenderSourceDelegate {
     }
 }
 
-protocol CodecCapacityDelegate: class {
+protocol CodecCapacityDelegate: AnyObject {
     func codecDidChangeCapacity(track: PlayerItemTrackProtocol)
     func codecFailed(error: NSError, track: PlayerItemTrackProtocol)
     func codecDidFinished(track: PlayerItemTrackProtocol)
 }
 
-protocol MEPlayerDelegate: class {
+protocol MEPlayerDelegate: AnyObject {
     func sourceDidChange(capacity: Capacity)
     func sourceDidOpened()
     func sourceDidFailed(error: NSError?)
@@ -88,7 +88,7 @@ protocol MEPlayerDelegate: class {
 // MARK: protocol
 
 // 缓冲情况
-protocol Capacity: class {
+protocol Capacity: AnyObject {
     var loadedTime: TimeInterval { get }
     var loadedCount: Int { get }
     var bufferingProgress: Int { get }
@@ -96,7 +96,7 @@ protocol Capacity: class {
     var isFinished: Bool { get }
 }
 
-public protocol ObjectQueueItem: class {
+public protocol ObjectQueueItem: AnyObject {
     var duration: Int64 { get }
     var size: Int64 { get }
     var position: Int64 { get }
@@ -106,7 +106,7 @@ protocol PixelFormat {
     var pixelFormatType: OSType { get set }
 }
 
-protocol FrameOutput: class {
+protocol FrameOutput: AnyObject {
     var renderSource: OutputRenderSourceDelegate? { get set }
     func play()
     func pause()

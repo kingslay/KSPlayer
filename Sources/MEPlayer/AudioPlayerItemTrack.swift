@@ -23,7 +23,7 @@ final class AudioPlayerItemTrack: FFPlayerItemTrack<AudioFrame> {
         return false
     }
 
-    override func fetchReuseFrame() -> Result<AudioFrame, Int32> {
+    override func fetchReuseFrame() throws -> AudioFrame {
         if inputNumberOfChannels != codecpar.pointee.channels || inputFormat.rawValue != codecpar.pointee.format || inputSampleRate != codecpar.pointee.sample_rate {
             destorySwrContext()
             _ = setupSwrContext()
@@ -32,7 +32,7 @@ final class AudioPlayerItemTrack: FFPlayerItemTrack<AudioFrame> {
         if let swrContext = swrContext, result == 0, let coreFrame = coreFrame {
             // 过滤掉不规范的音频
             if codecpar.pointee.channels != coreFrame.pointee.channels || codecpar.pointee.format != coreFrame.pointee.format || codecpar.pointee.sample_rate != coreFrame.pointee.sample_rate {
-                return .failure(result)
+                throw result
             }
             let frame = AudioFrame()
             frame.timebase = timebase
@@ -52,9 +52,9 @@ final class AudioPlayerItemTrack: FFPlayerItemTrack<AudioFrame> {
             for i in 0 ..< Int(KSDefaultParameter.audioPlayerMaximumChannels) {
                 frame.linesize[i] = linesize
             }
-            return .success(frame)
+            return frame
         }
-        return .failure(result)
+        throw result
     }
 
     override func seek(time: TimeInterval) {
