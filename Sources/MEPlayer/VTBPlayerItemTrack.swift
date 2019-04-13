@@ -72,28 +72,27 @@ class SamplePlayerItemTrack<Frame: MEFrame>: AsyncPlayerItemTrack<Frame>, PixelF
 }
 
 final class VideoSamplePlayerItemTrack: SamplePlayerItemTrack<VideoSampleBufferFrame> {
-    override func doDecode(packet: Packet) -> Result<[VideoSampleBufferFrame], NSError> {
+    override func doDecode(packet: Packet) throws -> [VideoSampleBufferFrame] {
         guard let corePacket = packet.corePacket, let data = corePacket.pointee.data, let formatDescription = formatDescription else {
-            return .success([])
+            return []
         }
-        return formatDescription.getSampleBuffer(isConvertNALSize: isConvertNALSize, data: data, size: Int(corePacket.pointee.size)).map { sampleBuffer -> [VideoSampleBufferFrame] in
-            let frame = VideoSampleBufferFrame()
-            frame.sampleBuffer = sampleBuffer
-            frame.timebase = timebase
-            frame.position = corePacket.pointee.pts
-            if frame.position == Int64.min || frame.position < 0 {
-                frame.position = max(corePacket.pointee.dts, 0)
-            }
-            frame.duration = corePacket.pointee.duration
-            frame.size = Int64(corePacket.pointee.size)
-            if let attachmentsArray = CMSampleBufferGetSampleAttachmentsArray(sampleBuffer, createIfNecessary: true) as? [Any] {
-                if let dic = attachmentsArray.first as? NSMutableDictionary {
-                    dic[kCMSampleAttachmentKey_DisplayImmediately] = false
-                    CMSampleBufferSetOutputPresentationTimeStamp(sampleBuffer, newValue: frame.cmtime)
-                }
-            }
-            return [frame]
+        let sampleBuffer = try formatDescription.getSampleBuffer(isConvertNALSize: isConvertNALSize, data: data, size: Int(corePacket.pointee.size))
+        let frame = VideoSampleBufferFrame()
+        frame.sampleBuffer = sampleBuffer
+        frame.timebase = timebase
+        frame.position = corePacket.pointee.pts
+        if frame.position == Int64.min || frame.position < 0 {
+            frame.position = max(corePacket.pointee.dts, 0)
         }
+        frame.duration = corePacket.pointee.duration
+        frame.size = Int64(corePacket.pointee.size)
+        if let attachmentsArray = CMSampleBufferGetSampleAttachmentsArray(sampleBuffer, createIfNecessary: true) as? [Any] {
+            if let dic = attachmentsArray.first as? NSMutableDictionary {
+                dic[kCMSampleAttachmentKey_DisplayImmediately] = false
+                CMSampleBufferSetOutputPresentationTimeStamp(sampleBuffer, newValue: frame.cmtime)
+            }
+        }
+        return [frame]
     }
 }
 
@@ -101,51 +100,48 @@ final class VTBPlayerItemTrack: SamplePlayerItemTrack<VideoVTBFrame> {
     // 刷新Session的话，后续的解码还是会失败，直到遇到I帧
     private var refreshSession = false
     private var decompressionSession: VTDecompressionSession?
-    override func doDecode(packet: Packet) -> Result<[VideoVTBFrame], NSError> {
+    override func doDecode(packet: Packet) throws -> [VideoVTBFrame] {
         guard let corePacket = packet.corePacket, let data = corePacket.pointee.data, let decompressionSession = decompressionSession, let formatDescription = formatDescription else {
-            return .success([])
+            return []
         }
-        return formatDescription.getSampleBuffer(isConvertNALSize: isConvertNALSize, data: data, size: Int(corePacket.pointee.size)).flatMap { sampleBuffer -> Result<[VideoVTBFrame], NSError> in
-            if refreshSession, corePacket.pointee.flags & AV_PKT_FLAG_KEY == 1 {
-                refreshSession = false
-            }
-            var result = [VideoVTBFrame]()
-            var error: NSError?
-            // swiftlint:disable line_length
-            let status = VTDecompressionSessionDecodeFrame(decompressionSession, sampleBuffer: sampleBuffer, flags: VTDecodeFrameFlags(rawValue: 0), infoFlagsOut: nil) { status, _, imageBuffer, _, _ in
-                if status == noErr {
-                    if let imageBuffer = imageBuffer {
-                        let frame = VideoVTBFrame()
-                        frame.corePixelBuffer = imageBuffer
-                        frame.timebase = self.timebase
-                        frame.position = corePacket.pointee.pts
-                        if frame.position == Int64.min || frame.position < 0 {
-                            frame.position = max(corePacket.pointee.dts, 0)
-                        }
-                        frame.duration = corePacket.pointee.duration
-                        frame.size = Int64(corePacket.pointee.size)
-                        result.append(frame)
+        let sampleBuffer = try formatDescription.getSampleBuffer(isConvertNALSize: isConvertNALSize, data: data, size: Int(corePacket.pointee.size))
+        if refreshSession, corePacket.pointee.flags & AV_PKT_FLAG_KEY == 1 {
+            refreshSession = false
+        }
+        var result = [VideoVTBFrame]()
+        var error: NSError?
+        let status = VTDecompressionSessionDecodeFrame(decompressionSession, sampleBuffer: sampleBuffer, flags: VTDecodeFrameFlags(rawValue: 0), infoFlagsOut: nil) { status, _, imageBuffer, _, _ in
+            if status == noErr {
+                if let imageBuffer = imageBuffer {
+                    let frame = VideoVTBFrame()
+                    frame.corePixelBuffer = imageBuffer
+                    frame.timebase = self.timebase
+                    frame.position = corePacket.pointee.pts
+                    if frame.position == Int64.min || frame.position < 0 {
+                        frame.position = max(corePacket.pointee.dts, 0)
                     }
-                } else {
-                    if !self.refreshSession {
-                        error = .init(result: status, errorCode: .codecVideoReceiveFrame)
-                    }
+                    frame.duration = corePacket.pointee.duration
+                    frame.size = Int64(corePacket.pointee.size)
+                    result.append(frame)
                 }
-            }
-            // swiftlint:enable line_length
-            if let error = error {
-                return .failure(error)
             } else {
-                if status == kVTInvalidSessionErr || status == kVTVideoDecoderMalfunctionErr {
-                    // 解决从后台切换到前台，解码失败的问题
-                    destoryDecompressionSession()
-                    _ = setupDecompressionSession()
-                    refreshSession = true
-                } else if status != noErr {
-                    return .failure(.init(result: status, errorCode: .codecVideoReceiveFrame))
+                if !self.refreshSession {
+                    error = .init(result: status, errorCode: .codecVideoReceiveFrame)
                 }
-                return .success(result)
             }
+        }
+        if let error = error {
+            throw error
+        } else {
+            if status == kVTInvalidSessionErr || status == kVTVideoDecoderMalfunctionErr {
+                // 解决从后台切换到前台，解码失败的问题
+                destoryDecompressionSession()
+                _ = setupDecompressionSession()
+                refreshSession = true
+            } else if status != noErr {
+                throw NSError(result: status, errorCode: .codecVideoReceiveFrame)
+            }
+            return result
         }
     }
 
@@ -188,7 +184,7 @@ final class VTBPlayerItemTrack: SamplePlayerItemTrack<VideoVTBFrame> {
 }
 
 extension CMFormatDescription {
-    fileprivate func getSampleBuffer(isConvertNALSize: Bool, data: UnsafeMutablePointer<UInt8>, size: Int) -> Result<CMSampleBuffer, NSError> {
+    fileprivate func getSampleBuffer(isConvertNALSize: Bool, data: UnsafeMutablePointer<UInt8>, size: Int) throws -> CMSampleBuffer {
         if isConvertNALSize {
             var ioContext: UnsafeMutablePointer<AVIOContext>?
             let status = avio_open_dyn_buf(&ioContext)
@@ -205,16 +201,16 @@ extension CMFormatDescription {
                 }
                 var demuxBuffer: UnsafeMutablePointer<UInt8>?
                 let demuxSze = avio_close_dyn_buf(ioContext, &demuxBuffer)
-                return createSampleBuffer(data: demuxBuffer, size: Int(demuxSze))
+                return try createSampleBuffer(data: demuxBuffer, size: Int(demuxSze))
             } else {
-                return .failure(.init(result: status, errorCode: .codecVideoReceiveFrame))
+                throw NSError(result: status, errorCode: .codecVideoReceiveFrame)
             }
         } else {
-            return createSampleBuffer(data: data, size: size)
+            return try createSampleBuffer(data: data, size: size)
         }
     }
 
-    private func createSampleBuffer(data: UnsafeMutablePointer<UInt8>?, size: Int) -> Result<CMSampleBuffer, NSError> {
+    private func createSampleBuffer(data: UnsafeMutablePointer<UInt8>?, size: Int) throws -> CMSampleBuffer {
         var blockBuffer: CMBlockBuffer?
         var sampleBuffer: CMSampleBuffer?
         // swiftlint:disable line_length
@@ -222,10 +218,10 @@ extension CMFormatDescription {
         if status == noErr {
             status = CMSampleBufferCreate(allocator: nil, dataBuffer: blockBuffer, dataReady: true, makeDataReadyCallback: nil, refcon: nil, formatDescription: self, sampleCount: 1, sampleTimingEntryCount: 0, sampleTimingArray: nil, sampleSizeEntryCount: 0, sampleSizeArray: nil, sampleBufferOut: &sampleBuffer)
             if let sampleBuffer = sampleBuffer {
-                return .success(sampleBuffer)
+                return sampleBuffer
             }
         }
-        return .failure(.init(result: status, errorCode: .codecVideoReceiveFrame))
+        throw NSError(result: status, errorCode: .codecVideoReceiveFrame)
         // swiftlint:enable line_length
     }
 }

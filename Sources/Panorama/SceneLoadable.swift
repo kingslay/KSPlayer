@@ -23,7 +23,7 @@ public protocol TextureRenderView {
     func set(texture: MTLTexture)
 }
 
-public protocol SceneLoadable: class {
+public protocol SceneLoadable: AnyObject {
     var scene: SCNScene? { get set }
 }
 
@@ -41,7 +41,7 @@ extension CategoryBitMask {
     public static let rightEye = CategoryBitMask(rawValue: 1 << 22)
 }
 
-public protocol OrientationIndicatorDataSource: class {
+public protocol OrientationIndicatorDataSource: AnyObject {
     var pointOfView: SCNNode? { get }
     var viewportSize: CGSize { get }
 }

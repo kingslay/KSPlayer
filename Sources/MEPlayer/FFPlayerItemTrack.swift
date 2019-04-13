@@ -48,15 +48,15 @@ class FFPlayerItemTrack<Frame: MEFrame>: AsyncPlayerItemTrack<Frame> {
         }
     }
 
-    override func doDecode(packet: Packet) -> Result<[Frame], NSError> {
+    override func doDecode(packet: Packet) throws -> [Frame] {
         let result = avcodec_send_packet(codecContext, packet.corePacket)
         guard result == 0 else {
-            return .success([])
+            return []
         }
         var array = [Frame]()
         while true {
             do {
-                array.append(try fetchReuseFrame().get())
+                array.append(try fetchReuseFrame())
             } catch let code as Int32 {
                 if code == 0 || AVFILTER_EOF(code) {
                     if IS_AVERROR_EOF(code) {
@@ -66,14 +66,14 @@ class FFPlayerItemTrack<Frame: MEFrame>: AsyncPlayerItemTrack<Frame> {
                 } else {
                     let error = NSError(result: code, errorCode: mediaType == .audio ? .codecAudioReceiveFrame : .codecVideoReceiveFrame)
                     KSLog(error)
-                    return .failure(error)
+                    throw error
                 }
             } catch {}
         }
-        return .success(array)
+        return array
     }
 
-    func fetchReuseFrame() -> Result<Frame, Int32> {
+    func fetchReuseFrame() throws -> Frame {
         fatalError("Abstract method")
     }
 }

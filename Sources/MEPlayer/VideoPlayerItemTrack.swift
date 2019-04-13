@@ -47,7 +47,7 @@ final class VideoPlayerItemTrack: FFPlayerItemTrack<VideoVTBFrame>, PixelFormat 
         return true
     }
 
-    override func fetchReuseFrame() -> Result<VideoVTBFrame, Int32> {
+    override func fetchReuseFrame() throws -> VideoVTBFrame {
         let result = avcodec_receive_frame(codecContext, coreFrame)
         if result == 0, let coreFrame = coreFrame {
             let convertFrame = swsConvert(frame: coreFrame.pointee)
@@ -73,10 +73,10 @@ final class VideoPlayerItemTrack: FFPlayerItemTrack<VideoVTBFrame>, PixelFormat 
                 frame.duration = coreFrame.pointee.pkt_duration
                 frame.size = Int64(coreFrame.pointee.pkt_size)
                 frame.timebase = timebase
-                return .success(frame)
+                return frame
             }
         }
-        return .failure(result)
+        throw result
     }
 
     override func shutdown() {

@@ -236,7 +236,7 @@ class AsyncPlayerItemTrack<Frame: MEFrame>: MEPlayerItemTrack<Frame> {
                 }
                 do {
                     //                        let startTime = CACurrentMediaTime()
-                    let frames = try doDecode(packet: packet).get()
+                    let frames = try doDecode(packet: packet)
                     //                        if type == .video {
                     //                            KSLog("视频解码耗时：\(CACurrentMediaTime()-startTime)")
                     //                        } else if type == .audio {
@@ -308,7 +308,7 @@ class AsyncPlayerItemTrack<Frame: MEFrame>: MEPlayerItemTrack<Frame> {
 
     func doFlushCodec() {}
 
-    func doDecode(packet _: Packet) -> Result<[Frame], NSError> {
+    func doDecode(packet _: Packet) throws -> [Frame] {
         fatalError("Abstract method")
     }
 }

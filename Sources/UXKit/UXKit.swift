@@ -42,7 +42,7 @@ public protocol LoadingIndector {
     case mouseExited
 }
 
-protocol KSSliderDelegate: class {
+protocol KSSliderDelegate: AnyObject {
     /**
      call when slider action trigged
      - parameter value:      progress

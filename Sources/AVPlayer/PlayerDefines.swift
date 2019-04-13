@@ -13,7 +13,7 @@ import UIKit
 import AppKit
 #endif
 
-@objc public protocol MediaPlayback: class {
+@objc public protocol MediaPlayback: AnyObject {
     var duration: TimeInterval { get }
     var naturalSize: CGSize { get }
     var currentPlaybackTime: TimeInterval { get }
@@ -51,7 +51,7 @@ import AppKit
     func thumbnailImageAtCurrentTime() -> UIImage?
 }
 
-@objc public protocol MediaPlayerDelegate: class {
+@objc public protocol MediaPlayerDelegate: AnyObject {
     func preparedToPlay(player: MediaPlayerProtocol)
     func changeLoadState(player: MediaPlayerProtocol)
     // 缓冲加载进度，0-100
