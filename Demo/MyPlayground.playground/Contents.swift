@@ -4,7 +4,7 @@ import KSPlayer
 import PlaygroundSupport
 import UIKit
 class ViewController: UIViewController {
-    var playerView = IOSVideoPlayerView()
+    let playerView = IOSVideoPlayerView()
     override func viewDidLoad() {
         super.viewDidLoad()
         view.addSubview(playerView)
