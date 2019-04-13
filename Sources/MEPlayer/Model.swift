@@ -96,7 +96,7 @@ protocol Capacity: AnyObject {
     var isFinished: Bool { get }
 }
 
-public protocol ObjectQueueItem: AnyObject {
+public protocol ObjectQueueItem {
     var duration: Int64 { get }
     var size: Int64 { get }
     var position: Int64 { get }
@@ -106,7 +106,7 @@ protocol PixelFormat {
     var pixelFormatType: OSType { get set }
 }
 
-protocol FrameOutput: AnyObject {
+protocol FrameOutput {
     var renderSource: OutputRenderSourceDelegate? { get set }
     func play()
     func pause()
