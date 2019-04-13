@@ -58,12 +58,10 @@ public final class KSObservable<Element> {
 
 public final class AsyncResult<T> {
     let progress: (Double) -> Void
-    let completion: (T) -> Void
-    let failure: (Error) -> Void
-    public init(progress: @escaping (Double) -> Void, completion: @escaping (T) -> Void, failure: @escaping (Error) -> Void) {
+    let completion: (Result<T, Error>) -> Void
+    public init(progress: @escaping (Double) -> Void, completion: @escaping (Result<T, Error>) -> Void) {
         self.progress = progress
         self.completion = completion
-        self.failure = failure
     }
 }
 
@@ -313,13 +311,13 @@ extension AVAsset {
                 let result = gifCreator.finalize()
                 if result {
                     let error = NSError(domain: AVFoundationErrorDomain, code: -1, userInfo: [NSLocalizedDescriptionKey: "Generate Gif Failed!"])
-                    blockResult.failure(error)
+                    blockResult.completion(.failure(error))
                 } else {
-                    blockResult.completion(result)
+                    blockResult.completion(.success(result))
                 }
             case .failed:
                 if let error = error {
-                    blockResult.failure(error)
+                    blockResult.completion(.failure(error))
                 }
             case .cancelled:
                 break
@@ -366,11 +364,11 @@ extension AVAsset {
                 blockResult.progress(Double(exportSession.progress))
             case .completed:
                 blockResult.progress(1)
-                blockResult.completion(outputURL)
+                blockResult.completion(.success(outputURL))
                 exportSession.cancelExport()
             case .failed:
                 if let error = exportSession.error {
-                    blockResult.failure(error)
+                    blockResult.completion(.failure(error))
                 }
                 exportSession.cancelExport()
             case .cancelled:
