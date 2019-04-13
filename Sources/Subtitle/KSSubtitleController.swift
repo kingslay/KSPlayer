@@ -23,7 +23,7 @@ public class KSSubtitleController {
     private var infos = [SubtitleInfo]()
     private var subtitleName: String?
     public var subtitle: KSSubtitleProtocol?
-    public var selectWithFilePath: ((Result<KSSubtitleProtocol, Error>) -> Void)?
+    public var selectWithFilePath: ((Result<KSSubtitleProtocol, NSError>) -> Void)?
     public var srtListCount: KSObservable<Int> = KSObservable(0)
 
     public var view: UIView & SubtitleViewProtocol

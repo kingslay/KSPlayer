@@ -15,7 +15,7 @@ import Foundation
 }
 
 public protocol MakeSubtitle {
-    func makeSubtitle(completion: @escaping (Result<KSSubtitleProtocol, Error>) -> Void)
+    func makeSubtitle(completion: @escaping (Result<KSSubtitleProtocol, NSError>) -> Void)
 }
 
 @objc public class URLSubtitleInfo: NSObject, SubtitleInfo {
@@ -32,14 +32,14 @@ public protocol MakeSubtitle {
 }
 
 extension URLSubtitleInfo: MakeSubtitle {
-    public func makeSubtitle(completion: @escaping (Result<KSSubtitleProtocol, Error>) -> Void) {
+    public func makeSubtitle(completion: @escaping (Result<KSSubtitleProtocol, NSError>) -> Void) {
         let block = { (url: URL) in
             let subtitles = KSURLSubtitle()
             do {
                 try subtitles.parse(url: url)
                 completion(.success(subtitles))
             } catch {
-                completion(.failure(error))
+                completion(.failure(error as NSError))
             }
         }
         if let downloadURL = downloadURL {
