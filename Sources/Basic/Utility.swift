@@ -56,15 +56,6 @@ public final class KSObservable<Element> {
     }
 }
 
-public final class AsyncResult<T> {
-    let progress: (Double) -> Void
-    let completion: (Result<T, Error>) -> Void
-    public init(progress: @escaping (Double) -> Void, completion: @escaping (Result<T, Error>) -> Void) {
-        self.progress = progress
-        self.completion = completion
-    }
-}
-
 class GIFCreator {
     private let destination: CGImageDestination
     private let frameProperties: CFDictionary
@@ -294,7 +285,7 @@ extension AVAsset {
         }
     }
 
-    public func generateGIF(beginTime: TimeInterval, endTime: TimeInterval, interval: Double = 0.2, savePath: URL, blockResult: AsyncResult<Bool>) {
+    public func generateGIF(beginTime: TimeInterval, endTime: TimeInterval, interval: Double = 0.2, savePath: URL, progress: @escaping (Double) -> Void, completion: @escaping (Error?) -> Void) {
         let count = Int(ceil((endTime - beginTime) / interval))
         let timesM = (0 ..< count).map { NSValue(time: CMTime(seconds: beginTime + Double($0) * interval)) }
         let imageGenerator = ceateImageGenerator()
@@ -306,18 +297,17 @@ extension AVAsset {
                 guard let imageRef = imageRef else { return }
                 i += 1
                 gifCreator.add(image: imageRef)
-                blockResult.progress(Double(i) / Double(count))
+                progress(Double(i) / Double(count))
                 guard i == count else { return }
-                let result = gifCreator.finalize()
-                if result {
-                    let error = NSError(domain: AVFoundationErrorDomain, code: -1, userInfo: [NSLocalizedDescriptionKey: "Generate Gif Failed!"])
-                    blockResult.completion(.failure(error))
+                if gifCreator.finalize() {
+                    completion(nil)
                 } else {
-                    blockResult.completion(.success(result))
+                    let error = NSError(domain: AVFoundationErrorDomain, code: -1, userInfo: [NSLocalizedDescriptionKey: "Generate Gif Failed!"])
+                    completion(error)
                 }
             case .failed:
                 if let error = error {
-                    blockResult.completion(.failure(error))
+                    completion(error)
                 }
             case .cancelled:
                 break
@@ -351,7 +341,7 @@ extension AVAsset {
         return exportSession
     }
 
-    func exportMp4(beginTime: TimeInterval, endTime: TimeInterval, outputURL: URL, blockResult: AsyncResult<URL>) throws {
+    func exportMp4(beginTime: TimeInterval, endTime: TimeInterval, outputURL: URL, progress: @escaping (Double) -> Void, completion: @escaping (Result<URL, Error>) -> Void) throws {
         try FileManager.default.removeItem(at: outputURL)
         guard let exportSession = try ceateExportSession(beginTime: beginTime, endTime: endTime) else { return }
         exportSession.outputURL = outputURL
@@ -361,14 +351,14 @@ extension AVAsset {
             }
             switch exportSession.status {
             case .exporting:
-                blockResult.progress(Double(exportSession.progress))
+                progress(Double(exportSession.progress))
             case .completed:
-                blockResult.progress(1)
-                blockResult.completion(.success(outputURL))
+                progress(1)
+                completion(.success(outputURL))
                 exportSession.cancelExport()
             case .failed:
                 if let error = exportSession.error {
-                    blockResult.completion(.failure(error))
+                    completion(.failure(error))
                 }
                 exportSession.cancelExport()
             case .cancelled:
@@ -381,10 +371,10 @@ extension AVAsset {
         }
     }
 
-    func exportMp4(beginTime: TimeInterval, endTime: TimeInterval, blockResult: AsyncResult<URL>) throws {
+    func exportMp4(beginTime: TimeInterval, endTime: TimeInterval, progress: @escaping (Double) -> Void, completion: @escaping (Result<URL, Error>) -> Void) throws {
         guard var exportURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first else { return }
         exportURL = exportURL.appendingPathExtension("Export.mp4")
-        try exportMp4(beginTime: beginTime, endTime: endTime, outputURL: exportURL, blockResult: blockResult)
+        try exportMp4(beginTime: beginTime, endTime: endTime, outputURL: exportURL, progress: progress, completion: completion)
     }
 }
 
