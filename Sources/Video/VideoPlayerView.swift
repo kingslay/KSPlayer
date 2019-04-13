@@ -318,9 +318,9 @@ extension VideoPlayerView {
         addSubview(subtitleBackView)
         addSubview(srtControl.view)
         srtControl.view.translatesAutoresizingMaskIntoConstraints = false
-        srtControl.selectWithFilePath = { [weak self] subtitle, _ in
+        srtControl.selectWithFilePath = { [weak self] result in
             guard let self = self else { return }
-            self.resource?.subtitle = subtitle
+            self.resource?.subtitle = try? result.get()
         }
     }
 

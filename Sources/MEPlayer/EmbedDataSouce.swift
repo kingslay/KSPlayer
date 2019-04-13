@@ -21,8 +21,8 @@ public class EmbedSubtitleInfo: SubtitleInfo {
 }
 
 extension EmbedSubtitleInfo: MakeSubtitle {
-    public func makeSubtitle(completion: @escaping (KSSubtitleProtocol?, Error?) -> Void) {
-        completion(subtitle, nil)
+    public func makeSubtitle(completion: @escaping ((Result<KSSubtitleProtocol, Error>) -> Void)) {
+        completion(.success(subtitle))
     }
 }
 
