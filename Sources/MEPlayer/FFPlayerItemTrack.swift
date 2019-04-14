@@ -10,8 +10,8 @@ import Foundation
 class FFPlayerItemTrack<Frame: MEFrame>: AsyncPlayerItemTrack<Frame> {
     // 第一次seek不要调用avcodec_flush_buffers。否则seek完之后可能会因为不是关键帧而导致蓝屏
     private var firstSeek = true
-    var coreFrame: UnsafeMutablePointer<AVFrame>?
-    var codecContext: UnsafeMutablePointer<AVCodecContext>? {
+    private(set) var coreFrame: UnsafeMutablePointer<AVFrame>?
+    private(set) var codecContext: UnsafeMutablePointer<AVCodecContext>? {
         didSet {
             codecContext?.pointee.time_base = timebase.rational
         }
@@ -19,7 +19,7 @@ class FFPlayerItemTrack<Frame: MEFrame>: AsyncPlayerItemTrack<Frame> {
 
     override func shutdown() {
         super.shutdown()
-        if let codecContext = self.codecContext {
+        if let codecContext = codecContext {
             avcodec_close(codecContext)
             avcodec_free_context(&self.codecContext)
             self.codecContext = nil

@@ -21,7 +21,7 @@ final class VideoPlayerItemTrack: FFPlayerItemTrack<VideoVTBFrame>, PixelFormat 
         guard super.open(), codecpar.pointee.format != AV_PIX_FMT_NONE.rawValue else {
             return false
         }
-        var convert = false
+        let convert: Bool
         if pixelFormatType == kCVPixelFormatType_32BGRA {
             convert = codecpar.pointee.format != AV_PIX_FMT_BGRA.rawValue
         } else {
