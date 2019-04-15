@@ -15,7 +15,7 @@ import Foundation
 }
 
 public protocol MakeSubtitle {
-    func makeSubtitle(completion: @escaping (Result<KSSubtitleProtocol, NSError>) -> Void)
+    func makeSubtitle(completion: @escaping (Result<KSSubtitleProtocol?, NSError>) -> Void)
 }
 
 @objc public class URLSubtitleInfo: NSObject, SubtitleInfo {
@@ -32,7 +32,7 @@ public protocol MakeSubtitle {
 }
 
 extension URLSubtitleInfo: MakeSubtitle {
-    public func makeSubtitle(completion: @escaping (Result<KSSubtitleProtocol, NSError>) -> Void) {
+    public func makeSubtitle(completion: @escaping (Result<KSSubtitleProtocol?, NSError>) -> Void) {
         let block = { (url: URL) in
             let subtitles = KSURLSubtitle()
             do {
@@ -54,8 +54,12 @@ extension URLSubtitleInfo: MakeSubtitle {
                     if let cache = subtitleDataSouce as? SubtitletoCache {
                         cache.addCache(subtitleID: self.subtitleID, downloadURL: downloadURL)
                     }
+                } else {
+                    completion(.success(nil))
                 }
             }
+        } else {
+            completion(.success(nil))
         }
     }
 }
