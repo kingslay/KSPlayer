@@ -3,6 +3,30 @@ if [ -z "$platform" ]
 then
   platform="iOS"
 fi
+COMPILE="y"
+LIPO="y"
+debug="--disable-debug"
+DEPLOYMENT_TARGET="9.0"
+if [ "$*" ]
+then
+	if [ "$*" = "lipo" ]
+	then
+		# skip compile
+		COMPILE=
+	else 
+		if [ "$*" = "debug" ]
+		then
+			debug="--enable-debug"
+		else
+			ARCHS="$*"
+			if [ $# -eq 1 ]
+			then
+				# skip lipo
+				LIPO=
+			fi
+		fi
+	fi
+fi
 if [ "$platform" = "iOS" ]
 then
 	SIMULATORPLATFORM="iphonesimulator"
@@ -34,7 +58,7 @@ if [[ $FFMPEG_VERSION != "" ]]; then
 fi
 ##### Add Begin #####
 # OpenSSL
-# OPENSSL=`pwd`/"openssl-$platform"
+OPENSSL=`pwd`/"openssl-$platform"
 #####  Add End  #####
 SOURCE="ffmpeg-$FF_VERSION"
 SCRATCH="scratch"
@@ -48,11 +72,12 @@ rm -rf SCRATCH
 
 #FDK_AAC=`pwd`/../fdk-aac-build-script-for-iOS/fdk-aac-ios
 # CONFIGURE_FLAGS="$CONFIGURE_FLAGS --prefix=PREFIX"
-CONFIGURE_FLAGS="--disable-debug --enable-optimizations --enable-pic --enable-neon "
+CONFIGURE_FLAGS="--enable-optimizations --enable-pic --enable-neon"
 # Licensing options:
 CONFIGURE_FLAGS="$CONFIGURE_FLAGS --disable-gpl"
 # CONFIGURE_FLAGS="$CONFIGURE_FLAGS --enable-version3"
 CONFIGURE_FLAGS="$CONFIGURE_FLAGS --disable-nonfree"
+CONFIGURE_FLAGS="$CONFIGURE_FLAGS $debug"
 
 # Configuration options:
 CONFIGURE_FLAGS="$CONFIGURE_FLAGS --enable-cross-compile"
@@ -236,27 +261,6 @@ then
 fi
 # avresample
 #CONFIGURE_FLAGS="$CONFIGURE_FLAGS --enable-avresample"
-
-COMPILE="y"
-LIPO="y"
-
-DEPLOYMENT_TARGET="9.0"
-
-if [ "$*" ]
-then
-	if [ "$*" = "lipo" ]
-	then
-		# skip compile
-		COMPILE=
-	else
-		ARCHS="$*"
-		if [ $# -eq 1 ]
-		then
-			# skip lipo
-			LIPO=
-		fi
-	fi
-fi
 
 if [ "$COMPILE" ]
 then
