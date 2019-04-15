@@ -153,8 +153,7 @@ final class AudioPlayer {
                 return noErr
             }
             let `self` = Unmanaged<AudioPlayer>.fromOpaque(refCon).takeUnretainedValue()
-            let data = UnsafeMutableAudioBufferListPointer(ioData)
-            self.delegate?.audioPlayerShouldInputData(ioData: data, numberOfSamples: inNumberFrames, numberOfChannels: self.numberOfChannels)
+            self.delegate?.audioPlayerShouldInputData(ioData: UnsafeMutableAudioBufferListPointer(ioData), numberOfSamples: inNumberFrames, numberOfChannels: self.numberOfChannels)
             return noErr
         }
         return inputCallbackStruct
