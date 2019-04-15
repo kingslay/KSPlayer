@@ -11,8 +11,7 @@ import ffmpeg
 final class ATBPlayerItemTrack: AsyncPlayerItemTrack<AudioFrame> {
     // 刷新Session的话，后续的解码还是会失败，直到遇到I帧
     private var converter: AudioConverterRef?
-    private var bufferSize = UInt32(0)
-    private var buffer: UnsafeMutableRawPointer?
+    private var outAudioBufferList = AudioBufferList()
     override func open() -> Bool {
         if super.open() {
             var inputFormat = codecpar.pointee.inputFormat
@@ -24,8 +23,11 @@ final class ATBPlayerItemTrack: AsyncPlayerItemTrack<AudioFrame> {
             outputFormat.mBitsPerChannel = UInt32(av_get_bytes_per_sample(sampleFmt) * 8)
             outputFormat.mSampleRate = inputFormat.mSampleRate
             outputFormat.mChannelsPerFrame = inputFormat.mChannelsPerFrame
-            bufferSize = UInt32(av_get_bytes_per_sample(AVSampleFormat(rawValue: codecpar.pointee.format)) * codecpar.pointee.channels * codecpar.pointee.frame_size)
-            buffer = UnsafeMutableRawPointer(mutating: UnsafeMutablePointer<UInt8>.allocate(capacity: Int(bufferSize)))
+            outAudioBufferList.mNumberBuffers = 1
+            outAudioBufferList.mBuffers.mNumberChannels = UInt32(codecpar.pointee.channels)
+            let bufferSize = outputFormat.mBitsPerChannel * UInt32(codecpar.pointee.channels * codecpar.pointee.frame_size)
+            outAudioBufferList.mBuffers.mDataByteSize = bufferSize
+            outAudioBufferList.mBuffers.mData = malloc(Int(bufferSize))
             return AudioConverterNew(&inputFormat, &outputFormat, &converter) == noErr
         }
         return false
@@ -41,25 +43,21 @@ final class ATBPlayerItemTrack: AsyncPlayerItemTrack<AudioFrame> {
                 return 1
             }
             audioBufferList.pointee.mNumberBuffers = 1
-//            audioBufferList.pointee.mBuffers.mNumberChannels = 0
+            audioBufferList.pointee.mBuffers.mNumberChannels = 1
             audioBufferList.pointee.mBuffers.mData = UnsafeMutableRawPointer(data)
             audioBufferList.pointee.mBuffers.mDataByteSize = UInt32(packet.pointee.size)
-            audioBufferList.pointee.mBuffers.mNumberChannels = 1
             ioPacketCount.pointee = 1
             if let packetDesc = packetDesc {
                 var description = AudioStreamPacketDescription()
+                description.mStartOffset = 0
+                description.mVariableFramesInPacket = 0
                 description.mDataByteSize = audioBufferList.pointee.mBuffers.mDataByteSize
                 withUnsafeMutablePointer(to: &description) {
                     packetDesc.pointee = $0
                 }
             }
-            return 0
+            return noErr
         }
-        var outAudioBufferList = AudioBufferList()
-        outAudioBufferList.mNumberBuffers = 1
-        outAudioBufferList.mBuffers.mNumberChannels = UInt32(codecpar.pointee.channels)
-        outAudioBufferList.mBuffers.mDataByteSize = bufferSize
-        outAudioBufferList.mBuffers.mData = buffer
         var ioOutputDataPacketSize = UInt32(codecpar.pointee.frame_size)
         let result = AudioConverterFillComplexBuffer(converter, inputDataProc, corePacket, &ioOutputDataPacketSize, &outAudioBufferList, nil)
         let frame = AudioFrame()
