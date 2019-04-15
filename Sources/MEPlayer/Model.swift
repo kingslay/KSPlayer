@@ -165,6 +165,20 @@ public struct KSDefaultParameter {
         #endif
         #endif
     }()
+
+    static func outputFormat() -> AudioStreamBasicDescription {
+        var audioStreamBasicDescription = AudioStreamBasicDescription()
+        let floatByteSize = UInt32(MemoryLayout<Float>.size)
+        audioStreamBasicDescription.mBitsPerChannel = 8 * floatByteSize
+        audioStreamBasicDescription.mBytesPerFrame = floatByteSize
+        audioStreamBasicDescription.mChannelsPerFrame = UInt32(KSDefaultParameter.audioPlayerMaximumChannels)
+        audioStreamBasicDescription.mFormatFlags = kAudioFormatFlagIsFloat | kAudioFormatFlagIsNonInterleaved
+        audioStreamBasicDescription.mFormatID = kAudioFormatLinearPCM
+        audioStreamBasicDescription.mFramesPerPacket = 1
+        audioStreamBasicDescription.mBytesPerPacket = audioStreamBasicDescription.mFramesPerPacket * audioStreamBasicDescription.mBytesPerFrame
+        audioStreamBasicDescription.mSampleRate = Float64(KSDefaultParameter.audioPlayerSampleRate)
+        return audioStreamBasicDescription
+    }
 }
 
 // 加载情况
