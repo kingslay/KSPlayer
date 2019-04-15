@@ -16,19 +16,7 @@ final class AudioPlayer {
     private let graph: AUGraph
     private var audioUnitForMixer: AudioUnit!
     private var audioUnitForTimePitch: AudioUnit!
-    private lazy var audioStreamBasicDescription: AudioStreamBasicDescription = {
-        var audioStreamBasicDescription = AudioStreamBasicDescription()
-        let floatByteSize = UInt32(MemoryLayout<Float>.size)
-        audioStreamBasicDescription.mBitsPerChannel = 8 * floatByteSize
-        audioStreamBasicDescription.mBytesPerFrame = floatByteSize
-        audioStreamBasicDescription.mChannelsPerFrame = UInt32(KSDefaultParameter.audioPlayerMaximumChannels)
-        audioStreamBasicDescription.mFormatFlags = kAudioFormatFlagIsFloat | kAudioFormatFlagIsNonInterleaved
-        audioStreamBasicDescription.mFormatID = kAudioFormatLinearPCM
-        audioStreamBasicDescription.mFramesPerPacket = 1
-        audioStreamBasicDescription.mBytesPerPacket = audioStreamBasicDescription.mFramesPerPacket * audioStreamBasicDescription.mBytesPerFrame
-        audioStreamBasicDescription.mSampleRate = Float64(KSDefaultParameter.audioPlayerSampleRate)
-        return audioStreamBasicDescription
-    }()
+    private var audioStreamBasicDescription = KSDefaultParameter.outputFormat()
 
     private var isPlaying: Bool {
         var running = DarwinBoolean(false)
