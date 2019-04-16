@@ -9,6 +9,7 @@
 import AppKit
 @NSApplicationMain
 class AppDelegate: NSObject, NSApplicationDelegate {
+    private lazy var openURLWindow = OpenURLWindowController()
     private var window = MainWindow()
 
     func applicationWillFinishLaunching(_: Notification) {
@@ -45,6 +46,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 open(url: url)
             }
         }
+    }
+
+    @IBAction func openURL(_: AnyObject) {
+        openURLWindow.showWindow(nil)
+        openURLWindow.resetFields()
     }
 
     func application(_: NSApplication, openFile _: String) -> Bool {

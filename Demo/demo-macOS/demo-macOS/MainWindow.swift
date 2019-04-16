@@ -21,7 +21,6 @@ class MainWindow: NSWindow {
         vc = ViewController()
         super.init(contentRect: contentRect, styleMask: style, backing: backingStoreType, defer: flag)
         contentViewController = vc
-        registerForDraggedTypes([.nsFilenames, .nsURL, .string])
         styleMask = [.closable, .miniaturizable, .resizable, .titled]
     }
 
@@ -31,19 +30,5 @@ class MainWindow: NSWindow {
             center()
         }
         vc.url = url
-    }
-}
-
-extension MainWindow: NSDraggingDestination {
-    func draggingEntered(_: NSDraggingInfo) -> NSDragOperation {
-        return .copy
-    }
-
-    func performDragOperation(_ sender: NSDraggingInfo) -> Bool {
-        if let url = sender.getUrl() {
-            open(url: url)
-            return true
-        }
-        return false
     }
 }
