@@ -15,6 +15,8 @@
 		AC62AEF020C9812F00A75F85 /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = AC62AEEE20C9812F00A75F85 /* MainMenu.xib */; };
 		AC62AEF320C9830300A75F85 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC62AEF120C9830300A75F85 /* ViewController.swift */; };
 		AC62AEF420C9830300A75F85 /* ViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = AC62AEF220C9830300A75F85 /* ViewController.xib */; };
+		ACB5A251226579E1004C4EEF /* OpenURLWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACB5A24F226579E0004C4EEF /* OpenURLWindowController.swift */; };
+		ACB5A252226579E1004C4EEF /* OpenURLWindowController.xib in Resources */ = {isa = PBXBuildFile; fileRef = ACB5A250226579E1004C4EEF /* OpenURLWindowController.xib */; };
 		ACEF02C121946723003E75E4 /* Polonaise.flac in Resources */ = {isa = PBXBuildFile; fileRef = ACEF02BD21946723003E75E4 /* Polonaise.flac */; };
 		ACEF02C221946723003E75E4 /* google-help-vr.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = ACEF02BE21946723003E75E4 /* google-help-vr.mp4 */; };
 		ACEF02C321946723003E75E4 /* 567082ac3ae39699f68de4fd2b7444b1e045515a.MP4 in Resources */ = {isa = PBXBuildFile; fileRef = ACEF02BF21946723003E75E4 /* 567082ac3ae39699f68de4fd2b7444b1e045515a.MP4 */; };
@@ -59,6 +61,8 @@
 		AC62AEF120C9830300A75F85 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
 		AC62AEF220C9830300A75F85 /* ViewController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = ViewController.xib; sourceTree = "<group>"; };
 		AC7ADAF4218988E1008C07EF /* MyPlayground.playground */ = {isa = PBXFileReference; lastKnownFileType = file.playground; path = MyPlayground.playground; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
+		ACB5A24F226579E0004C4EEF /* OpenURLWindowController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OpenURLWindowController.swift; sourceTree = "<group>"; };
+		ACB5A250226579E1004C4EEF /* OpenURLWindowController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = OpenURLWindowController.xib; sourceTree = "<group>"; };
 		ACEF02BD21946723003E75E4 /* Polonaise.flac */ = {isa = PBXFileReference; lastKnownFileType = file; path = Polonaise.flac; sourceTree = "<group>"; };
 		ACEF02BE21946723003E75E4 /* google-help-vr.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = "google-help-vr.mp4"; sourceTree = "<group>"; };
 		ACEF02BF21946723003E75E4 /* 567082ac3ae39699f68de4fd2b7444b1e045515a.MP4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = 567082ac3ae39699f68de4fd2b7444b1e045515a.MP4; sourceTree = "<group>"; };
@@ -138,6 +142,8 @@
 				AC3B64622187411000570305 /* MainWindow.swift */,
 				AC62AEF120C9830300A75F85 /* ViewController.swift */,
 				AC62AEF220C9830300A75F85 /* ViewController.xib */,
+				ACB5A24F226579E0004C4EEF /* OpenURLWindowController.swift */,
+				ACB5A250226579E1004C4EEF /* OpenURLWindowController.xib */,
 				AC0860E320B699E100D801FC /* Assets.xcassets */,
 				AC62AEEE20C9812F00A75F85 /* MainMenu.xib */,
 				AC0860E820B699E100D801FC /* Info.plist */,
@@ -291,6 +297,7 @@
 				ACEF02C421946723003E75E4 /* video-h265.mkv in Resources */,
 				AC0860E420B699E100D801FC /* Assets.xcassets in Resources */,
 				ACEF02C221946723003E75E4 /* google-help-vr.mp4 in Resources */,
+				ACB5A252226579E1004C4EEF /* OpenURLWindowController.xib in Resources */,
 				AC62AEF420C9830300A75F85 /* ViewController.xib in Resources */,
 				AC62AEF020C9812F00A75F85 /* MainMenu.xib in Resources */,
 			);
@@ -367,6 +374,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				AC3B64632187411000570305 /* MainWindow.swift in Sources */,
+				ACB5A251226579E1004C4EEF /* OpenURLWindowController.swift in Sources */,
 				AC62AEF320C9830300A75F85 /* ViewController.swift in Sources */,
 				AC0860E020B699E100D801FC /* AppDelegate.swift in Sources */,
 			);
