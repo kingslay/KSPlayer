@@ -16,7 +16,7 @@ class MainWindow: NSWindow {
         KSPlayerManager.secondPlayerType = KSMEPlayer.self
         KSPlayerManager.isAutoPlay = true
         KSPlayerManager.isSeekedAutoPlay = true
-        KSDefaultParameter.enableVideotoolbox = false
+        KSDefaultParameter.enableVideotoolbox = true
         KSDefaultParameter.logLevel = AV_LOG_DEBUG
         vc = ViewController()
         super.init(contentRect: contentRect, styleMask: style, backing: backingStoreType, defer: flag)

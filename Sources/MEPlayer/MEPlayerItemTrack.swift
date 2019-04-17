@@ -78,7 +78,7 @@ class MEPlayerItemTrack<Frame: MEFrame>: PlayerItemTrackProtocol {
         self.stream = stream
         self.timebase = timebase
         var fps = mediaType == .audio ? 44 : 24
-        if stream.pointee.duration > 0, stream.pointee.nb_frames > 0 {
+        if stream.pointee.duration > 0, stream.pointee.nb_frames > 0, stream.pointee.nb_frames != stream.pointee.duration {
             let count = Int(stream.pointee.nb_frames * Int64(timebase.den) / (stream.pointee.duration * Int64(timebase.num)))
             fps = max(count, fps)
         }
