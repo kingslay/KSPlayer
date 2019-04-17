@@ -162,9 +162,9 @@ final class AudioPlayer {
     private func addRenderNotify(audioUnit: AudioUnit) {
         AudioUnitAddRenderNotify(audioUnit, { refCon, ioActionFlags, inTimeStamp, _, _, _ in
             let `self` = Unmanaged<AudioPlayer>.fromOpaque(refCon).takeUnretainedValue()
-            if ioActionFlags.pointee.contains(AudioUnitRenderActionFlags.unitRenderAction_PreRender) {
+            if ioActionFlags.pointee.contains(.unitRenderAction_PreRender) {
                 self.delegate?.audioPlayerWillRenderSample(sampleTimestamp: inTimeStamp.pointee)
-            } else if ioActionFlags.pointee.contains(AudioUnitRenderActionFlags.unitRenderAction_PostRender) {
+            } else if ioActionFlags.pointee.contains(.unitRenderAction_PostRender) {
                 self.delegate?.audioPlayerDidRenderSample(sampleTimestamp: inTimeStamp.pointee)
             }
             return noErr
