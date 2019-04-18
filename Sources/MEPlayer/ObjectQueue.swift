@@ -9,7 +9,7 @@ import Foundation
 public final class ObjectQueue<Item: ObjectQueueItem> {
     private let condition = NSCondition()
     private var destoryed = false
-    private var objects = [Item]()
+    private var objects = ContiguousArray<Item>()
     private var puttingObject: Item?
     private var currentIndex = 0
     public let maxCount: Int
