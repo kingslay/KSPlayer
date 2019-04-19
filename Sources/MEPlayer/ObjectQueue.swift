@@ -24,8 +24,11 @@ public final class ObjectQueue<Item: ObjectQueueItem> {
         return count
     }
 
-    public init(maxCount: Int = Int.max, sortObjects: Bool = false) {
+    public init(maxCount: Int = .max, sortObjects: Bool = false) {
         self.maxCount = maxCount
+        if maxCount != .max {
+            objects.reserveCapacity(maxCount)
+        }
         self.sortObjects = sortObjects
     }
 
