@@ -222,4 +222,16 @@ public protocol PlayerControllerDelegate: class {
 
 
 ## 九、License
-KSPlayer is available under the MIT license. See the LICENSE file for more info.
+```
+Copyright (c) 2019 kintanwang
+Licensed under BSD
+```
+
+KSPlayer required features are based on or derives from projects below:
+
+- LGPL v2.1
+
+KSPlayer's build scripts are based on or derives from projects below:
+
+- [kewlbear/FFmpeg-iOS-build-script](https://github.com/kewlbear/FFmpeg-iOS-build-script) 
+
