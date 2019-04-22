@@ -134,7 +134,7 @@ public protocol PlayerControllerDelegate: class {
 
 
 ## 六、进阶用法
-- 继承 PlayerView` 自定义播放逻辑和UI。
+- 继承 PlayerView 自定义播放逻辑和UI。
 
 - 设置KSPlayerManager 、KSDefaultParameter里面的属性
 
