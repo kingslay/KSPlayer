@@ -3,7 +3,7 @@
 ## 一、介绍
 KSPlayer是一款基于 AVPlayer, FFmpeg  纯Swift的音视频播放器，支持所有视频格式和全景视频，支持苹果全平台。实现高可用，高性能的音视频播放能力。它包含UI控件模块、字幕模块、播放器内核模块。这些模块都是解耦的，可以通过pod按需接入。
 
- [原理详解](http://git.code.oa.com/kintanwang/KSPlayer/blob/master/documents/KSPlayer原理详解.md) 
+ [原理详解](https://github.com/kingslay/KSPlayer/blob/master/documents/KSPlayer原理详解.md) 
 
 ## 二、功能
 - [x] 首屏秒开
@@ -38,15 +38,15 @@ KSPlayer是一款基于 AVPlayer, FFmpeg  纯Swift的音视频播放器，支持
 ```ruby
 target 'ProjectName' do
     use_frameworks!
-    pod 'KSPlayer',:git => 'http://git.code.oa.com/kintanwang/KSPlayer.git', :branch => 'master'
-    pod 'Openssl',:git => 'http://git.code.oa.com/kintanwang/KSPlayer.git', :branch => 'master'
+    pod 'KSPlayer',:git => 'https://github.com/kingslay/KSPlayer.git', :branch => 'master'
+    pod 'Openssl',:git => 'https://github.com/kingslay/KSPlayer.git', :branch => 'master'
 end
 ```
 
 #### Carthage
 
 ```
-git "http://git.code.oa.com/kintanwang/KSPlayer.git" "master"
+git "https://github.com/kingslay/KSPlayer.git" "master"
 ```
 
 ### Demo
@@ -215,23 +215,8 @@ public protocol PlayerControllerDelegate: class {
 
 ## 七、效果:
 
-![gif](http://git.code.oa.com/kintanwang/KSPlayer/raw/master/Demo/demo.gif)
+![gif](https://github.com/kingslay/KSPlayer/raw/master/Demo/demo.gif)
 
 ## 八、参考：
 本项目参考了 [ZFPlayer](https://github.com/renzifeng/ZFPlayer)、**[SGPlayer](https://github.com/libobjc/SGPlayer)**
-
-
-## 九、License
-```
-Copyright (c) 2019 kintanwang
-Licensed under BSD
-```
-
-KSPlayer required features are based on or derives from projects below:
-
-- LGPL v2.1
-
-KSPlayer's build scripts are based on or derives from projects below:
-
-- [kewlbear/FFmpeg-iOS-build-script](https://github.com/kewlbear/FFmpeg-iOS-build-script) 
 
