@@ -18,7 +18,7 @@ let excludes = ["iOS", "macOS"]
 
 let package = Package(
     name: "KSPlayer1",
-    platforms: [.macOS(.v10_11),.iOS(.v9),.tvOS("10.2")],
+    platforms: [.macOS(.v10_11), .iOS(.v9), .tvOS("10.2")],
     products: [
         // Products define the executables and libraries produced by a package, and make them visible to other packages.
         .library(

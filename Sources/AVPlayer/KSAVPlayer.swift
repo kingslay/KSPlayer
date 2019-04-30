@@ -479,4 +479,13 @@ extension KSAVPlayer: MediaPlayerProtocol {
     public func enterForeground() {
         playerView.playerLayer.player = playerView.player
     }
+
+    public var isMuted: Bool {
+        set {
+            player.isMuted = newValue
+        }
+        get {
+            return player.isMuted
+        }
+    }
 }

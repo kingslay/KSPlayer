@@ -334,6 +334,15 @@ extension KSMEPlayer: MediaPlayerProtocol {
     public func enterForeground() {
         videoOutput.isOutput = true
     }
+
+    public var isMuted: Bool {
+        set {
+            playbackVolume = 0
+        }
+        get {
+            return playbackVolume == 0
+        }
+    }
 }
 
 extension KSMEPlayer {
