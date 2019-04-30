@@ -58,14 +58,18 @@ final class VideoOutput: NSObject, FrameOutput {
 
     func shutdown() {}
 
-    public func thumbnailImageAtCurrentTime() -> UIImage? {
+    public func thumbnailImageAtCurrentTime(handler: @escaping (UIImage?) -> Void) {
         if let frame = currentRender as? VideoVTBFrame, let pixelBuffer = frame.corePixelBuffer {
-            let ciImage = CIImage(cvImageBuffer: pixelBuffer)
-            let context = CIContext(options: nil)
-            if let videoImage = context.createCGImage(ciImage, from: CGRect(origin: .zero, size: pixelBuffer.size)) {
-                return UIImage(cgImage: videoImage)
+            DispatchQueue.global().async {
+                let ciImage = CIImage(cvImageBuffer: pixelBuffer)
+                let context = CIContext(options: nil)
+                if let videoImage = context.createCGImage(ciImage, from: CGRect(origin: .zero, size: pixelBuffer.size)) {
+                    handler(UIImage(cgImage: videoImage))
+                } else {
+                    handler(nil)
+                }
             }
         }
-        return nil
+        return handler(nil)
     }
 }

@@ -268,20 +268,16 @@ extension AVAsset {
         return imageGenerator
     }
 
-    public func thumbnailImage(currentTime: CMTime) -> UIImage? {
+    public func thumbnailImage(currentTime: CMTime, handler: @escaping (UIImage?) -> Void) {
         let imageGenerator = ceateImageGenerator()
-        var cgImage: CGImage?
-        do {
-            cgImage = try imageGenerator.copyCGImage(at: currentTime, actualTime: nil)
-        } catch {
-            imageGenerator.requestedTimeToleranceBefore = .positiveInfinity
-            imageGenerator.requestedTimeToleranceAfter = .positiveInfinity
-            cgImage = try? imageGenerator.copyCGImage(at: currentTime, actualTime: nil)
-        }
-        if let cgImage = cgImage {
-            return UIImage(cgImage: cgImage)
-        } else {
-            return nil
+        imageGenerator.requestedTimeToleranceBefore = .zero
+        imageGenerator.requestedTimeToleranceAfter = .zero
+        imageGenerator.generateCGImagesAsynchronously(forTimes: [NSValue(time: currentTime)]) { _, cgImage, _, _, _ in
+            if let cgImage = cgImage {
+                handler(UIImage(cgImage: cgImage))
+            } else {
+                handler(nil)
+            }
         }
     }
 

@@ -144,8 +144,16 @@ open class IOSVideoPlayerView: VideoPlayerView {
                 for (index, definition) in resource.definitions.enumerated() {
                     let action = UIAlertAction(title: definition.definition, style: .default) { [weak self] _ in
                         guard let self = self, index != self.currentDefinition else { return }
-                        //                        self.maskImageView.alpha = 1
-                        //                        self.maskImageView.image = self.delegate?.thumbnailImageAtCurrentTime?()
+                        self.playerLayer.player?.thumbnailImageAtCurrentTime { [weak self] image in
+                            if let self = self, let image = image {
+                                DispatchQueue.main.async { [weak self] in
+                                    if let self = self {
+                                        self.maskImageView.image = image
+                                        self.maskImageView.alpha = 1
+                                    }
+                                }
+                            }
+                        }
                         self.change(definitionIndex: index)
                     }
                     action.setValue(index == currentDefinition, forKey: "checked")
