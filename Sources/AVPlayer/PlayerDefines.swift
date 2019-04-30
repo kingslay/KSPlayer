@@ -35,6 +35,7 @@ import AppKit
     var isPlaying: Bool { get }
     //    var numberOfBytesTransferred: Int64 { get }
     var isAutoPlay: Bool { get set }
+    var isMuted: Bool { get set }
     var allowsExternalPlayback: Bool { get set }
     var usesExternalPlaybackWhileExternalScreenIsActive: Bool { get set }
     var isExternalPlaybackActive: Bool { get }
