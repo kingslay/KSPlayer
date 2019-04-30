@@ -49,7 +49,7 @@ import AppKit
     func pause()
     func enterBackground()
     func enterForeground()
-    func thumbnailImageAtCurrentTime() -> UIImage?
+    func thumbnailImageAtCurrentTime(handler: @escaping (UIImage?) -> Void)
 }
 
 @objc public protocol MediaPlayerDelegate: AnyObject {

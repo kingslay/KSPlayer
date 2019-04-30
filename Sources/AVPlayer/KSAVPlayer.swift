@@ -329,11 +329,11 @@ extension KSAVPlayer: MediaPlayerProtocol {
         }
     }
 
-    public func thumbnailImageAtCurrentTime() -> UIImage? {
+    public func thumbnailImageAtCurrentTime(handler: @escaping (UIImage?) -> Void) {
         guard let playerItem = player.currentItem, isPreparedToPlay else {
-            return nil
+            return handler(nil)
         }
-        return urlAsset.thumbnailImage(currentTime: playerItem.currentTime())
+        return urlAsset.thumbnailImage(currentTime: playerItem.currentTime(), handler: handler)
     }
 
     public var isPlaying: Bool {
