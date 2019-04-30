@@ -85,6 +85,7 @@ open class KSPlayerLayer: UIView {
                 KSLog("player is \(player)")
                 player.delegate = self
                 player.isAutoPlay = isAutoPlay
+                player.isMuted = true
                 player.isLoopPlay = KSPlayerManager.isLoopPlay
                 player.contentMode = .scaleAspectFit
                 if let oldValue = oldValue {

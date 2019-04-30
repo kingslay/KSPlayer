@@ -62,14 +62,15 @@ import AppKit
 }
 
 extension MediaPlayerProtocol {
-    func setAudioSession() {
+    func setAudioSession(isMuted: Bool = false) {
         #if !os(macOS)
+        let category: AVAudioSession.Category = isMuted ? .ambient : .playback
         if #available(iOS 11.0, tvOS 11.0, *) {
-            try? AVAudioSession.sharedInstance().setCategory(.playback, mode: .default, policy: .longForm)
+            try? AVAudioSession.sharedInstance().setCategory(category, mode: .default, policy: .longForm)
         } else if #available(iOS 10.0, *) {
-            try? AVAudioSession.sharedInstance().setCategory(.playback, mode: .default)
+            try? AVAudioSession.sharedInstance().setCategory(category, mode: .default)
         } else {
-            try? AVAudioSession.sharedInstance().setCategory(.playback)
+            try? AVAudioSession.sharedInstance().setCategory(category)
         }
         try? AVAudioSession.sharedInstance().setActive(true)
         #endif
@@ -125,16 +126,15 @@ public struct KSPlayerManager {
 
 @objc public enum MediaPlaybackState: Int {
     case idle
-    case stopped
     case playing
     case paused
     case seeking
     case finished
+    case stopped
 }
 
 @objc public enum MediaLoadState: Int {
     case idle
-    case paused
     case loading
     case playable
 }

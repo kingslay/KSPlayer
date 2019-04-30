@@ -36,24 +36,36 @@ final class AudioPlayer {
 
     weak var delegate: AudioPlayerDelegate?
     var playbackRate: Float {
+        set {
+            AudioUnitSetParameter(audioUnitForTimePitch, kNewTimePitchParam_Rate, kAudioUnitScope_Global, 0, newValue, 0)
+        }
         get {
             var playbackRate = AudioUnitParameterValue(0.0)
             AudioUnitGetParameter(audioUnitForMixer, kNewTimePitchParam_Rate, kAudioUnitScope_Global, 0, &playbackRate)
             return playbackRate
         }
-        set {
-            AudioUnitSetParameter(audioUnitForTimePitch, kNewTimePitchParam_Rate, kAudioUnitScope_Global, 0, newValue, 0)
-        }
     }
 
     var volume: Float {
+        set {
+            AudioUnitSetParameter(audioUnitForMixer, kMultiChannelMixerParam_Volume, kAudioUnitScope_Input, 0, newValue, 0)
+        }
         get {
             var volume = AudioUnitParameterValue(0.0)
             AudioUnitGetParameter(audioUnitForMixer, kMultiChannelMixerParam_Volume, kAudioUnitScope_Input, 0, &volume)
             return volume
         }
+    }
+
+    public var isMuted: Bool {
         set {
-            AudioUnitSetParameter(audioUnitForMixer, kMultiChannelMixerParam_Volume, kAudioUnitScope_Input, 0, newValue, 0)
+            let value = newValue ? 0 : 1
+            AudioUnitSetParameter(audioUnitForMixer, kMultiChannelMixerParam_Enable, kAudioUnitScope_Input, 0, AudioUnitParameterValue(value), 0)
+        }
+        get {
+            var value = AudioUnitParameterValue(1.0)
+            AudioUnitGetParameter(audioUnitForMixer, kMultiChannelMixerParam_Enable, kAudioUnitScope_Input, 0, &value)
+            return value == 0
         }
     }
 

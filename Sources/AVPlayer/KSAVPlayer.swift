@@ -483,6 +483,7 @@ extension KSAVPlayer: MediaPlayerProtocol {
     public var isMuted: Bool {
         set {
             player.isMuted = newValue
+            setAudioSession(isMuted: newValue)
         }
         get {
             return player.isMuted
