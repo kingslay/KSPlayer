@@ -101,7 +101,6 @@ extension KSMEPlayer {
 extension KSMEPlayer: MEPlayerDelegate {
     func sourceDidOpened() {
         isPreparedToPlay = true
-        playbackVolume = 1
         runInMainqueue { [weak self] in
             guard let self = self else { return }
             if self.isAutoPlay {
@@ -337,10 +336,11 @@ extension KSMEPlayer: MediaPlayerProtocol {
 
     public var isMuted: Bool {
         set {
-            playbackVolume = 0
+            audioOutput.audioPlayer.isMuted = newValue
+            setAudioSession(isMuted: newValue)
         }
         get {
-            return playbackVolume == 0
+            return audioOutput.audioPlayer.isMuted
         }
     }
 }
