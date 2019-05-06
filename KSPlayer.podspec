@@ -55,7 +55,7 @@ Pod::Spec.new do |s|
     # end
     s.subspec 'FFmpeg' do |ffmpeg|
         ffmpeg.public_header_files = 'Sources/FFmpeg/**/*.{h}'
-        ffmpeg.source_files = 'Sources/FFmpeg/**/*.{c,h}'
+        ffmpeg.source_files = 'Sources/FFmpeg/**/*.{c}'
         ffmpeg.libraries   = 'bz2', 'z'
         ffmpeg.ios.vendored_libraries  = 'FFmpeg/FFmpeg-iOS/lib/*.a'
         ffmpeg.ios.preserve_paths = 'FFmpeg/FFmpeg-iOS/include'
