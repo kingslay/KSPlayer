@@ -6,6 +6,7 @@
 //
 
 import AudioToolbox
+import CoreAudio
 protocol AudioPlayerDelegate: AnyObject {
     func audioPlayerShouldInputData(ioData: UnsafeMutableAudioBufferListPointer, numberOfSamples: UInt32, numberOfChannels: UInt32)
     func audioPlayerWillRenderSample(sampleTimestamp: AudioTimeStamp)
