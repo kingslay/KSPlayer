@@ -320,15 +320,15 @@ extension KSPlayerLayer {
 
     private func registerRemoteControllEvent() {
         if #available(OSX 10.12.2, *) {
-            MPRemoteCommandCenter.shared().playCommand.addTarget(self, action: #selector(remoteCommandAction))
-            MPRemoteCommandCenter.shared().pauseCommand.addTarget(self, action: #selector(remoteCommandAction))
-            MPRemoteCommandCenter.shared().togglePlayPauseCommand.addTarget(self, action: #selector(remoteCommandAction))
-            MPRemoteCommandCenter.shared().seekForwardCommand.addTarget(self, action: #selector(remoteCommandAction))
-            MPRemoteCommandCenter.shared().seekBackwardCommand.addTarget(self, action: #selector(remoteCommandAction))
-            MPRemoteCommandCenter.shared().changePlaybackRateCommand.addTarget(self, action: #selector(remoteCommandAction))
+            MPRemoteCommandCenter.shared().playCommand.addTarget(self, action: #selector(remoteCommandAction(event:)))
+            MPRemoteCommandCenter.shared().pauseCommand.addTarget(self, action: #selector(remoteCommandAction(event:)))
+            MPRemoteCommandCenter.shared().togglePlayPauseCommand.addTarget(self, action: #selector(remoteCommandAction(event:)))
+            MPRemoteCommandCenter.shared().seekForwardCommand.addTarget(self, action: #selector(remoteCommandAction(event:)))
+            MPRemoteCommandCenter.shared().seekBackwardCommand.addTarget(self, action: #selector(remoteCommandAction(event:)))
+            MPRemoteCommandCenter.shared().changePlaybackRateCommand.addTarget(self, action: #selector(remoteCommandAction(event:)))
         }
         if #available(iOS 9.1, OSX 10.12.2, *) {
-            MPRemoteCommandCenter.shared().changePlaybackPositionCommand.addTarget(self, action: #selector(remoteCommandAction))
+            MPRemoteCommandCenter.shared().changePlaybackPositionCommand.addTarget(self, action: #selector(remoteCommandAction(event:)))
         }
     }
 
@@ -347,9 +347,9 @@ extension KSPlayerLayer {
     }
 
     @available(OSX 10.12.2, *)
-    @objc private func remoteCommandAction(event: MPRemoteCommandEvent) {
+    @objc private func remoteCommandAction(event: MPRemoteCommandEvent) -> MPRemoteCommandHandlerStatus {
         guard let player = player else {
-            return
+            return .noSuchContent
         }
         if event.command == MPRemoteCommandCenter.shared().playCommand {
             play()
@@ -370,5 +370,6 @@ extension KSPlayerLayer {
         } else if let event = event as? MPChangePlaybackRateCommandEvent {
             player.playbackRate = event.playbackRate
         }
+        return .success
     }
 }
