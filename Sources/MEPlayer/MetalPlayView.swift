@@ -126,13 +126,11 @@ final class MetalPlayView: MTKView {
         fatalError("init(coder:) has not been implemented")
     }
 
-    #if !targetEnvironment(simulator)
     override var drawableSize: CGSize {
         didSet {
             (layer as? CAMetalLayer)?.drawableSize = drawableSize
         }
     }
-    #endif
 }
 
 extension MetalPlayView: PixelRenderView {
