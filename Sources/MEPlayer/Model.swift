@@ -158,11 +158,7 @@ public struct KSDefaultParameter {
         #if arch(arm)
         return OpenGLPlayView.self
         #else
-        #if targetEnvironment(simulator)
-        return SampleBufferPlayerView.self
-        #else
         return MetalPlayView.self
-        #endif
         #endif
     }()
 
