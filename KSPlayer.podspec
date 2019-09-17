@@ -54,8 +54,8 @@ Pod::Spec.new do |s|
     #     openssl.osx.preserve_paths = 'FFmpeg/openssl-macOS/include'
     # end
     s.subspec 'FFmpeg' do |ffmpeg|
-        ffmpeg.public_header_files = 'Sources/FFmpeg/**/*.{h}'
-        ffmpeg.source_files = 'Sources/FFmpeg/**/*.{c}'
+#        ffmpeg.public_header_files = 'Sources/FFmpeg/**/*.{h}'
+        ffmpeg.source_files = 'Sources/FFmpeg/**/*.{h,c}'
         ffmpeg.libraries   = 'bz2', 'z'
         ffmpeg.ios.vendored_libraries  = 'FFmpeg/FFmpeg-iOS/lib/*.a'
         ffmpeg.ios.preserve_paths = 'FFmpeg/FFmpeg-iOS/include'

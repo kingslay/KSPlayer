@@ -317,22 +317,11 @@
 			files = (
 			);
 			inputFileListPaths = (
-			);
-			inputPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-demo-iOS/Pods-demo-iOS-resources.sh",
-				"${PODS_ROOT}/../../Sources/MEPlayer/Shader.fsh",
-				"${PODS_ROOT}/../../Sources/MEPlayer/Shader.vsh",
-				"${PODS_ROOT}/../../Sources/MEPlayer/Shaders.metal",
-				"${PODS_CONFIGURATION_BUILD_DIR}/KSPlayer-iOS/KSResources.bundle",
+				"${PODS_ROOT}/Target Support Files/Pods-demo-iOS/Pods-demo-iOS-resources-${CONFIGURATION}-input-files.xcfilelist",
 			);
 			name = "[CP] Copy Pods Resources";
 			outputFileListPaths = (
-			);
-			outputPaths = (
-				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/Shader.fsh",
-				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/Shader.vsh",
-				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/Shaders.metal",
-				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/KSResources.bundle",
+				"${PODS_ROOT}/Target Support Files/Pods-demo-iOS/Pods-demo-iOS-resources-${CONFIGURATION}-output-files.xcfilelist",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;

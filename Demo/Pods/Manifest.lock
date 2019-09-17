@@ -51,7 +51,7 @@ PODS:
   - Openssl (1.1.1):
     - Openssl/Openssl (= 1.1.1)
   - Openssl/Openssl (1.1.1)
-  - SwiftLint (0.31.0)
+  - SwiftLint (0.35.0)
 
 DEPENDENCIES:
   - KSPlayer (from `../`)
@@ -70,10 +70,10 @@ EXTERNAL SOURCES:
     :path: "../"
 
 SPEC CHECKSUMS:
-  KSPlayer: a4d1eb41af17fa7dabf9b214c4e3be6e73658560
-  Openssl: fe2d63d6036e5c9bafd1eb3331db9bbb0e12ace1
-  SwiftLint: 7a0227733d786395817373b2d0ca799fd0093ff3
+  KSPlayer: c9e4e5bd8d1b5e8e877a90b1eee396e3211ffd4b
+  Openssl: eb5c039b647f24c24296f2bbf0c9e2b593fa0917
+  SwiftLint: 5553187048b900c91aa03552807681bb6b027846
 
-PODFILE CHECKSUM: 31a697bed2b20f47ccb6bf6031f1baa1d43d1618
+PODFILE CHECKSUM: b8f8dfa32b16b18db92002fcace241e720598100
 
-COCOAPODS: 1.6.1
+COCOAPODS: 1.7.5
