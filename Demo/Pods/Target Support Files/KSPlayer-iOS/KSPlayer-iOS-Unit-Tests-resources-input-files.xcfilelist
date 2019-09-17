@@ -1,0 +1,5 @@
+${PODS_ROOT}/Target Support Files/KSPlayer-iOS/KSPlayer-iOS-Unit-Tests-resources.sh
+${PODS_ROOT}/../../Sources/MEPlayer/Shader.fsh
+${PODS_ROOT}/../../Sources/MEPlayer/Shader.vsh
+${PODS_ROOT}/../../Sources/MEPlayer/Shaders.metal
+${PODS_CONFIGURATION_BUILD_DIR}/KSPlayer-iOS/KSResources.bundle

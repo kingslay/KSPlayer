@@ -17,7 +17,7 @@
     "osx": "10.11",
     "tvos": "10.2"
   },
-  "swift_version": "5.0",
+  "swift_versions": "5.0",
   "static_framework": true,
   "testspecs": [
     {
@@ -94,8 +94,7 @@
     },
     {
       "name": "FFmpeg",
-      "public_header_files": "Sources/FFmpeg/**/*.{h}",
-      "source_files": "Sources/FFmpeg/**/*.{c,h}",
+      "source_files": "Sources/FFmpeg/**/*.{h,c}",
       "libraries": [
         "bz2",
         "z"
@@ -270,5 +269,6 @@
         ]
       }
     }
-  ]
+  ],
+  "swift_version": "5.0"
 }

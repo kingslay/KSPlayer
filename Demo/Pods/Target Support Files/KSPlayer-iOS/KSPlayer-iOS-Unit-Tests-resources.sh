@@ -101,20 +101,12 @@ if [[ "$CONFIGURATION" == "Debug" ]]; then
   install_resource "${PODS_ROOT}/../../Sources/MEPlayer/Shader.vsh"
   install_resource "${PODS_ROOT}/../../Sources/MEPlayer/Shaders.metal"
   install_resource "${PODS_CONFIGURATION_BUILD_DIR}/KSPlayer-iOS/KSResources.bundle"
-  install_resource "${PODS_ROOT}/../../Tests/Resources/567082ac3ae39699f68de4fd2b7444b1e045515a.MP4"
-  install_resource "${PODS_ROOT}/../../Tests/Resources/google-help-vr.mp4"
-  install_resource "${PODS_ROOT}/../../Tests/Resources/Polonaise.flac"
-  install_resource "${PODS_ROOT}/../../Tests/Resources/video-h265.mkv"
 fi
 if [[ "$CONFIGURATION" == "Release" ]]; then
   install_resource "${PODS_ROOT}/../../Sources/MEPlayer/Shader.fsh"
   install_resource "${PODS_ROOT}/../../Sources/MEPlayer/Shader.vsh"
   install_resource "${PODS_ROOT}/../../Sources/MEPlayer/Shaders.metal"
   install_resource "${PODS_CONFIGURATION_BUILD_DIR}/KSPlayer-iOS/KSResources.bundle"
-  install_resource "${PODS_ROOT}/../../Tests/Resources/567082ac3ae39699f68de4fd2b7444b1e045515a.MP4"
-  install_resource "${PODS_ROOT}/../../Tests/Resources/google-help-vr.mp4"
-  install_resource "${PODS_ROOT}/../../Tests/Resources/Polonaise.flac"
-  install_resource "${PODS_ROOT}/../../Tests/Resources/video-h265.mkv"
 fi
 
 mkdir -p "${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}"
