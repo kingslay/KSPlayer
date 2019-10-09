@@ -42,7 +42,7 @@ class ViewController: NSViewController {
             playerView.topAnchor.constraint(equalTo: view.topAnchor),
             playerView.leftAnchor.constraint(equalTo: view.leftAnchor),
             playerView.rightAnchor.constraint(equalTo: view.rightAnchor),
-            playerView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+            playerView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         ])
     }
 

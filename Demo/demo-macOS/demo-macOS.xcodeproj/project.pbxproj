@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 50;
+	objectVersion = 51;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -248,7 +248,7 @@
 			isa = PBXProject;
 			attributes = {
 				LastSwiftUpdateCheck = 0930;
-				LastUpgradeCheck = 0930;
+				LastUpgradeCheck = 1100;
 				ORGANIZATIONNAME = kintan;
 				TargetAttributes = {
 					AC0860DB20B699E100D801FC = {
@@ -326,22 +326,11 @@
 			files = (
 			);
 			inputFileListPaths = (
-			);
-			inputPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-demo-macOS/Pods-demo-macOS-resources.sh",
-				"${PODS_ROOT}/../../Sources/MEPlayer/Shader.fsh",
-				"${PODS_ROOT}/../../Sources/MEPlayer/Shader.vsh",
-				"${PODS_ROOT}/../../Sources/MEPlayer/Shaders.metal",
-				"${PODS_CONFIGURATION_BUILD_DIR}/KSPlayer-macOS/KSResources.bundle",
+				"${PODS_ROOT}/Target Support Files/Pods-demo-macOS/Pods-demo-macOS-resources-${CONFIGURATION}-input-files.xcfilelist",
 			);
 			name = "[CP] Copy Pods Resources";
 			outputFileListPaths = (
-			);
-			outputPaths = (
-				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/Shader.fsh",
-				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/Shader.vsh",
-				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/Shaders.metal",
-				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/KSResources.bundle",
+				"${PODS_ROOT}/Target Support Files/Pods-demo-macOS/Pods-demo-macOS-resources-${CONFIGURATION}-output-files.xcfilelist",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -547,6 +536,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				DEVELOPMENT_TEAM = SBCL8A5DGD;
+				ENABLE_HARDENED_RUNTIME = YES;
 				INFOPLIST_FILE = "demo-macOS/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -570,6 +560,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				DEVELOPMENT_TEAM = SBCL8A5DGD;
+				ENABLE_HARDENED_RUNTIME = YES;
 				INFOPLIST_FILE = "demo-macOS/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
