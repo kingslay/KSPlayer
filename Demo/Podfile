@@ -1,5 +1,6 @@
 use_frameworks!
 workspace 'Demo.xcworkspace'
+install! 'cocoapods', :generate_multiple_pod_projects => true
 def common
   pod 'KSPlayer', :path => '../', :testspecs => ['Tests']
   pod 'Openssl', :path => '../'

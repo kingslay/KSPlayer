@@ -18,7 +18,7 @@
     "tvos": "10.2"
   },
   "default_subspecs": "Openssl",
-  "swift_version": "4.2",
+  "swift_versions": "4.2",
   "static_framework": true,
   "subspecs": [
     {
@@ -36,5 +36,6 @@
         "preserve_paths": "FFmpeg/openssl-macOS/include"
       }
     }
-  ]
+  ],
+  "swift_version": "4.2"
 }

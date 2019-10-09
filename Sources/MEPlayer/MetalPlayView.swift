@@ -51,55 +51,55 @@ final class MetalPlayView: MTKView {
     }()
 
     private lazy var colorConversion601VideoRangeMatrixBuffer: MTLBuffer? = {
-        let firstColumn = float3(1.164, 1.164, 1.164)
-        let secondColumn = float3(0, 0.392, 2.017)
-        let thirdColumn = float3(1.596, 0.813, 0)
-        var matrix = float3x3(firstColumn, secondColumn, thirdColumn)
-        let buffer = device?.makeBuffer(bytes: &matrix, length: MemoryLayout<float3x3>.size, options: .storageModeShared)
+        let firstColumn = SIMD3<Float>(1.164, 1.164, 1.164)
+        let secondColumn = SIMD3<Float>(0, 0.392, 2.017)
+        let thirdColumn = SIMD3<Float>(1.596, 0.813, 0)
+        var matrix = simd_float3x3(firstColumn, secondColumn, thirdColumn)
+        let buffer = device?.makeBuffer(bytes: &matrix, length: MemoryLayout<simd_float3x3>.size, options: .storageModeShared)
         buffer?.label = "colorConversionMatrix"
         return buffer
     }()
 
     private lazy var colorConversion601FullRangeMatrixBuffer: MTLBuffer? = {
-        let firstColumn = float3(1.0, 1.0, 1.0)
-        let secondColumn = float3(0.0, -0.343, 1.765)
-        let thirdColumn = float3(1.4, -0.711, 0.0)
-        var matrix = float3x3(firstColumn, secondColumn, thirdColumn)
-        let buffer = device?.makeBuffer(bytes: &matrix, length: MemoryLayout<float3x3>.size, options: .storageModeShared)
+        let firstColumn = SIMD3<Float>(1.0, 1.0, 1.0)
+        let secondColumn = SIMD3<Float>(0.0, -0.343, 1.765)
+        let thirdColumn = SIMD3<Float>(1.4, -0.711, 0.0)
+        var matrix = simd_float3x3(firstColumn, secondColumn, thirdColumn)
+        let buffer = device?.makeBuffer(bytes: &matrix, length: MemoryLayout<simd_float3x3>.size, options: .storageModeShared)
         buffer?.label = "colorConversionMatrix"
         return buffer
     }()
 
     private lazy var colorConversion709VideoRangeMatrixBuffer: MTLBuffer? = {
-        let firstColumn = float3(1.164, 1.164, 1.164)
-        let secondColumn = float3(0.0, -0.213, 2.112)
-        let thirdColumn = float3(1.793, -0.533, 0.0)
-        var matrix = float3x3(firstColumn, secondColumn, thirdColumn)
-        let buffer = device?.makeBuffer(bytes: &matrix, length: MemoryLayout<float3x3>.size, options: .storageModeShared)
+        let firstColumn = SIMD3<Float>(1.164, 1.164, 1.164)
+        let secondColumn = SIMD3<Float>(0.0, -0.213, 2.112)
+        let thirdColumn = SIMD3<Float>(1.793, -0.533, 0.0)
+        var matrix = simd_float3x3(firstColumn, secondColumn, thirdColumn)
+        let buffer = device?.makeBuffer(bytes: &matrix, length: MemoryLayout<simd_float3x3>.size, options: .storageModeShared)
         buffer?.label = "colorConversionMatrix"
         return buffer
     }()
 
     private lazy var colorConversion709FullRangeMatrixBuffer: MTLBuffer? = {
-        let firstColumn = float3(1, 1, 1)
-        let secondColumn = float3(0.0, -0.187, 1.856)
-        let thirdColumn = float3(1.570, -0.467, 0.0)
-        var matrix = float3x3(firstColumn, secondColumn, thirdColumn)
-        let buffer = device?.makeBuffer(bytes: &matrix, length: MemoryLayout<float3x3>.size, options: .storageModeShared)
+        let firstColumn = SIMD3<Float>(1, 1, 1)
+        let secondColumn = SIMD3<Float>(0.0, -0.187, 1.856)
+        let thirdColumn = SIMD3<Float>(1.570, -0.467, 0.0)
+        var matrix = simd_float3x3(firstColumn, secondColumn, thirdColumn)
+        let buffer = device?.makeBuffer(bytes: &matrix, length: MemoryLayout<simd_float3x3>.size, options: .storageModeShared)
         buffer?.label = "colorConversionMatrix"
         return buffer
     }()
 
     private lazy var colorOffsetVideoRangeMatrixBuffer: MTLBuffer? = {
-        var firstColumn = float3(-(16.0 / 255.0), -0.5, -0.5)
-        let buffer = device?.makeBuffer(bytes: &firstColumn, length: MemoryLayout<float3>.size, options: .storageModeShared)
+        var firstColumn = SIMD3<Float>(-(16.0 / 255.0), -0.5, -0.5)
+        let buffer = device?.makeBuffer(bytes: &firstColumn, length: MemoryLayout<SIMD3<Float>>.size, options: .storageModeShared)
         buffer?.label = "colorOffset"
         return buffer
     }()
 
     private lazy var colorOffsetFullRangeMatrixBuffer: MTLBuffer? = {
-        var firstColumn = float3(0, -0.5, -0.5)
-        let buffer = device?.makeBuffer(bytes: &firstColumn, length: MemoryLayout<float3>.size, options: .storageModeShared)
+        var firstColumn = SIMD3<Float>(0, -0.5, -0.5)
+        let buffer = device?.makeBuffer(bytes: &firstColumn, length: MemoryLayout<SIMD3<Float>>.size, options: .storageModeShared)
         buffer?.label = "colorOffset"
         return buffer
     }()

@@ -21,7 +21,7 @@ class DetailViewController: UIViewController {
             playerView.topAnchor.constraint(equalTo: view.topAnchor),
             playerView.leftAnchor.constraint(equalTo: view.leftAnchor),
             playerView.rightAnchor.constraint(equalTo: view.rightAnchor),
-            playerView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+            playerView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         ])
         view.layoutIfNeeded()
         if let url = detailItem {
