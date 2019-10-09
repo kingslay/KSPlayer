@@ -8,6 +8,8 @@
 import AudioToolbox
 import CoreMedia
 import QuartzCore
+import CoreAudio
+
 final class AudioOutput: FrameOutput {
     private let semaphore = DispatchSemaphore(value: 1)
     private var currentRenderReadOffset = Int(0)

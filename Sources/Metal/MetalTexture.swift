@@ -7,16 +7,12 @@
 
 import MetalKit
 final class MetalTexture {
-    #if !targetEnvironment(simulator)
     private var textureCache: CVMetalTextureCache?
-    #endif
     public var commandQueue: MTLCommandQueue?
     init(device: MTLDevice?) {
-        #if !targetEnvironment(simulator)
         if let device = device {
             CVMetalTextureCacheCreate(kCFAllocatorDefault, nil, device, nil, &textureCache)
         }
-        #endif
         commandQueue = device?.makeCommandQueue()
     }
 
@@ -44,15 +40,11 @@ final class MetalTexture {
     }
 
     private func texture(pixelBuffer: CVPixelBuffer, planeIndex: Int, pixelFormat: MTLPixelFormat, width: Int, height: Int) -> MTLTexture? {
-        #if targetEnvironment(simulator)
-        return nil
-        #else
         var cvTextureOut: CVMetalTexture?
         CVMetalTextureCacheCreateTextureFromImage(kCFAllocatorDefault, textureCache!, pixelBuffer, nil, pixelFormat, width, height, planeIndex, &cvTextureOut)
         guard let cvTexture = cvTextureOut, let inputTexture = CVMetalTextureGetTexture(cvTexture) else {
             return nil
         }
         return inputTexture
-        #endif
     }
 }
