@@ -190,32 +190,8 @@ final class AudioGraphPlayer: AudioPlayer {
     }
 }
 
-import AVFoundation
-
 import Accelerate
-
-extension AVAudioPlayerNode {
-//    func schedule(at: AVAudioTime? = nil, channels c: Int, format: AVAudioFormat, audioDatas datas: [UnsafePointer<UInt8>], floatsLength: Int, samples: Int, completion: AVAudioNodeCompletionHandler? ) {
-//
-//        guard let buf = AVAudioPCMBuffer(pcmFormat: format, frameCapacity: AVAudioFrameCount(floatsLength)) else { return }
-//        buf.frameLength = AVAudioFrameCount(samples)
-//        let channels = buf.floatChannelData
-//        for i in 0..<datas.count {
-//            let data = datas[i]
-//            guard let channel = channels?[i % c] else {
-//                break
-//            }
-//            let floats = data.withMemoryRebound(to: Float.self, capacity: floatsLength){$0}
-//            if i < c {
-//                cblas_scopy(Int32(floatsLength), floats, 1, channel, 1)
-//            } else {
-//                vDSP_vadd(channel, 1, floats, 1, channel, 1, vDSP_Length(floatsLength))
-//            }
-//        }
-//
-//        self.scheduleBuffer(buf, completionHandler: completion)
-//    }
-}
+import AVFoundation
 
 @available(OSX 10.13, tvOS 11.0, iOS 11.0, *)
 final class AudioEnginePlayer: AudioPlayer {

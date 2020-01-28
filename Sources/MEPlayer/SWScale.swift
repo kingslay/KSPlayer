@@ -169,7 +169,7 @@ class PixelBuffer: BufferProtocol {
     }
 
     private func image() -> UIImage? {
-        var image: UIImage?
+//        var image: UIImage?
 //        if format.format == AV_PIX_FMT_RGB24 {
 //            image = UIImage(rgbData: bytes[0]!, linesize: Int(bytesPerRow[0]), width: width, height: height)
 //        }
@@ -179,7 +179,7 @@ class PixelBuffer: BufferProtocol {
 //            }
 //            scale.shutdown()
 //        }
-        return image
+        return nil
     }
 }
 
@@ -188,7 +188,9 @@ extension UIImage {
         let colorSpace = CGColorSpaceCreateDeviceRGB()
         guard let data = CFDataCreate(kCFAllocatorDefault, rgbData, linesize * height),
             let provider = CGDataProvider(data: data),
+            // swiftlint:disable line_length
             let imageRef = CGImage(width: width, height: height, bitsPerComponent: 8, bitsPerPixel: 24, bytesPerRow: linesize, space: colorSpace, bitmapInfo: [], provider: provider, decode: nil, shouldInterpolate: false, intent: .defaultIntent) else {
+            // swiftlint:enable line_length
             return nil
         }
         self.init(cgImage: imageRef)
