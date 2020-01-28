@@ -19,17 +19,15 @@ class FFPlayerItemTrack<Frame: MEFrame>: AsyncPlayerItemTrack<Frame> {
 
     override func shutdown() {
         super.shutdown()
+        av_frame_free(&coreFrame)
         if let codecContext = codecContext {
             avcodec_close(codecContext)
             avcodec_free_context(&self.codecContext)
-            self.codecContext = nil
         }
-        av_frame_free(&coreFrame)
-        coreFrame = nil
     }
 
     override func open() -> Bool {
-        if let coreFrame = av_frame_alloc(), let codecContext = codecpar.ceateContext() {
+        if let codecContext = codecpar.ceateContext(), let coreFrame = av_frame_alloc() {
             self.coreFrame = coreFrame
             self.codecContext = codecContext
             return super.open()

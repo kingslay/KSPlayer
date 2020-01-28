@@ -17,14 +17,9 @@ Pod::Spec.new do |s|
     # s.watchos.deployment_target = '2.0'
     s.tvos.deployment_target = '10.2'
     s.default_subspec = 'Openssl'
-    s.swift_version = '4.2'
+    s.swift_version = '5.1'
     s.static_framework = true
     s.subspec 'Openssl' do |openssl|
-        openssl.ios.vendored_libraries  = 'FFmpeg/openssl-iOS/lib/*.a'
-        openssl.ios.preserve_paths = 'FFmpeg/openssl-iOS/include'
-        openssl.tvos.vendored_libraries  = 'FFmpeg/openssl-tvOS/lib/*.a'
-        openssl.tvos.preserve_paths = 'FFmpeg/openssl-tvOS/include'
-        openssl.osx.vendored_libraries  = 'FFmpeg/openssl-macOS/lib/*.a'
-        openssl.osx.preserve_paths = 'FFmpeg/openssl-macOS/include'
+        openssl.vendored_frameworks = 'FFmpeg/OpenSSL.xcframework'
     end
 end

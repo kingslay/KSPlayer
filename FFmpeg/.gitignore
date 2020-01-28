@@ -1,6 +1,5 @@
+/FFmpeg
 /ffmpeg-4*
-/ffmpeg-3*
-/scratch
-/thin
-/*.gz
+/OpenSSL
 /openssl-1*
+/*.gz

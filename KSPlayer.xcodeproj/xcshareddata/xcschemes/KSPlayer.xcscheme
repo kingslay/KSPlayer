@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Scheme
-   LastUpgradeVersion = "0940"
+   LastUpgradeVersion = "1110"
    version = "1.3">
    <BuildAction
       parallelizeBuildables = "YES"
@@ -14,7 +14,7 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "ACCE2C0C1F7A7006002C8DED"
+               BlueprintIdentifier = "KSPlayer::KSPlayer"
                BuildableName = "KSPlayer.framework"
                BlueprintName = "KSPlayer"
                ReferencedContainer = "container:KSPlayer.xcodeproj">
@@ -28,28 +28,7 @@
       selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
       shouldUseLaunchSchemeArgsEnv = "YES">
       <Testables>
-         <TestableReference
-            skipped = "NO">
-            <BuildableReference
-               BuildableIdentifier = "primary"
-               BlueprintIdentifier = "ACCE2C151F7A7006002C8DED"
-               BuildableName = "KSPlayerTests.xctest"
-               BlueprintName = "KSPlayerTests"
-               ReferencedContainer = "container:KSPlayer.xcodeproj">
-            </BuildableReference>
-         </TestableReference>
       </Testables>
-      <MacroExpansion>
-         <BuildableReference
-            BuildableIdentifier = "primary"
-            BlueprintIdentifier = "ACCE2C0C1F7A7006002C8DED"
-            BuildableName = "KSPlayer.framework"
-            BlueprintName = "KSPlayer"
-            ReferencedContainer = "container:KSPlayer.xcodeproj">
-         </BuildableReference>
-      </MacroExpansion>
-      <AdditionalOptions>
-      </AdditionalOptions>
    </TestAction>
    <LaunchAction
       buildConfiguration = "Debug"
@@ -61,17 +40,6 @@
       debugDocumentVersioning = "YES"
       debugServiceExtension = "internal"
       allowLocationSimulation = "YES">
-      <MacroExpansion>
-         <BuildableReference
-            BuildableIdentifier = "primary"
-            BlueprintIdentifier = "ACCE2C0C1F7A7006002C8DED"
-            BuildableName = "KSPlayer.framework"
-            BlueprintName = "KSPlayer"
-            ReferencedContainer = "container:KSPlayer.xcodeproj">
-         </BuildableReference>
-      </MacroExpansion>
-      <AdditionalOptions>
-      </AdditionalOptions>
    </LaunchAction>
    <ProfileAction
       buildConfiguration = "Release"
@@ -82,7 +50,7 @@
       <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "ACCE2C0C1F7A7006002C8DED"
+            BlueprintIdentifier = "KSPlayer::KSPlayer"
             BuildableName = "KSPlayer.framework"
             BlueprintName = "KSPlayer"
             ReferencedContainer = "container:KSPlayer.xcodeproj">

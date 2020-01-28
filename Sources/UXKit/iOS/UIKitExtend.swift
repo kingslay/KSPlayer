@@ -6,6 +6,12 @@
 //
 
 import UIKit
+extension UIScreen {
+    static var size: CGSize {
+        return main.bounds.size
+    }
+}
+
 public class KSSlider: UXSlider {
     private var tapGesture: UITapGestureRecognizer!
     private var panGesture: UIPanGestureRecognizer!

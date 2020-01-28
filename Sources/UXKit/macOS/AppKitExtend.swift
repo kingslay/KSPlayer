@@ -33,6 +33,16 @@ public typealias UITableViewDataSource = NSTableViewDataSource
 public typealias UITouch = NSTouch
 public typealias UIEvent = NSEvent
 
+extension NSScreen {
+    var scale: CGFloat {
+        return backingScaleFactor
+    }
+
+    static var size: CGSize {
+        return main?.frame.size ?? .zero
+    }
+}
+
 extension NSClickGestureRecognizer {
     open var numberOfTapsRequired: Int {
         get {
@@ -630,7 +640,7 @@ class CADisplayLink: NSObject {
         }
     }
 
-    public init(target: AnyObject, selector sel: Selector) {
+    public init(target: NSObject, selector sel: Selector) {
         self.target = target
         selector = sel
         super.init()

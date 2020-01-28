@@ -117,7 +117,7 @@ public class KSURLSubtitle: KSSubtitle {
         }
     }
 
-    @objc public func parse(url: URL) throws {
+    public func parse(url: URL) throws {
         try parse(url: url, encoding: nil)
     }
 

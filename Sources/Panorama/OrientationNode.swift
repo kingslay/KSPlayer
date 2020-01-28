@@ -46,7 +46,7 @@ public final class OrientationNode: SCNNode {
     #if os(iOS)
     public func updateInterfaceOrientation(atTime _: TimeInterval = ProcessInfo.processInfo.systemUptime) {
         let interfaceOrientation = UIApplication.shared.statusBarOrientation
-        var rotation = Rotation()
+        var rotation = simd_quatf()
 
         switch interfaceOrientation {
         case .portraitUpsideDown:
@@ -76,8 +76,8 @@ public final class OrientationNode: SCNNode {
     #endif
 
     public func resetRotation() {
-        let rotation1 = Rotation(pointOfView.presentation.worldTransform).inverted()
-        let rotation2 = Rotation(referenceRotationNode.presentation.worldTransform)
+        let rotation1 = simd_quatf(pointOfView.presentation.worldTransform).inverse
+        let rotation2 = simd_quatf(referenceRotationNode.presentation.worldTransform)
         let rotation3 = rotation1 * rotation2
         referenceRotationNode.transform = rotation3.scnMatrix4
         userRotationNode.transform = SCNMatrix4Identity

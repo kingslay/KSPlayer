@@ -6,9 +6,9 @@
 //
 
 import AudioToolbox
+import CoreAudio
 import CoreMedia
 import QuartzCore
-import CoreAudio
 
 final class AudioOutput: FrameOutput {
     private let semaphore = DispatchSemaphore(value: 1)
@@ -23,7 +23,7 @@ final class AudioOutput: FrameOutput {
     }
 
     weak var renderSource: OutputRenderSourceDelegate?
-    let audioPlayer = AudioPlayer()
+    let audioPlayer: AudioPlayer = AudioGraphPlayer()
 
     init() {
         audioPlayer.delegate = self

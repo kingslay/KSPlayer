@@ -1,0 +1,3 @@
+${PODS_ROOT}/Target Support Files/KSPlayer-iOS/KSPlayer-iOS-Unit-Tests-artifacts.sh
+${PODS_ROOT}/../../FFmpeg/FFmpeg.xcframework
+${PODS_ROOT}/../../FFmpeg/OpenSSL.xcframework

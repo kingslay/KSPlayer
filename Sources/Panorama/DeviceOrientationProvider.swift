@@ -1,5 +1,6 @@
+import simd
 public protocol DeviceOrientationProvider {
-    func deviceOrientation(atTime time: TimeInterval) -> Rotation?
+    func deviceOrientation(atTime time: TimeInterval) -> simd_quatf?
     func shouldWaitDeviceOrientation(atTime time: TimeInterval) -> Bool
 }
 
@@ -34,7 +35,7 @@ extension DeviceOrientationProvider {
 import CoreMotion
 
 extension CMMotionManager: DeviceOrientationProvider {
-    public func deviceOrientation(atTime time: TimeInterval) -> Rotation? {
+    public func deviceOrientation(atTime time: TimeInterval) -> simd_quatf? {
         guard let motion = deviceMotion else {
             return nil
         }
@@ -45,7 +46,7 @@ extension CMMotionManager: DeviceOrientationProvider {
             return nil
         }
 
-        var rotation = Rotation(motion)
+        var rotation = simd_quatf(motion)
 
         if timeInterval > 0 {
             rotation.rotate(byX: Float(motion.rotationRate.x * timeInterval))
@@ -53,9 +54,9 @@ extension CMMotionManager: DeviceOrientationProvider {
             rotation.rotate(byZ: Float(motion.rotationRate.z * timeInterval))
         }
 
-        let reference = Rotation(x: .pi / 2)
+        let reference = simd_quatf(x: .pi / 2)
 
-        return reference.inverted() * rotation.normalized()
+        return reference.inverse * rotation.normalized
     }
 
     public func shouldWaitDeviceOrientation(atTime time: TimeInterval) -> Bool {
@@ -101,7 +102,7 @@ internal final class DefaultDeviceOrientationProvider: DeviceOrientationProvider
         DefaultDeviceOrientationProvider.decrementInstanceCount()
     }
 
-    func deviceOrientation(atTime time: TimeInterval) -> Rotation? {
+    func deviceOrientation(atTime time: TimeInterval) -> simd_quatf? {
         return DefaultDeviceOrientationProvider.motionManager.deviceOrientation(atTime: time)
     }
 

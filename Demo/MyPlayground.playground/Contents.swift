@@ -13,10 +13,10 @@ class ViewController: UIViewController {
             playerView.topAnchor.constraint(equalTo: view.readableContentGuide.topAnchor),
             playerView.leftAnchor.constraint(equalTo: view.leftAnchor),
             playerView.rightAnchor.constraint(equalTo: view.rightAnchor),
-            playerView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+            playerView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
         ])
         var url = URL(string: "http://wvideo./spriteapp.cn/video/2016/0328/56f8ec01d9bfe_wpd.mp4")!
-        url = URL(fileURLWithPath: Bundle.main.path(forResource: "567082ac3ae39699f68de4fd2b7444b1e045515a", ofType: "MP4")!)
+        url = URL(fileURLWithPath: Bundle.main.path(forResource: "567082ac3ae39699f68de4fd2b7444b1e045515a", ofType: "mp4")!)
         playerView.set(url: url)
         playerView.play()
     }

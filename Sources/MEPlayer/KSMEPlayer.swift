@@ -12,13 +12,13 @@ import UIKit
 import AppKit
 #endif
 
-public class KSMEPlayer: NSObject {
+public class KSMEPlayer {
     private var loopCount = 1
     private let audioOutput = AudioOutput()
     // 为了及时显示页面
     private var needRefreshView = true
     private var playerItem: MEPlayerItem
-    private lazy var videoOutput = VideoOutput(renderView: renderViewType.init())
+    private let videoOutput = VideoOutput()
     public var isAutoPlay = true
     public private(set) var bufferingProgress = 0 {
         didSet {
@@ -31,13 +31,6 @@ public class KSMEPlayer: NSObject {
     public private(set) var isPreparedToPlay = false
     public var allowsExternalPlayback: Bool = false
     public var usesExternalPlaybackWhileExternalScreenIsActive: Bool = false
-    open var pixelFormatType: OSType {
-        return KSDefaultParameter.bufferPixelFormatType
-    }
-
-    open var renderViewType: (PixelRenderView & UIView).Type {
-        return KSDefaultParameter.renderViewType
-    }
 
     public var playbackRate: Float = 1 {
         didSet {
@@ -66,8 +59,6 @@ public class KSMEPlayer: NSObject {
 
     public required init(url: URL, options: [String: Any]? = [:]) {
         playerItem = MEPlayerItem(url: url, options: options)
-        super.init()
-        playerItem.pixelFormatType = pixelFormatType
         playerItem.delegate = self
         audioOutput.renderSource = playerItem
         videoOutput.renderSource = playerItem
@@ -341,6 +332,15 @@ extension KSMEPlayer: MediaPlayerProtocol {
         }
         get {
             return audioOutput.audioPlayer.isMuted
+        }
+    }
+
+    public var display: DisplayEnum {
+        get {
+            return videoOutput.renderView.display
+        }
+        set {
+            videoOutput.renderView.display = newValue
         }
     }
 }

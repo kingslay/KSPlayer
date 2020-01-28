@@ -7,13 +7,11 @@ PODS:
     - KSPlayer/FFmpeg (= 1.0)
     - KSPlayer/MEPlayer (= 1.0)
     - KSPlayer/Metal (= 1.0)
-    - KSPlayer/Panorama (= 1.0)
     - KSPlayer/Resources (= 1.0)
     - KSPlayer/Subtitle (= 1.0)
     - KSPlayer/SubtitleCore (= 1.0)
     - KSPlayer/UXKit (= 1.0)
     - KSPlayer/Video (= 1.0)
-    - KSPlayer/VRPlayer (= 1.0)
   - KSPlayer/Audio (1.0):
     - KSPlayer/Core
     - KSPlayer/SubtitleCore
@@ -24,16 +22,14 @@ PODS:
   - KSPlayer/Core (1.0):
     - KSPlayer/AVPlayer
     - KSPlayer/Resources
-  - KSPlayer/FFmpeg (1.0)
+  - KSPlayer/FFmpeg (1.0):
+    - Openssl
   - KSPlayer/MEPlayer (1.0):
     - KSPlayer/AVPlayer
     - KSPlayer/FFmpeg
     - KSPlayer/Metal
     - KSPlayer/SubtitleCore
   - KSPlayer/Metal (1.0)
-  - KSPlayer/Panorama (1.0):
-    - KSPlayer/Basic
-    - KSPlayer/Metal
   - KSPlayer/Resources (1.0)
   - KSPlayer/Subtitle (1.0):
     - KSPlayer/Basic
@@ -45,9 +41,6 @@ PODS:
   - KSPlayer/Video (1.0):
     - KSPlayer/Core
     - KSPlayer/Subtitle
-  - KSPlayer/VRPlayer (1.0):
-    - KSPlayer/MEPlayer
-    - KSPlayer/Panorama
   - Openssl (1.1.1):
     - Openssl/Openssl (= 1.1.1)
   - Openssl/Openssl (1.1.1)
@@ -60,7 +53,7 @@ DEPENDENCIES:
   - SwiftLint
 
 SPEC REPOS:
-  https://github.com/cocoapods/specs.git:
+  trunk:
     - SwiftLint
 
 EXTERNAL SOURCES:
@@ -70,10 +63,10 @@ EXTERNAL SOURCES:
     :path: "../"
 
 SPEC CHECKSUMS:
-  KSPlayer: c9e4e5bd8d1b5e8e877a90b1eee396e3211ffd4b
-  Openssl: eb5c039b647f24c24296f2bbf0c9e2b593fa0917
+  KSPlayer: 336d12c369e6bf3a0f24b1f9f28600efe9b05479
+  Openssl: dc2253a127aac00b10d1e52fb083cedf91ef041f
   SwiftLint: 5553187048b900c91aa03552807681bb6b027846
 
-PODFILE CHECKSUM: b8f8dfa32b16b18db92002fcace241e720598100
+PODFILE CHECKSUM: c3dc16af7a8c3835f12e35af968d2c922691ed5a
 
-COCOAPODS: 1.7.5
+COCOAPODS: 1.9.0.beta.2

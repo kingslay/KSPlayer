@@ -23,12 +23,11 @@ final class SubtitlePlayerItemTrack: MEPlayerItemTrack<SubtitleFrame> {
 
     override func shutdown() {
         super.shutdown()
+        avsubtitle_free(&subtitle)
         if let codecContext = self.codecContext {
             avcodec_close(codecContext)
             avcodec_free_context(&self.codecContext)
-            self.codecContext = nil
         }
-        avsubtitle_free(&subtitle)
     }
 
     override func getOutputRender(where predicate: ((MEFrame) -> Bool)?) -> MEFrame? {

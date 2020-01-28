@@ -22,12 +22,12 @@ open class IOSVideoPlayerView: VideoPlayerView {
     public let tapGesture = UITapGestureRecognizer()
     public let doubleTapGesture = UITapGestureRecognizer()
     public var airplayStatusView: UIView = AirplayStatusView()
-    @objc public var routeButton = MPVolumeView()
+    public var routeButton = MPVolumeView()
     /// Image view to show video cover
-    @objc public var maskImageView = UIImageView()
-    @objc public var landscapeButton = UIButton()
+    public var maskImageView = UIImageView()
+    public var landscapeButton = UIButton()
     /// Gesture used to show / hide control view
-    @objc public let panGesture = UIPanGestureRecognizer()
+    public let panGesture = UIPanGestureRecognizer()
     open override var isMaskShow: Bool {
         didSet {
             UIView.animate(withDuration: 0.3) {
@@ -36,7 +36,7 @@ open class IOSVideoPlayerView: VideoPlayerView {
         }
     }
 
-    @objc public override var isLock: Bool {
+    public override var isLock: Bool {
         return lockButton.isSelected
     }
 

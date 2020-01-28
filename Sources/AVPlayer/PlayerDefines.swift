@@ -13,7 +13,7 @@ import UIKit
 import AppKit
 #endif
 
-@objc public protocol MediaPlayback: AnyObject {
+public protocol MediaPlayback: AnyObject {
     var duration: TimeInterval { get }
     var naturalSize: CGSize { get }
     var currentPlaybackTime: TimeInterval { get }
@@ -25,7 +25,7 @@ import AppKit
     func seek(time: TimeInterval, completion handler: ((Bool) -> Void)?)
 }
 
-@objc public protocol MediaPlayerProtocol: MediaPlayback {
+public protocol MediaPlayerProtocol: MediaPlayback {
     var delegate: MediaPlayerDelegate? { get set }
     var view: UIView { get }
     var playableTime: TimeInterval { get }
@@ -44,6 +44,7 @@ import AppKit
     var contentMode: UIViewContentMode { get set }
     var preferredForwardBufferDuration: TimeInterval { get set }
     var subtitleDataSouce: SubtitleDataSouce? { get }
+    var display: DisplayEnum { get set }
     init(url: URL, options: [String: Any]?)
     func replace(url: URL, options: [String: Any]?)
     func pause()
@@ -52,7 +53,7 @@ import AppKit
     func thumbnailImageAtCurrentTime(handler: @escaping (UIImage?) -> Void)
 }
 
-@objc public protocol MediaPlayerDelegate: AnyObject {
+public protocol MediaPlayerDelegate: AnyObject {
     func preparedToPlay(player: MediaPlayerProtocol)
     func changeLoadState(player: MediaPlayerProtocol)
     // 缓冲加载进度，0-100
@@ -63,14 +64,14 @@ import AppKit
 
 extension MediaPlayerProtocol {
     func setAudioSession(isMuted: Bool = false) {
-        #if !os(macOS)
+        #if os(macOS)
+//        try? AVAudioSession.sharedInstance().setRouteSharingPolicy(.longForm)
+        #else
         let category: AVAudioSession.Category = isMuted ? .ambient : .playback
         if #available(iOS 11.0, tvOS 11.0, *) {
             try? AVAudioSession.sharedInstance().setCategory(category, mode: .default, policy: .longForm)
-        } else if #available(iOS 10.0, *) {
-            try? AVAudioSession.sharedInstance().setCategory(category, mode: .default)
         } else {
-            try? AVAudioSession.sharedInstance().setCategory(category)
+            try? AVAudioSession.sharedInstance().setCategory(category, mode: .default)
         }
         try? AVAudioSession.sharedInstance().setActive(true)
         #endif
@@ -124,7 +125,7 @@ public struct KSPlayerManager {
     }
 }
 
-@objc public enum MediaPlaybackState: Int {
+public enum MediaPlaybackState: Int {
     case idle
     case playing
     case paused
@@ -133,7 +134,7 @@ public struct KSPlayerManager {
     case stopped
 }
 
-@objc public enum MediaLoadState: Int {
+public enum MediaLoadState: Int {
     case idle
     case loading
     case playable
@@ -142,8 +143,4 @@ public struct KSPlayerManager {
 func KSLog(_ message: CustomStringConvertible, file: String = #file, function: String = #function, line: Int = #line) {
     let fileName = (file as NSString).lastPathComponent
     KSPlayerManager.logFunctionPoint("KSPlayer: \(fileName):\(line) \(function) | \(message)")
-}
-
-public protocol PixelRenderView {
-    func set(pixelBuffer: CVPixelBuffer, time: CMTime)
 }

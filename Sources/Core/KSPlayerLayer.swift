@@ -112,7 +112,7 @@ open class KSPlayerLayer: UIView {
         resetPlayer()
     }
 
-    public func set(url: URL, options: [String: Any]?) {
+    public func set(url: URL, options: [String: Any]?, display: DisplayEnum = .plane) {
         self.url = url
         playOptions = options
         if let cookies = playOptions?["Cookie"] as? [HTTPCookie] {
@@ -127,14 +127,25 @@ open class KSPlayerLayer: UIView {
             cookieStr.append("\r\n")
             playOptions?["headers"] = cookieStr
         }
-        // airplay的话，默认使用KSAVPlayer
-        let firstPlayerType = isWirelessRouteActive ? KSAVPlayer.self : KSPlayerManager.firstPlayerType
+        let firstPlayerType: MediaPlayerProtocol.Type
+        if isWirelessRouteActive {
+            // airplay的话，默认使用KSAVPlayer
+            firstPlayerType = KSAVPlayer.self
+        } else if display != .plane {
+            // AR模式只能用KSMEPlayer
+            // swiftlint:disable force_cast
+            firstPlayerType = NSClassFromString("KSPlayer.KSMEPlayer") as! MediaPlayerProtocol.Type
+            // swiftlint:enable force_cast
+        } else {
+            firstPlayerType = KSPlayerManager.firstPlayerType
+        }
         if let player = player, type(of: player) == firstPlayerType {
             player.replace(url: url, options: playOptions)
             prepareToPlay()
         } else {
             player = firstPlayerType.init(url: url, options: playOptions)
         }
+        player?.display = display
         timer = Timer.scheduledTimer(timeInterval: 0.5, target: self, selector: #selector(playerTimerAction), userInfo: nil, repeats: true)
         timer?.fireDate = Date.distantFuture
         registerRemoteControllEvent()
@@ -327,7 +338,7 @@ extension KSPlayerLayer {
             MPRemoteCommandCenter.shared().seekBackwardCommand.addTarget(self, action: #selector(remoteCommandAction(event:)))
             MPRemoteCommandCenter.shared().changePlaybackRateCommand.addTarget(self, action: #selector(remoteCommandAction(event:)))
         }
-        if #available(iOS 9.1, OSX 10.12.2, *) {
+        if #available(OSX 10.12.2, *) {
             MPRemoteCommandCenter.shared().changePlaybackPositionCommand.addTarget(self, action: #selector(remoteCommandAction(event:)))
         }
     }
@@ -341,7 +352,7 @@ extension KSPlayerLayer {
             MPRemoteCommandCenter.shared().seekBackwardCommand.removeTarget(self)
             MPRemoteCommandCenter.shared().changePlaybackRateCommand.removeTarget(self)
         }
-        if #available(iOS 9.1, OSX 10.12.2, *) {
+        if #available(OSX 10.12.2, *) {
             MPRemoteCommandCenter.shared().changePlaybackPositionCommand.removeTarget(self)
         }
     }

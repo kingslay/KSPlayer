@@ -50,7 +50,6 @@ final class MEPlayerItem {
     }
 
     weak var delegate: MEPlayerDelegate?
-    var pixelFormatType: OSType = KSDefaultParameter.bufferPixelFormatType
     var isLoopPlay = false
 
     init(url: URL, options: [String: Any]?) {
@@ -152,7 +151,7 @@ extension MEPlayerItem {
         tracks.removeAll()
         for i in 0 ..< Int(formatCtx.nb_streams) {
             if let coreStream = formatCtx.streams[i],
-                let codec = coreStream.createCodec(pixelFormatType: pixelFormatType) {
+                let codec = coreStream.createCodec() {
                 codec.delegate = self
                 tracks.append(codec)
             }
@@ -333,7 +332,6 @@ extension MEPlayerItem: CodecCapacityDelegate {
         KSLog("Decoder did Failed : \(error)")
         if track is VTBPlayerItemTrack {
             let newVideoCodec = VideoPlayerItemTrack(stream: track.stream)
-            newVideoCodec.pixelFormatType = pixelFormatType
             if newVideoCodec.open() {
                 track.shutdown()
                 newVideoCodec.delegate = self
@@ -423,7 +421,7 @@ extension UnsafeMutablePointer where Pointee == AVStream {
         return 0.0
     }
 
-    func createCodec(pixelFormatType: OSType) -> PlayerItemTrackProtocol? {
+    func createCodec() -> PlayerItemTrackProtocol? {
         switch pointee.codecpar.pointee.codec_type {
         case AVMEDIA_TYPE_AUDIO:
             let codec = AudioPlayerItemTrack(stream: self)
@@ -442,13 +440,11 @@ extension UnsafeMutablePointer where Pointee == AVStream {
             }
             if videotoolbox {
                 let codec = VTBPlayerItemTrack(stream: self)
-                codec.pixelFormatType = pixelFormatType
                 if codec.open() {
                     return codec
                 }
             }
             let codec = VideoPlayerItemTrack(stream: self)
-            codec.pixelFormatType = pixelFormatType
             return codec.open() ? codec : nil
         default:
             return nil

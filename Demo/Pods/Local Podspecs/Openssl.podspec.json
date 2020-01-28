@@ -18,24 +18,13 @@
     "tvos": "10.2"
   },
   "default_subspecs": "Openssl",
-  "swift_versions": "4.2",
+  "swift_versions": "5.1",
   "static_framework": true,
   "subspecs": [
     {
       "name": "Openssl",
-      "ios": {
-        "vendored_libraries": "FFmpeg/openssl-iOS/lib/*.a",
-        "preserve_paths": "FFmpeg/openssl-iOS/include"
-      },
-      "tvos": {
-        "vendored_libraries": "FFmpeg/openssl-tvOS/lib/*.a",
-        "preserve_paths": "FFmpeg/openssl-tvOS/include"
-      },
-      "osx": {
-        "vendored_libraries": "FFmpeg/openssl-macOS/lib/*.a",
-        "preserve_paths": "FFmpeg/openssl-macOS/include"
-      }
+      "vendored_frameworks": "FFmpeg/OpenSSL.xcframework"
     }
   ],
-  "swift_version": "4.2"
+  "swift_version": "5.1"
 }
