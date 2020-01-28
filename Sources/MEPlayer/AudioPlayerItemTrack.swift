@@ -42,7 +42,7 @@ final class AudioPlayerItemTrack: FFPlayerItemTrack<AudioFrame> {
             frame.size = Int64(coreFrame.pointee.pkt_size)
             var numberOfSamples = coreFrame.pointee.nb_samples
             let nbSamples = swr_get_out_samples(swrContext, numberOfSamples)
-            _ = av_samples_get_buffer_size(&frame.bufferSize, KSDefaultParameter.audioPlayerMaximumChannels, nbSamples, AV_SAMPLE_FMT_FLTP, 1)
+            _ = av_samples_get_buffer_size(&frame.bufferSize, Int32(KSDefaultParameter.audioPlayerMaximumChannels), nbSamples, AV_SAMPLE_FMT_FLTP, 1)
             var frameBuffer = Array(tuple: coreFrame.pointee.data).map { UnsafePointer<UInt8>($0) }
             numberOfSamples = swr_convert(swrContext, &frame.data, nbSamples, &frameBuffer, numberOfSamples)
             if frame.duration == 0 {
@@ -68,7 +68,7 @@ final class AudioPlayerItemTrack: FFPlayerItemTrack<AudioFrame> {
     }
 
     private func setupSwrContext() -> Bool {
-        inputNumberOfChannels = codecpar.pointee.channels
+        inputNumberOfChannels = UInt32(codecpar.pointee.channels)
         if inputNumberOfChannels == 0 {
             inputNumberOfChannels = KSDefaultParameter.audioPlayerMaximumChannels
         }
@@ -77,8 +77,8 @@ final class AudioPlayerItemTrack: FFPlayerItemTrack<AudioFrame> {
             inputSampleRate = KSDefaultParameter.audioPlayerSampleRate
         }
         inputFormat = AVSampleFormat(rawValue: codecpar.pointee.format)
-        let outChannel = av_get_default_channel_layout(KSDefaultParameter.audioPlayerMaximumChannels)
-        let inChannel = av_get_default_channel_layout(inputNumberOfChannels)
+        let outChannel = av_get_default_channel_layout(Int32(KSDefaultParameter.audioPlayerMaximumChannels))
+        let inChannel = av_get_default_channel_layout(Int32(inputNumberOfChannels))
         swrContext = swr_alloc_set_opts(nil, outChannel, AV_SAMPLE_FMT_FLTP, KSDefaultParameter.audioPlayerSampleRate, inChannel, inputFormat, inputSampleRate, 0, nil)
         let result = swr_init(swrContext)
         if result < 0 {
@@ -91,11 +91,9 @@ final class AudioPlayerItemTrack: FFPlayerItemTrack<AudioFrame> {
 
     private func destorySwrContext() {
         swr_free(&swrContext)
-        swrContext = nil
     }
 
     deinit {
         swr_free(&swrContext)
-        swrContext = nil
     }
 }

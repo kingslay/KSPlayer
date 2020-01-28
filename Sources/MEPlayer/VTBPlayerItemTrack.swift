@@ -8,10 +8,9 @@
 import ffmpeg
 import VideoToolbox
 
-class SamplePlayerItemTrack<Frame: MEFrame>: AsyncPlayerItemTrack<Frame>, PixelFormat {
+class SamplePlayerItemTrack<Frame: MEFrame>: AsyncPlayerItemTrack<Frame> {
     fileprivate var isConvertNALSize = false
     fileprivate var formatDescription: CMFormatDescription?
-    var pixelFormatType: OSType = KSDefaultParameter.bufferPixelFormatType
     override func open() -> Bool {
         if setupDecompressionSession(), super.open() {
             return true
@@ -43,7 +42,7 @@ class SamplePlayerItemTrack<Frame: MEFrame>: AsyncPlayerItemTrack<Frame>, PixelF
         let dic: NSMutableDictionary = [
             kCVImageBufferChromaLocationBottomFieldKey: "left",
             kCVImageBufferChromaLocationTopFieldKey: "left",
-            kCMFormatDescriptionExtension_FullRangeVideo: pixelFormatType != kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange,
+            kCMFormatDescriptionExtension_FullRangeVideo: KSDefaultParameter.bufferPixelFormatType != kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange,
             kCMFormatDescriptionExtension_SampleDescriptionExtensionAtoms: [
                 codecpar.pointee.codec_id.rawValue == AV_CODEC_ID_HEVC.rawValue ? "hvcC" : "avcC": NSData(bytes: extradata, length: Int(extradataSize)),
             ],
@@ -156,7 +155,7 @@ final class VTBPlayerItemTrack: SamplePlayerItemTrack<VideoVTBFrame> {
             return false
         }
         let dic: NSDictionary = [
-            kCVPixelBufferPixelFormatTypeKey: pixelFormatType,
+            kCVPixelBufferPixelFormatTypeKey: KSDefaultParameter.bufferPixelFormatType,
             kCVPixelBufferWidthKey: codecpar.pointee.width,
             kCVPixelBufferHeightKey: codecpar.pointee.height,
             kCVPixelBufferMetalCompatibilityKey: true,

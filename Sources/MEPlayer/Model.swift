@@ -13,10 +13,25 @@ import UIKit
 #else
 import AppKit
 #endif
+func canUseMetal() -> Bool {
+    #if arch(arm)
+    return false
+    #else
+    #if targetEnvironment(simulator)
+    if #available(iOS 13.0, tvOS 13.0, *) {
+        return true
+    } else {
+        return false
+    }
+    #else
+    return true
+    #endif
+    #endif
+}
 
 // MARK: enum
 
-@objc public enum MEErrorCode: Int {
+public enum MEErrorCode: Int {
     case unknown
     case formatCreate
     case formatOpenInput
@@ -102,10 +117,6 @@ public protocol ObjectQueueItem {
     var position: Int64 { get }
 }
 
-protocol PixelFormat {
-    var pixelFormatType: OSType { get set }
-}
-
 protocol FrameOutput {
     var renderSource: OutputRenderSourceDelegate? { get set }
     func play()
@@ -131,15 +142,23 @@ extension MEFrame {
 // MARK: model
 
 public struct KSDefaultParameter {
-    /// 视频颜色编码方式 支持kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange kCVPixelFormatType_420YpCbCr8BiPlanarFullRange kCVPixelFormatType_32BGRA 默认是kCVPixelFormatType_420YpCbCr8BiPlanarFullRange
-    public static var bufferPixelFormatType = kCVPixelFormatType_420YpCbCr8BiPlanarFullRange
+    /// 视频颜色编码方式 支持kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange kCVPixelFormatType_420YpCbCr8BiPlanarFullRange kCVPixelFormatType_32BGRA kCVPixelFormatType_420YpCbCr8Planar
+    public static var bufferPixelFormatType = kCVPixelFormatType_420YpCbCr8Planar
     /// 开启 硬解 默认true
     public static var enableVideotoolbox = true
+    /// 开启VR模式的陀飞轮
+    public static var enableSensor = true
     /// 日志级别
     public static var logLevel = AV_LOG_WARNING
-    public static var audioPlayerMaximumFramesPerSlice = Int32(4096)
-    public static var audioPlayerMaximumChannels = Int32(2)
+    public static var audioPlayerMaximumFramesPerSlice = AVAudioFrameCount(4096)
+    #if os(macOS)
     public static var audioPlayerSampleRate = Int32(44100)
+    public static var audioPlayerMaximumChannels = AVAudioChannelCount(2)
+    #else
+    public static var audioPlayerSampleRate = Int32(AVAudioSession.sharedInstance().sampleRate)
+    public static var audioPlayerMaximumChannels = AVAudioChannelCount(AVAudioSession.sharedInstance().outputNumberOfChannels)
+    #endif
+
     // 视频缓冲算法函数
     public static var playable: (LoadingStatus) -> Bool = { status in
         guard status.frameCount > 0 else { return false }
@@ -155,11 +174,11 @@ public struct KSDefaultParameter {
 
     // 画面绘制类
     public static var renderViewType: (PixelRenderView & UIView).Type = {
-        #if arch(arm)
-        return OpenGLPlayView.self
-        #else
-        return MetalPlayView.self
-        #endif
+        if canUseMetal() {
+            return MetalPlayView.self
+        } else {
+            return SampleBufferPlayerView.self
+        }
     }()
 
     static func outputFormat() -> AudioStreamBasicDescription {
@@ -167,14 +186,16 @@ public struct KSDefaultParameter {
         let floatByteSize = UInt32(MemoryLayout<Float>.size)
         audioStreamBasicDescription.mBitsPerChannel = 8 * floatByteSize
         audioStreamBasicDescription.mBytesPerFrame = floatByteSize
-        audioStreamBasicDescription.mChannelsPerFrame = UInt32(KSDefaultParameter.audioPlayerMaximumChannels)
+        audioStreamBasicDescription.mChannelsPerFrame = audioPlayerMaximumChannels
         audioStreamBasicDescription.mFormatFlags = kAudioFormatFlagIsFloat | kAudioFormatFlagIsNonInterleaved
         audioStreamBasicDescription.mFormatID = kAudioFormatLinearPCM
         audioStreamBasicDescription.mFramesPerPacket = 1
         audioStreamBasicDescription.mBytesPerPacket = audioStreamBasicDescription.mFramesPerPacket * audioStreamBasicDescription.mBytesPerFrame
-        audioStreamBasicDescription.mSampleRate = Float64(KSDefaultParameter.audioPlayerSampleRate)
+        audioStreamBasicDescription.mSampleRate = Float64(audioPlayerSampleRate)
         return audioStreamBasicDescription
     }
+
+    static let audioDefaultFormat = AVAudioFormat(commonFormat: .pcmFormatFloat32, sampleRate: Double(audioPlayerSampleRate), channels: audioPlayerMaximumChannels, interleaved: false)!
 }
 
 // 加载情况
@@ -255,7 +276,6 @@ final class Packet: ObjectQueueItem {
 
     deinit {
         av_packet_free(&corePacket)
-        corePacket = nil
     }
 }
 
@@ -305,7 +325,7 @@ final class AudioFrame: Frame {
 }
 
 final class VideoVTBFrame: Frame {
-    public var corePixelBuffer: CVPixelBuffer?
+    public var corePixelBuffer: BufferProtocol?
     deinit {
         corePixelBuffer = nil
     }
@@ -313,6 +333,11 @@ final class VideoVTBFrame: Frame {
 
 final class VideoSampleBufferFrame: Frame {
     public var sampleBuffer: CMSampleBuffer?
+}
+
+public protocol PixelRenderView {
+    var display: DisplayEnum { get set }
+    func set(pixelBuffer: BufferProtocol, time: CMTime)
 }
 
 extension PixelRenderView {

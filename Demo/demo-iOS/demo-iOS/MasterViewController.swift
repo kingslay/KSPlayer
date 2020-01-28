@@ -48,7 +48,7 @@ class MasterViewController: UIViewController, UITableViewDelegate, UITableViewDa
             objects.append(KSPlayerResource(url: URL(fileURLWithPath: path), name: "本地视频"))
         }
         if let path = Bundle.main.path(forResource: "google-help-vr", ofType: "mp4") {
-            objects.append(KSPlayerResource(url: URL(fileURLWithPath: path), name: "本地全景视频"))
+            objects.append(KSPlayerResource(url: URL(fileURLWithPath: path), name: "本地全景视频", display: .vr))
         }
         if let path = Bundle.main.path(forResource: "Polonaise", ofType: "flac") {
             objects.append(KSPlayerResource(url: URL(fileURLWithPath: path), name: "本地音频"))

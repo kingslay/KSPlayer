@@ -13,11 +13,11 @@
     "tag": "1.0"
   },
   "platforms": {
-    "ios": "9.0",
-    "osx": "10.11",
+    "ios": "10.0",
+    "osx": "10.12",
     "tvos": "10.2"
   },
-  "swift_versions": "5.0",
+  "swift_versions": "5.1",
   "static_framework": true,
   "testspecs": [
     {
@@ -94,57 +94,46 @@
     },
     {
       "name": "FFmpeg",
-      "source_files": "Sources/FFmpeg/**/*.{h,c}",
+      "source_files": "Sources/FFmpegExt/**/*.{h,c}",
       "libraries": [
         "bz2",
-        "z"
+        "z",
+        "iconv"
       ],
       "ios": {
-        "vendored_libraries": "FFmpeg/FFmpeg-iOS/lib/*.a",
-        "preserve_paths": "FFmpeg/FFmpeg-iOS/include",
         "xcconfig": {
-          "HEADER_SEARCH_PATHS": "${PODS_ROOT}/KSPlayer/FFmpeg/FFmpeg-iOS/include ${PODS_ROOT}/../../FFmpeg/FFmpeg-iOS/include",
-          "SWIFT_INCLUDE_PATHS": "${PODS_ROOT}/KSPlayer/FFmpeg/FFmpeg-iOS/include $(PODS_ROOT)/../../FFmpeg/FFmpeg-iOS/include"
+          "HEADER_SEARCH_PATHS": "${PODS_ROOT}/KSPlayer/FFmpeg/FFmpeg.xcframework/ios-arm64/FFmpeg.framework/Headers ${PODS_ROOT}/../../FFmpeg/FFmpeg.xcframework/ios-arm64/FFmpeg.framework/Headers",
+          "SWIFT_INCLUDE_PATHS": "${PODS_ROOT}/KSPlayer/FFmpeg/FFmpeg.xcframework/ios-arm64/FFmpeg.framework/Headers ${PODS_ROOT}/../../FFmpeg/FFmpeg.xcframework/ios-arm64/FFmpeg.framework/Headers"
         }
       },
       "tvos": {
-        "vendored_libraries": "FFmpeg/FFmpeg-tvOS/lib/*.a",
-        "preserve_paths": "FFmpeg/FFmpeg-tvOS/include",
         "xcconfig": {
-          "HEADER_SEARCH_PATHS": "${PODS_ROOT}/KSPlayer/FFmpeg/FFmpeg-tvOS/include ${PODS_ROOT}/../../FFmpeg/FFmpeg-tvOS/include",
-          "SWIFT_INCLUDE_PATHS": "${PODS_ROOT}/KSPlayer/FFmpeg/FFmpeg-tvOS/include $(PODS_ROOT)/../../FFmpeg/FFmpeg-tvOS/include"
+          "HEADER_SEARCH_PATHS": "${PODS_ROOT}/KSPlayer/FFmpeg/FFmpeg.xcframework/ios-arm64/FFmpeg.framework/Headers ${PODS_ROOT}/../../FFmpeg/FFmpeg.xcframework/ios-arm64/FFmpeg.framework/Headers",
+          "SWIFT_INCLUDE_PATHS": "${PODS_ROOT}/KSPlayer/FFmpeg/FFmpeg.xcframework/ios-arm64/FFmpeg.framework/Headers ${PODS_ROOT}/../../FFmpeg/FFmpeg.xcframework/ios-arm64/FFmpeg.framework/Headers"
         }
       },
       "osx": {
-        "vendored_libraries": "FFmpeg/FFmpeg-macOS/lib/*.a",
-        "preserve_paths": "FFmpeg/FFmpeg-macOS/include",
         "xcconfig": {
-          "HEADER_SEARCH_PATHS": "${PODS_ROOT}/KSPlayer/FFmpeg/FFmpeg-macOS/include ${PODS_ROOT}/../../FFmpeg/FFmpeg-macOS/include",
-          "SWIFT_INCLUDE_PATHS": "${PODS_ROOT}/KSPlayer/FFmpeg/FFmpeg-macOS/include $(PODS_ROOT)/../../FFmpeg/FFmpeg-macOS/include"
+          "HEADER_SEARCH_PATHS": "${PODS_ROOT}/KSPlayer/FFmpeg/FFmpeg.xcframework/ios-arm64/FFmpeg.framework/Headers ${PODS_ROOT}/../../FFmpeg/FFmpeg.xcframework/ios-arm64/FFmpeg.framework/Headers",
+          "SWIFT_INCLUDE_PATHS": "${PODS_ROOT}/KSPlayer/FFmpeg/FFmpeg.xcframework/ios-arm64/FFmpeg.framework/Headers ${PODS_ROOT}/../../FFmpeg/FFmpeg.xcframework/ios-arm64/FFmpeg.framework/Headers"
         }
       },
-      "vendored_frameworks": "Openssl.framework"
-    },
-    {
-      "name": "Metal",
-      "source_files": "Sources/Metal/*.{swift}",
-      "weak_frameworks": "MetalKit"
-    },
-    {
-      "name": "Panorama",
-      "source_files": "Sources/Panorama/**/*",
-      "frameworks": [
-        "SceneKit",
-        "GLKit"
-      ],
+      "vendored_frameworks": "FFmpeg/FFmpeg.xcframework",
       "dependencies": {
-        "KSPlayer/Basic": [
-
-        ],
-        "KSPlayer/Metal": [
+        "Openssl": [
 
         ]
       }
+    },
+    {
+      "name": "Metal",
+      "source_files": "Sources/Metal/*.{h,swift,metal}",
+      "resource_bundles": {
+        "Metal": [
+          "Sources/Metal/*.metal"
+        ]
+      },
+      "weak_frameworks": "MetalKit"
     },
     {
       "name": "AVPlayer",
@@ -159,11 +148,9 @@
     {
       "name": "MEPlayer",
       "source_files": "Sources/MEPlayer/**/*.{swift}",
-      "resources": "Sources/MEPlayer/**/*.{metal,glsl,vsh,fsh}",
       "frameworks": [
         "AudioToolbox",
-        "VideoToolbox",
-        "GLKit"
+        "VideoToolbox"
       ],
       "dependencies": {
         "KSPlayer/FFmpeg": [
@@ -176,18 +163,6 @@
 
         ],
         "KSPlayer/SubtitleCore": [
-
-        ]
-      }
-    },
-    {
-      "name": "VRPlayer",
-      "source_files": "Sources/VRPlayer/**/*",
-      "dependencies": {
-        "KSPlayer/MEPlayer": [
-
-        ],
-        "KSPlayer/Panorama": [
 
         ]
       }
@@ -270,5 +245,5 @@
       }
     }
   ],
-  "swift_version": "5.0"
+  "swift_version": "5.1"
 }

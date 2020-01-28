@@ -1,0 +1,3 @@
+${PODS_ROOT}/Target Support Files/Pods-demo-macOS/Pods-demo-macOS-artifacts.sh
+${PODS_ROOT}/../../FFmpeg/FFmpeg.xcframework
+${PODS_ROOT}/../../FFmpeg/OpenSSL.xcframework

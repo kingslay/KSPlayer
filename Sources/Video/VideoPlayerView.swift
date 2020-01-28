@@ -79,7 +79,7 @@ open class VideoPlayerView: PlayerView {
             if newValue, !playerLayer.isWirelessRouteActive, let proxyUrl = asset.proxyUrl {
                 url = proxyUrl
             }
-            playerLayer.set(url: url, options: asset.options)
+            playerLayer.set(url: url, options: asset.options, display: resource.display)
         }
     }
 
@@ -269,8 +269,8 @@ open class VideoPlayerView: PlayerView {
         }
     }
 
-    open override func set(url: URL, options: [String: Any]? = nil) {
-        set(resource: KSPlayerResource(url: url, options: options))
+    open override func set(url: URL, options: [String: Any]? = nil, display: DisplayEnum = .plane) {
+        set(resource: KSPlayerResource(url: url, options: options, display: display))
     }
 
     open func set(resource: KSPlayerResource, definitionIndex: Int = 0, isSetUrl: Bool = true) {

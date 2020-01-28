@@ -46,8 +46,8 @@ install_framework()
   fi
 
   # Use filter instead of exclude so missing patterns don't throw errors.
-  echo "rsync --delete -av "${RSYNC_PROTECT_TMP_FILES[@]}" --filter \"- CVS/\" --filter \"- .svn/\" --filter \"- .git/\" --filter \"- .hg/\" --filter \"- Headers\" --filter \"- PrivateHeaders\" --filter \"- Modules\" \"${source}\" \"${destination}\""
-  rsync --delete -av "${RSYNC_PROTECT_TMP_FILES[@]}" --filter "- CVS/" --filter "- .svn/" --filter "- .git/" --filter "- .hg/" --filter "- Headers" --filter "- PrivateHeaders" --filter "- Modules" "${source}" "${destination}"
+  echo "rsync --delete -av "${RSYNC_PROTECT_TMP_FILES[@]}" --links --filter \"- CVS/\" --filter \"- .svn/\" --filter \"- .git/\" --filter \"- .hg/\" --filter \"- Headers\" --filter \"- PrivateHeaders\" --filter \"- Modules\" \"${source}\" \"${destination}\""
+  rsync --delete -av "${RSYNC_PROTECT_TMP_FILES[@]}" --links --filter "- CVS/" --filter "- .svn/" --filter "- .git/" --filter "- .hg/" --filter "- Headers" --filter "- PrivateHeaders" --filter "- Modules" "${source}" "${destination}"
 
   local basename
   basename="$(basename -s .framework "$1")"
@@ -94,19 +94,27 @@ install_dsym() {
     binary="${DERIVED_FILES_DIR}/${basename}.framework.dSYM/Contents/Resources/DWARF/${basename}"
 
     # Strip invalid architectures so "fat" simulator / device frameworks work on device
-    if [[ "$(file "$binary")" == *"Mach-O dSYM companion"* ]]; then
+    if [[ "$(file "$binary")" == *"Mach-O "*"dSYM companion"* ]]; then
       strip_invalid_archs "$binary"
     fi
 
     if [[ $STRIP_BINARY_RETVAL == 1 ]]; then
       # Move the stripped file into its final destination.
-      echo "rsync --delete -av "${RSYNC_PROTECT_TMP_FILES[@]}" --filter \"- CVS/\" --filter \"- .svn/\" --filter \"- .git/\" --filter \"- .hg/\" --filter \"- Headers\" --filter \"- PrivateHeaders\" --filter \"- Modules\" \"${DERIVED_FILES_DIR}/${basename}.framework.dSYM\" \"${DWARF_DSYM_FOLDER_PATH}\""
-      rsync --delete -av "${RSYNC_PROTECT_TMP_FILES[@]}" --filter "- CVS/" --filter "- .svn/" --filter "- .git/" --filter "- .hg/" --filter "- Headers" --filter "- PrivateHeaders" --filter "- Modules" "${DERIVED_FILES_DIR}/${basename}.framework.dSYM" "${DWARF_DSYM_FOLDER_PATH}"
+      echo "rsync --delete -av "${RSYNC_PROTECT_TMP_FILES[@]}" --links --filter \"- CVS/\" --filter \"- .svn/\" --filter \"- .git/\" --filter \"- .hg/\" --filter \"- Headers\" --filter \"- PrivateHeaders\" --filter \"- Modules\" \"${DERIVED_FILES_DIR}/${basename}.framework.dSYM\" \"${DWARF_DSYM_FOLDER_PATH}\""
+      rsync --delete -av "${RSYNC_PROTECT_TMP_FILES[@]}" --links --filter "- CVS/" --filter "- .svn/" --filter "- .git/" --filter "- .hg/" --filter "- Headers" --filter "- PrivateHeaders" --filter "- Modules" "${DERIVED_FILES_DIR}/${basename}.framework.dSYM" "${DWARF_DSYM_FOLDER_PATH}"
     else
       # The dSYM was not stripped at all, in this case touch a fake folder so the input/output paths from Xcode do not reexecute this script because the file is missing.
       touch "${DWARF_DSYM_FOLDER_PATH}/${basename}.framework.dSYM"
     fi
   fi
+}
+
+# Copies the bcsymbolmap files of a vendored framework
+install_bcsymbolmap() {
+    local bcsymbolmap_path="$1"
+    local destination="${BUILT_PRODUCTS_DIR}"
+    echo "rsync --delete -av "${RSYNC_PROTECT_TMP_FILES[@]}" --filter "- CVS/" --filter "- .svn/" --filter "- .git/" --filter "- .hg/" --filter "- Headers" --filter "- PrivateHeaders" --filter "- Modules" "${bcsymbolmap_path}" "${destination}""
+    rsync --delete -av "${RSYNC_PROTECT_TMP_FILES[@]}" --filter "- CVS/" --filter "- .svn/" --filter "- .git/" --filter "- .hg/" --filter "- Headers" --filter "- PrivateHeaders" --filter "- Modules" "${bcsymbolmap_path}" "${destination}"
 }
 
 # Signs a framework with the provided identity
@@ -151,13 +159,37 @@ strip_invalid_archs() {
   STRIP_BINARY_RETVAL=1
 }
 
+install_artifact() {
+  artifact="$1"
+  base="$(basename "$artifact")"
+  case $base in
+  *.framework)
+    install_framework "$artifact"
+    ;;
+  *.dSYM)
+    install_dsym "$artifact"
+    ;;
+  *.bcsymbolmap)
+    install_bcsymbolmap "$artifact"
+    ;;
+  *)
+    echo "error: Unrecognized artifact "$artifact""
+    ;;
+  esac
+}
 
-if [[ "$CONFIGURATION" == "Debug" ]]; then
-  install_framework "${BUILT_PRODUCTS_DIR}/KSPlayer-tvOS/KSPlayer.framework"
+copy_artifacts() {
+  file_list="$1"
+  while read artifact; do
+    install_artifact "$artifact"
+  done <$file_list
+}
+
+ARTIFACT_LIST_FILE="${BUILT_PRODUCTS_DIR}/cocoapods-artifacts-${CONFIGURATION}.txt"
+if [ -r "${ARTIFACT_LIST_FILE}" ]; then
+  copy_artifacts "${ARTIFACT_LIST_FILE}"
 fi
-if [[ "$CONFIGURATION" == "Release" ]]; then
-  install_framework "${BUILT_PRODUCTS_DIR}/KSPlayer-tvOS/KSPlayer.framework"
-fi
+
 if [ "${COCOAPODS_PARALLEL_CODE_SIGN}" == "true" ]; then
   wait
 fi

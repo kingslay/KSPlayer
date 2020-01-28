@@ -83,14 +83,13 @@ public class KSSubtitleController {
 
     private func searchSubtitle(datasouce: SubtitleDataSouce, name: String) {
         datasouce.searchSubtitle(name: name) { array in
-            if let array = array {
-                array.forEach { $0.subtitleDataSouce = datasouce }
-                runInMainqueue { [weak self] in
-                    guard let self = self else { return }
-                    self.infos.append(contentsOf: array)
-                    self.srtListCount.value = self.infos.count
-                    self.view.setupDatas(infos: self.infos)
-                }
+            guard let array = array else { return }
+            array.forEach { $0.subtitleDataSouce = datasouce }
+            runInMainqueue { [weak self] in
+                guard let self = self else { return }
+                self.infos.append(contentsOf: array)
+                self.srtListCount.value = self.infos.count
+                self.view.setupDatas(infos: self.infos)
             }
         }
     }

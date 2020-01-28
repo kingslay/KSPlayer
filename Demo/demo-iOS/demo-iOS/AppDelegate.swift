@@ -16,10 +16,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         let window = UIWindow()
 //        KSPlayerManager.firstPlayerType = KSAVPlayer.self
 //        KSPlayerManager.isLoopPlay = true
+        KSPlayerManager.isAutoPlay = true
         KSPlayerManager.canBackgroundPlay = true
         KSPlayerManager.isSecondOpen = true
         KSPlayerManager.isAccurateSeek = true
-        KSPlayerManager.secondPlayerType = KSMEPlayer.self
+        KSPlayerManager.firstPlayerType = KSMEPlayer.self
         KSDefaultParameter.logLevel = AV_LOG_DEBUG
         KSDefaultParameter.enableVideotoolbox = true
         window.rootViewController = UINavigationController(rootViewController: MasterViewController())

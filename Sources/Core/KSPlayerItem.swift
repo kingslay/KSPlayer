@@ -7,10 +7,20 @@
 //
 
 import Foundation
+
+public enum DisplayEnum {
+    case plane
+    // swiftlint:disable identifier_name
+    case vr
+    // swiftlint:enable identifier_name
+    case vrBox
+}
+
 public class KSPlayerResource {
     public let name: String
     public let cover: URL?
     public let definitions: [KSPlayerResourceDefinition]
+    public let display: DisplayEnum
     public var subtitle: KSSubtitleProtocol?
     /**
      Player recource item with url, used to play single difinition video
@@ -20,13 +30,13 @@ public class KSPlayerResource {
      - parameter cover:     video cover, will show before playing, and hide when play
      - parameter subtitleURL: video subtitle
      */
-    public convenience init(url: URL, options: [String: Any]? = nil, name: String = "", cover: URL? = nil, subtitleURL: URL? = nil) {
+    public convenience init(url: URL, options: [String: Any]? = nil, name: String = "", cover: URL? = nil, subtitleURL: URL? = nil, display: DisplayEnum = .plane) {
         let definition = KSPlayerResourceDefinition(url: url, definition: "", options: options)
         var subtitle: KSSubtitleProtocol?
         if let subtitleURL = subtitleURL {
             subtitle = KSURLSubtitle(url: subtitleURL)
         }
-        self.init(name: name, definitions: [definition], cover: cover, subtitle: subtitle)
+        self.init(name: name, definitions: [definition], cover: cover, subtitle: subtitle, display: display)
     }
 
     /**
@@ -37,11 +47,12 @@ public class KSPlayerResource {
      - parameter cover:       video cover
      - parameter subtitle:   video subtitle
      */
-    public init(name: String = "", definitions: [KSPlayerResourceDefinition], cover: URL? = nil, subtitle: KSSubtitleProtocol? = nil) {
+    public init(name: String = "", definitions: [KSPlayerResourceDefinition], cover: URL? = nil, subtitle: KSSubtitleProtocol? = nil, display: DisplayEnum = .plane) {
         self.name = name
         self.cover = cover
         self.subtitle = subtitle
         self.definitions = definitions
+        self.display = display
     }
 }
 

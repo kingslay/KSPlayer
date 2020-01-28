@@ -104,8 +104,8 @@ open class PlayerView: UIView, KSPlayerLayerDelegate, KSSliderDelegate {
         totalTime = 0.0
     }
 
-    open func set(url: URL, options: [String: Any]? = nil) {
-        playerLayer.set(url: url, options: options)
+    open func set(url: URL, options: [String: Any]? = nil, display: DisplayEnum = .plane) {
+        playerLayer.set(url: url, options: options, display: display)
     }
 
     deinit {

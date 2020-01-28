@@ -10,36 +10,49 @@ import KSPlayer
 import UIKit
 
 class DetailViewController: UIViewController {
+    #if os(iOS)
     override var preferredStatusBarStyle: UIStatusBarStyle {
         return .lightContent
     }
 
-    var playerView = IOSVideoPlayerView()
+    private let playerView = IOSVideoPlayerView()
+    #else
+    private let playerView = VideoPlayerView()
+    #endif
     var resource: KSPlayerResource!
 
     override func viewDidLoad() {
         super.viewDidLoad()
         view.addSubview(playerView)
         playerView.translatesAutoresizingMaskIntoConstraints = false
+        #if os(iOS)
         NSLayoutConstraint.activate([
             playerView.topAnchor.constraint(equalTo: view.readableContentGuide.topAnchor),
             playerView.leftAnchor.constraint(equalTo: view.leftAnchor),
             playerView.rightAnchor.constraint(equalTo: view.rightAnchor),
             playerView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
         ])
+        #else
+        NSLayoutConstraint.activate([
+            playerView.topAnchor.constraint(equalTo: view.topAnchor),
+            playerView.leftAnchor.constraint(equalTo: view.leftAnchor),
+            playerView.rightAnchor.constraint(equalTo: view.rightAnchor),
+            playerView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+        ])
+        #endif
+        view.layoutIfNeeded()
         playerView.backBlock = { [unowned self] in
+            #if os(iOS)
             if UIApplication.shared.statusBarOrientation.isLandscape {
                 self.playerView.updateUI(isLandscape: false)
             } else {
                 self.navigationController?.popViewController(animated: true)
             }
+            #else
+            self.navigationController?.popViewController(animated: true)
+            #endif
         }
         if let resource = resource {
-            if resource.name.contains("全景") {
-                KSPlayerManager.firstPlayerType = KSVRPlayer.self
-            } else {
-                KSPlayerManager.firstPlayerType = KSMEPlayer.self
-            }
             playerView.set(resource: resource)
         }
     }

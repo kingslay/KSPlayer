@@ -6,7 +6,7 @@
 //
 import Foundation
 
-@objc public protocol SubtitleInfo {
+public protocol SubtitleInfo: AnyObject {
     var userInfo: NSMutableDictionary? { get set }
     var subtitleDataSouce: SubtitleDataSouce? { get set }
     var name: String { get }
@@ -18,14 +18,14 @@ public protocol MakeSubtitle {
     func makeSubtitle(completion: @escaping (Result<KSSubtitleProtocol?, NSError>) -> Void)
 }
 
-@objc public class URLSubtitleInfo: NSObject, SubtitleInfo {
+public class URLSubtitleInfo: SubtitleInfo {
     public weak var subtitleDataSouce: SubtitleDataSouce?
-    @objc public let name: String
-    @objc public let subtitleID: String
-    @objc public var comment: String?
-    @objc public var downloadURL: URL?
-    @objc public var userInfo: NSMutableDictionary?
-    @objc public init(subtitleID: String, name: String) {
+    public let name: String
+    public let subtitleID: String
+    public var comment: String?
+    public var downloadURL: URL?
+    public var userInfo: NSMutableDictionary?
+    public init(subtitleID: String, name: String) {
         self.subtitleID = subtitleID
         self.name = name
     }
@@ -64,8 +64,8 @@ extension URLSubtitleInfo: MakeSubtitle {
     }
 }
 
-@objc public protocol SubtitletoCache {
-    weak var cache: CacheDataSouce? { get set }
+public protocol SubtitletoCache: AnyObject {
+    var cache: CacheDataSouce? { get set }
 }
 
 extension SubtitletoCache {
@@ -74,22 +74,21 @@ extension SubtitletoCache {
     }
 }
 
-@objc public protocol SubtitleDataSouce {
+public protocol SubtitleDataSouce: AnyObject {
     func searchSubtitle(name: String, completion: @escaping ([SubtitleInfo]?) -> Void)
     func fetchSubtitleDetail(info: SubtitleInfo, completion: @escaping (SubtitleInfo, NSError?) -> Void)
 }
 
-@objc public class CacheDataSouce: NSObject, SubtitleDataSouce {
+public class CacheDataSouce: SubtitleDataSouce {
     private let cacheFolder = (NSTemporaryDirectory() as NSString).appendingPathComponent("KSSubtitleCache")
     private var srtCacheInfoPath: String
     // 因为plist不能保存URL
     private var srtInfoCaches = [String: String]()
-    override init() {
+    init() {
         if !FileManager.default.fileExists(atPath: cacheFolder) {
             try? FileManager.default.createDirectory(atPath: cacheFolder, withIntermediateDirectories: true, attributes: nil)
         }
         srtCacheInfoPath = (cacheFolder as NSString).appendingPathComponent("KSSrtInfo.plist")
-        super.init()
     }
 
     public func searchSubtitle(name: String, completion: @escaping ([SubtitleInfo]?) -> Void) {

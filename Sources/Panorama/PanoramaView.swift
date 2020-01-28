@@ -7,7 +7,7 @@ import AppKit
 #endif
 public final class PanoramaView: UIView {
     private var textureLoad: MetalTexture
-    public let device: MTLDevice?
+    private let device: MTLDevice
     public var scene: (SCNScene & TextureRenderView & ImageRenderView)? {
         get {
             return scnView.scene as? (SCNScene & TextureRenderView & ImageRenderView)
@@ -32,7 +32,7 @@ public final class PanoramaView: UIView {
         #if (arch(arm) || arch(arm64)) && os(iOS)
         let view = SCNView(frame: self.bounds, options: [
             SCNView.Option.preferredRenderingAPI.rawValue: SCNRenderingAPI.metal.rawValue,
-            SCNView.Option.preferredDevice.rawValue: self.device!,
+            SCNView.Option.preferredDevice.rawValue: self.device,
         ])
         #else
         let view = SCNView(frame: self.bounds)
@@ -60,26 +60,12 @@ public final class PanoramaView: UIView {
     }
 
     public convenience init(format: MediaFormat) {
-        #if os(macOS)
-        let metalDevice = MTLCopyAllDevices().first
-        #else
-        let metalDevice = MTLCreateSystemDefaultDevice()
-        #endif
-        self.init(frame: .zero, format: format, device: metalDevice)
+        self.init(frame: .zero, format: format)
     }
 
-    public convenience init(frame: CGRect, format: MediaFormat) {
-        #if os(macOS)
-        let metalDevice = MTLCopyAllDevices().first
-        #else
-        let metalDevice = MTLCreateSystemDefaultDevice()
-        #endif
-        self.init(frame: frame, format: format, device: metalDevice)
-    }
-
-    public init(frame: CGRect, format: MediaFormat, device: MTLDevice?) {
-        self.device = device
-        textureLoad = MetalTexture(device: device)
+    public init(frame: CGRect, format: MediaFormat) {
+        device = MetalRender.share.device
+        textureLoad = MetalTexture()
         super.init(frame: frame)
         switch format {
         case .mono:
@@ -134,7 +120,7 @@ public final class PanoramaView: UIView {
     #endif
 }
 
-extension PanoramaView: PixelRenderView {
+extension PanoramaView {
     public func set(pixelBuffer: CVPixelBuffer, time _: CMTime) {
         if let texture = textureLoad.texture(pixelBuffer: pixelBuffer)?.first {
             scene?.set(texture: texture)

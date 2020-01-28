@@ -3,21 +3,22 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 50;
+	objectVersion = 51;
 	objects = {
 
 /* Begin PBXBuildFile section */
 		4F8BF0EAD4FD485055852FBD /* Pods_demo_tvOS.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F227C20AECAAE8524D2F0F1D /* Pods_demo_tvOS.framework */; };
-		AC08611820B69A1C00D801FC /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC08611720B69A1C00D801FC /* AppDelegate.swift */; };
 		AC08611D20B69A1C00D801FC /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = AC08611B20B69A1C00D801FC /* Main.storyboard */; };
 		AC08611F20B69A1C00D801FC /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AC08611E20B69A1C00D801FC /* Assets.xcassets */; };
 		AC08612A20B69A1D00D801FC /* demo_tvOSTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC08612920B69A1D00D801FC /* demo_tvOSTests.swift */; };
 		AC08613520B69A1D00D801FC /* demo_tvOSUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC08613420B69A1D00D801FC /* demo_tvOSUITests.swift */; };
-		AC15342120B8592200925627 /* DetailViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC15341F20B8592200925627 /* DetailViewController.swift */; };
-		AC15342220B8592200925627 /* MasterViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC15342020B8592200925627 /* MasterViewController.swift */; };
+		AC3A420223D32DFE00B666A4 /* MasterViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC3A41FE23D32DFD00B666A4 /* MasterViewController.swift */; };
+		AC3A420323D32DFE00B666A4 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC3A41FF23D32DFE00B666A4 /* AppDelegate.swift */; };
+		AC3A420423D32DFE00B666A4 /* DetailViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC3A420023D32DFE00B666A4 /* DetailViewController.swift */; };
+		AC3A420523D32DFE00B666A4 /* AudioViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC3A420123D32DFE00B666A4 /* AudioViewController.swift */; };
+		AC3A420623D3303B00B666A4 /* 567082ac3ae39699f68de4fd2b7444b1e045515a.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = AC3A41F523D32DB000B666A4 /* 567082ac3ae39699f68de4fd2b7444b1e045515a.mp4 */; };
 		ACEF02CA21946730003E75E4 /* Polonaise.flac in Resources */ = {isa = PBXBuildFile; fileRef = ACEF02C621946730003E75E4 /* Polonaise.flac */; };
 		ACEF02CB21946730003E75E4 /* google-help-vr.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = ACEF02C721946730003E75E4 /* google-help-vr.mp4 */; };
-		ACEF02CC21946730003E75E4 /* 567082ac3ae39699f68de4fd2b7444b1e045515a.MP4 in Resources */ = {isa = PBXBuildFile; fileRef = ACEF02C821946730003E75E4 /* 567082ac3ae39699f68de4fd2b7444b1e045515a.MP4 */; };
 		ACEF02CD21946730003E75E4 /* video-h265.mkv in Resources */ = {isa = PBXBuildFile; fileRef = ACEF02C921946730003E75E4 /* video-h265.mkv */; };
 /* End PBXBuildFile section */
 
@@ -41,7 +42,6 @@
 /* Begin PBXFileReference section */
 		055202483CC6922E098C6565 /* Pods-demo-tvOS.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-demo-tvOS.debug.xcconfig"; path = "../Pods/Target Support Files/Pods-demo-tvOS/Pods-demo-tvOS.debug.xcconfig"; sourceTree = "<group>"; };
 		AC08611420B69A1C00D801FC /* demo-tvOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "demo-tvOS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
-		AC08611720B69A1C00D801FC /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		AC08611C20B69A1C00D801FC /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		AC08611E20B69A1C00D801FC /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		AC08612020B69A1C00D801FC /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -51,11 +51,13 @@
 		AC08613020B69A1D00D801FC /* demo-tvOSUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "demo-tvOSUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		AC08613420B69A1D00D801FC /* demo_tvOSUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = demo_tvOSUITests.swift; sourceTree = "<group>"; };
 		AC08613620B69A1D00D801FC /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		AC15341F20B8592200925627 /* DetailViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DetailViewController.swift; sourceTree = "<group>"; };
-		AC15342020B8592200925627 /* MasterViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MasterViewController.swift; sourceTree = "<group>"; };
+		AC3A41F523D32DB000B666A4 /* 567082ac3ae39699f68de4fd2b7444b1e045515a.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = 567082ac3ae39699f68de4fd2b7444b1e045515a.mp4; sourceTree = "<group>"; };
+		AC3A41FE23D32DFD00B666A4 /* MasterViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = MasterViewController.swift; path = "../../demo-iOS/demo-iOS/MasterViewController.swift"; sourceTree = "<group>"; };
+		AC3A41FF23D32DFE00B666A4 /* AppDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = AppDelegate.swift; path = "../../demo-iOS/demo-iOS/AppDelegate.swift"; sourceTree = "<group>"; };
+		AC3A420023D32DFE00B666A4 /* DetailViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = DetailViewController.swift; path = "../../demo-iOS/demo-iOS/DetailViewController.swift"; sourceTree = "<group>"; };
+		AC3A420123D32DFE00B666A4 /* AudioViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = AudioViewController.swift; path = "../../demo-iOS/demo-iOS/AudioViewController.swift"; sourceTree = "<group>"; };
 		ACEF02C621946730003E75E4 /* Polonaise.flac */ = {isa = PBXFileReference; lastKnownFileType = file; path = Polonaise.flac; sourceTree = "<group>"; };
 		ACEF02C721946730003E75E4 /* google-help-vr.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = "google-help-vr.mp4"; sourceTree = "<group>"; };
-		ACEF02C821946730003E75E4 /* 567082ac3ae39699f68de4fd2b7444b1e045515a.MP4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = 567082ac3ae39699f68de4fd2b7444b1e045515a.MP4; sourceTree = "<group>"; };
 		ACEF02C921946730003E75E4 /* video-h265.mkv */ = {isa = PBXFileReference; lastKnownFileType = file; path = "video-h265.mkv"; sourceTree = "<group>"; };
 		D4B47B55C1204959E7C6D995 /* Pods-demo-tvOS.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-demo-tvOS.release.xcconfig"; path = "../Pods/Target Support Files/Pods-demo-tvOS/Pods-demo-tvOS.release.xcconfig"; sourceTree = "<group>"; };
 		F227C20AECAAE8524D2F0F1D /* Pods_demo_tvOS.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_demo_tvOS.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -112,9 +114,10 @@
 		AC08611620B69A1C00D801FC /* demo-tvOS */ = {
 			isa = PBXGroup;
 			children = (
-				AC08611720B69A1C00D801FC /* AppDelegate.swift */,
-				AC15341F20B8592200925627 /* DetailViewController.swift */,
-				AC15342020B8592200925627 /* MasterViewController.swift */,
+				AC3A41FF23D32DFE00B666A4 /* AppDelegate.swift */,
+				AC3A420123D32DFE00B666A4 /* AudioViewController.swift */,
+				AC3A420023D32DFE00B666A4 /* DetailViewController.swift */,
+				AC3A41FE23D32DFD00B666A4 /* MasterViewController.swift */,
 				AC08611B20B69A1C00D801FC /* Main.storyboard */,
 				AC08611E20B69A1C00D801FC /* Assets.xcassets */,
 				AC08612020B69A1C00D801FC /* Info.plist */,
@@ -145,8 +148,8 @@
 			isa = PBXGroup;
 			children = (
 				ACEF02C621946730003E75E4 /* Polonaise.flac */,
+				AC3A41F523D32DB000B666A4 /* 567082ac3ae39699f68de4fd2b7444b1e045515a.mp4 */,
 				ACEF02C721946730003E75E4 /* google-help-vr.mp4 */,
-				ACEF02C821946730003E75E4 /* 567082ac3ae39699f68de4fd2b7444b1e045515a.MP4 */,
 				ACEF02C921946730003E75E4 /* video-h265.mkv */,
 			);
 			name = Resources;
@@ -178,10 +181,12 @@
 			buildConfigurationList = AC08613920B69A1D00D801FC /* Build configuration list for PBXNativeTarget "demo-tvOS" */;
 			buildPhases = (
 				A099CE7BFDF0BA6150CCFFF5 /* [CP] Check Pods Manifest.lock */,
+				C12B6DDAD62151C76F5FB73E /* [CP] Prepare Artifacts */,
 				AC08611020B69A1C00D801FC /* Sources */,
 				AC08611120B69A1C00D801FC /* Frameworks */,
 				AC08611220B69A1C00D801FC /* Resources */,
 				88F5FA60842399E33086AFB9 /* [CP] Copy Pods Resources */,
+				A0BA08429A9BD71013ECA858 /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -240,7 +245,7 @@
 				TargetAttributes = {
 					AC08611320B69A1C00D801FC = {
 						CreatedOnToolsVersion = 9.3.1;
-						LastSwiftMigration = 1000;
+						LastSwiftMigration = 1130;
 					};
 					AC08612420B69A1C00D801FC = {
 						CreatedOnToolsVersion = 9.3.1;
@@ -279,8 +284,8 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				ACEF02CC21946730003E75E4 /* 567082ac3ae39699f68de4fd2b7444b1e045515a.MP4 in Resources */,
 				AC08611F20B69A1C00D801FC /* Assets.xcassets in Resources */,
+				AC3A420623D3303B00B666A4 /* 567082ac3ae39699f68de4fd2b7444b1e045515a.mp4 in Resources */,
 				ACEF02CB21946730003E75E4 /* google-help-vr.mp4 in Resources */,
 				ACEF02CD21946730003E75E4 /* video-h265.mkv in Resources */,
 				AC08611D20B69A1C00D801FC /* Main.storyboard in Resources */,
@@ -340,6 +345,40 @@
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
 			showEnvVarsInLog = 0;
 		};
+		A0BA08429A9BD71013ECA858 /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-demo-tvOS/Pods-demo-tvOS-frameworks-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-demo-tvOS/Pods-demo-tvOS-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-demo-tvOS/Pods-demo-tvOS-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		C12B6DDAD62151C76F5FB73E /* [CP] Prepare Artifacts */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-demo-tvOS/Pods-demo-tvOS-artifacts-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Prepare Artifacts";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-demo-tvOS/Pods-demo-tvOS-artifacts-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-demo-tvOS/Pods-demo-tvOS-artifacts.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -347,9 +386,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				AC15342220B8592200925627 /* MasterViewController.swift in Sources */,
-				AC15342120B8592200925627 /* DetailViewController.swift in Sources */,
-				AC08611820B69A1C00D801FC /* AppDelegate.swift in Sources */,
+				AC3A420423D32DFE00B666A4 /* DetailViewController.swift in Sources */,
+				AC3A420523D32DFE00B666A4 /* AudioViewController.swift in Sources */,
+				AC3A420323D32DFE00B666A4 /* AppDelegate.swift in Sources */,
+				AC3A420223D32DFE00B666A4 /* MasterViewController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -514,6 +554,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = "App Icon & Top Shelf Image";
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				INFOPLIST_FILE = "demo-tvOS/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -522,6 +563,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "kintan.demo-tvOS";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 3;
 				TVOS_DEPLOYMENT_TARGET = 10.2;
@@ -534,6 +576,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = "App Icon & Top Shelf Image";
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				INFOPLIST_FILE = "demo-tvOS/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = (

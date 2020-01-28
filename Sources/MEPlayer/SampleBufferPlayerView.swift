@@ -12,6 +12,7 @@ import AppKit
 #endif
 // AVSampleBufferAudioRenderer AVSampleBufferRenderSynchronizer AVSampleBufferDisplayLayer
 public final class SampleBufferPlayerView: UIView {
+    public var display: DisplayEnum = .plane
     private var videoInfo: CMVideoFormatDescription?
     private var displayLayer: AVSampleBufferDisplayLayer {
         // swiftlint:disable force_cast
@@ -76,9 +77,12 @@ extension SampleBufferPlayerView: PixelRenderView {
         }
     }
 
-    public func set(pixelBuffer: CVPixelBuffer, time: CMTime) {
-        if videoInfo == nil || !CMVideoFormatDescriptionMatchesImageBuffer(videoInfo!, imageBuffer: pixelBuffer) {
-            let err = CMVideoFormatDescriptionCreateForImageBuffer(allocator: nil, imageBuffer: pixelBuffer, formatDescriptionOut: &videoInfo)
+    public func set(pixelBuffer: BufferProtocol, time: CMTime) {
+        // swiftlint:disable force_cast
+        let buffer = pixelBuffer as! CVPixelBuffer
+        // swiftlint:enable force_cast
+        if videoInfo == nil || !CMVideoFormatDescriptionMatchesImageBuffer(videoInfo!, imageBuffer: buffer) {
+            let err = CMVideoFormatDescriptionCreateForImageBuffer(allocator: nil, imageBuffer: buffer, formatDescriptionOut: &videoInfo)
             if err != noErr {
                 KSLog("Error at CMVideoFormatDescriptionCreateForImageBuffer \(err)")
             }
@@ -87,7 +91,7 @@ extension SampleBufferPlayerView: PixelRenderView {
         var timing = CMSampleTimingInfo(duration: .invalid, presentationTimeStamp: time, decodeTimeStamp: .invalid)
         var sampleBuffer: CMSampleBuffer?
         // swiftlint:disable line_length
-        CMSampleBufferCreateForImageBuffer(allocator: nil, imageBuffer: pixelBuffer, dataReady: true, makeDataReadyCallback: nil, refcon: nil, formatDescription: videoInfo, sampleTiming: &timing, sampleBufferOut: &sampleBuffer)
+        CMSampleBufferCreateForImageBuffer(allocator: nil, imageBuffer: buffer, dataReady: true, makeDataReadyCallback: nil, refcon: nil, formatDescription: videoInfo, sampleTiming: &timing, sampleBufferOut: &sampleBuffer)
         // swiftlint:enable line_length
 
         if let sampleBuffer = sampleBuffer {

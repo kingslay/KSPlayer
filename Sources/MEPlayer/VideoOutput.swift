@@ -24,8 +24,8 @@ final class VideoOutput: NSObject, FrameOutput {
         return displayLink
     }()
 
-    init(renderView: PixelRenderView & UIView) {
-        self.renderView = renderView
+    override init() {
+        renderView = KSDefaultParameter.renderViewType.init()
     }
 
     func play() {
@@ -59,17 +59,20 @@ final class VideoOutput: NSObject, FrameOutput {
     func shutdown() {}
 
     public func thumbnailImageAtCurrentTime(handler: @escaping (UIImage?) -> Void) {
-        if let frame = currentRender as? VideoVTBFrame, let pixelBuffer = frame.corePixelBuffer {
-            DispatchQueue.global().async {
-                let ciImage = CIImage(cvImageBuffer: pixelBuffer)
-                let context = CIContext(options: nil)
-                if let videoImage = context.createCGImage(ciImage, from: CGRect(origin: .zero, size: pixelBuffer.size)) {
-                    handler(UIImage(cgImage: videoImage))
-                } else {
-                    handler(nil)
-                }
-            }
+        DispatchQueue.global().async { [weak self] in
+            handler(self?.renderView.image())
         }
-        return handler(nil)
+    }
+}
+extension UIView {
+    func image() -> UIImage? {
+        UIGraphicsBeginImageContextWithOptions(bounds.size, isOpaque, 0.0)
+        defer { UIGraphicsEndImageContext() }
+        if let context = UIGraphicsGetCurrentContext() {
+            layer.render(in: context)
+            let image = UIGraphicsGetImageFromCurrentImageContext()
+            return image
+        }
+        return nil
     }
 }

@@ -13,9 +13,7 @@ public final class KSAVPlayerView: UIView {
         layer = AVPlayerLayer()
         #endif
         playerLayer.player = player
-        if #available(iOS 10.0, OSX 10.12, *) {
-            player.automaticallyWaitsToMinimizeStalling = false
-        }
+        player.automaticallyWaitsToMinimizeStalling = false
     }
 
     public required init?(coder _: NSCoder) {
@@ -107,6 +105,7 @@ public class KSAVPlayer {
     }
 
     public var isAutoPlay = true
+    public var display: DisplayEnum = .plane
     public weak var delegate: MediaPlayerDelegate?
     public private(set) var duration: TimeInterval = 0
     public private(set) var playableTime: TimeInterval = 0
@@ -255,25 +254,21 @@ extension KSAVPlayer {
     }
 
     private func setPlayerLooper(playerItem: AVPlayerItem) {
-        if #available(iOS 10.0, OSX 10.12, *) {
-            player.actionAtItemEnd = .advance
-            let playerLooper = AVPlayerLooper(player: player, templateItem: playerItem)
-            loopCountObservation?.invalidate()
-            loopCountObservation = playerLooper.observe(\.loopCount) { [weak self] playerLooper, _ in
-                guard let self = self else { return }
-                self.delegate?.playBack(player: self, loopCount: playerLooper.loopCount)
-            }
-            loopStatusObservation?.invalidate()
-            loopStatusObservation = playerLooper.observe(\.status) { [weak self] playerLooper, _ in
-                guard let self = self else { return }
-                if playerLooper.status == .failed {
-                    self.error = playerLooper.error
-                }
-            }
-            self.playerLooper = playerLooper
-        } else {
-            error = NSError(domain: AVFoundationErrorDomain, code: -1, userInfo: [NSLocalizedDescriptionKey: "KSAVPlayer not support loop play for iOS 9 and OSX 10.11"])
+        player.actionAtItemEnd = .advance
+        let playerLooper = AVPlayerLooper(player: player, templateItem: playerItem)
+        loopCountObservation?.invalidate()
+        loopCountObservation = playerLooper.observe(\.loopCount) { [weak self] playerLooper, _ in
+            guard let self = self else { return }
+            self.delegate?.playBack(player: self, loopCount: playerLooper.loopCount)
         }
+        loopStatusObservation?.invalidate()
+        loopStatusObservation = playerLooper.observe(\.status) { [weak self] playerLooper, _ in
+            guard let self = self else { return }
+            if playerLooper.status == .failed {
+                self.error = playerLooper.error
+            }
+        }
+        self.playerLooper = playerLooper
     }
 
     private func observer(playerItem: AVPlayerItem?) {
@@ -322,9 +317,7 @@ extension KSAVPlayer: MediaPlayerProtocol {
             return KSPlayerManager.preferredForwardBufferDuration
         }
         set {
-            if #available(iOS 10.0, OSX 10.12, *) {
-                player.currentItem?.preferredForwardBufferDuration = newValue
-            }
+            player.currentItem?.preferredForwardBufferDuration = newValue
             KSPlayerManager.preferredForwardBufferDuration = newValue
         }
     }
