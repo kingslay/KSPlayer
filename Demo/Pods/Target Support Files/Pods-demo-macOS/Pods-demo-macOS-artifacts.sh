@@ -86,9 +86,6 @@ install_xcframework() {
   if [[ "$PLATFORM_NAME" == *"simulator" ]]; then
     target_variant="simulator"
   fi
-  if [[ "$EFFECTIVE_PLATFORM_NAME" == *"maccatalyst" ]]; then
-    target_variant="maccatalyst"
-  fi
   for i in ${!paths[@]}; do
     if [[ "${paths[$i]}" == *"$target_arch"* ]] && [[ "${paths[$i]}" == *"$target_variant"* ]]; then
       # Found a matching slice

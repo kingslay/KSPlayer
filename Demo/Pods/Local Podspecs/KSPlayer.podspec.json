@@ -102,20 +102,17 @@
       ],
       "ios": {
         "xcconfig": {
-          "HEADER_SEARCH_PATHS": "${PODS_ROOT}/KSPlayer/FFmpeg/FFmpeg.xcframework/ios-arm64/FFmpeg.framework/Headers ${PODS_ROOT}/../../FFmpeg/FFmpeg.xcframework/ios-arm64/FFmpeg.framework/Headers",
-          "SWIFT_INCLUDE_PATHS": "${PODS_ROOT}/KSPlayer/FFmpeg/FFmpeg.xcframework/ios-arm64/FFmpeg.framework/Headers ${PODS_ROOT}/../../FFmpeg/FFmpeg.xcframework/ios-arm64/FFmpeg.framework/Headers"
+          "HEADER_SEARCH_PATHS": "${PODS_ROOT}/KSPlayer/FFmpeg/FFmpeg.xcframework/ios-arm64/FFmpeg.framework/Headers ${PODS_ROOT}/../../FFmpeg/FFmpeg.xcframework/ios-arm64/FFmpeg.framework/Headers"
         }
       },
       "tvos": {
         "xcconfig": {
-          "HEADER_SEARCH_PATHS": "${PODS_ROOT}/KSPlayer/FFmpeg/FFmpeg.xcframework/ios-arm64/FFmpeg.framework/Headers ${PODS_ROOT}/../../FFmpeg/FFmpeg.xcframework/ios-arm64/FFmpeg.framework/Headers",
-          "SWIFT_INCLUDE_PATHS": "${PODS_ROOT}/KSPlayer/FFmpeg/FFmpeg.xcframework/ios-arm64/FFmpeg.framework/Headers ${PODS_ROOT}/../../FFmpeg/FFmpeg.xcframework/ios-arm64/FFmpeg.framework/Headers"
+          "HEADER_SEARCH_PATHS": "${PODS_ROOT}/KSPlayer/FFmpeg/FFmpeg.xcframework/tvos-arm64/FFmpeg.framework/Headers ${PODS_ROOT}/../../FFmpeg/FFmpeg.xcframework/tvos-arm64/FFmpeg.framework/Headers"
         }
       },
       "osx": {
         "xcconfig": {
-          "HEADER_SEARCH_PATHS": "${PODS_ROOT}/KSPlayer/FFmpeg/FFmpeg.xcframework/ios-arm64/FFmpeg.framework/Headers ${PODS_ROOT}/../../FFmpeg/FFmpeg.xcframework/ios-arm64/FFmpeg.framework/Headers",
-          "SWIFT_INCLUDE_PATHS": "${PODS_ROOT}/KSPlayer/FFmpeg/FFmpeg.xcframework/ios-arm64/FFmpeg.framework/Headers ${PODS_ROOT}/../../FFmpeg/FFmpeg.xcframework/ios-arm64/FFmpeg.framework/Headers"
+          "HEADER_SEARCH_PATHS": "${PODS_ROOT}/KSPlayer/FFmpeg/FFmpeg.xcframework/macos-x86_64/FFmpeg.framework/Headers ${PODS_ROOT}/../../FFmpeg/FFmpeg.xcframework/macos-x86_64/FFmpeg.framework/Headers"
         }
       },
       "vendored_frameworks": "FFmpeg/FFmpeg.xcframework",

@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 51;
+	objectVersion = 52;
 	objects = {
 
 /* Begin PBXAggregateTarget section */
@@ -102,7 +102,7 @@
 				LastUpgradeCheck = 1100;
 			};
 			buildConfigurationList = 4FB14426193C9C27F7C8689611A6338E /* Build configuration list for PBXProject "SwiftLint" */;
-			compatibilityVersion = "Xcode 10.0";
+			compatibilityVersion = "Xcode 11.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (

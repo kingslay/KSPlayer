@@ -1,12 +1,11 @@
 ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES
 FRAMEWORK_SEARCH_PATHS = $(inherited) "${PODS_CONFIGURATION_BUILD_DIR}/KSPlayer-macOS" "${PODS_ROOT}/../../FFmpeg" "${PODS_ROOT}/../../FFmpeg/FFmpeg.xcframework/macos-x86_64" "${PODS_ROOT}/../../FFmpeg/OpenSSL.xcframework/macos-x86_64"
 GCC_PREPROCESSOR_DEFINITIONS = $(inherited) COCOAPODS=1
-HEADER_SEARCH_PATHS = $(inherited) "${PODS_CONFIGURATION_BUILD_DIR}/KSPlayer-macOS/KSPlayer.framework/Headers" ${PODS_ROOT}/KSPlayer/FFmpeg/FFmpeg.xcframework/ios-arm64/FFmpeg.framework/Headers ${PODS_ROOT}/../../FFmpeg/FFmpeg.xcframework/ios-arm64/FFmpeg.framework/Headers
+HEADER_SEARCH_PATHS = $(inherited) "${PODS_CONFIGURATION_BUILD_DIR}/KSPlayer-macOS/KSPlayer.framework/Headers" ${PODS_ROOT}/KSPlayer/FFmpeg/FFmpeg.xcframework/macos-x86_64/FFmpeg.framework/Headers ${PODS_ROOT}/../../FFmpeg/FFmpeg.xcframework/macos-x86_64/FFmpeg.framework/Headers
 OTHER_LDFLAGS = $(inherited) -ObjC -l"bz2" -l"iconv" -l"z" -framework "AVFoundation" -framework "AppKit" -framework "AudioToolbox" -framework "FFmpeg" -framework "Foundation" -framework "KSPlayer" -framework "OpenSSL" -framework "VideoToolbox" -weak_framework "MetalKit"
 OTHER_SWIFT_FLAGS = $(inherited) -D COCOAPODS
 PODS_BUILD_DIR = ${BUILD_DIR}
 PODS_CONFIGURATION_BUILD_DIR = ${PODS_BUILD_DIR}/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)
 PODS_PODFILE_DIR_PATH = ${SRCROOT}/..
 PODS_ROOT = ${SRCROOT}/../Pods
-SWIFT_INCLUDE_PATHS = $(inherited) ${PODS_ROOT}/KSPlayer/FFmpeg/FFmpeg.xcframework/ios-arm64/FFmpeg.framework/Headers ${PODS_ROOT}/../../FFmpeg/FFmpeg.xcframework/ios-arm64/FFmpeg.framework/Headers
 USE_RECURSIVE_SCRIPT_INPUTS_IN_SCRIPT_PHASES = YES

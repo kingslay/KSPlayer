@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 51;
+	objectVersion = 52;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -17,10 +17,6 @@
 		AC62AEF420C9830300A75F85 /* ViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = AC62AEF220C9830300A75F85 /* ViewController.xib */; };
 		ACB5A251226579E1004C4EEF /* OpenURLWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACB5A24F226579E0004C4EEF /* OpenURLWindowController.swift */; };
 		ACB5A252226579E1004C4EEF /* OpenURLWindowController.xib in Resources */ = {isa = PBXBuildFile; fileRef = ACB5A250226579E1004C4EEF /* OpenURLWindowController.xib */; };
-		ACEF02C121946723003E75E4 /* Polonaise.flac in Resources */ = {isa = PBXBuildFile; fileRef = ACEF02BD21946723003E75E4 /* Polonaise.flac */; };
-		ACEF02C221946723003E75E4 /* google-help-vr.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = ACEF02BE21946723003E75E4 /* google-help-vr.mp4 */; };
-		ACEF02C321946723003E75E4 /* 567082ac3ae39699f68de4fd2b7444b1e045515a.MP4 in Resources */ = {isa = PBXBuildFile; fileRef = ACEF02BF21946723003E75E4 /* 567082ac3ae39699f68de4fd2b7444b1e045515a.MP4 */; };
-		ACEF02C421946723003E75E4 /* video-h265.mkv in Resources */ = {isa = PBXBuildFile; fileRef = ACEF02C021946723003E75E4 /* video-h265.mkv */; };
 		FCE576E4DF033905B99A93E6 /* Pods_demo_macOS.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 90F4636D697BEE812114E1B4 /* Pods_demo_macOS.framework */; };
 /* End PBXBuildFile section */
 
@@ -63,10 +59,6 @@
 		AC7ADAF4218988E1008C07EF /* MyPlayground.playground */ = {isa = PBXFileReference; lastKnownFileType = file.playground; path = MyPlayground.playground; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
 		ACB5A24F226579E0004C4EEF /* OpenURLWindowController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OpenURLWindowController.swift; sourceTree = "<group>"; };
 		ACB5A250226579E1004C4EEF /* OpenURLWindowController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = OpenURLWindowController.xib; sourceTree = "<group>"; };
-		ACEF02BD21946723003E75E4 /* Polonaise.flac */ = {isa = PBXFileReference; lastKnownFileType = file; path = Polonaise.flac; sourceTree = "<group>"; };
-		ACEF02BE21946723003E75E4 /* google-help-vr.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = "google-help-vr.mp4"; sourceTree = "<group>"; };
-		ACEF02BF21946723003E75E4 /* 567082ac3ae39699f68de4fd2b7444b1e045515a.MP4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = 567082ac3ae39699f68de4fd2b7444b1e045515a.MP4; sourceTree = "<group>"; };
-		ACEF02C021946723003E75E4 /* video-h265.mkv */ = {isa = PBXFileReference; lastKnownFileType = file; path = "video-h265.mkv"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -148,7 +140,6 @@
 				AC62AEEE20C9812F00A75F85 /* MainMenu.xib */,
 				AC0860E820B699E100D801FC /* Info.plist */,
 				AC0860E920B699E100D801FC /* demo_macOS.entitlements */,
-				ACEF02BC21946723003E75E4 /* Resources */,
 			);
 			path = "demo-macOS";
 			sourceTree = "<group>";
@@ -169,18 +160,6 @@
 				AC0860FF20B699E200D801FC /* Info.plist */,
 			);
 			path = "demo-macOSUITests";
-			sourceTree = "<group>";
-		};
-		ACEF02BC21946723003E75E4 /* Resources */ = {
-			isa = PBXGroup;
-			children = (
-				ACEF02BD21946723003E75E4 /* Polonaise.flac */,
-				ACEF02BE21946723003E75E4 /* google-help-vr.mp4 */,
-				ACEF02BF21946723003E75E4 /* 567082ac3ae39699f68de4fd2b7444b1e045515a.MP4 */,
-				ACEF02C021946723003E75E4 /* video-h265.mkv */,
-			);
-			name = Resources;
-			path = ../../../Tests/Resources;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -270,7 +249,7 @@
 				};
 			};
 			buildConfigurationList = AC0860D720B699E100D801FC /* Build configuration list for PBXProject "demo-macOS" */;
-			compatibilityVersion = "Xcode 9.3";
+			compatibilityVersion = "Xcode 11.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -294,11 +273,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				ACEF02C121946723003E75E4 /* Polonaise.flac in Resources */,
-				ACEF02C321946723003E75E4 /* 567082ac3ae39699f68de4fd2b7444b1e045515a.MP4 in Resources */,
-				ACEF02C421946723003E75E4 /* video-h265.mkv in Resources */,
 				AC0860E420B699E100D801FC /* Assets.xcassets in Resources */,
-				ACEF02C221946723003E75E4 /* google-help-vr.mp4 in Resources */,
 				ACB5A252226579E1004C4EEF /* OpenURLWindowController.xib in Resources */,
 				AC62AEF420C9830300A75F85 /* ViewController.xib in Resources */,
 				AC62AEF020C9812F00A75F85 /* MainMenu.xib in Resources */,
@@ -568,10 +543,10 @@
 			baseConfigurationReference = A594382B6971720DF80046C9 /* Pods-demo-macOS.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_IDENTITY = "Mac Developer";
+				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				DEVELOPMENT_TEAM = 6A4WSM8YTR;
+				DEVELOPMENT_TEAM = "";
 				ENABLE_HARDENED_RUNTIME = YES;
 				INFOPLIST_FILE = "demo-macOS/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -591,10 +566,10 @@
 			baseConfigurationReference = 3D5C3988D63E62A43D829A21 /* Pods-demo-macOS.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_IDENTITY = "Mac Developer";
+				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				DEVELOPMENT_TEAM = 6A4WSM8YTR;
+				DEVELOPMENT_TEAM = "";
 				ENABLE_HARDENED_RUNTIME = YES;
 				INFOPLIST_FILE = "demo-macOS/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = (
