@@ -34,9 +34,10 @@ final class ATBPlayerItemTrack: AsyncPlayerItemTrack<AudioFrame> {
     }
 
     override func doDecode(packet: Packet) throws -> [AudioFrame] {
-        guard let corePacket = packet.corePacket, let converter = converter else {
+        guard let converter = converter else {
             return []
         }
+        let corePacket = packet.corePacket
         let inputDataProc: AudioConverterComplexInputDataProc = { (_, ioPacketCount, audioBufferList, packetDesc, userData) -> OSStatus in
             guard let packet = UnsafePointer<AVPacket>(OpaquePointer(userData)), let data = packet.pointee.data else {
                 ioPacketCount.pointee = 0
@@ -60,7 +61,7 @@ final class ATBPlayerItemTrack: AsyncPlayerItemTrack<AudioFrame> {
         }
         var ioOutputDataPacketSize = UInt32(codecpar.pointee.frame_size)
         let result = AudioConverterFillComplexBuffer(converter, inputDataProc, corePacket, &ioOutputDataPacketSize, &outAudioBufferList, nil)
-        let frame = AudioFrame()
+        let frame = AudioFrame(bufferSize: Int32(outAudioBufferList.mNumberBuffers))
         frame.timebase = timebase
         frame.position = corePacket.pointee.pts
         if frame.position == Int64.min || frame.position < 0 {
@@ -68,7 +69,6 @@ final class ATBPlayerItemTrack: AsyncPlayerItemTrack<AudioFrame> {
         }
         frame.duration = corePacket.pointee.duration
         frame.size = Int64(corePacket.pointee.size)
-//        frame.bufferSize = outAudioBufferList.mNumberBuffers
         return [frame]
     }
 

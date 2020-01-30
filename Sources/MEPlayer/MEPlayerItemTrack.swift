@@ -213,6 +213,7 @@ class AsyncPlayerItemTrack<Frame: MEFrame>: MEPlayerItemTrack<Frame> {
         decodeOperation = BlockOperation { [weak self] in
             guard let self = self else { return }
             Thread.current.name = self.operationQueue.name
+            Thread.current.stackSize = KSDefaultParameter.stackSize
             self.decodeThread()
         }
         decodeOperation?.queuePriority = .veryHigh

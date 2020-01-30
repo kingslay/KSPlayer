@@ -92,7 +92,6 @@ final class MEPlayerItem {
 extension MEPlayerItem {
     private func openThread() {
         avformat_close_input(&self.formatCtx)
-        avformat_free_context(self.formatCtx)
         formatCtx = avformat_alloc_context()
         guard let formatCtx = formatCtx else {
             error = NSError(domain: "FFCreateErrorCode", code: MEErrorCode.formatCreate.rawValue, userInfo: nil)
@@ -127,14 +126,13 @@ extension MEPlayerItem {
         av_dict_free(&avOptions)
         guard result == 0 else {
             error = .init(result: result, errorCode: .formatOpenInput)
-            avformat_free_context(self.formatCtx)
+            avformat_close_input(&self.formatCtx)
             return
         }
         result = avformat_find_stream_info(formatCtx, nil)
         guard result == 0 else {
             error = .init(result: result, errorCode: .formatFindStreamInfo)
             avformat_close_input(&self.formatCtx)
-            avformat_free_context(self.formatCtx)
             return
         }
         duration = TimeInterval(max(formatCtx.pointee.duration, 0) / Int64(AV_TIME_BASE))
@@ -174,6 +172,7 @@ extension MEPlayerItem {
         readOperation = BlockOperation { [weak self] in
             guard let self = self else { return }
             Thread.current.name = (self.operationQueue.name ?? "") + "_read"
+            Thread.current.stackSize = KSDefaultParameter.stackSize
             self.readThread()
         }
         readOperation?.queuePriority = .veryHigh
@@ -208,7 +207,7 @@ extension MEPlayerItem {
                 let readResult = av_read_frame(formatCtx, packet.corePacket)
                 if readResult == 0 {
                     packet.fill()
-                    tracks.first { $0.isEnabled && $0.stream.pointee.index == packet.corePacket?.pointee.stream_index }?.putPacket(packet: packet)
+                    tracks.first { $0.isEnabled && $0.stream.pointee.index == packet.corePacket.pointee.stream_index }?.putPacket(packet: packet)
                 } else {
                     if IS_AVERROR_EOF(readResult) {
                         if isLoopPlay {
@@ -265,6 +264,7 @@ extension MEPlayerItem: MediaPlayback {
         openOperation = BlockOperation { [weak self] in
             guard let self = self else { return }
             Thread.current.name = (self.operationQueue.name ?? "") + "_open"
+            Thread.current.stackSize = KSDefaultParameter.stackSize
             self.openThread()
         }
         openOperation?.queuePriority = .veryHigh
@@ -286,14 +286,13 @@ extension MEPlayerItem: MediaPlayback {
         guard state != .closed else { return }
         state = .closed
         condition.signal()
+        ObjectPool.share.removeAll()
         // 故意循环引用。等结束了。才释放
         let closeOperation = BlockOperation {
             Thread.current.name = (self.operationQueue.name ?? "") + "_close"
             self.tracks.forEach { $0.shutdown() }
             KSLog("清空formatCtx")
             avformat_close_input(&self.formatCtx)
-            avformat_free_context(self.formatCtx)
-            self.formatCtx = nil
             self.duration = 0
             self.closeOperation = nil
             self.operationQueue.cancelAllOperations()

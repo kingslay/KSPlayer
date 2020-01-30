@@ -46,15 +46,18 @@ final class MetalPlayView: MTKView {
         }
     }
     #endif
+    deinit {
+        MetalTexture.share.flush()
+    }
 }
 
 extension MetalPlayView: PixelRenderView {
     func set(pixelBuffer: BufferProtocol, time _: CMTime) {
         autoreleasepool {
+            drawableSize = display == .plane ? pixelBuffer.drawableSize : UIScreen.size
             guard let drawable = currentDrawable else {
                 return
             }
-            drawableSize = display == .plane ? pixelBuffer.drawableSize : CGSize(width: drawable.texture.width, height: drawable.texture.height)
             MetalRender.share.set(pixelBuffer: pixelBuffer, display: display, drawable: drawable)
             draw()
         }

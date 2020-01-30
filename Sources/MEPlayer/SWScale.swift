@@ -181,6 +181,12 @@ class PixelBuffer: BufferProtocol {
 //        }
         return nil
     }
+
+    deinit {
+        if let textures = textures {
+            MetalTexture.share.comeback(textures: textures)
+        }
+    }
 }
 
 extension UIImage {

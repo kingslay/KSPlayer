@@ -66,17 +66,33 @@ public final class MetalTexture {
         }
         var textures = [MTLTexture]()
         for i in 0 ..< planeCount {
-            if let texture = texture(pixelFormat: formats[i], width: widths[i], height: heights[i], bytes: bytes[i]!, bytesPerRow: Int(bytesPerRow[i])) {
-                textures.append(texture)
+            let key = "MTLTexture" + [Int(formats[i].rawValue), widths[i], heights[i]].description
+            let texture = ObjectPool.share.object(class: MTLTexture.self, key: key) {
+                let descriptor = MTLTextureDescriptor.texture2DDescriptor(pixelFormat: formats[i], width: widths[i], height: heights[i], mipmapped: false)
+                return self.device.makeTexture(descriptor: descriptor)!
             }
+            texture.replace(region: MTLRegionMake2D(0, 0, widths[i], heights[i]), mipmapLevel: 0, withBytes: bytes[i]!, bytesPerRow: Int(bytesPerRow[i]))
+            textures.append(texture)
         }
         return textures
     }
 
-    private func texture(pixelFormat: MTLPixelFormat, width: Int, height: Int, bytes: UnsafeRawPointer, bytesPerRow: Int) -> MTLTexture? {
-        let descriptor = MTLTextureDescriptor.texture2DDescriptor(pixelFormat: pixelFormat, width: width, height: height, mipmapped: false)
-        let texture = device.makeTexture(descriptor: descriptor)
-        texture?.replace(region: MTLRegionMake2D(0, 0, width, height), mipmapLevel: 0, withBytes: bytes, bytesPerRow: bytesPerRow)
-        return texture
+    public func comeback(textures: [MTLTexture]) {
+        textures.forEach { texture in
+            ObjectPool.share.comeback(item: texture, key: texture.key)
+        }
+    }
+
+    public func flush() {
+        if let textureCache = textureCache {
+            CVMetalTextureCacheFlush(textureCache, 0)
+        }
+        ObjectPool.share.removeValue(forKey: "MTLTexture")
+    }
+}
+
+extension MTLTexture {
+    var key: String {
+        return "MTLTexture" + [Int(pixelFormat.rawValue), width, height].description
     }
 }

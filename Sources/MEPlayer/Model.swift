@@ -117,6 +117,26 @@ public protocol ObjectQueueItem {
     var position: Int64 { get }
 }
 
+public protocol ObjectPoolItem: AnyObject {
+    init()
+}
+
+extension ObjectPoolItem {
+    static func object() -> Self {
+        return ObjectPool.share.object(class: Self.self)
+    }
+
+    func comeback() {
+        ObjectPool.share.comeback(item: self, key: NSStringFromClass(type(of: self)))
+    }
+}
+
+extension ObjectPool {
+    func object<P: ObjectPoolItem>(class: P.Type) -> P {
+        return object(class: `class`, key: NSStringFromClass(`class`)) { `class`.init() }
+    }
+}
+
 protocol FrameOutput {
     var renderSource: OutputRenderSourceDelegate? { get set }
     func play()
@@ -150,6 +170,7 @@ public struct KSDefaultParameter {
     public static var enableSensor = true
     /// 日志级别
     public static var logLevel = AV_LOG_WARNING
+    public static var stackSize = 16384
     public static var audioPlayerMaximumFramesPerSlice = AVAudioFrameCount(4096)
     #if os(macOS)
     public static var audioPlayerSampleRate = Int32(44100)
@@ -261,21 +282,26 @@ extension METime {
 }
 
 final class Packet: ObjectQueueItem {
-    public var duration: Int64 = 0
-    public var size: Int64 = 0
-    public var position: Int64 = 0
-    public var corePacket = av_packet_alloc()
-
-    public func fill() {
-        if let corePacket = corePacket {
-            position = corePacket.pointee.pts
-            duration = corePacket.pointee.duration
-            size = Int64(corePacket.pointee.size)
+    final class AVPacketWrap: ObjectPoolItem {
+        var corePacket = av_packet_alloc()
+        deinit {
+            av_packet_free(&corePacket)
         }
     }
 
+    public var duration: Int64 = 0
+    public var size: Int64 = 0
+    public var position: Int64 = 0
+    public var corePacket: UnsafeMutablePointer<AVPacket> { packetWrap.corePacket! }
+    private let packetWrap = AVPacketWrap.object()
+    public func fill() {
+        position = corePacket.pointee.pts
+        duration = corePacket.pointee.duration
+        size = Int64(corePacket.pointee.size)
+    }
+
     deinit {
-        av_packet_free(&corePacket)
+        packetWrap.comeback()
     }
 }
 
@@ -291,36 +317,55 @@ final class SubtitleFrame: Frame {
 }
 
 final class AudioFrame: Frame {
-    public var data: [UnsafeMutablePointer<UInt8>?]
-    public var linesize: [Int32]
-    public var bufferSize: Int32 = 0 {
-        didSet {
-            if bufferSize != oldValue {
-                (0 ..< Int(KSDefaultParameter.audioPlayerMaximumChannels)).forEach { index in
-                    if oldValue > 0 {
-                        data[index]?.deinitialize(count: Int(oldValue))
-                        data[index]?.deallocate()
-                    }
-                    if bufferSize > 0 {
-                        data[index] = UnsafeMutablePointer<UInt8>.allocate(capacity: Int(bufferSize))
+    final class DataWrap {
+        public var data: [UnsafeMutablePointer<UInt8>?]
+        fileprivate var bufferSize: Int32 {
+            didSet {
+                if bufferSize != oldValue {
+                    (0 ..< Int(KSDefaultParameter.audioPlayerMaximumChannels)).forEach { index in
+                        if oldValue > 0 {
+                            data[index]?.deinitialize(count: Int(oldValue))
+                            data[index]?.deallocate()
+                        }
+                        if bufferSize > 0 {
+                            data[index] = UnsafeMutablePointer<UInt8>.allocate(capacity: Int(bufferSize))
+                        }
                     }
                 }
             }
         }
-    }
 
-    public required override init() {
-        data = Array(repeating: nil, count: Int(KSDefaultParameter.audioPlayerMaximumChannels))
-        linesize = Array(repeating: bufferSize, count: Int(KSDefaultParameter.audioPlayerMaximumChannels))
-    }
+        public init(bufferSize: Int32) {
+            self.bufferSize = bufferSize
+            let count = Int(KSDefaultParameter.audioPlayerMaximumChannels)
+            data = (0 ..< count).map { _ -> UnsafeMutablePointer<UInt8>? in
+                UnsafeMutablePointer<UInt8>.allocate(capacity: Int(bufferSize))
+            }
+        }
 
-    deinit {
-        if bufferSize > 0 {
-            (0 ..< Int(KSDefaultParameter.audioPlayerMaximumChannels)).forEach { index in
+        deinit {
+            (0 ..< data.count).forEach { index in
                 data[index]?.deinitialize(count: Int(bufferSize))
                 data[index]?.deallocate()
             }
+            data.removeAll()
         }
+    }
+
+    public var data: [UnsafeMutablePointer<UInt8>?] { dataWrap.data }
+    public var linesize: [Int32]
+    let dataWrap: DataWrap
+    public init(bufferSize: Int32) {
+        let count = Int(KSDefaultParameter.audioPlayerMaximumChannels)
+        linesize = Array(repeating: bufferSize, count: count)
+        dataWrap = ObjectPool.share.object(class: DataWrap.self, key: NSStringFromClass(DataWrap.self)) {
+            DataWrap(bufferSize: bufferSize)
+        }
+        dataWrap.bufferSize = bufferSize
+    }
+
+    deinit {
+        ObjectPool.share.comeback(item: dataWrap, key: NSStringFromClass(DataWrap.self))
     }
 }
 

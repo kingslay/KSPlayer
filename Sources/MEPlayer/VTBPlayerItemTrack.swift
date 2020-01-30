@@ -72,7 +72,8 @@ class SamplePlayerItemTrack<Frame: MEFrame>: AsyncPlayerItemTrack<Frame> {
 
 final class VideoSamplePlayerItemTrack: SamplePlayerItemTrack<VideoSampleBufferFrame> {
     override func doDecode(packet: Packet) throws -> [VideoSampleBufferFrame] {
-        guard let corePacket = packet.corePacket, let data = corePacket.pointee.data, let formatDescription = formatDescription else {
+        let corePacket = packet.corePacket
+        guard let data = corePacket.pointee.data, let formatDescription = formatDescription else {
             return []
         }
         let sampleBuffer = try formatDescription.getSampleBuffer(isConvertNALSize: isConvertNALSize, data: data, size: Int(corePacket.pointee.size))
@@ -100,7 +101,8 @@ final class VTBPlayerItemTrack: SamplePlayerItemTrack<VideoVTBFrame> {
     private var refreshSession = false
     private var decompressionSession: VTDecompressionSession?
     override func doDecode(packet: Packet) throws -> [VideoVTBFrame] {
-        guard let corePacket = packet.corePacket, let data = corePacket.pointee.data, let decompressionSession = decompressionSession, let formatDescription = formatDescription else {
+        let corePacket = packet.corePacket
+        guard let data = corePacket.pointee.data, let decompressionSession = decompressionSession, let formatDescription = formatDescription else {
             return []
         }
         let sampleBuffer = try formatDescription.getSampleBuffer(isConvertNALSize: isConvertNALSize, data: data, size: Int(corePacket.pointee.size))
