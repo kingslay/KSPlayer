@@ -50,16 +50,13 @@ Pod::Spec.new do |s|
         ffmpeg.source_files = 'Sources/FFmpegExt/**/*.{h,c}'
         ffmpeg.libraries   = 'bz2', 'z', 'iconv'
         ffmpeg.ios.xcconfig = {
-            'HEADER_SEARCH_PATHS' => "${PODS_ROOT}/#{s.name}/FFmpeg/FFmpeg.xcframework/ios-arm64/FFmpeg.framework/Headers ${PODS_ROOT}/../../FFmpeg/FFmpeg.xcframework/ios-arm64/FFmpeg.framework/Headers",
-            'SWIFT_INCLUDE_PATHS' => "${PODS_ROOT}/#{s.name}/FFmpeg/FFmpeg.xcframework/ios-arm64/FFmpeg.framework/Headers ${PODS_ROOT}/../../FFmpeg/FFmpeg.xcframework/ios-arm64/FFmpeg.framework/Headers"
+            'HEADER_SEARCH_PATHS' => "${PODS_ROOT}/#{s.name}/FFmpeg/FFmpeg.xcframework/ios-arm64/FFmpeg.framework/Headers ${PODS_ROOT}/../../FFmpeg/FFmpeg.xcframework/ios-arm64/FFmpeg.framework/Headers"
         }
         ffmpeg.tvos.xcconfig = {
-            'HEADER_SEARCH_PATHS' => "${PODS_ROOT}/#{s.name}/FFmpeg/FFmpeg.xcframework/ios-arm64/FFmpeg.framework/Headers ${PODS_ROOT}/../../FFmpeg/FFmpeg.xcframework/ios-arm64/FFmpeg.framework/Headers",
-            'SWIFT_INCLUDE_PATHS' => "${PODS_ROOT}/#{s.name}/FFmpeg/FFmpeg.xcframework/ios-arm64/FFmpeg.framework/Headers ${PODS_ROOT}/../../FFmpeg/FFmpeg.xcframework/ios-arm64/FFmpeg.framework/Headers"
+            'HEADER_SEARCH_PATHS' => "${PODS_ROOT}/#{s.name}/FFmpeg/FFmpeg.xcframework/tvos-arm64/FFmpeg.framework/Headers ${PODS_ROOT}/../../FFmpeg/FFmpeg.xcframework/tvos-arm64/FFmpeg.framework/Headers"
         }
         ffmpeg.osx.xcconfig = {
-            'HEADER_SEARCH_PATHS' => "${PODS_ROOT}/#{s.name}/FFmpeg/FFmpeg.xcframework/ios-arm64/FFmpeg.framework/Headers ${PODS_ROOT}/../../FFmpeg/FFmpeg.xcframework/ios-arm64/FFmpeg.framework/Headers",
-            'SWIFT_INCLUDE_PATHS' => "${PODS_ROOT}/#{s.name}/FFmpeg/FFmpeg.xcframework/ios-arm64/FFmpeg.framework/Headers ${PODS_ROOT}/../../FFmpeg/FFmpeg.xcframework/ios-arm64/FFmpeg.framework/Headers"
+            'HEADER_SEARCH_PATHS' => "${PODS_ROOT}/#{s.name}/FFmpeg/FFmpeg.xcframework/macos-x86_64/FFmpeg.framework/Headers ${PODS_ROOT}/../../FFmpeg/FFmpeg.xcframework/macos-x86_64/FFmpeg.framework/Headers"
         }
         ffmpeg.vendored_frameworks = 'FFmpeg/FFmpeg.xcframework'
         ffmpeg.dependency 'Openssl'
