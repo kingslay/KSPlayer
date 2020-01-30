@@ -36,7 +36,8 @@ final class SubtitlePlayerItemTrack: MEPlayerItemTrack<SubtitleFrame> {
 
     // todo 无缝循环的话，无法处理字幕，导致字幕的内存一直增加。一个暴力的方法是判断数据里面有没有这个数据了
     override func putPacket(packet: Packet) {
-        guard let codecContext = codecContext, let corePacket = packet.corePacket else { return }
+        guard let codecContext = codecContext else { return }
+        let corePacket = packet.corePacket
         var pktSize = corePacket.pointee.size
         var error: NSError?
         while pktSize > 0 {

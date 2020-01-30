@@ -34,24 +34,25 @@ final class AudioPlayerItemTrack: FFPlayerItemTrack<AudioFrame> {
             if codecpar.pointee.channels != coreFrame.pointee.channels || codecpar.pointee.format != coreFrame.pointee.format || codecpar.pointee.sample_rate != coreFrame.pointee.sample_rate {
                 throw result
             }
-            let frame = AudioFrame()
-            frame.timebase = timebase
             bestEffortTimestamp = max(coreFrame.pointee.best_effort_timestamp, bestEffortTimestamp)
-            frame.position = bestEffortTimestamp
-            frame.duration = coreFrame.pointee.pkt_duration
-            frame.size = Int64(coreFrame.pointee.pkt_size)
             var numberOfSamples = coreFrame.pointee.nb_samples
             let nbSamples = swr_get_out_samples(swrContext, numberOfSamples)
-            _ = av_samples_get_buffer_size(&frame.bufferSize, Int32(KSDefaultParameter.audioPlayerMaximumChannels), nbSamples, AV_SAMPLE_FMT_FLTP, 1)
             var frameBuffer = Array(tuple: coreFrame.pointee.data).map { UnsafePointer<UInt8>($0) }
-            numberOfSamples = swr_convert(swrContext, &frame.data, nbSamples, &frameBuffer, numberOfSamples)
+            var bufferSize = Int32(0)
+            _ = av_samples_get_buffer_size(&bufferSize, Int32(KSDefaultParameter.audioPlayerMaximumChannels), nbSamples, AV_SAMPLE_FMT_FLTP, 1)
+            let frame = AudioFrame(bufferSize: bufferSize)
+            numberOfSamples = swr_convert(swrContext, &frame.dataWrap.data, nbSamples, &frameBuffer, numberOfSamples)
+            let linesize = numberOfSamples * Int32(MemoryLayout<Float>.size)
+            (0 ..< frame.linesize.count).forEach {
+                frame.linesize[$0] = linesize
+            }
+            frame.timebase = timebase
+            frame.position = bestEffortTimestamp
+            frame.duration = coreFrame.pointee.pkt_duration
             if frame.duration == 0 {
                 frame.duration = Int64(numberOfSamples) * Int64(frame.timebase.den) / (Int64(KSDefaultParameter.audioPlayerSampleRate) * Int64(frame.timebase.num))
             }
-            let linesize = numberOfSamples * Int32(MemoryLayout<Float>.size)
-            for i in 0 ..< Int(KSDefaultParameter.audioPlayerMaximumChannels) {
-                frame.linesize[i] = linesize
-            }
+            frame.size = Int64(coreFrame.pointee.pkt_size)
             return frame
         }
         throw result
