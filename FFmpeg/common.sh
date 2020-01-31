@@ -8,7 +8,7 @@ function Architectures() {
     case $platform in
     ios) echo "arm64 x86_64" ;;
     tvos) echo "arm64 x86_64" ;;
-	macos) echo "x86_64" ;;
+    macos) echo "x86_64" ;;
     maccatalyst) echo "x86_64" ;;
     esac
 }
@@ -25,7 +25,7 @@ function Build() {
     ios) buildIOS $platform $arch $TARGETDIR ;;
     tvos) buildTVOS $platform $arch $TARGETDIR ;;
     macos) buildMac $platform $arch $TARGETDIR ;;
-	maccatalyst) buildMacCatalyst $platform $arch $TARGETDIR  ;;
+    maccatalyst) buildMacCatalyst $platform $arch $TARGETDIR ;;
     esac
 }
 function BuildAll() {

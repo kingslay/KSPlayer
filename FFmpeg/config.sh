@@ -4,7 +4,7 @@ RED="\033[1;91m"
 MAGENTA="\033[1;35m"
 NOCOLOR="\033[0m"
 
-FF_VERSION="4.2"
+FF_VERSION="4.2.2"
 if [[ $FFMPEG_VERSION != "" ]]; then
     FF_VERSION=$FFMPEG_VERSION
 fi
@@ -16,7 +16,7 @@ OPENSSL=$(pwd)/OpenSSL
 SOURCE="ffmpeg-$FF_VERSION"
 XCODE_PATH=$(xcode-select -p)
 
-CONFIGURE_FLAGS="--enable-optimizations --enable-pic --enable-neon"
+CONFIGURE_FLAGS="--enable-optimizations"
 # Licensing options:
 CONFIGURE_FLAGS="$CONFIGURE_FLAGS --disable-gpl"
 # CONFIGURE_FLAGS="$CONFIGURE_FLAGS --enable-version3"
@@ -186,6 +186,12 @@ CONFIGURE_FLAGS="$CONFIGURE_FLAGS --disable-devices"
 CONFIGURE_FLAGS="$CONFIGURE_FLAGS --disable-indevs"
 CONFIGURE_FLAGS="$CONFIGURE_FLAGS --disable-outdevs"
 CONFIGURE_FLAGS="$CONFIGURE_FLAGS --disable-filters"
+CONFIGURE_FLAGS="$CONFIGURE_FLAGS --disable-iconv"
+CONFIGURE_FLAGS="$CONFIGURE_FLAGS --disable-audiotoolbox"
+CONFIGURE_FLAGS="$CONFIGURE_FLAGS --disable-videotoolbox"
+CONFIGURE_FLAGS="$CONFIGURE_FLAGS --disable-linux-perf"
+CONFIGURE_FLAGS="$CONFIGURE_FLAGS --disable-bzlib"
+
 
 if [ "$X264" ]; then
     CONFIGURE_FLAGS="$CONFIGURE_FLAGS --enable-gpl --enable-libx264"
@@ -212,10 +218,10 @@ function ConfigureForIOS() {
     if [ "$arch" = "i386" -o "$arch" = "x86_64" ]; then
         PLATFORM="iPhoneSimulator"
         CFLAGS="$CFLAGS -mios-simulator-version-min=$DEPLOYMENT_TARGET"
-        CONFIGURE_FLAGS="$CONFIGURE_FLAGS --disable-asm --disable-mmx --assert-level=2"
+        FFMPEG_CFG_FLAGS="$CONFIGURE_FLAGS --disable-asm --disable-mmx --assert-level=2"
     else
         CFLAGS="$CFLAGS -mios-version-min=$DEPLOYMENT_TARGET -fembed-bitcode"
-        CONFIGURE_FLAGS="$CONFIGURE_FLAGS --enable-small"
+        FFMPEG_CFG_FLAGS="$CONFIGURE_FLAGS --enable-pic --enable-neon --enable-small"
         if [ "$ARCH" = "arm64" ]; then
             EXPORT="GASPP_FIX_XCODE5=1"
         fi
@@ -236,10 +242,10 @@ function ConfigureForTVOS() {
     if [ "$arch" = "i386" -o "$arch" = "x86_64" ]; then
         PLATFORM="AppleTVSimulator"
         CFLAGS="$CFLAGS -mtvos-simulator-version-min=$DEPLOYMENT_TARGET"
-        CONFIGURE_FLAGS="$CONFIGURE_FLAGS --disable-asm --disable-mmx --assert-level=2"
+        FFMPEG_CFG_FLAGS="$CONFIGURE_FLAGS --disable-asm --disable-mmx --assert-level=2"
     else
         CFLAGS="$CFLAGS -mtvos-version-min=$DEPLOYMENT_TARGET -fembed-bitcode"
-        CONFIGURE_FLAGS="$CONFIGURE_FLAGS --enable-small"
+        FFMPEG_CFG_FLAGS="$CONFIGURE_FLAGS --enable-pic --enable-neon"
         if [ "$ARCH" = "arm64" ]; then
             EXPORT="GASPP_FIX_XCODE5=1"
         fi
@@ -256,7 +262,7 @@ function ConfigureForMacOS() {
 		 -L$XCODE_PATH/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/System/usr/lib"
 
     CFLAGS="-arch $arch"
-    CONFIGURE_FLAGS="$CONFIGURE_FLAGS --disable-asm --disable-mmx --assert-level=2"
+    FFMPEG_CFG_FLAGS="$CONFIGURE_FLAGS --disable-asm"
     CFLAGS="$CFLAGS -mmacosx-version-min=$DEPLOYMENT_TARGET"
 }
 
@@ -271,7 +277,7 @@ function ConfigureForMacCatalyst() {
 		-L$XCODE_PATH/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/maccatalyst"
 
     CFLAGS="-arch $arch"
-    CONFIGURE_FLAGS="$CONFIGURE_FLAGS --disable-asm --disable-mmx --assert-level=2"
+    FFMPEG_CFG_FLAGS="$CONFIGURE_FLAGS --disable-asm"
     CFLAGS="$CFLAGS -target x86_64-apple-ios13.0-macabi \
 						-isysroot $XCODE_PATH/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk \
 						-isystem $XCODE_PATH/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/System/iOSSupport/usr/include \
