@@ -317,12 +317,12 @@ final class SubtitleFrame: Frame {
 }
 
 final class AudioFrame: Frame {
-    final class DataWrap {
+    final class DataWrap: ObjectPoolItem {
         public var data: [UnsafeMutablePointer<UInt8>?]
-        fileprivate var bufferSize: Int32 {
+        fileprivate var bufferSize: Int32 = 0 {
             didSet {
                 if bufferSize != oldValue {
-                    (0 ..< Int(KSDefaultParameter.audioPlayerMaximumChannels)).forEach { index in
+                    (0 ..< data.count).forEach { index in
                         if oldValue > 0 {
                             data[index]?.deinitialize(count: Int(oldValue))
                             data[index]?.deallocate()
@@ -335,12 +335,8 @@ final class AudioFrame: Frame {
             }
         }
 
-        public init(bufferSize: Int32) {
-            self.bufferSize = bufferSize
-            let count = Int(KSDefaultParameter.audioPlayerMaximumChannels)
-            data = (0 ..< count).map { _ -> UnsafeMutablePointer<UInt8>? in
-                UnsafeMutablePointer<UInt8>.allocate(capacity: Int(bufferSize))
-            }
+        public init() {
+            data = Array(repeating: nil, count: Int(KSDefaultParameter.audioPlayerMaximumChannels))
         }
 
         deinit {
@@ -358,14 +354,14 @@ final class AudioFrame: Frame {
     public init(bufferSize: Int32) {
         let count = Int(KSDefaultParameter.audioPlayerMaximumChannels)
         linesize = Array(repeating: bufferSize, count: count)
-        dataWrap = ObjectPool.share.object(class: DataWrap.self, key: NSStringFromClass(DataWrap.self)) {
-            DataWrap(bufferSize: bufferSize)
+        dataWrap = DataWrap.object()
+        if bufferSize > dataWrap.bufferSize {
+            dataWrap.bufferSize = bufferSize
         }
-        dataWrap.bufferSize = bufferSize
     }
 
     deinit {
-        ObjectPool.share.comeback(item: dataWrap, key: NSStringFromClass(DataWrap.self))
+        dataWrap.comeback()
     }
 }
 
