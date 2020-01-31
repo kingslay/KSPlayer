@@ -53,7 +53,7 @@ function InnerBuild() {
         --arch=$arch \
         --cc="$CC" \
         --as="$AS" \
-        $CONFIGURE_FLAGS \
+        $FFMPEG_CFG_FLAGS \
         --extra-cflags="$CFLAGS" \
         --extra-ldflags="$LDFLAGS" \
         --prefix="$prefix" ||
