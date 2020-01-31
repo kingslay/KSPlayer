@@ -93,7 +93,7 @@ public class KSSubtitleView: UIControl, SubtitleViewProtocol {
     }
 
     public override init(frame: CGRect) {
-        selectedInfo = KSObservable(closeInfo)
+        selectedInfo = KSObservable(wrappedValue: closeInfo)
         super.init(frame: frame)
         tableView.dataSource = self
         tableView.delegate = self

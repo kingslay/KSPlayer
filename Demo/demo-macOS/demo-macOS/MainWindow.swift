@@ -12,7 +12,7 @@ import KSPlayer
 class MainWindow: NSWindow {
     let vc: ViewController
     override init(contentRect: NSRect, styleMask style: NSWindow.StyleMask, backing backingStoreType: NSWindow.BackingStoreType, defer flag: Bool) {
-//        KSPlayerManager.firstPlayerType = KSMEPlayer.self
+        KSPlayerManager.firstPlayerType = KSMEPlayer.self
         KSPlayerManager.secondPlayerType = KSMEPlayer.self
         KSPlayerManager.isAutoPlay = true
         KSPlayerManager.isSeekedAutoPlay = true

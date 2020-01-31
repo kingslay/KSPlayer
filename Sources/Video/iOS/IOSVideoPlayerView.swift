@@ -16,6 +16,7 @@ open class IOSVideoPlayerView: VideoPlayerView {
     private var tmpPanValue: Float = 0
     private var isVolume = false
     private var isSliderSliding = false
+    private let volumeView = BrightnessVolume()
     public var volumeViewSlider = UXSlider()
     public var lockButton = UIButton()
     public var backButton = UIButton()
@@ -45,7 +46,7 @@ open class IOSVideoPlayerView: VideoPlayerView {
         if UI_USER_INTERFACE_IDIOM() == .phone {
             subtitleLabel.font = .systemFont(ofSize: 14)
         }
-        srtControl.srtListCount.observer = { [weak self] _, count in
+        srtControl.$srtListCount.observer = { [weak self] _, count in
             guard let self = self, count > 0 else {
                 return
             }
@@ -88,6 +89,7 @@ open class IOSVideoPlayerView: VideoPlayerView {
         routeButton.isHidden = true
         navigationBar.addArrangedSubview(routeButton)
         addSubview(airplayStatusView)
+        volumeView.move(to: self)
         let tmp = MPVolumeView(frame: CGRect(x: -100, y: -100, width: 0, height: 0))
         UIApplication.shared.keyWindow?.addSubview(tmp)
         if let first = (tmp.subviews.first { $0 is UISlider }) as? UISlider {
@@ -153,7 +155,6 @@ open class IOSVideoPlayerView: VideoPlayerView {
                 viewController?.present(alertController, animated: true, completion: nil)
             }
         }
-        BrightnessVolume.shared.move(to: self)
     }
 
     open func updateUI(isLandscape: Bool) {
@@ -164,12 +165,12 @@ open class IOSVideoPlayerView: VideoPlayerView {
             topMaskView.isHidden = KSPlayerManager.topBarShowInCase != .always
         }
         toolBar.playbackRateButton.isHidden = false
-        toolBar.srtButton.isHidden = srtControl.srtListCount.value == 0
+        toolBar.srtButton.isHidden = srtControl.srtListCount == 0
         srtControl.view.isHidden = true
         if UIDevice.current.userInterfaceIdiom == .phone {
             if isLandscape {
                 landscapeButton.isHidden = true
-                toolBar.srtButton.isHidden = srtControl.srtListCount.value == 0
+                toolBar.srtButton.isHidden = srtControl.srtListCount == 0
             } else {
                 toolBar.srtButton.isHidden = true
                 if let image = maskImageView.image {
@@ -269,6 +270,7 @@ extension IOSVideoPlayerView {
         #if !targetEnvironment(simulator)
         var isPlaying = false
         callCenter.callEventHandler = { [weak self] call in
+            guard let self = self else { return }
             runInMainqueue { [weak self] in
                 guard let self = self else { return }
                 if call.callState == CTCallStateIncoming {

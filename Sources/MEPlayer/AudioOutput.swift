@@ -12,7 +12,7 @@ import QuartzCore
 
 final class AudioOutput: FrameOutput {
     private let semaphore = DispatchSemaphore(value: 1)
-    private var currentRenderReadOffset = Int(0)
+    private var currentRenderReadOffset = 0
     private var audioTime = CMTime.zero
     private var currentRender: AudioFrame? {
         didSet {
@@ -53,7 +53,7 @@ final class AudioOutput: FrameOutput {
 }
 
 extension AudioOutput: AudioPlayerDelegate {
-    func audioPlayerShouldInputData(ioData: UnsafeMutableAudioBufferListPointer, numberOfSamples: UInt32, numberOfChannels: UInt32) {
+    func audioPlayerShouldInputData(ioData: UnsafeMutableAudioBufferListPointer, numberOfSamples: UInt32, numberOfChannels _: UInt32) {
         semaphore.wait()
         defer {
             semaphore.signal()
@@ -64,26 +64,27 @@ extension AudioOutput: AudioPlayerDelegate {
             if currentRender == nil {
                 currentRender = renderSource?.getOutputRender(type: .audio) as? AudioFrame
             }
-            guard let currentRender = currentRender, currentRender.linesize[0] > currentRenderReadOffset else {
-                self.currentRender = nil
+            guard let currentRender = currentRender else {
                 return
             }
+            guard currentRender.numberOfSamples > currentRenderReadOffset else {
+                self.currentRender = nil
+                continue
+            }
             if ioDataWriteOffset == 0 {
-                let currentPreparePosition = currentRender.position + currentRender.duration * Int64(currentRenderReadOffset) / Int64(currentRender.linesize[0])
+                let currentPreparePosition = currentRender.position + currentRender.duration * Int64(currentRenderReadOffset) / Int64(currentRender.numberOfSamples)
                 audioTime = currentRender.timebase.cmtime(for: currentPreparePosition)
             }
-            let residueLinesize = Int(currentRender.linesize[0]) - currentRenderReadOffset
-            let bytesToCopy = min(numberOfSamples * MemoryLayout<Float>.size, residueLinesize)
-            for i in 0 ..< min(ioData.count, Int(numberOfChannels)) {
-                (ioData[i].mData! + ioDataWriteOffset).copyMemory(from: currentRender.data[i]! + currentRenderReadOffset, byteCount: bytesToCopy)
+            let residueLinesize = currentRender.numberOfSamples - currentRenderReadOffset
+            let framesToCopy = min(numberOfSamples, residueLinesize)
+            let bytesToCopy = framesToCopy * MemoryLayout<Float>.size
+            let offset = currentRenderReadOffset * MemoryLayout<Float>.size
+            for i in 0 ..< min(ioData.count, currentRender.dataWrap.numberOfChannels) {
+                (ioData[i].mData! + ioDataWriteOffset).copyMemory(from: currentRender.dataWrap.data[i]! + offset, byteCount: bytesToCopy)
             }
-            numberOfSamples -= bytesToCopy / MemoryLayout<Float>.size
+            numberOfSamples -= framesToCopy
             ioDataWriteOffset += bytesToCopy
-            if bytesToCopy == residueLinesize {
-                self.currentRender = nil
-            } else {
-                currentRenderReadOffset += bytesToCopy
-            }
+            currentRenderReadOffset += framesToCopy
         }
     }
 

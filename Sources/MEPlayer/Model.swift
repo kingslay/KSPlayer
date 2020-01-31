@@ -117,8 +117,15 @@ public protocol ObjectQueueItem {
     var position: Int64 { get }
 }
 
-public protocol ObjectPoolItem: AnyObject {
+public protocol ObjectPoolItem {
     init()
+    static func key() -> String
+}
+
+extension ObjectPoolItem where Self: AnyObject {
+    static func key() -> String {
+        NSStringFromClass(self)
+    }
 }
 
 extension ObjectPoolItem {
@@ -127,13 +134,13 @@ extension ObjectPoolItem {
     }
 
     func comeback() {
-        ObjectPool.share.comeback(item: self, key: NSStringFromClass(type(of: self)))
+        ObjectPool.share.comeback(item: self, key: Self.key())
     }
 }
 
 extension ObjectPool {
     func object<P: ObjectPoolItem>(class: P.Type) -> P {
-        return object(class: `class`, key: NSStringFromClass(`class`)) { `class`.init() }
+        return object(class: `class`, key: P.key()) { `class`.init() }
     }
 }
 
@@ -283,7 +290,7 @@ extension METime {
 
 final class Packet: ObjectQueueItem {
     final class AVPacketWrap: ObjectPoolItem {
-        var corePacket = av_packet_alloc()
+        fileprivate var corePacket = av_packet_alloc()
         deinit {
             av_packet_free(&corePacket)
         }
@@ -301,6 +308,7 @@ final class Packet: ObjectQueueItem {
     }
 
     deinit {
+        av_packet_unref(corePacket)
         packetWrap.comeback()
     }
 }
@@ -318,7 +326,8 @@ final class SubtitleFrame: Frame {
 
 final class AudioFrame: Frame {
     final class DataWrap: ObjectPoolItem {
-        public var data: [UnsafeMutablePointer<UInt8>?]
+        var data: [UnsafeMutablePointer<UInt8>?]
+        public let numberOfChannels = Int(KSDefaultParameter.audioPlayerMaximumChannels)
         fileprivate var bufferSize: Int32 = 0 {
             didSet {
                 if bufferSize != oldValue {
@@ -336,7 +345,7 @@ final class AudioFrame: Frame {
         }
 
         public init() {
-            data = Array(repeating: nil, count: Int(KSDefaultParameter.audioPlayerMaximumChannels))
+            data = Array(repeating: nil, count: numberOfChannels)
         }
 
         deinit {
@@ -348,12 +357,9 @@ final class AudioFrame: Frame {
         }
     }
 
-    public var data: [UnsafeMutablePointer<UInt8>?] { dataWrap.data }
-    public var linesize: [Int32]
+    public var numberOfSamples = 0
     let dataWrap: DataWrap
     public init(bufferSize: Int32) {
-        let count = Int(KSDefaultParameter.audioPlayerMaximumChannels)
-        linesize = Array(repeating: bufferSize, count: count)
         dataWrap = DataWrap.object()
         if bufferSize > dataWrap.bufferSize {
             dataWrap.bufferSize = bufferSize

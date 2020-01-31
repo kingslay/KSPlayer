@@ -24,7 +24,8 @@ public class KSSubtitleController {
     private var subtitleName: String?
     public var subtitle: KSSubtitleProtocol?
     public var selectWithFilePath: ((Result<KSSubtitleProtocol?, NSError>) -> Void)?
-    public var srtListCount: KSObservable<Int> = KSObservable(0)
+    @KSObservable
+    public var srtListCount: Int = 0
 
     public var view: UIView & SubtitleViewProtocol
     public init(customControlView: (UIView & SubtitleViewProtocol)? = nil) {
@@ -50,7 +51,7 @@ public class KSSubtitleController {
     public func searchSubtitle(name: String) {
         let subtitleName = (name as NSString).deletingPathExtension
         infos.removeAll()
-        srtListCount.value = infos.count
+        srtListCount = infos.count
         for subtitleDataSouce in subtitleDataSouces {
             searchSubtitle(datasouce: subtitleDataSouce, name: subtitleName)
         }
@@ -62,7 +63,7 @@ public class KSSubtitleController {
         runInMainqueue { [weak self] in
             guard let self = self else { return }
             self.infos.removeAll { $0.subtitleDataSouce === dataSouce }
-            self.srtListCount.value = self.infos.count
+            self.srtListCount = self.infos.count
             self.view.setupDatas(infos: self.infos)
         }
     }
@@ -88,7 +89,7 @@ public class KSSubtitleController {
             runInMainqueue { [weak self] in
                 guard let self = self else { return }
                 self.infos.append(contentsOf: array)
-                self.srtListCount.value = self.infos.count
+                self.srtListCount = self.infos.count
                 self.view.setupDatas(infos: self.infos)
             }
         }

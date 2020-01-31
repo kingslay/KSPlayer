@@ -34,7 +34,7 @@ open class VideoPlayerView: PlayerView {
                     srtControl.add(dataSouce: embedSubtitleDataSouce)
                     let infos = srtControl.filterInfos { $0.subtitleDataSouce === embedSubtitleDataSouce }
                     if let first = infos.first {
-                        srtControl.view.selectedInfo.value = first
+                        srtControl.view.selectedInfo.wrappedValue = first
                     }
                 }
             }

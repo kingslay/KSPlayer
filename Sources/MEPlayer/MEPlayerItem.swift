@@ -286,11 +286,11 @@ extension MEPlayerItem: MediaPlayback {
         guard state != .closed else { return }
         state = .closed
         condition.signal()
-        ObjectPool.share.removeAll()
         // 故意循环引用。等结束了。才释放
         let closeOperation = BlockOperation {
             Thread.current.name = (self.operationQueue.name ?? "") + "_close"
             self.tracks.forEach { $0.shutdown() }
+            ObjectPool.share.removeAll()
             KSLog("清空formatCtx")
             avformat_close_input(&self.formatCtx)
             self.duration = 0

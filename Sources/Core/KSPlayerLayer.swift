@@ -61,8 +61,10 @@ public protocol KSPlayerLayerDelegate: AnyObject {
 }
 
 open class KSPlayerLayer: UIView {
-    public let bufferingProgress: KSObservable<Int> = KSObservable(0)
-    public let loopCount: KSObservable<Int> = KSObservable(0)
+    @KSObservable
+    public var bufferingProgress: Int = 0
+    @KSObservable
+    public var loopCount: Int = 0
     private var timer: Timer?
     private var playOptions: [String: Any]?
     private var bufferedCount = 0
@@ -280,11 +282,11 @@ extension KSPlayerLayer: MediaPlayerDelegate {
     }
 
     public func changeBuffering(player _: MediaPlayerProtocol, progress: Int) {
-        bufferingProgress.value = progress
+        bufferingProgress = progress
     }
 
     public func playBack(player _: MediaPlayerProtocol, loopCount: Int) {
-        self.loopCount.value = loopCount
+        self.loopCount = loopCount
     }
 
     public func finish(player: MediaPlayerProtocol, error: Error?) {

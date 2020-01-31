@@ -93,7 +93,7 @@ public class KSSubtitleView: UIControl, SubtitleViewProtocol {
     }
 
     public override init(frame: CGRect) {
-        selectedInfo = KSObservable(closeInfo)
+        selectedInfo = KSObservable(wrappedValue: closeInfo)
         super.init(frame: frame)
         tableView.dataSource = self
         tableView.delegate = self
@@ -134,7 +134,7 @@ public class KSSubtitleView: UIControl, SubtitleViewProtocol {
 
 extension KSSubtitleView: UITableViewDelegate {
     public func tableView(_: UITableView, didSelectRowAt indexPath: IndexPath) {
-        selectedInfo.value = infos[indexPath.row]
+        selectedInfo.wrappedValue = infos[indexPath.row]
     }
 }
 
@@ -152,7 +152,7 @@ extension KSSubtitleView: UITableViewDataSource {
                 srtCell.localIconViewWidth.constant = 0
                 srtCell.localIconView.isHidden = true
             }
-            srtCell.checked(info === selectedInfo.value)
+            srtCell.checked(info === selectedInfo.wrappedValue)
         }
         return cell
     }

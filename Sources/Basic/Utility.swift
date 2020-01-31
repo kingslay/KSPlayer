@@ -38,21 +38,23 @@ open class LayerContainerView: UIView {
     }
 }
 
-public final class KSObservable<Element> {
-    public var observer: ((_ oldValue: Element, _ newValue: Element) -> Void)? {
+@propertyWrapper public final class KSObservable<T> {
+    public var observer: ((_ oldValue: T, _ newValue: T) -> Void)? {
         didSet {
-            observer?(value, value)
+            observer?(wrappedValue, wrappedValue)
         }
     }
 
-    public var value: Element {
+    public var wrappedValue: T {
         didSet {
-            observer?(oldValue, value)
+            observer?(oldValue, wrappedValue)
         }
     }
 
-    public init(_ value: Element) {
-        self.value = value
+    public var projectedValue: KSObservable { self }
+
+    public init(wrappedValue: T) {
+        self.wrappedValue = wrappedValue
     }
 }
 
