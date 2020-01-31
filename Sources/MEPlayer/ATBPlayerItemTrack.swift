@@ -9,7 +9,6 @@ import AudioToolbox
 import ffmpeg
 
 final class ATBPlayerItemTrack: AsyncPlayerItemTrack<AudioFrame> {
-    // 刷新Session的话，后续的解码还是会失败，直到遇到I帧
     private var converter: AudioConverterRef?
     private var outAudioBufferList = AudioBufferList()
     override func open() -> Bool {
@@ -60,16 +59,19 @@ final class ATBPlayerItemTrack: AsyncPlayerItemTrack<AudioFrame> {
             return noErr
         }
         var ioOutputDataPacketSize = UInt32(codecpar.pointee.frame_size)
-        let result = AudioConverterFillComplexBuffer(converter, inputDataProc, corePacket, &ioOutputDataPacketSize, &outAudioBufferList, nil)
-        let frame = AudioFrame(bufferSize: Int32(outAudioBufferList.mNumberBuffers))
-        frame.timebase = timebase
-        frame.position = corePacket.pointee.pts
-        if frame.position == Int64.min || frame.position < 0 {
-            frame.position = max(corePacket.pointee.dts, 0)
+        let status = AudioConverterFillComplexBuffer(converter, inputDataProc, corePacket, &ioOutputDataPacketSize, &outAudioBufferList, nil)
+        if status == noErr {
+            let frame = AudioFrame(bufferSize: Int32(outAudioBufferList.mNumberBuffers))
+            frame.timebase = timebase
+            frame.position = corePacket.pointee.pts
+            if frame.position == Int64.min || frame.position < 0 {
+                frame.position = max(corePacket.pointee.dts, 0)
+            }
+            frame.duration = corePacket.pointee.duration
+            frame.size = Int64(corePacket.pointee.size)
+            return [frame]
         }
-        frame.duration = corePacket.pointee.duration
-        frame.size = Int64(corePacket.pointee.size)
-        return [frame]
+        return []
     }
 
     override func shutdown() {

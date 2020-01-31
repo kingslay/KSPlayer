@@ -15,27 +15,17 @@ class ObjectPool {
     func object<P: Any>(class _: P.Type, key: String, initFunc: () -> P) -> P {
         semaphore.wait()
         var array = pool[key]
-        var object = array?.last as? P
-        if object != nil {
-            array?.removeLast()
-            pool[key] = array
-        } else {
-            object = initFunc()
-        }
+        let object = array?.popLast() as? P ?? initFunc()
+        pool[key] = array
         semaphore.signal()
-        return object!
+        return object
     }
 
     func comeback<P: Any>(item: P, key: String) {
         semaphore.wait()
-        if var array = pool[key] {
-            array.append(item)
-            pool[key] = array
-        } else {
-            var array = ContiguousArray<Any>()
-            array.append(item)
-            pool[key] = array
-        }
+        var array = pool[key, default: ContiguousArray<Any>()]
+        array.append(item)
+        pool[key] = array
         semaphore.signal()
     }
 

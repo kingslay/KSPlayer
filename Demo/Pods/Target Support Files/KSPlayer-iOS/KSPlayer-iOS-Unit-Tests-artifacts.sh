@@ -108,11 +108,11 @@ install_xcframework() {
 
 
 if [[ "$CONFIGURATION" == "Debug" ]]; then
-  install_xcframework "${PODS_ROOT}/../../FFmpeg/FFmpeg.xcframework" "false" "ios-x86_64-simulator/FFmpeg.framework" "ios-arm64/FFmpeg.framework" "ios-x86_64-maccatalyst/FFmpeg.framework"
+  install_xcframework "${PODS_ROOT}/../../FFmpeg/FFmpeg.xcframework" "false" "ios-x86_64-maccatalyst/FFmpeg.framework" "ios-x86_64-simulator/FFmpeg.framework" "ios-arm64/FFmpeg.framework"
   install_xcframework "${PODS_ROOT}/../../FFmpeg/OpenSSL.xcframework" "false" "ios-x86_64-simulator/OpenSSL.framework" "ios-x86_64-maccatalyst/OpenSSL.framework" "ios-arm64/OpenSSL.framework"
 fi
 if [[ "$CONFIGURATION" == "Release" ]]; then
-  install_xcframework "${PODS_ROOT}/../../FFmpeg/FFmpeg.xcframework" "false" "ios-x86_64-simulator/FFmpeg.framework" "ios-arm64/FFmpeg.framework" "ios-x86_64-maccatalyst/FFmpeg.framework"
+  install_xcframework "${PODS_ROOT}/../../FFmpeg/FFmpeg.xcframework" "false" "ios-x86_64-maccatalyst/FFmpeg.framework" "ios-x86_64-simulator/FFmpeg.framework" "ios-arm64/FFmpeg.framework"
   install_xcframework "${PODS_ROOT}/../../FFmpeg/OpenSSL.xcframework" "false" "ios-x86_64-simulator/OpenSSL.framework" "ios-x86_64-maccatalyst/OpenSSL.framework" "ios-arm64/OpenSSL.framework"
 fi
 

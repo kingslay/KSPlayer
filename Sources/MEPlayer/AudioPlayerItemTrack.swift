@@ -42,10 +42,7 @@ final class AudioPlayerItemTrack: FFPlayerItemTrack<AudioFrame> {
             _ = av_samples_get_buffer_size(&bufferSize, Int32(KSDefaultParameter.audioPlayerMaximumChannels), nbSamples, AV_SAMPLE_FMT_FLTP, 1)
             let frame = AudioFrame(bufferSize: bufferSize)
             numberOfSamples = swr_convert(swrContext, &frame.dataWrap.data, nbSamples, &frameBuffer, numberOfSamples)
-            let linesize = numberOfSamples * Int32(MemoryLayout<Float>.size)
-            (0 ..< frame.linesize.count).forEach {
-                frame.linesize[$0] = linesize
-            }
+            frame.numberOfSamples = Int(numberOfSamples)
             frame.timebase = timebase
             frame.position = bestEffortTimestamp
             frame.duration = coreFrame.pointee.pkt_duration
