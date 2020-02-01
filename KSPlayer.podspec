@@ -65,8 +65,7 @@ Pod::Spec.new do |s|
         ss.source_files = 'Sources/Metal/*.{h,swift,metal}'
         ss.resource_bundles = {
             'Metal' => ['Sources/Metal/*.metal']
-        }  
-        # ss.resources = 'Sources/Metal/**/*.{metal}'
+        }
         ss.weak_framework = 'MetalKit'
     end
     #AVPlayer播放内核
