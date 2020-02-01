@@ -39,7 +39,6 @@ CONFIGURE_FLAGS="$CONFIGURE_FLAGS --disable-programs"
 CONFIGURE_FLAGS="$CONFIGURE_FLAGS --disable-ffmpeg"
 CONFIGURE_FLAGS="$CONFIGURE_FLAGS --disable-ffplay"
 CONFIGURE_FLAGS="$CONFIGURE_FLAGS --disable-ffprobe"
-# CONFIGURE_FLAGS="$CONFIGURE_FLAGS --disable-ffserver"
 
 # Documentation options:
 CONFIGURE_FLAGS="$CONFIGURE_FLAGS --disable-doc"
@@ -71,9 +70,9 @@ CONFIGURE_FLAGS="$CONFIGURE_FLAGS --enable-network"
 # CONFIGURE_FLAGS="$CONFIGURE_FLAGS --disable-fft"
 
 # Hardware accelerators:
+CONFIGURE_FLAGS="$CONFIGURE_FLAGS --disable-d3d11va"
 CONFIGURE_FLAGS="$CONFIGURE_FLAGS --disable-dxva2"
 CONFIGURE_FLAGS="$CONFIGURE_FLAGS --disable-vaapi"
-# CONFIGURE_FLAGS="$CONFIGURE_FLAGS --disable-vda"
 CONFIGURE_FLAGS="$CONFIGURE_FLAGS --disable-vdpau"
 
 # Individual component options:
@@ -181,7 +180,30 @@ CONFIGURE_FLAGS="$CONFIGURE_FLAGS --disable-bsfs"
 # CONFIGURE_FLAGS="$CONFIGURE_FLAGS --disable-bsf=mov2textsub"
 # CONFIGURE_FLAGS="$CONFIGURE_FLAGS --disable-bsf=text2movsub"
 
-#
+# ./configure --list-protocols
+CONFIGURE_FLAGS="$CONFIGURE_FLAGS --enable-protocols"
+CONFIGURE_FLAGS="$CONFIGURE_FLAGS --enable-protocol=async"
+CONFIGURE_FLAGS="$CONFIGURE_FLAGS --disable-protocol=bluray"
+CONFIGURE_FLAGS="$CONFIGURE_FLAGS --disable-protocol=concat"
+CONFIGURE_FLAGS="$CONFIGURE_FLAGS --disable-protocol=crypto"
+CONFIGURE_FLAGS="$CONFIGURE_FLAGS --disable-protocol=ffrtmpcrypt"
+CONFIGURE_FLAGS="$CONFIGURE_FLAGS --enable-protocol=ffrtmphttp"
+CONFIGURE_FLAGS="$CONFIGURE_FLAGS --disable-protocol=gopher"
+CONFIGURE_FLAGS="$CONFIGURE_FLAGS --disable-protocol=icecast"
+CONFIGURE_FLAGS="$CONFIGURE_FLAGS --disable-protocol=librtmp*"
+CONFIGURE_FLAGS="$CONFIGURE_FLAGS --disable-protocol=libssh"
+CONFIGURE_FLAGS="$CONFIGURE_FLAGS --disable-protocol=md5"
+CONFIGURE_FLAGS="$CONFIGURE_FLAGS --disable-protocol=mmsh"
+CONFIGURE_FLAGS="$CONFIGURE_FLAGS --disable-protocol=mmst"
+CONFIGURE_FLAGS="$CONFIGURE_FLAGS --disable-protocol=rtmp*"
+CONFIGURE_FLAGS="$CONFIGURE_FLAGS --enable-protocol=rtmp"
+CONFIGURE_FLAGS="$CONFIGURE_FLAGS --enable-protocol=rtmpt"
+CONFIGURE_FLAGS="$CONFIGURE_FLAGS --disable-protocol=rtp"
+CONFIGURE_FLAGS="$CONFIGURE_FLAGS --disable-protocol=sctp"
+CONFIGURE_FLAGS="$CONFIGURE_FLAGS --disable-protocol=srtp"
+CONFIGURE_FLAGS="$CONFIGURE_FLAGS --disable-protocol=subfile"
+CONFIGURE_FLAGS="$CONFIGURE_FLAGS --disable-protocol=unix"
+
 CONFIGURE_FLAGS="$CONFIGURE_FLAGS --disable-devices"
 CONFIGURE_FLAGS="$CONFIGURE_FLAGS --disable-indevs"
 CONFIGURE_FLAGS="$CONFIGURE_FLAGS --disable-outdevs"
