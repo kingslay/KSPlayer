@@ -27,7 +27,7 @@ final class AudioGraphPlayer: AudioPlayer {
     private let graph: AUGraph
     private var audioUnitForMixer: AudioUnit!
     private var audioUnitForTimePitch: AudioUnit!
-    private var audioStreamBasicDescription = KSDefaultParameter.outputFormat()
+    private var audioStreamBasicDescription = KSPlayerManager.outputFormat()
 
     private var isPlaying: Bool {
         var running = DarwinBoolean(false)
@@ -122,13 +122,13 @@ final class AudioGraphPlayer: AudioPlayer {
         AUGraphSetNodeInputCallback(graph, nodeForTimePitch, 0, &inputCallbackStruct)
         addRenderNotify(audioUnit: audioUnitForOutput)
         let audioStreamBasicDescriptionSize = UInt32(MemoryLayout<AudioStreamBasicDescription>.size)
-        let inDataSize = UInt32(MemoryLayout.size(ofValue: KSDefaultParameter.audioPlayerMaximumFramesPerSlice))
+        let inDataSize = UInt32(MemoryLayout.size(ofValue: KSPlayerManager.audioPlayerMaximumFramesPerSlice))
         [audioUnitForTimePitch, audioUnitForMixer, audioUnitForOutput].forEach { unit in
             guard let unit = unit else { return }
             AudioUnitSetProperty(unit,
                                  kAudioUnitProperty_MaximumFramesPerSlice,
                                  kAudioUnitScope_Global, 0,
-                                 &KSDefaultParameter.audioPlayerMaximumFramesPerSlice,
+                                 &KSPlayerManager.audioPlayerMaximumFramesPerSlice,
                                  inDataSize)
             AudioUnitSetProperty(unit,
                                  kAudioUnitProperty_StreamFormat,
@@ -228,11 +228,11 @@ final class AudioEnginePlayer: AudioPlayer {
     init() {
         engine.attach(player)
         engine.attach(picth)
-        let format = KSDefaultParameter.audioDefaultFormat
+        let format = KSPlayerManager.audioDefaultFormat
         engine.connect(player, to: picth, format: format)
         engine.connect(picth, to: engine.mainMixerNode, format: format)
         engine.prepare()
-        try? engine.enableManualRenderingMode(.realtime, format: format, maximumFrameCount: KSDefaultParameter.audioPlayerMaximumFramesPerSlice)
+        try? engine.enableManualRenderingMode(.realtime, format: format, maximumFrameCount: KSPlayerManager.audioPlayerMaximumFramesPerSlice)
 //        engine.inputNode.setManualRenderingInputPCMFormat(format) { count -> UnsafePointer<AudioBufferList>? in
 //            self.delegate?.audioPlayerShouldInputData(ioData: <#T##UnsafeMutableAudioBufferListPointer#>, numberOfSamples: <#T##UInt32#>, numberOfChannels: <#T##UInt32#>)
 //        }

@@ -4,9 +4,10 @@ class KSPlayerLayerTest: XCTestCase {
     private var readyToPlayExpectation: XCTestExpectation?
     override func setUp() {
         KSPlayerManager.secondPlayerType = KSMEPlayer.self
-        KSPlayerManager.isSecondOpen = true
-        KSPlayerManager.isAccurateSeek = true
-        KSDefaultParameter.enableVideotoolbox = true
+        KSOptions.isSecondOpen = true
+        KSOptions.isAccurateSeek = true
+        KSOptions.hardwareDecodeH264 = true
+        KSOptions.hardwareDecodeH265 = true
     }
 
     func testPlayerLayer() {
@@ -28,19 +29,20 @@ class KSPlayerLayerTest: XCTestCase {
         let playerLayer = KSPlayerLayer()
         playerLayer.delegate = self
         XCTAssertEqual(playerLayer.state, .notSetURL)
-        playerLayer.set(url: URL(fileURLWithPath: path), options: nil)
+        let options = KSOptions()
+        playerLayer.set(url: URL(fileURLWithPath: path), options: options)
         readyToPlayExpectation = expectation(description: "openVideo")
         waitForExpectations(timeout: 2) { _ in
             XCTAssert(playerLayer.player?.isPreparedToPlay == true)
             XCTAssertEqual(playerLayer.state, .readyToPlay)
             playerLayer.play()
-            XCTAssert(playerLayer.isAutoPlay)
+            XCTAssert(options.isAutoPlay)
             playerLayer.pause()
-            XCTAssert(!playerLayer.isAutoPlay)
+            XCTAssert(!options.isAutoPlay)
             XCTAssertEqual(playerLayer.state, .paused)
             let seekExpectation = self.expectation(description: "seek")
             playerLayer.seek(time: 2, autoPlay: true) { _ in
-                XCTAssert(playerLayer.isAutoPlay)
+                XCTAssert(options.isAutoPlay)
                 seekExpectation.fulfill()
             }
             XCTAssertEqual(playerLayer.state, .buffering)

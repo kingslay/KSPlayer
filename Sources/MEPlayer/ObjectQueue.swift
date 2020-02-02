@@ -19,9 +19,8 @@ public final class ObjectQueue<Item: ObjectQueueItem> {
     //    public var size: Int64 = 0
     public var count: Int {
         condition.lock()
-        let count = objects.count
-        condition.unlock()
-        return count
+        defer { condition.unlock() }
+        return objects.count
     }
 
     public init(maxCount: Int = .max, sortObjects: Bool = false) {
@@ -69,26 +68,23 @@ public final class ObjectQueue<Item: ObjectQueueItem> {
 
     func getObjectSync() -> Item? {
         condition.lock()
+        defer { condition.unlock() }
         if destoryed {
-            condition.unlock()
             return nil
         }
         if objects.isEmpty {
             condition.wait()
             if destoryed || objects.isEmpty {
-                condition.unlock()
                 return nil
             }
         }
-        let object = getObject()
-        condition.unlock()
-        return object
+        return getObject()
     }
 
     func getObjectAsync(where predicate: ((Item) -> Bool)?) -> Item? {
         condition.lock()
+        defer { condition.unlock() }
         guard !destoryed, let first = objects.first else {
-            condition.unlock()
             return nil
         }
         var object: Item?
@@ -99,7 +95,6 @@ public final class ObjectQueue<Item: ObjectQueueItem> {
         } else {
             object = getObject()
         }
-        condition.unlock()
         return object
     }
 
@@ -120,9 +115,7 @@ public final class ObjectQueue<Item: ObjectQueueItem> {
 
     public func search(where predicate: (Item) -> Bool) -> Item? {
         condition.lock()
-        defer {
-            condition.unlock()
-        }
+        defer { condition.unlock() }
         if objects.count > currentIndex {
             let item = objects[currentIndex]
             if predicate(item) {
@@ -139,21 +132,19 @@ public final class ObjectQueue<Item: ObjectQueueItem> {
 
     public func forEach(_ body: (Item) -> Void) {
         condition.lock()
-        defer {
-            condition.unlock()
-        }
+        defer { condition.unlock() }
         objects.forEach(body)
     }
 
     func flush() {
         condition.lock()
+        defer { condition.unlock() }
         objects.removeAll()
         currentIndex = 0
 //        size = 0
 //        duration = 0
         puttingObject = nil
         condition.signal()
-        condition.unlock()
     }
 
     func shutdown() {

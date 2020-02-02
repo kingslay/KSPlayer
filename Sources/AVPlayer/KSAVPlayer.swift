@@ -78,6 +78,7 @@ public final class KSAVPlayerView: UIView {
 }
 
 public class KSAVPlayer {
+    private var options: KSOptions
     private let playerView = KSAVPlayerView()
     private var urlAsset: AVURLAsset
     private var shouldSeekTo = TimeInterval(0)
@@ -104,22 +105,9 @@ public class KSAVPlayer {
         }
     }
 
-    public var isAutoPlay = true
-    public var display: DisplayEnum = .plane
     public weak var delegate: MediaPlayerDelegate?
     public private(set) var duration: TimeInterval = 0
     public private(set) var playableTime: TimeInterval = 0
-    public var isLoopPlay = false {
-        didSet {
-            if isLoopPlay {
-                if playerLooper == nil, let playerItem = player.currentItem {
-                    setPlayerLooper(playerItem: playerItem)
-                }
-            } else {
-                playerLooper = nil
-            }
-        }
-    }
 
     public var playbackRate: Float = 1 {
         didSet {
@@ -163,7 +151,7 @@ public class KSAVPlayer {
         didSet {
             if isPreparedToPlay != oldValue {
                 if isPreparedToPlay {
-                    if isAutoPlay {
+                    if options.isAutoPlay {
                         play()
                     }
                     delegate?.preparedToPlay(player: self)
@@ -172,8 +160,9 @@ public class KSAVPlayer {
         }
     }
 
-    public required init(url: URL, options: [String: Any]? = nil) {
-        urlAsset = AVURLAsset(url: url, options: options)
+    public required init(url: URL, options: KSOptions) {
+        urlAsset = AVURLAsset(url: url, options: options.avOptions)
+        self.options = options
         setAudioSession()
         itemObservation = player.observe(\.currentItem) { [weak self] player, _ in
             guard let self = self else { return }
@@ -188,7 +177,7 @@ extension KSAVPlayer {
     }
 
     @objc private func moviePlayDidEnd(notification _: Notification) {
-        if !isLoopPlay {
+        if !options.isLoopPlay {
             playbackState = .finished
         }
     }
@@ -314,11 +303,10 @@ extension KSAVPlayer: MediaPlayerProtocol {
 
     public var preferredForwardBufferDuration: TimeInterval {
         get {
-            return KSPlayerManager.preferredForwardBufferDuration
+            return player.currentItem?.preferredForwardBufferDuration ?? options.preferredForwardBufferDuration
         }
         set {
             player.currentItem?.preferredForwardBufferDuration = newValue
-            KSPlayerManager.preferredForwardBufferDuration = newValue
         }
     }
 
@@ -405,7 +393,7 @@ extension KSAVPlayer: MediaPlayerProtocol {
         runInMainqueue { [weak self] in
             self?.bufferingProgress = 0
         }
-        let tolerance: CMTime = KSPlayerManager.isAccurateSeek ? .zero : .positiveInfinity
+        let tolerance: CMTime = options.isAccurateSeek ? .zero : .positiveInfinity
         player.seek(to: CMTime(seconds: time, preferredTimescale: Int32(NSEC_PER_SEC)), toleranceBefore: tolerance, toleranceAfter: tolerance) { [weak self] finished in
             guard let self = self else { return }
             self.playbackState = oldPlaybackState
@@ -420,7 +408,7 @@ extension KSAVPlayer: MediaPlayerProtocol {
             guard let self = self else { return }
             self.bufferingProgress = 0
             let playerItem = AVPlayerItem(asset: self.urlAsset)
-            if self.isLoopPlay {
+            if self.options.isLoopPlay {
                 self.setPlayerLooper(playerItem: playerItem)
             } else {
                 self.player.replaceCurrentItem(with: playerItem)
@@ -450,10 +438,11 @@ extension KSAVPlayer: MediaPlayerProtocol {
         player.replaceCurrentItem(with: nil)
     }
 
-    public func replace(url: URL, options: [String: Any]? = nil) {
+    public func replace(url: URL, options: KSOptions) {
         KSLog("replaceUrl \(self)")
         shutdown()
-        urlAsset = AVURLAsset(url: url, options: options)
+        urlAsset = AVURLAsset(url: url, options: options.avOptions)
+        self.options = options
     }
 
     public var contentMode: UIViewContentMode {

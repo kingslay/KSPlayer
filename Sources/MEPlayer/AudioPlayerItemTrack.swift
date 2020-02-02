@@ -12,8 +12,8 @@ typealias SwrContext = OpaquePointer
 final class AudioPlayerItemTrack: FFPlayerItemTrack<AudioFrame> {
     private var swrContext: SwrContext?
     private var bestEffortTimestamp = Int64(0)
-    private var inputNumberOfChannels = KSDefaultParameter.audioPlayerMaximumChannels
-    private var inputSampleRate = KSDefaultParameter.audioPlayerSampleRate
+    private var inputNumberOfChannels = KSPlayerManager.audioPlayerMaximumChannels
+    private var inputSampleRate = KSPlayerManager.audioPlayerSampleRate
     private var inputFormat = AV_SAMPLE_FMT_FLTP
 
     override func open() -> Bool {
@@ -39,7 +39,7 @@ final class AudioPlayerItemTrack: FFPlayerItemTrack<AudioFrame> {
             let nbSamples = swr_get_out_samples(swrContext, numberOfSamples)
             var frameBuffer = Array(tuple: coreFrame.pointee.data).map { UnsafePointer<UInt8>($0) }
             var bufferSize = Int32(0)
-            _ = av_samples_get_buffer_size(&bufferSize, Int32(KSDefaultParameter.audioPlayerMaximumChannels), nbSamples, AV_SAMPLE_FMT_FLTP, 1)
+            _ = av_samples_get_buffer_size(&bufferSize, Int32(KSPlayerManager.audioPlayerMaximumChannels), nbSamples, AV_SAMPLE_FMT_FLTP, 1)
             let frame = AudioFrame(bufferSize: bufferSize)
             numberOfSamples = swr_convert(swrContext, &frame.dataWrap.data, nbSamples, &frameBuffer, numberOfSamples)
             frame.numberOfSamples = Int(numberOfSamples)
@@ -47,7 +47,7 @@ final class AudioPlayerItemTrack: FFPlayerItemTrack<AudioFrame> {
             frame.position = bestEffortTimestamp
             frame.duration = coreFrame.pointee.pkt_duration
             if frame.duration == 0 {
-                frame.duration = Int64(numberOfSamples) * Int64(frame.timebase.den) / (Int64(KSDefaultParameter.audioPlayerSampleRate) * Int64(frame.timebase.num))
+                frame.duration = Int64(numberOfSamples) * Int64(frame.timebase.den) / (Int64(KSPlayerManager.audioPlayerSampleRate) * Int64(frame.timebase.num))
             }
             frame.size = Int64(coreFrame.pointee.pkt_size)
             return frame
@@ -68,16 +68,16 @@ final class AudioPlayerItemTrack: FFPlayerItemTrack<AudioFrame> {
     private func setupSwrContext() -> Bool {
         inputNumberOfChannels = UInt32(codecpar.pointee.channels)
         if inputNumberOfChannels == 0 {
-            inputNumberOfChannels = KSDefaultParameter.audioPlayerMaximumChannels
+            inputNumberOfChannels = KSPlayerManager.audioPlayerMaximumChannels
         }
         inputSampleRate = codecpar.pointee.sample_rate
         if inputSampleRate == 0 {
-            inputSampleRate = KSDefaultParameter.audioPlayerSampleRate
+            inputSampleRate = KSPlayerManager.audioPlayerSampleRate
         }
         inputFormat = AVSampleFormat(rawValue: codecpar.pointee.format)
-        let outChannel = av_get_default_channel_layout(Int32(KSDefaultParameter.audioPlayerMaximumChannels))
+        let outChannel = av_get_default_channel_layout(Int32(KSPlayerManager.audioPlayerMaximumChannels))
         let inChannel = av_get_default_channel_layout(Int32(inputNumberOfChannels))
-        swrContext = swr_alloc_set_opts(nil, outChannel, AV_SAMPLE_FMT_FLTP, KSDefaultParameter.audioPlayerSampleRate, inChannel, inputFormat, inputSampleRate, 0, nil)
+        swrContext = swr_alloc_set_opts(nil, outChannel, AV_SAMPLE_FMT_FLTP, KSPlayerManager.audioPlayerSampleRate, inChannel, inputFormat, inputSampleRate, 0, nil)
         let result = swr_init(swrContext)
         if result < 0 {
             destorySwrContext()

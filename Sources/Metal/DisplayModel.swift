@@ -93,7 +93,7 @@ private class SphereDisplayModel {
         indexBuffer = device.makeBuffer(bytes: indices, length: MemoryLayout<UInt16>.size * indices.count, options: .storageModeShared)!
         vertexBuffer = device.makeBuffer(bytes: vertices, length: MemoryLayout<Vertex>.size * vertices.count, options: .storageModeShared)
         #if os(iOS)
-        if KSDefaultParameter.enableSensor {
+        if KSPlayerManager.enableSensor {
             MotionSensor.shared.start()
         }
         #endif
@@ -170,7 +170,7 @@ private class VRDisplayModel: SphereDisplayModel {
         encoder.setFrontFacing(.clockwise)
         encoder.setVertexBuffer(vertexBuffer, offset: 0, index: 0)
         #if os(iOS)
-        if KSDefaultParameter.enableSensor, let matrix = MotionSensor.shared.matrix() {
+        if KSPlayerManager.enableSensor, let matrix = MotionSensor.shared.matrix() {
             modelViewMatrix = matrix
         }
         #endif
@@ -199,7 +199,7 @@ private class VRBoxDisplayModel: SphereDisplayModel {
         encoder.setFrontFacing(.clockwise)
         encoder.setVertexBuffer(vertexBuffer, offset: 0, index: 0)
         #if os(iOS)
-        if KSDefaultParameter.enableSensor, let matrix = MotionSensor.shared.matrix() {
+        if KSPlayerManager.enableSensor, let matrix = MotionSensor.shared.matrix() {
             modelViewMatrix = matrix
         }
         #endif

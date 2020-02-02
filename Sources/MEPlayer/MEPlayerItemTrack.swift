@@ -14,7 +14,7 @@ protocol PlayerItemTrackProtocol: Capacity {
     // 是否无缝循环
     var isLoopPlay: Bool { get set }
     var delegate: CodecCapacityDelegate? { get set }
-    init(stream: UnsafeMutablePointer<AVStream>)
+    init(stream: UnsafeMutablePointer<AVStream>, options: KSOptions)
     func open() -> Bool
     func decode()
     func seek(time: TimeInterval)
@@ -35,6 +35,7 @@ class MEPlayerItemTrack<Frame: MEFrame>: PlayerItemTrackProtocol {
     fileprivate var state = MECodecState.idle
     fileprivate let fps: Int
     weak var delegate: CodecCapacityDelegate?
+    let options: KSOptions
     let mediaType: AVFoundation.AVMediaType
     let stream: UnsafeMutablePointer<AVStream>
     let outputRenderQueue: ObjectQueue<Frame>
@@ -56,14 +57,15 @@ class MEPlayerItemTrack<Frame: MEFrame>: PlayerItemTrackProtocol {
     }
 
     var bufferingProgress: Int {
-        return min(100, loadedCount * 100 / (fps * Int(KSPlayerManager.preferredForwardBufferDuration)))
+        return min(100, loadedCount * 100 / (fps * Int(options.preferredForwardBufferDuration)))
     }
 
     var isPlayable: Bool {
         return true
     }
 
-    required init(stream: UnsafeMutablePointer<AVStream>) {
+    required init(stream: UnsafeMutablePointer<AVStream>, options: KSOptions) {
+        self.options = options
         if stream.pointee.codecpar.pointee.codec_type == AVMEDIA_TYPE_AUDIO {
             mediaType = .audio
         } else if stream.pointee.codecpar.pointee.codec_type == AVMEDIA_TYPE_VIDEO {
@@ -73,7 +75,7 @@ class MEPlayerItemTrack<Frame: MEFrame>: PlayerItemTrackProtocol {
         }
         var timebase = Timebase(stream.pointee.time_base)
         if timebase.num <= 0 || timebase.den <= 0 {
-            timebase = Timebase(num: 1, den: mediaType == .audio ? KSDefaultParameter.audioPlayerSampleRate : 25000)
+            timebase = Timebase(num: 1, den: mediaType == .audio ? KSPlayerManager.audioPlayerSampleRate : 25000)
         }
         self.stream = stream
         self.timebase = timebase
@@ -166,12 +168,12 @@ class AsyncPlayerItemTrack<Frame: MEFrame>: MEPlayerItemTrack<Frame> {
             return true
         }
         // 让音频能更快的打开
-        let isSecondOpen = mediaType == .audio || KSPlayerManager.isSecondOpen
+        let isSecondOpen = mediaType == .audio || options.isSecondOpen
         let status = LoadingStatus(fps: fps, packetCount: packetQueue.count,
                                    frameCount: outputRenderQueue.count,
                                    frameMaxCount: outputRenderQueue.maxCount,
                                    isFirst: isFirst, isSeek: isSeek, isSecondOpen: isSecondOpen)
-        if KSDefaultParameter.playable(status) {
+        if options.playable(status: status) {
             isFirst = false
             isSeek = false
             return true
@@ -213,7 +215,7 @@ class AsyncPlayerItemTrack<Frame: MEFrame>: MEPlayerItemTrack<Frame> {
         decodeOperation = BlockOperation { [weak self] in
             guard let self = self else { return }
             Thread.current.name = self.operationQueue.name
-            Thread.current.stackSize = KSDefaultParameter.stackSize
+            Thread.current.stackSize = KSPlayerManager.stackSize
             self.decodeThread()
         }
         decodeOperation?.queuePriority = .veryHigh
@@ -247,7 +249,7 @@ class AsyncPlayerItemTrack<Frame: MEFrame>: MEPlayerItemTrack<Frame> {
                         guard !state.contains(.flush), !state.contains(.closed) else {
                             return
                         }
-                        if seekTime > 0, KSPlayerManager.isAccurateSeek {
+                        if seekTime > 0, options.isAccurateSeek {
                             if frame.seconds < seekTime {
                                 return
                             } else {

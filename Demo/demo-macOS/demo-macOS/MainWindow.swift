@@ -14,10 +14,11 @@ class MainWindow: NSWindow {
     override init(contentRect: NSRect, styleMask style: NSWindow.StyleMask, backing backingStoreType: NSWindow.BackingStoreType, defer flag: Bool) {
         KSPlayerManager.firstPlayerType = KSMEPlayer.self
         KSPlayerManager.secondPlayerType = KSMEPlayer.self
-        KSPlayerManager.isAutoPlay = true
-        KSPlayerManager.isSeekedAutoPlay = true
-        KSDefaultParameter.enableVideotoolbox = true
-        KSDefaultParameter.logLevel = AV_LOG_DEBUG
+        KSPlayerManager.logLevel = AV_LOG_DEBUG
+        KSOptions.isAutoPlay = true
+        KSOptions.isSeekedAutoPlay = true
+        KSOptions.hardwareDecodeH264 = true
+        KSOptions.hardwareDecodeH265 = true
         vc = ViewController()
         super.init(contentRect: contentRect, styleMask: style, backing: backingStoreType, defer: flag)
         contentViewController = vc

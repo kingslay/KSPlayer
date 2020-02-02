@@ -88,7 +88,7 @@ class MetalRender {
         device = MTLCreateSystemDefaultDevice()!
         var library: MTLLibrary!
         library = device.makeDefaultLibrary()
-        if library == nil, let path = Bundle.main.path(forResource: "Metal", ofType: "bundle"), let bundle = Bundle(path: path) {
+        if library == nil, let path = Bundle(for: type(of: self)).path(forResource: "Metal", ofType: "bundle"), let bundle = Bundle(path: path) {
             library = try? device.makeDefaultLibrary(bundle: bundle)
         }
         self.library = library

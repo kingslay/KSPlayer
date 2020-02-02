@@ -65,19 +65,14 @@ open class KSPlayerLayer: UIView {
     public var bufferingProgress: Int = 0
     @KSObservable
     public var loopCount: Int = 0
+    private var options: KSOptions?
     private var timer: Timer?
-    private var playOptions: [String: Any]?
     private var bufferedCount = 0
     private var shouldSeekTo: TimeInterval = 0
     private var startTime: TimeInterval = 0
     private(set) var url: URL?
     public var isWirelessRouteActive = false
     public weak var delegate: KSPlayerLayerDelegate?
-    public var isAutoPlay = KSPlayerManager.isAutoPlay {
-        didSet {
-            player?.isAutoPlay = isAutoPlay
-        }
-    }
 
     public var player: MediaPlayerProtocol? {
         didSet {
@@ -86,8 +81,6 @@ open class KSPlayerLayer: UIView {
             if let player = player {
                 KSLog("player is \(player)")
                 player.delegate = self
-                player.isAutoPlay = isAutoPlay
-                player.isLoopPlay = KSPlayerManager.isLoopPlay
                 player.contentMode = .scaleAspectFit
                 if let oldValue = oldValue {
                     player.playbackRate = oldValue.playbackRate
@@ -114,26 +107,14 @@ open class KSPlayerLayer: UIView {
         resetPlayer()
     }
 
-    public func set(url: URL, options: [String: Any]?, display: DisplayEnum = .plane) {
+    public func set(url: URL, options: KSOptions) {
         self.url = url
-        playOptions = options
-        if let cookies = playOptions?["Cookie"] as? [HTTPCookie] {
-            #if !os(macOS)
-            playOptions?[AVURLAssetHTTPCookiesKey] = cookies
-            #endif
-            var cookieStr = "Cookie: "
-            for cookie in cookies {
-                cookieStr.append("\(cookie.name)=\(cookie.value); ")
-            }
-            cookieStr = String(cookieStr.dropLast(2))
-            cookieStr.append("\r\n")
-            playOptions?["headers"] = cookieStr
-        }
+        self.options = options
         let firstPlayerType: MediaPlayerProtocol.Type
         if isWirelessRouteActive {
             // airplay的话，默认使用KSAVPlayer
             firstPlayerType = KSAVPlayer.self
-        } else if display != .plane {
+        } else if options.display != .plane {
             // AR模式只能用KSMEPlayer
             // swiftlint:disable force_cast
             firstPlayerType = NSClassFromString("KSPlayer.KSMEPlayer") as! MediaPlayerProtocol.Type
@@ -142,12 +123,11 @@ open class KSPlayerLayer: UIView {
             firstPlayerType = KSPlayerManager.firstPlayerType
         }
         if let player = player, type(of: player) == firstPlayerType {
-            player.replace(url: url, options: playOptions)
+            player.replace(url: url, options: options)
             prepareToPlay()
         } else {
-            player = firstPlayerType.init(url: url, options: playOptions)
+            player = firstPlayerType.init(url: url, options: options)
         }
-        player?.display = display
         timer = Timer.scheduledTimer(timeInterval: 0.5, target: self, selector: #selector(playerTimerAction), userInfo: nil, repeats: true)
         timer?.fireDate = Date.distantFuture
         registerRemoteControllEvent()
@@ -155,7 +135,7 @@ open class KSPlayerLayer: UIView {
 
     open func play() {
         UIApplication.shared.isIdleTimerDisabled = true
-        isAutoPlay = true
+        options?.isAutoPlay = true
         if let player = player {
             if player.isPreparedToPlay {
                 player.play()
@@ -180,7 +160,7 @@ open class KSPlayerLayer: UIView {
                 ]
             }
         }
-        isAutoPlay = false
+        options?.isAutoPlay = false
         player?.pause()
         timer?.fireDate = Date.distantFuture
         state = .paused
@@ -195,14 +175,13 @@ open class KSPlayerLayer: UIView {
         state = .notSetURL
         bufferedCount = 0
         shouldSeekTo = 0
-        isAutoPlay = KSPlayerManager.isAutoPlay
         player?.playbackRate = 1
         player?.playbackVolume = 1
         player?.shutdown()
         UIApplication.shared.isIdleTimerDisabled = false
     }
 
-    open func seek(time: TimeInterval, autoPlay: Bool = KSPlayerManager.isSeekedAutoPlay, completion handler: ((Bool) -> Void)? = nil) {
+    open func seek(time: TimeInterval, autoPlay: Bool, completion handler: ((Bool) -> Void)? = nil) {
         if time.isInfinite || time.isNaN {
             return
         }
@@ -218,7 +197,7 @@ open class KSPlayerLayer: UIView {
                 handler?(finished)
             }
         } else {
-            isAutoPlay = autoPlay
+            options?.isAutoPlay = autoPlay
             shouldSeekTo = time
         }
     }
@@ -247,7 +226,7 @@ extension KSPlayerLayer: MediaPlayerDelegate {
             ]
         }
         state = .readyToPlay
-        if player.isAutoPlay {
+        if options?.isAutoPlay ?? false {
             if shouldSeekTo > 0 {
                 seek(time: shouldSeekTo, autoPlay: true) { [weak self] _ in
                     guard let self = self else { return }
@@ -293,7 +272,7 @@ extension KSPlayerLayer: MediaPlayerDelegate {
         if let error = error as NSError? {
             if error.domain == "AVMoviePlayer" || error.domain == AVFoundationErrorDomain, let secondPlayerType = KSPlayerManager.secondPlayerType {
                 player.shutdown()
-                self.player = secondPlayerType.init(url: url!, options: playOptions)
+                self.player = secondPlayerType.init(url: url!, options: options!)
                 return
             }
             state = .error
@@ -315,7 +294,7 @@ extension KSPlayerLayer {
         startTime = CACurrentMediaTime()
         bufferedCount = 0
         player?.prepareToPlay()
-        if isAutoPlay {
+        if options?.isAutoPlay ?? false {
             state = .buffering
         } else {
             state = .notSetURL
@@ -375,11 +354,11 @@ extension KSPlayerLayer {
                 play()
             }
         } else if event.command == MPRemoteCommandCenter.shared().seekForwardCommand {
-            seek(time: player.currentPlaybackTime + player.duration * 0.01)
+            seek(time: player.currentPlaybackTime + player.duration * 0.01, autoPlay: options?.isSeekedAutoPlay ?? false)
         } else if event.command == MPRemoteCommandCenter.shared().seekBackwardCommand {
-            seek(time: player.currentPlaybackTime - player.duration * 0.01)
+            seek(time: player.currentPlaybackTime - player.duration * 0.01, autoPlay: options?.isSeekedAutoPlay ?? false)
         } else if let event = event as? MPChangePlaybackPositionCommandEvent {
-            seek(time: event.positionTime)
+            seek(time: event.positionTime, autoPlay: options?.isSeekedAutoPlay ?? false)
         } else if let event = event as? MPChangePlaybackRateCommandEvent {
             player.playbackRate = event.playbackRate
         }

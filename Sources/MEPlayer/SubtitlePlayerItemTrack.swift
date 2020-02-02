@@ -14,7 +14,7 @@ final class SubtitlePlayerItemTrack: MEPlayerItemTrack<SubtitleFrame> {
     private var preSubtitleFrame: SubtitleFrame?
 
     override func open() -> Bool {
-        guard super.open(), let codecContext = codecpar.ceateContext() else {
+        guard super.open(), let codecContext = codecpar.ceateContext(options: options) else {
             return false
         }
         self.codecContext = codecContext

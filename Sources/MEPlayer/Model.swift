@@ -168,11 +168,7 @@ extension MEFrame {
 
 // MARK: model
 
-public struct KSDefaultParameter {
-    /// 视频颜色编码方式 支持kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange kCVPixelFormatType_420YpCbCr8BiPlanarFullRange kCVPixelFormatType_32BGRA kCVPixelFormatType_420YpCbCr8Planar
-    public static var bufferPixelFormatType = kCVPixelFormatType_420YpCbCr8Planar
-    /// 开启 硬解 默认true
-    public static var enableVideotoolbox = true
+extension KSPlayerManager {
     /// 开启VR模式的陀飞轮
     public static var enableSensor = true
     /// 日志级别
@@ -186,20 +182,6 @@ public struct KSDefaultParameter {
     public static var audioPlayerSampleRate = Int32(AVAudioSession.sharedInstance().sampleRate)
     public static var audioPlayerMaximumChannels = AVAudioChannelCount(AVAudioSession.sharedInstance().outputNumberOfChannels)
     #endif
-
-    // 视频缓冲算法函数
-    public static var playable: (LoadingStatus) -> Bool = { status in
-        guard status.frameCount > 0 else { return false }
-        if status.isSecondOpen, status.isFirst || status.isSeek, status.frameCount == status.frameMaxCount {
-            if status.isFirst {
-                return true
-            } else if status.isSeek {
-                return status.packetCount >= status.fps
-            }
-        }
-        return status.packetCount > status.fps * Int(KSPlayerManager.preferredForwardBufferDuration)
-    }
-
     // 画面绘制类
     public static var renderViewType: (PixelRenderView & UIView).Type = {
         if canUseMetal() {
@@ -327,7 +309,7 @@ final class SubtitleFrame: Frame {
 final class AudioFrame: Frame {
     final class DataWrap: ObjectPoolItem {
         var data: [UnsafeMutablePointer<UInt8>?]
-        public let numberOfChannels = Int(KSDefaultParameter.audioPlayerMaximumChannels)
+        public let numberOfChannels = Int(KSPlayerManager.audioPlayerMaximumChannels)
         fileprivate var bufferSize: Int32 = 0 {
             didSet {
                 if bufferSize != oldValue {
@@ -392,5 +374,21 @@ extension PixelRenderView {
         if let render = render as? VideoVTBFrame, let corePixelBuffer = render.corePixelBuffer {
             set(pixelBuffer: corePixelBuffer, time: render.cmtime)
         }
+    }
+}
+
+extension Dictionary where Key == String {
+    var avOptions: OpaquePointer? {
+        var avOptions: OpaquePointer?
+        forEach { key, value in
+            if let i = value as? Int64 {
+                av_dict_set_int(&avOptions, key, i, 0)
+            } else if let i = value as? Int {
+                av_dict_set_int(&avOptions, key, Int64(i), 0)
+            } else if let string = value as? String {
+                av_dict_set(&avOptions, key, string, 0)
+            }
+        }
+        return avOptions
     }
 }
