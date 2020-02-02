@@ -10,13 +10,11 @@ import AppKit
 import KSPlayer
 class ViewController: NSViewController {
     private let playerView = MacVideoPlayerView()
-    private let options: [String: Any] = ["analyzeduration": 1_000_000, "probesize": 1_000_000, "rw_timeout": 30_000_000, "reconnect": 1, "fpsprobesize": 5]
-
     var url: URL? {
         didSet {
             if let url = url {
-                let res0 = KSPlayerResourceDefinition(url: url, definition: "高清", options: options)
-                let res1 = KSPlayerResourceDefinition(url: url, definition: "标清", options: options)
+                let res0 = KSPlayerResourceDefinition(url: url, definition: "高清")
+                let res1 = KSPlayerResourceDefinition(url: url, definition: "标清")
                 let asset = KSPlayerResource(name: url.lastPathComponent, definitions: [res0, res1], cover: URL(string: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c5/Big_buck_bunny_poster_big.jpg/848px-Big_buck_bunny_poster_big.jpg"))
                 playerView.set(resource: asset)
             } else {

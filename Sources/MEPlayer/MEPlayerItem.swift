@@ -11,7 +11,7 @@ import VideoToolbox
 
 final class MEPlayerItem {
     private let url: URL
-    private let options: [String: Any]?
+    private let options: KSOptions
     private let operationQueue = OperationQueue()
     private let semaphore = DispatchSemaphore(value: 1)
     private let condition = NSCondition()
@@ -50,14 +50,13 @@ final class MEPlayerItem {
     }
 
     weak var delegate: MEPlayerDelegate?
-    var isLoopPlay = false
 
-    init(url: URL, options: [String: Any]?) {
+    init(url: URL, options: KSOptions) {
         self.url = url
         self.options = options
         avformat_network_init()
         av_log_set_callback { _, level, format, args in
-            guard let format = format, level <= KSDefaultParameter.logLevel else {
+            guard let format = format, level <= KSPlayerManager.logLevel else {
                 return
             }
             var log = String(cString: format)
@@ -112,16 +111,7 @@ extension MEPlayerItem {
             }
         }
         formatCtx.pointee.interrupt_callback = interruptCB
-        var avOptions: OpaquePointer?
-        options?.forEach { key, value in
-            if let i = value as? Int64 {
-                av_dict_set_int(&avOptions, key, i, 0)
-            } else if let i = value as? Int {
-                av_dict_set_int(&avOptions, key, Int64(i), 0)
-            } else if let string = value as? String {
-                av_dict_set(&avOptions, key, string, 0)
-            }
-        }
+        var avOptions = options.formatContextOptions.avOptions
         var result = avformat_open_input(&self.formatCtx, url.isFileURL ? url.path : url.absoluteString, nil, &avOptions)
         av_dict_free(&avOptions)
         guard result == 0 else {
@@ -149,7 +139,7 @@ extension MEPlayerItem {
         tracks.removeAll()
         for i in 0 ..< Int(formatCtx.nb_streams) {
             if let coreStream = formatCtx.streams[i],
-                let codec = coreStream.createCodec() {
+                let codec = coreStream.createCodec(options: options) {
                 codec.delegate = self
                 tracks.append(codec)
             }
@@ -172,7 +162,7 @@ extension MEPlayerItem {
         readOperation = BlockOperation { [weak self] in
             guard let self = self else { return }
             Thread.current.name = (self.operationQueue.name ?? "") + "_read"
-            Thread.current.stackSize = KSDefaultParameter.stackSize
+            Thread.current.stackSize = KSPlayerManager.stackSize
             self.readThread()
         }
         readOperation?.queuePriority = .veryHigh
@@ -210,7 +200,7 @@ extension MEPlayerItem {
                     tracks.first { $0.isEnabled && $0.stream.pointee.index == packet.corePacket.pointee.stream_index }?.putPacket(packet: packet)
                 } else {
                     if IS_AVERROR_EOF(readResult) {
-                        if isLoopPlay {
+                        if options.isLoopPlay {
                             if tracks.first(where: { $0.isLoopPlay }) == nil {
                                 tracks.forEach { $0.isLoopPlay = true }
                                 _ = av_seek_frame(formatCtx, -1, 0, AVSEEK_FLAG_BACKWARD)
@@ -264,7 +254,7 @@ extension MEPlayerItem: MediaPlayback {
         openOperation = BlockOperation { [weak self] in
             guard let self = self else { return }
             Thread.current.name = (self.operationQueue.name ?? "") + "_open"
-            Thread.current.stackSize = KSDefaultParameter.stackSize
+            Thread.current.stackSize = KSPlayerManager.stackSize
             self.openThread()
         }
         openOperation?.queuePriority = .veryHigh
@@ -330,7 +320,7 @@ extension MEPlayerItem: CodecCapacityDelegate {
     func codecFailed(error: NSError, track: PlayerItemTrackProtocol) {
         KSLog("Decoder did Failed : \(error)")
         if track is VTBPlayerItemTrack {
-            let newVideoCodec = VideoPlayerItemTrack(stream: track.stream)
+            let newVideoCodec = VideoPlayerItemTrack(stream: track.stream, options: options)
             if newVideoCodec.open() {
                 track.shutdown()
                 newVideoCodec.delegate = self
@@ -349,9 +339,9 @@ extension MEPlayerItem: CodecCapacityDelegate {
         let mix = MixCapacity(array: tracks.filter { $0.isEnabled && ($0.mediaType == .audio || $0.mediaType == .video) })
         delegate?.sourceDidChange(capacity: mix)
         if mix.isPlayable {
-            if mix.loadedTime > KSPlayerManager.maxBufferDuration {
+            if mix.loadedTime > options.maxBufferDuration {
                 pause()
-            } else if mix.loadedTime < KSPlayerManager.maxBufferDuration / 2 {
+            } else if mix.loadedTime < options.maxBufferDuration / 2 {
                 resume()
             }
         } else {
@@ -366,7 +356,7 @@ extension MEPlayerItem: CodecCapacityDelegate {
         }
         let allSatisfy = tracks.filter { $0.isEnabled && ($0.mediaType == .audio || $0.mediaType == .video) }.allSatisfy { $0.isFinished && $0.loadedCount == 0 }
         delegate?.sourceDidFinished(type: track.mediaType, allSatisfy: allSatisfy)
-        if allSatisfy, isLoopPlay {
+        if allSatisfy, options.isLoopPlay {
             isAudioStalled = false
             tracks.forEach { $0.changeLoop() }
             if state == .finished {
@@ -420,30 +410,28 @@ extension UnsafeMutablePointer where Pointee == AVStream {
         return 0.0
     }
 
-    func createCodec() -> PlayerItemTrackProtocol? {
+    func createCodec(options: KSOptions) -> PlayerItemTrackProtocol? {
         switch pointee.codecpar.pointee.codec_type {
         case AVMEDIA_TYPE_AUDIO:
-            let codec = AudioPlayerItemTrack(stream: self)
+            let codec = AudioPlayerItemTrack(stream: self, options: options)
             return codec.open() ? codec : nil
         case AVMEDIA_TYPE_SUBTITLE:
-            let codec = SubtitlePlayerItemTrack(stream: self)
+            let codec = SubtitlePlayerItemTrack(stream: self, options: options)
             return codec.open() ? codec : nil
         case AVMEDIA_TYPE_VIDEO:
             var videotoolbox = false
-            if KSDefaultParameter.enableVideotoolbox {
-                if pointee.codecpar.pointee.codec_id == AV_CODEC_ID_H264 {
-                    videotoolbox = true
-                } else if pointee.codecpar.pointee.codec_id == AV_CODEC_ID_HEVC, #available(iOS 11.0, tvOS 11.0, OSX 10.13, *), VTIsHardwareDecodeSupported(kCMVideoCodecType_HEVC) {
-                    videotoolbox = true
-                }
+            if pointee.codecpar.pointee.codec_id == AV_CODEC_ID_H264, options.hardwareDecodeH264 {
+                videotoolbox = true
+            } else if pointee.codecpar.pointee.codec_id == AV_CODEC_ID_HEVC, #available(iOS 11.0, tvOS 11.0, OSX 10.13, *), VTIsHardwareDecodeSupported(kCMVideoCodecType_HEVC), options.hardwareDecodeH265 {
+                videotoolbox = true
             }
             if videotoolbox {
-                let codec = VTBPlayerItemTrack(stream: self)
+                let codec = VTBPlayerItemTrack(stream: self, options: options)
                 if codec.open() {
                     return codec
                 }
             }
-            let codec = VideoPlayerItemTrack(stream: self)
+            let codec = VideoPlayerItemTrack(stream: self, options: options)
             return codec.open() ? codec : nil
         default:
             return nil

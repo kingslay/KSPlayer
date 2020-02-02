@@ -25,7 +25,7 @@ final class VideoOutput: NSObject, FrameOutput {
     }()
 
     override init() {
-        renderView = KSDefaultParameter.renderViewType.init()
+        renderView = KSPlayerManager.renderViewType.init()
     }
 
     func play() {

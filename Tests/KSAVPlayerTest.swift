@@ -18,7 +18,7 @@ class KSAVPlayerTest: XCTestCase {
     }
 
     func set(path: String) {
-        let play = KSAVPlayer(url: URL(fileURLWithPath: path))
+        let play = KSAVPlayer(url: URL(fileURLWithPath: path), options: KSOptions())
         play.delegate = self
         play.prepareToPlay()
         readyToPlayExpectation = expectation(description: "openVideo")

@@ -25,7 +25,7 @@ class AudioViewController: UIViewController {
         view.layoutIfNeeded()
 
         if let resource = resource {
-            playerView.set(url: resource.definitions[0].url)
+            playerView.set(url: resource.definitions[0].url, options: KSOptions())
         }
     }
 }

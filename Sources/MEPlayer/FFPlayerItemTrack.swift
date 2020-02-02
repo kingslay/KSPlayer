@@ -27,7 +27,7 @@ class FFPlayerItemTrack<Frame: MEFrame>: AsyncPlayerItemTrack<Frame> {
     }
 
     override func open() -> Bool {
-        if let codecContext = codecpar.ceateContext(), let coreFrame = av_frame_alloc() {
+        if let codecContext = codecpar.ceateContext(options: options), let coreFrame = av_frame_alloc() {
             self.coreFrame = coreFrame
             self.codecContext = codecContext
             return super.open()
@@ -77,7 +77,7 @@ class FFPlayerItemTrack<Frame: MEFrame>: AsyncPlayerItemTrack<Frame> {
 }
 
 extension UnsafeMutablePointer where Pointee == AVCodecParameters {
-    func ceateContext() -> UnsafeMutablePointer<AVCodecContext>? {
+    func ceateContext(options: KSOptions) -> UnsafeMutablePointer<AVCodecContext>? {
         var codecContextOption = avcodec_alloc_context3(nil)
         guard let codecContext = codecContextOption else {
             return nil
@@ -92,7 +92,15 @@ extension UnsafeMutablePointer where Pointee == AVCodecParameters {
             return nil
         }
         codecContext.pointee.codec_id = codec.pointee.id
-        result = avcodec_open2(codecContext, codec, nil)
+        var avOptions = options.decoderOptions.avOptions
+        if options.threadsAuto, av_dict_get(avOptions, "threads", nil, 0) != nil {
+            av_dict_set(&avOptions, "threads", "auto", 0)
+        }
+        if options.refcountedFrames, av_dict_get(avOptions, "refcounted_frames", nil, 0) != nil,
+            codecContext.pointee.codec_type == AVMEDIA_TYPE_VIDEO || codecContext.pointee.codec_type == AVMEDIA_TYPE_AUDIO {
+            av_dict_set(&avOptions, "refcounted_frames", "1", 0)
+        }
+        result = avcodec_open2(codecContext, codec, &avOptions)
         guard result == 0 else {
             avcodec_free_context(&codecContextOption)
             return nil

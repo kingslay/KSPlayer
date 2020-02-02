@@ -19,7 +19,7 @@ public class KSMEPlayer {
     private var needRefreshView = true
     private var playerItem: MEPlayerItem
     private let videoOutput = VideoOutput()
-    public var isAutoPlay = true
+    private var options: KSOptions
     public private(set) var bufferingProgress = 0 {
         didSet {
             delegate?.changeBuffering(player: self, progress: bufferingProgress)
@@ -57,11 +57,13 @@ public class KSMEPlayer {
         }
     }
 
-    public required init(url: URL, options: [String: Any]? = [:]) {
+    public required init(url: URL, options: KSOptions) {
         playerItem = MEPlayerItem(url: url, options: options)
+        self.options = options
         playerItem.delegate = self
         audioOutput.renderSource = playerItem
         videoOutput.renderSource = playerItem
+        videoOutput.renderView.display = options.display
         setAudioSession()
     }
 
@@ -94,7 +96,7 @@ extension KSMEPlayer: MEPlayerDelegate {
         isPreparedToPlay = true
         runInMainqueue { [weak self] in
             guard let self = self else { return }
-            if self.isAutoPlay {
+            if self.options.isAutoPlay {
                 self.play()
             }
             if self.playerItem.rotation != 0.0 {
@@ -125,7 +127,7 @@ extension KSMEPlayer: MEPlayerDelegate {
                 self.videoOutput.pause()
             }
             if allSatisfy {
-                if self.isLoopPlay {
+                if self.options.isLoopPlay {
                     self.loopCount += 1
                     self.delegate?.playBack(player: self, loopCount: self.loopCount)
                     self.audioOutput.play()
@@ -181,21 +183,12 @@ extension KSMEPlayer: MEPlayerDelegate {
 }
 
 extension KSMEPlayer: MediaPlayerProtocol {
-    public var isLoopPlay: Bool {
-        get {
-            return playerItem.isLoopPlay
-        }
-        set {
-            playerItem.isLoopPlay = newValue
-        }
-    }
-
     public var preferredForwardBufferDuration: TimeInterval {
         get {
-            return KSPlayerManager.preferredForwardBufferDuration
+            return options.preferredForwardBufferDuration
         }
         set {
-            KSPlayerManager.preferredForwardBufferDuration = newValue
+            options.preferredForwardBufferDuration = newValue
         }
     }
 
@@ -228,16 +221,17 @@ extension KSMEPlayer: MediaPlayerProtocol {
         return videoOutput.renderView
     }
 
-    public func replace(url: URL, options: [String: Any]? = nil) {
+    public func replace(url: URL, options: KSOptions) {
         KSLog("replaceUrl \(self)")
         shutdown()
         audioOutput.shutdown()
         videoOutput.shutdown()
         playerItem = MEPlayerItem(url: url, options: options)
-        playerItem.isLoopPlay = isLoopPlay
+        self.options = options
         playerItem.delegate = self
         audioOutput.renderSource = playerItem
         videoOutput.renderSource = playerItem
+        videoOutput.renderView.display = options.display
     }
 
     public var currentPlaybackTime: TimeInterval {
@@ -332,15 +326,6 @@ extension KSMEPlayer: MediaPlayerProtocol {
         }
         get {
             return audioOutput.audioPlayer.isMuted
-        }
-    }
-
-    public var display: DisplayEnum {
-        get {
-            return videoOutput.renderView.display
-        }
-        set {
-            videoOutput.renderView.display = newValue
         }
     }
 }

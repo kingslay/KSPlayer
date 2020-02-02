@@ -18,10 +18,9 @@ class SWScale {
     private let format: AVPixelFormat
     private let height: Int32
     var dstFrame: UnsafeMutablePointer<AVFrame>?
-    init?(width: Int32, height: Int32, format: AVPixelFormat) {
+    init?(width: Int32, height: Int32, format: AVPixelFormat, dstFormat: AVPixelFormat) {
         self.format = format
         self.height = height
-        let dstFormat = KSDefaultParameter.bufferPixelFormatType.format
         imgConvertCtx = sws_getCachedContext(imgConvertCtx, width, height, format, width, height, dstFormat, SWS_BICUBIC, nil, nil, nil)
         guard imgConvertCtx != nil else {
             return nil

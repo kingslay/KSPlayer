@@ -21,7 +21,7 @@ final class VideoPlayerItemTrack: FFPlayerItemTrack<VideoVTBFrame> {
         }
         let format = AVPixelFormat(rawValue: codecpar.pointee.format)
         if !PixelBuffer.isSupported(format: format) {
-            scale = SWScale(width: width, height: height, format: format)
+            scale = SWScale(width: width, height: height, format: format, dstFormat: options.bufferPixelFormatType.format)
             if scale == nil {
                 return false
             }

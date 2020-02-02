@@ -14,15 +14,15 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     var window: UIWindow?
     func application(_: UIApplication, didFinishLaunchingWithOptions _: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         let window = UIWindow()
-//        KSPlayerManager.firstPlayerType = KSAVPlayer.self
-//        KSPlayerManager.isLoopPlay = true
-        KSPlayerManager.isAutoPlay = true
         KSPlayerManager.canBackgroundPlay = true
-        KSPlayerManager.isSecondOpen = true
-        KSPlayerManager.isAccurateSeek = true
+        KSPlayerManager.logLevel = AV_LOG_DEBUG
         KSPlayerManager.firstPlayerType = KSMEPlayer.self
-        KSDefaultParameter.logLevel = AV_LOG_DEBUG
-        KSDefaultParameter.enableVideotoolbox = true
+        KSOptions.isAutoPlay = true
+        KSOptions.isSecondOpen = true
+        KSOptions.isAccurateSeek = true
+        KSOptions.isLoopPlay = true
+        KSOptions.hardwareDecodeH265 = true
+        KSOptions.hardwareDecodeH264 = true
         window.rootViewController = UINavigationController(rootViewController: MasterViewController())
         window.makeKeyAndVisible()
         self.window = window

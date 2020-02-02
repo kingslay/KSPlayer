@@ -42,7 +42,7 @@ class SamplePlayerItemTrack<Frame: MEFrame>: AsyncPlayerItemTrack<Frame> {
         let dic: NSMutableDictionary = [
             kCVImageBufferChromaLocationBottomFieldKey: "left",
             kCVImageBufferChromaLocationTopFieldKey: "left",
-            kCMFormatDescriptionExtension_FullRangeVideo: KSDefaultParameter.bufferPixelFormatType != kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange,
+            kCMFormatDescriptionExtension_FullRangeVideo: options.bufferPixelFormatType != kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange,
             kCMFormatDescriptionExtension_SampleDescriptionExtensionAtoms: [
                 codecpar.pointee.codec_id.rawValue == AV_CODEC_ID_HEVC.rawValue ? "hvcC" : "avcC": NSData(bytes: extradata, length: Int(extradataSize)),
             ],
@@ -157,7 +157,7 @@ final class VTBPlayerItemTrack: SamplePlayerItemTrack<VideoVTBFrame> {
             return false
         }
         let dic: NSDictionary = [
-            kCVPixelBufferPixelFormatTypeKey: KSDefaultParameter.bufferPixelFormatType,
+            kCVPixelBufferPixelFormatTypeKey: options.bufferPixelFormatType,
             kCVPixelBufferWidthKey: codecpar.pointee.width,
             kCVPixelBufferHeightKey: codecpar.pointee.height,
             kCVPixelBufferMetalCompatibilityKey: true,

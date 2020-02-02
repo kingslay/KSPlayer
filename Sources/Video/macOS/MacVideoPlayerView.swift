@@ -134,7 +134,7 @@ extension MacVideoPlayerView {
                 resource?.subtitle = KSURLSubtitle(url: url)
                 return true
             } else if MacVideoPlayerView.playableFileExt.contains(url.pathExtension.lowercased()) {
-                set(resource: KSPlayerResource(url: url, options: nil))
+                set(resource: KSPlayerResource(url: url, options: KSOptions()))
                 return true
             }
         }

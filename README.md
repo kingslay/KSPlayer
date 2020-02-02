@@ -102,8 +102,9 @@ playerView.set(resource: asset)
 
 ```swift
 let header = ["User-Agent":"KSPlayer"]
-let options = ["AVURLAssetHTTPHeaderFieldsKey":header]
-  
+let options = KSOptions()
+options.avOptions = ["AVURLAssetHTTPHeaderFieldsKey":header]
+
 let definition = KSPlayerResourceDefinition(url: URL(string: "http://clips.vorwaerts-gmbh.de/big_buck_bunny.mp4")!,
                                             definition: "高清",
                                             options: options)
@@ -136,15 +137,11 @@ public protocol PlayerControllerDelegate: class {
 ## 六、进阶用法
 - 继承 PlayerView 自定义播放逻辑和UI。
 
-- 设置KSPlayerManager 、KSDefaultParameter里面的属性
+- 设置KSPlayerManager 、KSOptions里面的属性
 
   ```swift
   public struct KSPlayerManager {
-      /// 是否自动播放，默认false
-      public static var isAutoPlay = false
-      /// seek完是否自动播放
-      public static var isSeekedAutoPlay = true
-      /// 顶部返回、标题、AirPlay按钮 显示选项，默认.Always，可选.HorizantalOnly、.None
+       /// 顶部返回、标题、AirPlay按钮 显示选项，默认.Always，可选.HorizantalOnly、.None
       public static var topBarShowInCase = KSPlayerTopBarShowCase.always
       /// 自动隐藏操作栏的时间间隔 默认5秒
       public static var animateDelayTimeInterval = TimeInterval(5)
@@ -156,60 +153,43 @@ public protocol PlayerControllerDelegate: class {
       public static var enablePlaytimeGestures = true
       /// 竖屏是否开启手势控制 默认false
       public static var enablePortraitGestures = false
-      /// 最低缓存视频时间
-      public static var preferredForwardBufferDuration = 3.0
-       /// 最大缓存视频时间
-      public static var maxBufferDuration = 30.0
       /// 播放内核选择策略 先使用firstPlayer，失败了自动切换到secondPlayer，播放内核有KSAVPlayer、KSMEPlayer两个选项
       public static var firstPlayerType: MediaPlayerProtocol.Type = KSAVPlayer.self
       public static var secondPlayerType: MediaPlayerProtocol.Type?
+      /// 是否能后台播放视频
+      public static var canBackgroundPlay = false
+      /// 日志输出方式
+      public static var logFunctionPoint: (String) -> Void = {
+          print($0)
+      }
+      /// 开启VR模式的陀飞轮
+      public static var enableSensor = true
+      /// 日志级别
+      public static var logLevel = AV_LOG_WARNING
+      public static var stackSize = 16384
+      public static var audioPlayerMaximumFramesPerSlice = AVAudioFrameCount(4096)
+  }
+  public class KSOptions {
+      /// 视频颜色编码方式 支持kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange kCVPixelFormatType_420YpCbCr8BiPlanarFullRange kCVPixelFormatType_32BGRA kCVPixelFormatType_420YpCbCr8Planar
+      public static var bufferPixelFormatType = kCVPixelFormatType_420YpCbCr8BiPlanarFullRange
+      public static var hardwareDecodeH264 = true
+      public static var hardwareDecodeH265 = true
+      /// 最低缓存视频时间
+      public static var preferredForwardBufferDuration = 3.0
+      /// 最大缓存视频时间
+      public static var maxBufferDuration = 30.0
       /// 是否开启秒开
       public static var isSecondOpen = false
       /// 开启精确seek
       public static var isAccurateSeek = true
       /// 开启无缝循环播放
       public static var isLoopPlay = false
-      /// 日志输出方式
-      public static var logFunctionPoint: (String) -> Void = {
-          print($0)
-      }
+      /// 是否自动播放，默认false
+      public static var isAutoPlay = false
+      /// seek完是否自动播放
+      public static var isSeekedAutoPlay = true
   }
-  public struct KSDefaultParameter {
-      /// 视频颜色编码方式 支持kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange kCVPixelFormatType_420YpCbCr8BiPlanarFullRange kCVPixelFormatType_32BGRA 默认是kCVPixelFormatType_420YpCbCr8BiPlanarFullRange
-      public static var bufferPixelFormatType = kCVPixelFormatType_420YpCbCr8BiPlanarFullRange
-      /// 开启 硬解 默认true
-      public static var enableVideotoolbox = true
-      /// 日志级别
-      public static var logLevel = AV_LOG_WARNING
-      public static var audioPlayerMaximumFramesPerSlice = Int32(4096)
-      public static var audioPlayerMaximumChannels = Int32(2)
-      public static var audioPlayerSampleRate = Int32(44100)
-      // 视频缓冲算法函数
-      public static var playable: (LoadingStatus) -> Bool = { status in
-          guard status.frameCount > 0 else { return false }
-          if status.isSecondOpen, status.isFirst || status.isSeek, status.frameCount == status.frameMaxCount {
-              if status.isFirst {
-                  return true
-              } else if status.isSeek {
-                  return status.packetCount >= status.fps
-              }
-          }
-          return status.packetCount > status.fps * Int(KSPlayerManager.preferredForwardBufferDuration)
-      }
   
-      // 画面绘制类
-      public static var renderViewType: (PixelRenderView & UIView).Type = {
-          #if arch(arm)
-          return OpenGLPlayView.self
-          #else
-          #if targetEnvironment(simulator)
-          return SampleBufferPlayerView.self
-          #else
-          return MetalPlayView.self
-          #endif
-          #endif
-      }()
-  }
   ```
 
 

@@ -17,8 +17,6 @@ public protocol MediaPlayback: AnyObject {
     var duration: TimeInterval { get }
     var naturalSize: CGSize { get }
     var currentPlaybackTime: TimeInterval { get }
-    /// 开启无缝循环播放
-    var isLoopPlay: Bool { get set }
     func prepareToPlay()
     func play()
     func shutdown()
@@ -34,7 +32,6 @@ public protocol MediaPlayerProtocol: MediaPlayback {
     var loadState: MediaLoadState { get }
     var isPlaying: Bool { get }
     //    var numberOfBytesTransferred: Int64 { get }
-    var isAutoPlay: Bool { get set }
     var isMuted: Bool { get set }
     var allowsExternalPlayback: Bool { get set }
     var usesExternalPlaybackWhileExternalScreenIsActive: Bool { get set }
@@ -44,9 +41,8 @@ public protocol MediaPlayerProtocol: MediaPlayback {
     var contentMode: UIViewContentMode { get set }
     var preferredForwardBufferDuration: TimeInterval { get set }
     var subtitleDataSouce: SubtitleDataSouce? { get }
-    var display: DisplayEnum { get set }
-    init(url: URL, options: [String: Any]?)
-    func replace(url: URL, options: [String: Any]?)
+    init(url: URL, options: KSOptions)
+    func replace(url: URL, options: KSOptions)
     func pause()
     func enterBackground()
     func enterForeground()
@@ -88,10 +84,6 @@ public enum KSPlayerTopBarShowCase {
 }
 
 public struct KSPlayerManager {
-    /// 是否自动播放，默认false
-    public static var isAutoPlay = false
-    /// seek完是否自动播放
-    public static var isSeekedAutoPlay = true
     /// 顶部返回、标题、AirPlay按钮 显示选项，默认.Always，可选.HorizantalOnly、.None
     public static var topBarShowInCase = KSPlayerTopBarShowCase.always
     /// 自动隐藏操作栏的时间间隔 默认5秒
@@ -104,19 +96,9 @@ public struct KSPlayerManager {
     public static var enablePlaytimeGestures = true
     /// 竖屏是否开启手势控制 默认false
     public static var enablePortraitGestures = false
-    /// 最低缓存视频时间
-    public static var preferredForwardBufferDuration = 3.0
-    /// 最大缓存视频时间
-    public static var maxBufferDuration = 30.0
     /// 播放内核选择策略 先使用firstPlayer，失败了自动切换到secondPlayer，播放内核有KSAVPlayer、KSMEPlayer两个选项
     public static var firstPlayerType: MediaPlayerProtocol.Type = KSAVPlayer.self
     public static var secondPlayerType: MediaPlayerProtocol.Type?
-    /// 是否开启秒开
-    public static var isSecondOpen = false
-    /// 开启精确seek
-    public static var isAccurateSeek = true
-    /// 开启无缝循环播放
-    public static var isLoopPlay = false
     /// 是否能后台播放视频
     public static var canBackgroundPlay = false
     /// 日志输出方式
