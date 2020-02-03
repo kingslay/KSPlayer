@@ -59,8 +59,6 @@ public class KSOptions {
 
     public var avOptions = [String: Any]()
     public var formatContextOptions = [String: Any]()
-    public var threadsAuto = true
-    public var refcountedFrames = true
     public var decoderOptions = [String: Any]()
     public init() {
         formatContextOptions["analyzeduration"] = 1_000_000
@@ -69,6 +67,9 @@ public class KSOptions {
         formatContextOptions["reconnect"] = 1
         formatContextOptions["timeout"] = 30_000_000
         formatContextOptions["user-agent"] = "ksplayer"
+        decoderOptions["threads"] = "auto"
+        decoderOptions["refcounted_frames"] = "1"
+
     }
 
     public func setCookie(_ cookies: [HTTPCookie]) {
