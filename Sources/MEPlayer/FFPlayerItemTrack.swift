@@ -93,13 +93,6 @@ extension UnsafeMutablePointer where Pointee == AVCodecParameters {
         }
         codecContext.pointee.codec_id = codec.pointee.id
         var avOptions = options.decoderOptions.avOptions
-        if options.threadsAuto, av_dict_get(avOptions, "threads", nil, 0) != nil {
-            av_dict_set(&avOptions, "threads", "auto", 0)
-        }
-        if options.refcountedFrames, av_dict_get(avOptions, "refcounted_frames", nil, 0) != nil,
-            codecContext.pointee.codec_type == AVMEDIA_TYPE_VIDEO || codecContext.pointee.codec_type == AVMEDIA_TYPE_AUDIO {
-            av_dict_set(&avOptions, "refcounted_frames", "1", 0)
-        }
         result = avcodec_open2(codecContext, codec, &avOptions)
         guard result == 0 else {
             avcodec_free_context(&codecContextOption)
