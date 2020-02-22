@@ -3,65 +3,84 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 52;
+	objectVersion = 50;
 	objects = {
 
 /* Begin PBXAggregateTarget section */
-		01D945EF01B3C42501631DE8715755D2 /* Openssl-tvOS */ = {
+		030728825BA2053F8CBB6F688C518CFF /* Openssl-tvOS10.2 */ = {
 			isa = PBXAggregateTarget;
-			buildConfigurationList = 6C9B00AE1F373FEBEB668B7AEAFCB152 /* Build configuration list for PBXAggregateTarget "Openssl-tvOS" */;
+			buildConfigurationList = 7A2348B6F0D4B9C7A962A8C589630EA7 /* Build configuration list for PBXAggregateTarget "Openssl-tvOS10.2" */;
 			buildPhases = (
 			);
 			dependencies = (
 			);
-			name = "Openssl-tvOS";
+			name = "Openssl-tvOS10.2";
 		};
-		772EDCEFF8838C79EA494BEF27278D65 /* Openssl-macOS */ = {
+		987B1118B7CC44271F5289B5A1EAE39A /* Openssl-macOS10.12 */ = {
 			isa = PBXAggregateTarget;
-			buildConfigurationList = C090FCC12D6305AD4AC7B60E8617A195 /* Build configuration list for PBXAggregateTarget "Openssl-macOS" */;
+			buildConfigurationList = 5264182A40779FB7EA91F7B7975A391E /* Build configuration list for PBXAggregateTarget "Openssl-macOS10.12" */;
 			buildPhases = (
 			);
 			dependencies = (
 			);
-			name = "Openssl-macOS";
+			name = "Openssl-macOS10.12";
 		};
-		EBFB4612D15C2B2A64648734332276CD /* Openssl-iOS */ = {
+		D5B5F1EB1CA703B262F3B9F6A123B738 /* Openssl-iOS13.0 */ = {
 			isa = PBXAggregateTarget;
-			buildConfigurationList = A1CA7555E89973626993135024C23324 /* Build configuration list for PBXAggregateTarget "Openssl-iOS" */;
+			buildConfigurationList = C5321EB5216EA167DE898580792D1E5D /* Build configuration list for PBXAggregateTarget "Openssl-iOS13.0" */;
 			buildPhases = (
 			);
 			dependencies = (
 			);
-			name = "Openssl-iOS";
+			name = "Openssl-iOS13.0";
+		};
+		DA9A3FF48A50EE0A3A2C0DBCF39B901E /* Openssl-iOS10.0 */ = {
+			isa = PBXAggregateTarget;
+			buildConfigurationList = 1D0D0C7B3A43A49EB9D592500A20F68D /* Build configuration list for PBXAggregateTarget "Openssl-iOS10.0" */;
+			buildPhases = (
+			);
+			dependencies = (
+			);
+			name = "Openssl-iOS10.0";
 		};
 /* End PBXAggregateTarget section */
 
 /* Begin PBXFileReference section */
-		618C9A30CC2977192F6DC08F2D925DB3 /* OpenSSL.xcframework */ = {isa = PBXFileReference; includeInIndex = 1; name = OpenSSL.xcframework; path = FFmpeg/OpenSSL.xcframework; sourceTree = "<group>"; };
-		8CF8501C4E3C14583A829927CCF2D350 /* Openssl-iOS.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Openssl-iOS.debug.xcconfig"; sourceTree = "<group>"; };
-		8D3EF2BFDAFBD25D925A26BC1B22A0D8 /* Openssl-tvOS.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Openssl-tvOS.debug.xcconfig"; path = "../Openssl-tvOS/Openssl-tvOS.debug.xcconfig"; sourceTree = "<group>"; };
-		9E0345C1A03F1107F56C9DBA44D5CACE /* Openssl.podspec */ = {isa = PBXFileReference; explicitFileType = text.script.ruby; includeInIndex = 1; indentWidth = 2; lastKnownFileType = text; path = Openssl.podspec; sourceTree = "<group>"; tabWidth = 2; xcLanguageSpecificationIdentifier = xcode.lang.ruby; };
-		9EAF591ABEEA82C2E164CE2F098A7501 /* Openssl-tvOS.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Openssl-tvOS.release.xcconfig"; path = "../Openssl-tvOS/Openssl-tvOS.release.xcconfig"; sourceTree = "<group>"; };
-		A7829E643D83B3256B7AD9A5EF853625 /* Openssl-iOS.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Openssl-iOS.release.xcconfig"; sourceTree = "<group>"; };
-		AFC0496BF9B6B2179715D4CA4D49F68C /* Openssl-macOS.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Openssl-macOS.debug.xcconfig"; path = "../Openssl-macOS/Openssl-macOS.debug.xcconfig"; sourceTree = "<group>"; };
-		EADD4AA6CBD12AC8D14A6C8930482F90 /* Openssl-macOS.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Openssl-macOS.release.xcconfig"; path = "../Openssl-macOS/Openssl-macOS.release.xcconfig"; sourceTree = "<group>"; };
+		19428EF311C39AAC9CDFE3358E648B3E /* Openssl.podspec */ = {isa = PBXFileReference; explicitFileType = text.script.ruby; includeInIndex = 1; indentWidth = 2; lastKnownFileType = text; path = Openssl.podspec; sourceTree = "<group>"; tabWidth = 2; xcLanguageSpecificationIdentifier = xcode.lang.ruby; };
+		3C5C360A03D8104086914A032BC1C6FF /* Openssl-macOS10.12.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Openssl-macOS10.12.debug.xcconfig"; path = "../Openssl-macOS10.12/Openssl-macOS10.12.debug.xcconfig"; sourceTree = "<group>"; };
+		4139F467F91A7D64E6DBCD8176A28563 /* Openssl-tvOS10.2.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Openssl-tvOS10.2.debug.xcconfig"; path = "../Openssl-tvOS10.2/Openssl-tvOS10.2.debug.xcconfig"; sourceTree = "<group>"; };
+		83C149233A2DCF25BD79089C16A70BA2 /* Openssl-iOS13.0.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Openssl-iOS13.0.release.xcconfig"; path = "../Openssl-iOS13.0/Openssl-iOS13.0.release.xcconfig"; sourceTree = "<group>"; };
+		8CDB52F914608750B5BFC5454331F442 /* Openssl-iOS10.0.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Openssl-iOS10.0.release.xcconfig"; sourceTree = "<group>"; };
+		A3D8A189A5489278244FC68957ED2ADD /* Openssl-iOS10.0.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Openssl-iOS10.0.debug.xcconfig"; sourceTree = "<group>"; };
+		A9FBD7135F3EE332C6C630C5B135B3DD /* Openssl-iOS13.0.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Openssl-iOS13.0.debug.xcconfig"; path = "../Openssl-iOS13.0/Openssl-iOS13.0.debug.xcconfig"; sourceTree = "<group>"; };
+		BABB0F78F45D056091E193AB67D9621D /* OpenSSL.xcframework */ = {isa = PBXFileReference; includeInIndex = 1; name = OpenSSL.xcframework; path = FFmpeg/OpenSSL.xcframework; sourceTree = "<group>"; };
+		E0247683ED43C13B10E653C3930724BA /* Openssl-tvOS10.2.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Openssl-tvOS10.2.release.xcconfig"; path = "../Openssl-tvOS10.2/Openssl-tvOS10.2.release.xcconfig"; sourceTree = "<group>"; };
+		EE83E8B74F2A729983564A3A2BC90C7F /* Openssl-macOS10.12.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Openssl-macOS10.12.release.xcconfig"; path = "../Openssl-macOS10.12/Openssl-macOS10.12.release.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
-		1C73CDEAE9D6FAE2E91042149DED3F29 /* Frameworks */ = {
+		0F3C39B7A14F679333F1C0945D426628 /* Support Files */ = {
 			isa = PBXGroup;
 			children = (
-				618C9A30CC2977192F6DC08F2D925DB3 /* OpenSSL.xcframework */,
+				A3D8A189A5489278244FC68957ED2ADD /* Openssl-iOS10.0.debug.xcconfig */,
+				8CDB52F914608750B5BFC5454331F442 /* Openssl-iOS10.0.release.xcconfig */,
+				A9FBD7135F3EE332C6C630C5B135B3DD /* Openssl-iOS13.0.debug.xcconfig */,
+				83C149233A2DCF25BD79089C16A70BA2 /* Openssl-iOS13.0.release.xcconfig */,
+				3C5C360A03D8104086914A032BC1C6FF /* Openssl-macOS10.12.debug.xcconfig */,
+				EE83E8B74F2A729983564A3A2BC90C7F /* Openssl-macOS10.12.release.xcconfig */,
+				4139F467F91A7D64E6DBCD8176A28563 /* Openssl-tvOS10.2.debug.xcconfig */,
+				E0247683ED43C13B10E653C3930724BA /* Openssl-tvOS10.2.release.xcconfig */,
 			);
-			name = Frameworks;
+			name = "Support Files";
+			path = "Demo/Pods/Target Support Files/Openssl-iOS10.0";
 			sourceTree = "<group>";
 		};
-		33B964A8371CFB8B863FF2181312BEF2 /* Pod */ = {
+		17F20259ED8DB6F001F234A258A44B90 /* Openssl */ = {
 			isa = PBXGroup;
 			children = (
-				9E0345C1A03F1107F56C9DBA44D5CACE /* Openssl.podspec */,
+				4DAA898BC32474BBF774C25F868AA6C5 /* Frameworks */,
 			);
-			name = Pod;
+			name = Openssl;
 			sourceTree = "<group>";
 		};
 		454FEFA0D54B848F72FA6CCA2888DBD9 /* Products */ = {
@@ -71,12 +90,23 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
-		7D4C12935F8D1FE08E8C78FE48E85A89 /* Openssl */ = {
+		4DAA898BC32474BBF774C25F868AA6C5 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				1C73CDEAE9D6FAE2E91042149DED3F29 /* Frameworks */,
+				BABB0F78F45D056091E193AB67D9621D /* OpenSSL.xcframework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		5DC04822D741CE62FCAD6BD510BAD639 /* Openssl */ = {
+			isa = PBXGroup;
+			children = (
+				17F20259ED8DB6F001F234A258A44B90 /* Openssl */,
+				98BFBED087977597733A0B29FA2A4FC9 /* Pod */,
+				0F3C39B7A14F679333F1C0945D426628 /* Support Files */,
 			);
 			name = Openssl;
+			path = ../..;
 			sourceTree = "<group>";
 		};
 		96BB489A902149032A1681B0890201E9 /* Frameworks */ = {
@@ -86,38 +116,21 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
-		9D25E1A6A502FB90189629176A3D6DC9 /* Support Files */ = {
+		98BFBED087977597733A0B29FA2A4FC9 /* Pod */ = {
 			isa = PBXGroup;
 			children = (
-				8CF8501C4E3C14583A829927CCF2D350 /* Openssl-iOS.debug.xcconfig */,
-				A7829E643D83B3256B7AD9A5EF853625 /* Openssl-iOS.release.xcconfig */,
-				AFC0496BF9B6B2179715D4CA4D49F68C /* Openssl-macOS.debug.xcconfig */,
-				EADD4AA6CBD12AC8D14A6C8930482F90 /* Openssl-macOS.release.xcconfig */,
-				8D3EF2BFDAFBD25D925A26BC1B22A0D8 /* Openssl-tvOS.debug.xcconfig */,
-				9EAF591ABEEA82C2E164CE2F098A7501 /* Openssl-tvOS.release.xcconfig */,
+				19428EF311C39AAC9CDFE3358E648B3E /* Openssl.podspec */,
 			);
-			name = "Support Files";
-			path = "Demo/Pods/Target Support Files/Openssl-iOS";
+			name = Pod;
 			sourceTree = "<group>";
 		};
 		EBDC26114F5FFE374B4A78C88894BB2E = {
 			isa = PBXGroup;
 			children = (
 				96BB489A902149032A1681B0890201E9 /* Frameworks */,
-				F2390EB528330714009E45493B3ABD4B /* Openssl */,
+				5DC04822D741CE62FCAD6BD510BAD639 /* Openssl */,
 				454FEFA0D54B848F72FA6CCA2888DBD9 /* Products */,
 			);
-			sourceTree = "<group>";
-		};
-		F2390EB528330714009E45493B3ABD4B /* Openssl */ = {
-			isa = PBXGroup;
-			children = (
-				7D4C12935F8D1FE08E8C78FE48E85A89 /* Openssl */,
-				33B964A8371CFB8B863FF2181312BEF2 /* Pod */,
-				9D25E1A6A502FB90189629176A3D6DC9 /* Support Files */,
-			);
-			name = Openssl;
-			path = ../..;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -130,7 +143,7 @@
 				LastUpgradeCheck = 1100;
 			};
 			buildConfigurationList = 558D33474BE0F49E85455A4CC2AEFE67 /* Build configuration list for PBXProject "Openssl" */;
-			compatibilityVersion = "Xcode 11.0";
+			compatibilityVersion = "Xcode 9.3";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -142,17 +155,18 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				EBFB4612D15C2B2A64648734332276CD /* Openssl-iOS */,
-				772EDCEFF8838C79EA494BEF27278D65 /* Openssl-macOS */,
-				01D945EF01B3C42501631DE8715755D2 /* Openssl-tvOS */,
+				DA9A3FF48A50EE0A3A2C0DBCF39B901E /* Openssl-iOS10.0 */,
+				D5B5F1EB1CA703B262F3B9F6A123B738 /* Openssl-iOS13.0 */,
+				987B1118B7CC44271F5289B5A1EAE39A /* Openssl-macOS10.12 */,
+				030728825BA2053F8CBB6F688C518CFF /* Openssl-tvOS10.2 */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin XCBuildConfiguration section */
-		224E294C8D886412D5F84B07D6534DF5 /* Release */ = {
+		2C56092CAEDB718B80D4891CB9DF1107 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = A7829E643D83B3256B7AD9A5EF853625 /* Openssl-iOS.release.xcconfig */;
+			baseConfigurationReference = A9FBD7135F3EE332C6C630C5B135B3DD /* Openssl-iOS13.0.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
@@ -163,13 +177,12 @@
 				);
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				VALIDATE_PRODUCT = YES;
 			};
-			name = Release;
+			name = Debug;
 		};
-		3AC1565B433A206A24166062E87782EA /* Release */ = {
+		2D85A87663D14BEBD4D129281DCF5A4A /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = EADD4AA6CBD12AC8D14A6C8930482F90 /* Openssl-macOS.release.xcconfig */;
+			baseConfigurationReference = EE83E8B74F2A729983564A3A2BC90C7F /* Openssl-macOS10.12.release.xcconfig */;
 			buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
@@ -185,9 +198,9 @@
 			};
 			name = Release;
 		};
-		4D6E08BD92E64A0ADB36ACF8F7A1FB7D /* Debug */ = {
+		3413E9482E836BB9AC9A37E7BFF065A5 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 8CF8501C4E3C14583A829927CCF2D350 /* Openssl-iOS.debug.xcconfig */;
+			baseConfigurationReference = 8CDB52F914608750B5BFC5454331F442 /* Openssl-iOS10.0.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
@@ -198,6 +211,41 @@
 				);
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		3D2677FF5E9B6DE0E2F10F029BCD21EE /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = A3D8A189A5489278244FC68957ED2ADD /* Openssl-iOS10.0.debug.xcconfig */;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		5AE478276AC478618F0A189A5E3CE909 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 3C5C360A03D8104086914A032BC1C6FF /* Openssl-macOS10.12.debug.xcconfig */;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				CODE_SIGN_IDENTITY = "-";
+				COMBINE_HIDPI_IMAGES = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 10.11;
+				SDKROOT = macosx;
 			};
 			name = Debug;
 		};
@@ -267,21 +315,53 @@
 			};
 			name = Debug;
 		};
-		743B11B64701275FD76C9CDD63E236B7 /* Debug */ = {
+		B0D9B6C401DC809132A02C898CD3F960 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = AFC0496BF9B6B2179715D4CA4D49F68C /* Openssl-macOS.debug.xcconfig */;
+			baseConfigurationReference = E0247683ED43C13B10E653C3930724BA /* Openssl-tvOS10.2.release.xcconfig */;
 			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CLANG_ENABLE_OBJC_WEAK = NO;
-				CODE_SIGN_IDENTITY = "-";
-				COMBINE_HIDPI_IMAGES = YES;
+				ASSETCATALOG_COMPILER_APPICON_NAME = "App Icon & Top Shelf Image";
+				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
-					"@executable_path/../Frameworks",
+					"@executable_path/Frameworks",
 				);
-				MACOSX_DEPLOYMENT_TARGET = 10.11;
-				SDKROOT = macosx;
+				SDKROOT = appletvos;
+				TARGETED_DEVICE_FAMILY = 3;
+				TVOS_DEPLOYMENT_TARGET = 10.2;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		B919F908189B9C422C1DAC6A2EF79322 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 83C149233A2DCF25BD79089C16A70BA2 /* Openssl-iOS13.0.release.xcconfig */;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		BF5BB2781653D9EC4EDAAC0B2F2FB3D5 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 4139F467F91A7D64E6DBCD8176A28563 /* Openssl-tvOS10.2.debug.xcconfig */;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = "App Icon & Top Shelf Image";
+				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				SDKROOT = appletvos;
+				TARGETED_DEVICE_FAMILY = 3;
+				TVOS_DEPLOYMENT_TARGET = 10.2;
 			};
 			name = Debug;
 		};
@@ -347,42 +427,27 @@
 			};
 			name = Release;
 		};
-		EA7EB50C28DE032CB844A0D553CBA9F2 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			baseConfigurationReference = 8D3EF2BFDAFBD25D925A26BC1B22A0D8 /* Openssl-tvOS.debug.xcconfig */;
-			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = "App Icon & Top Shelf Image";
-				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-				);
-				SDKROOT = appletvos;
-				TARGETED_DEVICE_FAMILY = 3;
-				TVOS_DEPLOYMENT_TARGET = 10.2;
-			};
-			name = Debug;
-		};
-		F7E502B8120543D776A09BD987CB421D /* Release */ = {
-			isa = XCBuildConfiguration;
-			baseConfigurationReference = 9EAF591ABEEA82C2E164CE2F098A7501 /* Openssl-tvOS.release.xcconfig */;
-			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = "App Icon & Top Shelf Image";
-				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-				);
-				SDKROOT = appletvos;
-				TARGETED_DEVICE_FAMILY = 3;
-				TVOS_DEPLOYMENT_TARGET = 10.2;
-				VALIDATE_PRODUCT = YES;
-			};
-			name = Release;
-		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		1D0D0C7B3A43A49EB9D592500A20F68D /* Build configuration list for PBXAggregateTarget "Openssl-iOS10.0" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				3D2677FF5E9B6DE0E2F10F029BCD21EE /* Debug */,
+				3413E9482E836BB9AC9A37E7BFF065A5 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		5264182A40779FB7EA91F7B7975A391E /* Build configuration list for PBXAggregateTarget "Openssl-macOS10.12" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				5AE478276AC478618F0A189A5E3CE909 /* Debug */,
+				2D85A87663D14BEBD4D129281DCF5A4A /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		558D33474BE0F49E85455A4CC2AEFE67 /* Build configuration list for PBXProject "Openssl" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
@@ -392,29 +457,20 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		6C9B00AE1F373FEBEB668B7AEAFCB152 /* Build configuration list for PBXAggregateTarget "Openssl-tvOS" */ = {
+		7A2348B6F0D4B9C7A962A8C589630EA7 /* Build configuration list for PBXAggregateTarget "Openssl-tvOS10.2" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				EA7EB50C28DE032CB844A0D553CBA9F2 /* Debug */,
-				F7E502B8120543D776A09BD987CB421D /* Release */,
+				BF5BB2781653D9EC4EDAAC0B2F2FB3D5 /* Debug */,
+				B0D9B6C401DC809132A02C898CD3F960 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		A1CA7555E89973626993135024C23324 /* Build configuration list for PBXAggregateTarget "Openssl-iOS" */ = {
+		C5321EB5216EA167DE898580792D1E5D /* Build configuration list for PBXAggregateTarget "Openssl-iOS13.0" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				4D6E08BD92E64A0ADB36ACF8F7A1FB7D /* Debug */,
-				224E294C8D886412D5F84B07D6534DF5 /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		C090FCC12D6305AD4AC7B60E8617A195 /* Build configuration list for PBXAggregateTarget "Openssl-macOS" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				743B11B64701275FD76C9CDD63E236B7 /* Debug */,
-				3AC1565B433A206A24166062E87782EA /* Release */,
+				2C56092CAEDB718B80D4891CB9DF1107 /* Debug */,
+				B919F908189B9C422C1DAC6A2EF79322 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

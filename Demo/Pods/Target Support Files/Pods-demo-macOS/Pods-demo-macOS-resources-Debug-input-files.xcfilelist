@@ -1,3 +1,3 @@
 ${PODS_ROOT}/Target Support Files/Pods-demo-macOS/Pods-demo-macOS-resources.sh
-${PODS_CONFIGURATION_BUILD_DIR}/KSPlayer-macOS/Metal.bundle
-${PODS_CONFIGURATION_BUILD_DIR}/KSPlayer-macOS/KSResources.bundle
+${PODS_CONFIGURATION_BUILD_DIR}/KSPlayer-macOS10.12/Metal.bundle
+${PODS_CONFIGURATION_BUILD_DIR}/KSPlayer-macOS10.12/KSResources.bundle

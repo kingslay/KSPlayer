@@ -14,7 +14,7 @@ class MainWindow: NSWindow {
     override init(contentRect: NSRect, styleMask style: NSWindow.StyleMask, backing backingStoreType: NSWindow.BackingStoreType, defer flag: Bool) {
         KSPlayerManager.firstPlayerType = KSMEPlayer.self
         KSPlayerManager.secondPlayerType = KSMEPlayer.self
-        KSPlayerManager.logLevel = AV_LOG_DEBUG
+        KSPlayerManager.logLevel = .debug
         KSOptions.isAutoPlay = true
         KSOptions.isSeekedAutoPlay = true
         KSOptions.hardwareDecodeH264 = true

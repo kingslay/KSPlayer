@@ -5,6 +5,9 @@
       location = "group:MyPlayground.playground">
    </FileRef>
    <FileRef
+      location = "group:demo-SwiftUI/demo-SwiftUI.xcodeproj">
+   </FileRef>
+   <FileRef
       location = "group:demo-iOS/demo-iOS.xcodeproj">
    </FileRef>
    <FileRef

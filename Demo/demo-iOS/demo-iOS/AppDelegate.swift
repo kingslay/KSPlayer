@@ -15,7 +15,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func application(_: UIApplication, didFinishLaunchingWithOptions _: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         let window = UIWindow()
         KSPlayerManager.canBackgroundPlay = true
-        KSPlayerManager.logLevel = AV_LOG_DEBUG
+        KSPlayerManager.logLevel = .debug
         KSPlayerManager.firstPlayerType = KSMEPlayer.self
         KSOptions.isAutoPlay = true
         KSOptions.isSecondOpen = true
