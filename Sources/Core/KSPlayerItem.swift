@@ -61,12 +61,12 @@ public class KSOptions {
     public var formatContextOptions = [String: Any]()
     public var decoderOptions = [String: Any]()
     public init() {
-        formatContextOptions["analyzeduration"] = 1_000_000
-        formatContextOptions["probesize"] = 1_000_000
+        formatContextOptions["analyzeduration"] = 2_000_000
+        formatContextOptions["probesize"] = 2_000_000
         formatContextOptions["auto_convert"] = 0
         formatContextOptions["reconnect"] = 1
         formatContextOptions["timeout"] = 30_000_000
-        formatContextOptions["user-agent"] = "ksplayer"
+        formatContextOptions["user_agent"] = "ksplayer"
         decoderOptions["threads"] = "auto"
         decoderOptions["refcounted_frames"] = "1"
 
@@ -155,7 +155,7 @@ public class KSPlayerResourceDefinition {
 
      to add http-header init options like this
      ```
-     let header = ["User-Agent":"KSPlayer"]
+     let header = ["user_agent":"KSPlayer"]
      let options = KSOptions()
      options.avOptions = ["AVURLAssetHTTPHeaderFieldsKey":header]
      ```

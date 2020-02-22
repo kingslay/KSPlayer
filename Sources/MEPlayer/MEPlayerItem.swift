@@ -56,7 +56,7 @@ final class MEPlayerItem {
         self.options = options
         avformat_network_init()
         av_log_set_callback { _, level, format, args in
-            guard let format = format, level <= KSPlayerManager.logLevel else {
+            guard let format = format, level <= KSPlayerManager.logLevel.rawValue else {
                 return
             }
             var log = String(cString: format)
@@ -244,7 +244,7 @@ extension MEPlayerItem: MediaPlayback {
         }
         var seekable = true
         if let ioContext = formatCtx.pointee.pb {
-            seekable = ioContext.pointee.seekable > 1
+            seekable = ioContext.pointee.seekable > 0
         }
         return seekable && duration > 0
     }

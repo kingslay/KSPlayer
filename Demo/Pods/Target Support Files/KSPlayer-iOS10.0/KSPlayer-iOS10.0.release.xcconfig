@@ -1,0 +1,12 @@
+CONFIGURATION_BUILD_DIR = ${PODS_CONFIGURATION_BUILD_DIR}/KSPlayer-iOS10.0
+FRAMEWORK_SEARCH_PATHS = $(inherited) "${PODS_ROOT}/../../FFmpeg" "${PODS_ROOT}/../../FFmpeg/FFmpeg.xcframework/ios-arm64" "${PODS_ROOT}/../../FFmpeg/FFmpeg.xcframework/ios-x86_64-maccatalyst" "${PODS_ROOT}/../../FFmpeg/FFmpeg.xcframework/ios-x86_64-simulator" "${PODS_ROOT}/../../FFmpeg/OpenSSL.xcframework/ios-arm64" "${PODS_ROOT}/../../FFmpeg/OpenSSL.xcframework/ios-x86_64-maccatalyst" "${PODS_ROOT}/../../FFmpeg/OpenSSL.xcframework/ios-x86_64-simulator"
+GCC_PREPROCESSOR_DEFINITIONS = $(inherited) COCOAPODS=1
+HEADER_SEARCH_PATHS = $(inherited) ${PODS_ROOT}/KSPlayer/FFmpeg/FFmpeg.xcframework/ios-arm64/FFmpeg.framework/Headers ${PODS_ROOT}/../../FFmpeg/FFmpeg.xcframework/ios-arm64/FFmpeg.framework/Headers
+OTHER_SWIFT_FLAGS = $(inherited) -D COCOAPODS
+PODS_BUILD_DIR = ${BUILD_DIR}
+PODS_CONFIGURATION_BUILD_DIR = ${PODS_BUILD_DIR}/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)
+PODS_ROOT = ${SRCROOT}
+PODS_TARGET_SRCROOT = ${PODS_ROOT}/../..
+PRODUCT_BUNDLE_IDENTIFIER = org.cocoapods.${PRODUCT_NAME:rfc1034identifier}
+SKIP_INSTALL = YES
+USE_RECURSIVE_SCRIPT_INPUTS_IN_SCRIPT_PHASES = YES
