@@ -65,11 +65,13 @@ public class KSOptions {
         formatContextOptions["probesize"] = 2_000_000
         formatContextOptions["auto_convert"] = 0
         formatContextOptions["reconnect"] = 1
-        formatContextOptions["timeout"] = 30_000_000
+        // There is total different meaning for 'timeout' option in rtmp
+        // remove 'timeout' option for rtmp
+        formatContextOptions["timeout"] = 3_000_000
+        formatContextOptions["rw_timeout"] = 3_000_000
         formatContextOptions["user_agent"] = "ksplayer"
         decoderOptions["threads"] = "auto"
         decoderOptions["refcounted_frames"] = "1"
-
     }
 
     public func setCookie(_ cookies: [HTTPCookie]) {

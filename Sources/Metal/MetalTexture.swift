@@ -44,7 +44,7 @@ public final class MetalTexture {
         return inputTexture
     }
 
-    func textures(pixelFormat: OSType, width: Int, height: Int, bytes: [UnsafeMutablePointer<UInt8>?], bytesPerRow: [Int32]) -> [MTLTexture]? {
+    func textures(pixelFormat: OSType, width: Int, height: Int, bytes: [UnsafeMutablePointer<UInt8>?], bytesPerRows: [Int32]) -> [MTLTexture]? {
         var planeCount = 3
         var widths = Array(repeating: width, count: 3)
         var heights = Array(repeating: height, count: 3)
@@ -71,7 +71,7 @@ public final class MetalTexture {
                 let descriptor = MTLTextureDescriptor.texture2DDescriptor(pixelFormat: formats[i], width: widths[i], height: heights[i], mipmapped: false)
                 return self.device.makeTexture(descriptor: descriptor)!
             }
-            texture.replace(region: MTLRegionMake2D(0, 0, widths[i], heights[i]), mipmapLevel: 0, withBytes: bytes[i]!, bytesPerRow: Int(bytesPerRow[i]))
+            texture.replace(region: MTLRegionMake2D(0, 0, widths[i], heights[i]), mipmapLevel: 0, withBytes: bytes[i]!, bytesPerRow: Int(bytesPerRows[i]))
             textures.append(texture)
         }
         return textures

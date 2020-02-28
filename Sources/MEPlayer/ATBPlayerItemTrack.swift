@@ -62,7 +62,7 @@ final class ATBPlayerItemTrack: AsyncPlayerItemTrack<AudioFrame> {
         let status = AudioConverterFillComplexBuffer(converter, inputDataProc, corePacket, &ioOutputDataPacketSize, &outAudioBufferList, nil)
         if status == noErr {
             let frame = AudioFrame(bufferSize: Int32(outAudioBufferList.mNumberBuffers))
-            frame.timebase = timebase
+            frame.timebase = track.timebase
             frame.position = corePacket.pointee.pts
             if frame.position == Int64.min || frame.position < 0 {
                 frame.position = max(corePacket.pointee.dts, 0)

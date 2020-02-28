@@ -79,7 +79,7 @@ final class VideoSamplePlayerItemTrack: SamplePlayerItemTrack<VideoSampleBufferF
         let sampleBuffer = try formatDescription.getSampleBuffer(isConvertNALSize: isConvertNALSize, data: data, size: Int(corePacket.pointee.size))
         let frame = VideoSampleBufferFrame()
         frame.sampleBuffer = sampleBuffer
-        frame.timebase = timebase
+        frame.timebase = track.timebase
         frame.position = corePacket.pointee.pts
         if frame.position == Int64.min || frame.position < 0 {
             frame.position = max(corePacket.pointee.dts, 0)
@@ -116,7 +116,7 @@ final class VTBPlayerItemTrack: SamplePlayerItemTrack<VideoVTBFrame> {
                 if let imageBuffer = imageBuffer {
                     let frame = VideoVTBFrame()
                     frame.corePixelBuffer = imageBuffer
-                    frame.timebase = self.timebase
+                    frame.timebase = self.track.timebase
                     frame.position = corePacket.pointee.pts
                     if frame.position == Int64.min || frame.position < 0 {
                         frame.position = max(corePacket.pointee.dts, 0)

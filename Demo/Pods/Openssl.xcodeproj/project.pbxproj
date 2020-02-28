@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 50;
+	objectVersion = 51;
 	objects = {
 
 /* Begin PBXAggregateTarget section */
@@ -143,7 +143,7 @@
 				LastUpgradeCheck = 1100;
 			};
 			buildConfigurationList = 558D33474BE0F49E85455A4CC2AEFE67 /* Build configuration list for PBXProject "Openssl" */;
-			compatibilityVersion = "Xcode 9.3";
+			compatibilityVersion = "Xcode 10.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (

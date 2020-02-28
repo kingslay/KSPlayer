@@ -7,29 +7,37 @@
 
 import ffmpeg
 import Foundation
-class FFPlayerItemTrack<Frame: MEFrame>: AsyncPlayerItemTrack<Frame> {
+
+class FFPlayerItemTrack: AsyncPlayerItemTrack<Frame> {
     // 第一次seek不要调用avcodec_flush_buffers。否则seek完之后可能会因为不是关键帧而导致蓝屏
     private var firstSeek = true
-    private(set) var coreFrame: UnsafeMutablePointer<AVFrame>?
-    private(set) var codecContext: UnsafeMutablePointer<AVCodecContext>? {
-        didSet {
-            codecContext?.pointee.time_base = timebase.rational
+    private var coreFrame: UnsafeMutablePointer<AVFrame>?
+    private var codecContextMap = [Int32: UnsafeMutablePointer<AVCodecContext>?]()
+    private var bestEffortTimestamp = Int64(0)
+    private let swresample: Swresample
+
+    required init(track: TrackProtocol, options: KSOptions) {
+        if track.mediaType == .video {
+            swresample = VideoSwresample(dstFormat: options.bufferPixelFormatType.format)
+        } else {
+            swresample = AudioSwresample()
         }
+        super.init(track: track, options: options)
     }
 
     override func shutdown() {
         super.shutdown()
         av_frame_free(&coreFrame)
-        if let codecContext = codecContext {
-            avcodec_close(codecContext)
-            avcodec_free_context(&self.codecContext)
+        codecContextMap.values.forEach { codecContext in
+            var content = codecContext
+            avcodec_free_context(&content)
         }
+        codecContextMap.removeAll()
     }
 
     override func open() -> Bool {
-        if let codecContext = codecpar.ceateContext(options: options), let coreFrame = av_frame_alloc() {
+        if let coreFrame = av_frame_alloc() {
             self.coreFrame = coreFrame
-            self.codecContext = codecContext
             return super.open()
         }
         return false
@@ -40,13 +48,21 @@ class FFPlayerItemTrack<Frame: MEFrame>: AsyncPlayerItemTrack<Frame> {
         if firstSeek {
             firstSeek = false
         } else {
-            if let codecContext = self.codecContext {
+            codecContextMap.values.forEach { codecContext in
                 avcodec_flush_buffers(codecContext)
             }
         }
     }
 
     override func doDecode(packet: Packet) throws -> [Frame] {
+        if codecContextMap.index(forKey: track.streamIndex) == nil {
+            let codecContext = codecpar.ceateContext(options: options)
+            codecContext?.pointee.time_base = track.timebase.rational
+            codecContextMap[track.streamIndex] = codecContext
+        }
+        guard let codecContext = codecContextMap[track.streamIndex], codecContext != nil else {
+            return []
+        }
         let result = avcodec_send_packet(codecContext, packet.corePacket)
         guard result == 0 else {
             return []
@@ -54,7 +70,21 @@ class FFPlayerItemTrack<Frame: MEFrame>: AsyncPlayerItemTrack<Frame> {
         var array = [Frame]()
         while true {
             do {
-                array.append(try fetchReuseFrame())
+                let result = avcodec_receive_frame(codecContext, coreFrame)
+                if result == 0, let avframe = coreFrame {
+                    let timestamp = avframe.pointee.best_effort_timestamp
+                    if timestamp >= bestEffortTimestamp {
+                        bestEffortTimestamp = timestamp
+                    } else if timestamp > 0 {
+                        throw Int32(0)
+                    }
+                    let frame = swresample.transfer(avframe: avframe, timebase: track.timebase)
+                    frame.position = bestEffortTimestamp
+                    bestEffortTimestamp += frame.duration
+                    array.append(frame)
+                } else {
+                    throw result
+                }
             } catch let code as Int32 {
                 if code == 0 || AVFILTER_EOF(code) {
                     if IS_AVERROR_EOF(code) {
@@ -62,7 +92,7 @@ class FFPlayerItemTrack<Frame: MEFrame>: AsyncPlayerItemTrack<Frame> {
                     }
                     break
                 } else {
-                    let error = NSError(result: code, errorCode: mediaType == .audio ? .codecAudioReceiveFrame : .codecVideoReceiveFrame)
+                    let error = NSError(result: code, errorCode: track.mediaType == .audio ? .codecAudioReceiveFrame : .codecVideoReceiveFrame)
                     KSLog(error)
                     throw error
                 }
@@ -71,8 +101,21 @@ class FFPlayerItemTrack<Frame: MEFrame>: AsyncPlayerItemTrack<Frame> {
         return array
     }
 
-    func fetchReuseFrame() throws -> Frame {
-        fatalError("Abstract method")
+    override func seek(time: TimeInterval) {
+        super.seek(time: time)
+        bestEffortTimestamp = Int64(0)
+    }
+
+    override func decode() {
+        super.decode()
+        bestEffortTimestamp = Int64(0)
+        codecContextMap.values.forEach { codecContext in
+            avcodec_flush_buffers(codecContext)
+        }
+    }
+
+    deinit {
+        swresample.shutdown()
     }
 }
 

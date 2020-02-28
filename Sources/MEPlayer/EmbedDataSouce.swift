@@ -42,14 +42,9 @@ extension SubtitlePlayerItemTrack: KSSubtitleProtocol {
 }
 
 extension MEPlayerItem: SubtitleDataSouce {
-    func searchSubtitle(name: String, completion: @escaping ([SubtitleInfo]?) -> Void) {
+    func searchSubtitle(name _: String, completion: @escaping ([SubtitleInfo]?) -> Void) {
         let infos = subtitleTracks.map { subtitleDecompress -> SubtitleInfo in
-            var name = NSLocalizedString("内置字幕", comment: "")
-            if let entry = av_dict_get(subtitleDecompress.stream.pointee.metadata, "title", nil, 0), let title = entry.pointee.value {
-                name = String(cString: title)
-            }
-            let info = EmbedSubtitleInfo(subtitleID: "Embed-\(subtitleDecompress.stream.pointee.index)", name: name, subtitle: subtitleDecompress)
-            return info
+            EmbedSubtitleInfo(subtitleID: "Embed-\(subtitleDecompress.track.streamIndex)", name: subtitleDecompress.track.name, subtitle: subtitleDecompress)
         }
         completion(infos)
     }
