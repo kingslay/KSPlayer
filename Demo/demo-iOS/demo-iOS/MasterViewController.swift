@@ -63,6 +63,13 @@ class MasterViewController: UIViewController, UITableViewDelegate, UITableViewDa
             let asset = KSPlayerResource(name: "http视频", definitions: [res0, res1], cover: URL(string: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c5/Big_buck_bunny_poster_big.jpg/848px-Big_buck_bunny_poster_big.jpg"))
             objects.append(asset)
         }
+
+        if let url = URL(string: "http://devimages.apple.com/iphone/samples/bipbop/bipbopall.m3u8") {
+            let res0 = KSPlayerResourceDefinition(url: url, definition: "高清")
+            let res1 = KSPlayerResourceDefinition(url: url, definition: "标清")
+            let asset = KSPlayerResource(name: "m3u8视频", definitions: [res0, res1], cover: URL(string: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c5/Big_buck_bunny_poster_big.jpg/848px-Big_buck_bunny_poster_big.jpg"))
+            objects.append(asset)
+        }
         let str = "https://devstreaming-cdn.apple.com/videos/tutorials/20170912/602x28bbwk8lp/metal_on_iphone_x_overview/hls_vod_mvp.m3u8"
         if let url = URL(string: str) {
             let options = KSOptions()

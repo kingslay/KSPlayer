@@ -167,6 +167,7 @@ extension MEFrame {
 }
 
 // MARK: model
+
 public enum LogLevel: Int32 {
     case panic = 0
     case fatal = 8
@@ -177,6 +178,7 @@ public enum LogLevel: Int32 {
     case debug = 48
     case trace = 56
 }
+
 extension KSPlayerManager {
     /// 开启VR模式的陀飞轮
     public static var enableSensor = true
@@ -290,9 +292,10 @@ final class Packet: ObjectQueueItem {
     public var duration: Int64 = 0
     public var size: Int64 = 0
     public var position: Int64 = 0
-    public var corePacket: UnsafeMutablePointer<AVPacket> { packetWrap.corePacket! }
+    var track: TrackProtocol!
+    var corePacket: UnsafeMutablePointer<AVPacket> { packetWrap.corePacket! }
     private let packetWrap = AVPacketWrap.object()
-    public func fill() {
+    func fill() {
         position = corePacket.pointee.pts
         duration = corePacket.pointee.duration
         size = Int64(corePacket.pointee.size)

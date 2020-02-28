@@ -7,14 +7,71 @@
 import AVFoundation
 import CoreMedia
 import ffmpeg
-protocol PlayerItemTrackProtocol: Capacity {
-    var mediaType: AVFoundation.AVMediaType { get }
+protocol TrackProtocol: AnyObject, CustomStringConvertible {
     var stream: UnsafeMutablePointer<AVStream> { get }
+    var mediaType: AVFoundation.AVMediaType { get }
+    var timebase: Timebase { get }
+    var fps: Int { get }
     var isEnabled: Bool { get set }
+}
+
+extension TrackProtocol {
+    var streamIndex: Int32 { stream.pointee.index }
+    var name: String {
+        if let entry = av_dict_get(stream.pointee.metadata, "title", nil, 0), let title = entry.pointee.value {
+            return String(cString: title)
+        } else {
+            if mediaType == .subtitle {
+                return NSLocalizedString("内置字幕", comment: "")
+            } else {
+                return ""
+            }
+        }
+    }
+}
+
+func == (lhs: TrackProtocol, rhs: TrackProtocol) -> Bool {
+    lhs.streamIndex == rhs.streamIndex
+}
+
+class Track: TrackProtocol, CustomStringConvertible {
+    var description: String { mediaType.rawValue + ", streamIndex: \(streamIndex)" }
+    let stream: UnsafeMutablePointer<AVStream>
+    let mediaType: AVFoundation.AVMediaType
+    let timebase: Timebase
+    let fps: Int
+    var isEnabled = true
+    init?(stream: UnsafeMutablePointer<AVStream>) {
+        self.stream = stream
+        if stream.pointee.codecpar.pointee.codec_type == AVMEDIA_TYPE_AUDIO {
+            mediaType = .audio
+        } else if stream.pointee.codecpar.pointee.codec_type == AVMEDIA_TYPE_VIDEO {
+            mediaType = .video
+        } else if stream.pointee.codecpar.pointee.codec_type == AVMEDIA_TYPE_SUBTITLE {
+            mediaType = .subtitle
+        } else {
+            return nil
+        }
+        var timebase = Timebase(stream.pointee.time_base)
+        if timebase.num <= 0 || timebase.den <= 0 {
+            timebase = Timebase(num: 1, den: mediaType == .audio ? KSPlayerManager.audioPlayerSampleRate : 25000)
+        }
+        self.timebase = timebase
+        var fps = mediaType == .audio ? 44 : 24
+        if stream.pointee.duration > 0, stream.pointee.nb_frames > 0, stream.pointee.nb_frames != stream.pointee.duration {
+            let count = Int(stream.pointee.nb_frames * Int64(timebase.den) / (stream.pointee.duration * Int64(timebase.num)))
+            fps = max(count, fps)
+        }
+        self.fps = fps
+    }
+}
+
+protocol PlayerItemTrackProtocol: Capacity {
+    init(track: TrackProtocol, options: KSOptions)
+    var track: TrackProtocol { get }
     // 是否无缝循环
-    var isLoopPlay: Bool { get set }
+    var isLoopModel: Bool { get set }
     var delegate: CodecCapacityDelegate? { get set }
-    init(stream: UnsafeMutablePointer<AVStream>, options: KSOptions)
     func open() -> Bool
     func decode()
     func seek(time: TimeInterval)
@@ -22,33 +79,29 @@ protocol PlayerItemTrackProtocol: Capacity {
     func putPacket(packet: Packet)
     func getOutputRender(where predicate: ((MEFrame) -> Bool)?) -> MEFrame?
     func shutdown()
-    func changeLoop()
 }
 
 extension PlayerItemTrackProtocol {
     var codecpar: UnsafeMutablePointer<AVCodecParameters> {
-        return stream.pointee.codecpar
+        return track.stream.pointee.codecpar
     }
 }
 
-class MEPlayerItemTrack<Frame: MEFrame>: PlayerItemTrackProtocol {
+class MEPlayerItemTrack<Frame: MEFrame>: PlayerItemTrackProtocol, CustomStringConvertible {
+    var description: String { track.description }
     fileprivate var state = MECodecState.idle
-    fileprivate let fps: Int
     weak var delegate: CodecCapacityDelegate?
+    var track: TrackProtocol
     let options: KSOptions
-    let mediaType: AVFoundation.AVMediaType
-    let stream: UnsafeMutablePointer<AVStream>
     let outputRenderQueue: ObjectQueue<Frame>
-    let timebase: Timebase
-    var isEnabled = true
-    var isLoopPlay = false
+    var isLoopModel = false
 
     var isFinished: Bool {
         return state.contains(.finished)
     }
 
     var loadedTime: TimeInterval {
-        return TimeInterval(loadedCount) / TimeInterval(fps)
+        return TimeInterval(loadedCount) / TimeInterval(track.fps)
 //        return CMTime((packetQueue.duration + outputRenderQueue.duration) * Int64(timebase.num), timebase.den).seconds
     }
 
@@ -57,39 +110,21 @@ class MEPlayerItemTrack<Frame: MEFrame>: PlayerItemTrackProtocol {
     }
 
     var bufferingProgress: Int {
-        return min(100, loadedCount * 100 / (fps * Int(options.preferredForwardBufferDuration)))
+        return min(100, loadedCount * 100 / (track.fps * Int(options.preferredForwardBufferDuration)))
     }
 
     var isPlayable: Bool {
         return true
     }
 
-    required init(stream: UnsafeMutablePointer<AVStream>, options: KSOptions) {
+    required init(track: TrackProtocol, options: KSOptions) {
+        self.track = track
         self.options = options
-        if stream.pointee.codecpar.pointee.codec_type == AVMEDIA_TYPE_AUDIO {
-            mediaType = .audio
-        } else if stream.pointee.codecpar.pointee.codec_type == AVMEDIA_TYPE_VIDEO {
-            mediaType = .video
-        } else {
-            mediaType = .subtitle
-        }
-        var timebase = Timebase(stream.pointee.time_base)
-        if timebase.num <= 0 || timebase.den <= 0 {
-            timebase = Timebase(num: 1, den: mediaType == .audio ? KSPlayerManager.audioPlayerSampleRate : 25000)
-        }
-        self.stream = stream
-        self.timebase = timebase
-        var fps = mediaType == .audio ? 44 : 24
-        if stream.pointee.duration > 0, stream.pointee.nb_frames > 0, stream.pointee.nb_frames != stream.pointee.duration {
-            let count = Int(stream.pointee.nb_frames * Int64(timebase.den) / (stream.pointee.duration * Int64(timebase.num)))
-            fps = max(count, fps)
-        }
-        self.fps = fps
         // 默认缓存队列大小跟帧率挂钩,经测试除以4，最优
-        if mediaType == .video {
-            outputRenderQueue = ObjectQueue(maxCount: fps / 4, sortObjects: true)
-        } else if mediaType == .audio {
-            outputRenderQueue = ObjectQueue(maxCount: fps / 4)
+        if track.mediaType == .video {
+            outputRenderQueue = ObjectQueue(maxCount: track.fps / 4)
+        } else if track.mediaType == .audio {
+            outputRenderQueue = ObjectQueue(maxCount: track.fps / 4, sortObjects: true)
         } else {
             outputRenderQueue = ObjectQueue()
         }
@@ -130,8 +165,6 @@ class MEPlayerItemTrack<Frame: MEFrame>: PlayerItemTrackProtocol {
         outputRenderQueue.shutdown()
     }
 
-    func changeLoop() {}
-
     deinit {
         shutdown()
     }
@@ -147,14 +180,19 @@ class AsyncPlayerItemTrack<Frame: MEFrame>: MEPlayerItemTrack<Frame> {
     private var loopPacketQueue: ObjectQueue<Packet>?
     private var packetQueue = ObjectQueue<Packet>()
     override var loadedTime: TimeInterval {
-        return TimeInterval(loadedCount + (loopPacketQueue?.count ?? 0)) / TimeInterval(fps)
+        return TimeInterval(loadedCount + (loopPacketQueue?.count ?? 0)) / TimeInterval(track.fps)
     }
 
-    override var isLoopPlay: Bool {
+    override var isLoopModel: Bool {
         didSet {
-            if isLoopPlay {
+            if isLoopModel {
                 loopPacketQueue = ObjectQueue<Packet>()
                 endOfFile()
+            } else {
+                if let loopPacketQueue = loopPacketQueue {
+                    packetQueue = loopPacketQueue
+                    decode()
+                }
             }
         }
     }
@@ -168,8 +206,8 @@ class AsyncPlayerItemTrack<Frame: MEFrame>: MEPlayerItemTrack<Frame> {
             return true
         }
         // 让音频能更快的打开
-        let isSecondOpen = mediaType == .audio || options.isSecondOpen
-        let status = LoadingStatus(fps: fps, packetCount: packetQueue.count,
+        let isSecondOpen = track.mediaType == .audio || options.isSecondOpen
+        let status = LoadingStatus(fps: track.fps, packetCount: packetQueue.count,
                                    frameCount: outputRenderQueue.count,
                                    frameMaxCount: outputRenderQueue.maxCount,
                                    isFirst: isFirst, isSeek: isSeek, isSecondOpen: isSecondOpen)
@@ -184,7 +222,7 @@ class AsyncPlayerItemTrack<Frame: MEFrame>: MEPlayerItemTrack<Frame> {
 
     override func open() -> Bool {
         if super.open() {
-            operationQueue.name = "KSPlayer_" + String(describing: self).components(separatedBy: ".").last!
+            operationQueue.name = "KSPlayer_" + String(describing: self).components(separatedBy: ".").last! + track.mediaType.rawValue
             operationQueue.maxConcurrentOperationCount = 1
             operationQueue.qualityOfService = .userInteractive
             return true
@@ -194,7 +232,7 @@ class AsyncPlayerItemTrack<Frame: MEFrame>: MEPlayerItemTrack<Frame> {
     }
 
     override func putPacket(packet: Packet) {
-        if isLoopPlay {
+        if isLoopModel {
             loopPacketQueue?.putObjectSync(object: packet)
         } else {
             packetQueue.putObjectSync(object: packet)
@@ -202,16 +240,8 @@ class AsyncPlayerItemTrack<Frame: MEFrame>: MEPlayerItemTrack<Frame> {
         }
     }
 
-    override func changeLoop() {
-        if let loopPacketQueue = loopPacketQueue {
-            packetQueue = loopPacketQueue
-        }
-        isLoopPlay = false
-        decode()
-    }
-
     override func decode() {
-        guard isEnabled, operationQueue.operationCount == 0 else { return }
+        guard operationQueue.operationCount == 0 else { return }
         decodeOperation = BlockOperation { [weak self] in
             guard let self = self else { return }
             Thread.current.name = self.operationQueue.name
@@ -239,6 +269,8 @@ class AsyncPlayerItemTrack<Frame: MEFrame>: MEPlayerItemTrack<Frame> {
                 }
                 do {
                     //                        let startTime = CACurrentMediaTime()
+
+                    track = packet.track
                     let frames = try doDecode(packet: packet)
                     //                        if type == .video {
                     //                            KSLog("视频解码耗时：\(CACurrentMediaTime()-startTime)")
@@ -283,8 +315,8 @@ class AsyncPlayerItemTrack<Frame: MEFrame>: MEPlayerItemTrack<Frame> {
         seekTime = time
         packetQueue.flush()
         super.seek(time: time)
-        isLoopPlay = false
         loopPacketQueue = nil
+        isLoopModel = false
         delegate?.codecDidChangeCapacity(track: self)
         isSeek = true
     }

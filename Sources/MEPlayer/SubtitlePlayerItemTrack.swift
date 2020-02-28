@@ -50,7 +50,7 @@ final class SubtitlePlayerItemTrack: MEPlayerItemTrack<SubtitleFrame> {
             }
             let attributedString = subtitle.text(reg: reg)
             let frame = SubtitleFrame()
-            frame.timebase = timebase
+            frame.timebase = track.timebase
             frame.position = subtitle.pts
             if frame.position == Int64.min {
                 frame.position = max(packet.position, 0)
