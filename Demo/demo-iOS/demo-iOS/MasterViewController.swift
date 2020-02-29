@@ -65,13 +65,21 @@ class MasterViewController: UIViewController, UITableViewDelegate, UITableViewDa
         }
 
         if let url = URL(string: "http://devimages.apple.com/iphone/samples/bipbop/bipbopall.m3u8") {
-            let res0 = KSPlayerResourceDefinition(url: url, definition: "高清")
-            let res1 = KSPlayerResourceDefinition(url: url, definition: "标清")
-            let asset = KSPlayerResource(name: "m3u8视频", definitions: [res0, res1], cover: URL(string: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c5/Big_buck_bunny_poster_big.jpg/848px-Big_buck_bunny_poster_big.jpg"))
-            objects.append(asset)
+            objects.append(KSPlayerResource(url: url, options: KSOptions(), name: "m3u8视频"))
         }
-        let str = "https://devstreaming-cdn.apple.com/videos/tutorials/20170912/602x28bbwk8lp/metal_on_iphone_x_overview/hls_vod_mvp.m3u8"
-        if let url = URL(string: str) {
+
+        if let url = URL(string: "http://aldirect.hls.huya.com/huyalive/30765679-2504742278-10757786168918540288-3049003128-10057-A-0-1_1200.m3u8") {
+            objects.append(KSPlayerResource(url: url, options: KSOptions(), name: "直播流"))
+        }
+
+        if let url = URL(string: "http://116.199.5.51:8114/00000000/hls/index.m3u8?Fsv_chan_hls_se_idx=188&FvSeid=1&Fsv_ctype=LIVES&Fsv_otype=1&Provider_id=&Pcontent_id=.m3u8") {
+            objects.append(KSPlayerResource(url: url, options: KSOptions(), name: "tvb视频"))
+        }
+
+        if let url = URL(string: "https://dash.akamaized.net/envivio/EnvivioDash3/manifest.mpd") {
+            objects.append(KSPlayerResource(url: url, options: KSOptions(), name: "dash视频"))
+        }
+        if let url = URL(string: "https://bitlivedemo-a.akamaihd.net/m3u8s/bitcodin.m3u8") {
             let options = KSOptions()
             options.formatContextOptions["timeout"] = 0
             objects.append(KSPlayerResource(url: url, options: options, name: "https视频"))

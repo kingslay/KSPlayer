@@ -130,9 +130,16 @@ extension MEPlayerItem {
             }
         }
         formatCtx.pointee.interrupt_callback = interruptCB
+//        formatCtx.pointee.io_open = { formatCtx, context, url, flags, options -> Int32 in
+//            return 0
+//        }
         var avOptions = options.formatContextOptions.avOptions
         var result = avformat_open_input(&self.formatCtx, url.isFileURL ? url.path : url.absoluteString, nil, &avOptions)
         av_dict_free(&avOptions)
+        if IS_AVERROR_EOF(result) {
+            state = .finished
+            return
+        }
         guard result == 0 else {
             error = .init(result: result, errorCode: .formatOpenInput)
             avformat_close_input(&self.formatCtx)
@@ -247,7 +254,7 @@ extension MEPlayerItem {
                         }
                     }
                 } else {
-                    if IS_AVERROR_EOF(readResult) {
+                    if IS_AVERROR_EOF(readResult) || avio_feof(formatCtx?.pointee.pb) != 0 {
                         if options.isLoopPlay {
                             if allTrack().first(where: { $0.isLoopModel }) == nil {
                                 allTrack().forEach { $0.isLoopModel = true }

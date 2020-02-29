@@ -75,11 +75,14 @@ class FFPlayerItemTrack: AsyncPlayerItemTrack<Frame> {
                     let timestamp = avframe.pointee.best_effort_timestamp
                     if timestamp >= bestEffortTimestamp {
                         bestEffortTimestamp = timestamp
-                    } else if timestamp > 0 {
+                    } else if codecContextMap.keys.count > 1 {
+                        //m3u8多路流需要丢帧
                         throw Int32(0)
                     }
                     let frame = swresample.transfer(avframe: avframe, timebase: track.timebase)
-                    frame.position = bestEffortTimestamp
+                    if frame.position < 0 {
+                        frame.position = bestEffortTimestamp
+                    }
                     bestEffortTimestamp += frame.duration
                     array.append(frame)
                 } else {

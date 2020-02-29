@@ -222,7 +222,7 @@ class AsyncPlayerItemTrack<Frame: MEFrame>: MEPlayerItemTrack<Frame> {
 
     override func open() -> Bool {
         if super.open() {
-            operationQueue.name = "KSPlayer_" + String(describing: self).components(separatedBy: ".").last! + track.mediaType.rawValue
+            operationQueue.name = "KSPlayer_" + description
             operationQueue.maxConcurrentOperationCount = 1
             operationQueue.qualityOfService = .userInteractive
             return true
