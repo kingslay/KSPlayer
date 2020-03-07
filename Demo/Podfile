@@ -7,15 +7,15 @@ def common
   pod 'SwiftLint'
 end
 target 'demo-iOS' do
-    project 'demo-iOS/demo-iOS.xcodeproj'
-    platform :ios, 10.0
-    common
+  project 'demo-iOS/demo-iOS.xcodeproj'
+  platform :ios, 10.0
+  common
 end
 
 target 'demo-macOS' do
-    project 'demo-macOS/demo-macOS.xcodeproj'
-    platform :osx, 10.12
-    common
+  project 'demo-macOS/demo-macOS.xcodeproj'
+  platform :osx, 10.12
+  common
 end
 
 target 'demo-SwiftUI' do
@@ -28,4 +28,12 @@ target 'demo-tvOS' do
   project 'demo-tvOS/demo-tvOS.xcodeproj'
   platform :tvos, 10.2
   common
+end
+
+post_install do |installer|
+  installer.generated_projects.each do |project|
+    project.build_configurations.each do |config|
+      config.build_settings['SWIFT_COMPILATION_MODE'] = 'wholemodule'
+    end
+  end
 end
