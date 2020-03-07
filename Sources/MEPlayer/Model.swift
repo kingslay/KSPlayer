@@ -296,7 +296,7 @@ final class Packet: ObjectQueueItem {
     var corePacket: UnsafeMutablePointer<AVPacket> { packetWrap.corePacket! }
     private let packetWrap = AVPacketWrap.object()
     func fill() {
-        position = corePacket.pointee.pts
+        position = corePacket.pointee.pts == Int64.min ? corePacket.pointee.dts : corePacket.pointee.pts
         duration = corePacket.pointee.duration
         size = Int64(corePacket.pointee.size)
     }

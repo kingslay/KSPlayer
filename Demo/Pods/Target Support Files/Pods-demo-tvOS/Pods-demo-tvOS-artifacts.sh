@@ -75,7 +75,8 @@ install_framework()
 
 install_xcframework() {
   local basepath="$1"
-  local embed="$2"
+  local dsym_folder="$2"
+  local embed="$3"
   shift
   local paths=("$@")
 
@@ -104,16 +105,27 @@ install_xcframework() {
   fi
 
   install_framework "$basepath/$target_path" "$embed"
+
+  if [[ -z "$dsym_folder" || ! -d "$dsym_folder" ]]; then
+    return
+  fi
+
+  dsyms=($(ls "$dsym_folder"))
+
+  local target_dsym=""
+  for i in ${!dsyms[@]}; do
+    install_artifact "$dsym_folder/${dsyms[$i]}" "$CONFIGURATION_BUILD_DIR" "true"
+  done
 }
 
 
 if [[ "$CONFIGURATION" == "Debug" ]]; then
-  install_xcframework "${PODS_ROOT}/../../FFmpeg/FFmpeg.xcframework" "false" "tvos-arm64/FFmpeg.framework" "tvos-x86_64-simulator/FFmpeg.framework"
-  install_xcframework "${PODS_ROOT}/../../FFmpeg/OpenSSL.xcframework" "false" "tvos-arm64/OpenSSL.framework" "tvos-x86_64-simulator/OpenSSL.framework"
+  install_xcframework "${PODS_ROOT}/../../FFmpeg/FFmpeg.xcframework" "" "false" "tvos-x86_64-simulator/FFmpeg.framework" "tvos-arm64/FFmpeg.framework"
+  install_xcframework "${PODS_ROOT}/../../FFmpeg/OpenSSL.xcframework" "" "false" "tvos-arm64/OpenSSL.framework" "tvos-x86_64-simulator/OpenSSL.framework"
 fi
 if [[ "$CONFIGURATION" == "Release" ]]; then
-  install_xcframework "${PODS_ROOT}/../../FFmpeg/FFmpeg.xcframework" "false" "tvos-arm64/FFmpeg.framework" "tvos-x86_64-simulator/FFmpeg.framework"
-  install_xcframework "${PODS_ROOT}/../../FFmpeg/OpenSSL.xcframework" "false" "tvos-arm64/OpenSSL.framework" "tvos-x86_64-simulator/OpenSSL.framework"
+  install_xcframework "${PODS_ROOT}/../../FFmpeg/FFmpeg.xcframework" "" "false" "tvos-x86_64-simulator/FFmpeg.framework" "tvos-arm64/FFmpeg.framework"
+  install_xcframework "${PODS_ROOT}/../../FFmpeg/OpenSSL.xcframework" "" "false" "tvos-arm64/OpenSSL.framework" "tvos-x86_64-simulator/OpenSSL.framework"
 fi
 
 echo "Artifact list stored at $ARTIFACT_LIST_FILE"
