@@ -1,6 +1,6 @@
 #!/bin/sh
 
-source config.sh
+source ffmpegConfig.sh
 
 LIBRARY_NAME="FFmpeg"
 source common.sh

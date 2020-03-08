@@ -232,6 +232,7 @@ function ConfigureForIOS() {
     PLATFORM="iPhoneOS"
     SYSLIBROOT="$XCODE_PATH/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS.sdk"
     LIBTOOL_FLAGS="-syslibroot $SYSLIBROOT"
+    LDFLAGS="-arch $arch"
     CFLAGS="-arch $arch"
 
     if [ "$arch" = "i386" -o "$arch" = "x86_64" ]; then
@@ -253,6 +254,7 @@ function ConfigureForTVOS() {
     PLATFORM="AppleTVOS"
     SYSLIBROOT="$XCODE_PATH/Platforms/AppleTVOS.platform/Developer/SDKs/AppleTVOS.sdk"
     LIBTOOL_FLAGS="-syslibroot $SYSLIBROOT"
+    LDFLAGS="-arch $arch"
     CFLAGS="-arch $arch"
 
     if [ "$arch" = "i386" -o "$arch" = "x86_64" ]; then
@@ -274,7 +276,7 @@ function ConfigureForMacOS() {
     PLATFORM="MacOSX"
     SYSLIBROOT="$XCODE_PATH/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk"
     LIBTOOL_FLAGS="-syslibroot $SYSLIBROOT"
-
+    LDFLAGS="-arch $arch"
     CFLAGS="-arch $arch"
     FFMPEG_CFG_FLAGS="$CONFIGURE_FLAGS --disable-asm"
     CFLAGS="$CFLAGS -mmacosx-version-min=$DEPLOYMENT_TARGET"
@@ -290,16 +292,10 @@ function ConfigureForMacCatalyst() {
 		-syslibroot $SYSLIBROOT \
 		-L$SYSLIBROOT/System/iOSSupport/usr/lib \
 		-L$XCODE_PATH/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/maccatalyst"
-
-    CFLAGS="-arch $arch"
     FFMPEG_CFG_FLAGS="$CONFIGURE_FLAGS --disable-asm"
+    CFLAGS="-arch $arch"
     CFLAGS="$CFLAGS -target x86_64-apple-ios13.0-macabi \
 						-isysroot $SYSLIBROOT \
 						-iframework $SYSLIBROOT/System/iOSSupport/System/Library/Frameworks"
-
-    LDFLAGS="$LDFLAGS -target x86_64-apple-ios13.0-macabi \
-				-isysroot $SYSLIBROOT \
-				-L$SYSLIBROOT/System/iOSSupport/usr/lib \
-				-L$XCODE_PATH/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/maccatalyst \
-				-iframework $SYSLIBROOT/System/iOSSupport/System/Library/Frameworks"
+    LDFLAGS="$CFLAGS"
 }

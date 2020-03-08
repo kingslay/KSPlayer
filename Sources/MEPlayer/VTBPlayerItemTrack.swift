@@ -8,24 +8,23 @@
 import ffmpeg
 import VideoToolbox
 
+extension KSOptions {
+    func canHardwareDecode(codecpar: AVCodecParameters) -> Bool {
+        if codecpar.codec_id == AV_CODEC_ID_H264, hardwareDecodeH264 {
+            return true
+        } else if codecpar.codec_id == AV_CODEC_ID_HEVC, #available(iOS 11.0, tvOS 11.0, OSX 10.13, *), VTIsHardwareDecodeSupported(kCMVideoCodecType_HEVC), hardwareDecodeH265 {
+            return true
+        }
+        return false
+    }
+}
 class DecompressionSession {
     fileprivate let isConvertNALSize: Bool
     fileprivate let formatDescription: CMFormatDescription
     fileprivate let decompressionSession: VTDecompressionSession
 
-    private static func open(codecpar: AVCodecParameters, options: KSOptions) -> Bool {
-        if codecpar.codec_id == AV_CODEC_ID_H264, options.hardwareDecodeH264 {
-            return true
-        } else if codecpar.codec_id == AV_CODEC_ID_HEVC, #available(iOS 11.0, tvOS 11.0, OSX 10.13, *), VTIsHardwareDecodeSupported(kCMVideoCodecType_HEVC), options.hardwareDecodeH265 {
-            return true
-        }
-        return false
-    }
-
     init?(codecpar: AVCodecParameters, options: KSOptions) {
-        guard DecompressionSession.open(codecpar: codecpar, options: options),
-            codecpar.format == AV_PIX_FMT_YUV420P.rawValue,
-            let extradata = codecpar.extradata else {
+        guard options.canHardwareDecode(codecpar: codecpar), codecpar.format == AV_PIX_FMT_YUV420P.rawValue, let extradata = codecpar.extradata else {
             return nil
         }
         let extradataSize = codecpar.extradata_size
