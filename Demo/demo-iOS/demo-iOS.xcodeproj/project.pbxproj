@@ -59,6 +59,7 @@
 		AC08619520B69AB400D801FC /* MasterViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MasterViewController.swift; sourceTree = "<group>"; };
 		AC155F1223AFA9F40092D004 /* demo-iOS.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "demo-iOS.entitlements"; sourceTree = "<group>"; };
 		AC458DE521DF830F00BD4CF9 /* AudioViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioViewController.swift; sourceTree = "<group>"; };
+		AC7E04DB2414DA5E00B0F540 /* libxml2.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libxml2.tbd; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk/usr/lib/libxml2.tbd; sourceTree = DEVELOPER_DIR; };
 		ACEF02B42194670F003E75E4 /* Polonaise.flac */ = {isa = PBXFileReference; lastKnownFileType = file; path = Polonaise.flac; sourceTree = "<group>"; };
 		ACEF02B52194670F003E75E4 /* google-help-vr.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = "google-help-vr.mp4"; sourceTree = "<group>"; };
 		ACEF02B62194670F003E75E4 /* 567082ac3ae39699f68de4fd2b7444b1e045515a.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = 567082ac3ae39699f68de4fd2b7444b1e045515a.mp4; sourceTree = "<group>"; };
@@ -94,6 +95,7 @@
 		15F03ACE93ED6586BC17C60F /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				AC7E04DB2414DA5E00B0F540 /* libxml2.tbd */,
 				652FADC7FD99912D1B883FB1 /* Pods_demo_iOS.framework */,
 				839B31E32B04D796647D7334 /* Pods_demo_iOSTests.framework */,
 			);
