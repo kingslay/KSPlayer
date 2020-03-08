@@ -72,7 +72,6 @@ protocol PlayerItemTrackProtocol: Capacity {
     // 是否无缝循环
     var isLoopModel: Bool { get set }
     var delegate: CodecCapacityDelegate? { get set }
-    func open() -> Bool
     func decode()
     func seek(time: TimeInterval)
     func endOfFile()
@@ -128,11 +127,6 @@ class MEPlayerItemTrack<Frame: MEFrame>: PlayerItemTrackProtocol, CustomStringCo
         } else {
             outputRenderQueue = ObjectQueue()
         }
-    }
-
-    func open() -> Bool {
-        state = .opening
-        return true
     }
 
     func decode() {
@@ -220,15 +214,11 @@ class AsyncPlayerItemTrack<Frame: MEFrame>: MEPlayerItemTrack<Frame> {
         }
     }
 
-    override func open() -> Bool {
-        if super.open() {
-            operationQueue.name = "KSPlayer_" + description
-            operationQueue.maxConcurrentOperationCount = 1
-            operationQueue.qualityOfService = .userInteractive
-            return true
-        } else {
-            return false
-        }
+    required init(track: TrackProtocol, options: KSOptions) {
+        super.init(track: track, options: options)
+        operationQueue.name = "KSPlayer_" + description
+        operationQueue.maxConcurrentOperationCount = 1
+        operationQueue.qualityOfService = .userInteractive
     }
 
     override func putPacket(packet: Packet) {

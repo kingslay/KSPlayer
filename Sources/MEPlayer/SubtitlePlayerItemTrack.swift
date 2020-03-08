@@ -12,13 +12,9 @@ final class SubtitlePlayerItemTrack: MEPlayerItemTrack<SubtitleFrame> {
     private var codecContext: UnsafeMutablePointer<AVCodecContext>?
     private var subtitle = AVSubtitle()
     private var preSubtitleFrame: SubtitleFrame?
-
-    override func open() -> Bool {
-        guard super.open(), let codecContext = codecpar.ceateContext(options: options) else {
-            return false
-        }
-        self.codecContext = codecContext
-        return true
+    required init(track: TrackProtocol, options: KSOptions) {
+        super.init(track: track, options: options)
+        codecContext = codecpar.ceateContext(options: options)
     }
 
     override func shutdown() {

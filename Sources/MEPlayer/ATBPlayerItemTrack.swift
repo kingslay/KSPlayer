@@ -11,25 +11,23 @@ import ffmpeg
 final class ATBPlayerItemTrack: AsyncPlayerItemTrack<AudioFrame> {
     private var converter: AudioConverterRef?
     private var outAudioBufferList = AudioBufferList()
-    override func open() -> Bool {
-        if super.open() {
-            var inputFormat = codecpar.pointee.inputFormat
-            var outputFormat = AudioStreamBasicDescription()
-            outputFormat.mFormatID = kAudioFormatLinearPCM
-            outputFormat.mFormatFlags = kAudioFormatFlagIsSignedInteger | kAudioFormatFlagIsPacked
-            outputFormat.mFramesPerPacket = 1
-            let sampleFmt = codecpar.pointee.bits_per_raw_sample == 32 ? AV_SAMPLE_FMT_S32 : AV_SAMPLE_FMT_S16
-            outputFormat.mBitsPerChannel = UInt32(av_get_bytes_per_sample(sampleFmt) * 8)
-            outputFormat.mSampleRate = inputFormat.mSampleRate
-            outputFormat.mChannelsPerFrame = inputFormat.mChannelsPerFrame
-            outAudioBufferList.mNumberBuffers = 1
-            outAudioBufferList.mBuffers.mNumberChannels = UInt32(codecpar.pointee.channels)
-            let bufferSize = outputFormat.mBitsPerChannel * UInt32(codecpar.pointee.channels * codecpar.pointee.frame_size)
-            outAudioBufferList.mBuffers.mDataByteSize = bufferSize
-            outAudioBufferList.mBuffers.mData = malloc(Int(bufferSize))
-            return AudioConverterNew(&inputFormat, &outputFormat, &converter) == noErr
-        }
-        return false
+    required init(track: TrackProtocol, options: KSOptions) {
+        super.init(track: track, options: options)
+        var inputFormat = codecpar.pointee.inputFormat
+        var outputFormat = AudioStreamBasicDescription()
+        outputFormat.mFormatID = kAudioFormatLinearPCM
+        outputFormat.mFormatFlags = kAudioFormatFlagIsSignedInteger | kAudioFormatFlagIsPacked
+        outputFormat.mFramesPerPacket = 1
+        let sampleFmt = codecpar.pointee.bits_per_raw_sample == 32 ? AV_SAMPLE_FMT_S32 : AV_SAMPLE_FMT_S16
+        outputFormat.mBitsPerChannel = UInt32(av_get_bytes_per_sample(sampleFmt) * 8)
+        outputFormat.mSampleRate = inputFormat.mSampleRate
+        outputFormat.mChannelsPerFrame = inputFormat.mChannelsPerFrame
+        outAudioBufferList.mNumberBuffers = 1
+        outAudioBufferList.mBuffers.mNumberChannels = UInt32(codecpar.pointee.channels)
+        let bufferSize = outputFormat.mBitsPerChannel * UInt32(codecpar.pointee.channels * codecpar.pointee.frame_size)
+        outAudioBufferList.mBuffers.mDataByteSize = bufferSize
+        outAudioBufferList.mBuffers.mData = malloc(Int(bufferSize))
+        AudioConverterNew(&inputFormat, &outputFormat, &converter)
     }
 
     override func doDecode(packet: Packet) throws -> [AudioFrame] {

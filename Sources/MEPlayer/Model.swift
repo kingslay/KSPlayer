@@ -234,12 +234,11 @@ struct MECodecState: OptionSet {
     public let rawValue: UInt
     public init(rawValue: UInt) { self.rawValue = rawValue }
     static let idle = MECodecState(rawValue: 1 << 0)
-    static let opening = MECodecState(rawValue: 1 << 1)
-    static let decoding = MECodecState(rawValue: 1 << 2)
-    static let flush = MECodecState(rawValue: 1 << 3)
-    static let closed = MECodecState(rawValue: 1 << 4)
-    static let finished = MECodecState(rawValue: 1 << 5)
-    static let failed = MECodecState(rawValue: 1 << 6)
+    static let decoding = MECodecState(rawValue: 1 << 1)
+    static let flush = MECodecState(rawValue: 1 << 2)
+    static let closed = MECodecState(rawValue: 1 << 3)
+    static let finished = MECodecState(rawValue: 1 << 4)
+    static let failed = MECodecState(rawValue: 1 << 5)
 }
 
 struct Timebase {
