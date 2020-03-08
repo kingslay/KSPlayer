@@ -26,7 +26,7 @@ CONFIGURE_FLAGS="$CONFIGURE_FLAGS --disable-debug"
 # Configuration options:
 CONFIGURE_FLAGS="$CONFIGURE_FLAGS --enable-cross-compile"
 CONFIGURE_FLAGS="$CONFIGURE_FLAGS --enable-stripping"
-
+CONFIGURE_FLAGS="$CONFIGURE_FLAGS --enable-libxml2"
 CONFIGURE_FLAGS="$CONFIGURE_FLAGS --enable-thumb"
 CONFIGURE_FLAGS="$CONFIGURE_FLAGS --enable-static"
 CONFIGURE_FLAGS="$CONFIGURE_FLAGS --disable-shared"
@@ -230,11 +230,8 @@ function ConfigureForIOS() {
     local arch=$1
     DEPLOYMENT_TARGET="9.0"
     PLATFORM="iPhoneOS"
-
-    LIBTOOL_FLAGS="\
-		 -syslibroot $XCODE_PATH/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS.sdk \
-		 -L$XCODE_PATH/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS.sdk/System/iOSSupport/usr/lib"
-
+    SYSLIBROOT="$XCODE_PATH/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS.sdk"
+    LIBTOOL_FLAGS="-syslibroot $SYSLIBROOT"
     CFLAGS="-arch $arch"
 
     if [ "$arch" = "i386" -o "$arch" = "x86_64" ]; then
@@ -254,11 +251,8 @@ function ConfigureForTVOS() {
     local arch=$1
     DEPLOYMENT_TARGET="12.0"
     PLATFORM="AppleTVOS"
-
-    LIBTOOL_FLAGS="\
-		 -syslibroot $XCODE_PATH/Platforms/AppleTVOS.platform/Developer/SDKs/AppleTVOS.sdk \
-		 -L$XCODE_PATH/Platforms/AppleTVOS.platform/Developer/SDKs/AppleTVOS.sdk/System/usr/lib"
-
+    SYSLIBROOT="$XCODE_PATH/Platforms/AppleTVOS.platform/Developer/SDKs/AppleTVOS.sdk"
+    LIBTOOL_FLAGS="-syslibroot $SYSLIBROOT"
     CFLAGS="-arch $arch"
 
     if [ "$arch" = "i386" -o "$arch" = "x86_64" ]; then
@@ -278,10 +272,8 @@ function ConfigureForMacOS() {
     local arch=$1
     DEPLOYMENT_TARGET="10.14"
     PLATFORM="MacOSX"
-
-    LIBTOOL_FLAGS="\
-		 -syslibroot $XCODE_PATH/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk \
-		 -L$XCODE_PATH/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/System/usr/lib"
+    SYSLIBROOT="$XCODE_PATH/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk"
+    LIBTOOL_FLAGS="-syslibroot $SYSLIBROOT"
 
     CFLAGS="-arch $arch"
     FFMPEG_CFG_FLAGS="$CONFIGURE_FLAGS --disable-asm"
@@ -292,22 +284,22 @@ function ConfigureForMacCatalyst() {
     local arch=$1
     DEPLOYMENT_TARGET="10.15"
     PLATFORM="iPhoneOS"
+    SYSLIBROOT="$XCODE_PATH/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk"
 
     LIBTOOL_FLAGS="\
-		-syslibroot $XCODE_PATH/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk \
-		-L$XCODE_PATH/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk/System/iOSSupport/usr/lib \
+		-syslibroot $SYSLIBROOT \
+		-L$SYSLIBROOT/System/iOSSupport/usr/lib \
 		-L$XCODE_PATH/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/maccatalyst"
 
     CFLAGS="-arch $arch"
     FFMPEG_CFG_FLAGS="$CONFIGURE_FLAGS --disable-asm"
     CFLAGS="$CFLAGS -target x86_64-apple-ios13.0-macabi \
-						-isysroot $XCODE_PATH/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk \
-						-isystem $XCODE_PATH/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/System/iOSSupport/usr/include \
-						-iframework $XCODE_PATH/Platforms/MacOSX.platform/Developer/SDKs/MacOS.sdk/System/iOSSupport/System/Library/Frameworks"
+						-isysroot $SYSLIBROOT \
+						-iframework $SYSLIBROOT/System/iOSSupport/System/Library/Frameworks"
 
     LDFLAGS="$LDFLAGS -target x86_64-apple-ios13.0-macabi \
-				-isysroot $XCODE_PATH/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk \
-				-L$XCODE_PATH/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/System/iOSSupport/usr/lib \
+				-isysroot $SYSLIBROOT \
+				-L$SYSLIBROOT/System/iOSSupport/usr/lib \
 				-L$XCODE_PATH/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/maccatalyst \
-				-iframework $XCODE_PATH/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/System/iOSSupport/System/Library/Frameworks"
+				-iframework $SYSLIBROOT/System/iOSSupport/System/Library/Frameworks"
 }

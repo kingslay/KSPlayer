@@ -98,7 +98,8 @@
       "libraries": [
         "bz2",
         "z",
-        "iconv"
+        "iconv",
+        "xml2"
       ],
       "ios": {
         "xcconfig": {

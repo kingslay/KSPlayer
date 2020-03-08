@@ -76,7 +76,7 @@ class MasterViewController: UIViewController, UITableViewDelegate, UITableViewDa
             objects.append(KSPlayerResource(url: url, options: KSOptions(), name: "tvb视频"))
         }
 
-        if let url = URL(string: "https://dash.akamaized.net/envivio/EnvivioDash3/manifest.mpd") {
+        if let url = URL(string: "http://dash.edgesuite.net/akamai/bbb_30fps/bbb_30fps.mpd") {
             objects.append(KSPlayerResource(url: url, options: KSOptions(), name: "dash视频"))
         }
         if let url = URL(string: "https://bitlivedemo-a.akamaihd.net/m3u8s/bitcodin.m3u8") {

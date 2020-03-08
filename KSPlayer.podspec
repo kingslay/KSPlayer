@@ -48,7 +48,7 @@ Pod::Spec.new do |s|
     s.subspec 'FFmpeg' do |ffmpeg|
 #        ffmpeg.public_header_files = 'Sources/FFmpeg/**/*.{h}'
         ffmpeg.source_files = 'Sources/FFmpegExt/**/*.{h,c}'
-        ffmpeg.libraries   = 'bz2', 'z', 'iconv'
+        ffmpeg.libraries   = 'bz2', 'z', 'iconv', 'xml2'
         ffmpeg.ios.xcconfig = {
             'HEADER_SEARCH_PATHS' => "${PODS_ROOT}/#{s.name}/FFmpeg/FFmpeg.xcframework/ios-arm64/FFmpeg.framework/Headers ${PODS_ROOT}/../../FFmpeg/FFmpeg.xcframework/ios-arm64/FFmpeg.framework/Headers"
         }

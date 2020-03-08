@@ -29,9 +29,6 @@ function InnerBuild() {
         AS="gas-preprocessor.pl -- $CC"
     fi
 
-    CXXFLAGS="$CFLAGS"
-    LDFLAGS="$CFLAGS"
-
     if [ "$X264" ]; then
         CFLAGS="$CFLAGS -I$X264/include"
         LDFLAGS="$LDFLAGS -L$X264/lib"
@@ -47,6 +44,8 @@ function InnerBuild() {
         CFLAGS="$CFLAGS -I$OPENSSLPath/include"
         LDFLAGS="$LDFLAGS -L$OPENSSLPath/lib"
     fi
+    
+    CFLAGS="$CFLAGS -I$SYSLIBROOT/usr/include/libxml2"
 
     TMPDIR=${TMPDIR/%\//} $current_dir/$SOURCE/configure \
         --target-os=darwin \

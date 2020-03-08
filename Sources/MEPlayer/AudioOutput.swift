@@ -13,7 +13,6 @@ import QuartzCore
 final class AudioOutput: FrameOutput {
     private let semaphore = DispatchSemaphore(value: 1)
     private var currentRenderReadOffset = 0
-    private var audioTime = CMTime.zero
     private var currentRender: AudioFrame? {
         didSet {
             if currentRender == nil {
@@ -40,14 +39,12 @@ final class AudioOutput: FrameOutput {
     func flush() {
         semaphore.wait()
         currentRender = nil
-        audioTime = CMTime.invalid
         semaphore.signal()
     }
 
     func shutdown() {
         semaphore.wait()
         currentRender = nil
-        audioTime = CMTime.zero
         semaphore.signal()
     }
 }
@@ -67,15 +64,11 @@ extension AudioOutput: AudioPlayerDelegate {
             guard let currentRender = currentRender else {
                 return
             }
-            guard currentRender.numberOfSamples > currentRenderReadOffset else {
+            let residueLinesize = currentRender.numberOfSamples - currentRenderReadOffset
+            guard residueLinesize > 0 else {
                 self.currentRender = nil
                 continue
             }
-            if ioDataWriteOffset == 0 {
-                let currentPreparePosition = currentRender.position + currentRender.duration * Int64(currentRenderReadOffset) / Int64(currentRender.numberOfSamples)
-                audioTime = currentRender.timebase.cmtime(for: currentPreparePosition)
-            }
-            let residueLinesize = currentRender.numberOfSamples - currentRenderReadOffset
             let framesToCopy = min(numberOfSamples, residueLinesize)
             let bytesToCopy = framesToCopy * MemoryLayout<Float>.size
             let offset = currentRenderReadOffset * MemoryLayout<Float>.size
@@ -91,8 +84,9 @@ extension AudioOutput: AudioPlayerDelegate {
     func audioPlayerWillRenderSample(sampleTimestamp _: AudioTimeStamp) {}
 
     func audioPlayerDidRenderSample(sampleTimestamp _: AudioTimeStamp) {
-        if audioTime.isValid {
-            renderSource?.setAudio(time: audioTime)
+        if let currentRender = currentRender {
+            let currentPreparePosition = currentRender.position + currentRender.duration * Int64(currentRenderReadOffset) / Int64(currentRender.numberOfSamples)
+            renderSource?.setAudio(time: currentRender.timebase.cmtime(for: currentPreparePosition))
         }
     }
 }
