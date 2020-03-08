@@ -11,7 +11,7 @@ import Foundation
 class FFPlayerItemTrack: AsyncPlayerItemTrack<Frame> {
     // 第一次seek不要调用avcodec_flush_buffers。否则seek完之后可能会因为不是关键帧而导致蓝屏
     private var firstSeek = true
-    private var coreFrame: UnsafeMutablePointer<AVFrame>?
+    private var coreFrame: UnsafeMutablePointer<AVFrame>? = av_frame_alloc()
     private var codecContextMap = [Int32: UnsafeMutablePointer<AVCodecContext>?]()
     private var bestEffortTimestamp = Int64(0)
     private let swresample: Swresample
@@ -33,14 +33,6 @@ class FFPlayerItemTrack: AsyncPlayerItemTrack<Frame> {
             avcodec_free_context(&content)
         }
         codecContextMap.removeAll()
-    }
-
-    override func open() -> Bool {
-        if let coreFrame = av_frame_alloc() {
-            self.coreFrame = coreFrame
-            return super.open()
-        }
-        return false
     }
 
     override func doFlushCodec() {
@@ -76,7 +68,7 @@ class FFPlayerItemTrack: AsyncPlayerItemTrack<Frame> {
                     if timestamp >= bestEffortTimestamp {
                         bestEffortTimestamp = timestamp
                     } else if codecContextMap.keys.count > 1 {
-                        //m3u8多路流需要丢帧
+                        // m3u8多路流需要丢帧
                         throw Int32(0)
                     }
                     let frame = swresample.transfer(avframe: avframe, timebase: track.timebase)

@@ -169,37 +169,24 @@ extension MEPlayerItem {
             return nil
         }
         let videos = tracks.filter { $0.mediaType == .video }
-        videoTrack = videos.compactMap {
-            var videotoolbox = false
-            if $0.stream.pointee.codecpar.pointee.codec_id == AV_CODEC_ID_H264, self.options.hardwareDecodeH264 {
-                videotoolbox = true
-            } else if $0.stream.pointee.codecpar.pointee.codec_id == AV_CODEC_ID_HEVC, #available(iOS 11.0, tvOS 11.0, OSX 10.13, *), VTIsHardwareDecodeSupported(kCMVideoCodecType_HEVC), self.options.hardwareDecodeH265 {
-                videotoolbox = true
+        if let first = videos.first {
+            if let session = DecompressionSession(codecpar: first.stream.pointee.codecpar.pointee, options: options) {
+                videoTrack = VTBPlayerItemTrack(track: first, options: options, session: session)
+            } else {
+                videoTrack = FFPlayerItemTrack(track: first, options: options)
             }
-            if videotoolbox {
-                let codec = VTBPlayerItemTrack(track: $0, options: self.options)
-                if codec.open() {
-                    return codec
-                }
-            }
-            let codec = FFPlayerItemTrack(track: $0, options: self.options)
-            return codec.open() ? codec : nil
-        }.first
-        subtitleTracks = tracks.filter { $0.mediaType == .subtitle }.compactMap {
-            let codec = SubtitlePlayerItemTrack(track: $0, options: options)
-            return codec.open() ? codec : nil
+        }
+        subtitleTracks = tracks.filter { $0.mediaType == .subtitle }.map {
+            SubtitlePlayerItemTrack(track: $0, options: options)
         }
         let audios = tracks.filter { $0.mediaType == .audio }
-        if audios.isEmpty {
-            isAudioStalled = true
-        } else {
-            audioTrack = audios.compactMap {
-                let codec = FFPlayerItemTrack(track: $0, options: self.options)
-                return codec.open() ? codec : nil
-            }.first
+        if let first = audios.first {
+            audioTrack = FFPlayerItemTrack(track: first, options: options)
             if videos.count == 1 {
                 audios.filter { $0.streamIndex != audioTrack?.track.streamIndex }.forEach { $0.isEnabled = false }
             }
+        } else {
+            isAudioStalled = true
         }
     }
 
@@ -390,12 +377,10 @@ extension MEPlayerItem: CodecCapacityDelegate {
         KSLog("Decoder did Failed : \(error)")
         if track is VTBPlayerItemTrack {
             let newVideoCodec = FFPlayerItemTrack(track: track.track, options: options)
-            if newVideoCodec.open() {
-                track.shutdown()
-                videoTrack = newVideoCodec
-                newVideoCodec.decode()
-                KSLog("VideoCodec switch to \(newVideoCodec.self)")
-            }
+            track.shutdown()
+            videoTrack = newVideoCodec
+            newVideoCodec.decode()
+            KSLog("VideoCodec switch to software decompression")
         }
     }
 
