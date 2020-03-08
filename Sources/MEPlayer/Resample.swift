@@ -61,18 +61,24 @@ class VideoSwresample: Swresample {
     }
 
     func transfer(avframe: UnsafeMutablePointer<AVFrame>, timebase: Timebase) -> Frame {
-        if setup(frame: avframe), let dstFrame = dstFrame, swsConvert(data: Array(tuple: avframe.pointee.data), linesize: Array(tuple: avframe.pointee.linesize)) {
-            avframe.pointee.format = dstFrame.pointee.format
-            avframe.pointee.data = dstFrame.pointee.data
-            avframe.pointee.linesize = dstFrame.pointee.linesize
-        }
         let frame = VideoVTBFrame()
-        frame.corePixelBuffer = PixelBuffer(frame: avframe)
+        frame.timebase = timebase
+        if avframe.pointee.format == AV_PIX_FMT_VIDEOTOOLBOX.rawValue {
+            // swiftlint:disable force_cast
+            frame.corePixelBuffer = avframe.pointee.data.3 as! CVPixelBuffer
+            // swiftlint:enable force_cast
+        } else {
+            if setup(frame: avframe), let dstFrame = dstFrame, swsConvert(data: Array(tuple: avframe.pointee.data), linesize: Array(tuple: avframe.pointee.linesize)) {
+                avframe.pointee.format = dstFrame.pointee.format
+                avframe.pointee.data = dstFrame.pointee.data
+                avframe.pointee.linesize = dstFrame.pointee.linesize
+            }
+            frame.corePixelBuffer = PixelBuffer(frame: avframe)
+        }
         frame.position = avframe.pointee.best_effort_timestamp
         if frame.position == Int64.min || frame.position < 0 {
             frame.position = max(avframe.pointee.pkt_dts, 0)
         }
-        frame.timebase = timebase
         frame.duration = avframe.pointee.pkt_duration
         frame.size = Int64(avframe.pointee.pkt_size)
         return frame
