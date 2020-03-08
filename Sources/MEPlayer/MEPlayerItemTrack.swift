@@ -1,5 +1,5 @@
 //
-//  PlayerItemTrackProtocol.swift
+//  Decoder.swift
 //  KSPlayer
 //
 //  Created by kintan on 2018/3/9.
@@ -17,25 +17,24 @@ protocol TrackProtocol: AnyObject, CustomStringConvertible {
 
 extension TrackProtocol {
     var streamIndex: Int32 { stream.pointee.index }
-    var name: String {
-        if let entry = av_dict_get(stream.pointee.metadata, "title", nil, 0), let title = entry.pointee.value {
-            return String(cString: title)
-        } else {
-            if mediaType == .subtitle {
-                return NSLocalizedString("内置字幕", comment: "")
-            } else {
-                return ""
-            }
-        }
-    }
 }
 
 func == (lhs: TrackProtocol, rhs: TrackProtocol) -> Bool {
     lhs.streamIndex == rhs.streamIndex
 }
 
-class Track: TrackProtocol, CustomStringConvertible {
-    var description: String { mediaType.rawValue + ", streamIndex: \(streamIndex)" }
+class AssetTrack: TrackProtocol, CustomStringConvertible {
+    var description: String {
+        if let entry = av_dict_get(stream.pointee.metadata, "title", nil, 0), let title = entry.pointee.value {
+            return String(cString: title)
+        } else {
+            if mediaType == .subtitle {
+                return NSLocalizedString("内置字幕", comment: "")
+            } else {
+                return mediaType.rawValue
+            }
+        }
+    }
     let stream: UnsafeMutablePointer<AVStream>
     let mediaType: AVFoundation.AVMediaType
     let timebase: Timebase
@@ -67,8 +66,8 @@ class Track: TrackProtocol, CustomStringConvertible {
 }
 
 protocol PlayerItemTrackProtocol: Capacity {
-    init(track: TrackProtocol, options: KSOptions)
-    var track: TrackProtocol { get }
+    init(assetTrack: TrackProtocol, options: KSOptions)
+    var mediaType: AVFoundation.AVMediaType { get }
     // 是否无缝循环
     var isLoopModel: Bool { get set }
     var delegate: CodecCapacityDelegate? { get set }
@@ -80,18 +79,14 @@ protocol PlayerItemTrackProtocol: Capacity {
     func shutdown()
 }
 
-extension PlayerItemTrackProtocol {
-    var codecpar: UnsafeMutablePointer<AVCodecParameters> {
-        return track.stream.pointee.codecpar
-    }
-}
-
-class MEPlayerItemTrack<Frame: MEFrame>: PlayerItemTrackProtocol, CustomStringConvertible {
-    var description: String { track.description }
+class FFPlayerItemTrack<Frame: MEFrame>: PlayerItemTrackProtocol, CustomStringConvertible {
+    let description: String
     fileprivate var state = MECodecState.idle
     weak var delegate: CodecCapacityDelegate?
-    var track: TrackProtocol
+//    var track: TrackProtocol
+    fileprivate let fps: Int
     let options: KSOptions
+    let mediaType: AVFoundation.AVMediaType
     let outputRenderQueue: ObjectQueue<Frame>
     var isLoopModel = false
 
@@ -100,7 +95,7 @@ class MEPlayerItemTrack<Frame: MEFrame>: PlayerItemTrackProtocol, CustomStringCo
     }
 
     var loadedTime: TimeInterval {
-        return TimeInterval(loadedCount) / TimeInterval(track.fps)
+        return TimeInterval(loadedCount) / TimeInterval(fps)
 //        return CMTime((packetQueue.duration + outputRenderQueue.duration) * Int64(timebase.num), timebase.den).seconds
     }
 
@@ -109,21 +104,23 @@ class MEPlayerItemTrack<Frame: MEFrame>: PlayerItemTrackProtocol, CustomStringCo
     }
 
     var bufferingProgress: Int {
-        return min(100, loadedCount * 100 / (track.fps * Int(options.preferredForwardBufferDuration)))
+        return min(100, Int(loadedTime * 100) / Int(options.preferredForwardBufferDuration))
     }
 
     var isPlayable: Bool {
         return true
     }
 
-    required init(track: TrackProtocol, options: KSOptions) {
-        self.track = track
+    required init(assetTrack: TrackProtocol, options: KSOptions) {
+        mediaType = assetTrack.mediaType
+        description = mediaType.rawValue
+        fps = assetTrack.fps
         self.options = options
         // 默认缓存队列大小跟帧率挂钩,经测试除以4，最优
-        if track.mediaType == .video {
-            outputRenderQueue = ObjectQueue(maxCount: track.fps / 4)
-        } else if track.mediaType == .audio {
-            outputRenderQueue = ObjectQueue(maxCount: track.fps / 4, sortObjects: true)
+        if mediaType == .video {
+            outputRenderQueue = ObjectQueue(maxCount: fps / 4)
+        } else if mediaType == .audio {
+            outputRenderQueue = ObjectQueue(maxCount: fps / 4, sortObjects: true)
         } else {
             outputRenderQueue = ObjectQueue()
         }
@@ -164,8 +161,9 @@ class MEPlayerItemTrack<Frame: MEFrame>: PlayerItemTrackProtocol, CustomStringCo
     }
 }
 
-class AsyncPlayerItemTrack<Frame: MEFrame>: MEPlayerItemTrack<Frame> {
+class AsyncPlayerItemTrack: FFPlayerItemTrack<Frame> {
     private let operationQueue = OperationQueue()
+    private var decoderMap = [Int32: DecodeProtocol]()
     private var decodeOperation: BlockOperation?
     private var seekTime = 0.0
     private var isFirst = true
@@ -173,9 +171,6 @@ class AsyncPlayerItemTrack<Frame: MEFrame>: MEPlayerItemTrack<Frame> {
     // 无缝播放使用的PacketQueue
     private var loopPacketQueue: ObjectQueue<Packet>?
     private var packetQueue = ObjectQueue<Packet>()
-    override var loadedTime: TimeInterval {
-        return TimeInterval(loadedCount + (loopPacketQueue?.count ?? 0)) / TimeInterval(track.fps)
-    }
 
     override var isLoopModel: Bool {
         didSet {
@@ -192,7 +187,7 @@ class AsyncPlayerItemTrack<Frame: MEFrame>: MEPlayerItemTrack<Frame> {
     }
 
     override var loadedCount: Int {
-        return packetQueue.count + super.loadedCount
+        return packetQueue.count + super.loadedCount + (loopPacketQueue?.count ?? 0)
     }
 
     override var isPlayable: Bool {
@@ -200,8 +195,8 @@ class AsyncPlayerItemTrack<Frame: MEFrame>: MEPlayerItemTrack<Frame> {
             return true
         }
         // 让音频能更快的打开
-        let isSecondOpen = track.mediaType == .audio || options.isSecondOpen
-        let status = LoadingStatus(fps: track.fps, packetCount: packetQueue.count,
+        let isSecondOpen = mediaType == .audio || options.isSecondOpen
+        let status = LoadingStatus(fps: fps, packetCount: packetQueue.count,
                                    frameCount: outputRenderQueue.count,
                                    frameMaxCount: outputRenderQueue.maxCount,
                                    isFirst: isFirst, isSeek: isSeek, isSecondOpen: isSecondOpen)
@@ -214,8 +209,9 @@ class AsyncPlayerItemTrack<Frame: MEFrame>: MEPlayerItemTrack<Frame> {
         }
     }
 
-    required init(track: TrackProtocol, options: KSOptions) {
-        super.init(track: track, options: options)
+    required init(assetTrack: TrackProtocol, options: KSOptions) {
+        decoderMap[assetTrack.streamIndex] = assetTrack.makeDecode(options: options)
+        super.init(assetTrack: assetTrack, options: options)
         operationQueue.name = "KSPlayer_" + description
         operationQueue.maxConcurrentOperationCount = 1
         operationQueue.qualityOfService = .userInteractive
@@ -243,6 +239,7 @@ class AsyncPlayerItemTrack<Frame: MEFrame>: MEPlayerItemTrack<Frame> {
         if let decodeOperation = decodeOperation {
             operationQueue.addOperation(decodeOperation)
         }
+        decoderMap.values.forEach { $0.decode() }
     }
 
     private func decodeThread() {
@@ -257,34 +254,7 @@ class AsyncPlayerItemTrack<Frame: MEFrame>: MEPlayerItemTrack<Frame> {
                 guard let packet = packetQueue.getObjectSync(), !state.contains(.flush), !state.contains(.closed) else {
                     continue
                 }
-                do {
-                    //                        let startTime = CACurrentMediaTime()
-
-                    track = packet.track
-                    let frames = try doDecode(packet: packet)
-                    //                        if type == .video {
-                    //                            KSLog("视频解码耗时：\(CACurrentMediaTime()-startTime)")
-                    //                        } else if type == .audio {
-                    //                            KSLog("音频解码耗时：\(CACurrentMediaTime()-startTime)")
-                    //                        }
-                    frames.forEach { frame in
-                        guard !state.contains(.flush), !state.contains(.closed) else {
-                            return
-                        }
-                        if seekTime > 0, options.isAccurateSeek {
-                            if frame.seconds < seekTime {
-                                return
-                            } else {
-                                seekTime = 0.0
-                            }
-                        }
-                        outputRenderQueue.putObjectSync(object: frame)
-                        delegate?.codecDidChangeCapacity(track: self)
-                    }
-                } catch {
-                    delegate?.codecFailed(error: error as NSError, track: self)
-                    state = .failed
-                }
+                doDecode(packet: packet)
             }
         }
     }
@@ -309,6 +279,7 @@ class AsyncPlayerItemTrack<Frame: MEFrame>: MEPlayerItemTrack<Frame> {
         isLoopModel = false
         delegate?.codecDidChangeCapacity(track: self)
         isSeek = true
+        decoderMap.values.forEach { $0.seek(time: time) }
     }
 
     override func endOfFile() {
@@ -329,11 +300,50 @@ class AsyncPlayerItemTrack<Frame: MEFrame>: MEPlayerItemTrack<Frame> {
         if Thread.current.name != operationQueue.name {
             operationQueue.waitUntilAllOperationsAreFinished()
         }
+        decoderMap.values.forEach { $0.shutdown() }
+        decoderMap.removeAll()
     }
 
-    func doFlushCodec() {}
+    private func doFlushCodec() {
+        decoderMap.values.forEach { $0.doFlushCodec() }
+    }
 
-    func doDecode(packet _: Packet) throws -> [Frame] {
-        fatalError("Abstract method")
+    private func doDecode(packet: Packet) {
+        let decoder = decoderMap.value(for: packet.assetTrack.streamIndex, default: packet.assetTrack.makeDecode(options: options))
+        do {
+            try decoder.doDecode(packet: packet.corePacket).forEach { frame in
+                guard !state.contains(.flush), !state.contains(.closed) else {
+                    return
+                }
+                if seekTime > 0, options.isAccurateSeek {
+                    if frame.seconds < seekTime {
+                        return
+                    } else {
+                        seekTime = 0.0
+                    }
+                }
+                outputRenderQueue.putObjectSync(object: frame)
+                delegate?.codecDidChangeCapacity(track: self)
+            }
+        } catch {
+            KSLog("Decoder did Failed : \(error)")
+            if decoder is HardwareDecode {
+                decoderMap[packet.assetTrack.streamIndex] = SoftwareDecode(assetTrack: packet.assetTrack, options: options)
+                KSLog("VideoCodec switch to software decompression")
+            } else {
+                state = .failed
+            }
+        }
+    }
+}
+extension Dictionary {
+    public mutating func value(for key: Key, default defaultValue: @autoclosure () -> Value) -> Value {
+        if let value = self[key] {
+            return value
+        } else {
+            let value = defaultValue()
+            self[key] = value
+            return value
+        }
     }
 }

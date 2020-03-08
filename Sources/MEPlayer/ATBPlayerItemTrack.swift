@@ -7,79 +7,79 @@
 
 import AudioToolbox
 import ffmpeg
-
-final class ATBPlayerItemTrack: AsyncPlayerItemTrack<AudioFrame> {
-    private var converter: AudioConverterRef?
-    private var outAudioBufferList = AudioBufferList()
-    required init(track: TrackProtocol, options: KSOptions) {
-        super.init(track: track, options: options)
-        var inputFormat = codecpar.pointee.inputFormat
-        var outputFormat = AudioStreamBasicDescription()
-        outputFormat.mFormatID = kAudioFormatLinearPCM
-        outputFormat.mFormatFlags = kAudioFormatFlagIsSignedInteger | kAudioFormatFlagIsPacked
-        outputFormat.mFramesPerPacket = 1
-        let sampleFmt = codecpar.pointee.bits_per_raw_sample == 32 ? AV_SAMPLE_FMT_S32 : AV_SAMPLE_FMT_S16
-        outputFormat.mBitsPerChannel = UInt32(av_get_bytes_per_sample(sampleFmt) * 8)
-        outputFormat.mSampleRate = inputFormat.mSampleRate
-        outputFormat.mChannelsPerFrame = inputFormat.mChannelsPerFrame
-        outAudioBufferList.mNumberBuffers = 1
-        outAudioBufferList.mBuffers.mNumberChannels = UInt32(codecpar.pointee.channels)
-        let bufferSize = outputFormat.mBitsPerChannel * UInt32(codecpar.pointee.channels * codecpar.pointee.frame_size)
-        outAudioBufferList.mBuffers.mDataByteSize = bufferSize
-        outAudioBufferList.mBuffers.mData = malloc(Int(bufferSize))
-        AudioConverterNew(&inputFormat, &outputFormat, &converter)
-    }
-
-    override func doDecode(packet: Packet) throws -> [AudioFrame] {
-        guard let converter = converter else {
-            return []
-        }
-        let corePacket = packet.corePacket
-        let inputDataProc: AudioConverterComplexInputDataProc = { (_, ioPacketCount, audioBufferList, packetDesc, userData) -> OSStatus in
-            guard let packet = UnsafePointer<AVPacket>(OpaquePointer(userData)), let data = packet.pointee.data else {
-                ioPacketCount.pointee = 0
-                return 1
-            }
-            audioBufferList.pointee.mNumberBuffers = 1
-            audioBufferList.pointee.mBuffers.mNumberChannels = 1
-            audioBufferList.pointee.mBuffers.mData = UnsafeMutableRawPointer(data)
-            audioBufferList.pointee.mBuffers.mDataByteSize = UInt32(packet.pointee.size)
-            ioPacketCount.pointee = 1
-            if let packetDesc = packetDesc {
-                var description = AudioStreamPacketDescription()
-                description.mStartOffset = 0
-                description.mVariableFramesInPacket = 0
-                description.mDataByteSize = audioBufferList.pointee.mBuffers.mDataByteSize
-                withUnsafeMutablePointer(to: &description) {
-                    packetDesc.pointee = $0
-                }
-            }
-            return noErr
-        }
-        var ioOutputDataPacketSize = UInt32(codecpar.pointee.frame_size)
-        let status = AudioConverterFillComplexBuffer(converter, inputDataProc, corePacket, &ioOutputDataPacketSize, &outAudioBufferList, nil)
-        if status == noErr {
-            let frame = AudioFrame(bufferSize: Int32(outAudioBufferList.mNumberBuffers))
-            frame.timebase = track.timebase
-            frame.position = corePacket.pointee.pts
-            if frame.position == Int64.min || frame.position < 0 {
-                frame.position = max(corePacket.pointee.dts, 0)
-            }
-            frame.duration = corePacket.pointee.duration
-            frame.size = Int64(corePacket.pointee.size)
-            return [frame]
-        }
-        return []
-    }
-
-    override func shutdown() {
-        super.shutdown()
-        if let converter = converter {
-            AudioConverterDispose(converter)
-        }
-        converter = nil
-    }
-}
+//
+//final class ATBPlayerItemTrack: AsyncPlayerItemTrack<AudioFrame> {
+//    private var converter: AudioConverterRef?
+//    private var outAudioBufferList = AudioBufferList()
+//    required init(assetTrack: TrackProtocol, options: KSOptions) {
+//        super.init(track: track, options: options)
+//        var inputFormat = codecpar.pointee.inputFormat
+//        var outputFormat = AudioStreamBasicDescription()
+//        outputFormat.mFormatID = kAudioFormatLinearPCM
+//        outputFormat.mFormatFlags = kAudioFormatFlagIsSignedInteger | kAudioFormatFlagIsPacked
+//        outputFormat.mFramesPerPacket = 1
+//        let sampleFmt = codecpar.pointee.bits_per_raw_sample == 32 ? AV_SAMPLE_FMT_S32 : AV_SAMPLE_FMT_S16
+//        outputFormat.mBitsPerChannel = UInt32(av_get_bytes_per_sample(sampleFmt) * 8)
+//        outputFormat.mSampleRate = inputFormat.mSampleRate
+//        outputFormat.mChannelsPerFrame = inputFormat.mChannelsPerFrame
+//        outAudioBufferList.mNumberBuffers = 1
+//        outAudioBufferList.mBuffers.mNumberChannels = UInt32(codecpar.pointee.channels)
+//        let bufferSize = outputFormat.mBitsPerChannel * UInt32(codecpar.pointee.channels * codecpar.pointee.frame_size)
+//        outAudioBufferList.mBuffers.mDataByteSize = bufferSize
+//        outAudioBufferList.mBuffers.mData = malloc(Int(bufferSize))
+//        AudioConverterNew(&inputFormat, &outputFormat, &converter)
+//    }
+//
+//    override func doDecode(packet: Packet) throws -> [AudioFrame] {
+//        guard let converter = converter else {
+//            return []
+//        }
+//        let corePacket = packet.corePacket
+//        let inputDataProc: AudioConverterComplexInputDataProc = { (_, ioPacketCount, audioBufferList, packetDesc, userData) -> OSStatus in
+//            guard let packet = UnsafePointer<AVPacket>(OpaquePointer(userData)), let data = packet.pointee.data else {
+//                ioPacketCount.pointee = 0
+//                return 1
+//            }
+//            audioBufferList.pointee.mNumberBuffers = 1
+//            audioBufferList.pointee.mBuffers.mNumberChannels = 1
+//            audioBufferList.pointee.mBuffers.mData = UnsafeMutableRawPointer(data)
+//            audioBufferList.pointee.mBuffers.mDataByteSize = UInt32(packet.pointee.size)
+//            ioPacketCount.pointee = 1
+//            if let packetDesc = packetDesc {
+//                var description = AudioStreamPacketDescription()
+//                description.mStartOffset = 0
+//                description.mVariableFramesInPacket = 0
+//                description.mDataByteSize = audioBufferList.pointee.mBuffers.mDataByteSize
+//                withUnsafeMutablePointer(to: &description) {
+//                    packetDesc.pointee = $0
+//                }
+//            }
+//            return noErr
+//        }
+//        var ioOutputDataPacketSize = UInt32(codecpar.pointee.frame_size)
+//        let status = AudioConverterFillComplexBuffer(converter, inputDataProc, corePacket, &ioOutputDataPacketSize, &outAudioBufferList, nil)
+//        if status == noErr {
+//            let frame = AudioFrame(bufferSize: Int32(outAudioBufferList.mNumberBuffers))
+//            frame.timebase = track.timebase
+//            frame.position = corePacket.pointee.pts
+//            if frame.position == Int64.min || frame.position < 0 {
+//                frame.position = max(corePacket.pointee.dts, 0)
+//            }
+//            frame.duration = corePacket.pointee.duration
+//            frame.size = Int64(corePacket.pointee.size)
+//            return [frame]
+//        }
+//        return []
+//    }
+//
+//    override func shutdown() {
+//        super.shutdown()
+//        if let converter = converter {
+//            AudioConverterDispose(converter)
+//        }
+//        converter = nil
+//    }
+//}
 
 extension AVCodecID {
     var mFormatID: UInt32 {
