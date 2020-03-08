@@ -23,26 +23,16 @@ final class MEPlayerItem {
     // 没有音频数据可以渲染
     private var isAudioStalled = false
     private var videoMediaTime = CACurrentMediaTime()
-    private var videoTrack: PlayerItemTrackProtocol? {
-        didSet {
-            videoTrack?.delegate = self
-            if let currentVideoCodec = videoTrack {
-                rotation = currentVideoCodec.track.stream.rotation
-                let codecpar = currentVideoCodec.codecpar.pointee
-                naturalSize = CGSize(width: Int(codecpar.width), height: Int(codecpar.height))
-                KSLog("VideoCodec is \(currentVideoCodec.self)")
-            }
-        }
-    }
-
+    private var videoTrack: PlayerItemTrackProtocol?
     private var audioTrack: PlayerItemTrackProtocol? {
         didSet {
             audioTrack?.delegate = self
         }
     }
-
-    public private(set) var tracks = [TrackProtocol]()
-    var subtitleTracks = [SubtitlePlayerItemTrack]()
+    private var allTracks = [PlayerItemTrackProtocol]()
+    private var videoAudioTracks = [PlayerItemTrackProtocol]()
+    private var assetTracks = [TrackProtocol]()
+    private(set) var subtitleTracks = [SubtitlePlayerItemTrack]()
     private(set) var currentPlaybackTime = TimeInterval(0)
     private(set) var rotation = 0.0
     private(set) var duration: TimeInterval = 0
@@ -153,7 +143,7 @@ extension MEPlayerItem {
         }
         duration = TimeInterval(max(formatCtx.pointee.duration, 0) / Int64(AV_TIME_BASE))
         createCodec(formatCtx: formatCtx.pointee)
-        if tracks.first == nil {
+        if assetTracks.first == nil {
             state = .failed
         } else {
             play()
@@ -161,33 +151,40 @@ extension MEPlayerItem {
     }
 
     private func createCodec(formatCtx: AVFormatContext) {
-        tracks.removeAll()
-        tracks = (0 ..< Int(formatCtx.nb_streams)).compactMap { i in
+        assetTracks.removeAll()
+        assetTracks = (0 ..< Int(formatCtx.nb_streams)).compactMap { i in
             if let coreStream = formatCtx.streams[i] {
-                return Track(stream: coreStream)
+                return AssetTrack(stream: coreStream)
             }
             return nil
         }
-        let videos = tracks.filter { $0.mediaType == .video }
+        let videos = assetTracks.filter { $0.mediaType == .video }
         if let first = videos.first {
-            if let session = DecompressionSession(codecpar: first.stream.pointee.codecpar.pointee, options: options) {
-                videoTrack = VTBPlayerItemTrack(track: first, options: options, session: session)
-            } else {
-                videoTrack = FFPlayerItemTrack(track: first, options: options)
-            }
+            rotation = first.stream.rotation
+            let codecpar = first.stream.pointee.codecpar.pointee
+            naturalSize = CGSize(width: Int(codecpar.width), height: Int(codecpar.height))
+            let track = AsyncPlayerItemTrack(assetTrack: first, options: options)
+            videoAudioTracks.append(track)
+            track.delegate = self
+            videoTrack = track
         }
-        subtitleTracks = tracks.filter { $0.mediaType == .subtitle }.map {
-            SubtitlePlayerItemTrack(track: $0, options: options)
-        }
-        let audios = tracks.filter { $0.mediaType == .audio }
+        let audios = assetTracks.filter { $0.mediaType == .audio }
         if let first = audios.first {
-            audioTrack = FFPlayerItemTrack(track: first, options: options)
+            let track = AsyncPlayerItemTrack(assetTrack: first, options: options)
+            track.delegate = self
+            videoAudioTracks.append(track)
+            audioTrack = track
             if videos.count == 1 {
-                audios.filter { $0.streamIndex != audioTrack?.track.streamIndex }.forEach { $0.isEnabled = false }
+                audios.filter { $0.streamIndex != first.streamIndex }.forEach { $0.isEnabled = false }
             }
         } else {
             isAudioStalled = true
         }
+        subtitleTracks = assetTracks.filter { $0.mediaType == .subtitle }.map {
+            SubtitlePlayerItemTrack(assetTrack: $0, options: options)
+        }
+        allTracks.append(contentsOf: videoAudioTracks)
+        allTracks.append(contentsOf: subtitleTracks)
     }
 
     private func read() {
@@ -208,7 +205,7 @@ extension MEPlayerItem {
     }
 
     private func readThread() {
-        allTrack().forEach { $0.decode() }
+        allTracks.forEach { $0.decode() }
         while readOperation?.isCancelled == false {
             if formatCtx == nil || [MESourceState.finished, .closed, .failed].contains(state) {
                 break
@@ -220,7 +217,7 @@ extension MEPlayerItem {
                 //                let tolerance: Int64 = KSPlayerManager.isAccurateSeek ? 0 : 2
                 //                let result = avformat_seek_file(formatCtx, -1, timeStamp - tolerance, timeStamp, timeStamp, AVSEEK_FLAG_BACKWARD)
                 let result = av_seek_frame(formatCtx, -1, timeStamp, AVSEEK_FLAG_BACKWARD)
-                allTrack().forEach { $0.seek(time: currentPlaybackTime) }
+                allTracks.forEach { $0.seek(time: currentPlaybackTime) }
                 seekingCompletionHandler?(result >= 0)
                 seekingCompletionHandler = nil
                 state = .reading
@@ -229,29 +226,29 @@ extension MEPlayerItem {
                 let readResult = av_read_frame(formatCtx, packet.corePacket)
                 if readResult == 0 {
                     packet.fill()
-                    let first = tracks.first { $0.isEnabled && $0.stream.pointee.index == packet.corePacket.pointee.stream_index }
+                    let first = assetTracks.first { $0.isEnabled && $0.stream.pointee.index == packet.corePacket.pointee.stream_index }
                     if let first = first {
-                        packet.track = first
+                        packet.assetTrack = first
                         if first.mediaType == .video {
                             videoTrack?.putPacket(packet: packet)
                         } else if first.mediaType == .audio {
                             audioTrack?.putPacket(packet: packet)
                         } else {
-                            subtitleTracks.first { $0.track == first }?.putPacket(packet: packet)
+                            subtitleTracks.first { $0.assetTrack == first }?.putPacket(packet: packet)
                         }
                     }
                 } else {
                     if IS_AVERROR_EOF(readResult) || avio_feof(formatCtx?.pointee.pb) != 0 {
                         if options.isLoopPlay {
-                            if allTrack().first(where: { $0.isLoopModel }) == nil {
-                                allTrack().forEach { $0.isLoopModel = true }
+                            if allTracks.first(where: { $0.isLoopModel }) == nil {
+                                allTracks.forEach { $0.isLoopModel = true }
                                 _ = av_seek_frame(formatCtx, -1, 0, AVSEEK_FLAG_BACKWARD)
                             } else {
-                                allTrack().forEach { $0.endOfFile() }
+                                allTracks.forEach { $0.endOfFile() }
                                 state = .finished
                             }
                         } else {
-                            allTrack().forEach { $0.endOfFile() }
+                            allTracks.forEach { $0.endOfFile() }
                             state = .finished
                         }
                     } else {
@@ -274,20 +271,6 @@ extension MEPlayerItem {
             state = .reading
             condition.signal()
         }
-    }
-
-    private func allTrack(containSubTitle: Bool = true) -> [PlayerItemTrackProtocol] {
-        var array = [PlayerItemTrackProtocol]()
-        if let audioTrack = audioTrack {
-            array.append(audioTrack)
-        }
-        if let videoTrack = videoTrack {
-            array.append(videoTrack)
-        }
-        if containSubTitle {
-            array.append(contentsOf: subtitleTracks)
-        }
-        return array
     }
 }
 
@@ -335,13 +318,14 @@ extension MEPlayerItem: MediaPlayback {
         // 故意循环引用。等结束了。才释放
         let closeOperation = BlockOperation {
             Thread.current.name = (self.operationQueue.name ?? "") + "_close"
-            self.allTrack().forEach { $0.shutdown() }
+            self.allTracks.forEach { $0.shutdown() }
             ObjectPool.share.removeAll()
             KSLog("清空formatCtx")
             avformat_close_input(&self.formatCtx)
             self.duration = 0
             self.closeOperation = nil
             self.operationQueue.cancelAllOperations()
+            ObjectPool.share.removeAll()
         }
         closeOperation.queuePriority = .veryHigh
         closeOperation.qualityOfService = .userInteractive
@@ -368,25 +352,14 @@ extension MEPlayerItem: MediaPlayback {
             state = .seeking
             read()
         }
-        isAudioStalled = tracks.first { $0.mediaType == .audio && $0.isEnabled } == nil
+        isAudioStalled = assetTracks.first { $0.mediaType == .audio && $0.isEnabled } == nil
     }
 }
 
 extension MEPlayerItem: CodecCapacityDelegate {
-    func codecFailed(error: NSError, track: PlayerItemTrackProtocol) {
-        KSLog("Decoder did Failed : \(error)")
-        if track is VTBPlayerItemTrack {
-            let newVideoCodec = FFPlayerItemTrack(track: track.track, options: options)
-            track.shutdown()
-            videoTrack = newVideoCodec
-            newVideoCodec.decode()
-            KSLog("VideoCodec switch to software decompression")
-        }
-    }
-
     func codecDidChangeCapacity(track _: PlayerItemTrackProtocol) {
         semaphore.wait()
-        let mix = MixCapacity(array: allTrack(containSubTitle: false))
+        let mix = MixCapacity(array: videoAudioTracks)
         delegate?.sourceDidChange(capacity: mix)
         if mix.isPlayable {
             if mix.loadedTime > options.maxBufferDuration {
@@ -401,11 +374,11 @@ extension MEPlayerItem: CodecCapacityDelegate {
     }
 
     func codecDidFinished(track: PlayerItemTrackProtocol) {
-        if track.track.mediaType == .audio {
+        if track.mediaType == .audio {
             isAudioStalled = true
         }
-        let allSatisfy = allTrack(containSubTitle: false).allSatisfy { $0.isFinished && $0.loadedCount == 0 }
-        delegate?.sourceDidFinished(type: track.track.mediaType, allSatisfy: allSatisfy)
+        let allSatisfy = videoAudioTracks.allSatisfy { $0.isFinished && $0.loadedCount == 0 }
+        delegate?.sourceDidFinished(type: track.mediaType, allSatisfy: allSatisfy)
         if allSatisfy, options.isLoopPlay {
             isAudioStalled = false
             audioTrack?.isLoopModel = false

@@ -89,7 +89,6 @@ extension OutputRenderSourceDelegate {
 
 protocol CodecCapacityDelegate: AnyObject {
     func codecDidChangeCapacity(track: PlayerItemTrackProtocol)
-    func codecFailed(error: NSError, track: PlayerItemTrackProtocol)
     func codecDidFinished(track: PlayerItemTrackProtocol)
 }
 
@@ -291,7 +290,7 @@ final class Packet: ObjectQueueItem {
     public var duration: Int64 = 0
     public var size: Int64 = 0
     public var position: Int64 = 0
-    var track: TrackProtocol!
+    var assetTrack: TrackProtocol!
     var corePacket: UnsafeMutablePointer<AVPacket> { packetWrap.corePacket! }
     private let packetWrap = AVPacketWrap.object()
     func fill() {

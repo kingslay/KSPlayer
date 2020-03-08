@@ -44,7 +44,7 @@ extension SubtitlePlayerItemTrack: KSSubtitleProtocol {
 extension MEPlayerItem: SubtitleDataSouce {
     func searchSubtitle(name _: String, completion: @escaping ([SubtitleInfo]?) -> Void) {
         let infos = subtitleTracks.map { subtitleDecompress -> SubtitleInfo in
-            EmbedSubtitleInfo(subtitleID: "Embed-\(subtitleDecompress.track.streamIndex)", name: subtitleDecompress.track.name, subtitle: subtitleDecompress)
+            EmbedSubtitleInfo(subtitleID: "Embed-\(subtitleDecompress.assetTrack.streamIndex)", name: subtitleDecompress.assetTrack.description, subtitle: subtitleDecompress)
         }
         completion(infos)
     }

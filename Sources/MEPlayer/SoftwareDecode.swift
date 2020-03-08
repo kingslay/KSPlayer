@@ -8,54 +8,32 @@
 import ffmpeg
 import Foundation
 
-class FFPlayerItemTrack: AsyncPlayerItemTrack<Frame> {
+class SoftwareDecode: DecodeProtocol {
+    private let assetTrack: TrackProtocol
+    private let options: KSOptions
     // 第一次seek不要调用avcodec_flush_buffers。否则seek完之后可能会因为不是关键帧而导致蓝屏
     private var firstSeek = true
     private var coreFrame: UnsafeMutablePointer<AVFrame>? = av_frame_alloc()
-    private var codecContextMap = [Int32: UnsafeMutablePointer<AVCodecContext>?]()
+    private var codecContext: UnsafeMutablePointer<AVCodecContext>?
     private var bestEffortTimestamp = Int64(0)
     private let swresample: Swresample
-
-    required init(track: TrackProtocol, options: KSOptions) {
-        if track.mediaType == .video {
+    required init(assetTrack: TrackProtocol, options: KSOptions) {
+        self.assetTrack = assetTrack
+        self.options = options
+        codecContext = assetTrack.stream.pointee.codecpar.ceateContext(options: options)
+        codecContext?.pointee.time_base = assetTrack.timebase.rational
+        if assetTrack.mediaType == .video {
             swresample = VideoSwresample(dstFormat: options.bufferPixelFormatType.format)
         } else {
             swresample = AudioSwresample()
         }
-        super.init(track: track, options: options)
     }
 
-    override func shutdown() {
-        super.shutdown()
-        av_frame_free(&coreFrame)
-        codecContextMap.values.forEach { codecContext in
-            var content = codecContext
-            avcodec_free_context(&content)
-        }
-        codecContextMap.removeAll()
-    }
-
-    override func doFlushCodec() {
-        super.doFlushCodec()
-        if firstSeek {
-            firstSeek = false
-        } else {
-            codecContextMap.values.forEach { codecContext in
-                avcodec_flush_buffers(codecContext)
-            }
-        }
-    }
-
-    override func doDecode(packet: Packet) throws -> [Frame] {
-        if codecContextMap.index(forKey: track.streamIndex) == nil {
-            let codecContext = codecpar.ceateContext(options: options)
-            codecContext?.pointee.time_base = track.timebase.rational
-            codecContextMap[track.streamIndex] = codecContext
-        }
-        guard let codecContext = codecContextMap[track.streamIndex], codecContext != nil else {
+    func doDecode(packet: UnsafeMutablePointer<AVPacket>) throws -> [Frame] {
+        guard let codecContext = codecContext else {
             return []
         }
-        let result = avcodec_send_packet(codecContext, packet.corePacket)
+        let result = avcodec_send_packet(codecContext, packet)
         guard result == 0 else {
             return []
         }
@@ -67,11 +45,11 @@ class FFPlayerItemTrack: AsyncPlayerItemTrack<Frame> {
                     let timestamp = avframe.pointee.best_effort_timestamp
                     if timestamp >= bestEffortTimestamp {
                         bestEffortTimestamp = timestamp
-                    } else if codecContextMap.keys.count > 1 {
-                        // m3u8多路流需要丢帧
-                        throw Int32(0)
+                    } else {
+//                        // todo m3u8s多路流需要丢帧
+//                        throw Int32(0)
                     }
-                    let frame = swresample.transfer(avframe: avframe, timebase: track.timebase)
+                    let frame = swresample.transfer(avframe: avframe, timebase: assetTrack.timebase)
                     if frame.position < 0 {
                         frame.position = bestEffortTimestamp
                     }
@@ -87,7 +65,7 @@ class FFPlayerItemTrack: AsyncPlayerItemTrack<Frame> {
                     }
                     break
                 } else {
-                    let error = NSError(result: code, errorCode: track.mediaType == .audio ? .codecAudioReceiveFrame : .codecVideoReceiveFrame)
+                    let error = NSError(result: code, errorCode: assetTrack.mediaType == .audio ? .codecAudioReceiveFrame : .codecVideoReceiveFrame)
                     KSLog(error)
                     throw error
                 }
@@ -96,17 +74,26 @@ class FFPlayerItemTrack: AsyncPlayerItemTrack<Frame> {
         return array
     }
 
-    override func seek(time: TimeInterval) {
-        super.seek(time: time)
+    func doFlushCodec() {
+        if firstSeek {
+            firstSeek = false
+        } else {
+            avcodec_flush_buffers(codecContext)
+        }
+    }
+
+    func shutdown() {
+        av_frame_free(&coreFrame)
+        avcodec_free_context(&codecContext)
+    }
+
+    func seek(time _: TimeInterval) {
         bestEffortTimestamp = Int64(0)
     }
 
-    override func decode() {
-        super.decode()
+    func decode() {
         bestEffortTimestamp = Int64(0)
-        codecContextMap.values.forEach { codecContext in
-            avcodec_flush_buffers(codecContext)
-        }
+        avcodec_flush_buffers(codecContext)
     }
 
     deinit {
@@ -125,7 +112,7 @@ extension UnsafeMutablePointer where Pointee == AVCodecParameters {
             avcodec_free_context(&codecContextOption)
             return nil
         }
-        if options.canHardwareDecode(codecpar: self.pointee) {
+        if options.canHardwareDecode(codecpar: pointee) {
             codecContext.pointee.opaque = Unmanaged.passUnretained(options).toOpaque()
             codecContext.pointee.get_format = { ctx, fmt -> AVPixelFormat in
 

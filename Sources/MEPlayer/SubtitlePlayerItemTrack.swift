@@ -7,14 +7,16 @@
 
 import ffmpeg
 import Foundation
-final class SubtitlePlayerItemTrack: MEPlayerItemTrack<SubtitleFrame> {
+final class SubtitlePlayerItemTrack: FFPlayerItemTrack<SubtitleFrame> {
     private let reg = try? NSRegularExpression(pattern: "\\{[^}]+\\}", options: .caseInsensitive)
     private var codecContext: UnsafeMutablePointer<AVCodecContext>?
     private var subtitle = AVSubtitle()
     private var preSubtitleFrame: SubtitleFrame?
-    required init(track: TrackProtocol, options: KSOptions) {
-        super.init(track: track, options: options)
-        codecContext = codecpar.ceateContext(options: options)
+    let assetTrack: TrackProtocol
+    required init(assetTrack: TrackProtocol, options: KSOptions) {
+        self.assetTrack = assetTrack
+        super.init(assetTrack: assetTrack, options: options)
+        codecContext = assetTrack.stream.pointee.codecpar.ceateContext(options: options)
     }
 
     override func shutdown() {
@@ -46,7 +48,7 @@ final class SubtitlePlayerItemTrack: MEPlayerItemTrack<SubtitleFrame> {
             }
             let attributedString = subtitle.text(reg: reg)
             let frame = SubtitleFrame()
-            frame.timebase = track.timebase
+            frame.timebase = packet.assetTrack.timebase
             frame.position = subtitle.pts
             if frame.position == Int64.min {
                 frame.position = max(packet.position, 0)

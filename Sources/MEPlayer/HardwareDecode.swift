@@ -8,6 +8,24 @@
 import ffmpeg
 import VideoToolbox
 
+protocol DecodeProtocol {
+    init(assetTrack: TrackProtocol, options: KSOptions)
+    func decode()
+    func doDecode(packet: UnsafeMutablePointer<AVPacket>) throws -> [Frame]
+    func seek(time: TimeInterval)
+    func doFlushCodec()
+    func shutdown()
+}
+extension TrackProtocol {
+    func makeDecode(options: KSOptions) -> DecodeProtocol {
+        if let session = DecompressionSession(codecpar: stream.pointee.codecpar.pointee, options: options) {
+            return HardwareDecode(assetTrack: self, options: options, session: session)
+        } else {
+            return SoftwareDecode(assetTrack: self, options: options)
+        }
+    }
+}
+
 extension KSOptions {
     func canHardwareDecode(codecpar: AVCodecParameters) -> Bool {
         if codecpar.codec_id == AV_CODEC_ID_H264, hardwareDecodeH264 {
@@ -18,6 +36,82 @@ extension KSOptions {
         return false
     }
 }
+
+class HardwareDecode: DecodeProtocol {
+    private var session: DecompressionSession?
+    // 刷新Session的话，后续的解码还是会失败，直到遇到I帧
+    private var refreshSession = false
+    private let assetTrack: TrackProtocol
+    private let options: KSOptions
+    required init(assetTrack: TrackProtocol, options: KSOptions) {
+        self.assetTrack = assetTrack
+        self.options = options
+        session = DecompressionSession(codecpar: assetTrack.stream.pointee.codecpar.pointee, options: options)
+    }
+
+    init(assetTrack: TrackProtocol, options: KSOptions, session: DecompressionSession) {
+        self.assetTrack = assetTrack
+        self.options = options
+        self.session = session
+    }
+
+    func doDecode(packet: UnsafeMutablePointer<AVPacket>) throws -> [Frame] {
+        guard let data = packet.pointee.data, let session = session else {
+            return []
+        }
+        let sampleBuffer = try session.formatDescription.getSampleBuffer(isConvertNALSize: session.isConvertNALSize, data: data, size: Int(packet.pointee.size))
+        if refreshSession, packet.pointee.flags & AV_PKT_FLAG_KEY == 1 {
+            refreshSession = false
+        }
+        var result = [VideoVTBFrame]()
+        var error: NSError?
+        let status = VTDecompressionSessionDecodeFrame(session.decompressionSession, sampleBuffer: sampleBuffer, flags: VTDecodeFrameFlags(rawValue: 0), infoFlagsOut: nil) { status, _, imageBuffer, _, _ in
+            if status == noErr {
+                if let imageBuffer = imageBuffer {
+                    let frame = VideoVTBFrame()
+                    frame.corePixelBuffer = imageBuffer
+                    frame.timebase = self.assetTrack.timebase
+                    frame.position = packet.pointee.pts
+                    if frame.position == Int64.min || frame.position < 0 {
+                        frame.position = max(packet.pointee.dts, 0)
+                    }
+                    frame.duration = packet.pointee.duration
+                    frame.size = Int64(packet.pointee.size)
+                    result.append(frame)
+                }
+            } else {
+                if !self.refreshSession {
+                    error = .init(result: status, errorCode: .codecVideoReceiveFrame)
+                }
+            }
+        }
+        if let error = error {
+            throw error
+        } else {
+            if status == kVTInvalidSessionErr || status == kVTVideoDecoderMalfunctionErr {
+                // 解决从后台切换到前台，解码失败的问题
+                doFlushCodec()
+                refreshSession = true
+            } else if status != noErr {
+                throw NSError(result: status, errorCode: .codecVideoReceiveFrame)
+            }
+            return result
+        }
+    }
+
+    func doFlushCodec() {
+        session = DecompressionSession(codecpar: assetTrack.stream.pointee.codecpar.pointee, options: options)
+    }
+
+    func shutdown() {
+        session = nil
+    }
+
+    func seek(time _: TimeInterval) {}
+
+    func decode() {}
+}
+
 class DecompressionSession {
     fileprivate let isConvertNALSize: Bool
     fileprivate let formatDescription: CMFormatDescription
@@ -84,75 +178,6 @@ class DecompressionSession {
     deinit {
         VTDecompressionSessionWaitForAsynchronousFrames(decompressionSession)
         VTDecompressionSessionInvalidate(decompressionSession)
-    }
-}
-
-final class VTBPlayerItemTrack: AsyncPlayerItemTrack<VideoVTBFrame> {
-    private var session: DecompressionSession?
-    // 刷新Session的话，后续的解码还是会失败，直到遇到I帧
-    private var refreshSession = false
-    required init(track: TrackProtocol, options: KSOptions, session: DecompressionSession) {
-        super.init(track: track, options: options)
-        self.session = session
-    }
-
-    required init(track _: TrackProtocol, options _: KSOptions) {
-        fatalError("init(track:options:) has not been implemented")
-    }
-
-    override func doDecode(packet: Packet) throws -> [VideoVTBFrame] {
-        let corePacket = packet.corePacket
-        guard let data = corePacket.pointee.data, let session = session else {
-            return []
-        }
-        let sampleBuffer = try session.formatDescription.getSampleBuffer(isConvertNALSize: session.isConvertNALSize, data: data, size: Int(corePacket.pointee.size))
-        if refreshSession, corePacket.pointee.flags & AV_PKT_FLAG_KEY == 1 {
-            refreshSession = false
-        }
-        var result = [VideoVTBFrame]()
-        var error: NSError?
-        let status = VTDecompressionSessionDecodeFrame(session.decompressionSession, sampleBuffer: sampleBuffer, flags: VTDecodeFrameFlags(rawValue: 0), infoFlagsOut: nil) { status, _, imageBuffer, _, _ in
-            if status == noErr {
-                if let imageBuffer = imageBuffer {
-                    let frame = VideoVTBFrame()
-                    frame.corePixelBuffer = imageBuffer
-                    frame.timebase = self.track.timebase
-                    frame.position = corePacket.pointee.pts
-                    if frame.position == Int64.min || frame.position < 0 {
-                        frame.position = max(corePacket.pointee.dts, 0)
-                    }
-                    frame.duration = corePacket.pointee.duration
-                    frame.size = Int64(corePacket.pointee.size)
-                    result.append(frame)
-                }
-            } else {
-                if !self.refreshSession {
-                    error = .init(result: status, errorCode: .codecVideoReceiveFrame)
-                }
-            }
-        }
-        if let error = error {
-            throw error
-        } else {
-            if status == kVTInvalidSessionErr || status == kVTVideoDecoderMalfunctionErr {
-                // 解决从后台切换到前台，解码失败的问题
-                self.session = DecompressionSession(codecpar: codecpar.pointee, options: options)
-                refreshSession = true
-            } else if status != noErr {
-                throw NSError(result: status, errorCode: .codecVideoReceiveFrame)
-            }
-            return result
-        }
-    }
-
-    override func doFlushCodec() {
-        super.doFlushCodec()
-        session = DecompressionSession(codecpar: codecpar.pointee, options: options)
-    }
-
-    override func shutdown() {
-        super.shutdown()
-        session = nil
     }
 }
 
