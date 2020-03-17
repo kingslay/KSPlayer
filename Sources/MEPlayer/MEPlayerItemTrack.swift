@@ -117,9 +117,9 @@ class FFPlayerItemTrack<Frame: MEFrame>: PlayerItemTrackProtocol, CustomStringCo
         fps = assetTrack.fps
         self.options = options
         // 默认缓存队列大小跟帧率挂钩,经测试除以4，最优
-        if mediaType == .video {
+        if mediaType == .audio {
             outputRenderQueue = ObjectQueue(maxCount: fps / 4)
-        } else if mediaType == .audio {
+        } else if mediaType == .video {
             outputRenderQueue = ObjectQueue(maxCount: fps / 4, sortObjects: true)
         } else {
             outputRenderQueue = ObjectQueue()
