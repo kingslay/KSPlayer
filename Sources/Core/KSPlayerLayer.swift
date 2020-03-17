@@ -276,6 +276,7 @@ extension KSPlayerLayer: MediaPlayerDelegate {
                 return
             }
             state = .error
+            KSLog(error)
         } else {
             let duration = player.duration
             delegate?.player(layer: self, currentTime: duration, totalTime: duration)
