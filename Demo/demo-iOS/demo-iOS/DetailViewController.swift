@@ -8,8 +8,10 @@
 
 import KSPlayer
 import UIKit
-
-class DetailViewController: UIViewController {
+protocol DetailProtocol: UIViewController {
+    var resource: KSPlayerResource? { get set }
+}
+class DetailViewController: UIViewController, DetailProtocol {
     #if os(iOS)
     override var preferredStatusBarStyle: UIStatusBarStyle {
         return .lightContent
@@ -19,7 +21,13 @@ class DetailViewController: UIViewController {
     #else
     private let playerView = VideoPlayerView()
     #endif
-    var resource: KSPlayerResource!
+    var resource: KSPlayerResource? {
+        didSet {
+            if let resource = resource {
+                playerView.set(resource: resource)
+            }
+        }
+    }
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -59,7 +67,9 @@ class DetailViewController: UIViewController {
 
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        navigationController?.setNavigationBarHidden(true, animated: true)
+        if UIDevice.current.userInterfaceIdiom == .phone {
+            navigationController?.setNavigationBarHidden(true, animated: true)
+        }
     }
 
     override func viewWillDisappear(_ animated: Bool) {

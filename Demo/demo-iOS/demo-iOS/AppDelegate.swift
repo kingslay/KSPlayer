@@ -10,7 +10,7 @@ import ffmpeg
 import KSPlayer
 import UIKit
 @UIApplicationMain
-class AppDelegate: UIResponder, UIApplicationDelegate {
+class AppDelegate: UIResponder, UIApplicationDelegate, UISplitViewControllerDelegate {
     var window: UIWindow?
     func application(_: UIApplication, didFinishLaunchingWithOptions _: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         let window = UIWindow()
@@ -23,19 +23,20 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         KSOptions.isLoopPlay = true
         KSOptions.hardwareDecodeH265 = true
         KSOptions.hardwareDecodeH264 = true
-        window.rootViewController = UINavigationController(rootViewController: MasterViewController())
+        if UIDevice.current.userInterfaceIdiom == .phone {
+            window.rootViewController = UINavigationController(rootViewController: MasterViewController())
+        } else {
+            let splitViewController = UISplitViewController()
+            splitViewController.preferredDisplayMode = .primaryOverlay
+            splitViewController.delegate = self
+            let detailVC = DetailViewController()
+            splitViewController.viewControllers = [UINavigationController(rootViewController: MasterViewController()),UINavigationController(rootViewController: detailVC)]
+            detailVC.navigationItem.leftBarButtonItem = splitViewController.displayModeButtonItem
+            detailVC.navigationItem.leftItemsSupplementBackButton = true
+            window.rootViewController = splitViewController
+        }
         window.makeKeyAndVisible()
         self.window = window
         return true
     }
-
-    func applicationWillResignActive(_: UIApplication) {}
-
-    func applicationDidEnterBackground(_: UIApplication) {}
-
-    func applicationWillEnterForeground(_: UIApplication) {}
-
-    func applicationDidBecomeActive(_: UIApplication) {}
-
-    func applicationWillTerminate(_: UIApplication) {}
 }

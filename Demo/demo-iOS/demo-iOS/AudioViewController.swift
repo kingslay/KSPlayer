@@ -8,9 +8,15 @@
 import KSPlayer
 import UIKit
 
-class AudioViewController: UIViewController {
+class AudioViewController: UIViewController, DetailProtocol {
     var playerView = AudioPlayerView()
-    var resource: KSPlayerResource!
+    var resource: KSPlayerResource? {
+        didSet {
+            if let resource = resource {
+                playerView.set(url: resource.definitions[0].url, options: KSOptions())
+            }
+        }
+    }
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = UIColor.lightGray
