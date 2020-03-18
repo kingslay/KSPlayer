@@ -123,14 +123,20 @@ class MasterViewController: UIViewController, UITableViewDelegate, UITableViewDa
 
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
-        if indexPath.row == objects.count - 1 {
-            let controller = AudioViewController()
-            controller.resource = objects[indexPath.row]
-            navigationController?.pushViewController(controller, animated: true)
-        } else {
-            let controller = DetailViewController()
-            controller.resource = objects[indexPath.row]
-            navigationController?.pushViewController(controller, animated: true)
+        if let split = splitViewController, let nav = split.viewControllers.last as? UINavigationController, let detail = nav.topViewController as? DetailProtocol {
+                detail.resource = objects[indexPath.row]
+                detail.navigationItem.leftBarButtonItem = split.displayModeButtonItem
+                detail.navigationItem.leftItemsSupplementBackButton = true
+                split.preferredDisplayMode = .primaryHidden
+                return
         }
+        let controller: DetailProtocol
+        if indexPath.row == objects.count - 1 {
+            controller = AudioViewController()
+        } else {
+            controller = DetailViewController()
+        }
+        controller.resource = objects[indexPath.row]
+        navigationController?.pushViewController(controller, animated: true)
     }
 }
