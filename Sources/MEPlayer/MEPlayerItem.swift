@@ -69,15 +69,10 @@ final class MEPlayerItem {
                 return
             }
             var log = String(cString: format)
-            #if arch(x86_64)
-            #if DEBUG
-            log = NSString(format: log, arguments: args) as String
-            #endif
-            #else
-            if let args = args {
-                log = NSString(format: log, arguments: args) as String
+            let arguments: CVaListPointer? = args
+            if let arguments = arguments {
+                log = NSString(format: log, arguments: arguments) as String
             }
-            #endif
             // 找不到解码器
             //            if log.hasPrefix("parser not found for codec") {}
             KSLog(log)

@@ -19,7 +19,7 @@ final class VideoOutput: NSObject, FrameOutput {
     var isOutput = true
     private lazy var displayLink: CADisplayLink = {
         let displayLink = CADisplayLink(target: self, selector: #selector(readBuffer(_:)))
-        displayLink.add(to: .main, forMode: RunLoop.Mode.default)
+        displayLink.add(to: .main, forMode: RunLoop.Mode.common)
         displayLink.isPaused = true
         return displayLink
     }()
