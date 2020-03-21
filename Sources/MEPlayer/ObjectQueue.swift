@@ -6,155 +6,163 @@
 //
 
 import Foundation
-public final class ObjectQueue<Item: ObjectQueueItem> {
+
+public class CircularBuffer<Item: ObjectQueueItem> {
+    private var _buffer = ContiguousArray<Item?>()
+//    private let semaphore = DispatchSemaphore(value: 0)
     private let condition = NSCondition()
+    private var headIndex = Int(0)
+    private var tailIndex = Int(0)
+    private let expanding: Bool
+    private let sorted: Bool
     private var destoryed = false
-    private var objects = ContiguousArray<Item>()
-    private var puttingObject: Item?
-    private var currentIndex = 0
-    public let maxCount: Int
-    // 视频有可能不是按顺序解码。所以一定要排序下，不然画面会来回抖动
-    private let sortObjects: Bool
-    //    public var duration: Int64 = 0
-    //    public var size: Int64 = 0
+    @inline(__always) private var _count: Int { Int(UInt(tailIndex) - UInt(headIndex)) }
     public var count: Int {
         condition.lock()
         defer { condition.unlock() }
-        return objects.count
+        return _count
+    }
+    public var maxCount: Int
+    private var mask: Int
+
+    public init(initialCapacity: Int = 256, sorted: Bool = false, expanding: Bool = true) {
+        self.expanding = expanding
+        self.sorted = sorted
+        let capacity = Int(UInt32(initialCapacity).nextPowerOf2())
+        self._buffer = ContiguousArray<Item?>(repeating: nil, count: capacity)
+        maxCount = capacity
+        mask = maxCount - 1
+        assert(_buffer.count == capacity)
     }
 
-    public init(maxCount: Int = .max, sortObjects: Bool = false) {
-        self.maxCount = maxCount
-        if maxCount != .max {
-            objects.reserveCapacity(maxCount)
-        }
-        self.sortObjects = sortObjects
-    }
-
-    func putObjectSync(object: Item) {
-        guard !destoryed else { return }
+    public func append(_ value: Item) {
         condition.lock()
-        while objects.count >= maxCount {
-            puttingObject = object
-            condition.wait()
-            if destoryed || puttingObject == nil {
-                condition.unlock()
-                return
-            }
-            puttingObject = nil
+        defer { condition.unlock() }
+        if destoryed {
+            return
         }
-
-        if sortObjects {
+        _buffer[tailIndex & mask] = value
+        if sorted {
             // 不用sort进行排序，这个比较高效
-            var index = objects.count - 1
-            while index >= 0 {
-                if objects[index].position < object.position {
+            var index = tailIndex - 1
+            while index >= headIndex {
+                guard let item = _buffer[index & mask] else {
+                    break
+                }
+                if item.position < value.position {
                     break
                 }
                 index -= 1
             }
-            objects.insert(object, at: index + 1)
+            if tailIndex != index + 1 {
+                _buffer.swapAt((index+1) & mask, tailIndex & mask)
+            }
+        }
+        tailIndex += 1
+        if _count == maxCount {
+            if expanding {
+                // No more room left for another append so grow the buffer now.
+                _doubleCapacity()
+            } else {
+                condition.wait()
+            }
         } else {
-            objects.append(object)
+            // 只有数据了。就signal。因为有可能这是最后的数据了。
+            if _count == 1 {
+                condition.signal()
+            }
         }
-        //            duration += object.duration
-        //            size += object.size
-        // 只有数据了。就signal。因为有可能这是最后的数据了。
-        if objects.count == 1 {
-            condition.signal()
-        }
-        condition.unlock()
     }
-
-    func getObjectSync() -> Item? {
+    public func first(sync: Bool = false, where predicate: ((Item) -> Bool)? = nil) -> Item? {
         condition.lock()
         defer { condition.unlock() }
         if destoryed {
             return nil
         }
-        if objects.isEmpty {
-            condition.wait()
-            if destoryed || objects.isEmpty {
+        if headIndex == tailIndex {
+            if sync {
+                condition.wait()
+                if destoryed || headIndex == tailIndex {
+                    return nil
+                }
+            } else {
                 return nil
             }
         }
-        return getObject()
-    }
-
-    func getObjectAsync(where predicate: ((Item) -> Bool)?) -> Item? {
-        condition.lock()
-        defer { condition.unlock() }
-        guard !destoryed, let first = objects.first else {
+        let index = headIndex & mask
+        guard let item = _buffer[index] else {
+            assertionFailure("Can't get value of headIndex: \(headIndex), tailIndex: \(tailIndex)")
             return nil
         }
-        var object: Item?
-        if let predicate = predicate {
-            if predicate(first) {
-                object = getObject()
-            }
+        if let predicate = predicate, !predicate(item) {
+            return nil
         } else {
-            object = getObject()
+            headIndex += 1
+            _buffer[index] = nil
+            if _count == maxCount >> 1 {
+                condition.signal()
+            }
+            return item
         }
-        return object
     }
-
-    private func getObject() -> Item {
-        let object = objects.removeFirst()
-        if maxCount != Int.max, objects.count == maxCount >> 1 {
-            condition.signal()
-        }
-//        if objects.isEmpty {
-//            duration = 0
-//            size = 0
-//        } else {
-//            duration = max(duration - object.duration, 0)
-//            size = max(size - object.size, 0)
-//        }
-        return object
-    }
-
     public func search(where predicate: (Item) -> Bool) -> Item? {
-        condition.lock()
-        defer { condition.unlock() }
-        if objects.count > currentIndex {
-            let item = objects[currentIndex]
+        if tailIndex > headIndex, let item = _buffer[headIndex] {
             if predicate(item) {
                 return item
             }
         }
-        if let index = objects.firstIndex(where: predicate) {
-            currentIndex = index
-            return objects[index]
-        } else {
-            return nil
+        for i in (0..<maxCount) {
+            if let item = _buffer[i] {
+                if predicate(item) {
+                    headIndex = i
+                    return item
+                }
+            } else {
+                return nil
+            }
         }
+        return nil
     }
-
-    public func forEach(_ body: (Item) -> Void) {
+    public func flush() {
         condition.lock()
         defer { condition.unlock() }
-        objects.forEach(body)
-    }
-
-    func flush() {
-        condition.lock()
-        defer { condition.unlock() }
-        objects.removeAll()
-        currentIndex = 0
-//        size = 0
-//        duration = 0
-        puttingObject = nil
+        headIndex = 0
+        tailIndex = 0
+        (0..<maxCount).forEach { _buffer[$0] = nil }
         condition.signal()
     }
 
-    func shutdown() {
+    public func shutdown() {
         destoryed = true
         flush()
     }
-}
 
-extension ObjectQueue {
-    public var isEmpty: Bool {
-        return count == 0
+    private func _doubleCapacity() {
+        var newBacking: ContiguousArray<Item?> = []
+        let newCapacity = maxCount << 1 // Double the storage.
+        precondition(newCapacity > 0, "Can't double capacity of \(_buffer.count)")
+        assert(newCapacity % 2 == 0)
+        newBacking.reserveCapacity(newCapacity)
+        let head = headIndex & mask
+        newBacking.append(contentsOf: _buffer[head..<maxCount])
+        if head > 0 {
+            newBacking.append(contentsOf: _buffer[0..<head])
+        }
+        let repeatitionCount = newCapacity &- newBacking.count
+        newBacking.append(contentsOf: repeatElement(nil, count: repeatitionCount))
+        headIndex = 0
+        tailIndex = newBacking.count &- repeatitionCount
+        _buffer = newBacking
+        maxCount = newCapacity
+        mask = maxCount - 1
+    }
+}
+extension FixedWidthInteger {
+    /// Returns the next power of two.
+    @inline(__always) func nextPowerOf2() -> Self {
+        guard self != 0 else {
+            return 1
+        }
+        return 1 << (Self.bitWidth - (self - 1).leadingZeroBitCount)
     }
 }

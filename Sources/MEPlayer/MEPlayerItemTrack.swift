@@ -87,7 +87,7 @@ class FFPlayerItemTrack<Frame: MEFrame>: PlayerItemTrackProtocol, CustomStringCo
     fileprivate let fps: Int
     let options: KSOptions
     let mediaType: AVFoundation.AVMediaType
-    let outputRenderQueue: ObjectQueue<Frame>
+    let outputRenderQueue: CircularBuffer<Frame>
     var isLoopModel = false
 
     var isFinished: Bool {
@@ -118,11 +118,11 @@ class FFPlayerItemTrack<Frame: MEFrame>: PlayerItemTrackProtocol, CustomStringCo
         self.options = options
         // 默认缓存队列大小跟帧率挂钩,经测试除以4，最优
         if mediaType == .audio {
-            outputRenderQueue = ObjectQueue(maxCount: fps / 4)
+            outputRenderQueue = CircularBuffer(initialCapacity: fps / 4, expanding: false)
         } else if mediaType == .video {
-            outputRenderQueue = ObjectQueue(maxCount: fps / 4, sortObjects: true)
+            outputRenderQueue = CircularBuffer(initialCapacity: fps / 4, sorted: true, expanding: false)
         } else {
-            outputRenderQueue = ObjectQueue()
+            outputRenderQueue = CircularBuffer()
         }
     }
 
@@ -141,7 +141,7 @@ class FFPlayerItemTrack<Frame: MEFrame>: PlayerItemTrackProtocol, CustomStringCo
     }
 
     func getOutputRender(where predicate: ((MEFrame) -> Bool)?) -> MEFrame? {
-        return outputRenderQueue.getObjectAsync(where: predicate)
+        return outputRenderQueue.first(where: predicate)
     }
 
     func endOfFile() {
@@ -169,13 +169,13 @@ class AsyncPlayerItemTrack: FFPlayerItemTrack<Frame> {
     private var isFirst = true
     private var isSeek = false
     // 无缝播放使用的PacketQueue
-    private var loopPacketQueue: ObjectQueue<Packet>?
-    private var packetQueue = ObjectQueue<Packet>()
+    private var loopPacketQueue: CircularBuffer<Packet>?
+    private var packetQueue = CircularBuffer<Packet>()
 
     override var isLoopModel: Bool {
         didSet {
             if isLoopModel {
-                loopPacketQueue = ObjectQueue<Packet>()
+                loopPacketQueue = CircularBuffer<Packet>()
                 endOfFile()
             } else {
                 if let loopPacketQueue = loopPacketQueue {
@@ -187,7 +187,7 @@ class AsyncPlayerItemTrack: FFPlayerItemTrack<Frame> {
     }
 
     override var loadedCount: Int {
-        return packetQueue.count + super.loadedCount + (loopPacketQueue?.count ?? 0)
+        return packetQueue.count + super.loadedCount
     }
 
     override var isPlayable: Bool {
@@ -219,9 +219,9 @@ class AsyncPlayerItemTrack: FFPlayerItemTrack<Frame> {
 
     override func putPacket(packet: Packet) {
         if isLoopModel {
-            loopPacketQueue?.putObjectSync(object: packet)
+            loopPacketQueue?.append(packet)
         } else {
-            packetQueue.putObjectSync(object: packet)
+            packetQueue.append(packet)
             delegate?.codecDidChangeCapacity(track: self)
         }
     }
@@ -245,13 +245,13 @@ class AsyncPlayerItemTrack: FFPlayerItemTrack<Frame> {
     private func decodeThread() {
         state = .decoding
         while decodeOperation?.isCancelled == false {
-            if state.contains(.closed) || state.contains(.failed) || (state.contains(.finished) && packetQueue.isEmpty) {
+            if state.contains(.closed) || state.contains(.failed) || (state.contains(.finished) && packetQueue.count == 0) {
                 break
             } else if state.contains(.flush) {
                 doFlushCodec()
                 state.remove(.flush)
             } else if state.contains(.decoding) {
-                guard let packet = packetQueue.getObjectSync(), !state.contains(.flush), !state.contains(.closed) else {
+                guard let packet = packetQueue.first(sync: true), !state.contains(.flush), !state.contains(.closed) else {
                     continue
                 }
                 doDecode(packet: packet)
@@ -260,7 +260,7 @@ class AsyncPlayerItemTrack: FFPlayerItemTrack<Frame> {
     }
 
     override func getOutputRender(where predicate: ((MEFrame) -> Bool)?) -> MEFrame? {
-        let outputFecthRender = outputRenderQueue.getObjectAsync(where: predicate)
+        let outputFecthRender = outputRenderQueue.first(where: predicate)
         if outputFecthRender == nil {
             if state.contains(.finished), loadedCount == 0 {
                 delegate?.codecDidFinished(track: self)
@@ -322,7 +322,7 @@ class AsyncPlayerItemTrack: FFPlayerItemTrack<Frame> {
                         seekTime = 0.0
                     }
                 }
-                outputRenderQueue.putObjectSync(object: frame)
+                outputRenderQueue.append(frame)
                 delegate?.codecDidChangeCapacity(track: self)
             }
         } catch {
