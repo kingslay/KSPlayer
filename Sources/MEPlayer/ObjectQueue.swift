@@ -11,27 +11,27 @@ public class CircularBuffer<Item: ObjectQueueItem> {
     private var _buffer = ContiguousArray<Item?>()
 //    private let semaphore = DispatchSemaphore(value: 0)
     private let condition = NSCondition()
-    private var headIndex = Int(0)
-    private var tailIndex = Int(0)
+    private var headIndex = UInt(0)
+    private var tailIndex = UInt(0)
     private let expanding: Bool
     private let sorted: Bool
     private var destoryed = false
-    @inline(__always) private var _count: Int { Int(UInt(tailIndex) - UInt(headIndex)) }
+    @inline(__always) private var _count: Int { Int(tailIndex &- headIndex) }
     public var count: Int {
         condition.lock()
         defer { condition.unlock() }
         return _count
     }
     public var maxCount: Int
-    private var mask: Int
+    private var mask: UInt
 
     public init(initialCapacity: Int = 256, sorted: Bool = false, expanding: Bool = true) {
         self.expanding = expanding
         self.sorted = sorted
-        let capacity = Int(UInt32(initialCapacity).nextPowerOf2())
+        let capacity = initialCapacity.nextPowerOf2()
         self._buffer = ContiguousArray<Item?>(repeating: nil, count: capacity)
         maxCount = capacity
-        mask = maxCount - 1
+        mask = UInt(maxCount - 1)
         assert(_buffer.count == capacity)
     }
 
@@ -41,12 +41,13 @@ public class CircularBuffer<Item: ObjectQueueItem> {
         if destoryed {
             return
         }
-        _buffer[tailIndex & mask] = value
+        let currenIndex = Int(tailIndex & mask)
+        _buffer[currenIndex] = value
         if sorted {
             // 不用sort进行排序，这个比较高效
-            var index = tailIndex - 1
-            while index >= headIndex {
-                guard let item = _buffer[index & mask] else {
+            var index = tailIndex
+            while index > headIndex {
+                guard let item = _buffer[Int((index - 1) & mask)] else {
                     break
                 }
                 if item.position < value.position {
@@ -54,11 +55,11 @@ public class CircularBuffer<Item: ObjectQueueItem> {
                 }
                 index -= 1
             }
-            if tailIndex != index + 1 {
-                _buffer.swapAt((index+1) & mask, tailIndex & mask)
+            if tailIndex != index {
+                _buffer.swapAt(Int(index & mask), currenIndex)
             }
         }
-        tailIndex += 1
+        tailIndex &+= 1
         if _count == maxCount {
             if expanding {
                 // No more room left for another append so grow the buffer now.
@@ -89,7 +90,7 @@ public class CircularBuffer<Item: ObjectQueueItem> {
                 return nil
             }
         }
-        let index = headIndex & mask
+        let index = Int(headIndex & mask)
         guard let item = _buffer[index] else {
             assertionFailure("Can't get value of headIndex: \(headIndex), tailIndex: \(tailIndex)")
             return nil
@@ -97,7 +98,7 @@ public class CircularBuffer<Item: ObjectQueueItem> {
         if let predicate = predicate, !predicate(item) {
             return nil
         } else {
-            headIndex += 1
+            headIndex &+= 1
             _buffer[index] = nil
             if _count == maxCount >> 1 {
                 condition.signal()
@@ -106,7 +107,7 @@ public class CircularBuffer<Item: ObjectQueueItem> {
         }
     }
     public func search(where predicate: (Item) -> Bool) -> Item? {
-        if tailIndex > headIndex, let item = _buffer[headIndex] {
+        if tailIndex > headIndex, let item = _buffer[Int(headIndex)] {
             if predicate(item) {
                 return item
             }
@@ -114,7 +115,7 @@ public class CircularBuffer<Item: ObjectQueueItem> {
         for i in (0..<maxCount) {
             if let item = _buffer[i] {
                 if predicate(item) {
-                    headIndex = i
+                    headIndex = UInt(i)
                     return item
                 }
             } else {
@@ -143,7 +144,7 @@ public class CircularBuffer<Item: ObjectQueueItem> {
         precondition(newCapacity > 0, "Can't double capacity of \(_buffer.count)")
         assert(newCapacity % 2 == 0)
         newBacking.reserveCapacity(newCapacity)
-        let head = headIndex & mask
+        let head = Int(headIndex & mask)
         newBacking.append(contentsOf: _buffer[head..<maxCount])
         if head > 0 {
             newBacking.append(contentsOf: _buffer[0..<head])
@@ -151,10 +152,10 @@ public class CircularBuffer<Item: ObjectQueueItem> {
         let repeatitionCount = newCapacity &- newBacking.count
         newBacking.append(contentsOf: repeatElement(nil, count: repeatitionCount))
         headIndex = 0
-        tailIndex = newBacking.count &- repeatitionCount
+        tailIndex = UInt(newBacking.count &- repeatitionCount)
         _buffer = newBacking
         maxCount = newCapacity
-        mask = maxCount - 1
+        mask = UInt(maxCount - 1)
     }
 }
 extension FixedWidthInteger {
