@@ -2398,6 +2398,7 @@
 			baseConfigurationReference = 0B2246B98F000F7D8896AF0F9730D20E /* KSPlayer-iOS13.0.release.xcconfig */;
 			buildSettings = {
 				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "-";
 				CONFIGURATION_BUILD_DIR = "$(BUILD_DIR)/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)/KSPlayer-iOS13.0";
 				IBSC_MODULE = KSPlayer;
 				INFOPLIST_FILE = "Target Support Files/KSPlayer-iOS13.0/ResourceBundle-KSResources-KSPlayer-iOS13.0-Info.plist";
@@ -2496,6 +2497,7 @@
 			baseConfigurationReference = 0B2246B98F000F7D8896AF0F9730D20E /* KSPlayer-iOS13.0.release.xcconfig */;
 			buildSettings = {
 				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "-";
 				CONFIGURATION_BUILD_DIR = "$(BUILD_DIR)/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)/KSPlayer-iOS13.0";
 				IBSC_MODULE = KSPlayer;
 				INFOPLIST_FILE = "Target Support Files/KSPlayer-iOS13.0/ResourceBundle-Metal-KSPlayer-iOS13.0-Info.plist";
@@ -2741,6 +2743,7 @@
 			baseConfigurationReference = DD8B577580B7485D6603B698411CE155 /* KSPlayer-iOS13.0.debug.xcconfig */;
 			buildSettings = {
 				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "-";
 				CONFIGURATION_BUILD_DIR = "$(BUILD_DIR)/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)/KSPlayer-iOS13.0";
 				IBSC_MODULE = KSPlayer;
 				INFOPLIST_FILE = "Target Support Files/KSPlayer-iOS13.0/ResourceBundle-KSResources-KSPlayer-iOS13.0-Info.plist";
@@ -2758,6 +2761,7 @@
 			baseConfigurationReference = DD8B577580B7485D6603B698411CE155 /* KSPlayer-iOS13.0.debug.xcconfig */;
 			buildSettings = {
 				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "-";
 				CONFIGURATION_BUILD_DIR = "$(BUILD_DIR)/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)/KSPlayer-iOS13.0";
 				IBSC_MODULE = KSPlayer;
 				INFOPLIST_FILE = "Target Support Files/KSPlayer-iOS13.0/ResourceBundle-Metal-KSPlayer-iOS13.0-Info.plist";

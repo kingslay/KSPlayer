@@ -134,7 +134,7 @@
 			attributes = {
 				LastSwiftUpdateCheck = 1130;
 				LastUpgradeCheck = 1130;
-				ORGANIZATIONNAME = wangjinbian;
+				ORGANIZATIONNAME = kintan;
 				TargetAttributes = {
 					AC752B702400301400A127BF = {
 						CreatedOnToolsVersion = 11.3.1;

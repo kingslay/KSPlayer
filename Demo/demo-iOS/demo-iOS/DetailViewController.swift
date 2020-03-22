@@ -61,9 +61,6 @@ class DetailViewController: UIViewController, DetailProtocol {
             self.navigationController?.popViewController(animated: true)
             #endif
         }
-        if let resource = resource {
-            playerView.set(resource: resource)
-        }
     }
 
     override func viewWillAppear(_ animated: Bool) {
