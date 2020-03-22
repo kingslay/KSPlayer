@@ -101,7 +101,11 @@ public class KSOptions {
     }
 }
 
-public class KSPlayerResource {
+public class KSPlayerResource: Hashable {
+    public static func == (lhs: KSPlayerResource, rhs: KSPlayerResource) -> Bool {
+        lhs.definitions == rhs.definitions
+    }
+
     public let name: String
     public let cover: URL?
     public let definitions: [KSPlayerResourceDefinition]
@@ -137,9 +141,17 @@ public class KSPlayerResource {
         self.subtitle = subtitle
         self.definitions = definitions
     }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(definitions)
+    }
 }
 
-public class KSPlayerResourceDefinition {
+public class KSPlayerResourceDefinition: Hashable {
+    public static func == (lhs: KSPlayerResourceDefinition, rhs: KSPlayerResourceDefinition) -> Bool {
+        lhs.url == rhs.url
+    }
+
     public let url: URL
     public let definition: String
     public let options: KSOptions
@@ -166,5 +178,9 @@ public class KSPlayerResourceDefinition {
         self.url = url
         self.definition = definition
         self.options = options
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(url)
     }
 }
