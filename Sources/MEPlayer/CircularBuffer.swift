@@ -22,6 +22,7 @@ public class CircularBuffer<Item: ObjectQueueItem> {
         defer { condition.unlock() }
         return _count
     }
+
     public var maxCount: Int
     private var mask: UInt
 
@@ -29,13 +30,13 @@ public class CircularBuffer<Item: ObjectQueueItem> {
         self.expanding = expanding
         self.sorted = sorted
         let capacity = initialCapacity.nextPowerOf2()
-        self._buffer = ContiguousArray<Item?>(repeating: nil, count: capacity)
+        _buffer = ContiguousArray<Item?>(repeating: nil, count: capacity)
         maxCount = capacity
         mask = UInt(maxCount - 1)
         assert(_buffer.count == capacity)
     }
 
-    public func append(_ value: Item) {
+    public func push(_ value: Item) {
         condition.lock()
         defer { condition.unlock() }
         if destoryed {
@@ -75,14 +76,15 @@ public class CircularBuffer<Item: ObjectQueueItem> {
             }
         }
     }
-    public func first(sync: Bool = false, where predicate: ((Item) -> Bool)? = nil) -> Item? {
+
+    public func pop(wait: Bool = false, where predicate: ((Item) -> Bool)? = nil) -> Item? {
         condition.lock()
         defer { condition.unlock() }
         if destoryed {
             return nil
         }
         if headIndex == tailIndex {
-            if sync {
+            if wait {
                 condition.wait()
                 if destoryed || headIndex == tailIndex {
                     return nil
@@ -107,10 +109,11 @@ public class CircularBuffer<Item: ObjectQueueItem> {
             return item
         }
     }
+
     public func search(where predicate: (Item) -> Bool) -> Item? {
         condition.lock()
         defer { condition.unlock() }
-        for i in (headIndex..<tailIndex) {
+        for i in headIndex ..< tailIndex {
             if let item = _buffer[Int(i)] {
                 if predicate(item) {
                     headIndex = i
@@ -123,12 +126,13 @@ public class CircularBuffer<Item: ObjectQueueItem> {
         }
         return nil
     }
+
     public func flush() {
         condition.lock()
         defer { condition.unlock() }
         headIndex = 0
         tailIndex = 0
-        (0..<maxCount).forEach { _buffer[$0] = nil }
+        (0 ..< maxCount).forEach { _buffer[$0] = nil }
         condition.signal()
     }
 
@@ -144,9 +148,9 @@ public class CircularBuffer<Item: ObjectQueueItem> {
         assert(newCapacity % 2 == 0)
         newBacking.reserveCapacity(newCapacity)
         let head = Int(headIndex & mask)
-        newBacking.append(contentsOf: _buffer[head..<maxCount])
+        newBacking.append(contentsOf: _buffer[head ..< maxCount])
         if head > 0 {
-            newBacking.append(contentsOf: _buffer[0..<head])
+            newBacking.append(contentsOf: _buffer[0 ..< head])
         }
         let repeatitionCount = newCapacity &- newBacking.count
         newBacking.append(contentsOf: repeatElement(nil, count: repeatitionCount))
@@ -157,6 +161,7 @@ public class CircularBuffer<Item: ObjectQueueItem> {
         mask = UInt(maxCount - 1)
     }
 }
+
 extension FixedWidthInteger {
     /// Returns the next power of two.
     @inline(__always) func nextPowerOf2() -> Self {

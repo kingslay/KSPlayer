@@ -35,6 +35,7 @@ class AssetTrack: TrackProtocol, CustomStringConvertible {
             }
         }
     }
+
     let stream: UnsafeMutablePointer<AVStream>
     let mediaType: AVFoundation.AVMediaType
     let timebase: Timebase
@@ -141,7 +142,7 @@ class FFPlayerItemTrack<Frame: MEFrame>: PlayerItemTrackProtocol, CustomStringCo
     }
 
     func getOutputRender(where predicate: ((MEFrame) -> Bool)?) -> MEFrame? {
-        return outputRenderQueue.first(where: predicate)
+        return outputRenderQueue.pop(where: predicate)
     }
 
     func endOfFile() {
@@ -219,9 +220,9 @@ class AsyncPlayerItemTrack: FFPlayerItemTrack<Frame> {
 
     override func putPacket(packet: Packet) {
         if isLoopModel {
-            loopPacketQueue?.append(packet)
+            loopPacketQueue?.push(packet)
         } else {
-            packetQueue.append(packet)
+            packetQueue.push(packet)
             delegate?.codecDidChangeCapacity(track: self)
         }
     }
@@ -251,7 +252,7 @@ class AsyncPlayerItemTrack: FFPlayerItemTrack<Frame> {
                 doFlushCodec()
                 state.remove(.flush)
             } else if state.contains(.decoding) {
-                guard let packet = packetQueue.first(sync: true), !state.contains(.flush), !state.contains(.closed) else {
+                guard let packet = packetQueue.pop(wait: true), !state.contains(.flush), !state.contains(.closed) else {
                     continue
                 }
                 doDecode(packet: packet)
@@ -260,7 +261,7 @@ class AsyncPlayerItemTrack: FFPlayerItemTrack<Frame> {
     }
 
     override func getOutputRender(where predicate: ((MEFrame) -> Bool)?) -> MEFrame? {
-        let outputFecthRender = outputRenderQueue.first(where: predicate)
+        let outputFecthRender = outputRenderQueue.pop(where: predicate)
         if outputFecthRender == nil {
             if state.contains(.finished), loadedCount == 0 {
                 delegate?.codecDidFinished(track: self)
@@ -322,7 +323,7 @@ class AsyncPlayerItemTrack: FFPlayerItemTrack<Frame> {
                         seekTime = 0.0
                     }
                 }
-                outputRenderQueue.append(frame)
+                outputRenderQueue.push(frame)
                 delegate?.codecDidChangeCapacity(track: self)
             }
         } catch {
@@ -336,6 +337,7 @@ class AsyncPlayerItemTrack: FFPlayerItemTrack<Frame> {
         }
     }
 }
+
 extension Dictionary {
     public mutating func value(for key: Key, default defaultValue: @autoclosure () -> Value) -> Value {
         if let value = self[key] {

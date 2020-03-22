@@ -29,6 +29,7 @@ final class MEPlayerItem {
             audioTrack?.delegate = self
         }
     }
+
     private var allTracks = [PlayerItemTrackProtocol]()
     private var videoAudioTracks = [PlayerItemTrackProtocol]()
     private var assetTracks = [TrackProtocol]()

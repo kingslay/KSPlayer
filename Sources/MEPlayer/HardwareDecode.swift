@@ -16,6 +16,7 @@ protocol DecodeProtocol {
     func doFlushCodec()
     func shutdown()
 }
+
 extension TrackProtocol {
     func makeDecode(options: KSOptions) -> DecodeProtocol {
         if let session = DecompressionSession(codecpar: stream.pointee.codecpar.pointee, options: options) {

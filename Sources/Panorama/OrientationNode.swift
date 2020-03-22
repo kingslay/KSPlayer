@@ -110,7 +110,7 @@ public final class OrientationNode: SCNNode {
     }
 
     private func updateCamera() {
-        guard let camera = self.pointOfView.camera else { return }
+        guard let camera = pointOfView.camera else { return }
 
         if #available(iOS 11, tvOS 11.0, OSX 10.13, *) {
             camera.fieldOfView = fieldOfView
