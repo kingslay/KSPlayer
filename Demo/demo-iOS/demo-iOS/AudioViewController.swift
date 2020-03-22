@@ -17,6 +17,7 @@ class AudioViewController: UIViewController, DetailProtocol {
             }
         }
     }
+
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = UIColor.lightGray

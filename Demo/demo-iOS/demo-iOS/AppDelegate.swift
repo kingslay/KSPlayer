@@ -30,7 +30,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UISplitViewControllerDele
             splitViewController.preferredDisplayMode = .primaryOverlay
             splitViewController.delegate = self
             let detailVC = DetailViewController()
-            splitViewController.viewControllers = [UINavigationController(rootViewController: MasterViewController()),UINavigationController(rootViewController: detailVC)]
+            splitViewController.viewControllers = [UINavigationController(rootViewController: MasterViewController()), UINavigationController(rootViewController: detailVC)]
             detailVC.navigationItem.leftBarButtonItem = splitViewController.displayModeButtonItem
             detailVC.navigationItem.leftItemsSupplementBackButton = true
             window.rootViewController = splitViewController

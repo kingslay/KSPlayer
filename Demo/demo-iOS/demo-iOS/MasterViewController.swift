@@ -124,11 +124,11 @@ class MasterViewController: UIViewController, UITableViewDelegate, UITableViewDa
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
         if let split = splitViewController, let nav = split.viewControllers.last as? UINavigationController, let detail = nav.topViewController as? DetailProtocol {
-                detail.resource = objects[indexPath.row]
-                detail.navigationItem.leftBarButtonItem = split.displayModeButtonItem
-                detail.navigationItem.leftItemsSupplementBackButton = true
-                split.preferredDisplayMode = .primaryHidden
-                return
+            detail.resource = objects[indexPath.row]
+            detail.navigationItem.leftBarButtonItem = split.displayModeButtonItem
+            detail.navigationItem.leftItemsSupplementBackButton = true
+            split.preferredDisplayMode = .primaryHidden
+            return
         }
         let controller: DetailProtocol
         if indexPath.row == objects.count - 1 {

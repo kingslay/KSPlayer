@@ -67,7 +67,7 @@ final class SubtitlePlayerItemTrack: FFPlayerItemTrack<SubtitleFrame> {
             } else {
                 frame.part = part
                 preSubtitleFrame = frame
-                outputRenderQueue.append(frame)
+                outputRenderQueue.push(frame)
             }
             if len == 0 {
                 break

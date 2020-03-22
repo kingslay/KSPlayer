@@ -11,6 +11,7 @@ import UIKit
 protocol DetailProtocol: UIViewController {
     var resource: KSPlayerResource? { get set }
 }
+
 class DetailViewController: UIViewController, DetailProtocol {
     #if os(iOS)
     override var preferredStatusBarStyle: UIStatusBarStyle {
