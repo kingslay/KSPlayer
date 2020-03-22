@@ -48,6 +48,7 @@ public class CircularBuffer<Item: ObjectQueueItem> {
             var index = tailIndex
             while index > headIndex {
                 guard let item = _buffer[Int((index - 1) & mask)] else {
+                    assertionFailure("value is nil of index: \((index - 1) & mask) headIndex: \(headIndex), tailIndex: \(tailIndex)")
                     break
                 }
                 if item.position < value.position {
@@ -92,7 +93,7 @@ public class CircularBuffer<Item: ObjectQueueItem> {
         }
         let index = Int(headIndex & mask)
         guard let item = _buffer[index] else {
-            assertionFailure("Can't get value of headIndex: \(headIndex), tailIndex: \(tailIndex)")
+            assertionFailure("value is nil of index: \(index) headIndex: \(headIndex), tailIndex: \(tailIndex)")
             return nil
         }
         if let predicate = predicate, !predicate(item) {
@@ -107,18 +108,16 @@ public class CircularBuffer<Item: ObjectQueueItem> {
         }
     }
     public func search(where predicate: (Item) -> Bool) -> Item? {
-        if tailIndex > headIndex, let item = _buffer[Int(headIndex)] {
-            if predicate(item) {
-                return item
-            }
-        }
-        for i in (0..<maxCount) {
-            if let item = _buffer[i] {
+        condition.lock()
+        defer { condition.unlock() }
+        for i in (headIndex..<tailIndex) {
+            if let item = _buffer[Int(i)] {
                 if predicate(item) {
-                    headIndex = UInt(i)
+                    headIndex = i
                     return item
                 }
             } else {
+                assertionFailure("value is nil of index: \(i) headIndex: \(headIndex), tailIndex: \(tailIndex)")
                 return nil
             }
         }
