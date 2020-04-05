@@ -4,17 +4,18 @@
 
 ```bash
 cd FFmpeg
-sh build-ffmpeg-macOS.sh debug
-dwarfdump -F --debug-info FFmpeg-macOS/lib/libavcodec.a  | head -n 20
+sh build-openssl.sh
+sh build-ffmpeg.sh debug
+dwarfdump -F --debug-info FFmpeg.xcframework/ios-arm64/FFmpeg.framework/FFmpeg | head -n 20
 ```
 
-![6](http://git.code.oa.com/kintanwang/KSPlayer/raw/master/documents/6.png)
+![6](https://github.com/kingslay/KSPlayer/blob/develop/documents/6.png?raw=true)
 
 二、把文件加入到项目
 
 拿到了路径,我们就把路径加入到项目里面。
 
-![7](http://git.code.oa.com/kintanwang/KSPlayer/raw/master/documents/7.png)
+![7](https://github.com/kingslay/KSPlayer/blob/develop/documents/7.png?raw=true)
 
-![8](http://git.code.oa.com/kintanwang/KSPlayer/raw/master/documents/8.png)
+![8](https://github.com/kingslay/KSPlayer/blob/develop/documents/8.png?raw=true)
 
