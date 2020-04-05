@@ -5,9 +5,6 @@ MAGENTA="\033[1;35m"
 NOCOLOR="\033[0m"
 
 FF_VERSION="4.2.2"
-if [[ $FFMPEG_VERSION != "" ]]; then
-    FF_VERSION=$FFMPEG_VERSION
-fi
 ##### Add Begin #####
 # OpenSSL
 OPENSSL=$(pwd)/OpenSSL
@@ -21,7 +18,9 @@ CONFIGURE_FLAGS="--enable-optimizations"
 CONFIGURE_FLAGS="$CONFIGURE_FLAGS --disable-gpl"
 # CONFIGURE_FLAGS="$CONFIGURE_FLAGS --enable-version3"
 CONFIGURE_FLAGS="$CONFIGURE_FLAGS --disable-nonfree"
+if [ "$1" != "debug" ]; then
 CONFIGURE_FLAGS="$CONFIGURE_FLAGS --disable-debug"
+fi
 
 # Configuration options:
 CONFIGURE_FLAGS="$CONFIGURE_FLAGS --enable-cross-compile"

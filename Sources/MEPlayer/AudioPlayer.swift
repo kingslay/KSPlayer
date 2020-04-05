@@ -239,11 +239,15 @@ final class AudioEnginePlayer: AudioPlayer {
     }
 
     func play() {
+        if !engine.isRunning {
+            try? engine.start()
+        }
         player.play()
     }
 
     func pause() {
         player.pause()
+        engine.pause()
     }
 
     func audioPlay(buffer: AVAudioPCMBuffer) {

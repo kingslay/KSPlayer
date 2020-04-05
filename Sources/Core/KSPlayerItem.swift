@@ -56,10 +56,11 @@ public class KSOptions {
     /// seek完是否自动播放
     public var isSeekedAutoPlay = KSOptions.isSeekedAutoPlay
     public var display = DisplayEnum.plane
-
+    public var asynchronousDecompression = false
     public var avOptions = [String: Any]()
     public var formatContextOptions = [String: Any]()
     public var decoderOptions = [String: Any]()
+    var isMultiRate: Bool = false
     public init() {
         formatContextOptions["analyzeduration"] = 2_000_000
         formatContextOptions["probesize"] = 2_000_000

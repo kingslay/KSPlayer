@@ -66,20 +66,22 @@ class HardwareDecode: DecodeProtocol {
         }
         var result = [VideoVTBFrame]()
         var error: NSError?
-        let status = VTDecompressionSessionDecodeFrame(session.decompressionSession, sampleBuffer: sampleBuffer, flags: VTDecodeFrameFlags(rawValue: 0), infoFlagsOut: nil) { status, _, imageBuffer, _, _ in
+        let flags = options.asynchronousDecompression ?  VTDecodeFrameFlags._EnableAsynchronousDecompression : VTDecodeFrameFlags(rawValue: 0)
+        let status = VTDecompressionSessionDecodeFrame(session.decompressionSession, sampleBuffer: sampleBuffer, flags: flags, infoFlagsOut: nil) { status, _, imageBuffer, _, _ in
             if status == noErr {
-                if let imageBuffer = imageBuffer {
-                    let frame = VideoVTBFrame()
-                    frame.corePixelBuffer = imageBuffer
-                    frame.timebase = self.assetTrack.timebase
-                    frame.position = packet.pointee.pts
-                    if frame.position == Int64.min || frame.position < 0 {
-                        frame.position = max(packet.pointee.dts, 0)
-                    }
-                    frame.duration = packet.pointee.duration
-                    frame.size = Int64(packet.pointee.size)
-                    result.append(frame)
+                guard let imageBuffer = imageBuffer else {
+                    return
                 }
+                let frame = VideoVTBFrame()
+                frame.corePixelBuffer = imageBuffer
+                frame.timebase = self.assetTrack.timebase
+                frame.position = packet.pointee.pts
+                if frame.position == Int64.min || frame.position < 0 {
+                    frame.position = max(packet.pointee.dts, 0)
+                }
+                frame.duration = packet.pointee.duration
+                frame.size = Int64(packet.pointee.size)
+                result.append(frame)
             } else {
                 if !self.refreshSession {
                     error = .init(result: status, errorCode: .codecVideoReceiveFrame)

@@ -46,8 +46,6 @@ class SoftwareDecode: DecodeProtocol {
                     if timestamp >= bestEffortTimestamp {
                         bestEffortTimestamp = timestamp
                     } else {
-//                        // todo m3u8s多路流需要丢帧
-//                        throw Int32(0)
                     }
                     let frame = swresample.transfer(avframe: avframe, timebase: assetTrack.timebase)
                     if frame.position < 0 {

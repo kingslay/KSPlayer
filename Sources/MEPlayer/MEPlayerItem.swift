@@ -137,6 +137,10 @@ extension MEPlayerItem {
             avformat_close_input(&self.formatCtx)
             return
         }
+        let format = String(cString: formatCtx.pointee.iformat.pointee.name)
+        if format.starts(with: "hls") || format.starts(with: "dash") {
+            options.isMultiRate = true
+        }
         duration = TimeInterval(max(formatCtx.pointee.duration, 0) / Int64(AV_TIME_BASE))
         createCodec(formatCtx: formatCtx.pointee)
         if assetTracks.first == nil {
@@ -221,9 +225,12 @@ extension MEPlayerItem {
                 let packet = Packet()
                 let readResult = av_read_frame(formatCtx, packet.corePacket)
                 if readResult == 0 {
+                    if packet.corePacket.pointee.size <= 0 {
+                        continue
+                    }
                     packet.fill()
                     let first = assetTracks.first { $0.isEnabled && $0.stream.pointee.index == packet.corePacket.pointee.stream_index }
-                    if let first = first {
+                    if let first = first, first.stream.pointee.discard != AVDISCARD_ALL {
                         packet.assetTrack = first
                         if first.mediaType == .video {
                             videoTrack?.putPacket(packet: packet)

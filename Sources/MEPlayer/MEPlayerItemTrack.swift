@@ -172,7 +172,7 @@ class AsyncPlayerItemTrack: FFPlayerItemTrack<Frame> {
     // 无缝播放使用的PacketQueue
     private var loopPacketQueue: CircularBuffer<Packet>?
     private var packetQueue = CircularBuffer<Packet>()
-
+    private var bestEffortTimestamp = Int64(-1)
     override var isLoopModel: Bool {
         didSet {
             if isLoopModel {
@@ -281,6 +281,7 @@ class AsyncPlayerItemTrack: FFPlayerItemTrack<Frame> {
         delegate?.codecDidChangeCapacity(track: self)
         isSeek = true
         decoderMap.values.forEach { $0.seek(time: time) }
+        bestEffortTimestamp = -1
     }
 
     override func endOfFile() {
@@ -312,10 +313,15 @@ class AsyncPlayerItemTrack: FFPlayerItemTrack<Frame> {
     private func doDecode(packet: Packet) {
         let decoder = decoderMap.value(for: packet.assetTrack.streamIndex, default: packet.assetTrack.makeDecode(options: options))
         do {
-            try decoder.doDecode(packet: packet.corePacket).forEach { frame in
-                guard !state.contains(.flush), !state.contains(.closed) else {
+            let array = try decoder.doDecode(packet: packet.corePacket)
+            guard packet.corePacket.pointee.flags & AV_PKT_FLAG_DISCARD == 0 else {
+                return
+            }
+            array.forEach { frame in
+                guard !state.contains(.flush), !state.contains(.closed), (decoderMap.values.count == 1 || frame.position > bestEffortTimestamp) else {
                     return
                 }
+                bestEffortTimestamp = frame.position
                 if seekTime > 0, options.isAccurateSeek {
                     if frame.seconds < seekTime {
                         return
