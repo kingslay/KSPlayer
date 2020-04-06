@@ -64,14 +64,15 @@ open class KSPlayerLayer: UIView {
     @KSObservable
     public var loopCount: Int = 0
     private var options: KSOptions?
-    private var timer: Timer?
     private var bufferedCount = 0
     private var shouldSeekTo: TimeInterval = 0
     private var startTime: TimeInterval = 0
     private(set) var url: URL?
     public var isWirelessRouteActive = false
     public weak var delegate: KSPlayerLayerDelegate?
-
+    private lazy var timer: Timer = {
+        Timer.scheduledTimer(timeInterval: 0.5, target: self, selector: #selector(playerTimerAction), userInfo: nil, repeats: true)
+    }()
     public var player: MediaPlayerProtocol? {
         didSet {
             oldValue?.view.removeFromSuperview()
@@ -126,8 +127,6 @@ open class KSPlayerLayer: UIView {
         } else {
             player = firstPlayerType.init(url: url, options: options)
         }
-        timer = Timer.scheduledTimer(timeInterval: 0.5, target: self, selector: #selector(playerTimerAction), userInfo: nil, repeats: true)
-        timer?.fireDate = Date.distantFuture
         registerRemoteControllEvent()
     }
 
@@ -137,7 +136,7 @@ open class KSPlayerLayer: UIView {
         if let player = player {
             if player.isPreparedToPlay {
                 player.play()
-                timer?.fireDate = Date.distantPast
+                timer.fireDate = Date.distantPast
             } else {
                 if state == .error {
                     player.prepareToPlay()
@@ -160,7 +159,7 @@ open class KSPlayerLayer: UIView {
         }
         options?.isAutoPlay = false
         player?.pause()
-        timer?.fireDate = Date.distantFuture
+        timer.fireDate = Date.distantFuture
         state = .paused
         UIApplication.shared.isIdleTimerDisabled = false
     }
@@ -168,8 +167,7 @@ open class KSPlayerLayer: UIView {
     open func resetPlayer() {
         KSLog("resetPlayer")
         unregisterRemoteControllEvent()
-        timer?.invalidate()
-        timer = nil
+        timer.invalidate()
         state = .notSetURL
         bufferedCount = 0
         shouldSeekTo = 0
@@ -280,7 +278,7 @@ extension KSPlayerLayer: MediaPlayerDelegate {
             delegate?.player(layer: self, currentTime: duration, totalTime: duration)
             state = .playedToTheEnd
         }
-        timer?.fireDate = Date.distantFuture
+        timer.fireDate = Date.distantFuture
         bufferedCount = 1
         delegate?.player(layer: self, finish: error)
     }
@@ -317,8 +315,6 @@ extension KSPlayerLayer {
             MPRemoteCommandCenter.shared().seekForwardCommand.addTarget(self, action: #selector(remoteCommandAction(event:)))
             MPRemoteCommandCenter.shared().seekBackwardCommand.addTarget(self, action: #selector(remoteCommandAction(event:)))
             MPRemoteCommandCenter.shared().changePlaybackRateCommand.addTarget(self, action: #selector(remoteCommandAction(event:)))
-        }
-        if #available(OSX 10.12.2, *) {
             MPRemoteCommandCenter.shared().changePlaybackPositionCommand.addTarget(self, action: #selector(remoteCommandAction(event:)))
         }
     }
@@ -331,8 +327,6 @@ extension KSPlayerLayer {
             MPRemoteCommandCenter.shared().seekForwardCommand.removeTarget(self)
             MPRemoteCommandCenter.shared().seekBackwardCommand.removeTarget(self)
             MPRemoteCommandCenter.shared().changePlaybackRateCommand.removeTarget(self)
-        }
-        if #available(OSX 10.12.2, *) {
             MPRemoteCommandCenter.shared().changePlaybackPositionCommand.removeTarget(self)
         }
     }

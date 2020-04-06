@@ -189,7 +189,7 @@ extension KSPlayerManager {
     public static var audioPlayerMaximumChannels = AVAudioChannelCount(AVAudioSession.sharedInstance().outputNumberOfChannels)
     #endif
     // 画面绘制类
-    public static var renderViewType: (PixelRenderView & UIView).Type = {
+    public static var renderViewType: PixelRenderView.Type = {
         canUseMetal() ? MetalPlayView.self : SampleBufferPlayerView.self
     }()
 
@@ -356,7 +356,7 @@ final class VideoSampleBufferFrame: Frame {
     public var sampleBuffer: CMSampleBuffer?
 }
 
-public protocol PixelRenderView {
+public protocol PixelRenderView: UIView {
     var display: DisplayEnum { get set }
     func set(pixelBuffer: BufferProtocol, time: CMTime)
 }

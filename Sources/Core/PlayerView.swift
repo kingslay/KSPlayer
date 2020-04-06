@@ -66,11 +66,11 @@ open class PlayerView: UIView, KSPlayerLayerDelegate, KSSliderDelegate {
     }
 
     @objc open func onButtonPressed(_ button: UIButton) {
-        if var type = PlayerButtonType(rawValue: button.tag) {
-            if type == .play, button.isSelected {
-                type = .pause
-            }
-            switch type {
+        guard var type = PlayerButtonType(rawValue: button.tag) else {  return }
+        if type == .play, button.isSelected {
+            type = .pause
+        }
+        switch type {
             case .back:
                 backBlock?()
             case .play, .replay:
@@ -79,9 +79,8 @@ open class PlayerView: UIView, KSPlayerLayerDelegate, KSSliderDelegate {
                 pause()
             default:
                 break
-            }
-            delegate?.playerController(action: type)
         }
+        delegate?.playerController(action: type)
     }
 
     open func play() {

@@ -152,10 +152,10 @@ class FFPlayerItemTrack<Frame: MEFrame>: PlayerItemTrackProtocol, CustomStringCo
     }
 }
 
-class AsyncPlayerItemTrack: FFPlayerItemTrack<Frame> {
+final class AsyncPlayerItemTrack: FFPlayerItemTrack<Frame> {
     private let operationQueue = OperationQueue()
     private var decoderMap = [Int32: DecodeProtocol]()
-    private var decodeOperation: BlockOperation?
+    private var decodeOperation: BlockOperation!
     private var seekTime = 0.0
     private var isFirst = true
     private var isSeek = false
@@ -163,6 +163,7 @@ class AsyncPlayerItemTrack: FFPlayerItemTrack<Frame> {
     private var loopPacketQueue: CircularBuffer<Packet>?
     private var packetQueue = CircularBuffer<Packet>()
     private var bestEffortTimestamp = Int64(-1)
+    override var loadedCount: Int { packetQueue.count + outputRenderQueue.count }
     override var isLoopModel: Bool {
         didSet {
             if isLoopModel {
@@ -176,9 +177,6 @@ class AsyncPlayerItemTrack: FFPlayerItemTrack<Frame> {
             }
         }
     }
-
-    override var loadedCount: Int { packetQueue.count + super.loadedCount }
-
     override var isPlayable: Bool {
         guard !state.contains(.finished) else {
             return true
@@ -221,21 +219,19 @@ class AsyncPlayerItemTrack: FFPlayerItemTrack<Frame> {
             Thread.current.stackSize = KSPlayerManager.stackSize
             self.decodeThread()
         }
-        decodeOperation?.queuePriority = .veryHigh
-        decodeOperation?.qualityOfService = .userInteractive
-        if let decodeOperation = decodeOperation {
-            operationQueue.addOperation(decodeOperation)
-        }
+        decodeOperation.queuePriority = .veryHigh
+        decodeOperation.qualityOfService = .userInteractive
+        operationQueue.addOperation(decodeOperation)
         decoderMap.values.forEach { $0.decode() }
     }
 
     private func decodeThread() {
         state = .decoding
-        while decodeOperation?.isCancelled == false {
+        while !decodeOperation.isCancelled {
             if state.contains(.closed) || state.contains(.failed) || (state.contains(.finished) && packetQueue.count == 0) {
                 break
             } else if state.contains(.flush) {
-                doFlushCodec()
+                decoderMap.values.forEach { $0.doFlushCodec() }
                 state.remove(.flush)
             } else if state.contains(.decoding) {
                 guard let packet = packetQueue.pop(wait: true), !state.contains(.flush), !state.contains(.closed) else {
@@ -290,10 +286,6 @@ class AsyncPlayerItemTrack: FFPlayerItemTrack<Frame> {
         }
         decoderMap.values.forEach { $0.shutdown() }
         decoderMap.removeAll()
-    }
-
-    private func doFlushCodec() {
-        decoderMap.values.forEach { $0.doFlushCodec() }
     }
 
     private func doDecode(packet: Packet) {

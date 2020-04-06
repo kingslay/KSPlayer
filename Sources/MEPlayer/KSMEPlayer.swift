@@ -216,6 +216,7 @@ extension KSMEPlayer: MediaPlayerProtocol {
         shutdown()
         audioOutput.shutdown()
         videoOutput.shutdown()
+        playerItem.delegate = nil
         playerItem = MEPlayerItem(url: url, options: options)
         self.options = options
         playerItem.delegate = self

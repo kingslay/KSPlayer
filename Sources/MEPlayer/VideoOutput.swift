@@ -15,7 +15,7 @@ import AppKit
 final class VideoOutput: NSObject, FrameOutput {
     private var currentRender: MEFrame?
     weak var renderSource: OutputRenderSourceDelegate?
-    var renderView: PixelRenderView & UIView
+    let renderView: PixelRenderView
     var isOutput = true
     private lazy var displayLink: CADisplayLink = {
         let displayLink = CADisplayLink(target: self, selector: #selector(readBuffer(_:)))
