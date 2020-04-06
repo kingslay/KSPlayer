@@ -16,7 +16,7 @@ public final class SampleBufferPlayerView: UIView {
     private var videoInfo: CMVideoFormatDescription?
     private var displayLayer: AVSampleBufferDisplayLayer {
         // swiftlint:disable force_cast
-        return layer as! AVSampleBufferDisplayLayer
+        layer as! AVSampleBufferDisplayLayer
         // swiftlint:enable force_cast
     }
 
@@ -40,7 +40,7 @@ public final class SampleBufferPlayerView: UIView {
 
     #if !os(macOS)
     public override class var layerClass: AnyClass {
-        return AVSampleBufferDisplayLayer.self
+        AVSampleBufferDisplayLayer.self
     }
 
     public override var contentMode: UIViewContentMode {

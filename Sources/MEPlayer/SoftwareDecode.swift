@@ -45,8 +45,7 @@ class SoftwareDecode: DecodeProtocol {
                     let timestamp = avframe.pointee.best_effort_timestamp
                     if timestamp >= bestEffortTimestamp {
                         bestEffortTimestamp = timestamp
-                    } else {
-                    }
+                    } else {}
                     let frame = swresample.transfer(avframe: avframe, timebase: assetTrack.timebase)
                     if frame.position < 0 {
                         frame.position = bestEffortTimestamp

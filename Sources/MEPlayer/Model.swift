@@ -83,7 +83,7 @@ protocol OutputRenderSourceDelegate: AnyObject {
 
 extension OutputRenderSourceDelegate {
     func getOutputRender(type: AVFoundation.AVMediaType) -> MEFrame? {
-        return getOutputRender(type: type, isDependent: false)
+        getOutputRender(type: type, isDependent: false)
     }
 }
 
@@ -129,7 +129,7 @@ extension ObjectPoolItem where Self: AnyObject {
 
 extension ObjectPoolItem {
     static func object() -> Self {
-        return ObjectPool.share.object(class: Self.self)
+        ObjectPool.share.object(class: Self.self)
     }
 
     func comeback() {
@@ -139,7 +139,7 @@ extension ObjectPoolItem {
 
 extension ObjectPool {
     func object<P: ObjectPoolItem>(class: P.Type) -> P {
-        return object(class: `class`, key: P.key()) { `class`.init() }
+        object(class: `class`, key: P.key()) { `class`.init() }
     }
 }
 
@@ -156,13 +156,9 @@ protocol MEFrame: ObjectQueueItem {
 }
 
 extension MEFrame {
-    public var seconds: TimeInterval {
-        return cmtime.seconds
-    }
+    public var seconds: TimeInterval { cmtime.seconds }
 
-    public var cmtime: CMTime {
-        return timebase.cmtime(for: position)
-    }
+    public var cmtime: CMTime { timebase.cmtime(for: position) }
 }
 
 // MARK: model
@@ -194,11 +190,7 @@ extension KSPlayerManager {
     #endif
     // 画面绘制类
     public static var renderViewType: (PixelRenderView & UIView).Type = {
-        if canUseMetal() {
-            return MetalPlayView.self
-        } else {
-            return SampleBufferPlayerView.self
-        }
+        canUseMetal() ? MetalPlayView.self : SampleBufferPlayerView.self
     }()
 
     static func outputFormat() -> AudioStreamBasicDescription {
@@ -226,7 +218,7 @@ public struct LoadingStatus {
     let frameMaxCount: Int
     let isFirst: Bool
     let isSeek: Bool
-    let isSecondOpen: Bool
+    let mediaType: AVFoundation.AVMediaType
 }
 
 struct MECodecState: OptionSet {
@@ -244,19 +236,13 @@ struct Timebase {
     static let defaultValue = Timebase(num: 1, den: 1)
     public var num: Int32
     public var den: Int32
-    func getPosition(from seconds: TimeInterval) -> Int64 {
-        return Int64(seconds * TimeInterval(den) / TimeInterval(num))
-    }
+    func getPosition(from seconds: TimeInterval) -> Int64 { Int64(seconds * TimeInterval(den) / TimeInterval(num)) }
 
-    func cmtime(for timestamp: Int64) -> CMTime {
-        return CMTime(value: timestamp * Int64(num), timescale: den)
-    }
+    func cmtime(for timestamp: Int64) -> CMTime { CMTime(value: timestamp * Int64(num), timescale: den) }
 }
 
 extension Timebase {
-    public var rational: AVRational {
-        return AVRational(num: num, den: den)
-    }
+    public var rational: AVRational { AVRational(num: num, den: den) }
 
     init(_ rational: AVRational) {
         num = rational.num
@@ -270,13 +256,9 @@ struct METime {
 }
 
 extension METime {
-    public var seconds: TimeInterval {
-        return cmtime.seconds
-    }
+    public var seconds: TimeInterval { cmtime.seconds }
 
-    public var cmtime: CMTime {
-        return timebase.cmtime(for: timestamp)
-    }
+    public var cmtime: CMTime { timebase.cmtime(for: timestamp) }
 }
 
 final class Packet: ObjectQueueItem {

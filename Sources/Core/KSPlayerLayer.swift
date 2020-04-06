@@ -48,9 +48,7 @@ public enum KSPlayerState: CustomStringConvertible {
         }
     }
 
-    public var isPlaying: Bool {
-        return self == .buffering || self == .bufferFinished
-    }
+    public var isPlaying: Bool { self == .buffering || self == .bufferFinished }
 }
 
 public protocol KSPlayerLayerDelegate: AnyObject {

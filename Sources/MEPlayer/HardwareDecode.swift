@@ -66,7 +66,7 @@ class HardwareDecode: DecodeProtocol {
         }
         var result = [VideoVTBFrame]()
         var error: NSError?
-        let flags = options.asynchronousDecompression ?  VTDecodeFrameFlags._EnableAsynchronousDecompression : VTDecodeFrameFlags(rawValue: 0)
+        let flags = options.asynchronousDecompression ? VTDecodeFrameFlags._EnableAsynchronousDecompression : VTDecodeFrameFlags(rawValue: 0)
         let status = VTDecompressionSessionDecodeFrame(session.decompressionSession, sampleBuffer: sampleBuffer, flags: flags, infoFlagsOut: nil) { status, _, imageBuffer, _, _ in
             if status == noErr {
                 guard let imageBuffer = imageBuffer else {

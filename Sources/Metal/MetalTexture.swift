@@ -92,7 +92,5 @@ public final class MetalTexture {
 }
 
 extension MTLTexture {
-    var key: String {
-        return "MTLTexture" + [Int(pixelFormat.rawValue), width, height].description
-    }
+    var key: String { "MTLTexture" + [Int(pixelFormat.rawValue), width, height].description }
 }

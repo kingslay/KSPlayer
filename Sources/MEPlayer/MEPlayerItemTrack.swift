@@ -91,26 +91,16 @@ class FFPlayerItemTrack<Frame: MEFrame>: PlayerItemTrackProtocol, CustomStringCo
     let outputRenderQueue: CircularBuffer<Frame>
     var isLoopModel = false
 
-    var isFinished: Bool {
-        return state.contains(.finished)
-    }
+    var isFinished: Bool { state.contains(.finished) }
 
-    var loadedTime: TimeInterval {
-        return TimeInterval(loadedCount) / TimeInterval(fps)
-//        return CMTime((packetQueue.duration + outputRenderQueue.duration) * Int64(timebase.num), timebase.den).seconds
-    }
+    //   CMTime((packetQueue.duration + outputRenderQueue.duration) * Int64(timebase.num), timebase.den).seconds
+    var loadedTime: TimeInterval { TimeInterval(loadedCount) / TimeInterval(fps) }
 
-    var loadedCount: Int {
-        return outputRenderQueue.count
-    }
+    var loadedCount: Int { outputRenderQueue.count }
 
-    var bufferingProgress: Int {
-        return min(100, Int(loadedTime * 100) / Int(options.preferredForwardBufferDuration))
-    }
+    var bufferingProgress: Int { min(100, Int(loadedTime * 100) / Int(options.preferredForwardBufferDuration)) }
 
-    var isPlayable: Bool {
-        return true
-    }
+    var isPlayable: Bool { true }
 
     required init(assetTrack: TrackProtocol, options: KSOptions) {
         mediaType = assetTrack.mediaType
@@ -187,20 +177,16 @@ class AsyncPlayerItemTrack: FFPlayerItemTrack<Frame> {
         }
     }
 
-    override var loadedCount: Int {
-        return packetQueue.count + super.loadedCount
-    }
+    override var loadedCount: Int { packetQueue.count + super.loadedCount }
 
     override var isPlayable: Bool {
         guard !state.contains(.finished) else {
             return true
         }
-        // 让音频能更快的打开
-        let isSecondOpen = mediaType == .audio || options.isSecondOpen
         let status = LoadingStatus(fps: fps, packetCount: packetQueue.count,
                                    frameCount: outputRenderQueue.count,
                                    frameMaxCount: outputRenderQueue.maxCount,
-                                   isFirst: isFirst, isSeek: isSeek, isSecondOpen: isSecondOpen)
+                                   isFirst: isFirst, isSeek: isSeek, mediaType: mediaType)
         if options.playable(status: status) {
             isFirst = false
             isSeek = false
@@ -318,10 +304,9 @@ class AsyncPlayerItemTrack: FFPlayerItemTrack<Frame> {
                 return
             }
             array.forEach { frame in
-                guard !state.contains(.flush), !state.contains(.closed), (decoderMap.values.count == 1 || frame.position > bestEffortTimestamp) else {
+                guard !state.contains(.flush), !state.contains(.closed), decoderMap.values.count == 1 || frame.position > bestEffortTimestamp else {
                     return
                 }
-                bestEffortTimestamp = frame.position
                 if seekTime > 0, options.isAccurateSeek {
                     if frame.seconds < seekTime {
                         return
@@ -329,6 +314,7 @@ class AsyncPlayerItemTrack: FFPlayerItemTrack<Frame> {
                         seekTime = 0.0
                     }
                 }
+                bestEffortTimestamp = frame.position
                 outputRenderQueue.push(frame)
                 delegate?.codecDidChangeCapacity(track: self)
             }

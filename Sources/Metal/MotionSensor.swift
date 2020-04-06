@@ -45,10 +45,7 @@ final class MotionSensor {
     }
 
     func ready() -> Bool {
-        if manager.isDeviceMotionAvailable {
-            return manager.isDeviceMotionActive
-        }
-        return false
+        manager.isDeviceMotionAvailable ? manager.isDeviceMotionActive : false
     }
 
     func start() {

@@ -98,9 +98,7 @@ class MetalRender {
         renderPassDescriptor.colorAttachments[0].storeAction = .store
     }
 
-    public func makeCommandBuffer() -> MTLCommandBuffer? {
-        return commandQueue?.makeCommandBuffer()
-    }
+    public func makeCommandBuffer() -> MTLCommandBuffer? { commandQueue?.makeCommandBuffer() }
 
     func set(pixelBuffer: BufferProtocol, display: DisplayEnum = .plane, drawable: CAMetalDrawable) {
         renderPassDescriptor.colorAttachments[0].texture = drawable.texture
