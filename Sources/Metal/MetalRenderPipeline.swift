@@ -92,6 +92,20 @@ public protocol BufferProtocol: AnyObject {
 }
 
 extension CVPixelBuffer: BufferProtocol {
+    public var width: Int { CVPixelBufferGetWidth(self) }
+
+    public var height: Int { CVPixelBufferGetHeight(self) }
+
+    public var size: CGSize { CGSize(width: width, height: height) }
+
+    public var isPlanar: Bool { CVPixelBufferIsPlanar(self) }
+
+    public var planeCount: Int { isPlanar ? CVPixelBufferGetPlaneCount(self) : 1 }
+
+    public var format: OSType { CVPixelBufferGetPixelFormatType(self) }
+
+    public var textures: [MTLTexture]? { MetalTexture.share.texture(pixelBuffer: self) }
+
     public var drawableSize: CGSize {
         // Check if the pixel buffer exists
         if let ratio = CVBufferGetAttachment(self, kCVImageBufferPixelAspectRatioKey, nil)?.takeUnretainedValue() as? NSDictionary,
@@ -102,30 +116,6 @@ extension CVPixelBuffer: BufferProtocol {
         } else {
             return size
         }
-    }
-
-    public var width: Int {
-        CVPixelBufferGetWidth(self)
-    }
-
-    public var height: Int {
-        CVPixelBufferGetHeight(self)
-    }
-
-    public var size: CGSize {
-        CGSize(width: width, height: height)
-    }
-
-    public var isPlanar: Bool {
-        CVPixelBufferIsPlanar(self)
-    }
-
-    public var planeCount: Int {
-        isPlanar ? CVPixelBufferGetPlaneCount(self) : 1
-    }
-
-    public var format: OSType {
-        CVPixelBufferGetPixelFormatType(self)
     }
 
     public var isFullRangeVideo: Bool {
@@ -146,19 +136,15 @@ extension CVPixelBuffer: BufferProtocol {
         }
     }
 
-    public var textures: [MTLTexture]? {
-        return MetalTexture.share.texture(pixelBuffer: self)
-    }
-
     public func widthOfPlane(at planeIndex: Int) -> Int {
-        return CVPixelBufferGetWidthOfPlane(self, planeIndex)
+        CVPixelBufferGetWidthOfPlane(self, planeIndex)
     }
 
     public func heightOfPlane(at planeIndex: Int) -> Int {
-        return CVPixelBufferGetHeightOfPlane(self, planeIndex)
+        CVPixelBufferGetHeightOfPlane(self, planeIndex)
     }
 
     func baseAddressOfPlane(at planeIndex: Int) -> UnsafeMutableRawPointer? {
-        return CVPixelBufferGetBaseAddressOfPlane(self, planeIndex)
+        CVPixelBufferGetBaseAddressOfPlane(self, planeIndex)
     }
 }

@@ -94,15 +94,15 @@ extension simd_float4x4 {
     }
 
     func rotateX(radians: Float) -> simd_float4x4 {
-        return self * simd_float4x4(rotationX: radians)
+        self * simd_float4x4(rotationX: radians)
     }
 
     func rotateY(radians: Float) -> simd_float4x4 {
-        return self * simd_float4x4(rotationY: radians)
+        self * simd_float4x4(rotationY: radians)
     }
 
     func rotateZ(radians: Float) -> simd_float4x4 {
-        return self * simd_float4x4(rotationZ: radians)
+        self * simd_float4x4(rotationZ: radians)
     }
 }
 

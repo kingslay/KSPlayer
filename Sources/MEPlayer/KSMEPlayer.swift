@@ -185,7 +185,7 @@ extension KSMEPlayer: MEPlayerDelegate {
 extension KSMEPlayer: MediaPlayerProtocol {
     public var preferredForwardBufferDuration: TimeInterval {
         get {
-            return options.preferredForwardBufferDuration
+            options.preferredForwardBufferDuration
         }
         set {
             options.preferredForwardBufferDuration = newValue
@@ -194,32 +194,22 @@ extension KSMEPlayer: MediaPlayerProtocol {
 
     public var playbackVolume: Float {
         get {
-            return audioOutput.audioPlayer.volume
+            audioOutput.audioPlayer.volume
         }
         set {
             audioOutput.audioPlayer.volume = newValue
         }
     }
 
-    public var isPlaying: Bool {
-        return playbackState == .playing
-    }
+    public var isPlaying: Bool { playbackState == .playing }
 
     public var naturalSize: CGSize {
-        if playerItem.rotation == 90 || playerItem.rotation == 270 {
-            return playerItem.naturalSize.reverse
-        } else {
-            return playerItem.naturalSize
-        }
+        playerItem.rotation == 90 || playerItem.rotation == 270 ? playerItem.naturalSize.reverse : playerItem.naturalSize
     }
 
-    public var isExternalPlaybackActive: Bool {
-        return false
-    }
+    public var isExternalPlaybackActive: Bool { false }
 
-    public var view: UIView {
-        return videoOutput.renderView
-    }
+    public var view: UIView { videoOutput.renderView }
 
     public func replace(url: URL, options: KSOptions) {
         KSLog("replaceUrl \(self)")
@@ -236,20 +226,16 @@ extension KSMEPlayer: MediaPlayerProtocol {
 
     public var currentPlaybackTime: TimeInterval {
         get {
-            return playerItem.currentPlaybackTime
+            playerItem.currentPlaybackTime
         }
         set {
             seek(time: newValue)
         }
     }
 
-    public var duration: TimeInterval {
-        return playerItem.duration
-    }
+    public var duration: TimeInterval { playerItem.duration }
 
-    public var seekable: Bool {
-        return playerItem.seekable
-    }
+    public var seekable: Bool { playerItem.seekable }
 
     public func seek(time: TimeInterval, completion handler: ((Bool) -> Void)? = nil) {
         let oldPlaybackState = playbackState
@@ -303,12 +289,12 @@ extension KSMEPlayer: MediaPlayerProtocol {
             view.contentMode = newValue
         }
         get {
-            return view.contentMode
+            view.contentMode
         }
     }
 
     public func thumbnailImageAtCurrentTime(handler: @escaping (UIImage?) -> Void) {
-        return videoOutput.thumbnailImageAtCurrentTime(handler: handler)
+        videoOutput.thumbnailImageAtCurrentTime(handler: handler)
     }
 
     public func enterBackground() {
@@ -325,17 +311,13 @@ extension KSMEPlayer: MediaPlayerProtocol {
             setAudioSession(isMuted: newValue)
         }
         get {
-            return audioOutput.audioPlayer.isMuted
+            audioOutput.audioPlayer.isMuted
         }
     }
 }
 
 extension KSMEPlayer {
-    public var subtitleDataSouce: SubtitleDataSouce? {
-        return playerItem
-    }
+    public var subtitleDataSouce: SubtitleDataSouce? { playerItem }
 
-    public var subtitles: [KSSubtitleProtocol] {
-        return playerItem.subtitleTracks
-    }
+    public var subtitles: [KSSubtitleProtocol] { playerItem.subtitleTracks }
 }

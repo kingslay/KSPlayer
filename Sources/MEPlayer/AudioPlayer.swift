@@ -37,13 +37,9 @@ final class AudioGraphPlayer: AudioPlayer {
         return false
     }
 
-    private var sampleRate: Float64 {
-        return audioStreamBasicDescription.mSampleRate
-    }
+    private var sampleRate: Float64 { audioStreamBasicDescription.mSampleRate }
 
-    private var numberOfChannels: UInt32 {
-        return audioStreamBasicDescription.mChannelsPerFrame
-    }
+    private var numberOfChannels: UInt32 { audioStreamBasicDescription.mChannelsPerFrame }
 
     weak var delegate: AudioPlayerDelegate?
     var playbackRate: Float {
@@ -202,7 +198,7 @@ final class AudioEnginePlayer: AudioPlayer {
 
     var playbackRate: Float {
         get {
-            return picth.rate
+            picth.rate
         }
         set {
             picth.rate = min(32, max(1.0 / 32.0, newValue))
@@ -211,7 +207,7 @@ final class AudioEnginePlayer: AudioPlayer {
 
     var volume: Float {
         get {
-            return player.volume
+            player.volume
         }
         set {
             player.volume = newValue
@@ -220,7 +216,7 @@ final class AudioEnginePlayer: AudioPlayer {
 
     var isMuted: Bool {
         get {
-            return volume == 0
+            volume == 0
         }
         set {}
     }

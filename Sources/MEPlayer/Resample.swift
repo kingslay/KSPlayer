@@ -103,59 +103,6 @@ class VideoSwresample: Swresample {
     }
 }
 
-public final class PixelBufferConverter {
-    public static let share = PixelBufferConverter()
-    public var bufferCount = 24
-    private var pool: CVPixelBufferPool?
-    private var width = Int32(0)
-    private var height = Int32(0)
-    private var format = Int32(0)
-    private init() {}
-
-    public static func isSupported(format: AVPixelFormat) -> Bool {
-        return format == AV_PIX_FMT_NV12 || format == AV_PIX_FMT_YUV420P || format == AV_PIX_FMT_BGRA
-    }
-
-    public func getPixelBuffer(fromFrame frame: AVFrame) -> CVPixelBuffer? {
-        if pool == nil || frame.width != width || frame.height != height || frame.format != format {
-            makePool(fromFrame: frame)
-        }
-        return pool?.getPixelBuffer(fromFrame: frame)
-    }
-
-    public func shutdown() {
-        if let pool = pool {
-            CVPixelBufferPoolFlush(pool, CVPixelBufferPoolFlushFlags(rawValue: 0))
-        }
-        pool = nil
-    }
-
-    private func makePool(fromFrame frame: AVFrame) {
-        shutdown()
-        width = frame.width
-        height = frame.height
-        format = frame.format
-        let dic: NSMutableDictionary = [
-            kCVImageBufferChromaLocationBottomFieldKey: "left",
-            kCVImageBufferChromaLocationTopFieldKey: "left",
-            kCVImageBufferFieldCountKey: 1,
-        ]
-        let sourcePixelBufferOptions: NSMutableDictionary = [
-            kCVPixelBufferPixelFormatTypeKey: AVPixelFormat(rawValue: format).format,
-            kCVPixelBufferWidthKey: width,
-            kCVPixelBufferHeightKey: height,
-            //            kCVPixelBufferBytesPerRowAlignmentKey: 64,
-            kCVPixelBufferMetalCompatibilityKey: true,
-            kCVPixelBufferCGImageCompatibilityKey: true,
-            kCVPixelBufferCGBitmapContextCompatibilityKey: true,
-            kCVPixelBufferIOSurfacePropertiesKey: NSDictionary(),
-            kCVBufferPropagatedAttachmentsKey: dic,
-        ]
-        let pixelBufferPoolOptions: NSDictionary = [kCVPixelBufferPoolMinimumBufferCountKey: bufferCount]
-        CVPixelBufferPoolCreate(kCFAllocatorDefault, pixelBufferPoolOptions, sourcePixelBufferOptions, &pool)
-    }
-}
-
 class PixelBuffer: BufferProtocol {
     let format: OSType
     let planeCount: Int
@@ -205,7 +152,7 @@ class PixelBuffer: BufferProtocol {
     }
 
     public static func isSupported(format: AVPixelFormat) -> Bool {
-        return format == AV_PIX_FMT_NV12 || format == AV_PIX_FMT_YUV420P || format == AV_PIX_FMT_BGRA
+        format == AV_PIX_FMT_NV12 || format == AV_PIX_FMT_YUV420P || format == AV_PIX_FMT_BGRA
     }
 
     private func image() -> UIImage? {
@@ -407,7 +354,7 @@ class AudioDescriptor: Equatable {
     }
 
     static func == (lhs: AudioDescriptor, rhs: AudioDescriptor) -> Bool {
-        return lhs.inputFormat == rhs.inputFormat && lhs.inputSampleRate == rhs.inputSampleRate && lhs.inputNumberOfChannels == rhs.inputNumberOfChannels
+        lhs.inputFormat == rhs.inputFormat && lhs.inputSampleRate == rhs.inputSampleRate && lhs.inputNumberOfChannels == rhs.inputNumberOfChannels
     }
 
     static func == (lhs: AudioDescriptor, rhs: AVFrame) -> Bool {

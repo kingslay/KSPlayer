@@ -91,7 +91,8 @@ public class KSOptions {
     // 视频缓冲算法函数
     open func playable(status: LoadingStatus) -> Bool {
         guard status.frameCount > 0 else { return false }
-        if status.isSecondOpen, status.isFirst || status.isSeek, status.frameCount == status.frameMaxCount {
+        // 让音频能更快的打开
+        if status.mediaType == .audio || isSecondOpen, status.isFirst || status.isSeek, status.frameCount == status.frameMaxCount {
             if status.isFirst {
                 return true
             } else if status.isSeek {

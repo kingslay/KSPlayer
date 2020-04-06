@@ -51,9 +51,7 @@ public final class KSAVPlayerView: UIView {
     }
 
     #else
-    public override class var layerClass: AnyClass {
-        return AVPlayerLayer.self
-    }
+    public override class var layerClass: AnyClass { AVPlayerLayer.self }
 
     public override var contentMode: UIViewContentMode {
         didSet {
@@ -72,7 +70,7 @@ public final class KSAVPlayerView: UIView {
     #endif
     fileprivate var playerLayer: AVPlayerLayer {
         // swiftlint:disable force_cast
-        return layer as! AVPlayerLayer
+        layer as! AVPlayerLayer
         // swiftlint:enable force_cast
     }
 }
@@ -172,9 +170,7 @@ public class KSAVPlayer {
 }
 
 extension KSAVPlayer {
-    public var player: AVQueuePlayer {
-        return playerView.player
-    }
+    public var player: AVQueuePlayer { playerView.player }
 
     @objc private func moviePlayDidEnd(notification _: Notification) {
         if !options.isLoopPlay {
@@ -297,40 +293,24 @@ extension KSAVPlayer {
 }
 
 extension KSAVPlayer: MediaPlayerProtocol {
-    public var subtitleDataSouce: SubtitleDataSouce? {
-        return nil
-    }
+    public var subtitleDataSouce: SubtitleDataSouce? { nil }
 
     public var preferredForwardBufferDuration: TimeInterval {
         get {
-            return player.currentItem?.preferredForwardBufferDuration ?? options.preferredForwardBufferDuration
+            player.currentItem?.preferredForwardBufferDuration ?? options.preferredForwardBufferDuration
         }
         set {
             player.currentItem?.preferredForwardBufferDuration = newValue
         }
     }
 
-    public func thumbnailImageAtCurrentTime(handler: @escaping (UIImage?) -> Void) {
-        guard let playerItem = player.currentItem, isPreparedToPlay else {
-            return handler(nil)
-        }
-        return urlAsset.thumbnailImage(currentTime: playerItem.currentTime(), handler: handler)
-    }
+    public var isPlaying: Bool { player.rate > 0 ? true : playbackState == .playing }
 
-    public var isPlaying: Bool {
-        if player.rate > 0 {
-            return true
-        }
-        return playbackState == .playing
-    }
-
-    public var view: UIView {
-        return playerView
-    }
+    public var view: UIView { playerView }
 
     public var allowsExternalPlayback: Bool {
         get {
-            return player.allowsExternalPlayback
+            player.allowsExternalPlayback
         }
         set {
             player.allowsExternalPlayback = newValue
@@ -352,9 +332,7 @@ extension KSAVPlayer: MediaPlayerProtocol {
         }
     }
 
-    public var isExternalPlaybackActive: Bool {
-        return player.isExternalPlaybackActive
-    }
+    public var isExternalPlaybackActive: Bool { player.isExternalPlaybackActive }
 
     public var naturalSize: CGSize {
         if let videoTrack = urlAsset.tracks(withMediaType: .video).first {
@@ -383,6 +361,13 @@ extension KSAVPlayer: MediaPlayerProtocol {
             return 0
         }
         return event.numberOfBytesTransferred
+    }
+
+    public func thumbnailImageAtCurrentTime(handler: @escaping (UIImage?) -> Void) {
+        guard let playerItem = player.currentItem, isPreparedToPlay else {
+            return handler(nil)
+        }
+        return urlAsset.thumbnailImage(currentTime: playerItem.currentTime(), handler: handler)
     }
 
     public func seek(time: TimeInterval, completion handler: ((Bool) -> Void)? = nil) {
@@ -450,7 +435,7 @@ extension KSAVPlayer: MediaPlayerProtocol {
             view.contentMode = newValue
         }
         get {
-            return view.contentMode
+            view.contentMode
         }
     }
 
@@ -468,7 +453,7 @@ extension KSAVPlayer: MediaPlayerProtocol {
             setAudioSession(isMuted: newValue)
         }
         get {
-            return player.isMuted
+            player.isMuted
         }
     }
 }

@@ -317,6 +317,7 @@ extension MEPlayerItem: MediaPlayback {
     func shutdown() {
         guard state != .closed else { return }
         state = .closed
+        delegate = nil
         condition.signal()
         // 故意循环引用。等结束了。才释放
         let closeOperation = BlockOperation {
@@ -440,26 +441,15 @@ extension UnsafeMutablePointer where Pointee == AVStream {
 
 private final class MixCapacity: Capacity {
     private let array: [PlayerItemTrackProtocol]
+    lazy var loadedTime: TimeInterval = { array.map { $0.loadedTime }.min() ?? 0 }()
 
-    lazy var loadedTime: TimeInterval = {
-        array.min { $0.loadedTime < $1.loadedTime }?.loadedTime ?? 0
-    }()
+    lazy var loadedCount: Int = { array.map { $0.loadedCount }.min() ?? 0 }()
 
-    lazy var loadedCount: Int = {
-        array.min { $0.loadedCount < $1.loadedCount }?.loadedCount ?? 0
-    }()
+    lazy var bufferingProgress: Int = { array.map { $0.bufferingProgress }.min() ?? 0 }()
 
-    lazy var bufferingProgress: Int = {
-        array.min { $0.bufferingProgress < $1.bufferingProgress }?.bufferingProgress ?? 0
-    }()
+    lazy var isPlayable: Bool = { array.allSatisfy { $0.isPlayable } }()
 
-    lazy var isPlayable: Bool = {
-        array.allSatisfy { $0.isPlayable }
-    }()
-
-    lazy var isFinished: Bool = {
-        array.allSatisfy { $0.isFinished }
-    }()
+    lazy var isFinished: Bool = { array.allSatisfy { $0.isFinished } }()
 
     init(array: [PlayerItemTrackProtocol]) {
         self.array = array
