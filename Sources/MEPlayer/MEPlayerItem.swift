@@ -317,7 +317,6 @@ extension MEPlayerItem: MediaPlayback {
     func shutdown() {
         guard state != .closed else { return }
         state = .closed
-        delegate = nil
         condition.signal()
         // 故意循环引用。等结束了。才释放
         let closeOperation = BlockOperation {
