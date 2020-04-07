@@ -183,15 +183,6 @@ extension KSMEPlayer: MEPlayerDelegate {
 }
 
 extension KSMEPlayer: MediaPlayerProtocol {
-    public var preferredForwardBufferDuration: TimeInterval {
-        get {
-            options.preferredForwardBufferDuration
-        }
-        set {
-            options.preferredForwardBufferDuration = newValue
-        }
-    }
-
     public var playbackVolume: Float {
         get {
             audioOutput.audioPlayer.volume

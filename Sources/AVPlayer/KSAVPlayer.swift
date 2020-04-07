@@ -76,7 +76,15 @@ public final class KSAVPlayerView: UIView {
 }
 
 public class KSAVPlayer {
-    private var options: KSOptions
+    private var options: KSOptions {
+        didSet {
+            player.currentItem?.preferredForwardBufferDuration = options.preferredForwardBufferDuration
+            options.$preferredForwardBufferDuration.observer = { [weak self] _, newValue in
+                self?.player.currentItem?.preferredForwardBufferDuration = newValue
+            }
+        }
+    }
+
     private let playerView = KSAVPlayerView()
     private var urlAsset: AVURLAsset
     private var shouldSeekTo = TimeInterval(0)
@@ -211,18 +219,14 @@ extension KSAVPlayer {
     private func updatePlayableDuration(item: AVPlayerItem) {
         let first = item.loadedTimeRanges.first { CMTimeRangeContainsTime($0.timeRangeValue, time: item.currentTime()) }
         if let first = first {
-            updatePlayableDuration(time: first.timeRangeValue.end)
-        }
-    }
-
-    private func updatePlayableDuration(time: CMTime) {
-        playableTime = time.seconds
-        guard playableTime > 0 else { return }
-        let loadedTime = playableTime - currentPlaybackTime
-        guard loadedTime > 0 else { return }
-        bufferingProgress = Int(min(loadedTime * 100 / preferredForwardBufferDuration, 100))
-        if bufferingProgress >= 100 {
-            loadState = .playable
+            playableTime = first.timeRangeValue.end.seconds
+            guard playableTime > 0 else { return }
+            let loadedTime = playableTime - currentPlaybackTime
+            guard loadedTime > 0 else { return }
+            bufferingProgress = Int(min(loadedTime * 100 / item.preferredForwardBufferDuration, 100))
+            if bufferingProgress >= 100 {
+                loadState = .playable
+            }
         }
     }
 
@@ -294,15 +298,6 @@ extension KSAVPlayer {
 
 extension KSAVPlayer: MediaPlayerProtocol {
     public var subtitleDataSouce: SubtitleDataSouce? { nil }
-
-    public var preferredForwardBufferDuration: TimeInterval {
-        get {
-            player.currentItem?.preferredForwardBufferDuration ?? options.preferredForwardBufferDuration
-        }
-        set {
-            player.currentItem?.preferredForwardBufferDuration = newValue
-        }
-    }
 
     public var isPlaying: Bool { player.rate > 0 ? true : playbackState == .playing }
 

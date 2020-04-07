@@ -210,17 +210,6 @@ extension KSPlayerManager {
     static let audioDefaultFormat = AVAudioFormat(commonFormat: .pcmFormatFloat32, sampleRate: Double(audioPlayerSampleRate), channels: audioPlayerMaximumChannels, interleaved: false)!
 }
 
-// 加载情况
-public struct LoadingStatus {
-    let fps: Int
-    let packetCount: Int
-    let frameCount: Int
-    let frameMaxCount: Int
-    let isFirst: Bool
-    let isSeek: Bool
-    let mediaType: AVFoundation.AVMediaType
-}
-
 struct MECodecState: OptionSet {
     public let rawValue: UInt
     public init(rawValue: UInt) { self.rawValue = rawValue }

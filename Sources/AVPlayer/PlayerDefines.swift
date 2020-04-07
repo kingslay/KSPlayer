@@ -39,7 +39,6 @@ public protocol MediaPlayerProtocol: MediaPlayback {
     var playbackRate: Float { get set }
     var playbackVolume: Float { get set }
     var contentMode: UIViewContentMode { get set }
-    var preferredForwardBufferDuration: TimeInterval { get set }
     var subtitleDataSouce: SubtitleDataSouce? { get }
     init(url: URL, options: KSOptions)
     func replace(url: URL, options: KSOptions)
@@ -74,33 +73,116 @@ extension MediaPlayerProtocol {
     }
 }
 
-public enum KSPlayerTopBarShowCase {
-    /// 始终显示
-    case always
-    /// 只在横屏界面显示
-    case horizantalOnly
-    /// 不显示
-    case none
+public enum DisplayEnum {
+    case plane
+    // swiftlint:disable identifier_name
+    case vr
+    // swiftlint:enable identifier_name
+    case vrBox
+}
+
+// 加载情况
+public struct LoadingStatus {
+    let fps: Int
+    let packetCount: Int
+    let frameCount: Int
+    let frameMaxCount: Int
+    let isFirst: Bool
+    let isSeek: Bool
+    let mediaType: AVFoundation.AVMediaType
+}
+
+public class KSOptions {
+    /// 视频颜色编码方式 支持kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange kCVPixelFormatType_420YpCbCr8BiPlanarFullRange kCVPixelFormatType_32BGRA kCVPixelFormatType_420YpCbCr8Planar
+    public static var bufferPixelFormatType = kCVPixelFormatType_420YpCbCr8BiPlanarFullRange
+    public static var hardwareDecodeH264 = true
+    public static var hardwareDecodeH265 = true
+    /// 最低缓存视频时间
+    public static var preferredForwardBufferDuration = 3.0
+    /// 最大缓存视频时间
+    public static var maxBufferDuration = 30.0
+    /// 是否开启秒开
+    public static var isSecondOpen = false
+    /// 开启精确seek
+    public static var isAccurateSeek = true
+    /// 开启无缝循环播放
+    public static var isLoopPlay = false
+    /// 是否自动播放，默认false
+    public static var isAutoPlay = false
+    /// seek完是否自动播放
+    public static var isSeekedAutoPlay = true
+
+    //    public static let shared = KSOptions()
+    public var bufferPixelFormatType = KSOptions.bufferPixelFormatType
+    public var hardwareDecodeH264 = KSOptions.hardwareDecodeH264
+    public var hardwareDecodeH265 = KSOptions.hardwareDecodeH265
+    /// 最低缓存视频时间
+    @KSObservable
+    public var preferredForwardBufferDuration = KSOptions.preferredForwardBufferDuration
+    /// 最大缓存视频时间
+    public var maxBufferDuration = KSOptions.maxBufferDuration
+    /// 是否开启秒开
+    public var isSecondOpen = KSOptions.isSecondOpen
+    /// 开启精确seek
+    public var isAccurateSeek = KSOptions.isAccurateSeek
+    /// 开启无缝循环播放
+    public var isLoopPlay = KSOptions.isLoopPlay
+    /// 是否自动播放，默认false
+    public var isAutoPlay = KSOptions.isAutoPlay
+    /// seek完是否自动播放
+    public var isSeekedAutoPlay = KSOptions.isSeekedAutoPlay
+    public var display = DisplayEnum.plane
+    public var videoDisable = false
+    public var audioDisable = false
+    public var subtitleDisable = false
+    public var asynchronousDecompression = false
+    public var avOptions = [String: Any]()
+    public var formatContextOptions = [String: Any]()
+    public var decoderOptions = [String: Any]()
+    var isMultiRate: Bool = false
+    public init() {
+        formatContextOptions["analyzeduration"] = 2_000_000
+        formatContextOptions["probesize"] = 2_000_000
+        formatContextOptions["auto_convert"] = 0
+        formatContextOptions["reconnect"] = 1
+        // There is total different meaning for 'timeout' option in rtmp
+        // remove 'timeout' option for rtmp
+        formatContextOptions["timeout"] = 30_000_000
+        formatContextOptions["rw_timeout"] = 30_000_000
+        formatContextOptions["user_agent"] = "ksplayer"
+        decoderOptions["threads"] = "auto"
+        decoderOptions["refcounted_frames"] = "1"
+    }
+
+    public func setCookie(_ cookies: [HTTPCookie]) {
+        #if !os(macOS)
+        avOptions[AVURLAssetHTTPCookiesKey] = cookies
+        #endif
+        var cookieStr = "Cookie: "
+        for cookie in cookies {
+            cookieStr.append("\(cookie.name)=\(cookie.value); ")
+        }
+        cookieStr = String(cookieStr.dropLast(2))
+        cookieStr.append("\r\n")
+        formatContextOptions["headers"] = cookieStr
+    }
+
+    // 视频缓冲算法函数
+    open func playable(status: LoadingStatus) -> Bool {
+        guard status.frameCount > 0 else { return false }
+        // 让音频能更快的打开
+        if status.mediaType == .audio || isSecondOpen, status.isFirst || status.isSeek, status.frameCount == status.frameMaxCount {
+            if status.isFirst {
+                return true
+            } else if status.isSeek {
+                return status.packetCount >= status.fps
+            }
+        }
+        return status.packetCount > status.fps * Int(preferredForwardBufferDuration)
+    }
 }
 
 public struct KSPlayerManager {
-    /// 顶部返回、标题、AirPlay按钮 显示选项，默认.Always，可选.HorizantalOnly、.None
-    public static var topBarShowInCase = KSPlayerTopBarShowCase.always
-    /// 自动隐藏操作栏的时间间隔 默认5秒
-    public static var animateDelayTimeInterval = TimeInterval(5)
-    /// 开启亮度手势 默认true
-    public static var enableBrightnessGestures = true
-    /// 开启音量手势 默认true
-    public static var enableVolumeGestures = true
-    /// 开启进度滑动手势 默认true
-    public static var enablePlaytimeGestures = true
-    /// 竖屏是否开启手势控制 默认false
-    public static var enablePortraitGestures = false
-    /// 播放内核选择策略 先使用firstPlayer，失败了自动切换到secondPlayer，播放内核有KSAVPlayer、KSMEPlayer两个选项
-    public static var firstPlayerType: MediaPlayerProtocol.Type = KSAVPlayer.self
-    public static var secondPlayerType: MediaPlayerProtocol.Type?
-    /// 是否能后台播放视频
-    public static var canBackgroundPlay = false
     /// 日志输出方式
     public static var logFunctionPoint: (String) -> Void = {
         print($0)
