@@ -73,6 +73,7 @@ open class KSPlayerLayer: UIView {
     private lazy var timer: Timer = {
         Timer.scheduledTimer(timeInterval: 0.5, target: self, selector: #selector(playerTimerAction), userInfo: nil, repeats: true)
     }()
+
     public var player: MediaPlayerProtocol? {
         didSet {
             oldValue?.view.removeFromSuperview()
@@ -357,4 +358,9 @@ extension KSPlayerLayer {
         }
         return .success
     }
+}
+
+extension KSPlayerManager {
+    public static var firstPlayerType: MediaPlayerProtocol.Type = KSAVPlayer.self
+    public static var secondPlayerType: MediaPlayerProtocol.Type?
 }

@@ -66,19 +66,19 @@ open class PlayerView: UIView, KSPlayerLayerDelegate, KSSliderDelegate {
     }
 
     @objc open func onButtonPressed(_ button: UIButton) {
-        guard var type = PlayerButtonType(rawValue: button.tag) else {  return }
+        guard var type = PlayerButtonType(rawValue: button.tag) else { return }
         if type == .play, button.isSelected {
             type = .pause
         }
         switch type {
-            case .back:
-                backBlock?()
-            case .play, .replay:
-                play()
-            case .pause:
-                pause()
-            default:
-                break
+        case .back:
+            backBlock?()
+        case .play, .replay:
+            play()
+        case .pause:
+            pause()
+        default:
+            break
         }
         delegate?.playerController(action: type)
     }

@@ -21,7 +21,7 @@ final class MEPlayerItem {
     private var closeOperation: BlockOperation?
     private var seekingCompletionHandler: ((Bool) -> Void)?
     // 没有音频数据可以渲染
-    private var isAudioStalled = false
+    private var isAudioStalled = true
     private var videoMediaTime = CACurrentMediaTime()
     private var videoTrack: PlayerItemTrackProtocol?
     private var audioTrack: PlayerItemTrackProtocol? {
@@ -142,7 +142,7 @@ extension MEPlayerItem {
             options.isMultiRate = true
         }
         duration = TimeInterval(max(formatCtx.pointee.duration, 0) / Int64(AV_TIME_BASE))
-        createCodec(formatCtx: formatCtx.pointee)
+        createCodec(formatCtx: formatCtx)
         if assetTracks.first == nil {
             state = .failed
         } else {
@@ -150,41 +150,49 @@ extension MEPlayerItem {
         }
     }
 
-    private func createCodec(formatCtx: AVFormatContext) {
+    private func createCodec(formatCtx: UnsafeMutablePointer<AVFormatContext>) {
         assetTracks.removeAll()
-        assetTracks = (0 ..< Int(formatCtx.nb_streams)).compactMap { i in
-            if let coreStream = formatCtx.streams[i] {
+        assetTracks = (0 ..< Int(formatCtx.pointee.nb_streams)).compactMap { i in
+            if let coreStream = formatCtx.pointee.streams[i] {
+                coreStream.pointee.discard = AVDISCARD_ALL
                 return AssetTrack(stream: coreStream)
+            } else {
+                return nil
             }
-            return nil
         }
-        let videos = assetTracks.filter { $0.mediaType == .video }
-        if let first = videos.first {
-            rotation = first.stream.rotation
-            let codecpar = first.stream.pointee.codecpar.pointee
-            naturalSize = CGSize(width: Int(codecpar.width), height: Int(codecpar.height))
-            let track = AsyncPlayerItemTrack(assetTrack: first, options: options)
-            videoAudioTracks.append(track)
-            track.delegate = self
-            videoTrack = track
-        }
-        let audios = assetTracks.filter { $0.mediaType == .audio }
-        if let first = audios.first {
-            let track = AsyncPlayerItemTrack(assetTrack: first, options: options)
-            track.delegate = self
-            videoAudioTracks.append(track)
-            audioTrack = track
-            if videos.count == 1 {
-                audios.filter { $0.streamIndex != first.streamIndex }.forEach { $0.isEnabled = false }
+        var videoIndex: Int32 = -1
+        if !options.videoDisable {
+            videoIndex = av_find_best_stream(formatCtx, AVMEDIA_TYPE_VIDEO, -1, -1, nil, 0)
+            if let first = assetTracks.first(where: { $0.mediaType == .video && $0.streamIndex == videoIndex }) {
+                first.stream.pointee.discard = AVDISCARD_DEFAULT
+                rotation = first.stream.rotation
+                let codecpar = first.stream.pointee.codecpar.pointee
+                naturalSize = CGSize(width: Int(codecpar.width), height: Int(codecpar.height))
+                let track = AsyncPlayerItemTrack(assetTrack: first, options: options)
+                videoAudioTracks.append(track)
+                track.delegate = self
+                videoTrack = track
             }
-        } else {
-            isAudioStalled = true
         }
-        subtitleTracks = assetTracks.filter { $0.mediaType == .subtitle }.map {
-            SubtitlePlayerItemTrack(assetTrack: $0, options: options)
+        if !options.audioDisable {
+            let index = av_find_best_stream(formatCtx, AVMEDIA_TYPE_AUDIO, -1, videoIndex, nil, 0)
+            if let first = assetTracks.first(where: { $0.mediaType == .audio && $0.streamIndex == index }) {
+                first.stream.pointee.discard = AVDISCARD_DEFAULT
+                let track = AsyncPlayerItemTrack(assetTrack: first, options: options)
+                track.delegate = self
+                videoAudioTracks.append(track)
+                audioTrack = track
+                isAudioStalled = false
+            }
+        }
+        if !options.subtitleDisable {
+            subtitleTracks = assetTracks.filter { $0.mediaType == .subtitle }.map {
+                $0.stream.pointee.discard = AVDISCARD_DEFAULT
+                return SubtitlePlayerItemTrack(assetTrack: $0, options: options)
+            }
+            allTracks.append(contentsOf: subtitleTracks)
         }
         allTracks.append(contentsOf: videoAudioTracks)
-        allTracks.append(contentsOf: subtitleTracks)
     }
 
     private func read() {
