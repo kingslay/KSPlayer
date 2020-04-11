@@ -12,7 +12,9 @@ protocol TrackProtocol: AnyObject, CustomStringConvertible {
     var mediaType: AVFoundation.AVMediaType { get }
     var timebase: Timebase { get }
     var fps: Int { get }
-    var isEnabled: Bool { get set }
+    var rotation: Double { get }
+    var bitRate: Int64 { get }
+    var naturalSize: CGSize { get }
 }
 
 extension TrackProtocol {
@@ -40,9 +42,12 @@ class AssetTrack: TrackProtocol, CustomStringConvertible {
     let mediaType: AVFoundation.AVMediaType
     let timebase: Timebase
     let fps: Int
-    var isEnabled = true
+    let bitRate: Int64
+    let rotation: Double
+    let naturalSize: CGSize
     init?(stream: UnsafeMutablePointer<AVStream>) {
         self.stream = stream
+        bitRate = stream.pointee.codecpar.pointee.bit_rate
         if stream.pointee.codecpar.pointee.codec_type == AVMEDIA_TYPE_AUDIO {
             mediaType = .audio
         } else if stream.pointee.codecpar.pointee.codec_type == AVMEDIA_TYPE_VIDEO {
@@ -57,12 +62,16 @@ class AssetTrack: TrackProtocol, CustomStringConvertible {
             timebase = Timebase(num: 1, den: mediaType == .audio ? KSPlayerManager.audioPlayerSampleRate : 25000)
         }
         self.timebase = timebase
-        var fps = mediaType == .audio ? 44 : 24
+        rotation = stream.rotation
+        naturalSize = CGSize(width: Int(stream.pointee.codecpar.pointee.width), height: Int(stream.pointee.codecpar.pointee.height))
+        let frameRate = av_guess_frame_rate(nil, stream, nil)
         if stream.pointee.duration > 0, stream.pointee.nb_frames > 0, stream.pointee.nb_frames != stream.pointee.duration {
-            let count = Int(stream.pointee.nb_frames * Int64(timebase.den) / (stream.pointee.duration * Int64(timebase.num)))
-            fps = max(count, fps)
+            fps = Int(stream.pointee.nb_frames * Int64(timebase.den) / (stream.pointee.duration * Int64(timebase.num)))
+        } else if frameRate.den > 0, frameRate.num > 0 {
+            fps = Int(frameRate.num / frameRate.den)
+        } else {
+            fps = mediaType == .audio ? 44 : 24
         }
-        self.fps = fps
     }
 }
 
