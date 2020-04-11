@@ -136,9 +136,11 @@ public class KSOptions {
     public var audioDisable = false
     public var subtitleDisable = false
     public var asynchronousDecompression = false
+    public var videoAdaptable = true
     public var avOptions = [String: Any]()
     public var formatContextOptions = [String: Any]()
     public var decoderOptions = [String: Any]()
+    public internal(set) var formatName = ""
     var isMultiRate: Bool = false
     public init() {
         formatContextOptions["analyzeduration"] = 2_000_000

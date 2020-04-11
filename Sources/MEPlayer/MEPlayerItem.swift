@@ -137,10 +137,7 @@ extension MEPlayerItem {
             avformat_close_input(&self.formatCtx)
             return
         }
-        let format = String(cString: formatCtx.pointee.iformat.pointee.name)
-        if format.starts(with: "hls") || format.starts(with: "dash") {
-            options.isMultiRate = true
-        }
+        options.formatName = String(cString: formatCtx.pointee.iformat.pointee.name)
         duration = TimeInterval(max(formatCtx.pointee.duration, 0) / Int64(AV_TIME_BASE))
         createCodec(formatCtx: formatCtx)
         if assetTracks.first == nil {
@@ -165,14 +162,14 @@ extension MEPlayerItem {
             videoIndex = av_find_best_stream(formatCtx, AVMEDIA_TYPE_VIDEO, -1, -1, nil, 0)
             if let first = assetTracks.first(where: { $0.mediaType == .video && $0.streamIndex == videoIndex }) {
                 first.stream.pointee.discard = AVDISCARD_DEFAULT
-                rotation = first.stream.rotation
-                let codecpar = first.stream.pointee.codecpar.pointee
-                naturalSize = CGSize(width: Int(codecpar.width), height: Int(codecpar.height))
+                rotation = first.rotation
+                naturalSize = first.naturalSize
                 let track = AsyncPlayerItemTrack(assetTrack: first, options: options)
                 videoAudioTracks.append(track)
                 track.delegate = self
                 videoTrack = track
             }
+            options.isMultiRate = assetTracks.filter { $0.mediaType == .video }.count > 1
         }
         if !options.audioDisable {
             let index = av_find_best_stream(formatCtx, AVMEDIA_TYPE_AUDIO, -1, videoIndex, nil, 0)
@@ -237,7 +234,7 @@ extension MEPlayerItem {
                         continue
                     }
                     packet.fill()
-                    let first = assetTracks.first { $0.isEnabled && $0.stream.pointee.index == packet.corePacket.pointee.stream_index }
+                    let first = assetTracks.first { $0.stream.pointee.index == packet.corePacket.pointee.stream_index }
                     if let first = first, first.stream.pointee.discard != AVDISCARD_ALL {
                         packet.assetTrack = first
                         if first.mediaType == .video {
@@ -363,7 +360,7 @@ extension MEPlayerItem: MediaPlayback {
             state = .seeking
             read()
         }
-        isAudioStalled = assetTracks.first { $0.mediaType == .audio && $0.isEnabled } == nil
+        isAudioStalled = audioTrack == nil
     }
 }
 
@@ -391,7 +388,7 @@ extension MEPlayerItem: CodecCapacityDelegate {
         let allSatisfy = videoAudioTracks.allSatisfy { $0.isFinished && $0.loadedCount == 0 }
         delegate?.sourceDidFinished(type: track.mediaType, allSatisfy: allSatisfy)
         if allSatisfy, options.isLoopPlay {
-            isAudioStalled = false
+            isAudioStalled = audioTrack == nil
             audioTrack?.isLoopModel = false
             videoTrack?.isLoopModel = false
             if state == .finished {
