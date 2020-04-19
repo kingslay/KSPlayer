@@ -82,14 +82,26 @@ public enum DisplayEnum {
 }
 
 // 加载情况
-public struct LoadingStatus {
-    let fps: Int
-    let packetCount: Int
-    let frameCount: Int
-    let frameMaxCount: Int
-    let isFirst: Bool
-    let isSeek: Bool
-    let mediaType: AVFoundation.AVMediaType
+public struct LoadingState {
+    public let fps: Int
+    public let packetCount: Int
+    public let frameCount: Int
+    public let frameMaxCount: Int
+    public let isFirst: Bool
+    public let isSeek: Bool
+    public let mediaType: AVFoundation.AVMediaType
+}
+
+public struct VideoAdaptationState {
+    public struct BitRateState {
+        let bitRate: Int64
+        let time: TimeInterval
+    }
+
+    public let bitRates: [Int64]
+    public var fps: Int
+    public internal(set) var bitRateStates: [BitRateState]
+    public internal(set) var loadedCount: Int = 0
 }
 
 public class KSOptions {
@@ -141,7 +153,6 @@ public class KSOptions {
     public var formatContextOptions = [String: Any]()
     public var decoderOptions = [String: Any]()
     public internal(set) var formatName = ""
-    var isMultiRate: Bool = false
     public init() {
         formatContextOptions["analyzeduration"] = 2_000_000
         formatContextOptions["probesize"] = 2_000_000
@@ -170,17 +181,34 @@ public class KSOptions {
     }
 
     // 视频缓冲算法函数
-    open func playable(status: LoadingStatus) -> Bool {
-        guard status.frameCount > 0 else { return false }
+    open func playable(state: LoadingState) -> Bool {
+        guard state.frameCount > 0 else { return false }
         // 让音频能更快的打开
-        if status.mediaType == .audio || isSecondOpen, status.isFirst || status.isSeek, status.frameCount == status.frameMaxCount {
-            if status.isFirst {
+        if state.mediaType == .audio || isSecondOpen, state.isFirst || state.isSeek, state.frameCount == state.frameMaxCount {
+            if state.isFirst {
                 return true
-            } else if status.isSeek {
-                return status.packetCount >= status.fps
+            } else if state.isSeek {
+                return state.packetCount >= state.fps
             }
         }
-        return status.packetCount > status.fps * Int(preferredForwardBufferDuration)
+        return state.packetCount > state.fps * Int(preferredForwardBufferDuration)
+    }
+
+    open func adaptable(state: VideoAdaptationState) -> (Int64, Int64)? {
+        guard let last = state.bitRateStates.last, CACurrentMediaTime() - last.time > maxBufferDuration / 2, let index = state.bitRates.firstIndex(of: last.bitRate) else {
+            return nil
+        }
+        let isUp = state.loadedCount > (state.fps * Int(maxBufferDuration)) / 2
+        if isUp {
+            if index < state.bitRates.endIndex - 1 {
+                return (last.bitRate, state.bitRates[index + 1])
+            }
+        } else {
+            if index > state.bitRates.startIndex {
+                return (last.bitRate, state.bitRates[index - 1])
+            }
+        }
+        return nil
     }
 }
 
