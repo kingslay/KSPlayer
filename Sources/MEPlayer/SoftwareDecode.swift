@@ -5,11 +5,13 @@
 //  Created by kintan on 2018/3/9.
 //
 
+import AVFoundation
 import ffmpeg
 import Foundation
 
 class SoftwareDecode: DecodeProtocol {
-    private let assetTrack: TrackProtocol
+    private let mediaType: AVFoundation.AVMediaType
+    private let timebase: Timebase
     private let options: KSOptions
     // 第一次seek不要调用avcodec_flush_buffers。否则seek完之后可能会因为不是关键帧而导致蓝屏
     private var firstSeek = true
@@ -18,11 +20,12 @@ class SoftwareDecode: DecodeProtocol {
     private var bestEffortTimestamp = Int64(0)
     private let swresample: Swresample
     required init(assetTrack: TrackProtocol, options: KSOptions) {
-        self.assetTrack = assetTrack
+        timebase = assetTrack.timebase
+        mediaType = assetTrack.mediaType
         self.options = options
         codecContext = assetTrack.stream.pointee.codecpar.ceateContext(options: options)
-        codecContext?.pointee.time_base = assetTrack.timebase.rational
-        if assetTrack.mediaType == .video {
+        codecContext?.pointee.time_base = timebase.rational
+        if mediaType == .video {
             swresample = VideoSwresample(dstFormat: options.bufferPixelFormatType.format)
         } else {
             swresample = AudioSwresample()
@@ -46,7 +49,7 @@ class SoftwareDecode: DecodeProtocol {
                     if timestamp >= bestEffortTimestamp {
                         bestEffortTimestamp = timestamp
                     }
-                    let frame = swresample.transfer(avframe: avframe, timebase: assetTrack.timebase)
+                    let frame = swresample.transfer(avframe: avframe, timebase: timebase)
                     if frame.position < 0 {
                         frame.position = bestEffortTimestamp
                     }
@@ -62,7 +65,7 @@ class SoftwareDecode: DecodeProtocol {
                     }
                     break
                 } else {
-                    let error = NSError(result: code, errorCode: assetTrack.mediaType == .audio ? .codecAudioReceiveFrame : .codecVideoReceiveFrame)
+                    let error = NSError(result: code, errorCode: mediaType == .audio ? .codecAudioReceiveFrame : .codecVideoReceiveFrame)
                     KSLog(error)
                     throw error
                 }
@@ -104,8 +107,7 @@ extension UnsafeMutablePointer where Pointee == AVCodecParameters {
         guard let codecContext = codecContextOption else {
             return nil
         }
-        var result = avcodec_parameters_to_context(codecContext, self)
-        guard result == 0 else {
+        guard avcodec_parameters_to_context(codecContext, self) == 0 else {
             avcodec_free_context(&codecContextOption)
             return nil
         }
@@ -153,8 +155,7 @@ extension UnsafeMutablePointer where Pointee == AVCodecParameters {
         }
         codecContext.pointee.codec_id = codec.pointee.id
         var avOptions = options.decoderOptions.avOptions
-        result = avcodec_open2(codecContext, codec, &avOptions)
-        guard result == 0 else {
+        guard avcodec_open2(codecContext, codec, &avOptions) == 0 else {
             avcodec_free_context(&codecContextOption)
             return nil
         }

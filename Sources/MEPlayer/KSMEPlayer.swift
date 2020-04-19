@@ -180,6 +180,10 @@ extension KSMEPlayer: MEPlayerDelegate {
             }
         }
     }
+
+    func sourceDidChange(oldBitRate: Int64, newBitrate: Int64) {
+        KSLog("oldBitRate \(oldBitRate) change to newBitrate \(newBitrate)")
+    }
 }
 
 extension KSMEPlayer: MediaPlayerProtocol {

@@ -40,18 +40,21 @@ extension KSOptions {
 
 class HardwareDecode: DecodeProtocol {
     private var session: DecompressionSession?
+    private let codecpar: AVCodecParameters
+    private let timebase: Timebase
     // 刷新Session的话，后续的解码还是会失败，直到遇到I帧
     private var refreshSession = false
-    private let assetTrack: TrackProtocol
     private let options: KSOptions
     required init(assetTrack: TrackProtocol, options: KSOptions) {
-        self.assetTrack = assetTrack
+        timebase = assetTrack.timebase
+        codecpar = assetTrack.stream.pointee.codecpar.pointee
         self.options = options
-        session = DecompressionSession(codecpar: assetTrack.stream.pointee.codecpar.pointee, options: options)
+        session = DecompressionSession(codecpar: codecpar, options: options)
     }
 
     init(assetTrack: TrackProtocol, options: KSOptions, session: DecompressionSession) {
-        self.assetTrack = assetTrack
+        timebase = assetTrack.timebase
+        codecpar = assetTrack.stream.pointee.codecpar.pointee
         self.options = options
         self.session = session
     }
@@ -67,14 +70,17 @@ class HardwareDecode: DecodeProtocol {
         var result = [VideoVTBFrame]()
         var error: NSError?
         let flags = options.asynchronousDecompression ? VTDecodeFrameFlags._EnableAsynchronousDecompression : VTDecodeFrameFlags(rawValue: 0)
-        let status = VTDecompressionSessionDecodeFrame(session.decompressionSession, sampleBuffer: sampleBuffer, flags: flags, infoFlagsOut: nil) { status, _, imageBuffer, _, _ in
+        let status = VTDecompressionSessionDecodeFrame(session.decompressionSession, sampleBuffer: sampleBuffer, flags: flags, infoFlagsOut: nil) { [weak self] status, _, imageBuffer, _, _ in
+            guard let self = self else {
+                return
+            }
             if status == noErr {
                 guard let imageBuffer = imageBuffer else {
                     return
                 }
                 let frame = VideoVTBFrame()
                 frame.corePixelBuffer = imageBuffer
-                frame.timebase = self.assetTrack.timebase
+                frame.timebase = self.timebase
                 frame.position = packet.pointee.pts
                 if frame.position == Int64.min || frame.position < 0 {
                     frame.position = max(packet.pointee.dts, 0)
@@ -103,7 +109,7 @@ class HardwareDecode: DecodeProtocol {
     }
 
     func doFlushCodec() {
-        session = DecompressionSession(codecpar: assetTrack.stream.pointee.codecpar.pointee, options: options)
+        session = DecompressionSession(codecpar: codecpar, options: options)
     }
 
     func shutdown() {

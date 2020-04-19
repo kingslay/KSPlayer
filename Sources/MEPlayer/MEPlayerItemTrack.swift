@@ -47,7 +47,11 @@ class AssetTrack: TrackProtocol, CustomStringConvertible {
     let naturalSize: CGSize
     init?(stream: UnsafeMutablePointer<AVStream>) {
         self.stream = stream
-        bitRate = stream.pointee.codecpar.pointee.bit_rate
+        if let bitrateEntry = av_dict_get(stream.pointee.metadata, "variant_bitrate", nil, 0), let bitRate = Int64(String(cString: bitrateEntry.pointee.value)) {
+            self.bitRate = bitRate
+        } else {
+            bitRate = stream.pointee.codecpar.pointee.bit_rate
+        }
         if stream.pointee.codecpar.pointee.codec_type == AVMEDIA_TYPE_AUDIO {
             mediaType = .audio
         } else if stream.pointee.codecpar.pointee.codec_type == AVMEDIA_TYPE_VIDEO {
@@ -190,11 +194,11 @@ final class AsyncPlayerItemTrack: FFPlayerItemTrack<Frame> {
         guard !state.contains(.finished) else {
             return true
         }
-        let status = LoadingStatus(fps: fps, packetCount: packetQueue.count,
-                                   frameCount: outputRenderQueue.count,
-                                   frameMaxCount: outputRenderQueue.maxCount,
-                                   isFirst: isFirst, isSeek: isSeek, mediaType: mediaType)
-        if options.playable(status: status) {
+        let state = LoadingState(fps: fps, packetCount: packetQueue.count,
+                                 frameCount: outputRenderQueue.count,
+                                 frameMaxCount: outputRenderQueue.maxCount,
+                                 isFirst: isFirst, isSeek: isSeek, mediaType: mediaType)
+        if options.playable(state: state) {
             isFirst = false
             isSeek = false
             return true

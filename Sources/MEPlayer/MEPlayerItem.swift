@@ -33,6 +33,7 @@ final class MEPlayerItem {
     private var allTracks = [PlayerItemTrackProtocol]()
     private var videoAudioTracks = [PlayerItemTrackProtocol]()
     private var assetTracks = [TrackProtocol]()
+    private var videoAdaptation: VideoAdaptationState?
     private(set) var subtitleTracks = [SubtitlePlayerItemTrack]()
     private(set) var currentPlaybackTime = TimeInterval(0)
     private(set) var rotation = 0.0
@@ -140,7 +141,7 @@ extension MEPlayerItem {
         options.formatName = String(cString: formatCtx.pointee.iformat.pointee.name)
         duration = TimeInterval(max(formatCtx.pointee.duration, 0) / Int64(AV_TIME_BASE))
         createCodec(formatCtx: formatCtx)
-        if assetTracks.first == nil {
+        if videoTrack == nil, audioTrack == nil {
             state = .failed
         } else {
             play()
@@ -148,7 +149,11 @@ extension MEPlayerItem {
     }
 
     private func createCodec(formatCtx: UnsafeMutablePointer<AVFormatContext>) {
+        allTracks.removeAll()
         assetTracks.removeAll()
+        videoAdaptation = nil
+        videoTrack = nil
+        audioTrack = nil
         assetTracks = (0 ..< Int(formatCtx.pointee.nb_streams)).compactMap { i in
             if let coreStream = formatCtx.pointee.streams[i] {
                 coreStream.pointee.discard = AVDISCARD_ALL
@@ -160,7 +165,8 @@ extension MEPlayerItem {
         var videoIndex: Int32 = -1
         if !options.videoDisable {
             videoIndex = av_find_best_stream(formatCtx, AVMEDIA_TYPE_VIDEO, -1, -1, nil, 0)
-            if let first = assetTracks.first(where: { $0.mediaType == .video && $0.streamIndex == videoIndex }) {
+            let videos = assetTracks.filter { $0.mediaType == .video }
+            if let first = videos.first(where: { $0.streamIndex == videoIndex }) {
                 first.stream.pointee.discard = AVDISCARD_DEFAULT
                 rotation = first.rotation
                 naturalSize = first.naturalSize
@@ -168,8 +174,12 @@ extension MEPlayerItem {
                 videoAudioTracks.append(track)
                 track.delegate = self
                 videoTrack = track
+                if videos.count > 1, options.videoAdaptable {
+                    let bitRates = videos.map { $0.bitRate }.sorted(by: <)
+                    let bitRateState = VideoAdaptationState.BitRateState(bitRate: first.bitRate, time: CACurrentMediaTime())
+                    videoAdaptation = VideoAdaptationState(bitRates: bitRates, fps: first.fps, bitRateStates: [bitRateState])
+                }
             }
-            options.isMultiRate = assetTracks.filter { $0.mediaType == .video }.count > 1
         }
         if !options.audioDisable {
             let index = av_find_best_stream(formatCtx, AVMEDIA_TYPE_AUDIO, -1, videoIndex, nil, 0)
@@ -365,18 +375,24 @@ extension MEPlayerItem: MediaPlayback {
 }
 
 extension MEPlayerItem: CodecCapacityDelegate {
-    func codecDidChangeCapacity(track _: PlayerItemTrackProtocol) {
+    func codecDidChangeCapacity(track: PlayerItemTrackProtocol) {
         semaphore.wait()
         let mix = MixCapacity(array: videoAudioTracks)
         delegate?.sourceDidChange(capacity: mix)
         if mix.isPlayable {
             if mix.loadedTime > options.maxBufferDuration {
                 pause()
+                if track.mediaType == .video {
+                    adaptable(track: track)
+                }
             } else if mix.loadedTime < options.maxBufferDuration / 2 {
                 resume()
             }
         } else {
             resume()
+            if track.mediaType == .video {
+                adaptable(track: track)
+            }
         }
         semaphore.signal()
     }
@@ -396,6 +412,21 @@ extension MEPlayerItem: CodecCapacityDelegate {
                 read()
             }
         }
+    }
+
+    private func adaptable(track: PlayerItemTrackProtocol) {
+        guard var videoAdaptation = videoAdaptation else {
+            return
+        }
+        videoAdaptation.loadedCount = track.loadedCount
+        guard let (oldBitRate, newBitrate) = options.adaptable(state: videoAdaptation) else {
+            return
+        }
+        assetTracks.first { $0.mediaType == .video && $0.bitRate == oldBitRate }?.stream.pointee.discard = AVDISCARD_ALL
+        assetTracks.first { $0.mediaType == .video && $0.bitRate == newBitrate }?.stream.pointee.discard = AVDISCARD_DEFAULT
+        let bitRateState = VideoAdaptationState.BitRateState(bitRate: newBitrate, time: CACurrentMediaTime())
+        self.videoAdaptation?.bitRateStates.append(bitRateState)
+        delegate?.sourceDidChange(oldBitRate: oldBitRate, newBitrate: newBitrate)
     }
 }
 

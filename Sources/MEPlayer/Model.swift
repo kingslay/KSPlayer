@@ -97,6 +97,7 @@ protocol MEPlayerDelegate: AnyObject {
     func sourceDidOpened()
     func sourceDidFailed(error: NSError?)
     func sourceDidFinished(type: AVFoundation.AVMediaType, allSatisfy: Bool)
+    func sourceDidChange(oldBitRate: Int64, newBitrate: Int64)
 }
 
 // MARK: protocol
