@@ -79,7 +79,7 @@ class MasterViewController: UIViewController, UITableViewDelegate, UITableViewDa
         if let url = URL(string: "http://dash.edgesuite.net/akamai/bbb_30fps/bbb_30fps.mpd") {
             objects.append(KSPlayerResource(url: url, options: KSOptions(), name: "dash视频"))
         }
-        if let url = URL(string: "https://bitlivedemo-a.akamaihd.net/m3u8s/bitcodin.m3u8") {
+        if let url = URL(string: "https://devstreaming-cdn.apple.com/videos/wwdc/2019/244gmopitz5ezs2kkq/244/hls_vod_mvp.m3u8") {
             let options = KSOptions()
             options.formatContextOptions["timeout"] = 0
             objects.append(KSPlayerResource(url: url, options: options, name: "https视频"))
