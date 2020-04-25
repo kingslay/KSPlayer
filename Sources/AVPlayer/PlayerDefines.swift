@@ -60,11 +60,11 @@ public protocol MediaPlayerDelegate: AnyObject {
 extension MediaPlayerProtocol {
     func setAudioSession(isMuted: Bool = false) {
         #if os(macOS)
-//        try? AVAudioSession.sharedInstance().setRouteSharingPolicy(.longForm)
+//        try? AVAudioSession.sharedInstance().setRouteSharingPolicy(.longFormAudio)
         #else
         let category: AVAudioSession.Category = isMuted ? .ambient : .playback
         if #available(iOS 11.0, tvOS 11.0, *) {
-            try? AVAudioSession.sharedInstance().setCategory(category, mode: .default, policy: .longForm)
+            try? AVAudioSession.sharedInstance().setCategory(category, mode: .default, policy: .longFormAudio)
         } else {
             try? AVAudioSession.sharedInstance().setCategory(category, mode: .default)
         }
