@@ -43,14 +43,14 @@ open class IOSVideoPlayerView: VideoPlayerView {
 
     open override func customizeUIComponents() {
         super.customizeUIComponents()
-        if UI_USER_INTERFACE_IDIOM() == .phone {
+        if UIDevice.current.userInterfaceIdiom == .phone {
             subtitleLabel.font = .systemFont(ofSize: 14)
         }
         srtControl.$srtListCount.observer = { [weak self] _, count in
             guard let self = self, count > 0 else {
                 return
             }
-            if UIApplication.shared.statusBarOrientation.isLandscape || UIDevice.current.userInterfaceIdiom == .pad {
+            if UIApplication.isLandscape || UIDevice.current.userInterfaceIdiom == .pad {
                 self.toolBar.srtButton.isHidden = false
             }
         }
@@ -137,12 +137,12 @@ open class IOSVideoPlayerView: VideoPlayerView {
                 isMaskShow = !button.isSelected
                 button.alpha = 1.0
             } else if type == .landscape {
-                updateUI(isLandscape: !UIApplication.shared.statusBarOrientation.isLandscape)
+                updateUI(isLandscape: !UIApplication.isLandscape)
             } else if type == .rate {
                 changePlaybackRate(button: button)
             } else if type == .definition {
                 guard let resource = resource, resource.definitions.count > 1 else { return }
-                let alertController = UIAlertController(title: "选择画质", message: nil, preferredStyle: UI_USER_INTERFACE_IDIOM() == .phone ? .actionSheet : .alert)
+                let alertController = UIAlertController(title: "选择画质", message: nil, preferredStyle: UIDevice.current.userInterfaceIdiom == .phone ? .actionSheet : .alert)
                 for (index, definition) in resource.definitions.enumerated() {
                     let action = UIAlertAction(title: definition.definition, style: .default) { [weak self] _ in
                         guard let self = self, index != self.currentDefinition else { return }
@@ -183,7 +183,7 @@ open class IOSVideoPlayerView: VideoPlayerView {
         } else {
             landscapeButton.isHidden = true
         }
-        if UIApplication.shared.statusBarOrientation.isLandscape != isLandscape {
+        if UIApplication.isLandscape != isLandscape {
             UIDevice.current.setValue(UIDevice.current.orientation.rawValue, forKey: "orientation")
             UIDevice.current.setValue((isLandscape ? UIInterfaceOrientation.landscapeRight : UIInterfaceOrientation.portrait).rawValue, forKey: "orientation")
         }
@@ -217,7 +217,7 @@ open class IOSVideoPlayerView: VideoPlayerView {
     }
 
     open func changePlaybackRate(button: UIButton) {
-        let alertController = UIAlertController(title: "选择倍速", message: nil, preferredStyle: UI_USER_INTERFACE_IDIOM() == .phone ? .actionSheet : .alert)
+        let alertController = UIAlertController(title: "选择倍速", message: nil, preferredStyle: UIDevice.current.userInterfaceIdiom == .phone ? .actionSheet : .alert)
         [0.75, 1.0, 1.25, 1.5, 2.0].forEach { rate in
             let title = "\(rate)X"
             let action = UIAlertAction(title: title, style: .default) { [weak self] _ in
@@ -325,7 +325,7 @@ extension IOSVideoPlayerView {
     }
 
     @objc private func orientationChanged() {
-        updateUI(isLandscape: UIApplication.shared.statusBarOrientation.isLandscape)
+        updateUI(isLandscape: UIApplication.isLandscape)
     }
 
     @objc private func onTapGestureTapped(_: UITapGestureRecognizer) {
@@ -413,7 +413,7 @@ extension IOSVideoPlayerView {
     }
 
     private func judgePanGesture() {
-        if UIApplication.shared.statusBarOrientation.isLandscape {
+        if UIApplication.isLandscape || UIDevice.current.userInterfaceIdiom == .pad {
             panGesture.isEnabled = isPlayed && !replayButton.isSelected
         } else {
             if KSPlayerManager.enablePortraitGestures {
@@ -457,5 +457,15 @@ public class AirplayStatusView: UIView {
 
     required init?(coder _: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+}
+
+extension UIApplication {
+    static var isLandscape: Bool {
+        if #available(iOS 13.0, *) {
+            return UIApplication.shared.windows.first?.windowScene?.interfaceOrientation.isLandscape ?? false
+        } else {
+            return UIApplication.shared.statusBarOrientation.isLandscape
+        }
     }
 }
