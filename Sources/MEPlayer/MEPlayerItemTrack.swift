@@ -26,18 +26,7 @@ func == (lhs: TrackProtocol, rhs: TrackProtocol) -> Bool {
 }
 
 class AssetTrack: TrackProtocol, CustomStringConvertible {
-    var description: String {
-        if let entry = av_dict_get(stream.pointee.metadata, "title", nil, 0), let title = entry.pointee.value {
-            return String(cString: title)
-        } else {
-            if mediaType == .subtitle {
-                return NSLocalizedString("内置字幕", comment: "")
-            } else {
-                return mediaType.rawValue
-            }
-        }
-    }
-
+    let description: String
     let stream: UnsafeMutablePointer<AVStream>
     let mediaType: AVFoundation.AVMediaType
     let timebase: Timebase
@@ -75,6 +64,19 @@ class AssetTrack: TrackProtocol, CustomStringConvertible {
             fps = Int(frameRate.num / frameRate.den)
         } else {
             fps = mediaType == .audio ? 44 : 24
+        }
+        if let entry = av_dict_get(stream.pointee.metadata, "title", nil, 0), let title = entry.pointee.value {
+            description = String(cString: title)
+        } else {
+            if mediaType == .subtitle {
+                if let entry = av_dict_get(stream.pointee.metadata, "language", nil, 0), let title = entry.pointee.value {
+                    description = String(cString: title)
+                } else {
+                    description = NSLocalizedString("内置字幕", comment: "")
+                }
+            } else {
+                description = mediaType.rawValue
+            }
         }
     }
 }
