@@ -45,8 +45,6 @@ function InnerBuild() {
         LDFLAGS="$LDFLAGS -L$OPENSSLPath/lib"
     fi
     
-    CFLAGS="$CFLAGS -I$SYSLIBROOT/usr/include/libxml2"
-
     TMPDIR=${TMPDIR/%\//} $current_dir/$SOURCE/configure \
         --target-os=darwin \
         --arch=$arch \

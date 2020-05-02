@@ -11,7 +11,6 @@ OPENSSL=$(pwd)/OpenSSL
 
 #####  Add End  #####
 SOURCE="ffmpeg-$FF_VERSION"
-XCODE_PATH=$(xcode-select -p)
 
 CONFIGURE_FLAGS="--enable-optimizations"
 # Licensing options:
