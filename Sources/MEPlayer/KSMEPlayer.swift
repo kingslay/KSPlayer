@@ -304,11 +304,18 @@ extension KSMEPlayer: MediaPlayerProtocol {
     public var isMuted: Bool {
         set {
             audioOutput.audioPlayer.isMuted = newValue
-            setAudioSession(isMuted: newValue)
         }
         get {
             audioOutput.audioPlayer.isMuted
         }
+    }
+
+    public func tracks(mediaType: AVFoundation.AVMediaType) -> [MediaPlayerTrack] {
+        playerItem.assetTracks.filter { $0.mediaType == mediaType }
+    }
+
+    public func select(track: MediaPlayerTrack) {
+        playerItem.select(track: track)
     }
 }
 

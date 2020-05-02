@@ -32,7 +32,7 @@ final class MEPlayerItem {
 
     private var allTracks = [PlayerItemTrackProtocol]()
     private var videoAudioTracks = [PlayerItemTrackProtocol]()
-    private var assetTracks = [TrackProtocol]()
+    private(set) var assetTracks = [TrackProtocol]()
     private var videoAdaptation: VideoAdaptationState?
     private(set) var subtitleTracks = [SubtitlePlayerItemTrack]()
     private(set) var currentPlaybackTime = TimeInterval(0)
@@ -88,6 +88,13 @@ final class MEPlayerItem {
         if !operationQueue.operations.isEmpty {
             shutdown()
             operationQueue.waitUntilAllOperationsAreFinished()
+        }
+    }
+
+    func select(track: MediaPlayerTrack) {
+        if let track = track as? TrackProtocol {
+            assetTracks.filter { $0.mediaType == track.mediaType }.forEach { $0.stream.pointee.discard = AVDISCARD_ALL }
+            track.stream.pointee.discard = AVDISCARD_DEFAULT
         }
     }
 }
@@ -245,7 +252,7 @@ extension MEPlayerItem {
                     }
                     packet.fill()
                     let first = assetTracks.first { $0.stream.pointee.index == packet.corePacket.pointee.stream_index }
-                    if let first = first, first.stream.pointee.discard != AVDISCARD_ALL {
+                    if let first = first, first.isEnabled {
                         packet.assetTrack = first
                         if first.mediaType == .video {
                             videoTrack?.putPacket(packet: packet)

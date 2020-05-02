@@ -46,6 +46,8 @@ public protocol MediaPlayerProtocol: MediaPlayback {
     func enterBackground()
     func enterForeground()
     func thumbnailImageAtCurrentTime(handler: @escaping (UIImage?) -> Void)
+    func tracks(mediaType: AVFoundation.AVMediaType) -> [MediaPlayerTrack]
+    func select(track: MediaPlayerTrack)
 }
 
 public protocol MediaPlayerDelegate: AnyObject {
@@ -57,16 +59,24 @@ public protocol MediaPlayerDelegate: AnyObject {
     func finish(player: MediaPlayerProtocol, error: Error?)
 }
 
+public protocol MediaPlayerTrack {
+    var name: String { get }
+    var language: String? { get }
+}
+
 extension MediaPlayerProtocol {
-    func setAudioSession(isMuted: Bool = false) {
+    func setAudioSession() {
         #if os(macOS)
 //        try? AVAudioSession.sharedInstance().setRouteSharingPolicy(.longFormAudio)
         #else
-        let category: AVAudioSession.Category = isMuted ? .ambient : .playback
+        let category = AVAudioSession.sharedInstance().category
+        if category == .playback || category == .playAndRecord {
+            return
+        }
         if #available(iOS 11.0, tvOS 11.0, *) {
-            try? AVAudioSession.sharedInstance().setCategory(category, mode: .default, policy: .longFormAudio)
+            try? AVAudioSession.sharedInstance().setCategory(.playback, mode: .default, policy: .longFormAudio)
         } else {
-            try? AVAudioSession.sharedInstance().setCategory(category, mode: .default)
+            try? AVAudioSession.sharedInstance().setCategory(.playback, mode: .default)
         }
         try? AVAudioSession.sharedInstance().setActive(true)
         #endif
