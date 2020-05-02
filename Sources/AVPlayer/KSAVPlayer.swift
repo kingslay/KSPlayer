@@ -445,10 +445,50 @@ extension KSAVPlayer: MediaPlayerProtocol {
     public var isMuted: Bool {
         set {
             player.isMuted = newValue
-            setAudioSession(isMuted: newValue)
         }
         get {
             player.isMuted
         }
+    }
+
+    public func tracks(mediaType: AVMediaType) -> [MediaPlayerTrack] {
+        guard let group = player.currentItem?.asset.mediaSelectionGroup(forMediaCharacteristic: mediaType.mediaCharacteristic) else {
+            return []
+        }
+        return group.options.map { AVMediaPlayerTrack(option: $0, group: group) }
+    }
+
+    public func select(track: MediaPlayerTrack) {
+        if let track = track as? AVMediaPlayerTrack {
+            player.currentItem?.select(track.option, in: track.group)
+        }
+    }
+}
+
+extension AVMediaType {
+    var mediaCharacteristic: AVMediaCharacteristic {
+        switch self {
+        case .video:
+            return .visual
+        case .audio:
+            return .audible
+        case .subtitle:
+            return .legible
+        default:
+            return .easyToRead
+        }
+    }
+}
+
+struct AVMediaPlayerTrack: MediaPlayerTrack {
+    let option: AVMediaSelectionOption
+    let group: AVMediaSelectionGroup
+    let name: String
+    let language: String?
+    init(option: AVMediaSelectionOption, group: AVMediaSelectionGroup) {
+        self.option = option
+        self.group = group
+        name = option.displayName
+        language = option.extendedLanguageTag
     }
 }

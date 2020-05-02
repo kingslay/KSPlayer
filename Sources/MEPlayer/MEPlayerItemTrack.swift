@@ -7,7 +7,7 @@
 import AVFoundation
 import CoreMedia
 import ffmpeg
-protocol TrackProtocol: AnyObject, CustomStringConvertible {
+protocol TrackProtocol: MediaPlayerTrack, CustomStringConvertible {
     var stream: UnsafeMutablePointer<AVStream> { get }
     var mediaType: AVFoundation.AVMediaType { get }
     var timebase: Timebase { get }
@@ -18,6 +18,14 @@ protocol TrackProtocol: AnyObject, CustomStringConvertible {
 }
 
 extension TrackProtocol {
+    var description: String { name }
+    var isEnabled: Bool {
+        get { stream.pointee.discard == AVDISCARD_DEFAULT }
+        set { stream.pointee.discard = newValue ? AVDISCARD_DEFAULT : AVDISCARD_ALL }
+    }
+}
+
+extension TrackProtocol {
     var streamIndex: Int32 { stream.pointee.index }
 }
 
@@ -25,8 +33,9 @@ func == (lhs: TrackProtocol, rhs: TrackProtocol) -> Bool {
     lhs.streamIndex == rhs.streamIndex
 }
 
-class AssetTrack: TrackProtocol, CustomStringConvertible {
-    let description: String
+struct AssetTrack: TrackProtocol {
+    let name: String
+    let language: String?
     let stream: UnsafeMutablePointer<AVStream>
     let mediaType: AVFoundation.AVMediaType
     let timebase: Timebase
@@ -65,17 +74,18 @@ class AssetTrack: TrackProtocol, CustomStringConvertible {
         } else {
             fps = mediaType == .audio ? 44 : 24
         }
-        if let entry = av_dict_get(stream.pointee.metadata, "title", nil, 0), let title = entry.pointee.value {
-            description = String(cString: title)
+        if let entry = av_dict_get(stream.pointee.metadata, "language", nil, 0), let title = entry.pointee.value {
+            language = String(cString: title)
         } else {
-            if mediaType == .subtitle {
-                if let entry = av_dict_get(stream.pointee.metadata, "language", nil, 0), let title = entry.pointee.value {
-                    description = String(cString: title)
-                } else {
-                    description = NSLocalizedString("内置字幕", comment: "")
-                }
+            language = nil
+        }
+        if let entry = av_dict_get(stream.pointee.metadata, "title", nil, 0), let title = entry.pointee.value {
+            name = String(cString: title)
+        } else {
+            if let language = language {
+                name = language
             } else {
-                description = mediaType.rawValue
+                name = mediaType == .subtitle ? NSLocalizedString("内置字幕", comment: "") : mediaType.rawValue
             }
         }
     }
