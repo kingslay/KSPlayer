@@ -2,7 +2,7 @@ LIBRARY_FILE="$LIBRARY_NAME.a"
 XCFRAMEWORK_FILE="$LIBRARY_NAME.xcframework"
 PLATFORMS="ios tvos macos maccatalyst"
 # PLATFORMS="maccatalyst"
-
+XCODE_PATH=$(xcode-select -p)
 function Architectures() {
     local platform=$1
     case $platform in

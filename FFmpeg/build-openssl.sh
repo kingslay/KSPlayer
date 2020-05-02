@@ -44,11 +44,10 @@ buildMac() {
 	TARGETDIR=$3
 
 	echo "Building ${OPENSSL_VERSION} for ${ARCH}"
-	SDKVERSION=$(xcrun -sdk macosx --show-sdk-version)
 	TARGET="darwin64-x86_64-cc"
-	export CROSS_TOP="${DEVELOPER}/Platforms/MacOSX.platform/Developer"
-	export CROSS_SDK="MacOSX${SDKVERSION}.sdk"
-	export CC="/usr/bin/clang -arch ${ARCH} -fembed-bitcode -mmacosx-version-min=${OSX_DEPLOYMENT_TARGET} -isysroot \$(CROSS_TOP)/SDKs/\$(CROSS_SDK) -fno-common"
+	export CROSS_TOP="${XCODE_PATH}/Platforms/MacOSX.platform/Developer"
+	export CROSS_SDK="MacOSX.sdk"
+	export CC="/usr/bin/clang -arch ${ARCH} -fembed-bitcode -mmacosx-version-min=${OSX_DEPLOYMENT_TARGET} -fno-common"
 	pushd . >/dev/null
 	cd "${OPENSSL_VERSION}"
 	./Configure ${TARGET} --prefix=${TARGETDIR} no-async no-shared --openssldir=${TARGETDIR} &>"${TARGETDIR}.log"
@@ -62,11 +61,10 @@ buildMacCatalyst() {
 	ARCH=$2
 	TARGETDIR=$3
 	echo "Building ${OPENSSL_VERSION} for ${ARCH}"
-	SDKVERSION=$(xcrun -sdk macosx --show-sdk-version)
 	TARGET="darwin64-x86_64-cc"
-	export CROSS_TOP="${DEVELOPER}/Platforms/MacOSX.platform/Developer"
-	export CROSS_SDK="MacOSX${SDKVERSION}.sdk"
-	export CC="/usr/bin/clang -arch ${ARCH} -fembed-bitcode -isysroot \$(CROSS_TOP)/SDKs/\$(CROSS_SDK) -fno-common"
+	export CROSS_TOP="${XCODE_PATH}/Platforms/MacOSX.platform/Developer"
+	export CROSS_SDK="MacOSX.sdk"
+	export CC="/usr/bin/clang -arch ${ARCH} -fembed-bitcode -fno-common"
 	pushd . >/dev/null
 	cd "${OPENSSL_VERSION}"
 	./Configure ${TARGET} --target=x86_64-apple-ios13.0-macabi -mmacosx-version-min=10.15 --prefix=${TARGETDIR} no-async no-shared --openssldir=${TARGETDIR} &>"${TARGETDIR}.log"
@@ -90,11 +88,10 @@ buildIOS() {
 	fi
 
 	export $PLATFORM
-	export CROSS_TOP="${DEVELOPER}/Platforms/${PLATFORM}.platform/Developer"
-	export CROSS_SDK="${PLATFORM}${IOS_SDK_VERSION}.sdk"
-	export BUILD_TOOLS="${DEVELOPER}"
-	export CC="${BUILD_TOOLS}/usr/bin/gcc -fembed-bitcode -arch ${ARCH} -miphoneos-version-min=${IOS_MIN_SDK_VERSION} -isysroot \$(CROSS_TOP)/SDKs/\$(CROSS_SDK)"
-
+	export CROSS_TOP="${XCODE_PATH}/Platforms/${PLATFORM}.platform/Developer"
+	export CROSS_SDK="${PLATFORM}.sdk"
+	export CC="${XCODE_PATH}/usr/bin/gcc -fembed-bitcode -arch ${ARCH} -miphoneos-version-min=${IOS_MIN_SDK_VERSION} -isysroot $CROSS_TOP/SDKs/$CROSS_SDK"
+	
 	echo "Building ${OPENSSL_VERSION} for ${PLATFORM} ${IOS_SDK_VERSION} ${ARCH}"
 	TARGET="iphoneos-cross"
 	if [[ "${ARCH}" == "x86_64" ]]; then
@@ -123,10 +120,9 @@ buildTVOS() {
 	fi
 
 	export $PLATFORM
-	export CROSS_TOP="${DEVELOPER}/Platforms/${PLATFORM}.platform/Developer"
-	export CROSS_SDK="${PLATFORM}${TVOS_SDK_VERSION}.sdk"
-	export BUILD_TOOLS="${DEVELOPER}"
-	export CC="${BUILD_TOOLS}/usr/bin/gcc -fembed-bitcode -arch ${ARCH} -mtvos-version-min=${TVOS_MIN_SDK_VERSION} -isysroot \$(CROSS_TOP)/SDKs/\$(CROSS_SDK)"
+	export CROSS_TOP="${XCODE_PATH}/Platforms/${PLATFORM}.platform/Developer"
+	export CROSS_SDK="$PLATFORM.sdk"
+	export CC="${XCODE_PATH}/usr/bin/gcc -fembed-bitcode -arch ${ARCH} -mtvos-version-min=${TVOS_MIN_SDK_VERSION} -isysroot $CROSS_TOP/SDKs/$CROSS_SDK"
 
 	echo "Building ${OPENSSL_VERSION} for ${PLATFORM} ${TVOS_SDK_VERSION} ${ARCH}"
 

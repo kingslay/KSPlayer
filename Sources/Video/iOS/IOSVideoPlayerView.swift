@@ -5,12 +5,13 @@
 //  Created by kintan on 2018/10/31.
 //
 
-import CoreTelephony
+import CallKit
 import MediaPlayer
 import UIKit
 
 open class IOSVideoPlayerView: VideoPlayerView {
-    private lazy var callCenter = CTCallCenter()
+    private var isPlayingForCall = false
+    private let callCenter = CXCallObserver()
     /// 滑动方向
     private var scrollDirection = KSPanDirection.horizontal
     private var tmpPanValue: Float = 0
@@ -257,6 +258,21 @@ open class IOSVideoPlayerView: VideoPlayerView {
     }
 }
 
+extension IOSVideoPlayerView: CXCallObserverDelegate {
+    public func callObserver(_: CXCallObserver, callChanged call: CXCall) {
+        if call.hasConnected || call.isOutgoing {
+            isPlayingForCall = toolBar.playButton.isSelected
+            if isPlayingForCall {
+                pause()
+            }
+        } else if call.hasEnded {
+            if isPlayingForCall {
+                play()
+            }
+        }
+    }
+}
+
 // MARK: - private functions
 
 extension IOSVideoPlayerView {
@@ -267,25 +283,7 @@ extension IOSVideoPlayerView {
         NotificationCenter.default.addObserver(self, selector: #selector(enterForeground), name: UIApplication.willEnterForegroundNotification, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(routesAvailableDidChange), name: .MPVolumeViewWirelessRoutesAvailableDidChange, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(wirelessRouteActiveDidChange(notification:)), name: .MPVolumeViewWirelessRouteActiveDidChange, object: nil)
-        #if !targetEnvironment(simulator)
-        var isPlaying = false
-        callCenter.callEventHandler = { [weak self] call in
-            guard let self = self else { return }
-            runInMainqueue { [weak self] in
-                guard let self = self else { return }
-                if call.callState == CTCallStateIncoming {
-                    isPlaying = self.toolBar.playButton.isSelected
-                    if isPlaying {
-                        self.pause()
-                    }
-                } else if call.callState == CTCallStateDisconnected {
-                    if isPlaying {
-                        self.play()
-                    }
-                }
-            }
-        }
-        #endif
+        callCenter.setDelegate(self, queue: DispatchQueue.main)
     }
 
     @objc private func routesAvailableDidChange(notification _: Notification) {
