@@ -31,30 +31,12 @@ func canUseMetal() -> Bool {
 
 // MARK: enum
 
-public enum MEErrorCode: Int {
-    case unknown
-    case formatCreate
-    case formatOpenInput
-    case formatFindStreamInfo
-    case streamNotFound
-    case readFrame
-    case codecContextCreate
-    case codecContextSetParam
-    case codecFindDecoder
-    case codecVideoSendPacket
-    case codecAudioSendPacket
-    case codecVideoReceiveFrame
-    case codecAudioReceiveFrame
-    case codecOpen2
-    case auidoSwrInit
-    case codecSubtitleSendPacket
-}
-
 extension NSError {
-    convenience init(result: Int32, errorCode: MEErrorCode) {
+    convenience init(errorCode: KSPlayerErrorCode, ffmpegErrnum: Int32) {
         var errorStringBuffer = [Int8](repeating: 0, count: 512)
-        av_strerror(result, &errorStringBuffer, 512)
-        self.init(domain: "FFmpeg", code: errorCode.rawValue, userInfo: [NSLocalizedDescriptionKey: "FFmpeg code : \(result), FFmpeg msg : \(String(cString: errorStringBuffer))"])
+        av_strerror(ffmpegErrnum, &errorStringBuffer, 512)
+        let underlyingError = NSError(domain: "FFmpegDomain", code: Int(ffmpegErrnum), userInfo: [NSLocalizedDescriptionKey: String(cString: errorStringBuffer)])
+        self.init(errorCode: errorCode, userInfo: [NSUnderlyingErrorKey: underlyingError])
     }
 }
 

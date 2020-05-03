@@ -16,7 +16,11 @@ final class SubtitlePlayerItemTrack: FFPlayerItemTrack<SubtitleFrame> {
     required init(assetTrack: TrackProtocol, options: KSOptions) {
         self.assetTrack = assetTrack
         super.init(assetTrack: assetTrack, options: options)
-        codecContext = assetTrack.stream.pointee.codecpar.ceateContext(options: options)
+        do {
+            codecContext = try assetTrack.stream.pointee.codecpar.ceateContext(options: options)
+        } catch {
+            KSLog(error as CustomStringConvertible)
+        }
     }
 
     override func shutdown() {
@@ -42,7 +46,7 @@ final class SubtitlePlayerItemTrack: FFPlayerItemTrack<SubtitleFrame> {
             var gotsubtitle = Int32(0)
             let len = avcodec_decode_subtitle2(codecContext, &subtitle, &gotsubtitle, corePacket)
             if len < 0 {
-                error = .init(result: len, errorCode: .codecSubtitleSendPacket)
+                error = .init(errorCode: .codecSubtitleSendPacket, ffmpegErrnum: len)
                 KSLog(error!)
                 break
             }

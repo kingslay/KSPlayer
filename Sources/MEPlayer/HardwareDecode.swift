@@ -90,7 +90,7 @@ class HardwareDecode: DecodeProtocol {
                 result.append(frame)
             } else {
                 if !self.refreshSession {
-                    error = .init(result: status, errorCode: .codecVideoReceiveFrame)
+                    error = .init(errorCode: .codecVideoReceiveFrame, ffmpegErrnum: status)
                 }
             }
         }
@@ -102,7 +102,7 @@ class HardwareDecode: DecodeProtocol {
                 doFlushCodec()
                 refreshSession = true
             } else if status != noErr {
-                throw NSError(result: status, errorCode: .codecVideoReceiveFrame)
+                throw NSError(errorCode: .codecVideoReceiveFrame, ffmpegErrnum: status)
             }
             return result
         }
@@ -210,7 +210,7 @@ extension CMFormatDescription {
                 let demuxSze = avio_close_dyn_buf(ioContext, &demuxBuffer)
                 return try createSampleBuffer(data: demuxBuffer, size: Int(demuxSze))
             } else {
-                throw NSError(result: status, errorCode: .codecVideoReceiveFrame)
+                throw NSError(errorCode: .codecVideoReceiveFrame, ffmpegErrnum: status)
             }
         } else {
             return try createSampleBuffer(data: data, size: size)
@@ -228,7 +228,7 @@ extension CMFormatDescription {
                 return sampleBuffer
             }
         }
-        throw NSError(result: status, errorCode: .codecVideoReceiveFrame)
+        throw NSError(errorCode: .codecVideoReceiveFrame, ffmpegErrnum: status)
         // swiftlint:enable line_length
     }
 }

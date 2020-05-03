@@ -194,7 +194,7 @@ extension KSAVPlayer {
             } else if let error = userInfo[AVPlayerItemFailedToPlayToEndTimeErrorKey] as? NSError {
                 playError = error
             } else if let errorCode = (userInfo["error"] as? NSNumber)?.intValue {
-                playError = NSError(domain: AVFoundationErrorDomain, code: errorCode, userInfo: nil)
+                playError = NSError(domain: "AVMoviePlayer", code: errorCode, userInfo: nil)
             }
         }
         delegate?.finish(player: self, error: playError)
@@ -202,9 +202,9 @@ extension KSAVPlayer {
 
     private func updateStatus(item: AVPlayerItem) {
         if item.status == .readyToPlay {
-            let videoTrack = item.tracks.first { $0.assetTrack?.mediaType.rawValue == AVMediaType.video.rawValue }
-            if let videoTrack = videoTrack, videoTrack.assetTrack?.isPlayable == false {
-                error = NSError(domain: AVFoundationErrorDomain, code: -1, userInfo: [NSLocalizedDescriptionKey: "can't player"])
+            let videoTracks = item.tracks.filter { $0.assetTrack?.mediaType.rawValue == AVMediaType.video.rawValue }
+            if videoTracks.isEmpty || videoTracks.allSatisfy({ $0.assetTrack?.isPlayable == false }) {
+                error = NSError(errorCode: .videoTracksUnplayable)
                 return
             }
             // 默认选择第一个声道

@@ -223,6 +223,8 @@ public class KSOptions {
 }
 
 public struct KSPlayerManager {
+    public static var firstPlayerType: MediaPlayerProtocol.Type = KSAVPlayer.self
+    public static var secondPlayerType: MediaPlayerProtocol.Type?
     /// 日志输出方式
     public static var logFunctionPoint: (String) -> Void = {
         print($0)
@@ -247,4 +249,71 @@ public enum MediaLoadState: Int {
 func KSLog(_ message: CustomStringConvertible, file: String = #file, function: String = #function, line: Int = #line) {
     let fileName = (file as NSString).lastPathComponent
     KSPlayerManager.logFunctionPoint("KSPlayer: \(fileName):\(line) \(function) | \(message)")
+}
+
+public let KSPlayerErrorDomain = "KSPlayerErrorDomain"
+
+public enum KSPlayerErrorCode: Int {
+    case unknown
+    case formatCreate
+    case formatOpenInput
+    case formatFindStreamInfo
+    case readFrame
+    case codecContextCreate
+    case codecContextSetParam
+    case codecContextFindDecoder
+    case codesContextOpen
+    case codecVideoSendPacket
+    case codecAudioSendPacket
+    case codecVideoReceiveFrame
+    case codecAudioReceiveFrame
+    case auidoSwrInit
+    case codecSubtitleSendPacket
+    case videoTracksUnplayable
+    case subtitleUnEncoding
+    case subtitleUnParse
+    case subtitleFormatUnSupport
+}
+
+extension KSPlayerErrorCode: CustomStringConvertible {
+    public var description: String {
+        switch self {
+        case .formatCreate:
+            return "avformat_alloc_context return nil"
+        case .formatOpenInput:
+            return "avformat can't open input"
+        case .formatFindStreamInfo:
+            return "avformat_find_stream_info return nil"
+        case .codecContextCreate:
+            return "avcodec_alloc_context3 return nil"
+        case .codecContextSetParam:
+            return "avcodec can't set parameters to context"
+        case .codesContextOpen:
+            return "codesContext can't Open"
+        case .codecVideoReceiveFrame:
+            return "avcodec can't receive video frame"
+        case .codecAudioReceiveFrame:
+            return "avcodec can't receive audio frame"
+        case .videoTracksUnplayable:
+            return "VideoTracks are not even playable."
+        case .codecSubtitleSendPacket:
+            return "avcodec can't decode subtitle"
+        case .subtitleUnEncoding:
+            return "Subtitle encoding format is not supported."
+        case .subtitleUnParse:
+            return "Subtitle parsing error"
+        case .subtitleFormatUnSupport:
+            return "Current subtitle format is not supported"
+        default:
+            return "unknown"
+        }
+    }
+}
+
+extension NSError {
+    convenience init(errorCode: KSPlayerErrorCode, userInfo: [String: Any] = [:]) {
+        var userInfo = userInfo
+        userInfo[NSLocalizedDescriptionKey] = errorCode.description
+        self.init(domain: KSPlayerErrorDomain, code: errorCode.rawValue, userInfo: userInfo)
+    }
 }

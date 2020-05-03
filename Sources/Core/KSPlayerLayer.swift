@@ -266,14 +266,14 @@ extension KSPlayerLayer: MediaPlayerDelegate {
     }
 
     public func finish(player: MediaPlayerProtocol, error: Error?) {
-        if let error = error as NSError? {
-            if error.domain == "AVMoviePlayer" || error.domain == AVFoundationErrorDomain, let secondPlayerType = KSPlayerManager.secondPlayerType {
+        if let error = error {
+            if type(of: player) == KSPlayerManager.firstPlayerType, let secondPlayerType = KSPlayerManager.secondPlayerType {
                 player.shutdown()
                 self.player = secondPlayerType.init(url: url!, options: options!)
                 return
             }
             state = .error
-            KSLog(error)
+            KSLog(error as CustomStringConvertible)
         } else {
             let duration = player.duration
             delegate?.player(layer: self, currentTime: duration, totalTime: duration)
@@ -358,9 +358,4 @@ extension KSPlayerLayer {
         }
         return .success
     }
-}
-
-extension KSPlayerManager {
-    public static var firstPlayerType: MediaPlayerProtocol.Type = KSAVPlayer.self
-    public static var secondPlayerType: MediaPlayerProtocol.Type?
 }
