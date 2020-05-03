@@ -248,7 +248,7 @@ open class VideoPlayerView: PlayerView {
     }
 
     open override func player(layer: KSPlayerLayer, finish error: Error?) {
-        if let error = error as NSError?, error.domain == "FFmpeg", useProxyUrl {
+        if let error = error as NSError?, error.domain == KSPlayerErrorDomain, useProxyUrl {
             useProxyUrl = false
             play()
             return

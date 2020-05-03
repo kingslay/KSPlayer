@@ -23,7 +23,11 @@ class SoftwareDecode: DecodeProtocol {
         timebase = assetTrack.timebase
         mediaType = assetTrack.mediaType
         self.options = options
-        codecContext = assetTrack.stream.pointee.codecpar.ceateContext(options: options)
+        do {
+            codecContext = try assetTrack.stream.pointee.codecpar.ceateContext(options: options)
+        } catch {
+            KSLog(error as CustomStringConvertible)
+        }
         codecContext?.pointee.time_base = timebase.rational
         if mediaType == .video {
             swresample = VideoSwresample(dstFormat: options.bufferPixelFormatType.format)
@@ -65,7 +69,7 @@ class SoftwareDecode: DecodeProtocol {
                     }
                     break
                 } else {
-                    let error = NSError(result: code, errorCode: mediaType == .audio ? .codecAudioReceiveFrame : .codecVideoReceiveFrame)
+                    let error = NSError(errorCode: mediaType == .audio ? .codecAudioReceiveFrame : .codecVideoReceiveFrame, ffmpegErrnum: code)
                     KSLog(error)
                     throw error
                 }
@@ -102,14 +106,15 @@ class SoftwareDecode: DecodeProtocol {
 }
 
 extension UnsafeMutablePointer where Pointee == AVCodecParameters {
-    func ceateContext(options: KSOptions) -> UnsafeMutablePointer<AVCodecContext>? {
+    func ceateContext(options: KSOptions) throws -> UnsafeMutablePointer<AVCodecContext> {
         var codecContextOption = avcodec_alloc_context3(nil)
         guard let codecContext = codecContextOption else {
-            return nil
+            throw NSError(errorCode: .codecContextCreate)
         }
-        guard avcodec_parameters_to_context(codecContext, self) == 0 else {
+        var result = avcodec_parameters_to_context(codecContext, self)
+        guard result == 0 else {
             avcodec_free_context(&codecContextOption)
-            return nil
+            throw NSError(errorCode: .codecContextSetParam, ffmpegErrnum: result)
         }
         if options.canHardwareDecode(codecpar: pointee) {
             codecContext.pointee.opaque = Unmanaged.passUnretained(options).toOpaque()
@@ -151,13 +156,14 @@ extension UnsafeMutablePointer where Pointee == AVCodecParameters {
         }
         guard let codec = avcodec_find_decoder(codecContext.pointee.codec_id) else {
             avcodec_free_context(&codecContextOption)
-            return nil
+            throw NSError(errorCode: .codecContextFindDecoder, ffmpegErrnum: result)
         }
         codecContext.pointee.codec_id = codec.pointee.id
         var avOptions = options.decoderOptions.avOptions
-        guard avcodec_open2(codecContext, codec, &avOptions) == 0 else {
+        result = avcodec_open2(codecContext, codec, &avOptions)
+        guard result == 0 else {
             avcodec_free_context(&codecContextOption)
-            return nil
+            throw NSError(errorCode: .codesContextOpen, ffmpegErrnum: result)
         }
         return codecContext
     }

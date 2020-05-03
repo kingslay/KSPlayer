@@ -137,19 +137,19 @@ public class KSURLSubtitle: KSSubtitle {
                 }
             }
             guard let subtitle = string else {
-                throw NSError(domain: "KSPlayer", code: -1, userInfo: [NSLocalizedDescriptionKey: "字幕编码格式不支持", "url": url.absoluteString])
+                throw NSError(errorCode: .subtitleUnEncoding, userInfo: ["url": url.absoluteString])
             }
             let parse = parses.first { $0.canParse(subtitle: subtitle) }
             if let parse = parse {
                 parts = parse.parse(subtitle: subtitle)
                 if partsCount == 0 {
-                    throw NSError(domain: "KSPlayer", code: -1, userInfo: [NSLocalizedDescriptionKey: "字幕解析出错", "url": url.absoluteString])
+                    throw NSError(errorCode: .subtitleUnParse, userInfo: ["url": url.absoluteString])
                 }
             } else {
-                throw NSError(domain: "KSPlayer", code: -1, userInfo: [NSLocalizedDescriptionKey: "不支持当前字幕格式", "url": url.absoluteString])
+                throw NSError(errorCode: .subtitleFormatUnSupport, userInfo: ["url": url.absoluteString])
             }
         } catch {
-            throw NSError(domain: "KSPlayer", code: -1, userInfo: [NSLocalizedDescriptionKey: "字幕编码格式不支持", "url": url.absoluteString])
+            throw NSError(errorCode: .subtitleUnEncoding, userInfo: ["url": url.absoluteString])
         }
     }
 }

@@ -106,7 +106,7 @@ extension MEPlayerItem {
         avformat_close_input(&self.formatCtx)
         formatCtx = avformat_alloc_context()
         guard let formatCtx = formatCtx else {
-            error = NSError(domain: "FFCreateErrorCode", code: MEErrorCode.formatCreate.rawValue, userInfo: nil)
+            error = NSError(errorCode: .formatCreate)
             return
         }
         var interruptCB = AVIOInterruptCB()
@@ -135,13 +135,13 @@ extension MEPlayerItem {
             return
         }
         guard result == 0 else {
-            error = .init(result: result, errorCode: .formatOpenInput)
+            error = .init(errorCode: .formatOpenInput, ffmpegErrnum: result)
             avformat_close_input(&self.formatCtx)
             return
         }
         result = avformat_find_stream_info(formatCtx, nil)
         guard result == 0 else {
-            error = .init(result: result, errorCode: .formatFindStreamInfo)
+            error = .init(errorCode: .formatFindStreamInfo, ffmpegErrnum: result)
             avformat_close_input(&self.formatCtx)
             return
         }
@@ -278,7 +278,7 @@ extension MEPlayerItem {
                         }
                     } else {
                         //                        if IS_AVERROR_INVALIDDATA(readResult)
-                        error = .init(result: readResult, errorCode: .readFrame)
+                        error = .init(errorCode: .readFrame, ffmpegErrnum: readResult)
                     }
                 }
             }
