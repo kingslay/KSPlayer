@@ -50,19 +50,19 @@ final class AudioOutput: FrameOutput {
 }
 
 extension AudioOutput: AudioPlayerDelegate {
-    func audioPlayerShouldInputData(ioData: UnsafeMutableAudioBufferListPointer, numberOfSamples: UInt32, numberOfChannels _: UInt32) {
+    func audioPlayerShouldInputData(ioData: UnsafeMutableAudioBufferListPointer, numberOfFrames: UInt32, numberOfChannels _: UInt32) {
         semaphore.wait()
         defer {
             semaphore.signal()
         }
         var ioDataWriteOffset = 0
-        var numberOfSamples = Int(numberOfSamples)
+        var numberOfSamples = Int(numberOfFrames)
         while numberOfSamples > 0 {
             if currentRender == nil {
                 currentRender = renderSource?.getOutputRender(type: .audio) as? AudioFrame
             }
             guard let currentRender = currentRender else {
-                return
+                break
             }
             let residueLinesize = currentRender.numberOfSamples - currentRenderReadOffset
             guard residueLinesize > 0 else {
@@ -78,6 +78,13 @@ extension AudioOutput: AudioPlayerDelegate {
             numberOfSamples -= framesToCopy
             ioDataWriteOffset += bytesToCopy
             currentRenderReadOffset += framesToCopy
+        }
+        let sizeCopied = (Int(numberOfFrames) - numberOfSamples) * MemoryLayout<Float>.size
+        for i in 0 ..< ioData.count {
+            let sizeLeft = Int(ioData[i].mDataByteSize) - sizeCopied
+            if sizeLeft > 0 {
+                memset(ioData[i].mData! + sizeCopied, 0, sizeLeft)
+            }
         }
     }
 

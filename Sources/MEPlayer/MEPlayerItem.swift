@@ -186,7 +186,7 @@ extension MEPlayerItem {
                 if videos.count > 1, options.videoAdaptable {
                     let bitRates = videos.map { $0.bitRate }.sorted(by: <)
                     let bitRateState = VideoAdaptationState.BitRateState(bitRate: first.bitRate, time: CACurrentMediaTime())
-                    videoAdaptation = VideoAdaptationState(bitRates: bitRates, fps: first.fps, bitRateStates: [bitRateState])
+                    videoAdaptation = VideoAdaptationState(bitRates: bitRates, duration: duration, currentPlaybackTime: 0, fps: first.fps, bitRateStates: [bitRateState])
                 }
             }
         }
@@ -387,7 +387,12 @@ extension MEPlayerItem: MediaPlayback {
 extension MEPlayerItem: CodecCapacityDelegate {
     func codecDidChangeCapacity(track: PlayerItemTrackProtocol) {
         semaphore.wait()
-        let loadingState = options.playable(capacitys: videoAudioTracks, isFirst: isFirst, isSeek: isSeek)
+        defer {
+            semaphore.signal()
+        }
+        guard let loadingState = options.playable(capacitys: videoAudioTracks, isFirst: isFirst, isSeek: isSeek) else {
+            return
+        }
         delegate?.sourceDidChange(loadingState: loadingState)
         if loadingState.isPlayable {
             isFirst = false
@@ -406,7 +411,6 @@ extension MEPlayerItem: CodecCapacityDelegate {
                 adaptable(track: track)
             }
         }
-        semaphore.signal()
     }
 
     func codecDidFinished(track: PlayerItemTrackProtocol) {
@@ -431,6 +435,7 @@ extension MEPlayerItem: CodecCapacityDelegate {
             return
         }
         videoAdaptation.loadedCount = track.loadedCount
+        videoAdaptation.currentPlaybackTime = currentPlaybackTime
         guard let (oldBitRate, newBitrate) = options.adaptable(state: videoAdaptation) else {
             return
         }

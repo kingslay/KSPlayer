@@ -98,6 +98,8 @@ public struct VideoAdaptationState {
     }
 
     public let bitRates: [Int64]
+    public let duration: TimeInterval
+    public var currentPlaybackTime: TimeInterval
     public var fps: Int
     public internal(set) var bitRateStates: [BitRateState]
     public internal(set) var loadedCount: Int = 0
@@ -152,6 +154,8 @@ public class KSOptions {
     public var formatContextOptions = [String: Any]()
     public var decoderOptions = [String: Any]()
     public internal(set) var formatName = ""
+    // 加个节流器，防止频繁的更新加载状态
+    private var throttle = CACurrentMediaTime()
     public init() {
         formatContextOptions["analyzeduration"] = 2_000_000
         formatContextOptions["probesize"] = 2_000_000
@@ -180,10 +184,13 @@ public class KSOptions {
     }
 
     // 缓冲算法函数
-    open func playable(capacitys: [CapacityProtocol], isFirst: Bool, isSeek: Bool) -> LoadingState {
-        let isFinished = capacitys.allSatisfy { $0.isFinished }
+    open func playable(capacitys: [CapacityProtocol], isFirst: Bool, isSeek: Bool) -> LoadingState? {
+        guard isFirst || isSeek ||  CACurrentMediaTime() - throttle > 0.5 else {
+            return nil
+        }
         let packetCount = capacitys.map { $0.packetCount }.min() ?? 0
         let frameCount = capacitys.map { $0.frameCount }.min() ?? 0
+        let isFinished = capacitys.allSatisfy { $0.isFinished }
         let loadedTime = capacitys.map { TimeInterval($0.loadedCount) / TimeInterval($0.fps) }.min() ?? 0
         let progress = loadedTime * 100.0 / preferredForwardBufferDuration
         let isPlayable = capacitys.allSatisfy { capacity in
@@ -196,8 +203,9 @@ public class KSOptions {
                     return capacity.packetCount >= capacity.fps
                 }
             }
-            return capacity.packetCount > capacity.fps * Int(preferredForwardBufferDuration)
+            return capacity.loadedCount >= capacity.fps * Int(preferredForwardBufferDuration)
         }
+        throttle = CACurrentMediaTime()
         return LoadingState(loadedTime: loadedTime, progress: progress, packetCount: packetCount, frameCount: frameCount, isFinished: isFinished, isPlayable: isPlayable, isFirst: isFirst, isSeek: isSeek)
     }
 

@@ -9,7 +9,7 @@ import AudioToolbox
 import CoreAudio
 
 protocol AudioPlayerDelegate: AnyObject {
-    func audioPlayerShouldInputData(ioData: UnsafeMutableAudioBufferListPointer, numberOfSamples: UInt32, numberOfChannels: UInt32)
+    func audioPlayerShouldInputData(ioData: UnsafeMutableAudioBufferListPointer, numberOfFrames: UInt32, numberOfChannels: UInt32)
     func audioPlayerWillRenderSample(sampleTimestamp: AudioTimeStamp)
     func audioPlayerDidRenderSample(sampleTimestamp: AudioTimeStamp)
 }
@@ -148,7 +148,7 @@ final class AudioGraphPlayer: AudioPlayer {
                 return noErr
             }
             let `self` = Unmanaged<AudioGraphPlayer>.fromOpaque(refCon).takeUnretainedValue()
-            self.delegate?.audioPlayerShouldInputData(ioData: UnsafeMutableAudioBufferListPointer(ioData), numberOfSamples: inNumberFrames, numberOfChannels: self.numberOfChannels)
+            self.delegate?.audioPlayerShouldInputData(ioData: UnsafeMutableAudioBufferListPointer(ioData), numberOfFrames: inNumberFrames, numberOfChannels: self.numberOfChannels)
             return noErr
         }
         return inputCallbackStruct
