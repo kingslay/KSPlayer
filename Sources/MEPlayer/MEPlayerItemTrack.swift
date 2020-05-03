@@ -91,9 +91,8 @@ struct AssetTrack: TrackProtocol {
     }
 }
 
-protocol PlayerItemTrackProtocol: Capacity {
+protocol PlayerItemTrackProtocol: CapacityProtocol, AnyObject {
     init(assetTrack: TrackProtocol, options: KSOptions)
-    var mediaType: AVFoundation.AVMediaType { get }
     // 是否无缝循环
     var isLoopModel: Bool { get set }
     var delegate: CodecCapacityDelegate? { get set }
@@ -106,26 +105,19 @@ protocol PlayerItemTrackProtocol: Capacity {
 }
 
 class FFPlayerItemTrack<Frame: MEFrame>: PlayerItemTrackProtocol, CustomStringConvertible {
+    var packetCount: Int { 0 }
+    var frameCount: Int { outputRenderQueue.count }
+    let frameMaxCount: Int
     let description: String
     fileprivate var state = MECodecState.idle
     weak var delegate: CodecCapacityDelegate?
 //    var track: TrackProtocol
-    fileprivate let fps: Int
+    let fps: Int
     let options: KSOptions
     let mediaType: AVFoundation.AVMediaType
     let outputRenderQueue: CircularBuffer<Frame>
     var isLoopModel = false
-
     var isFinished: Bool { state.contains(.finished) }
-
-    //   CMTime((packetQueue.duration + outputRenderQueue.duration) * Int64(timebase.num), timebase.den).seconds
-    var loadedTime: TimeInterval { TimeInterval(loadedCount) / TimeInterval(fps) }
-
-    var loadedCount: Int { outputRenderQueue.count }
-
-    var bufferingProgress: Int { min(100, Int(loadedTime * 100) / Int(options.preferredForwardBufferDuration)) }
-
-    var isPlayable: Bool { true }
 
     required init(assetTrack: TrackProtocol, options: KSOptions) {
         mediaType = assetTrack.mediaType
@@ -140,6 +132,7 @@ class FFPlayerItemTrack<Frame: MEFrame>: PlayerItemTrackProtocol, CustomStringCo
         } else {
             outputRenderQueue = CircularBuffer()
         }
+        frameMaxCount = outputRenderQueue.maxCount
     }
 
     func decode() {
@@ -182,12 +175,10 @@ final class AsyncPlayerItemTrack: FFPlayerItemTrack<Frame> {
     private var decoderMap = [Int32: DecodeProtocol]()
     private var decodeOperation: BlockOperation!
     private var seekTime = 0.0
-    private var isFirst = true
-    private var isSeek = false
     // 无缝播放使用的PacketQueue
     private var loopPacketQueue: CircularBuffer<Packet>?
     private var packetQueue = CircularBuffer<Packet>()
-    override var loadedCount: Int { packetQueue.count + outputRenderQueue.count }
+    override var packetCount: Int { packetQueue.count }
     override var isLoopModel: Bool {
         didSet {
             if isLoopModel {
@@ -199,23 +190,6 @@ final class AsyncPlayerItemTrack: FFPlayerItemTrack<Frame> {
                     decode()
                 }
             }
-        }
-    }
-
-    override var isPlayable: Bool {
-        guard !state.contains(.finished) else {
-            return true
-        }
-        let state = LoadingState(fps: fps, packetCount: packetQueue.count,
-                                 frameCount: outputRenderQueue.count,
-                                 frameMaxCount: outputRenderQueue.maxCount,
-                                 isFirst: isFirst, isSeek: isSeek, mediaType: mediaType)
-        if options.playable(state: state) {
-            isFirst = false
-            isSeek = false
-            return true
-        } else {
-            return false
         }
     }
 
@@ -270,7 +244,7 @@ final class AsyncPlayerItemTrack: FFPlayerItemTrack<Frame> {
     override func getOutputRender(where predicate: ((MEFrame) -> Bool)?) -> MEFrame? {
         let outputFecthRender = outputRenderQueue.pop(where: predicate)
         if outputFecthRender == nil {
-            if state.contains(.finished), loadedCount == 0 {
+            if state.contains(.finished), packetCount + frameCount == 0 {
                 delegate?.codecDidFinished(track: self)
             }
         } else {
@@ -286,13 +260,12 @@ final class AsyncPlayerItemTrack: FFPlayerItemTrack<Frame> {
         loopPacketQueue = nil
         isLoopModel = false
         delegate?.codecDidChangeCapacity(track: self)
-        isSeek = true
         decoderMap.values.forEach { $0.seek(time: time) }
     }
 
     override func endOfFile() {
         super.endOfFile()
-        if loadedCount == 0 {
+        if packetCount + frameCount == 0 {
             delegate?.codecDidFinished(track: self)
         }
         delegate?.codecDidChangeCapacity(track: self)

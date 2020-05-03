@@ -91,17 +91,6 @@ public enum DisplayEnum {
     case vrBox
 }
 
-// 加载情况
-public struct LoadingState {
-    public let fps: Int
-    public let packetCount: Int
-    public let frameCount: Int
-    public let frameMaxCount: Int
-    public let isFirst: Bool
-    public let isSeek: Bool
-    public let mediaType: AVFoundation.AVMediaType
-}
-
 public struct VideoAdaptationState {
     public struct BitRateState {
         let bitRate: Int64
@@ -190,18 +179,26 @@ public class KSOptions {
         formatContextOptions["headers"] = cookieStr
     }
 
-    // 视频缓冲算法函数
-    open func playable(state: LoadingState) -> Bool {
-        guard state.frameCount > 0 else { return false }
-        // 让音频能更快的打开
-        if state.mediaType == .audio || isSecondOpen, state.isFirst || state.isSeek, state.frameCount == state.frameMaxCount {
-            if state.isFirst {
-                return true
-            } else if state.isSeek {
-                return state.packetCount >= state.fps
+    // 缓冲算法函数
+    open func playable(capacitys: [CapacityProtocol], isFirst: Bool, isSeek: Bool) -> LoadingState {
+        let isFinished = capacitys.allSatisfy { $0.isFinished }
+        let packetCount = capacitys.map { $0.packetCount }.min() ?? 0
+        let frameCount = capacitys.map { $0.frameCount }.min() ?? 0
+        let loadedTime = capacitys.map { TimeInterval($0.loadedCount) / TimeInterval($0.fps) }.min() ?? 0
+        let progress = loadedTime * 100.0 / preferredForwardBufferDuration
+        let isPlayable = capacitys.allSatisfy { capacity in
+            guard capacity.frameCount > 0 else { return false }
+            // 让音频能更快的打开
+            if capacity.mediaType == .audio || isSecondOpen, isFirst || isSeek, capacity.frameCount == capacity.frameMaxCount {
+                if isFirst {
+                    return true
+                } else if isSeek {
+                    return capacity.packetCount >= capacity.fps
+                }
             }
+            return capacity.packetCount > capacity.fps * Int(preferredForwardBufferDuration)
         }
-        return state.packetCount > state.fps * Int(preferredForwardBufferDuration)
+        return LoadingState(loadedTime: loadedTime, progress: progress, packetCount: packetCount, frameCount: frameCount, isFinished: isFinished, isPlayable: isPlayable, isFirst: isFirst, isSeek: isSeek)
     }
 
     open func adaptable(state: VideoAdaptationState) -> (Int64, Int64)? {
@@ -220,6 +217,27 @@ public class KSOptions {
         }
         return nil
     }
+}
+
+// 缓冲情况
+public protocol CapacityProtocol {
+    var fps: Int { get }
+    var packetCount: Int { get }
+    var frameCount: Int { get }
+    var frameMaxCount: Int { get }
+    var isFinished: Bool { get }
+    var mediaType: AVFoundation.AVMediaType { get }
+}
+
+public struct LoadingState {
+    public let loadedTime: TimeInterval
+    public let progress: TimeInterval
+    public let packetCount: Int
+    public let frameCount: Int
+    public let isFinished: Bool
+    public let isPlayable: Bool
+    public let isFirst: Bool
+    public let isSeek: Bool
 }
 
 public struct KSPlayerManager {

@@ -23,6 +23,10 @@ final class MEPlayerItem {
     // 没有音频数据可以渲染
     private var isAudioStalled = true
     private var videoMediaTime = CACurrentMediaTime()
+    private var isFirst = true
+    private var isSeek = false
+    private var allTracks = [PlayerItemTrackProtocol]()
+    private var videoAudioTracks = [PlayerItemTrackProtocol]()
     private var videoTrack: PlayerItemTrackProtocol?
     private var audioTrack: PlayerItemTrackProtocol? {
         didSet {
@@ -30,8 +34,6 @@ final class MEPlayerItem {
         }
     }
 
-    private var allTracks = [PlayerItemTrackProtocol]()
-    private var videoAudioTracks = [PlayerItemTrackProtocol]()
     private(set) var assetTracks = [TrackProtocol]()
     private var videoAdaptation: VideoAdaptationState?
     private(set) var subtitleTracks = [SubtitlePlayerItemTrack]()
@@ -239,6 +241,7 @@ extension MEPlayerItem {
                 //                let tolerance: Int64 = KSPlayerManager.isAccurateSeek ? 0 : 2
                 //                let result = avformat_seek_file(formatCtx, -1, timeStamp - tolerance, timeStamp, timeStamp, AVSEEK_FLAG_BACKWARD)
                 let result = av_seek_frame(formatCtx, -1, timeStamp, AVSEEK_FLAG_BACKWARD)
+                isSeek = true
                 allTracks.forEach { $0.seek(time: currentPlaybackTime) }
                 seekingCompletionHandler?(result >= 0)
                 seekingCompletionHandler = nil
@@ -384,15 +387,17 @@ extension MEPlayerItem: MediaPlayback {
 extension MEPlayerItem: CodecCapacityDelegate {
     func codecDidChangeCapacity(track: PlayerItemTrackProtocol) {
         semaphore.wait()
-        let mix = MixCapacity(array: videoAudioTracks)
-        delegate?.sourceDidChange(capacity: mix)
-        if mix.isPlayable {
-            if mix.loadedTime > options.maxBufferDuration {
+        let loadingState = options.playable(capacitys: videoAudioTracks, isFirst: isFirst, isSeek: isSeek)
+        delegate?.sourceDidChange(loadingState: loadingState)
+        if loadingState.isPlayable {
+            isFirst = false
+            isSeek = false
+            if loadingState.loadedTime > options.maxBufferDuration {
                 pause()
                 if track.mediaType == .video {
                     adaptable(track: track)
                 }
-            } else if mix.loadedTime < options.maxBufferDuration / 2 {
+            } else if loadingState.loadedTime < options.maxBufferDuration / 2 {
                 resume()
             }
         } else {
@@ -478,22 +483,5 @@ extension UnsafeMutablePointer where Pointee == AVStream {
             return -av_display_rotation_get(matrix)
         }
         return 0.0
-    }
-}
-
-private final class MixCapacity: Capacity {
-    private let array: [PlayerItemTrackProtocol]
-    lazy var loadedTime: TimeInterval = { array.map { $0.loadedTime }.min() ?? 0 }()
-
-    lazy var loadedCount: Int = { array.map { $0.loadedCount }.min() ?? 0 }()
-
-    lazy var bufferingProgress: Int = { array.map { $0.bufferingProgress }.min() ?? 0 }()
-
-    lazy var isPlayable: Bool = { array.allSatisfy { $0.isPlayable } }()
-
-    lazy var isFinished: Bool = { array.allSatisfy { $0.isFinished } }()
-
-    init(array: [PlayerItemTrackProtocol]) {
-        self.array = array
     }
 }
