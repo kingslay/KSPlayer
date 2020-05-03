@@ -119,7 +119,6 @@ extension UnsafeMutablePointer where Pointee == AVCodecParameters {
         if options.canHardwareDecode(codecpar: pointee) {
             codecContext.pointee.opaque = Unmanaged.passUnretained(options).toOpaque()
             codecContext.pointee.get_format = { ctx, fmt -> AVPixelFormat in
-
                 guard let fmt = fmt, let ctx = ctx else {
                     return AV_PIX_FMT_NONE
                 }
@@ -134,9 +133,8 @@ extension UnsafeMutablePointer where Pointee == AVCodecParameters {
                         av_buffer_unref(&deviceCtx)
                         var framesCtx = av_hwframe_ctx_alloc(deviceCtx)
                         if let framesCtx = framesCtx {
-                            // swiftlint:disable force_cast
-                            let framesCtxData = framesCtx.pointee.data as! UnsafeMutablePointer<AVHWFramesContext>
-                            // swiftlint:enable force_cast
+                            let framesCtxData = UnsafeMutableRawPointer(framesCtx.pointee.data)
+                                .bindMemory(to: AVHWFramesContext.self, capacity: 1)
                             framesCtxData.pointee.format = AV_PIX_FMT_VIDEOTOOLBOX
                             framesCtxData.pointee.sw_format = options.bufferPixelFormatType.format
                             framesCtxData.pointee.width = ctx.pointee.width

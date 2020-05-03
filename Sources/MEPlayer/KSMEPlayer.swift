@@ -139,14 +139,14 @@ extension KSMEPlayer: MEPlayerDelegate {
         }
     }
 
-    func sourceDidChange(capacity: Capacity) {
-        if capacity.isFinished {
+    func sourceDidChange(loadingState: LoadingState) {
+        if loadingState.isFinished {
             playableTime = duration
             loadState = .playable
         } else {
-            playableTime = currentPlaybackTime + capacity.loadedTime
+            playableTime = currentPlaybackTime + loadingState.loadedTime
             if loadState == .playable {
-                if capacity.loadedCount == 0 {
+                if loadingState.packetCount == 0, loadingState.frameCount == 0 {
                     loadState = .loading
                     if playbackState == .playing {
                         runInMainqueue { [weak self] in
@@ -157,10 +157,10 @@ extension KSMEPlayer: MEPlayerDelegate {
                 }
             } else {
                 var progress = 100
-                if capacity.isPlayable {
+                if loadingState.isPlayable {
                     loadState = .playable
                 } else {
-                    progress = capacity.bufferingProgress
+                    progress = min(100, Int(loadingState.progress))
                 }
                 if playbackState == .playing {
                     runInMainqueue { [weak self] in

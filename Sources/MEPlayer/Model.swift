@@ -75,7 +75,7 @@ protocol CodecCapacityDelegate: AnyObject {
 }
 
 protocol MEPlayerDelegate: AnyObject {
-    func sourceDidChange(capacity: Capacity)
+    func sourceDidChange(loadingState: LoadingState)
     func sourceDidOpened()
     func sourceDidFailed(error: NSError?)
     func sourceDidFinished(type: AVFoundation.AVMediaType, allSatisfy: Bool)
@@ -84,13 +84,8 @@ protocol MEPlayerDelegate: AnyObject {
 
 // MARK: protocol
 
-// 缓冲情况
-protocol Capacity: AnyObject {
-    var loadedTime: TimeInterval { get }
-    var loadedCount: Int { get }
-    var bufferingProgress: Int { get }
-    var isPlayable: Bool { get }
-    var isFinished: Bool { get }
+extension CapacityProtocol {
+    var loadedCount: Int { packetCount + frameCount }
 }
 
 public protocol ObjectQueueItem {
