@@ -171,7 +171,8 @@ public class KSOptions {
         decoderOptions["refcounted_frames"] = "1"
         var timebaseInfo = mach_timebase_info_data_t()
         mach_timebase_info(&timebaseInfo)
-        throttleDiff = UInt64(500_000_000 * timebaseInfo.denom / timebaseInfo.numer)
+        //间隔0.1s
+        throttleDiff = UInt64(100_000_000 * timebaseInfo.denom / timebaseInfo.numer)
     }
 
     public func setCookie(_ cookies: [HTTPCookie]) {
@@ -195,7 +196,7 @@ public class KSOptions {
         let packetCount = capacitys.map { $0.packetCount }.min() ?? 0
         let frameCount = capacitys.map { $0.frameCount }.min() ?? 0
         let isFinished = capacitys.allSatisfy { $0.isFinished }
-        let loadedTime = capacitys.map { TimeInterval($0.loadedCount) / TimeInterval($0.fps) }.min() ?? 0
+        let loadedTime = capacitys.map { TimeInterval($0.packetCount + $0.frameCount) / TimeInterval($0.fps) }.min() ?? 0
         let progress = loadedTime * 100.0 / preferredForwardBufferDuration
         let isPlayable = capacitys.allSatisfy { capacity in
             guard capacity.frameCount > 0 else { return false }
@@ -207,7 +208,7 @@ public class KSOptions {
                     return capacity.packetCount >= capacity.fps
                 }
             }
-            return capacity.loadedCount >= capacity.fps * Int(preferredForwardBufferDuration)
+            return capacity.packetCount + capacity.frameCount >= capacity.fps * Int(preferredForwardBufferDuration)
         }
         throttle = mach_absolute_time()
         return LoadingState(loadedTime: loadedTime, progress: progress, packetCount: packetCount, frameCount: frameCount, isFinished: isFinished, isPlayable: isPlayable, isFirst: isFirst, isSeek: isSeek)

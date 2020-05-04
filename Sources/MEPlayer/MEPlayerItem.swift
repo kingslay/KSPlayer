@@ -230,19 +230,18 @@ extension MEPlayerItem {
 
     private func readThread() {
         allTracks.forEach { $0.decode() }
-        while readOperation?.isCancelled == false {
-            if formatCtx == nil || [MESourceState.finished, .closed, .failed].contains(state) {
-                break
-            } else if state == .paused {
+        while [MESourceState.paused, .seeking, .reading].contains(state) {
+            if state == .paused {
                 condition.wait()
-            } else if state == .seeking {
+            }
+            if state == .seeking {
                 let timeStamp = Int64(currentPlaybackTime * TimeInterval(AV_TIME_BASE))
                 // 不要用avformat_seek_file，否则可能会向前跳
                 //                let tolerance: Int64 = KSPlayerManager.isAccurateSeek ? 0 : 2
                 //                let result = avformat_seek_file(formatCtx, -1, timeStamp - tolerance, timeStamp, timeStamp, AVSEEK_FLAG_BACKWARD)
                 let result = av_seek_frame(formatCtx, -1, timeStamp, AVSEEK_FLAG_BACKWARD)
-                isSeek = true
                 allTracks.forEach { $0.seek(time: currentPlaybackTime) }
+                isSeek = true
                 seekingCompletionHandler?(result >= 0)
                 seekingCompletionHandler = nil
                 state = .reading
@@ -267,14 +266,9 @@ extension MEPlayerItem {
                     }
                 } else {
                     if IS_AVERROR_EOF(readResult) || avio_feof(formatCtx?.pointee.pb) != 0 {
-                        if options.isLoopPlay {
-                            if allTracks.first(where: { $0.isLoopModel }) == nil {
-                                allTracks.forEach { $0.isLoopModel = true }
-                                _ = av_seek_frame(formatCtx, -1, 0, AVSEEK_FLAG_BACKWARD)
-                            } else {
-                                allTracks.forEach { $0.endOfFile() }
-                                state = .finished
-                            }
+                        if options.isLoopPlay, allTracks.allSatisfy({ !$0.isLoopModel }) {
+                            allTracks.forEach { $0.isLoopModel = true }
+                            _ = av_seek_frame(formatCtx, -1, 0, AVSEEK_FLAG_BACKWARD)
                         } else {
                             allTracks.forEach { $0.endOfFile() }
                             state = .finished
@@ -417,7 +411,7 @@ extension MEPlayerItem: CodecCapacityDelegate {
         if track.mediaType == .audio {
             isAudioStalled = true
         }
-        let allSatisfy = videoAudioTracks.allSatisfy { $0.isFinished && $0.loadedCount == 0 }
+        let allSatisfy = videoAudioTracks.allSatisfy { $0.isFinished && $0.frameCount == 0 }
         delegate?.sourceDidFinished(type: track.mediaType, allSatisfy: allSatisfy)
         if allSatisfy, options.isLoopPlay {
             isAudioStalled = audioTrack == nil
@@ -434,7 +428,7 @@ extension MEPlayerItem: CodecCapacityDelegate {
         guard var videoAdaptation = videoAdaptation else {
             return
         }
-        videoAdaptation.loadedCount = track.loadedCount
+        videoAdaptation.loadedCount = track.packetCount + track.frameCount
         videoAdaptation.currentPlaybackTime = currentPlaybackTime
         guard let (oldBitRate, newBitrate) = options.adaptable(state: videoAdaptation) else {
             return

@@ -178,7 +178,7 @@ final class AsyncPlayerItemTrack: FFPlayerItemTrack<Frame> {
     // 无缝播放使用的PacketQueue
     private var loopPacketQueue: CircularBuffer<Packet>?
     private var packetQueue = CircularBuffer<Packet>()
-    override var packetCount: Int { packetQueue.count }
+    override var packetCount: Int { packetQueue.count + (loopPacketQueue?.count ?? 0) }
     override var isLoopModel: Bool {
         didSet {
             if isLoopModel {
@@ -206,8 +206,8 @@ final class AsyncPlayerItemTrack: FFPlayerItemTrack<Frame> {
             loopPacketQueue?.push(packet)
         } else {
             packetQueue.push(packet)
-            delegate?.codecDidChangeCapacity(track: self)
         }
+        delegate?.codecDidChangeCapacity(track: self)
     }
 
     override func decode() {
@@ -244,7 +244,7 @@ final class AsyncPlayerItemTrack: FFPlayerItemTrack<Frame> {
     override func getOutputRender(where predicate: ((MEFrame) -> Bool)?) -> MEFrame? {
         let outputFecthRender = outputRenderQueue.pop(where: predicate)
         if outputFecthRender == nil {
-            if state.contains(.finished), packetCount + frameCount == 0 {
+            if state.contains(.finished), packetQueue.count == 0, frameCount == 0 {
                 delegate?.codecDidFinished(track: self)
             }
         } else {
@@ -265,7 +265,7 @@ final class AsyncPlayerItemTrack: FFPlayerItemTrack<Frame> {
 
     override func endOfFile() {
         super.endOfFile()
-        if packetCount + frameCount == 0 {
+        if packetQueue.count == 0, frameCount == 0 {
             delegate?.codecDidFinished(track: self)
         }
         delegate?.codecDidChangeCapacity(track: self)
