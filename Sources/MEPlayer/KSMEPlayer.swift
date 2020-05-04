@@ -18,7 +18,7 @@ public class KSMEPlayer {
     // 为了及时显示页面
     private var needRefreshView = true
     private var playerItem: MEPlayerItem
-    private let videoOutput = VideoOutput()
+    private let videoOutput = MetalPlayView()
     private var options: KSOptions
     public private(set) var bufferingProgress = 0 {
         didSet {
@@ -63,13 +63,13 @@ public class KSMEPlayer {
         playerItem.delegate = self
         audioOutput.renderSource = playerItem
         videoOutput.renderSource = playerItem
-        videoOutput.renderView.display = options.display
+        videoOutput.display = options.display
         setAudioSession()
     }
 
     deinit {
         audioOutput.pause()
-        videoOutput.invalidate()
+        videoOutput.shutdown()
     }
 }
 
@@ -175,7 +175,7 @@ extension KSMEPlayer: MEPlayerDelegate {
                 guard let self = self else { return }
                 if self.needRefreshView, let render = self.playerItem.getOutputRender(type: .video) {
                     self.needRefreshView = false
-                    self.videoOutput.renderView.set(render: render)
+                    self.videoOutput.set(render: render)
                 }
             }
         }
@@ -204,7 +204,7 @@ extension KSMEPlayer: MediaPlayerProtocol {
 
     public var isExternalPlaybackActive: Bool { false }
 
-    public var view: UIView { videoOutput.renderView }
+    public var view: UIView { videoOutput }
 
     public func replace(url: URL, options: KSOptions) {
         KSLog("replaceUrl \(self)")
@@ -217,7 +217,7 @@ extension KSMEPlayer: MediaPlayerProtocol {
         playerItem.delegate = self
         audioOutput.renderSource = playerItem
         videoOutput.renderSource = playerItem
-        videoOutput.renderView.display = options.display
+        videoOutput.display = options.display
     }
 
     public var currentPlaybackTime: TimeInterval {
@@ -234,6 +234,9 @@ extension KSMEPlayer: MediaPlayerProtocol {
     public var seekable: Bool { playerItem.seekable }
 
     public func seek(time: TimeInterval, completion handler: ((Bool) -> Void)? = nil) {
+        guard time > 0 else {
+            return
+        }
         let oldPlaybackState = playbackState
         playbackState = .seeking
         runInMainqueue { [weak self] in
@@ -290,7 +293,9 @@ extension KSMEPlayer: MediaPlayerProtocol {
     }
 
     public func thumbnailImageAtCurrentTime(handler: @escaping (UIImage?) -> Void) {
-        videoOutput.thumbnailImageAtCurrentTime(handler: handler)
+        DispatchQueue.global().async { [weak self] in
+            handler(self?.videoOutput.image())
+        }
     }
 
     public func enterBackground() {

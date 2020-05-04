@@ -523,7 +523,7 @@ public class KSSlider: NSSlider {
     }
 
     @objc private func progressSliderTouchEnded(_ sender: KSSlider) {
-        delegate?.slider(value: Double(sender.value), event: .touchUpInside)
+        delegate?.slider(value: Double(sender.floatValue), event: .touchUpInside)
     }
 
     open func setThumbImage(_: UIImage?, for _: State) {}
