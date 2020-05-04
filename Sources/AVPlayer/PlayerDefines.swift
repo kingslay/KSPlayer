@@ -155,7 +155,8 @@ public class KSOptions {
     public var decoderOptions = [String: Any]()
     public internal(set) var formatName = ""
     // 加个节流器，防止频繁的更新加载状态
-    private var throttle = CACurrentMediaTime()
+    private var throttle = mach_absolute_time()
+    private let throttleDiff: UInt64
     public init() {
         formatContextOptions["analyzeduration"] = 2_000_000
         formatContextOptions["probesize"] = 2_000_000
@@ -168,6 +169,9 @@ public class KSOptions {
         formatContextOptions["user_agent"] = "ksplayer"
         decoderOptions["threads"] = "auto"
         decoderOptions["refcounted_frames"] = "1"
+        var timebaseInfo = mach_timebase_info_data_t()
+        mach_timebase_info(&timebaseInfo)
+        throttleDiff = UInt64(500_000_000 * timebaseInfo.denom / timebaseInfo.numer)
     }
 
     public func setCookie(_ cookies: [HTTPCookie]) {
@@ -185,7 +189,7 @@ public class KSOptions {
 
     // 缓冲算法函数
     open func playable(capacitys: [CapacityProtocol], isFirst: Bool, isSeek: Bool) -> LoadingState? {
-        guard isFirst || isSeek ||  CACurrentMediaTime() - throttle > 0.5 else {
+        guard isFirst || isSeek || mach_absolute_time() - throttle > throttleDiff else {
             return nil
         }
         let packetCount = capacitys.map { $0.packetCount }.min() ?? 0
@@ -205,7 +209,7 @@ public class KSOptions {
             }
             return capacity.loadedCount >= capacity.fps * Int(preferredForwardBufferDuration)
         }
-        throttle = CACurrentMediaTime()
+        throttle = mach_absolute_time()
         return LoadingState(loadedTime: loadedTime, progress: progress, packetCount: packetCount, frameCount: frameCount, isFinished: isFinished, isPlayable: isPlayable, isFirst: isFirst, isSeek: isSeek)
     }
 

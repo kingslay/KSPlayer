@@ -159,6 +159,7 @@ extension KSPlayerManager {
     public static var logLevel = LogLevel.warning
     public static var stackSize = 16384
     public static var audioPlayerMaximumFramesPerSlice = AVAudioFrameCount(4096)
+    public static var preferredFramesPerSecond = 30
     #if os(macOS)
     public static var audioPlayerSampleRate = Int32(44100)
     public static var audioPlayerMaximumChannels = AVAudioChannelCount(2)
@@ -166,11 +167,6 @@ extension KSPlayerManager {
     public static var audioPlayerSampleRate = Int32(AVAudioSession.sharedInstance().sampleRate)
     public static var audioPlayerMaximumChannels = AVAudioChannelCount(AVAudioSession.sharedInstance().outputNumberOfChannels)
     #endif
-    // 画面绘制类
-    public static var renderViewType: PixelRenderView.Type = {
-        canUseMetal() ? MetalPlayView.self : SampleBufferPlayerView.self
-    }()
-
     static func outputFormat() -> AudioStreamBasicDescription {
         var audioStreamBasicDescription = AudioStreamBasicDescription()
         let floatByteSize = UInt32(MemoryLayout<Float>.size)
@@ -314,26 +310,6 @@ final class AudioFrame: Frame {
 
 final class VideoVTBFrame: Frame {
     public var corePixelBuffer: BufferProtocol?
-    deinit {
-        corePixelBuffer = nil
-    }
-}
-
-final class VideoSampleBufferFrame: Frame {
-    public var sampleBuffer: CMSampleBuffer?
-}
-
-public protocol PixelRenderView: UIView {
-    var display: DisplayEnum { get set }
-    func set(pixelBuffer: BufferProtocol, time: CMTime)
-}
-
-extension PixelRenderView {
-    func set(render: MEFrame) {
-        if let render = render as? VideoVTBFrame, let corePixelBuffer = render.corePixelBuffer {
-            set(pixelBuffer: corePixelBuffer, time: render.cmtime)
-        }
-    }
 }
 
 extension Dictionary where Key == String {

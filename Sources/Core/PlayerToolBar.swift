@@ -86,6 +86,7 @@ public class PlayerToolBar: UIStackView {
         timeLabel.textAlignment = .left
         timeLabel.font = UIFont(name: "HelveticaNeue-Medium", size: 14)
         timeLabel.text = "\(0.toString(for: timeType)) / \(0.toString(for: timeType))"
+        timeSlider.minimumValue = 0
         timeSlider.maximumTrackTintColor = UIColor.white.withAlphaComponent(0.3)
         timeSlider.minimumTrackTintColor = UIColor(red: 0.0, green: 164 / 255.0, blue: 1.0, alpha: 1.0)
         playbackRateButton.titleFont = .systemFont(ofSize: 14, weight: .medium)

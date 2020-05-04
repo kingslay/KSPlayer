@@ -86,7 +86,7 @@ public protocol BufferProtocol: AnyObject {
     var height: Int { get }
     var isFullRangeVideo: Bool { get }
     var colorAttachments: NSString { get }
-    var textures: [MTLTexture]? { get }
+    var textures: [MTLTexture] { get }
     func widthOfPlane(at planeIndex: Int) -> Int
     func heightOfPlane(at planeIndex: Int) -> Int
 }
@@ -104,7 +104,7 @@ extension CVPixelBuffer: BufferProtocol {
 
     public var format: OSType { CVPixelBufferGetPixelFormatType(self) }
 
-    public var textures: [MTLTexture]? { MetalTexture.share.texture(pixelBuffer: self) }
+    public var textures: [MTLTexture] { MetalTexture.share.texture(pixelBuffer: self) }
 
     public var drawableSize: CGSize {
         // Check if the pixel buffer exists

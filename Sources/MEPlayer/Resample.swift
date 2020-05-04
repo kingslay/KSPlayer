@@ -110,7 +110,7 @@ class PixelBuffer: BufferProtocol {
     let height: Int
     let isFullRangeVideo: Bool
     let colorAttachments: NSString
-    let textures: [MTLTexture]?
+    let textures: [MTLTexture]
     let drawableSize: CGSize
 //    private let bytes: [UnsafeMutablePointer<UInt8>?]
 //    private let bytesPerRow: [Int32]
@@ -167,12 +167,6 @@ class PixelBuffer: BufferProtocol {
 //            scale.shutdown()
 //        }
         return nil
-    }
-
-    deinit {
-        if let textures = textures {
-            MetalTexture.share.comeback(textures: textures)
-        }
     }
 }
 

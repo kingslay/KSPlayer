@@ -8,17 +8,17 @@
 import CoreMedia
 import MetalKit
 
-final class MetalPlayView: MTKView {
+final class MetalPlayView: MTKView, MTKViewDelegate, FrameOutput {
     var display: DisplayEnum = .plane
+    weak var renderSource: OutputRenderSourceDelegate?
+    var isOutput = true
     init() {
         let device = MetalRender.share.device
         super.init(frame: .zero, device: device)
+        framebufferOnly = false
         clearColor = MTLClearColor(red: 0, green: 0, blue: 0, alpha: 1)
-//        delegate = self
-        framebufferOnly = true
-        autoResizeDrawable = false
-        // Change drawing mode based on setNeedsDisplay().
-        enableSetNeedsDisplay = true
+        delegate = self
+        preferredFramesPerSecond = KSPlayerManager.preferredFramesPerSecond
     }
 
     required init(coder _: NSCoder) {
@@ -37,6 +37,47 @@ final class MetalPlayView: MTKView {
         }
     }
 
+    func play() {
+        isPaused = false
+    }
+
+    func pause() {
+        isPaused = true
+    }
+
+    func flush() {}
+
+    func shutdown() {
+        MetalTexture.share.flush()
+    }
+
+    func mtkView(_: MTKView, drawableSizeWillChange _: CGSize) {}
+
+    func draw(in _: MTKView) {
+        if let render = renderSource?.getOutputRender(type: .video, isDependent: true) {
+            set(render: render)
+        }
+    }
+
+    func set(render: MEFrame) {
+        if let render = render as? VideoVTBFrame, let pixelBuffer = render.corePixelBuffer {
+            renderSource?.setVideo(time: render.cmtime)
+            guard isOutput, let drawable = currentDrawable else {
+                return
+            }
+            drawableSize = display == .plane ? pixelBuffer.drawableSize : UIScreen.size
+            guard let commandBuffer = MetalRender.share.draw(pixelBuffer: pixelBuffer, display: display, outputTexture: drawable.texture) else {
+                return
+            }
+            //        commandBuffer.present(drawable)
+            commandBuffer.addScheduledHandler { _ in
+                drawable.present()
+                render.corePixelBuffer = nil
+            }
+            commandBuffer.commit()
+        }
+    }
+
     #if targetEnvironment(simulator) || targetEnvironment(macCatalyst)
     override func touchesMoved(_ touches: Set<UITouch>, with: UIEvent?) {
         if display == .plane {
@@ -48,18 +89,5 @@ final class MetalPlayView: MTKView {
     #endif
     deinit {
         MetalTexture.share.flush()
-    }
-}
-
-extension MetalPlayView: PixelRenderView {
-    func set(pixelBuffer: BufferProtocol, time _: CMTime) {
-        autoreleasepool {
-            drawableSize = display == .plane ? pixelBuffer.drawableSize : UIScreen.size
-            guard let drawable = currentDrawable else {
-                return
-            }
-            MetalRender.share.set(pixelBuffer: pixelBuffer, display: display, drawable: drawable)
-            draw()
-        }
     }
 }

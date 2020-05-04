@@ -100,11 +100,12 @@ class MetalRender {
 
     public func makeCommandBuffer() -> MTLCommandBuffer? { commandQueue?.makeCommandBuffer() }
 
-    func set(pixelBuffer: BufferProtocol, display: DisplayEnum = .plane, drawable: CAMetalDrawable) {
-        renderPassDescriptor.colorAttachments[0].texture = drawable.texture
-        guard let textures = pixelBuffer.textures, let commandBuffer = commandQueue?.makeCommandBuffer(),
+    func draw(pixelBuffer: BufferProtocol, display: DisplayEnum = .plane, outputTexture: MTLTexture) -> MTLCommandBuffer? {
+        renderPassDescriptor.colorAttachments[0].texture = outputTexture
+        let textures = pixelBuffer.textures
+        guard textures.count > 0, let commandBuffer = commandQueue?.makeCommandBuffer(),
             let encoder = commandBuffer.makeRenderCommandEncoder(descriptor: renderPassDescriptor) else {
-            return
+            return nil
         }
         encoder.setCullMode(.none)
         encoder.pushDebugGroup("RenderFrame")
@@ -118,12 +119,7 @@ class MetalRender {
         display.set(encoder: encoder)
         encoder.popDebugGroup()
         encoder.endEncoding()
-//        commandBuffer.present(drawable)
-        // 不能用commandBuffer.present(drawable)，不然界面不可见的时候，会卡顿，苹果太坑了
-        commandBuffer.addScheduledHandler { _ in
-            drawable.present()
-        }
-        commandBuffer.commit()
+        return commandBuffer
     }
 
     private func pipeline(pixelBuffer: BufferProtocol) -> MetalRenderPipeline {
