@@ -84,10 +84,6 @@ protocol MEPlayerDelegate: AnyObject {
 
 // MARK: protocol
 
-extension CapacityProtocol {
-    var loadedCount: Int { packetCount + frameCount }
-}
-
 public protocol ObjectQueueItem {
     var duration: Int64 { get }
     var size: Int64 { get }
@@ -135,7 +131,6 @@ protocol MEFrame: ObjectQueueItem {
 
 extension MEFrame {
     public var seconds: TimeInterval { cmtime.seconds }
-
     public var cmtime: CMTime { timebase.cmtime(for: position) }
 }
 
