@@ -171,7 +171,7 @@ public class KSOptions {
         decoderOptions["refcounted_frames"] = "1"
         var timebaseInfo = mach_timebase_info_data_t()
         mach_timebase_info(&timebaseInfo)
-        //间隔0.1s
+        // 间隔0.1s
         throttleDiff = UInt64(100_000_000 * timebaseInfo.denom / timebaseInfo.numer)
     }
 
@@ -199,7 +199,9 @@ public class KSOptions {
         let loadedTime = capacitys.map { TimeInterval($0.packetCount + $0.frameCount) / TimeInterval($0.fps) }.min() ?? 0
         let progress = loadedTime * 100.0 / preferredForwardBufferDuration
         let isPlayable = capacitys.allSatisfy { capacity in
-            guard capacity.frameCount > 0 else { return false }
+            if capacity.isFinished {
+                return true
+            }
             // 让音频能更快的打开
             if capacity.mediaType == .audio || isSecondOpen, isFirst || isSeek, capacity.frameCount == capacity.frameMaxCount {
                 if isFirst {

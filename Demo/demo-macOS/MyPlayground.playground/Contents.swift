@@ -92,3 +92,15 @@ array.withUnsafeMutableBufferPointer { pointer -> Void in
     print(pointer.baseAddress!) // 得到 UnsafePointer<Int> 对象
     print(pointer.first!) // 得到起始地址指向的 Int 对象
 }
+
+var _buffer = ContiguousArray<Int?>(repeating: 1, count: 102_400)
+var startTime = CACurrentMediaTime()
+_buffer.removeAll(keepingCapacity: true)
+_buffer.append(contentsOf: ContiguousArray<Int?>(repeating: nil, count: 102_400))
+var diff = CACurrentMediaTime() - startTime
+print(diff)
+_buffer = ContiguousArray<Int?>(repeating: 1, count: 102_400)
+startTime = CACurrentMediaTime()
+(0 ..< _buffer.count).forEach { _buffer[$0] = nil }
+diff = CACurrentMediaTime() - startTime
+print(diff)
