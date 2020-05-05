@@ -98,19 +98,16 @@ class MetalRender {
         renderPassDescriptor.colorAttachments[0].storeAction = .store
     }
 
-    public func makeCommandBuffer() -> MTLCommandBuffer? { commandQueue?.makeCommandBuffer() }
-
-    func draw(pixelBuffer: BufferProtocol, display: DisplayEnum = .plane, outputTexture: MTLTexture) -> MTLCommandBuffer? {
+    func draw(pixelBuffer: BufferProtocol, display: DisplayEnum = .plane, inputTextures: [MTLTexture], outputTexture: MTLTexture) -> MTLCommandBuffer? {
         renderPassDescriptor.colorAttachments[0].texture = outputTexture
-        let textures = pixelBuffer.textures
-        guard textures.count > 0, let commandBuffer = commandQueue?.makeCommandBuffer(),
+        guard inputTextures.count > 0, let commandBuffer = commandQueue?.makeCommandBuffer(),
             let encoder = commandBuffer.makeRenderCommandEncoder(descriptor: renderPassDescriptor) else {
             return nil
         }
         encoder.setCullMode(.none)
         encoder.pushDebugGroup("RenderFrame")
         encoder.setFragmentSamplerState(samplerState, index: 0)
-        for (index, texture) in textures.enumerated() {
+        for (index, texture) in inputTextures.enumerated() {
             texture.label = "texture\(index)"
             encoder.setFragmentTexture(texture, index: index)
         }
