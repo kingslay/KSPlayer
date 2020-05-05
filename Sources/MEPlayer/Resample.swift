@@ -33,17 +33,21 @@ class VideoSwresample: Swresample {
     }
 
     private func setup(frame: UnsafeMutablePointer<AVFrame>) -> Bool {
-        if format.rawValue == frame.pointee.format, width == frame.pointee.width, height == frame.pointee.height {
+        setup(format: frame.pointee.format, width: frame.pointee.width, height: frame.pointee.height)
+    }
+
+    func setup(format: Int32, width: Int32, height: Int32) -> Bool {
+        if self.format.rawValue == format, self.width == width, self.height == height {
             return true
         }
         shutdown()
-        format = AVPixelFormat(rawValue: frame.pointee.format)
-        height = frame.pointee.height
-        width = frame.pointee.width
-        if PixelBuffer.isSupported(format: format) {
+        self.format = AVPixelFormat(rawValue: format)
+        self.height = height
+        self.width = width
+        if PixelBuffer.isSupported(format: self.format) {
             return true
         }
-        imgConvertCtx = sws_getCachedContext(imgConvertCtx, width, height, format, width, height, dstFormat, SWS_BICUBIC, nil, nil, nil)
+        imgConvertCtx = sws_getCachedContext(imgConvertCtx, width, height, self.format, width, height, dstFormat, SWS_BICUBIC, nil, nil, nil)
         guard imgConvertCtx != nil else {
             return false
         }
@@ -110,10 +114,9 @@ class PixelBuffer: BufferProtocol {
     let height: Int
     let isFullRangeVideo: Bool
     let colorAttachments: NSString
-    let textures: [MTLTexture]
     let drawableSize: CGSize
-//    private let bytes: [UnsafeMutablePointer<UInt8>?]
-//    private let bytesPerRow: [Int32]
+    private let bytes: [UnsafeMutablePointer<UInt8>?]
+    private let bytesPerRow: [Int32]
     init(frame: UnsafeMutablePointer<AVFrame>) {
         format = AVPixelFormat(rawValue: frame.pointee.format).format
         if frame.pointee.colorspace == AVCOL_SPC_BT709 {
@@ -125,7 +128,8 @@ class PixelBuffer: BufferProtocol {
         width = Int(frame.pointee.width)
         height = Int(frame.pointee.height)
         isFullRangeVideo = format != kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange
-        textures = MetalTexture.share.textures(pixelFormat: format, width: width, height: height, bytes: Array(tuple: frame.pointee.data), bytesPerRows: Array(tuple: frame.pointee.linesize))
+        bytes = Array(tuple: frame.pointee.data)
+        bytesPerRow = Array(tuple: frame.pointee.linesize)
         let vertical = Int(frame.pointee.sample_aspect_ratio.den)
         let horizontal = Int(frame.pointee.sample_aspect_ratio.num)
         if vertical > 0, horizontal > 0, vertical != horizontal {
@@ -143,6 +147,10 @@ class PixelBuffer: BufferProtocol {
         }
     }
 
+    func textures(frome cache: MetalTextureCache) -> [MTLTexture] {
+        cache.textures(pixelFormat: format, width: width, height: height, bytes: bytes, bytesPerRows: bytesPerRow)
+    }
+
     func widthOfPlane(at planeIndex: Int) -> Int {
         planeIndex == 0 ? width : width / 2
     }
@@ -156,17 +164,18 @@ class PixelBuffer: BufferProtocol {
     }
 
     private func image() -> UIImage? {
-//        var image: UIImage?
-//        if format.format == AV_PIX_FMT_RGB24 {
-//            image = UIImage(rgbData: bytes[0]!, linesize: Int(bytesPerRow[0]), width: width, height: height)
-//        }
-//        if let scale = SWScale(width: Int32(width), height: Int32(height), format: AV_PIX_FMT_RGB24) {
-//            if scale.swsConvert(data: bytes, linesize: bytesPerRow), let frame = scale.dstFrame?.pointee {
-//                image = UIImage(rgbData: frame.data.0!, linesize: Int(frame.linesize.0), width: width, height: height)
-//            }
-//            scale.shutdown()
-//        }
-        return nil
+        var image: UIImage?
+        if format.format == AV_PIX_FMT_RGB24 {
+            image = UIImage(rgbData: bytes[0]!, linesize: Int(bytesPerRow[0]), width: width, height: height)
+        }
+        let scale = VideoSwresample(dstFormat: AV_PIX_FMT_RGB24)
+        if scale.setup(format: format.format.rawValue, width: Int32(width), height: Int32(height)) {
+            if scale.swsConvert(data: bytes, linesize: bytesPerRow), let frame = scale.dstFrame?.pointee {
+                image = UIImage(rgbData: frame.data.0!, linesize: Int(frame.linesize.0), width: width, height: height)
+            }
+            scale.shutdown()
+        }
+        return image
     }
 }
 

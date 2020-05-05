@@ -69,7 +69,6 @@ public class KSMEPlayer {
 
     deinit {
         audioOutput.pause()
-        videoOutput.shutdown()
     }
 }
 
@@ -175,7 +174,7 @@ extension KSMEPlayer: MEPlayerDelegate {
                 guard let self = self else { return }
                 if self.needRefreshView, let render = self.playerItem.getOutputRender(type: .video) {
                     self.needRefreshView = false
-                    self.videoOutput.set(render: render)
+                    self.videoOutput.draw(frame: render)
                 }
             }
         }
@@ -209,8 +208,8 @@ extension KSMEPlayer: MediaPlayerProtocol {
     public func replace(url: URL, options: KSOptions) {
         KSLog("replaceUrl \(self)")
         shutdown()
-        audioOutput.shutdown()
-        videoOutput.shutdown()
+        audioOutput.flush()
+        videoOutput.flush()
         playerItem.delegate = nil
         playerItem = MEPlayerItem(url: url, options: options)
         self.options = options

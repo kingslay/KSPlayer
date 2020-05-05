@@ -122,7 +122,6 @@ protocol FrameOutput {
     func play()
     func pause()
     func flush()
-    func shutdown()
 }
 
 protocol MEFrame: ObjectQueueItem {

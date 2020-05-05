@@ -173,8 +173,15 @@ extension MEPlayerItem {
         }
         var videoIndex: Int32 = -1
         if !options.videoDisable {
-            videoIndex = av_find_best_stream(formatCtx, AVMEDIA_TYPE_VIDEO, -1, -1, nil, 0)
             let videos = assetTracks.filter { $0.mediaType == .video }
+            let bitRates = videos.map { $0.bitRate }
+            let wantedStreamNb: Int32
+            if videos.count > 0, let bitRate = options.wanted(bitRates: bitRates), let track = videos.first(where: { $0.bitRate == bitRate }) {
+                wantedStreamNb = track.streamIndex
+            } else {
+                wantedStreamNb = -1
+            }
+            videoIndex = av_find_best_stream(formatCtx, AVMEDIA_TYPE_VIDEO, wantedStreamNb, -1, nil, 0)
             if let first = videos.first(where: { $0.streamIndex == videoIndex }) {
                 first.stream.pointee.discard = AVDISCARD_DEFAULT
                 rotation = first.rotation
@@ -184,9 +191,8 @@ extension MEPlayerItem {
                 track.delegate = self
                 videoTrack = track
                 if videos.count > 1, options.videoAdaptable {
-                    let bitRates = videos.map { $0.bitRate }.sorted(by: <)
                     let bitRateState = VideoAdaptationState.BitRateState(bitRate: first.bitRate, time: CACurrentMediaTime())
-                    videoAdaptation = VideoAdaptationState(bitRates: bitRates, duration: duration, currentPlaybackTime: 0, fps: first.fps, bitRateStates: [bitRateState])
+                    videoAdaptation = VideoAdaptationState(bitRates: bitRates.sorted(by: <), duration: duration, currentPlaybackTime: 0, fps: first.fps, bitRateStates: [bitRateState])
                 }
             }
         }
@@ -393,17 +399,13 @@ extension MEPlayerItem: CodecCapacityDelegate {
             isSeek = false
             if loadingState.loadedTime > options.maxBufferDuration {
                 pause()
-                if track.mediaType == .video {
-                    adaptable(track: track)
-                }
+                adaptable(track: track, loadingState: loadingState)
             } else if loadingState.loadedTime < options.maxBufferDuration / 2 {
                 resume()
             }
         } else {
             resume()
-            if track.mediaType == .video {
-                adaptable(track: track)
-            }
+            adaptable(track: track, loadingState: loadingState)
         }
     }
 
@@ -424,8 +426,8 @@ extension MEPlayerItem: CodecCapacityDelegate {
         }
     }
 
-    private func adaptable(track: PlayerItemTrackProtocol) {
-        guard var videoAdaptation = videoAdaptation else {
+    private func adaptable(track: PlayerItemTrackProtocol, loadingState: LoadingState) {
+        guard var videoAdaptation = videoAdaptation, track.mediaType == .video, !loadingState.isFinished else {
             return
         }
         videoAdaptation.loadedCount = track.packetCount + track.frameCount

@@ -9,6 +9,7 @@ import CoreMedia
 import MetalKit
 
 final class MetalPlayView: MTKView, MTKViewDelegate, FrameOutput {
+    private let textureCache = MetalTextureCache()
     var display: DisplayEnum = .plane
     weak var renderSource: OutputRenderSourceDelegate?
     var isOutput = true
@@ -47,32 +48,29 @@ final class MetalPlayView: MTKView, MTKViewDelegate, FrameOutput {
 
     func flush() {}
 
-    func shutdown() {
-        MetalTexture.share.flush()
-    }
-
     func mtkView(_: MTKView, drawableSizeWillChange _: CGSize) {}
 
     func draw(in _: MTKView) {
-        if let render = renderSource?.getOutputRender(type: .video, isDependent: true) {
-            set(render: render)
+        if let frame = renderSource?.getOutputRender(type: .video, isDependent: true) {
+            draw(frame: frame)
         }
     }
 
-    func set(render: MEFrame) {
-        if let render = render as? VideoVTBFrame, let pixelBuffer = render.corePixelBuffer {
-            renderSource?.setVideo(time: render.cmtime)
+    func draw(frame: MEFrame) {
+        if let frame = frame as? VideoVTBFrame, let pixelBuffer = frame.corePixelBuffer {
+            renderSource?.setVideo(time: frame.cmtime)
             guard isOutput, let drawable = currentDrawable else {
                 return
             }
             drawableSize = display == .plane ? pixelBuffer.drawableSize : UIScreen.size
-            guard let commandBuffer = MetalRender.share.draw(pixelBuffer: pixelBuffer, display: display, outputTexture: drawable.texture) else {
+            let textures = pixelBuffer.textures(frome: textureCache)
+            guard let commandBuffer = MetalRender.share.draw(pixelBuffer: pixelBuffer, display: display, inputTextures: textures, outputTexture: drawable.texture) else {
                 return
             }
             //        commandBuffer.present(drawable)
             commandBuffer.addScheduledHandler { _ in
                 drawable.present()
-                render.corePixelBuffer = nil
+                frame.corePixelBuffer = nil
             }
             commandBuffer.commit()
         }
@@ -87,7 +85,4 @@ final class MetalPlayView: MTKView, MTKViewDelegate, FrameOutput {
         }
     }
     #endif
-    deinit {
-        MetalTexture.share.flush()
-    }
 }

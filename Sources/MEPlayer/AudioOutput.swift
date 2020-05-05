@@ -41,12 +41,6 @@ final class AudioOutput: FrameOutput {
         currentRender = nil
         semaphore.signal()
     }
-
-    func shutdown() {
-        semaphore.wait()
-        currentRender = nil
-        semaphore.signal()
-    }
 }
 
 extension AudioOutput: AudioPlayerDelegate {

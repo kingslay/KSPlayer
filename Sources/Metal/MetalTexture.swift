@@ -6,12 +6,11 @@
 //
 
 import MetalKit
-public final class MetalTexture {
-    public static var share = MetalTexture()
+public final class MetalTextureCache {
     private var textureCache: CVMetalTextureCache?
     private let device: MTLDevice
     private var textures = [MTLTexture]()
-    init() {
+    public init() {
         device = MetalRender.share.device
         CVMetalTextureCacheCreate(kCFAllocatorDefault, nil, device, nil, &textureCache)
     }
@@ -84,7 +83,7 @@ public final class MetalTexture {
         return textures
     }
 
-    public func flush() {
+    deinit {
         textures.removeAll()
         if let textureCache = textureCache {
             CVMetalTextureCacheFlush(textureCache, 0)
