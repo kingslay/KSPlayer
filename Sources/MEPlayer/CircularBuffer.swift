@@ -132,7 +132,8 @@ public class CircularBuffer<Item: ObjectQueueItem> {
         defer { condition.unlock() }
         headIndex = 0
         tailIndex = 0
-        (0 ..< maxCount).forEach { _buffer[$0] = nil }
+        _buffer.removeAll(keepingCapacity: true)
+        _buffer.append(contentsOf: ContiguousArray<Item?>(repeating: nil, count: maxCount))
         condition.signal()
     }
 
