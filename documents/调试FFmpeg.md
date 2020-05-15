@@ -3,7 +3,7 @@
 一、编译
 
 ```bash
-brew install pkg-config
+brew install sdl2
 cd FFmpeg
 sh build-openssl.sh
 sh build-ffmpeg.sh debug

@@ -14,12 +14,9 @@ SOURCE="ffmpeg-$FF_VERSION"
 
 CONFIGURE_FLAGS="--enable-optimizations"
 # Licensing options:
-CONFIGURE_FLAGS="$CONFIGURE_FLAGS --disable-gpl"
-# CONFIGURE_FLAGS="$CONFIGURE_FLAGS --enable-version3"
-CONFIGURE_FLAGS="$CONFIGURE_FLAGS --disable-nonfree"
-if [ "$1" != "debug" ]; then
-CONFIGURE_FLAGS="$CONFIGURE_FLAGS --disable-debug"
-fi
+CONFIGURE_FLAGS="$CONFIGURE_FLAGS --enable-gpl"
+CONFIGURE_FLAGS="$CONFIGURE_FLAGS --enable-version3"
+CONFIGURE_FLAGS="$CONFIGURE_FLAGS --enable-nonfree"
 
 # Configuration options:
 CONFIGURE_FLAGS="$CONFIGURE_FLAGS --enable-cross-compile"
@@ -33,9 +30,6 @@ CONFIGURE_FLAGS="$CONFIGURE_FLAGS --disable-gray"
 CONFIGURE_FLAGS="$CONFIGURE_FLAGS --disable-swscale-alpha"
 
 # Program options:
-CONFIGURE_FLAGS="$CONFIGURE_FLAGS --disable-programs"
-CONFIGURE_FLAGS="$CONFIGURE_FLAGS --disable-ffmpeg"
-CONFIGURE_FLAGS="$CONFIGURE_FLAGS --disable-ffplay"
 CONFIGURE_FLAGS="$CONFIGURE_FLAGS --disable-ffprobe"
 
 # Documentation options:
@@ -53,7 +47,6 @@ CONFIGURE_FLAGS="$CONFIGURE_FLAGS --enable-avutil"
 CONFIGURE_FLAGS="$CONFIGURE_FLAGS --enable-swresample"
 CONFIGURE_FLAGS="$CONFIGURE_FLAGS --enable-swscale"
 CONFIGURE_FLAGS="$CONFIGURE_FLAGS --disable-postproc"
-CONFIGURE_FLAGS="$CONFIGURE_FLAGS --disable-avfilter"
 CONFIGURE_FLAGS="$CONFIGURE_FLAGS --disable-avresample"
 # CONFIGURE_FLAGS="$CONFIGURE_FLAGS --disable-pthreads"
 # CONFIGURE_FLAGS="$CONFIGURE_FLAGS --disable-w32threads"
@@ -167,7 +160,7 @@ CONFIGURE_FLAGS="$CONFIGURE_FLAGS --enable-demuxer=asf"
 CONFIGURE_FLAGS="$CONFIGURE_FLAGS --enable-demuxer=avi"
 CONFIGURE_FLAGS="$CONFIGURE_FLAGS --enable-demuxer=matroska"
 CONFIGURE_FLAGS="$CONFIGURE_FLAGS --enable-demuxer=rm"
-CONFIGURE_FLAGS="$CONFIGURE_FLAGS --enable-demuxer=webm_dash_manifest"
+# CONFIGURE_FLAGS="$CONFIGURE_FLAGS --enable-demuxer=webm_dash_manifest"
 CONFIGURE_FLAGS="$CONFIGURE_FLAGS --enable-demuxer=vc1"
 
 # ./configure --list-bsf
@@ -205,7 +198,6 @@ CONFIGURE_FLAGS="$CONFIGURE_FLAGS --disable-protocol=unix"
 CONFIGURE_FLAGS="$CONFIGURE_FLAGS --disable-devices"
 CONFIGURE_FLAGS="$CONFIGURE_FLAGS --disable-indevs"
 CONFIGURE_FLAGS="$CONFIGURE_FLAGS --disable-outdevs"
-CONFIGURE_FLAGS="$CONFIGURE_FLAGS --disable-filters"
 CONFIGURE_FLAGS="$CONFIGURE_FLAGS --disable-iconv"
 CONFIGURE_FLAGS="$CONFIGURE_FLAGS --disable-audiotoolbox"
 CONFIGURE_FLAGS="$CONFIGURE_FLAGS --disable-videotoolbox"
