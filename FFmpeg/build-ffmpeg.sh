@@ -4,11 +4,18 @@ source ffmpegConfig.sh
 
 LIBRARY_NAME="FFmpeg"
 source common.sh
-
+parameter=$1
 function InnerBuild() {
     local platform=$1
     local arch=$2
-
+    if [[ $parameter = "debug" && $platform = "macos" ]]; then
+        FFMPEG_CFG_FLAGS="$FFMPEG_CFG_FLAGS --enable-ffmpeg --enable-ffplay --enable-sdl2"
+    else
+        FFMPEG_CFG_FLAGS="$FFMPEG_CFG_FLAGS --disable-programs --disable-ffmpeg --disable-ffplay --disable-avfilter --disable-filters"
+    fi
+    if ! [[ $parameter = "debug" && $platform = "maccatalyst" ]]; then
+        FFMPEG_CFG_FLAGS="$FFMPEG_CFG_FLAGS --disable-debug"
+    fi
     echo "${ORANGE}Building for platform: $platform, arch: $arch ${NOCOLOR}"
 
     local current_dir=$(pwd)
@@ -21,13 +28,6 @@ function InnerBuild() {
 
     local xcrun_sdk=$(echo $PLATFORM | tr '[:upper:]' '[:lower:]')
     CC="xcrun -sdk $xcrun_sdk clang"
-
-    # force "configure" to use "gas-preprocessor.pl" (FFmpeg 3.3)
-    if [ "$arch" = "arm64" ]; then
-        AS="gas-preprocessor.pl -arch aarch64 -- $CC"
-    else
-        AS="gas-preprocessor.pl -- $CC"
-    fi
 
     if [ "$X264" ]; then
         CFLAGS="$CFLAGS -I$X264/include"
@@ -45,41 +45,27 @@ function InnerBuild() {
         LDFLAGS="$LDFLAGS -L$OPENSSLPath/lib"
     fi
     
-    TMPDIR=${TMPDIR/%\//} $current_dir/$SOURCE/configure \
-        --target-os=darwin \
-        --arch=$arch \
-        --cc="$CC" \
-        --as="$AS" \
-        $FFMPEG_CFG_FLAGS \
-        --extra-cflags="$CFLAGS" \
-        --extra-ldflags="$LDFLAGS" \
-        --prefix="$prefix" ||
-        exit 1
-
-    make -j3 install $EXPORT || exit 1
+    $current_dir/$SOURCE/configure  --target-os=darwin --arch=$arch --cc="$CC" $FFMPEG_CFG_FLAGS --extra-cflags="$CFLAGS" --extra-ldflags="$LDFLAGS" --prefix="$prefix" || exit 1
+    make -j8 install $EXPORT || exit 1
+    if [[ $parameter = "debug" && $platform = "macos" ]]; then
+        cp $prefix/bin/ffmpeg /usr/local/bin
+        cp $prefix/bin/ffplay /usr/local/bin
+    fi
     cd $current_dir
 }
 
 function PrepareYasm() {
+    if [ ! $(which brew) ]; then
+        echo "${RED}Homebrew not found. Trying to install... ${NOCOLOR}"
+        ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)" || exit 1
+    fi
     if [ ! $(which yasm) ]; then
         echo 'Yasm not found'
-
-        if [ ! $(which brew) ]; then
-            echo "${RED}Homebrew not found. Trying to install... ${NOCOLOR}"
-            ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)" ||
-                exit 1
-        fi
-
         echo 'Trying to install Yasm...'
         brew install yasm || exit 1
     fi
-
-    if [ ! $(which gas-preprocessor.pl) ]; then
-        echo "${RED}gas-preprocessor.pl not found. Trying to install... ${NOCOLOR}"
-        (curl -L https://github.com/libav/gas-preprocessor/raw/master/gas-preprocessor.pl \
-            -o /usr/local/bin/gas-preprocessor.pl &&
-            chmod +x /usr/local/bin/gas-preprocessor.pl) ||
-            exit 1
+    if [ ! $(which pkg-config) ]; then
+        brew install pkg-config || exit 1
     fi
 
     if [ ! -r $SOURCE ]; then
