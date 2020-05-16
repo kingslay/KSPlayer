@@ -233,7 +233,7 @@ public class KSOptions {
         return nil
     }
 
-    open func wanted(bitRates: [Int64]) -> Int64? {
+    open func wanted(bitRates _: [Int64]) -> Int64? {
         return nil
     }
 }
