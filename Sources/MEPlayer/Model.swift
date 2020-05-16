@@ -265,7 +265,9 @@ final class AudioFrame: Frame {
     let dataWrap: ByteDataWrap
     public init(bufferSize: Int32) {
         dataWrap = ObjectPool.share.object(class: ByteDataWrap.self, key: "AudioData") { ByteDataWrap() }
-        dataWrap.size = Array(repeating: Int(bufferSize), count: Int(KSPlayerManager.audioPlayerMaximumChannels))
+        if dataWrap.size[0] < bufferSize {
+            dataWrap.size = Array(repeating: Int(bufferSize), count: Int(KSPlayerManager.audioPlayerMaximumChannels))
+        }
     }
 
     deinit {
