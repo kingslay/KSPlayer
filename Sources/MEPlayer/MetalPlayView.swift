@@ -59,12 +59,14 @@ final class MetalPlayView: MTKView, MTKViewDelegate, FrameOutput {
     func draw(frame: MEFrame) {
         if let frame = frame as? VideoVTBFrame, let pixelBuffer = frame.corePixelBuffer {
             renderSource?.setVideo(time: frame.cmtime)
-            guard isOutput, let drawable = currentDrawable else {
+            guard isOutput, let drawable = currentDrawable, let renderPassDescriptor = currentRenderPassDescriptor else {
                 return
             }
             drawableSize = display == .plane ? pixelBuffer.drawableSize : UIScreen.size
             let textures = pixelBuffer.textures(frome: textureCache)
-            guard let commandBuffer = MetalRender.share.draw(pixelBuffer: pixelBuffer, display: display, inputTextures: textures, outputTexture: drawable.texture) else {
+            renderPassDescriptor.colorAttachments[0].clearColor = MTLClearColor(red: 0, green: 0, blue: 0, alpha: 0)
+            renderPassDescriptor.colorAttachments[0].loadAction = .clear
+            guard let commandBuffer = MetalRender.share.draw(pixelBuffer: pixelBuffer, display: display, inputTextures: textures, renderPassDescriptor: renderPassDescriptor) else {
                 return
             }
             //        commandBuffer.present(drawable)
@@ -73,6 +75,7 @@ final class MetalPlayView: MTKView, MTKViewDelegate, FrameOutput {
                 frame.corePixelBuffer = nil
             }
             commandBuffer.commit()
+//            commandBuffer.waitUntilCompleted()
         }
     }
 

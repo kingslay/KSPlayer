@@ -66,7 +66,7 @@ extension AudioOutput: AudioPlayerDelegate {
             let framesToCopy = min(numberOfSamples, residueLinesize)
             let bytesToCopy = framesToCopy * MemoryLayout<Float>.size
             let offset = currentRenderReadOffset * MemoryLayout<Float>.size
-            for i in 0 ..< min(ioData.count, currentRender.dataWrap.numberOfChannels) {
+            for i in 0 ..< min(ioData.count, currentRender.dataWrap.data.count) {
                 (ioData[i].mData! + ioDataWriteOffset).copyMemory(from: currentRender.dataWrap.data[i]! + offset, byteCount: bytesToCopy)
             }
             numberOfSamples -= framesToCopy

@@ -14,7 +14,6 @@ class MetalRender {
     static let share = MetalRender()
     let device: MTLDevice
     private let commandQueue: MTLCommandQueue?
-    private let renderPassDescriptor = MTLRenderPassDescriptor()
     private let library: MTLLibrary
     private lazy var yuv = YUVMetalRenderPipeline(device: device, library: library)
     private lazy var nv12 = NV12MetalRenderPipeline(device: device, library: library)
@@ -93,25 +92,20 @@ class MetalRender {
         }
         self.library = library
         commandQueue = device.makeCommandQueue()
-        renderPassDescriptor.colorAttachments[0].clearColor = MTLClearColor(red: 0, green: 0, blue: 0, alpha: 1)
-        renderPassDescriptor.colorAttachments[0].loadAction = .clear
-        renderPassDescriptor.colorAttachments[0].storeAction = .store
     }
 
-    func draw(pixelBuffer: BufferProtocol, display: DisplayEnum = .plane, inputTextures: [MTLTexture], outputTexture: MTLTexture) -> MTLCommandBuffer? {
-        renderPassDescriptor.colorAttachments[0].texture = outputTexture
+    func draw(pixelBuffer: BufferProtocol, display: DisplayEnum = .plane, inputTextures: [MTLTexture], renderPassDescriptor: MTLRenderPassDescriptor) -> MTLCommandBuffer? {
         guard inputTextures.count > 0, let commandBuffer = commandQueue?.makeCommandBuffer(),
             let encoder = commandBuffer.makeRenderCommandEncoder(descriptor: renderPassDescriptor) else {
             return nil
         }
-        encoder.setCullMode(.none)
         encoder.pushDebugGroup("RenderFrame")
+        encoder.setRenderPipelineState(pipeline(pixelBuffer: pixelBuffer).state)
         encoder.setFragmentSamplerState(samplerState, index: 0)
         for (index, texture) in inputTextures.enumerated() {
             texture.label = "texture\(index)"
             encoder.setFragmentTexture(texture, index: index)
         }
-        encoder.setRenderPipelineState(pipeline(pixelBuffer: pixelBuffer).state)
         setFragmentBuffer(pixelBuffer: pixelBuffer, encoder: encoder)
         display.set(encoder: encoder)
         encoder.popDebugGroup()

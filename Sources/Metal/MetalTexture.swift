@@ -44,28 +44,10 @@ public final class MetalTextureCache {
         return inputTexture
     }
 
-    func textures(pixelFormat: OSType, width: Int, height: Int, bytes: [UnsafeMutablePointer<UInt8>?], bytesPerRows: [Int32]) -> [MTLTexture] {
-        var planeCount = 3
-        var widths = Array(repeating: width, count: 3)
-        var heights = Array(repeating: height, count: 3)
-        var formats = Array(repeating: MTLPixelFormat.r8Unorm, count: 3)
-        switch pixelFormat {
-        case kCVPixelFormatType_420YpCbCr8Planar:
-            widths[1] = width / 2
-            widths[2] = width / 2
-            heights[1] = height / 2
-            heights[2] = height / 2
-        case kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange, kCVPixelFormatType_420YpCbCr8BiPlanarFullRange:
-            planeCount = 2
-            widths[1] = width / 2
-            heights[1] = height / 2
-            formats[1] = .rg8Unorm
-        default:
-            planeCount = 1
-            formats[0] = .bgra8Unorm
-        }
-        if textures.count != planeCount {
-            textures.removeAll()
+    func textures(formats: [MTLPixelFormat], widths: [Int], heights: [Int], bytes: [UnsafeMutablePointer<UInt8>?], bytesPerRows: [Int32]) -> [MTLTexture] {
+        let planeCount = formats.count
+        if textures.count > planeCount {
+            textures.removeLast(textures.count - planeCount)
         }
         for i in 0 ..< planeCount {
             let key = "MTLTexture" + [Int(formats[i].rawValue), widths[i], heights[i]].description

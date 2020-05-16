@@ -109,13 +109,16 @@ class VideoSwresample: Swresample {
 
 class PixelBuffer: BufferProtocol {
     let format: OSType
-    let planeCount: Int
     let width: Int
     let height: Int
+    let planeCount: Int
     let isFullRangeVideo: Bool
     let colorAttachments: NSString
     let drawableSize: CGSize
-    private let bytes: [UnsafeMutablePointer<UInt8>?]
+    private let formats: [MTLPixelFormat]
+    private let widths: [Int]
+    private let heights: [Int]
+    private let dataWrap: ByteDataWrap
     private let bytesPerRow: [Int32]
     init(frame: UnsafeMutablePointer<AVFrame>) {
         format = AVPixelFormat(rawValue: frame.pointee.format).format
@@ -128,7 +131,6 @@ class PixelBuffer: BufferProtocol {
         width = Int(frame.pointee.width)
         height = Int(frame.pointee.height)
         isFullRangeVideo = format != kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange
-        bytes = Array(tuple: frame.pointee.data)
         bytesPerRow = Array(tuple: frame.pointee.linesize)
         let vertical = Int(frame.pointee.sample_aspect_ratio.den)
         let horizontal = Int(frame.pointee.sample_aspect_ratio.num)
@@ -140,23 +142,42 @@ class PixelBuffer: BufferProtocol {
         switch format {
         case kCVPixelFormatType_420YpCbCr8Planar:
             planeCount = 3
+            formats = [.r8Unorm, .r8Unorm, .r8Unorm]
+            widths = [width, width / 2, width / 2]
+            heights = [height, height / 2, height / 2]
         case kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange, kCVPixelFormatType_420YpCbCr8BiPlanarFullRange:
             planeCount = 2
+            formats = [.r8Unorm, .rg8Unorm]
+            widths = [width, width / 2]
+            heights = [height, height / 2]
         default:
             planeCount = 1
+            formats = [.bgra8Unorm]
+            widths = [width]
+            heights = [height]
+        }
+        dataWrap = ObjectPool.share.object(class: ByteDataWrap.self, key: "VideoData") { ByteDataWrap() }
+        let bytes = Array(tuple: frame.pointee.data)
+        dataWrap.size = (0 ..< planeCount).map { Int(bytesPerRow[$0]) * heights[$0] }
+        (0 ..< planeCount).forEach { i in
+            dataWrap.data[i]?.assign(from: bytes[i]!, count: dataWrap.size[i])
         }
     }
 
+    deinit {
+        ObjectPool.share.comeback(item: dataWrap, key: "VideoData")
+    }
+
     func textures(frome cache: MetalTextureCache) -> [MTLTexture] {
-        cache.textures(pixelFormat: format, width: width, height: height, bytes: bytes, bytesPerRows: bytesPerRow)
+        cache.textures(formats: formats, widths: widths, heights: heights, bytes: dataWrap.data, bytesPerRows: bytesPerRow)
     }
 
     func widthOfPlane(at planeIndex: Int) -> Int {
-        planeIndex == 0 ? width : width / 2
+        widths[planeIndex]
     }
 
     func heightOfPlane(at planeIndex: Int) -> Int {
-        planeIndex == 0 ? height : height / 2
+        heights[planeIndex]
     }
 
     public static func isSupported(format: AVPixelFormat) -> Bool {
@@ -166,11 +187,11 @@ class PixelBuffer: BufferProtocol {
     private func image() -> UIImage? {
         var image: UIImage?
         if format.format == AV_PIX_FMT_RGB24 {
-            image = UIImage(rgbData: bytes[0]!, linesize: Int(bytesPerRow[0]), width: width, height: height)
+            image = UIImage(rgbData: dataWrap.data[0]!, linesize: Int(bytesPerRow[0]), width: width, height: height)
         }
         let scale = VideoSwresample(dstFormat: AV_PIX_FMT_RGB24)
         if scale.setup(format: format.format.rawValue, width: Int32(width), height: Int32(height)) {
-            if scale.swsConvert(data: bytes, linesize: bytesPerRow), let frame = scale.dstFrame?.pointee {
+            if scale.swsConvert(data: dataWrap.data, linesize: bytesPerRow), let frame = scale.dstFrame?.pointee {
                 image = UIImage(rgbData: frame.data.0!, linesize: Int(frame.linesize.0), width: width, height: height)
             }
             scale.shutdown()
