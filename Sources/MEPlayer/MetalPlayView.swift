@@ -26,18 +26,6 @@ final class MetalPlayView: MTKView, MTKViewDelegate, FrameOutput {
         fatalError("init(coder:) has not been implemented")
     }
 
-    override var drawableSize: CGSize {
-        didSet {
-            #if targetEnvironment(simulator)
-            if #available(iOS 13.0, tvOS 13.0, *) {
-                (layer as? CAMetalLayer)?.drawableSize = drawableSize
-            }
-            #else
-            (layer as? CAMetalLayer)?.drawableSize = drawableSize
-            #endif
-        }
-    }
-
     func play() {
         isPaused = false
     }
@@ -59,10 +47,10 @@ final class MetalPlayView: MTKView, MTKViewDelegate, FrameOutput {
     func draw(frame: MEFrame) {
         if let frame = frame as? VideoVTBFrame, let pixelBuffer = frame.corePixelBuffer {
             renderSource?.setVideo(time: frame.cmtime)
+            drawableSize = display == .plane ? pixelBuffer.drawableSize : UIScreen.size
             guard isOutput, let drawable = currentDrawable, let renderPassDescriptor = currentRenderPassDescriptor else {
                 return
             }
-            drawableSize = display == .plane ? pixelBuffer.drawableSize : UIScreen.size
             let textures = pixelBuffer.textures(frome: textureCache)
             renderPassDescriptor.colorAttachments[0].clearColor = MTLClearColor(red: 0, green: 0, blue: 0, alpha: 0)
             renderPassDescriptor.colorAttachments[0].loadAction = .clear

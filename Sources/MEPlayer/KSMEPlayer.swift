@@ -95,6 +95,7 @@ extension KSMEPlayer: MEPlayerDelegate {
         isPreparedToPlay = true
         runInMainqueue { [weak self] in
             guard let self = self else { return }
+            self.videoOutput.drawableSize = self.options.display == .plane ? self.naturalSize : UIScreen.size
             if self.options.isAutoPlay {
                 self.play()
             }
