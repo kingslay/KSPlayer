@@ -75,7 +75,7 @@ struct ContentView: View {
     }
 
     private func parsem3u8(string: String) -> [KSPlayerResource] {
-        return string.components(separatedBy: "#EXTINF:").compactMap { content in
+        string.components(separatedBy: "#EXTINF:").compactMap { content in
             let array = content.split(separator: "\n")
             guard array.count > 1, let url = URL(string: String(array[1])) else {
                 return nil

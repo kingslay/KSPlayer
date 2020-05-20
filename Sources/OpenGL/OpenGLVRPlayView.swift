@@ -107,7 +107,7 @@ final class OpenGLVRPlayView: OpenGLPlayView {
 
 extension GLKMatrix4 {
     var array: [Float] {
-        return (0 ..< 16).map { i in
+        (0 ..< 16).map { i in
             self[i]
         }
     }

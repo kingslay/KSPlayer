@@ -33,7 +33,7 @@ final class SubtitlePlayerItemTrack: FFPlayerItemTrack<SubtitleFrame> {
     }
 
     override func getOutputRender(where predicate: ((MEFrame) -> Bool)?) -> MEFrame? {
-        return outputRenderQueue.search(where: predicate ?? { _ in true })
+        outputRenderQueue.search(where: predicate ?? { _ in true })
     }
 
     // todo 无缝循环的话，无法处理字幕，导致字幕的内存一直增加。一个暴力的方法是判断数据里面有没有这个数据了

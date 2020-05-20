@@ -79,7 +79,7 @@ public class KSSubtitleController {
     }
 
     public func filterInfos(_ isIncluded: (SubtitleInfo) -> Bool) -> [SubtitleInfo] {
-        return infos.filter(isIncluded)
+        infos.filter(isIncluded)
     }
 
     private func searchSubtitle(datasouce: SubtitleDataSouce, name: String) {

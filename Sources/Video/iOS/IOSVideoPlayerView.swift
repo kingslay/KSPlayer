@@ -30,7 +30,7 @@ open class IOSVideoPlayerView: VideoPlayerView {
     public var landscapeButton = UIButton()
     /// Gesture used to show / hide control view
     public let panGesture = UIPanGestureRecognizer()
-    open override var isMaskShow: Bool {
+    override open var isMaskShow: Bool {
         didSet {
             UIView.animate(withDuration: 0.3) {
                 self.lockButton.alpha = self.isMaskShow ? 1.0 : 0.0
@@ -38,11 +38,11 @@ open class IOSVideoPlayerView: VideoPlayerView {
         }
     }
 
-    public override var isLock: Bool {
-        return lockButton.isSelected
+    override public var isLock: Bool {
+        lockButton.isSelected
     }
 
-    open override func customizeUIComponents() {
+    override open func customizeUIComponents() {
         super.customizeUIComponents()
         if UIDevice.current.userInterfaceIdiom == .phone {
             subtitleLabel.font = .systemFont(ofSize: 14)
@@ -121,7 +121,7 @@ open class IOSVideoPlayerView: VideoPlayerView {
         addNotification()
     }
 
-    open override func resetPlayer() {
+    override open func resetPlayer() {
         super.resetPlayer()
         maskImageView.alpha = 1
         maskImageView.image = nil
@@ -130,7 +130,7 @@ open class IOSVideoPlayerView: VideoPlayerView {
         routeButton.isHidden = !routeButton.areWirelessRoutesAvailable
     }
 
-    open override func onButtonPressed(_ button: UIButton) {
+    override open func onButtonPressed(_ button: UIButton) {
         super.onButtonPressed(button)
         if let type = PlayerButtonType(rawValue: button.tag) {
             if type == .lock {
@@ -192,7 +192,7 @@ open class IOSVideoPlayerView: VideoPlayerView {
         judgePanGesture()
     }
 
-    open override func player(layer: KSPlayerLayer, state: KSPlayerState) {
+    override open func player(layer: KSPlayerLayer, state: KSPlayerState) {
         super.player(layer: layer, state: state)
         if state == .readyToPlay {
             UIView.animate(withDuration: 0.3) {
@@ -202,13 +202,13 @@ open class IOSVideoPlayerView: VideoPlayerView {
         judgePanGesture()
     }
 
-    open override func player(layer: KSPlayerLayer, currentTime: TimeInterval, totalTime: TimeInterval) {
+    override open func player(layer: KSPlayerLayer, currentTime: TimeInterval, totalTime: TimeInterval) {
         airplayStatusView.isHidden = !(layer.player?.isExternalPlaybackActive ?? false)
         guard !isSliderSliding else { return }
         super.player(layer: layer, currentTime: currentTime, totalTime: totalTime)
     }
 
-    open override func slider(value: Double, event: ControlEvents) {
+    override open func slider(value: Double, event: ControlEvents) {
         super.slider(value: value, event: event)
         if event == .touchDown {
             isSliderSliding = true
@@ -233,12 +233,12 @@ open class IOSVideoPlayerView: VideoPlayerView {
         viewController?.present(alertController, animated: true, completion: nil)
     }
 
-    open override func set(resource: KSPlayerResource, definitionIndex: Int = 0, isSetUrl: Bool = true) {
+    override open func set(resource: KSPlayerResource, definitionIndex: Int = 0, isSetUrl: Bool = true) {
         super.set(resource: resource, definitionIndex: definitionIndex, isSetUrl: isSetUrl)
         maskImageView.image(url: resource.cover)
     }
 
-    open override func change(definitionIndex: Int) {
+    override open func change(definitionIndex: Int) {
         playerLayer.player?.thumbnailImageAtCurrentTime { [weak self] image in
             if let self = self, let image = image {
                 DispatchQueue.main.async { [weak self] in
@@ -424,7 +424,7 @@ extension IOSVideoPlayerView {
 }
 
 public class AirplayStatusView: UIView {
-    public override init(frame: CGRect) {
+    override public init(frame: CGRect) {
         super.init(frame: frame)
         let airplayicon = UIImageView(image: image(named: "airplayicon_play"))
         addSubview(airplayicon)

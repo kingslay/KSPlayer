@@ -157,7 +157,7 @@ private class SphereDisplayModel {
 
 private class VRDisplayModel: SphereDisplayModel {
     private let modelViewProjectionMatrix: simd_float4x4
-    required override init() {
+    override required init() {
         let size = UIScreen.size
         let aspect = Float(size.width / size.height)
         let projectionMatrix = simd_float4x4(perspective: Float.pi / 3, aspect: aspect, nearZ: 0.1, farZ: 400.0)
@@ -184,7 +184,7 @@ private class VRDisplayModel: SphereDisplayModel {
 private class VRBoxDisplayModel: SphereDisplayModel {
     private let modelViewProjectionMatrixLeft: simd_float4x4
     private let modelViewProjectionMatrixRight: simd_float4x4
-    required override init() {
+    override required init() {
         let size = UIScreen.size
         let aspect = Float(size.width / size.height) / 2
         let viewMatrixLeft = simd_float4x4(lookAt: [-0.012, 0, 0], center: [0, 0, -1000], up: [0, 1, 0])

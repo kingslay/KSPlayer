@@ -10,7 +10,7 @@ import Cocoa
 
 class OpenURLWindowController: NSWindowController, NSTextFieldDelegate, NSControlTextEditingDelegate {
     override var windowNibName: NSNib.Name {
-        return NSNib.Name("OpenURLWindowController")
+        NSNib.Name("OpenURLWindowController")
     }
 
     @IBOutlet var urlStackView: NSStackView!

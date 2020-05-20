@@ -3,7 +3,7 @@ import SceneKit
 public final class MediaSphereNode: SCNNode {
     public var mediaContents: Any? {
         get {
-            return geometry?.firstMaterial?.diffuse.contents
+            geometry?.firstMaterial?.diffuse.contents
         }
         set(value) {
             geometry?.firstMaterial?.diffuse.contents = value

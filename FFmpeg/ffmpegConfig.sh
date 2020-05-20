@@ -29,9 +29,6 @@ CONFIGURE_FLAGS="$CONFIGURE_FLAGS --enable-runtime-cpudetect"
 CONFIGURE_FLAGS="$CONFIGURE_FLAGS --disable-gray"
 CONFIGURE_FLAGS="$CONFIGURE_FLAGS --disable-swscale-alpha"
 
-# Program options:
-CONFIGURE_FLAGS="$CONFIGURE_FLAGS --disable-ffprobe"
-
 # Documentation options:
 CONFIGURE_FLAGS="$CONFIGURE_FLAGS --disable-doc"
 CONFIGURE_FLAGS="$CONFIGURE_FLAGS --disable-htmlpages"

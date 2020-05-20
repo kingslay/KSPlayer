@@ -15,7 +15,7 @@ protocol DetailProtocol: UIViewController {
 class DetailViewController: UIViewController, DetailProtocol {
     #if os(iOS)
     override var preferredStatusBarStyle: UIStatusBarStyle {
-        return .lightContent
+        .lightContent
     }
 
     private let playerView = IOSVideoPlayerView()

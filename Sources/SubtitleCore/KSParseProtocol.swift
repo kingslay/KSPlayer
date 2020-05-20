@@ -12,7 +12,7 @@ public protocol KSParseProtocol {
 
 extension KSParseProtocol {
     public static func patternReg() -> NSRegularExpression? {
-        return try? NSRegularExpression(pattern: "\\{[^}]+\\}", options: .caseInsensitive)
+        try? NSRegularExpression(pattern: "\\{[^}]+\\}", options: .caseInsensitive)
     }
 
     public static func parseDuration(_ fromStr: String) -> TimeInterval {
@@ -33,7 +33,7 @@ extension KSParseProtocol {
 
 public class AssParse: KSParseProtocol {
     public func canParse(subtitle: String) -> Bool {
-        return subtitle.contains("[Script Info]")
+        subtitle.contains("[Script Info]")
     }
 
     // Dialogue: 0,0:12:37.73,0:12:38.83,Aki Default,,0,0,0,,{\be8}原来如此
@@ -103,7 +103,7 @@ public class AssParse: KSParseProtocol {
 
 public class SrtParse: KSParseProtocol {
     public func canParse(subtitle: String) -> Bool {
-        return subtitle.contains(" --> ")
+        subtitle.contains(" --> ")
     }
 
     /**

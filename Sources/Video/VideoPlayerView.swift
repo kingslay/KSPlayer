@@ -111,10 +111,10 @@ open class VideoPlayerView: PlayerView {
     }
 
     public var isLock: Bool {
-        return false
+        false
     }
 
-    public override init(frame: CGRect) {
+    override public init(frame: CGRect) {
         super.init(frame: frame)
         setupUIComponents()
         addConstraint()
@@ -132,7 +132,7 @@ open class VideoPlayerView: PlayerView {
 
     // MARK: - Action Response
 
-    @objc open override func onButtonPressed(_ button: UIButton) {
+    @objc override open func onButtonPressed(_ button: UIButton) {
         autoFadeOutViewWithAnimation()
         super.onButtonPressed(button)
         if button.tag == PlayerButtonType.srt.rawValue {
@@ -182,7 +182,7 @@ open class VideoPlayerView: PlayerView {
         addSubview(bottomMaskView)
     }
 
-    open override func player(layer: KSPlayerLayer, currentTime: TimeInterval, totalTime: TimeInterval) {
+    override open func player(layer: KSPlayerLayer, currentTime: TimeInterval, totalTime: TimeInterval) {
         super.player(layer: layer, currentTime: currentTime, totalTime: totalTime)
         if let subtitle = resource?.subtitle {
             showSubtile(from: subtitle, at: currentTime)
@@ -191,7 +191,7 @@ open class VideoPlayerView: PlayerView {
         }
     }
 
-    open override func player(layer: KSPlayerLayer, state: KSPlayerState) {
+    override open func player(layer: KSPlayerLayer, state: KSPlayerState) {
         super.player(layer: layer, state: state)
         switch state {
         case .readyToPlay:
@@ -222,7 +222,7 @@ open class VideoPlayerView: PlayerView {
         }
     }
 
-    open override func resetPlayer() {
+    override open func resetPlayer() {
         super.resetPlayer()
         delayItem = nil
         resource = nil
@@ -238,7 +238,7 @@ open class VideoPlayerView: PlayerView {
 
     // MARK: - KSSliderDelegate
 
-    open override func slider(value: Double, event: ControlEvents) {
+    override open func slider(value: Double, event: ControlEvents) {
         if event == .valueChanged {
             delayItem?.cancel()
         } else if event == .touchUpInside {
@@ -247,7 +247,7 @@ open class VideoPlayerView: PlayerView {
         super.slider(value: value, event: event)
     }
 
-    open override func player(layer: KSPlayerLayer, finish error: Error?) {
+    override open func player(layer: KSPlayerLayer, finish error: Error?) {
         if let error = error as NSError?, error.domain == KSPlayerErrorDomain, useProxyUrl {
             useProxyUrl = false
             play()
@@ -269,7 +269,7 @@ open class VideoPlayerView: PlayerView {
         }
     }
 
-    open override func set(url: URL, options: KSOptions) {
+    override open func set(url: URL, options: KSOptions) {
         set(resource: KSPlayerResource(url: url, options: options))
     }
 

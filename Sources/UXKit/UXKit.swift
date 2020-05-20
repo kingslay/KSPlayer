@@ -20,7 +20,7 @@ public extension UIView {
 
     var cornerRadius: CGFloat {
         get {
-            return backingLayer?.cornerRadius ?? 0
+            backingLayer?.cornerRadius ?? 0
         }
         set {
             backingLayer?.cornerRadius = newValue

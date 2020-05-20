@@ -17,7 +17,7 @@ import MobileCoreServices.UTType
 #endif
 open class LayerContainerView: UIView {
     #if os(macOS)
-    public override init(frame: CGRect) {
+    override public init(frame: CGRect) {
         super.init(frame: frame)
         layer = CAGradientLayer()
     }
@@ -27,13 +27,13 @@ open class LayerContainerView: UIView {
     }
 
     #else
-    open override class var layerClass: AnyClass {
-        return CAGradientLayer.self
+    override open class var layerClass: AnyClass {
+        CAGradientLayer.self
     }
     #endif
     public var gradientLayer: CAGradientLayer {
         // swiftlint:disable force_cast
-        return layer as! CAGradientLayer
+        layer as! CAGradientLayer
         // swiftlint:enable force_cast
     }
 }
@@ -127,36 +127,36 @@ extension UIColor {
 public extension UIView {
     var widthConstraint: NSLayoutConstraint? {
         // 防止返回NSContentSizeLayoutConstraint
-        return constraints.first { $0.isMember(of: NSLayoutConstraint.self) && $0.firstAttribute == .width }
+        constraints.first { $0.isMember(of: NSLayoutConstraint.self) && $0.firstAttribute == .width }
     }
 
     var heightConstraint: NSLayoutConstraint? {
         // 防止返回NSContentSizeLayoutConstraint
-        return constraints.first { $0.isMember(of: NSLayoutConstraint.self) && $0.firstAttribute == .height }
+        constraints.first { $0.isMember(of: NSLayoutConstraint.self) && $0.firstAttribute == .height }
     }
 
     var rightConstraint: NSLayoutConstraint? {
-        return superview?.constraints.first { $0.firstItem === self && $0.firstAttribute == .right }
+        superview?.constraints.first { $0.firstItem === self && $0.firstAttribute == .right }
     }
 
     var leftConstraint: NSLayoutConstraint? {
-        return superview?.constraints.first { $0.firstItem === self && $0.firstAttribute == .left }
+        superview?.constraints.first { $0.firstItem === self && $0.firstAttribute == .left }
     }
 
     var topConstraint: NSLayoutConstraint? {
-        return superview?.constraints.first { $0.firstItem === self && $0.firstAttribute == .top }
+        superview?.constraints.first { $0.firstItem === self && $0.firstAttribute == .top }
     }
 
     var bottomConstraint: NSLayoutConstraint? {
-        return superview?.constraints.first { $0.firstItem === self && $0.firstAttribute == .bottom }
+        superview?.constraints.first { $0.firstItem === self && $0.firstAttribute == .bottom }
     }
 
     var centerXConstraint: NSLayoutConstraint? {
-        return superview?.constraints.first { $0.firstItem === self && $0.firstAttribute == .centerX }
+        superview?.constraints.first { $0.firstItem === self && $0.firstAttribute == .centerX }
     }
 
     var centerYConstraint: NSLayoutConstraint? {
-        return superview?.constraints.first { $0.firstItem === self && $0.firstAttribute == .centerY }
+        superview?.constraints.first { $0.firstItem === self && $0.firstAttribute == .centerY }
     }
 
     var safeTopAnchor: NSLayoutYAxisAnchor {
@@ -224,11 +224,11 @@ extension CMTimeRange {
 
 extension CGSize {
     var reverse: CGSize {
-        return CGSize(width: height, height: width)
+        CGSize(width: height, height: width)
     }
 
     var toPoint: CGPoint {
-        return CGPoint(x: width, y: height)
+        CGPoint(x: width, y: height)
     }
 }
 
@@ -243,19 +243,19 @@ extension Array {
 }
 
 func * (left: CGSize, right: CGFloat) -> CGSize {
-    return CGSize(width: left.width * right, height: left.height * right)
+    CGSize(width: left.width * right, height: left.height * right)
 }
 
 func * (left: CGPoint, right: CGFloat) -> CGPoint {
-    return CGPoint(x: left.x * right, y: left.y * right)
+    CGPoint(x: left.x * right, y: left.y * right)
 }
 
 func * (left: CGRect, right: CGFloat) -> CGRect {
-    return CGRect(origin: left.origin * right, size: left.size * right)
+    CGRect(origin: left.origin * right, size: left.size * right)
 }
 
 func - (left: CGSize, right: CGSize) -> CGSize {
-    return CGSize(width: left.width - right.width, height: left.height - right.height)
+    CGSize(width: left.width - right.width, height: left.height - right.height)
 }
 
 public func runInMainqueue(block: @escaping () -> Void) {

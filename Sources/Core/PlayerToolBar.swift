@@ -107,7 +107,7 @@ public class PlayerToolBar: UIStackView {
         ])
     }
 
-    public override func addArrangedSubview(_ view: UIView) {
+    override public func addArrangedSubview(_ view: UIView) {
         super.addArrangedSubview(view)
         view.isHidden = false
     }

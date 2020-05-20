@@ -11,7 +11,7 @@ import UIKit
 import AppKit
 #endif
 open class AudioPlayerView: PlayerView {
-    public override init(frame: CGRect) {
+    override public init(frame: CGRect) {
         super.init(frame: frame)
         toolBar.timeType = .min
         toolBar.spacing = 5
