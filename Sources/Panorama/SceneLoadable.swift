@@ -80,7 +80,7 @@ extension simd_quatf {
     }
 
     public var scnMatrix4: SCNMatrix4 {
-        return SCNMatrix4(simd_float4x4(self))
+        SCNMatrix4(simd_float4x4(self))
     }
 
     public var scnQuaternion: SCNQuaternion {

@@ -51,7 +51,7 @@ open class PlayerView: UIView, KSPlayerLayerDelegate, KSSliderDelegate {
         #endif
     }
 
-    public override init(frame: CGRect) {
+    override public init(frame: CGRect) {
         super.init(frame: frame)
         #if !os(macOS)
         NotificationCenter.default.addObserver(self, selector: #selector(audioInterrupted), name: AVAudioSession.interruptionNotification, object: nil)
@@ -154,7 +154,7 @@ open class PlayerView: UIView, KSPlayerLayerDelegate, KSSliderDelegate {
 extension PlayerView {
     public var totalTime: TimeInterval {
         get {
-            return toolBar.totalTime
+            toolBar.totalTime
         }
         set {
             toolBar.totalTime = newValue

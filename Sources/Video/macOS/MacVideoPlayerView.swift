@@ -37,12 +37,12 @@ open class MacVideoPlayerView: VideoPlayerView {
     /// 滑动方向
     private var scrollDirection = KSPanDirection.horizontal
     private var tmpPanValue: Float = 1
-    open override func customizeUIComponents() {
+    override open func customizeUIComponents() {
         super.customizeUIComponents()
         registerForDraggedTypes([.nsFilenames, .nsURL, .string])
     }
 
-    open override func player(layer: KSPlayerLayer, state: KSPlayerState) {
+    override open func player(layer: KSPlayerLayer, state: KSPlayerState) {
         super.player(layer: layer, state: state)
         if state == .readyToPlay {
             if let naturalSize = layer.player?.naturalSize {
@@ -53,7 +53,7 @@ open class MacVideoPlayerView: VideoPlayerView {
 }
 
 extension MacVideoPlayerView {
-    open override func updateTrackingAreas() {
+    override open func updateTrackingAreas() {
         trackingAreas.forEach {
             removeTrackingArea($0)
         }
@@ -61,19 +61,19 @@ extension MacVideoPlayerView {
         addTrackingArea(trackingArea)
     }
 
-    open override func mouseEntered(with _: NSEvent) {
+    override open func mouseEntered(with _: NSEvent) {
         isMaskShow = true
     }
 
-    open override func mouseMoved(with _: NSEvent) {
+    override open func mouseMoved(with _: NSEvent) {
         isMaskShow = true
     }
 
-    open override func mouseExited(with _: NSEvent) {
+    override open func mouseExited(with _: NSEvent) {
         isMaskShow = false
     }
 
-    open override func scrollWheel(with event: NSEvent) {
+    override open func scrollWheel(with event: NSEvent) {
         if event.phase.contains(.began) {
             if event.scrollingDeltaX != 0 {
                 scrollDirection = .horizontal
@@ -105,11 +105,11 @@ extension MacVideoPlayerView {
         }
     }
 
-    open override var acceptsFirstResponder: Bool {
-        return true
+    override open var acceptsFirstResponder: Bool {
+        true
     }
 
-    open override func keyDown(with event: NSEvent) {
+    override open func keyDown(with event: NSEvent) {
         if let specialKey = event.specialKey {
             if specialKey == .rightArrow {
                 slider(value: Double(toolBar.timeSlider.value) + 0.01 * totalTime, event: .touchUpInside)
@@ -123,11 +123,11 @@ extension MacVideoPlayerView {
         }
     }
 
-    open override func draggingEntered(_: NSDraggingInfo) -> NSDragOperation {
-        return .copy
+    override open func draggingEntered(_: NSDraggingInfo) -> NSDragOperation {
+        .copy
     }
 
-    open override func performDragOperation(_ sender: NSDraggingInfo) -> Bool {
+    override open func performDragOperation(_ sender: NSDraggingInfo) -> Bool {
         if let url = sender.getUrl() {
             if let set = MacVideoPlayerView.supportedFileExt[.subtitle],
                 set.contains(url.pathExtension.lowercased()) {

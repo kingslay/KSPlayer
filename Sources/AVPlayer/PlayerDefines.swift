@@ -213,7 +213,8 @@ public class KSOptions {
             return capacity.packetCount + capacity.frameCount >= capacity.fps * Int(preferredForwardBufferDuration)
         }
         throttle = mach_absolute_time()
-        return LoadingState(loadedTime: loadedTime, progress: progress, packetCount: packetCount, frameCount: frameCount, isFinished: isFinished, isPlayable: isPlayable, isFirst: isFirst, isSeek: isSeek)
+        return LoadingState(loadedTime: loadedTime, progress: progress, packetCount: packetCount,
+                            frameCount: frameCount, isFinished: isFinished, isPlayable: isPlayable, isFirst: isFirst, isSeek: isSeek)
     }
 
     open func adaptable(state: VideoAdaptationState) -> (Int64, Int64)? {
@@ -234,7 +235,7 @@ public class KSOptions {
     }
 
     open func wanted(bitRates _: [Int64]) -> Int64? {
-        return nil
+        nil
     }
 }
 

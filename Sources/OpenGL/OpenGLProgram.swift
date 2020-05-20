@@ -27,11 +27,11 @@ final class OpenGLProgram {
     }
 
     func attributeIndex(attributeName: String) -> GLuint {
-        return GLuint(attributes.index(of: attributeName))
+        GLuint(attributes.index(of: attributeName))
     }
 
     func uniformIndex(uniformName: String) -> GLuint {
-        return GLuint(glGetUniformLocation(program, NSString(string: uniformName).utf8String))
+        GLuint(glGetUniformLocation(program, NSString(string: uniformName).utf8String))
     }
 
     func link() -> Bool {

@@ -77,7 +77,7 @@ pointer.deallocate()
 rawPointer -= 1
 // rawPointer.deallocate()
 func pointerFunc(i: UnsafePointer<Int>) -> Int {
-    return i.pointee + 1
+    i.pointee + 1
 }
 
 var test5 = 1

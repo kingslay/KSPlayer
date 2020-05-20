@@ -10,7 +10,7 @@ import KSPlayer
 import UIKit
 class TableViewCell: UITableViewCell {
     var nameLabel: UILabel
-    public override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
+    override public init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         nameLabel = UILabel()
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         contentView.addSubview(nameLabel)
@@ -106,11 +106,11 @@ class MasterViewController: UIViewController, UITableViewDelegate, UITableViewDa
     // MARK: - Table View
 
     func numberOfSections(in _: UITableView) -> Int {
-        return 1
+        1
     }
 
     func tableView(_: UITableView, numberOfRowsInSection _: Int) -> Int {
-        return objects.count
+        objects.count
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {

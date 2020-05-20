@@ -66,7 +66,7 @@ extension KSPlayerLayerTest: KSPlayerLayerDelegate {
     func player(layer _: KSPlayerLayer, currentTime _: TimeInterval, totalTime _: TimeInterval) {}
 
     func player(layer _: KSPlayerLayer, finish _: Error?) {}
-    func player(layer _: KSPlayerLayer, bufferedCount: Int, consumeTime: TimeInterval) {
+    func player(layer _: KSPlayerLayer, bufferedCount: Int, consumeTime _: TimeInterval) {
         if bufferedCount > 0 {
             XCTFail()
         }

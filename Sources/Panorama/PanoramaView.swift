@@ -10,7 +10,7 @@ public final class PanoramaView: UIView {
     private let device: MTLDevice
     public var scene: (SCNScene & TextureRenderView & ImageRenderView)? {
         get {
-            return scnView.scene as? (SCNScene & TextureRenderView & ImageRenderView)
+            scnView.scene as? (SCNScene & TextureRenderView & ImageRenderView)
         }
         set(value) {
             orientationNode.removeFromParentNode()
@@ -85,20 +85,20 @@ public final class PanoramaView: UIView {
     }
 
     #if os(macOS)
-    public override func resize(withOldSuperviewSize oldSize: NSSize) {
+    override public func resize(withOldSuperviewSize oldSize: NSSize) {
         super.resize(withOldSuperviewSize: oldSize)
         scnView.frame = bounds
     }
 
     #else
-    public override func layoutSubviews() {
+    override public func layoutSubviews() {
         super.layoutSubviews()
         scnView.frame = bounds
     }
     #endif
     #if os(iOS)
     private var observer: NSObjectProtocol?
-    public override func willMove(toWindow newWindow: UIWindow?) {
+    override public func willMove(toWindow newWindow: UIWindow?) {
         if newWindow == nil {
             guard let observer = observer else {
                 return
@@ -136,12 +136,12 @@ extension PanoramaView: ImageRenderView {
 
 extension PanoramaView {
     public var sceneRenderer: SCNSceneRenderer {
-        return scnView
+        scnView
     }
 
     public var isPlaying: Bool {
         get {
-            return scnView.isPlaying
+            scnView.isPlaying
         }
         set(value) {
             scnView.isPlaying = value
@@ -150,7 +150,7 @@ extension PanoramaView {
 
     public var antialiasingMode: SCNAntialiasingMode {
         get {
-            return scnView.antialiasingMode
+            scnView.antialiasingMode
         }
         set(value) {
             scnView.antialiasingMode = value
@@ -158,11 +158,11 @@ extension PanoramaView {
     }
 
     public func snapshot() -> UIImage {
-        return scnView.snapshot()
+        scnView.snapshot()
     }
 
     public var panGestureRecognizer: UIPanGestureRecognizer {
-        return panGestureManager.gestureRecognizer
+        panGestureManager.gestureRecognizer
     }
 
     public func setNeedsResetRotation(animated: Bool = false) {
@@ -177,11 +177,11 @@ extension PanoramaView {
 
 extension PanoramaView: OrientationIndicatorDataSource {
     public var pointOfView: SCNNode? {
-        return orientationNode.pointOfView
+        orientationNode.pointOfView
     }
 
     public var viewportSize: CGSize {
-        return scnView.bounds.size
+        scnView.bounds.size
     }
 }
 

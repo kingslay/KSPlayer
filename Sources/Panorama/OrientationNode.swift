@@ -16,7 +16,7 @@ public final class OrientationNode: SCNNode {
 
     public var deviceOrientationProvider: DeviceOrientationProvider?
 
-    public override init() {
+    override public init() {
         super.init()
         #if os(iOS)
         deviceOrientationProvider = DefaultDeviceOrientationProvider()

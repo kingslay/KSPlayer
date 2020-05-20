@@ -11,7 +11,7 @@ function InnerBuild() {
     if [[ $parameter = "debug" && $platform = "macos" ]]; then
         FFMPEG_CFG_FLAGS="$FFMPEG_CFG_FLAGS --enable-ffmpeg --enable-ffplay --enable-sdl2"
     else
-        FFMPEG_CFG_FLAGS="$FFMPEG_CFG_FLAGS --disable-programs --disable-ffmpeg --disable-ffplay --disable-avfilter --disable-filters"
+        FFMPEG_CFG_FLAGS="$FFMPEG_CFG_FLAGS --disable-programs --disable-ffmpeg --disable-ffplay --disable-ffprobe --disable-avfilter --disable-filters"
     fi
     if ! [[ $parameter = "debug" && $platform = "maccatalyst" ]]; then
         FFMPEG_CFG_FLAGS="$FFMPEG_CFG_FLAGS --disable-debug"
@@ -50,6 +50,7 @@ function InnerBuild() {
     if [[ $parameter = "debug" && $platform = "macos" ]]; then
         cp $prefix/bin/ffmpeg /usr/local/bin
         cp $prefix/bin/ffplay /usr/local/bin
+        cp $prefix/bin/ffprobe /usr/local/bin
     fi
     cd $current_dir
 }

@@ -35,18 +35,18 @@ public typealias UIEvent = NSEvent
 
 extension NSScreen {
     var scale: CGFloat {
-        return backingScaleFactor
+        backingScaleFactor
     }
 
     static var size: CGSize {
-        return main?.frame.size ?? .zero
+        main?.frame.size ?? .zero
     }
 }
 
 extension NSClickGestureRecognizer {
     open var numberOfTapsRequired: Int {
         get {
-            return numberOfClicksRequired
+            numberOfClicksRequired
         }
         set {
             numberOfClicksRequired = newValue
@@ -89,12 +89,12 @@ extension NSView {
     }
 
     open var center: CGPoint {
-        return CGPoint(x: frame.midX, y: frame.midY)
+        CGPoint(x: frame.midX, y: frame.midY)
     }
 
     public var alpha: CGFloat {
         get {
-            return alphaValue
+            alphaValue
         }
         set {
             alphaValue = newValue
@@ -147,7 +147,7 @@ extension NSView {
 
     open var transform: CGAffineTransform {
         get {
-            return backingLayer?.affineTransform() ?? CGAffineTransform.identity
+            backingLayer?.affineTransform() ?? CGAffineTransform.identity
         }
         set {
             backingLayer?.setAffineTransform(newValue)
@@ -164,7 +164,7 @@ extension NSImage {
 extension NSButton {
     open var titleFont: UIFont? {
         get {
-            return font
+            font
         }
         set {
             font = newValue
@@ -190,7 +190,7 @@ extension NSButton {
 extension NSControl {
     public var textAlignment: NSTextAlignment {
         get {
-            return alignment
+            alignment
         }
         set {
             alignment = newValue
@@ -199,7 +199,7 @@ extension NSControl {
 
     public var text: String {
         get {
-            return stringValue
+            stringValue
         }
         set {
             stringValue = newValue
@@ -208,7 +208,7 @@ extension NSControl {
 
     public var attributedText: NSAttributedString {
         get {
-            return attributedStringValue
+            attributedStringValue
         }
         set {
             attributedStringValue = newValue
@@ -217,7 +217,7 @@ extension NSControl {
 
     public var numberOfLines: Int {
         get {
-            return usesSingleLineMode ? 1 : 0
+            usesSingleLineMode ? 1 : 0
         }
         set {
             usesSingleLineMode = newValue == 1
@@ -228,7 +228,7 @@ extension NSControl {
 extension NSTextContainer {
     public var numberOfLines: Int {
         get {
-            return maximumNumberOfLines
+            maximumNumberOfLines
         }
         set {
             maximumNumberOfLines = newValue
@@ -238,7 +238,7 @@ extension NSTextContainer {
 
 extension NSResponder {
     public var next: NSResponder? {
-        return nextResponder
+        nextResponder
     }
 }
 
@@ -260,14 +260,14 @@ extension NSSlider {
 
     open var maximumTrackTintColor: UIColor? {
         get {
-            return nil
+            nil
         }
         set {}
     }
 
     @IBInspectable public var maximumValue: Float {
         get {
-            return Float(maxValue)
+            Float(maxValue)
         }
         set {
             maxValue = Double(newValue)
@@ -276,7 +276,7 @@ extension NSSlider {
 
     @IBInspectable public var minimumValue: Float {
         get {
-            return Float(minValue)
+            Float(minValue)
         }
         set {
             minValue = Double(newValue)
@@ -285,7 +285,7 @@ extension NSSlider {
 
     @IBInspectable public var value: Float {
         get {
-            return floatValue
+            floatValue
         }
         set {
             floatValue = newValue
@@ -296,7 +296,7 @@ extension NSSlider {
 extension NSStackView {
     open var axis: NSUserInterfaceLayoutOrientation {
         get {
-            return orientation
+            orientation
         }
         set {
             orientation = newValue
@@ -307,7 +307,7 @@ extension NSStackView {
 extension NSWindow {
     open var rootViewController: NSViewController? {
         get {
-            return contentViewController
+            contentViewController
         }
         set {
             contentViewController = newValue
@@ -341,7 +341,7 @@ extension UIApplication {
 
     public var isIdleTimerDisabled: Bool {
         get {
-            return UIApplication.isIdleTimerDisabled
+            UIApplication.isIdleTimerDisabled
         }
         set {
             UIApplication.isIdleTimerDisabled = newValue
@@ -415,7 +415,7 @@ public class UIButton: NSButton {
     private var titleColors = [State: UIColor]()
     private var targetActions = [ControlEvents: (AnyObject?, Selector)]()
 
-    public override init(frame frameRect: NSRect) {
+    override public init(frame frameRect: NSRect) {
         super.init(frame: frameRect)
         isBordered = false
     }
@@ -430,7 +430,7 @@ public class UIButton: NSButton {
         }
     }
 
-    public override var isEnabled: Bool {
+    override public var isEnabled: Bool {
         didSet {
             update(state: isEnabled ? .normal : .disabled)
         }
@@ -474,7 +474,7 @@ public class UIButton: NSButton {
         targetActions.removeValue(forKey: controlEvents)
     }
 
-    open override func updateTrackingAreas() {
+    override open func updateTrackingAreas() {
         trackingAreas.forEach {
             removeTrackingArea($0)
         }
@@ -482,21 +482,21 @@ public class UIButton: NSButton {
         addTrackingArea(trackingArea)
     }
 
-    public override func mouseDown(with event: NSEvent) {
+    override public func mouseDown(with event: NSEvent) {
         super.mouseDown(with: event)
         if let (target, action) = targetActions[.touchUpInside] {
             _ = target?.perform(action, with: self)
         }
     }
 
-    public override func mouseEntered(with event: NSEvent) {
+    override public func mouseEntered(with event: NSEvent) {
         super.mouseEntered(with: event)
         if let (target, action) = targetActions[.mouseExited] {
             _ = target?.perform(action, with: self)
         }
     }
 
-    public override func mouseExited(with event: NSEvent) {
+    override public func mouseExited(with event: NSEvent) {
         super.mouseExited(with: event)
         if let (target, action) = targetActions[.mouseExited] {
             _ = target?.perform(action, with: self)
@@ -512,7 +512,7 @@ public class KSSlider: NSSlider {
         self.init(frame: .zero)
     }
 
-    public override init(frame frameRect: NSRect) {
+    override public init(frame frameRect: NSRect) {
         super.init(frame: frameRect)
         target = self
         action = #selector(progressSliderTouchEnded(_:))
@@ -620,16 +620,16 @@ class CADisplayLink: NSObject {
     }
 
     public var duration: TimeInterval {
-        return CVDisplayLinkGetActualOutputVideoRefreshPeriod(displayLink!)
+        CVDisplayLinkGetActualOutputVideoRefreshPeriod(displayLink!)
     }
 
     public var targetTimestamp: TimeInterval {
-        return duration + timestamp
+        duration + timestamp
     }
 
     public var isPaused: Bool {
         get {
-            return !CVDisplayLinkIsRunning(displayLink!)
+            !CVDisplayLinkIsRunning(displayLink!)
         }
         set {
             if newValue {

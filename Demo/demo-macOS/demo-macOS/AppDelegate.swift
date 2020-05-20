@@ -54,7 +54,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     func application(_: NSApplication, openFile _: String) -> Bool {
-        return true
+        true
     }
 
     func application(_: NSApplication, openFiles filenames: [String]) {

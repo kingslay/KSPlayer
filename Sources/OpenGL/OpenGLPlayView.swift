@@ -89,7 +89,7 @@ class OpenGLPlayView: GLKView, PixelRenderView {
     }
 
     func matrixWithSize(size _: CGSize) -> [Float] {
-        return defaultMatrix
+        defaultMatrix
     }
 
     private func configureGLKView() {
@@ -153,7 +153,7 @@ class OpenGLPlayView: GLKView, PixelRenderView {
     }
 
     #if !os(macOS)
-    open override func layoutSubviews() {
+    override open func layoutSubviews() {
         super.layoutSubviews()
         updateViewport()
     }

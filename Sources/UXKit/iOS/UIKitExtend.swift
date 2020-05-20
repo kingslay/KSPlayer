@@ -8,7 +8,7 @@
 import UIKit
 extension UIScreen {
     static var size: CGSize {
-        return main.bounds.size
+        main.bounds.size
     }
 }
 
@@ -18,7 +18,7 @@ public class KSSlider: UXSlider {
     weak var delegate: KSSliderDelegate?
     public var trackHeigt = CGFloat(2)
     public var isPlayable = false
-    public override init(frame: CGRect) {
+    override public init(frame: CGRect) {
         super.init(frame: frame)
         tapGesture = UITapGestureRecognizer(target: self, action: #selector(actionTapGesture(sender:)))
         panGesture = UIPanGestureRecognizer(target: self, action: #selector(actionPanGesture(sender:)))
@@ -33,14 +33,14 @@ public class KSSlider: UXSlider {
         fatalError("init(coder:) has not been implemented")
     }
 
-    open override func trackRect(forBounds bounds: CGRect) -> CGRect {
+    override open func trackRect(forBounds bounds: CGRect) -> CGRect {
         var customBounds = super.trackRect(forBounds: bounds)
         customBounds.origin.y -= trackHeigt / 2
         customBounds.size.height = trackHeigt
         return customBounds
     }
 
-    open override func thumbRect(forBounds bounds: CGRect, trackRect rect: CGRect, value: Float) -> CGRect {
+    override open func thumbRect(forBounds bounds: CGRect, trackRect rect: CGRect, value: Float) -> CGRect {
         let rect = super.thumbRect(forBounds: bounds, trackRect: rect, value: value)
         return rect.insetBy(dx: -20, dy: -20)
     }
@@ -101,7 +101,7 @@ public typealias UXSlider = UISlider
 public class UXSlider: UIProgressView {
     @IBInspectable public var value: Float {
         get {
-            return progress * maximumValue
+            progress * maximumValue
         }
         set {
             progress = newValue / maximumValue
@@ -122,7 +122,7 @@ public class UXSlider: UIProgressView {
 
     open var minimumTrackTintColor: UIColor? {
         get {
-            return progressTintColor
+            progressTintColor
         }
         set {
             progressTintColor = newValue
@@ -131,7 +131,7 @@ public class UXSlider: UIProgressView {
 
     open var maximumTrackTintColor: UIColor? {
         get {
-            return trackTintColor
+            trackTintColor
         }
         set {
             trackTintColor = newValue
@@ -141,7 +141,7 @@ public class UXSlider: UIProgressView {
     open func setThumbImage(_: UIImage?, for _: UIControl.State) {}
     open func addTarget(_: Any?, action _: Selector, for _: UIControl.Event) {}
 
-    public override init(frame: CGRect) {
+    override public init(frame: CGRect) {
         super.init(frame: frame)
         setup()
     }
@@ -159,11 +159,11 @@ public class UXSlider: UIProgressView {
 
     private func refresh() {}
     open func trackRect(forBounds bounds: CGRect) -> CGRect {
-        return bounds
+        bounds
     }
 
     open func thumbRect(forBounds bounds: CGRect, trackRect _: CGRect, value _: Float) -> CGRect {
-        return bounds
+        bounds
     }
 }
 #endif
@@ -171,7 +171,7 @@ public typealias UIViewContentMode = UIView.ContentMode
 extension UIButton {
     open var titleFont: UIFont? {
         get {
-            return titleLabel?.font
+            titleLabel?.font
         }
         set {
             titleLabel?.font = newValue

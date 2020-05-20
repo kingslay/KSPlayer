@@ -7,7 +7,7 @@ import AppKit
 #endif
 public final class KSAVPlayerView: UIView {
     public let player = AVQueuePlayer()
-    public override init(frame: CGRect) {
+    override public init(frame: CGRect) {
         super.init(frame: frame)
         #if os(macOS)
         layer = AVPlayerLayer()
@@ -51,9 +51,9 @@ public final class KSAVPlayerView: UIView {
     }
 
     #else
-    public override class var layerClass: AnyClass { AVPlayerLayer.self }
+    override public class var layerClass: AnyClass { AVPlayerLayer.self }
 
-    public override var contentMode: UIViewContentMode {
+    override public var contentMode: UIViewContentMode {
         didSet {
             switch contentMode {
             case .scaleToFill:

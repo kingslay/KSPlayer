@@ -12,7 +12,7 @@ public class SrtListCell: UITableViewCell {
     fileprivate let localIconViewWidth: NSLayoutConstraint
     fileprivate let titleLabel = UILabel()
     fileprivate let localIconView = UIButton()
-    public override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
+    override public init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         localIconViewWidth = localIconView.widthAnchor.constraint(equalToConstant: 34)
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         selectionStyle = .none
@@ -69,7 +69,7 @@ public class KSSubtitleView: UIControl, SubtitleViewProtocol {
     private let tableWidth = CGFloat(360)
     private var tableViewRightConstraint: NSLayoutConstraint!
     public let selectedInfo: KSObservable<SubtitleInfo>
-    public override var isHidden: Bool {
+    override public var isHidden: Bool {
         didSet {
             if isHidden {
                 UIView.animate(withDuration: 0.25) {
@@ -92,7 +92,7 @@ public class KSSubtitleView: UIControl, SubtitleViewProtocol {
         self.init(frame: UIScreen.main.bounds)
     }
 
-    public override init(frame: CGRect) {
+    override public init(frame: CGRect) {
         selectedInfo = KSObservable(wrappedValue: closeInfo)
         super.init(frame: frame)
         tableView.dataSource = self
@@ -126,7 +126,7 @@ public class KSSubtitleView: UIControl, SubtitleViewProtocol {
         tableView.reloadData()
     }
 
-    public override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+    override public func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         super.touchesBegan(touches, with: event)
         isHidden = true
     }
@@ -158,6 +158,6 @@ extension KSSubtitleView: UITableViewDataSource {
     }
 
     public func tableView(_: UITableView, numberOfRowsInSection _: Int) -> Int {
-        return infos.count
+        infos.count
     }
 }

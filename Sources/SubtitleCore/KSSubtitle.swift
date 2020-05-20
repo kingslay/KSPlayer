@@ -26,7 +26,7 @@ public class SubtitlePart: CustomStringConvertible {
     }
 
     public var description: String {
-        return "Subtile Group ==========\nstart: \(start)\nend:\(end)\ntext:\(text)"
+        "Subtile Group ==========\nstart: \(start)\nend:\(end)\ntext:\(text)"
     }
 }
 
@@ -91,11 +91,11 @@ public class KSSubtitle {
     private var isFirstSearch = true
     public var isChangeIndex = true
     public var currentPart: SubtitlePart {
-        return parts[currentIndex]
+        parts[currentIndex]
     }
 
     public var partsCount: Int {
-        return parts.count
+        parts.count
     }
 
     public init() {}

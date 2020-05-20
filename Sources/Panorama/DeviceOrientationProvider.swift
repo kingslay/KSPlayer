@@ -60,7 +60,7 @@ extension CMMotionManager: DeviceOrientationProvider {
     }
 
     public func shouldWaitDeviceOrientation(atTime time: TimeInterval) -> Bool {
-        return isDeviceMotionActive && time - (deviceMotion?.timestamp ?? 0) > 1
+        isDeviceMotionActive && time - (deviceMotion?.timestamp ?? 0) > 1
     }
 }
 
@@ -103,11 +103,11 @@ internal final class DefaultDeviceOrientationProvider: DeviceOrientationProvider
     }
 
     func deviceOrientation(atTime time: TimeInterval) -> simd_quatf? {
-        return DefaultDeviceOrientationProvider.motionManager.deviceOrientation(atTime: time)
+        DefaultDeviceOrientationProvider.motionManager.deviceOrientation(atTime: time)
     }
 
     func shouldWaitDeviceOrientation(atTime time: TimeInterval) -> Bool {
-        return DefaultDeviceOrientationProvider.motionManager.shouldWaitDeviceOrientation(atTime: time)
+        DefaultDeviceOrientationProvider.motionManager.shouldWaitDeviceOrientation(atTime: time)
     }
 }
 #endif
