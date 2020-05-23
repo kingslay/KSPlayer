@@ -12,24 +12,16 @@ import UIKit
 open class IOSVideoPlayerView: VideoPlayerView {
     private var isPlayingForCall = false
     private let callCenter = CXCallObserver()
-    /// 滑动方向
-    private var scrollDirection = KSPanDirection.horizontal
-    private var tmpPanValue: Float = 0
     private var isVolume = false
-    private var isSliderSliding = false
     private let volumeView = BrightnessVolume()
     public var volumeViewSlider = UXSlider()
     public var lockButton = UIButton()
     public var backButton = UIButton()
-    public let tapGesture = UITapGestureRecognizer()
-    public let doubleTapGesture = UITapGestureRecognizer()
     public var airplayStatusView: UIView = AirplayStatusView()
     public var routeButton = MPVolumeView()
     /// Image view to show video cover
     public var maskImageView = UIImageView()
     public var landscapeButton = UIButton()
-    /// Gesture used to show / hide control view
-    public let panGesture = UIPanGestureRecognizer()
     override open var isMaskShow: Bool {
         didSet {
             UIView.animate(withDuration: 0.3) {
@@ -44,6 +36,7 @@ open class IOSVideoPlayerView: VideoPlayerView {
 
     override open func customizeUIComponents() {
         super.customizeUIComponents()
+        panGesture.isEnabled = false
         if UIDevice.current.userInterfaceIdiom == .phone {
             subtitleLabel.font = .systemFont(ofSize: 14)
         }
@@ -62,16 +55,6 @@ open class IOSVideoPlayerView: VideoPlayerView {
         landscapeButton.setImage(KSPlayerManager.image(named: "KSPlayer_fullscreen"), for: .normal)
         landscapeButton.setImage(KSPlayerManager.image(named: "KSPlayer_portialscreen"), for: .selected)
         landscapeButton.addTarget(self, action: #selector(onButtonPressed(_:)), for: .touchUpInside)
-        tapGesture.addTarget(self, action: #selector(onTapGestureTapped(_:)))
-        tapGesture.numberOfTapsRequired = 1
-        addGestureRecognizer(tapGesture)
-        panGesture.addTarget(self, action: #selector(panDirection(_:)))
-        panGesture.isEnabled = false
-        addGestureRecognizer(panGesture)
-        doubleTapGesture.addTarget(self, action: #selector(doubleGestureAction))
-        doubleTapGesture.numberOfTapsRequired = 2
-        tapGesture.require(toFail: doubleTapGesture)
-        addGestureRecognizer(doubleTapGesture)
         backButton.tag = PlayerButtonType.back.rawValue
         backButton.setImage(KSPlayerManager.image(named: "KSPlayer_back"), for: .normal)
         backButton.addTarget(self, action: #selector(onButtonPressed(_:)), for: .touchUpInside)
@@ -138,22 +121,6 @@ open class IOSVideoPlayerView: VideoPlayerView {
             button.alpha = 1.0
         } else if type == .landscape {
             updateUI(isLandscape: !UIApplication.isLandscape)
-        } else if type == .rate {
-            changePlaybackRate(button: button)
-        } else if type == .definition {
-            guard let resource = resource, resource.definitions.count > 1 else { return }
-            let title = NSLocalizedString("select video quality", comment: "")
-            let alertController = UIAlertController(title: title, message: nil, preferredStyle: UIDevice.current.userInterfaceIdiom == .phone ? .actionSheet : .alert)
-            for (index, definition) in resource.definitions.enumerated() {
-                let action = UIAlertAction(title: definition.definition, style: .default) { [weak self] _ in
-                    guard let self = self, index != self.currentDefinition else { return }
-                    self.change(definitionIndex: index)
-                }
-                action.setValue(index == currentDefinition, forKey: "checked")
-                alertController.addAction(action)
-            }
-            alertController.addAction(UIAlertAction(title: NSLocalizedString("cancel", comment: ""), style: .cancel, handler: nil))
-            viewController?.present(alertController, animated: true, completion: nil)
         }
     }
 
@@ -203,34 +170,7 @@ open class IOSVideoPlayerView: VideoPlayerView {
 
     override open func player(layer: KSPlayerLayer, currentTime: TimeInterval, totalTime: TimeInterval) {
         airplayStatusView.isHidden = !(layer.player?.isExternalPlaybackActive ?? false)
-        guard !isSliderSliding else { return }
         super.player(layer: layer, currentTime: currentTime, totalTime: totalTime)
-    }
-
-    override open func slider(value: Double, event: ControlEvents) {
-        super.slider(value: value, event: event)
-        if event == .touchDown {
-            isSliderSliding = true
-        } else if event == .touchUpInside {
-            isSliderSliding = false
-        }
-    }
-
-    open func changePlaybackRate(button: UIButton) {
-        let title = NSLocalizedString("select speed", comment: "")
-        let alertController = UIAlertController(title: title, message: nil, preferredStyle: UIDevice.current.userInterfaceIdiom == .phone ? .actionSheet : .alert)
-        [0.75, 1.0, 1.25, 1.5, 2.0].forEach { rate in
-            let title = "\(rate)X"
-            let action = UIAlertAction(title: title, style: .default) { [weak self] _ in
-                guard let self = self else { return }
-                button.setTitle(title, for: .normal)
-                self.playerLayer.player?.playbackRate = Float(rate)
-            }
-            action.setValue(title == button.titleLabel?.text, forKey: "checked")
-            alertController.addAction(action)
-        }
-        alertController.addAction(UIAlertAction(title: NSLocalizedString("cancel", comment: ""), style: .cancel, handler: nil))
-        viewController?.present(alertController, animated: true, completion: nil)
     }
 
     override open func set(resource: KSPlayerResource, definitionIndex: Int = 0, isSetUrl: Bool = true) {
@@ -252,9 +192,33 @@ open class IOSVideoPlayerView: VideoPlayerView {
         super.change(definitionIndex: definitionIndex)
     }
 
-    @objc open func doubleGestureAction() {
-        toolBar.playButton.sendActions(for: .touchUpInside)
-        isMaskShow = true
+    override func panBegan(location point: CGPoint, direction: KSPanDirection) {
+        if direction == .vertical {
+            if point.x > bounds.size.width / 2 {
+                isVolume = true
+                tmpPanValue = volumeViewSlider.value
+            } else {
+                isVolume = false
+            }
+        } else {
+            super.panBegan(location: point, direction: direction)
+        }
+    }
+
+    override func panChanged(velocity point: CGPoint, direction: KSPanDirection) {
+        if direction == .vertical {
+            if isVolume {
+                if KSPlayerManager.enableVolumeGestures {
+                    tmpPanValue -= Float(point.y) / 0x2800
+                    tmpPanValue = max(min(tmpPanValue, 1), 0)
+                    volumeViewSlider.value = tmpPanValue
+                }
+            } else if KSPlayerManager.enableBrightnessGestures {
+                UIScreen.main.brightness -= point.y / 0x2800
+            }
+        } else {
+            super.panChanged(velocity: point, direction: direction)
+        }
     }
 }
 
@@ -324,90 +288,6 @@ extension IOSVideoPlayerView {
 
     @objc private func orientationChanged() {
         updateUI(isLandscape: UIApplication.isLandscape)
-    }
-
-    @objc private func onTapGestureTapped(_: UITapGestureRecognizer) {
-        isMaskShow.toggle()
-    }
-
-    @objc private func panDirection(_ pan: UIPanGestureRecognizer) {
-        // 播放结束时，忽略手势,锁屏状态忽略手势
-        guard !replayButton.isSelected, !isLock else { return }
-        // 根据上次和本次移动的位置，算出一个速率的point
-        let velocityPoint = pan.velocity(in: self)
-        switch pan.state {
-        case .began:
-            // 使用绝对值来判断移动的方向
-            if abs(velocityPoint.x) > abs(velocityPoint.y) {
-                scrollDirection = .horizontal
-                // 给tmpPanValue初值
-                if totalTime > 0 {
-                    tmpPanValue = toolBar.timeSlider.value
-                }
-            } else {
-                scrollDirection = .vertical
-                if pan.location(in: self).x > bounds.size.width / 2 {
-                    isVolume = true
-                    tmpPanValue = volumeViewSlider.value
-                } else {
-                    isVolume = false
-                }
-            }
-
-        case .changed:
-            switch scrollDirection {
-            case .horizontal:
-                horizontalMoved(value: velocityPoint.x)
-            case .vertical:
-                verticalMoved(value: velocityPoint.y)
-            }
-
-        case .ended:
-            gestureEnd()
-        default:
-            break
-        }
-    }
-
-    private func verticalMoved(value: CGFloat) {
-        if isVolume {
-            if KSPlayerManager.enableVolumeGestures {
-                tmpPanValue -= Float(value) / 0x2800
-                tmpPanValue = max(min(tmpPanValue, 1), 0)
-                volumeViewSlider.value = tmpPanValue
-            }
-        } else if KSPlayerManager.enableBrightnessGestures {
-            UIScreen.main.brightness -= value / 0x2800
-        }
-    }
-
-    private func horizontalMoved(value: CGFloat) {
-        if !KSPlayerManager.enablePlaytimeGestures {
-            return
-        }
-        isSliderSliding = true
-        if totalTime > 0 {
-            // 每次滑动需要叠加时间，通过一定的比例，使滑动一直处于统一水平
-            tmpPanValue += max(min(Float(value) / 0x40000, 0.01), -0.01) * Float(totalTime)
-            tmpPanValue = max(min(tmpPanValue, Float(totalTime)), 0)
-            showSeekToView(second: Double(tmpPanValue), isAdd: value > 0)
-        }
-    }
-
-    private func gestureEnd() {
-        // 移动结束也需要判断垂直或者平移
-        // 比如水平移动结束时，要快进到指定位置，如果这里没有判断，当我们调节音量完之后，会出现屏幕跳动的bug
-        switch scrollDirection {
-        case .horizontal:
-            if KSPlayerManager.enablePlaytimeGestures {
-                hideSeekToView()
-                isSliderSliding = false
-                slider(value: Double(tmpPanValue), event: .touchUpInside)
-                tmpPanValue = 0.0
-            }
-        case .vertical:
-            isVolume = false
-        }
     }
 
     private func judgePanGesture() {

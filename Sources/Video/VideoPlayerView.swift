@@ -29,6 +29,15 @@ extension UIActivityIndicatorView: LoadingIndector {}
 
 open class VideoPlayerView: PlayerView {
     private var delayItem: DispatchWorkItem?
+    /// Gesture used to show / hide control view
+    public let tapGesture = UITapGestureRecognizer()
+    public let doubleTapGesture = UITapGestureRecognizer()
+    public let panGesture = UIPanGestureRecognizer()
+    /// 滑动方向
+    var scrollDirection = KSPanDirection.horizontal
+    var tmpPanValue: Float = 0
+    private var isSliderSliding = false
+
     public let bottomMaskView = LayerContainerView()
     public let topMaskView = LayerContainerView()
     // 是否播放过
@@ -147,11 +156,39 @@ open class VideoPlayerView: PlayerView {
         if type == .srt {
             srtControl.view.isHidden = false
             isMaskShow = false
+        } else if type == .rate {
+            changePlaybackRate(button: button)
+        } else if type == .definition {
+            guard let resource = resource, resource.definitions.count > 1 else { return }
+            let alertController = UIAlertController(title: NSLocalizedString("select video quality", comment: ""), message: nil, preferredStyle: preferredStyle())
+            for (index, definition) in resource.definitions.enumerated() {
+                let action = UIAlertAction(title: definition.definition, style: .default) { [weak self] _ in
+                    guard let self = self, index != self.currentDefinition else { return }
+                    self.change(definitionIndex: index)
+                }
+                action.setValue(index == currentDefinition, forKey: "checked")
+                alertController.addAction(action)
+            }
+            alertController.addAction(UIAlertAction(title: NSLocalizedString("cancel", comment: ""), style: .cancel, handler: nil))
+            viewController?.present(alertController, animated: true, completion: nil)
         }
     }
 
-    /// Add Customize functions here
-    open func customizeUIComponents() {}
+    open func changePlaybackRate(button: UIButton) {
+        let alertController = UIAlertController(title: NSLocalizedString("select speed", comment: ""), message: nil, preferredStyle: preferredStyle())
+        [0.75, 1.0, 1.25, 1.5, 2.0].forEach { rate in
+            let title = "\(rate)X"
+            let action = UIAlertAction(title: title, style: .default) { [weak self] _ in
+                guard let self = self else { return }
+                button.setTitle(title, for: .normal)
+                self.playerLayer.player?.playbackRate = Float(rate)
+            }
+            action.setValue(title == button.title, forKey: "checked")
+            alertController.addAction(action)
+        }
+        alertController.addAction(UIAlertAction(title: NSLocalizedString("cancel", comment: ""), style: .cancel, handler: nil))
+        viewController?.present(alertController, animated: true, completion: nil)
+    }
 
     open func setupUIComponents() {
         addSubview(playerLayer)
@@ -185,13 +222,27 @@ open class VideoPlayerView: PlayerView {
         replayButton.backgroundColor = UIColor.black.withAlphaComponent(0.5)
         replayButton.setImage(KSPlayerManager.image(named: "KSPlayer_play"), for: .normal)
         replayButton.setImage(KSPlayerManager.image(named: "KSPlayer_replay"), for: .selected)
-        replayButton.addTarget(self, action: #selector(onButtonPressed(_:)), for: .touchUpInside)
+        replayButton.addTarget(self, action: #selector(onButtonPressed(_:)), for: .primaryActionTriggered)
         replayButton.tag = PlayerButtonType.replay.rawValue
         addSubview(topMaskView)
         addSubview(bottomMaskView)
     }
 
+    /// Add Customize functions here
+    open func customizeUIComponents() {
+        tapGesture.addTarget(self, action: #selector(onTapGestureTapped(_:)))
+        tapGesture.numberOfTapsRequired = 1
+        addGestureRecognizer(tapGesture)
+        panGesture.addTarget(self, action: #selector(panDirection(_:)))
+        addGestureRecognizer(panGesture)
+        doubleTapGesture.addTarget(self, action: #selector(doubleGestureAction))
+        doubleTapGesture.numberOfTapsRequired = 2
+        tapGesture.require(toFail: doubleTapGesture)
+        addGestureRecognizer(doubleTapGesture)
+    }
+
     override open func player(layer: KSPlayerLayer, currentTime: TimeInterval, totalTime: TimeInterval) {
+        guard !isSliderSliding else { return }
         super.player(layer: layer, currentTime: currentTime, totalTime: totalTime)
         if let subtitle = resource?.subtitle {
             showSubtile(from: subtitle, at: currentTime)
@@ -254,6 +305,11 @@ open class VideoPlayerView: PlayerView {
             autoFadeOutViewWithAnimation()
         }
         super.slider(value: value, event: event)
+        if event == .touchDown {
+            isSliderSliding = true
+        } else if event == .touchUpInside {
+            isSliderSliding = false
+        }
     }
 
     override open func player(layer: KSPlayerLayer, finish error: Error?) {
@@ -287,6 +343,73 @@ open class VideoPlayerView: PlayerView {
         currentDefinition = definitionIndex >= resource.definitions.count ? resource.definitions.count - 1 : definitionIndex
         if isSetUrl {
             useProxyUrl = true
+        }
+    }
+
+    @objc open func doubleGestureAction() {
+        toolBar.playButton.sendActions(for: .primaryActionTriggered)
+        isMaskShow = true
+    }
+
+    @objc private func onTapGestureTapped(_: UITapGestureRecognizer) {
+        isMaskShow.toggle()
+    }
+
+    @objc private func panDirection(_ pan: UIPanGestureRecognizer) {
+        // 播放结束时，忽略手势,锁屏状态忽略手势
+        guard !replayButton.isSelected, !isLock else { return }
+        // 根据上次和本次移动的位置，算出一个速率的point
+        let velocityPoint = pan.velocity(in: self)
+        switch pan.state {
+        case .began:
+            // 使用绝对值来判断移动的方向
+            if abs(velocityPoint.x) > abs(velocityPoint.y) {
+                scrollDirection = .horizontal
+            } else {
+                scrollDirection = .vertical
+            }
+            panBegan(location: pan.location(in: self), direction: scrollDirection)
+        case .changed:
+            panChanged(velocity: velocityPoint, direction: scrollDirection)
+        case .ended:
+            gestureEnd()
+        default:
+            break
+        }
+    }
+
+    func panBegan(location _: CGPoint, direction: KSPanDirection) {
+        if direction == .horizontal {
+            // 给tmpPanValue初值
+            if totalTime > 0 {
+                tmpPanValue = toolBar.timeSlider.value
+            }
+        }
+    }
+
+    func panChanged(velocity point: CGPoint, direction: KSPanDirection) {
+        if direction == .horizontal {
+            if !KSPlayerManager.enablePlaytimeGestures {
+                return
+            }
+            isSliderSliding = true
+            if totalTime > 0 {
+                // 每次滑动需要叠加时间，通过一定的比例，使滑动一直处于统一水平
+                tmpPanValue += max(min(Float(point.x) / 0x40000, 0.01), -0.01) * Float(totalTime)
+                tmpPanValue = max(min(tmpPanValue, Float(totalTime)), 0)
+                showSeekToView(second: Double(tmpPanValue), isAdd: point.x > 0)
+            }
+        }
+    }
+
+    private func gestureEnd() {
+        // 移动结束也需要判断垂直或者平移
+        // 比如水平移动结束时，要快进到指定位置，如果这里没有判断，当我们调节音量完之后，会出现屏幕跳动的bug
+        if scrollDirection == .horizontal, KSPlayerManager.enablePlaytimeGestures {
+            hideSeekToView()
+            isSliderSliding = false
+            slider(value: Double(tmpPanValue), event: .touchUpInside)
+            tmpPanValue = 0.0
         }
     }
 }
@@ -435,6 +558,14 @@ extension VideoPlayerView {
             subtitleLabel.topAnchor.constraint(equalTo: subtitleBackView.topAnchor, constant: 2),
             subtitleLabel.bottomAnchor.constraint(equalTo: subtitleBackView.bottomAnchor, constant: -2),
         ])
+    }
+
+    func preferredStyle() -> UIAlertController.Style {
+        #if canImport(UIKit)
+        return UIDevice.current.userInterfaceIdiom == .phone ? .actionSheet : .alert
+        #else
+        return .alert
+        #endif
     }
 }
 
