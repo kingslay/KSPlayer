@@ -37,7 +37,11 @@ final class MEPlayerItem {
     private(set) var assetTracks = [TrackProtocol]()
     private var videoAdaptation: VideoAdaptationState?
     private(set) var subtitleTracks = [SubtitlePlayerItemTrack]()
-    private(set) var currentPlaybackTime = TimeInterval(0)
+    var currentPlaybackTime: TimeInterval {
+        max(positionTime - startTime, 0)
+    }
+    private var positionTime = TimeInterval(0)
+    private var startTime = TimeInterval(0)
     private(set) var rotation = 0.0
     private(set) var duration: TimeInterval = 0
     private(set) var naturalSize = CGSize.zero
@@ -163,6 +167,9 @@ extension MEPlayerItem {
         videoAdaptation = nil
         videoTrack = nil
         audioTrack = nil
+        if formatCtx.pointee.start_time != Int64.min {
+            startTime = TimeInterval(formatCtx.pointee.start_time / 1000000)
+        }
         assetTracks = (0 ..< Int(formatCtx.pointee.nb_streams)).compactMap { i in
             if let coreStream = formatCtx.pointee.streams[i] {
                 coreStream.pointee.discard = AVDISCARD_ALL
@@ -241,12 +248,12 @@ extension MEPlayerItem {
                 condition.wait()
             }
             if state == .seeking {
-                let timeStamp = Int64(currentPlaybackTime * TimeInterval(AV_TIME_BASE))
+                let timeStamp = Int64(positionTime * TimeInterval(AV_TIME_BASE))
                 // 不要用avformat_seek_file，否则可能会向前跳
                 //                let tolerance: Int64 = KSPlayerManager.isAccurateSeek ? 0 : 2
                 //                let result = avformat_seek_file(formatCtx, -1, timeStamp - tolerance, timeStamp, timeStamp, AVSEEK_FLAG_BACKWARD)
                 let result = av_seek_frame(formatCtx, -1, timeStamp, AVSEEK_FLAG_BACKWARD)
-                allTracks.forEach { $0.seek(time: currentPlaybackTime) }
+                allTracks.forEach { $0.seek(time: positionTime) }
                 isSeek = true
                 seekingCompletionHandler?(result >= 0)
                 seekingCompletionHandler = nil
@@ -370,12 +377,12 @@ extension MEPlayerItem: MediaPlayback {
 
     func seek(time: TimeInterval, completion handler: ((Bool) -> Void)?) {
         if state == .reading || state == .paused {
-            currentPlaybackTime = time
+            positionTime = time + startTime
             seekingCompletionHandler = handler
             state = .seeking
             condition.signal()
         } else if state == .finished {
-            currentPlaybackTime = time
+            positionTime = time + startTime
             seekingCompletionHandler = handler
             state = .seeking
             read()
@@ -446,14 +453,14 @@ extension MEPlayerItem: CodecCapacityDelegate {
 extension MEPlayerItem: OutputRenderSourceDelegate {
     func setVideo(time: CMTime) {
         if isAudioStalled {
-            currentPlaybackTime = time.seconds
+            positionTime = time.seconds
             videoMediaTime = CACurrentMediaTime()
         }
     }
 
     func setAudio(time: CMTime) {
         if !isAudioStalled {
-            currentPlaybackTime = time.seconds
+            positionTime = time.seconds
         }
     }
 
@@ -462,7 +469,7 @@ extension MEPlayerItem: OutputRenderSourceDelegate {
         if isDependent {
             predicate = { [weak self] (frame) -> Bool in
                 guard let self = self else { return true }
-                var desire = self.currentPlaybackTime
+                var desire = self.positionTime
                 if self.isAudioStalled {
                     desire += max(CACurrentMediaTime() - self.videoMediaTime, 0)
                 }
