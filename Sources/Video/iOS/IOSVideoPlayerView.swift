@@ -130,31 +130,30 @@ open class IOSVideoPlayerView: VideoPlayerView {
         routeButton.isHidden = !routeButton.areWirelessRoutesAvailable
     }
 
-    override open func onButtonPressed(_ button: UIButton) {
-        super.onButtonPressed(button)
-        if let type = PlayerButtonType(rawValue: button.tag) {
-            if type == .lock {
-                button.isSelected.toggle()
-                isMaskShow = !button.isSelected
-                button.alpha = 1.0
-            } else if type == .landscape {
-                updateUI(isLandscape: !UIApplication.isLandscape)
-            } else if type == .rate {
-                changePlaybackRate(button: button)
-            } else if type == .definition {
-                guard let resource = resource, resource.definitions.count > 1 else { return }
-                let alertController = UIAlertController(title: NSLocalizedString("select video quality", comment: ""), message: nil, preferredStyle: UIDevice.current.userInterfaceIdiom == .phone ? .actionSheet : .alert)
-                for (index, definition) in resource.definitions.enumerated() {
-                    let action = UIAlertAction(title: definition.definition, style: .default) { [weak self] _ in
-                        guard let self = self, index != self.currentDefinition else { return }
-                        self.change(definitionIndex: index)
-                    }
-                    action.setValue(index == currentDefinition, forKey: "checked")
-                    alertController.addAction(action)
+    override open func onButtonPressed(type: PlayerButtonType, button: UIButton) {
+        super.onButtonPressed(type: type, button: button)
+        if type == .lock {
+            button.isSelected.toggle()
+            isMaskShow = !button.isSelected
+            button.alpha = 1.0
+        } else if type == .landscape {
+            updateUI(isLandscape: !UIApplication.isLandscape)
+        } else if type == .rate {
+            changePlaybackRate(button: button)
+        } else if type == .definition {
+            guard let resource = resource, resource.definitions.count > 1 else { return }
+            let title = NSLocalizedString("select video quality", comment: "")
+            let alertController = UIAlertController(title: title, message: nil, preferredStyle: UIDevice.current.userInterfaceIdiom == .phone ? .actionSheet : .alert)
+            for (index, definition) in resource.definitions.enumerated() {
+                let action = UIAlertAction(title: definition.definition, style: .default) { [weak self] _ in
+                    guard let self = self, index != self.currentDefinition else { return }
+                    self.change(definitionIndex: index)
                 }
-                alertController.addAction(UIAlertAction(title: NSLocalizedString("cancel", comment: ""), style: .cancel, handler: nil))
-                viewController?.present(alertController, animated: true, completion: nil)
+                action.setValue(index == currentDefinition, forKey: "checked")
+                alertController.addAction(action)
             }
+            alertController.addAction(UIAlertAction(title: NSLocalizedString("cancel", comment: ""), style: .cancel, handler: nil))
+            viewController?.present(alertController, animated: true, completion: nil)
         }
     }
 
@@ -218,7 +217,8 @@ open class IOSVideoPlayerView: VideoPlayerView {
     }
 
     open func changePlaybackRate(button: UIButton) {
-        let alertController = UIAlertController(title: NSLocalizedString("select speed", comment: ""), message: nil, preferredStyle: UIDevice.current.userInterfaceIdiom == .phone ? .actionSheet : .alert)
+        let title = NSLocalizedString("select speed", comment: "")
+        let alertController = UIAlertController(title: title, message: nil, preferredStyle: UIDevice.current.userInterfaceIdiom == .phone ? .actionSheet : .alert)
         [0.75, 1.0, 1.25, 1.5, 2.0].forEach { rate in
             let title = "\(rate)X"
             let action = UIAlertAction(title: title, style: .default) { [weak self] _ in
