@@ -31,8 +31,9 @@ public extension UIView {
 @objc public enum ControlEvents: Int {
     case touchDown
     case touchUpInside
-    case valueChanged
     case touchCancel
+    case valueChanged
+    case primaryActionTriggered
     case mouseEntered
     case mouseExited
 }

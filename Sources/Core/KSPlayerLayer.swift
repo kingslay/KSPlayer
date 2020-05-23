@@ -358,6 +358,23 @@ extension KSPlayerLayer {
         }
         return .success
     }
+
+//    override open func pressesBegan(_ presses: Set<UIPress>, with _: UIPressesEvent?) {
+//        guard let presse = presses.first else {
+//            return
+//        }
+//        switch presse.type {
+//        case .playPause:
+//            if state.isPlaying {
+//                pause()
+//            } else {
+//                play()
+//            }
+//        case .menu: break
+//
+//        default: break
+//        }
+//    }
 }
 
 extension KSPlayerManager {

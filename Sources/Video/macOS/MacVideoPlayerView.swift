@@ -34,9 +34,6 @@ open class MacVideoPlayerView: VideoPlayerView {
 
     static let playableFileExt = supportedFileExt[.video]! + supportedFileExt[.audio]!
 
-    /// 滑动方向
-    private var scrollDirection = KSPanDirection.horizontal
-    private var tmpPanValue: Float = 1
     override open func customizeUIComponents() {
         super.customizeUIComponents()
         registerForDraggedTypes([.nsFilenames, .nsURL, .string])

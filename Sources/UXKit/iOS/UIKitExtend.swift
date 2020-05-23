@@ -177,6 +177,15 @@ extension UIButton {
             titleLabel?.font = newValue
         }
     }
+
+    open var title: String? {
+        get {
+            titleLabel?.text
+        }
+        set {
+            titleLabel?.text = newValue
+        }
+    }
 }
 
 extension UIView {

@@ -52,6 +52,10 @@ extension NSClickGestureRecognizer {
             numberOfClicksRequired = newValue
         }
     }
+
+    open func require(toFail otherGestureRecognizer: NSClickGestureRecognizer) {
+        buttonMask = otherGestureRecognizer.buttonMask << 1
+    }
 }
 
 extension NSView {
@@ -484,7 +488,7 @@ public class UIButton: NSButton {
 
     override public func mouseDown(with event: NSEvent) {
         super.mouseDown(with: event)
-        if let (target, action) = targetActions[.touchUpInside] {
+        if let (target, action) = targetActions[.touchUpInside] ?? targetActions[.primaryActionTriggered] {
             _ = target?.perform(action, with: self)
         }
     }
@@ -499,6 +503,12 @@ public class UIButton: NSButton {
     override public func mouseExited(with event: NSEvent) {
         super.mouseExited(with: event)
         if let (target, action) = targetActions[.mouseExited] {
+            _ = target?.perform(action, with: self)
+        }
+    }
+
+    open func sendActions(for controlEvents: ControlEvents) {
+        if let (target, action) = targetActions[controlEvents] {
             _ = target?.perform(action, with: self)
         }
     }
@@ -606,4 +616,41 @@ extension UIView {
         image.addRepresentation(rep)
         return image
     }
+}
+
+// todo
+open class UIAlertController: UIViewController {
+    public enum Style: Int {
+        case actionSheet
+
+        case alert
+    }
+
+    public convenience init(title _: String?, message _: String?, preferredStyle _: UIAlertController.Style) {
+        self.init()
+    }
+
+    open func addAction(_: UIAlertAction) {}
+}
+
+open class UIAlertAction: NSObject {
+    public enum Style: Int {
+        case `default`
+
+        case cancel
+
+        case destructive
+    }
+
+    public let title: String?
+    public let style: UIAlertAction.Style
+    public private(set) var isEnabled: Bool = false
+    public init(title: String?, style: UIAlertAction.Style, handler _: ((UIAlertAction) -> Void)? = nil) {
+        self.title = title
+        self.style = style
+    }
+}
+
+extension UIViewController {
+    open func present(_: UIViewController, animated _: Bool, completion _: (() -> Void)? = nil) {}
 }
