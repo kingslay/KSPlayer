@@ -102,6 +102,7 @@ final class MEPlayerItem {
         if let track = track as? TrackProtocol {
             assetTracks.filter { $0.mediaType == track.mediaType }.forEach { $0.stream.pointee.discard = AVDISCARD_ALL }
             track.stream.pointee.discard = AVDISCARD_DEFAULT
+            seek(time: currentPlaybackTime, completion: nil)
         }
     }
 }
