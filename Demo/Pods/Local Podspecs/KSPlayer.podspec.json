@@ -193,7 +193,10 @@
         "frameworks": "UIKit"
       },
       "tvos": {
-        "source_files": "Sources/Video/tvOS/*.swift",
+        "source_files": [
+          "Sources/Video/tvOS/*.swift",
+          "Sources/Video/iOS/KSSubtitleView.swift"
+        ],
         "frameworks": "UIKit"
       },
       "osx": {

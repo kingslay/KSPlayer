@@ -96,7 +96,7 @@ Pod::Spec.new do |s|
     s.subspec 'Video' do |ss|
         ss.source_files = 'Sources/Video/*.swift'
         ss.ios.source_files = 'Sources/Video/iOS/*.swift'
-        ss.tvos.source_files = 'Sources/Video/tvOS/*.swift'
+        ss.tvos.source_files = 'Sources/Video/tvOS/*.swift', 'Sources/Video/iOS/KSSubtitleView.swift'
         ss.osx.source_files = 'Sources/Video/macOS/*.swift'
         ss.ios.frameworks  = 'UIKit'
         ss.tvos.frameworks  = 'UIKit'

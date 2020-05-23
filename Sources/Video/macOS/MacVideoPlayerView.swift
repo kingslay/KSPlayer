@@ -167,7 +167,7 @@ class UIActivityIndicatorView: UIView {
         loadingView.wantsLayer = true
         addSubview(loadingView)
         let imageView = NSImageView()
-        imageView.image = UIImage(ksName: "loading")
+        imageView.image = KSPlayerManager.image(named: "loading")
         loadingView.addSubview(imageView)
         imageView.imageScaling = .scaleAxesIndependently
         imageView.translatesAutoresizingMaskIntoConstraints = false
