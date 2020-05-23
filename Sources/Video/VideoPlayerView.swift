@@ -20,8 +20,8 @@ enum KSPanDirection {
 
 open class VideoPlayerView: PlayerView {
     private var delayItem: DispatchWorkItem?
-    private var bottomMaskView = LayerContainerView()
-    private(set) var topMaskView = LayerContainerView()
+    public let bottomMaskView = LayerContainerView()
+    public let topMaskView = LayerContainerView()
     // 是否播放过
     private(set) var isPlayed = false
     private var embedSubtitleDataSouce: SubtitleDataSouce? {
