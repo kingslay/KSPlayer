@@ -14,6 +14,7 @@ protocol TrackProtocol: MediaPlayerTrack, CustomStringConvertible {
     var fps: Int { get }
     var rotation: Double { get }
     var bitRate: Int64 { get }
+    var language: String? { get }
     var naturalSize: CGSize { get }
 }
 
