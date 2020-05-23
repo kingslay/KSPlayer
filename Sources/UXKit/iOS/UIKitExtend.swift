@@ -179,7 +179,6 @@ extension UIButton {
     }
 }
 
-extension UIActivityIndicatorView: LoadingIndector {}
 extension UIView {
     func image() -> UIImage? {
         UIGraphicsBeginImageContextWithOptions(bounds.size, isOpaque, 0.0)

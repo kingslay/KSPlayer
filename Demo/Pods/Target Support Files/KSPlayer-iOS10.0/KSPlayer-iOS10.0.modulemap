@@ -1,6 +1,0 @@
-framework module KSPlayer {
-  umbrella header "KSPlayer-iOS10.0-umbrella.h"
-
-  export *
-  module * { export * }
-}

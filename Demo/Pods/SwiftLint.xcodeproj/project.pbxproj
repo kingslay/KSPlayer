@@ -7,53 +7,42 @@
 	objects = {
 
 /* Begin PBXAggregateTarget section */
-		6281C8ADD2DF669F32171B6BB98AE882 /* SwiftLint-macOS10.12 */ = {
+		06C3393C7585CF48B3D51ED92A7494B3 /* SwiftLint-macOS */ = {
 			isa = PBXAggregateTarget;
-			buildConfigurationList = 71C8D35EFF931BB4C454C4E08A7F4936 /* Build configuration list for PBXAggregateTarget "SwiftLint-macOS10.12" */;
+			buildConfigurationList = 4C421FBA5A71F039B4332C318730AE04 /* Build configuration list for PBXAggregateTarget "SwiftLint-macOS" */;
 			buildPhases = (
 			);
 			dependencies = (
 			);
-			name = "SwiftLint-macOS10.12";
+			name = "SwiftLint-macOS";
 		};
-		98706BE38D4D4D62BC3453E1A3C5BC29 /* SwiftLint-iOS13.0 */ = {
+		85BF42A508B024DBC10149113DE26FF0 /* SwiftLint-iOS */ = {
 			isa = PBXAggregateTarget;
-			buildConfigurationList = 596E3C9825AA4099DB9462890C992038 /* Build configuration list for PBXAggregateTarget "SwiftLint-iOS13.0" */;
+			buildConfigurationList = 8433C58125E71D385C400FD0D1BCBEBF /* Build configuration list for PBXAggregateTarget "SwiftLint-iOS" */;
 			buildPhases = (
 			);
 			dependencies = (
 			);
-			name = "SwiftLint-iOS13.0";
+			name = "SwiftLint-iOS";
 		};
-		9A5D5DCE3BBE41E99C7AF750E64790F7 /* SwiftLint-iOS10.0 */ = {
+		FBD8E00DAB35E7CDDC6F82CDC59FEDF8 /* SwiftLint-tvOS */ = {
 			isa = PBXAggregateTarget;
-			buildConfigurationList = 1C41369502BED199DBA17139ACDEEDB4 /* Build configuration list for PBXAggregateTarget "SwiftLint-iOS10.0" */;
+			buildConfigurationList = A6E8FBC16A9C0A0DE45DCB2A837EB408 /* Build configuration list for PBXAggregateTarget "SwiftLint-tvOS" */;
 			buildPhases = (
 			);
 			dependencies = (
 			);
-			name = "SwiftLint-iOS10.0";
-		};
-		9DD0A872D103D3D4B1BAC43B79837934 /* SwiftLint-tvOS10.2 */ = {
-			isa = PBXAggregateTarget;
-			buildConfigurationList = B7FC7ABA8D8AA06627EBD211452D83AF /* Build configuration list for PBXAggregateTarget "SwiftLint-tvOS10.2" */;
-			buildPhases = (
-			);
-			dependencies = (
-			);
-			name = "SwiftLint-tvOS10.2";
+			name = "SwiftLint-tvOS";
 		};
 /* End PBXAggregateTarget section */
 
 /* Begin PBXFileReference section */
-		0F698101448E34D9CDC8965B990F87B7 /* SwiftLint-macOS10.12.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "SwiftLint-macOS10.12.debug.xcconfig"; path = "../SwiftLint-macOS10.12/SwiftLint-macOS10.12.debug.xcconfig"; sourceTree = "<group>"; };
-		15BEAD273C0A09955CB4921A9729C4E1 /* SwiftLint-tvOS10.2.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "SwiftLint-tvOS10.2.release.xcconfig"; path = "../SwiftLint-tvOS10.2/SwiftLint-tvOS10.2.release.xcconfig"; sourceTree = "<group>"; };
-		5AC6F6B7B52291D75828B34117CB10A7 /* SwiftLint-iOS10.0.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "SwiftLint-iOS10.0.debug.xcconfig"; sourceTree = "<group>"; };
-		8BED8861820866C45C0FCE0E5F840184 /* SwiftLint-iOS13.0.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "SwiftLint-iOS13.0.release.xcconfig"; path = "../SwiftLint-iOS13.0/SwiftLint-iOS13.0.release.xcconfig"; sourceTree = "<group>"; };
-		915903E9F17CD62195DCD41D1DA4F627 /* SwiftLint-tvOS10.2.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "SwiftLint-tvOS10.2.debug.xcconfig"; path = "../SwiftLint-tvOS10.2/SwiftLint-tvOS10.2.debug.xcconfig"; sourceTree = "<group>"; };
-		AAC158680D7489813FAC3CB75AA5B54D /* SwiftLint-macOS10.12.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "SwiftLint-macOS10.12.release.xcconfig"; path = "../SwiftLint-macOS10.12/SwiftLint-macOS10.12.release.xcconfig"; sourceTree = "<group>"; };
-		D009F321B29F21D689468E4454AB48D3 /* SwiftLint-iOS13.0.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "SwiftLint-iOS13.0.debug.xcconfig"; path = "../SwiftLint-iOS13.0/SwiftLint-iOS13.0.debug.xcconfig"; sourceTree = "<group>"; };
-		F0141F54FA79AE795E4803F4A8995370 /* SwiftLint-iOS10.0.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "SwiftLint-iOS10.0.release.xcconfig"; sourceTree = "<group>"; };
+		03391072BD9EF39D5096CECC38D95290 /* SwiftLint-tvOS.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "SwiftLint-tvOS.release.xcconfig"; path = "../SwiftLint-tvOS/SwiftLint-tvOS.release.xcconfig"; sourceTree = "<group>"; };
+		1867F92BF6A5DEF73F35026582BAEF98 /* SwiftLint-iOS.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "SwiftLint-iOS.debug.xcconfig"; sourceTree = "<group>"; };
+		8889FF4E25D067C4FF3F3EE9325862F6 /* SwiftLint-macOS.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "SwiftLint-macOS.release.xcconfig"; path = "../SwiftLint-macOS/SwiftLint-macOS.release.xcconfig"; sourceTree = "<group>"; };
+		B27B7F48793A94F20241567799DE42AA /* SwiftLint-macOS.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "SwiftLint-macOS.debug.xcconfig"; path = "../SwiftLint-macOS/SwiftLint-macOS.debug.xcconfig"; sourceTree = "<group>"; };
+		C088627834B0A604CEE749A43739FB8D /* SwiftLint-iOS.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "SwiftLint-iOS.release.xcconfig"; sourceTree = "<group>"; };
+		EC0D9F894E5E43455A21CC9032AC6C11 /* SwiftLint-tvOS.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "SwiftLint-tvOS.debug.xcconfig"; path = "../SwiftLint-tvOS/SwiftLint-tvOS.debug.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -69,8 +58,22 @@
 			children = (
 				90786418D6752F1374EFEC474E0BDDAF /* Frameworks */,
 				3FF158F36A70A3D4CE703E895A182651 /* Products */,
-				E0D5A5D58971985BD298ABA7A38050B8 /* SwiftLint */,
+				A36C589E5B5B3A728BB105A65CD153FC /* SwiftLint */,
 			);
+			sourceTree = "<group>";
+		};
+		9061A0CE6D977FC2BB10B33D5EBB859C /* Support Files */ = {
+			isa = PBXGroup;
+			children = (
+				1867F92BF6A5DEF73F35026582BAEF98 /* SwiftLint-iOS.debug.xcconfig */,
+				C088627834B0A604CEE749A43739FB8D /* SwiftLint-iOS.release.xcconfig */,
+				B27B7F48793A94F20241567799DE42AA /* SwiftLint-macOS.debug.xcconfig */,
+				8889FF4E25D067C4FF3F3EE9325862F6 /* SwiftLint-macOS.release.xcconfig */,
+				EC0D9F894E5E43455A21CC9032AC6C11 /* SwiftLint-tvOS.debug.xcconfig */,
+				03391072BD9EF39D5096CECC38D95290 /* SwiftLint-tvOS.release.xcconfig */,
+			);
+			name = "Support Files";
+			path = "../Target Support Files/SwiftLint-iOS";
 			sourceTree = "<group>";
 		};
 		90786418D6752F1374EFEC474E0BDDAF /* Frameworks */ = {
@@ -80,26 +83,10 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
-		D158CDBCF5A4E856A4CB77D38402FE88 /* Support Files */ = {
+		A36C589E5B5B3A728BB105A65CD153FC /* SwiftLint */ = {
 			isa = PBXGroup;
 			children = (
-				5AC6F6B7B52291D75828B34117CB10A7 /* SwiftLint-iOS10.0.debug.xcconfig */,
-				F0141F54FA79AE795E4803F4A8995370 /* SwiftLint-iOS10.0.release.xcconfig */,
-				D009F321B29F21D689468E4454AB48D3 /* SwiftLint-iOS13.0.debug.xcconfig */,
-				8BED8861820866C45C0FCE0E5F840184 /* SwiftLint-iOS13.0.release.xcconfig */,
-				0F698101448E34D9CDC8965B990F87B7 /* SwiftLint-macOS10.12.debug.xcconfig */,
-				AAC158680D7489813FAC3CB75AA5B54D /* SwiftLint-macOS10.12.release.xcconfig */,
-				915903E9F17CD62195DCD41D1DA4F627 /* SwiftLint-tvOS10.2.debug.xcconfig */,
-				15BEAD273C0A09955CB4921A9729C4E1 /* SwiftLint-tvOS10.2.release.xcconfig */,
-			);
-			name = "Support Files";
-			path = "../Target Support Files/SwiftLint-iOS10.0";
-			sourceTree = "<group>";
-		};
-		E0D5A5D58971985BD298ABA7A38050B8 /* SwiftLint */ = {
-			isa = PBXGroup;
-			children = (
-				D158CDBCF5A4E856A4CB77D38402FE88 /* Support Files */,
+				9061A0CE6D977FC2BB10B33D5EBB859C /* Support Files */,
 			);
 			name = SwiftLint;
 			path = SwiftLint;
@@ -127,35 +114,17 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				9A5D5DCE3BBE41E99C7AF750E64790F7 /* SwiftLint-iOS10.0 */,
-				98706BE38D4D4D62BC3453E1A3C5BC29 /* SwiftLint-iOS13.0 */,
-				6281C8ADD2DF669F32171B6BB98AE882 /* SwiftLint-macOS10.12 */,
-				9DD0A872D103D3D4B1BAC43B79837934 /* SwiftLint-tvOS10.2 */,
+				85BF42A508B024DBC10149113DE26FF0 /* SwiftLint-iOS */,
+				06C3393C7585CF48B3D51ED92A7494B3 /* SwiftLint-macOS */,
+				FBD8E00DAB35E7CDDC6F82CDC59FEDF8 /* SwiftLint-tvOS */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin XCBuildConfiguration section */
-		2395420A2F62C406D14E82127A42CA3D /* Release */ = {
+		0F5478B1B758D69339967C6BDD95BE04 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 15BEAD273C0A09955CB4921A9729C4E1 /* SwiftLint-tvOS10.2.release.xcconfig */;
-			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = "App Icon & Top Shelf Image";
-				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-				);
-				SDKROOT = appletvos;
-				TARGETED_DEVICE_FAMILY = 3;
-				TVOS_DEPLOYMENT_TARGET = 9.0;
-				VALIDATE_PRODUCT = YES;
-			};
-			name = Release;
-		};
-		3BB028E78F3AE642DA3C1A2F2AD6EC41 /* Release */ = {
-			isa = XCBuildConfiguration;
-			baseConfigurationReference = F0141F54FA79AE795E4803F4A8995370 /* SwiftLint-iOS10.0.release.xcconfig */;
+			baseConfigurationReference = 1867F92BF6A5DEF73F35026582BAEF98 /* SwiftLint-iOS.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
@@ -166,9 +135,26 @@
 				);
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				VALIDATE_PRODUCT = YES;
 			};
-			name = Release;
+			name = Debug;
+		};
+		399F1A68BB6CB1EA90B353C2E7B966FC /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = B27B7F48793A94F20241567799DE42AA /* SwiftLint-macOS.debug.xcconfig */;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				CODE_SIGN_IDENTITY = "-";
+				COMBINE_HIDPI_IMAGES = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 10.6;
+				SDKROOT = macosx;
+			};
+			name = Debug;
 		};
 		4C006F0F25D51799A97C344C24AD8461 /* Release */ = {
 			isa = XCBuildConfiguration;
@@ -232,77 +218,42 @@
 			};
 			name = Release;
 		};
-		5BE10D7CDD7A49611059FD7F17D1CB81 /* Debug */ = {
+		A281E0F47307D8FE7A93BB3F31FB3C79 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = D009F321B29F21D689468E4454AB48D3 /* SwiftLint-iOS13.0.debug.xcconfig */;
+			baseConfigurationReference = EC0D9F894E5E43455A21CC9032AC6C11 /* SwiftLint-tvOS.debug.xcconfig */;
 			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_IDENTITY = "iPhone Developer";
-				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
+				ASSETCATALOG_COMPILER_APPICON_NAME = "App Icon & Top Shelf Image";
+				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				SDKROOT = iphoneos;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				SDKROOT = appletvos;
+				TARGETED_DEVICE_FAMILY = 3;
+				TVOS_DEPLOYMENT_TARGET = 9.0;
 			};
 			name = Debug;
 		};
-		73B7D6CE7FE4D1F4F6D349B169D170F7 /* Debug */ = {
+		E647855C5F6B50B900C25B6DCB0E63D2 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 5AC6F6B7B52291D75828B34117CB10A7 /* SwiftLint-iOS10.0.debug.xcconfig */;
+			baseConfigurationReference = 03391072BD9EF39D5096CECC38D95290 /* SwiftLint-tvOS.release.xcconfig */;
 			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_IDENTITY = "iPhone Developer";
-				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
+				ASSETCATALOG_COMPILER_APPICON_NAME = "App Icon & Top Shelf Image";
+				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				SDKROOT = iphoneos;
-				TARGETED_DEVICE_FAMILY = "1,2";
-			};
-			name = Debug;
-		};
-		77DDB3DDAADD0BDAEE67C6D556A44744 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			baseConfigurationReference = 0F698101448E34D9CDC8965B990F87B7 /* SwiftLint-macOS10.12.debug.xcconfig */;
-			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CLANG_ENABLE_OBJC_WEAK = NO;
-				CODE_SIGN_IDENTITY = "-";
-				COMBINE_HIDPI_IMAGES = YES;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/../Frameworks",
-				);
-				MACOSX_DEPLOYMENT_TARGET = 10.6;
-				SDKROOT = macosx;
-			};
-			name = Debug;
-		};
-		935019F4AFFB79549B6FD114E358098B /* Release */ = {
-			isa = XCBuildConfiguration;
-			baseConfigurationReference = AAC158680D7489813FAC3CB75AA5B54D /* SwiftLint-macOS10.12.release.xcconfig */;
-			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CLANG_ENABLE_OBJC_WEAK = NO;
-				CODE_SIGN_IDENTITY = "-";
-				COMBINE_HIDPI_IMAGES = YES;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/../Frameworks",
-				);
-				MACOSX_DEPLOYMENT_TARGET = 10.6;
-				SDKROOT = macosx;
+				SDKROOT = appletvos;
+				TARGETED_DEVICE_FAMILY = 3;
+				TVOS_DEPLOYMENT_TARGET = 9.0;
+				VALIDATE_PRODUCT = YES;
 			};
 			name = Release;
 		};
-		A71544840FDD548C5067ADBB6A2F9A3B /* Release */ = {
+		E8F0AC52BD854E71CAD8E725AA8DE109 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 8BED8861820866C45C0FCE0E5F840184 /* SwiftLint-iOS13.0.release.xcconfig */;
+			baseConfigurationReference = C088627834B0A604CEE749A43739FB8D /* SwiftLint-iOS.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
@@ -316,22 +267,6 @@
 				VALIDATE_PRODUCT = YES;
 			};
 			name = Release;
-		};
-		A78C0DB8893C01D1C80096EC41ECC8C8 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			baseConfigurationReference = 915903E9F17CD62195DCD41D1DA4F627 /* SwiftLint-tvOS10.2.debug.xcconfig */;
-			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = "App Icon & Top Shelf Image";
-				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-				);
-				SDKROOT = appletvos;
-				TARGETED_DEVICE_FAMILY = 3;
-				TVOS_DEPLOYMENT_TARGET = 9.0;
-			};
-			name = Debug;
 		};
 		F3085962681176196D3087C5FBB99CE1 /* Debug */ = {
 			isa = XCBuildConfiguration;
@@ -400,14 +335,32 @@
 			};
 			name = Debug;
 		};
+		F5A9E587D8F69793FFCECD3998226C96 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 8889FF4E25D067C4FF3F3EE9325862F6 /* SwiftLint-macOS.release.xcconfig */;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				CODE_SIGN_IDENTITY = "-";
+				COMBINE_HIDPI_IMAGES = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 10.6;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		1C41369502BED199DBA17139ACDEEDB4 /* Build configuration list for PBXAggregateTarget "SwiftLint-iOS10.0" */ = {
+		4C421FBA5A71F039B4332C318730AE04 /* Build configuration list for PBXAggregateTarget "SwiftLint-macOS" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				73B7D6CE7FE4D1F4F6D349B169D170F7 /* Debug */,
-				3BB028E78F3AE642DA3C1A2F2AD6EC41 /* Release */,
+				399F1A68BB6CB1EA90B353C2E7B966FC /* Debug */,
+				F5A9E587D8F69793FFCECD3998226C96 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
@@ -421,29 +374,20 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		596E3C9825AA4099DB9462890C992038 /* Build configuration list for PBXAggregateTarget "SwiftLint-iOS13.0" */ = {
+		8433C58125E71D385C400FD0D1BCBEBF /* Build configuration list for PBXAggregateTarget "SwiftLint-iOS" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				5BE10D7CDD7A49611059FD7F17D1CB81 /* Debug */,
-				A71544840FDD548C5067ADBB6A2F9A3B /* Release */,
+				0F5478B1B758D69339967C6BDD95BE04 /* Debug */,
+				E8F0AC52BD854E71CAD8E725AA8DE109 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		71C8D35EFF931BB4C454C4E08A7F4936 /* Build configuration list for PBXAggregateTarget "SwiftLint-macOS10.12" */ = {
+		A6E8FBC16A9C0A0DE45DCB2A837EB408 /* Build configuration list for PBXAggregateTarget "SwiftLint-tvOS" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				77DDB3DDAADD0BDAEE67C6D556A44744 /* Debug */,
-				935019F4AFFB79549B6FD114E358098B /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		B7FC7ABA8D8AA06627EBD211452D83AF /* Build configuration list for PBXAggregateTarget "SwiftLint-tvOS10.2" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				A78C0DB8893C01D1C80096EC41ECC8C8 /* Debug */,
-				2395420A2F62C406D14E82127A42CA3D /* Release */,
+				A281E0F47307D8FE7A93BB3F31FB3C79 /* Debug */,
+				E647855C5F6B50B900C25B6DCB0E63D2 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

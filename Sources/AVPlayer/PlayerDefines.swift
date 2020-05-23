@@ -261,8 +261,6 @@ public struct LoadingState {
 }
 
 public struct KSPlayerManager {
-    public static var firstPlayerType: MediaPlayerProtocol.Type = KSAVPlayer.self
-    public static var secondPlayerType: MediaPlayerProtocol.Type?
     /// 日志输出方式
     public static var logFunctionPoint: (String) -> Void = {
         print($0)

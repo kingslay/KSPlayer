@@ -59,8 +59,8 @@ open class IOSVideoPlayerView: VideoPlayerView {
         maskImageView.contentMode = .scaleAspectFit
         toolBar.addArrangedSubview(landscapeButton)
         landscapeButton.tag = PlayerButtonType.landscape.rawValue
-        landscapeButton.setImage(image(named: "KSPlayer_fullscreen"), for: .normal)
-        landscapeButton.setImage(image(named: "KSPlayer_portialscreen"), for: .selected)
+        landscapeButton.setImage(UIImage(ksName: "KSPlayer_fullscreen"), for: .normal)
+        landscapeButton.setImage(UIImage(ksName: "KSPlayer_portialscreen"), for: .selected)
         landscapeButton.addTarget(self, action: #selector(onButtonPressed(_:)), for: .touchUpInside)
         tapGesture.addTarget(self, action: #selector(onTapGestureTapped(_:)))
         tapGesture.numberOfTapsRequired = 1
@@ -73,13 +73,13 @@ open class IOSVideoPlayerView: VideoPlayerView {
         tapGesture.require(toFail: doubleTapGesture)
         addGestureRecognizer(doubleTapGesture)
         backButton.tag = PlayerButtonType.back.rawValue
-        backButton.setImage(image(named: "KSPlayer_back"), for: .normal)
+        backButton.setImage(UIImage(ksName: "KSPlayer_back"), for: .normal)
         backButton.addTarget(self, action: #selector(onButtonPressed(_:)), for: .touchUpInside)
         navigationBar.insertArrangedSubview(backButton, at: 0)
         lockButton.backgroundColor = UIColor.black.withAlphaComponent(0.5)
         lockButton.cornerRadius = 32
-        lockButton.setImage(image(named: "KSPlayer_unlocking"), for: .normal)
-        lockButton.setImage(image(named: "KSPlayer_autoRotationLock"), for: .selected)
+        lockButton.setImage(UIImage(ksName: "KSPlayer_unlocking"), for: .normal)
+        lockButton.setImage(UIImage(ksName: "KSPlayer_autoRotationLock"), for: .selected)
         lockButton.tag = PlayerButtonType.lock.rawValue
         lockButton.addTarget(self, action: #selector(onButtonPressed(_:)), for: .touchUpInside)
         lockButton.isHidden = true
@@ -143,7 +143,7 @@ open class IOSVideoPlayerView: VideoPlayerView {
                 changePlaybackRate(button: button)
             } else if type == .definition {
                 guard let resource = resource, resource.definitions.count > 1 else { return }
-                let alertController = UIAlertController(title: "选择画质", message: nil, preferredStyle: UIDevice.current.userInterfaceIdiom == .phone ? .actionSheet : .alert)
+                let alertController = UIAlertController(title: NSLocalizedString("select video quality", comment: ""), message: nil, preferredStyle: UIDevice.current.userInterfaceIdiom == .phone ? .actionSheet : .alert)
                 for (index, definition) in resource.definitions.enumerated() {
                     let action = UIAlertAction(title: definition.definition, style: .default) { [weak self] _ in
                         guard let self = self, index != self.currentDefinition else { return }
@@ -152,7 +152,7 @@ open class IOSVideoPlayerView: VideoPlayerView {
                     action.setValue(index == currentDefinition, forKey: "checked")
                     alertController.addAction(action)
                 }
-                alertController.addAction(UIAlertAction(title: "取消", style: .cancel, handler: nil))
+                alertController.addAction(UIAlertAction(title: NSLocalizedString("cancel", comment: ""), style: .cancel, handler: nil))
                 viewController?.present(alertController, animated: true, completion: nil)
             }
         }
@@ -218,7 +218,7 @@ open class IOSVideoPlayerView: VideoPlayerView {
     }
 
     open func changePlaybackRate(button: UIButton) {
-        let alertController = UIAlertController(title: "选择倍速", message: nil, preferredStyle: UIDevice.current.userInterfaceIdiom == .phone ? .actionSheet : .alert)
+        let alertController = UIAlertController(title: NSLocalizedString("select speed", comment: ""), message: nil, preferredStyle: UIDevice.current.userInterfaceIdiom == .phone ? .actionSheet : .alert)
         [0.75, 1.0, 1.25, 1.5, 2.0].forEach { rate in
             let title = "\(rate)X"
             let action = UIAlertAction(title: title, style: .default) { [weak self] _ in
@@ -229,7 +229,7 @@ open class IOSVideoPlayerView: VideoPlayerView {
             action.setValue(title == button.titleLabel?.text, forKey: "checked")
             alertController.addAction(action)
         }
-        alertController.addAction(UIAlertAction(title: "取消", style: .cancel, handler: nil))
+        alertController.addAction(UIAlertAction(title: NSLocalizedString("cancel", comment: ""), style: .cancel, handler: nil))
         viewController?.present(alertController, animated: true, completion: nil)
     }
 
@@ -426,7 +426,7 @@ extension IOSVideoPlayerView {
 public class AirplayStatusView: UIView {
     override public init(frame: CGRect) {
         super.init(frame: frame)
-        let airplayicon = UIImageView(image: image(named: "airplayicon_play"))
+        let airplayicon = UIImageView(image: UIImage(ksName: "airplayicon_play"))
         addSubview(airplayicon)
         let airplaymessage = UILabel()
         airplaymessage.backgroundColor = .clear

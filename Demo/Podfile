@@ -20,7 +20,7 @@ end
 
 target 'demo-SwiftUI' do
   project 'demo-SwiftUI/demo-SwiftUI.xcodeproj'
-  platform :ios, 13.0
+  platform :ios, 10.0
   common
 end
 

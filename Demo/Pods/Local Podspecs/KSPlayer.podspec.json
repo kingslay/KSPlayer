@@ -17,7 +17,7 @@
     "osx": "10.12",
     "tvos": "10.2"
   },
-  "swift_versions": "5.1",
+  "swift_versions": "5.2",
   "static_framework": true,
   "testspecs": [
     {
@@ -61,36 +61,9 @@
       }
     },
     {
-      "name": "SubtitleCore",
-      "source_files": "Sources/SubtitleCore/*.{swift}",
-      "frameworks": "Foundation"
-    },
-    {
       "name": "Subtitle",
       "source_files": "Sources/Subtitle/*.{swift}",
-      "ios": {
-        "source_files": "Sources/Subtitle/iOS/*.swift",
-        "frameworks": "UIKit"
-      },
-      "tvos": {
-        "source_files": "Sources/Subtitle/iOS/*.swift",
-        "frameworks": "UIKit"
-      },
-      "osx": {
-        "source_files": "Sources/Subtitle/macOS/*.swift",
-        "frameworks": "AppKit"
-      },
-      "dependencies": {
-        "KSPlayer/Basic": [
-
-        ],
-        "KSPlayer/SubtitleCore": [
-
-        ],
-        "KSPlayer/Resources": [
-
-        ]
-      }
+      "frameworks": "Foundation"
     },
     {
       "name": "FFmpeg",
@@ -160,7 +133,7 @@
         "KSPlayer/Metal": [
 
         ],
-        "KSPlayer/SubtitleCore": [
+        "KSPlayer/Subtitle": [
 
         ]
       }
@@ -180,9 +153,11 @@
       "dependencies": {
         "KSPlayer/AVPlayer": [
 
-        ],
-        "KSPlayer/Resources": [
-
+        ]
+      },
+      "resource_bundles": {
+        "KSResources": [
+          "Sources/Core/Resources/*"
         ]
       }
     },
@@ -205,7 +180,7 @@
         "KSPlayer/Core": [
 
         ],
-        "KSPlayer/SubtitleCore": [
+        "KSPlayer/Subtitle": [
 
         ]
       }
@@ -233,15 +208,7 @@
 
         ]
       }
-    },
-    {
-      "name": "Resources",
-      "resource_bundles": {
-        "KSResources": [
-          "Sources/Resources/*.xcassets"
-        ]
-      }
     }
   ],
-  "swift_version": "5.1"
+  "swift_version": "5.2"
 }

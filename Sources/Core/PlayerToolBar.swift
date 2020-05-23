@@ -74,8 +74,8 @@ public class PlayerToolBar: UIStackView {
     private func initUI() {
         distribution = .fill
         playButton.tag = PlayerButtonType.play.rawValue
-        playButton.setImage(image(named: "toolbar_ic_play"), for: .normal)
-        playButton.setImage(image(named: "toolbar_ic_pause"), for: .selected)
+        playButton.setImage(UIImage(ksName: "toolbar_ic_play"), for: .normal)
+        playButton.setImage(UIImage(ksName: "toolbar_ic_pause"), for: .selected)
         currentTimeLabel.textColor = UIColor(hex: 0x9B9B9B)
         currentTimeLabel.font = UIFont(name: "HelveticaNeue-Medium", size: 14)
         currentTimeLabel.text = 0.toString(for: timeType)
@@ -90,11 +90,11 @@ public class PlayerToolBar: UIStackView {
         timeSlider.maximumTrackTintColor = UIColor.white.withAlphaComponent(0.3)
         timeSlider.minimumTrackTintColor = UIColor(red: 0.0, green: 164 / 255.0, blue: 1.0, alpha: 1.0)
         playbackRateButton.titleFont = .systemFont(ofSize: 14, weight: .medium)
-        playbackRateButton.setTitle("倍速", for: .normal)
+        playbackRateButton.setTitle(NSLocalizedString("speed", comment: ""), for: .normal)
         playbackRateButton.tag = PlayerButtonType.rate.rawValue
         definitionButton.titleFont = .systemFont(ofSize: 14, weight: .medium)
         definitionButton.tag = PlayerButtonType.definition.rawValue
-        srtButton.setTitle("字幕", for: .normal)
+        srtButton.setTitle(NSLocalizedString("subtitle", comment: ""), for: .normal)
         srtButton.titleFont = .systemFont(ofSize: 14, weight: .medium)
         srtButton.tag = PlayerButtonType.srt.rawValue
         playButton.translatesAutoresizingMaskIntoConstraints = false
@@ -125,7 +125,7 @@ public class PlayerToolBar: UIStackView {
         playButton.isSelected = false
         timeSlider.value = 0.0
         timeSlider.isPlayable = false
-        playbackRateButton.setTitle("倍速", for: .normal)
+        playbackRateButton.setTitle(NSLocalizedString("speed", comment: ""), for: .normal)
     }
 }
 

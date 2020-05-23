@@ -70,8 +70,8 @@ private final class SystemView: UIVisualEffectView {
     private let stackView = UIStackView()
     private let imageView = UIImageView()
     private let titleLabel = UILabel()
-    private lazy var brightnessImage = image(named: "KSPlayer_brightness")
-    private lazy var volumeImage = image(named: "KSPlayer_volume")
+    private lazy var brightnessImage = UIImage(ksName: "KSPlayer_brightness")
+    private lazy var volumeImage = UIImage(ksName: "KSPlayer_volume")
     private convenience init() {
         self.init(effect: UIBlurEffect(style: .extraLight))
         clipsToBounds = true
@@ -130,10 +130,10 @@ extension SystemView: BrightnessVolumeViewProtocol {
     public func setProgress(_ progress: Float, type: UInt) {
         if type == 0 {
             imageView.image = brightnessImage
-            titleLabel.text = "亮度"
+            titleLabel.text = NSLocalizedString("brightness", comment: "")
         } else {
             imageView.image = volumeImage
-            titleLabel.text = "音量"
+            titleLabel.text = NSLocalizedString("volume", comment: "")
         }
         let level = Int(progress * Float(stackView.arrangedSubviews.count))
         for i in 0 ..< stackView.arrangedSubviews.count {
@@ -162,10 +162,10 @@ extension SystemView: BrightnessVolumeViewProtocol {
 }
 
 private final class ProgressView: UIView {
-    private lazy var brightnessImage = image(named: "ic_light")
-    private lazy var volumeImage = image(named: "ic_voice")
-    private lazy var brightnessOffImage = image(named: "ic_light_off")
-    private lazy var volumeOffImage = image(named: "ic_voice_off")
+    private lazy var brightnessImage = UIImage(ksName: "ic_light")
+    private lazy var volumeImage = UIImage(ksName: "ic_voice")
+    private lazy var brightnessOffImage = UIImage(ksName: "ic_light_off")
+    private lazy var volumeOffImage = UIImage(ksName: "ic_voice_off")
     private let progressView = UIProgressView()
     private let imageView = UIImageView()
 

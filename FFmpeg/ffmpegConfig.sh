@@ -121,7 +121,7 @@ CONFIGURE_FLAGS="$CONFIGURE_FLAGS --enable-decoder=ssa"
 CONFIGURE_FLAGS="$CONFIGURE_FLAGS --enable-decoder=movtext"
 CONFIGURE_FLAGS="$CONFIGURE_FLAGS --enable-decoder=subrip"
 CONFIGURE_FLAGS="$CONFIGURE_FLAGS --enable-decoder=dvdsub"
-
+CONFIGURE_FLAGS="$CONFIGURE_FLAGS --enable-decoder=webvtt"
 CONFIGURE_FLAGS="$CONFIGURE_FLAGS --disable-hwaccels"
 # ./configure --list-muxers
 CONFIGURE_FLAGS="$CONFIGURE_FLAGS --disable-muxers"
