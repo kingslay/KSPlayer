@@ -366,12 +366,12 @@ extension KSPlayerManager {
     static let bundle: Bundle = Bundle(for: KSPlayerLayer.self).path(forResource: "KSResources", ofType: "bundle").map { Bundle(path: $0) ?? Bundle.main } ?? Bundle.main
 }
 
-extension UIImage {
-    convenience init?(ksName named: String) {
+extension KSPlayerManager {
+    static func image(named: String) -> UIImage? {
         #if os(macOS)
         return KSPlayerManager.bundle.image(forResource: named)
         #else
-        self.init(named: named, in: KSPlayerManager.bundle, compatibleWith: nil)
+        return UIImage(named: named, in: KSPlayerManager.bundle, compatibleWith: nil)
         #endif
     }
 }

@@ -59,8 +59,8 @@ open class IOSVideoPlayerView: VideoPlayerView {
         maskImageView.contentMode = .scaleAspectFit
         toolBar.addArrangedSubview(landscapeButton)
         landscapeButton.tag = PlayerButtonType.landscape.rawValue
-        landscapeButton.setImage(UIImage(ksName: "KSPlayer_fullscreen"), for: .normal)
-        landscapeButton.setImage(UIImage(ksName: "KSPlayer_portialscreen"), for: .selected)
+        landscapeButton.setImage(KSPlayerManager.image(named: "KSPlayer_fullscreen"), for: .normal)
+        landscapeButton.setImage(KSPlayerManager.image(named: "KSPlayer_portialscreen"), for: .selected)
         landscapeButton.addTarget(self, action: #selector(onButtonPressed(_:)), for: .touchUpInside)
         tapGesture.addTarget(self, action: #selector(onTapGestureTapped(_:)))
         tapGesture.numberOfTapsRequired = 1
@@ -73,13 +73,13 @@ open class IOSVideoPlayerView: VideoPlayerView {
         tapGesture.require(toFail: doubleTapGesture)
         addGestureRecognizer(doubleTapGesture)
         backButton.tag = PlayerButtonType.back.rawValue
-        backButton.setImage(UIImage(ksName: "KSPlayer_back"), for: .normal)
+        backButton.setImage(KSPlayerManager.image(named: "KSPlayer_back"), for: .normal)
         backButton.addTarget(self, action: #selector(onButtonPressed(_:)), for: .touchUpInside)
         navigationBar.insertArrangedSubview(backButton, at: 0)
         lockButton.backgroundColor = UIColor.black.withAlphaComponent(0.5)
         lockButton.cornerRadius = 32
-        lockButton.setImage(UIImage(ksName: "KSPlayer_unlocking"), for: .normal)
-        lockButton.setImage(UIImage(ksName: "KSPlayer_autoRotationLock"), for: .selected)
+        lockButton.setImage(KSPlayerManager.image(named: "KSPlayer_unlocking"), for: .normal)
+        lockButton.setImage(KSPlayerManager.image(named: "KSPlayer_autoRotationLock"), for: .selected)
         lockButton.tag = PlayerButtonType.lock.rawValue
         lockButton.addTarget(self, action: #selector(onButtonPressed(_:)), for: .touchUpInside)
         lockButton.isHidden = true
@@ -426,7 +426,7 @@ extension IOSVideoPlayerView {
 public class AirplayStatusView: UIView {
     override public init(frame: CGRect) {
         super.init(frame: frame)
-        let airplayicon = UIImageView(image: UIImage(ksName: "airplayicon_play"))
+        let airplayicon = UIImageView(image: KSPlayerManager.image(named: "airplayicon_play"))
         addSubview(airplayicon)
         let airplaymessage = UILabel()
         airplaymessage.backgroundColor = .clear

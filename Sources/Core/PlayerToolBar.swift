@@ -74,8 +74,8 @@ public class PlayerToolBar: UIStackView {
     private func initUI() {
         distribution = .fill
         playButton.tag = PlayerButtonType.play.rawValue
-        playButton.setImage(UIImage(ksName: "toolbar_ic_play"), for: .normal)
-        playButton.setImage(UIImage(ksName: "toolbar_ic_pause"), for: .selected)
+        playButton.setImage(KSPlayerManager.image(named: "toolbar_ic_play"), for: .normal)
+        playButton.setImage(KSPlayerManager.image(named: "toolbar_ic_pause"), for: .selected)
         currentTimeLabel.textColor = UIColor(hex: 0x9B9B9B)
         currentTimeLabel.font = UIFont(name: "HelveticaNeue-Medium", size: 14)
         currentTimeLabel.text = 0.toString(for: timeType)

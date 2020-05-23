@@ -23,12 +23,12 @@ import Foundation
 //        contentView.addSubview(titleLabel)
 //        localIconView.isUserInteractionEnabled = false
 //        localIconView.titleLabel?.font = .systemFont(ofSize: 12)
-//        localIconView.setBackgroundImage(UIImage(ksName: "ic_subtitle_local"), for: .normal)
-//        localIconView.setBackgroundImage(UIImage(ksName: "ic_subtitle_selected"), for: .selected)
+//        localIconView.setBackgroundImage(KSPlayerManager.image(named: "ic_subtitle_local"), for: .normal)
+//        localIconView.setBackgroundImage(KSPlayerManager.image(named: "ic_subtitle_selected"), for: .selected)
 //        localIconView.setTitleColor(.white, for: .normal)
 //        localIconView.setTitleColor(UIColor(red: 0x29 / 255.0, green: 0x80 / 255.0, blue: 1.0, alpha: 1.0), for: .selected)
 //        contentView.addSubview(localIconView)
-//        checkView.image = UIImage(ksName: "ic_check")
+//        checkView.image = KSPlayerManager.image(named: "ic_check")
 //        checkView.contentMode = .right
 //        contentView.addSubview(checkView)
 //        titleLabel.translatesAutoresizingMaskIntoConstraints = false
