@@ -65,8 +65,13 @@ open class PlayerView: UIView, KSPlayerLayerDelegate, KSSliderDelegate {
         fatalError("init(coder:) has not been implemented")
     }
 
-    @objc open func onButtonPressed(_ button: UIButton) {
-        guard var type = PlayerButtonType(rawValue: button.tag) else { return }
+    @objc func onButtonPressed(_ button: UIButton) {
+        guard let type = PlayerButtonType(rawValue: button.tag) else { return }
+        onButtonPressed(type: type, button: button)
+    }
+
+    open func onButtonPressed(type: PlayerButtonType, button: UIButton) {
+        var type = type
         if type == .play, button.isSelected {
             type = .pause
         }

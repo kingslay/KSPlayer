@@ -141,10 +141,10 @@ open class VideoPlayerView: PlayerView {
 
     // MARK: - Action Response
 
-    @objc override open func onButtonPressed(_ button: UIButton) {
+    override open func onButtonPressed(type: PlayerButtonType, button: UIButton) {
         autoFadeOutViewWithAnimation()
-        super.onButtonPressed(button)
-        if button.tag == PlayerButtonType.srt.rawValue {
+        super.onButtonPressed(type: type, button: button)
+        if type == .srt {
             srtControl.view.isHidden = false
             isMaskShow = false
         }

@@ -75,3 +75,20 @@ class DetailViewController: UIViewController, DetailProtocol {
         navigationController?.setNavigationBarHidden(false, animated: true)
     }
 }
+
+#if os(iOS)
+class CustomVideoPlayerView: IOSVideoPlayerView {
+    override func updateUI(isLandscape: Bool) {
+        super.updateUI(isLandscape: isLandscape)
+        toolBar.playbackRateButton.isHidden = true
+    }
+
+    override func onButtonPressed(type: PlayerButtonType, button: UIButton) {
+        if type == .landscape {
+            // xx
+        } else {
+            super.onButtonPressed(type: type, button: button)
+        }
+    }
+}
+#endif

@@ -3,7 +3,7 @@
 
 # KSPlayer 
 
-- KSPlayer is a powerful media play framework for iOS, macOS, and tvOS.
+- KSPlayer is a powerful media play framework foriOS, tvOS, macOS,maccatalyst.
 
 ## Based On
 
@@ -13,7 +13,7 @@
 
 ## Features
 
-- iOS, tvOS, macOS.
+- iOS, tvOS, macOS,maccatalyst.
 - 360° panorama video.
 - Background playback.
 - RTMP/RTSP/Dash/HLS streaming.
@@ -141,7 +141,15 @@ public protocol PlayerControllerDelegate: class {
   class CustomVideoPlayerView: IOSVideoPlayerView {
       override func updateUI(isLandscape: Bool) {
           super.updateUI(isLandscape: isLandscape)
-          bottomMaskView.isHidden = true
+          toolBar.playbackRateButton.isHidden = true
+      }
+  
+      override func onButtonPressed(type: PlayerButtonType, button: UIButton) {
+          if type == .landscape {
+              // xx
+          } else {
+              super.onButtonPressed(type: type, button: button)
+          }
       }
   }
   ```
