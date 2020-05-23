@@ -359,3 +359,19 @@ extension KSPlayerLayer {
         return .success
     }
 }
+
+extension KSPlayerManager {
+    public static var firstPlayerType: MediaPlayerProtocol.Type = KSAVPlayer.self
+    public static var secondPlayerType: MediaPlayerProtocol.Type?
+    static let bundle: Bundle = Bundle(for: KSPlayerLayer.self).path(forResource: "KSResources", ofType: "bundle").map { Bundle(path: $0) ?? Bundle.main } ?? Bundle.main
+}
+
+extension UIImage {
+    convenience init?(ksName named: String) {
+        #if os(macOS)
+        return KSPlayerManager.bundle.image(forResource: named)
+        #else
+        self.init(named: named, in: KSPlayerManager.bundle, compatibleWith: nil)
+        #endif
+    }
+}

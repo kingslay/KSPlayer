@@ -159,7 +159,7 @@ public protocol PlayerControllerDelegate: class {
     /// the language of the track
     let language = track.language
     /// selecting the one
-  	player.select(track: track)
+    player.select(track: track)
   ```
 
 - ### Set the properties in KSPlayerManager and KSOptions.

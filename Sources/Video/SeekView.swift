@@ -26,7 +26,7 @@ class SeekView: UIView {
         cornerRadius = 4
         clipsToBounds = true
         isHidden = true
-        seekToViewImage.image = image(named: "KSPlayer_seek_to_image")
+        seekToViewImage.image = UIImage(ksName: "KSPlayer_seek_to_image")
         translatesAutoresizingMaskIntoConstraints = false
         seekToViewImage.translatesAutoresizingMaskIntoConstraints = false
         seekToLabel.translatesAutoresizingMaskIntoConstraints = false

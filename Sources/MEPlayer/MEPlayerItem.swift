@@ -40,6 +40,7 @@ final class MEPlayerItem {
     var currentPlaybackTime: TimeInterval {
         max(positionTime - startTime, 0)
     }
+
     private var positionTime = TimeInterval(0)
     private var startTime = TimeInterval(0)
     private(set) var rotation = 0.0
@@ -168,7 +169,7 @@ extension MEPlayerItem {
         videoTrack = nil
         audioTrack = nil
         if formatCtx.pointee.start_time != Int64.min {
-            startTime = TimeInterval(formatCtx.pointee.start_time / 1000000)
+            startTime = TimeInterval(formatCtx.pointee.start_time / 1_000_000)
         }
         assetTracks = (0 ..< Int(formatCtx.pointee.nb_streams)).compactMap { i in
             if let coreStream = formatCtx.pointee.streams[i] {

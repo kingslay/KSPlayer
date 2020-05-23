@@ -1,0 +1,3 @@
+${PODS_ROOT}/Target Support Files/KSPlayer-tvOS/KSPlayer-tvOS-Unit-Tests-resources.sh
+${PODS_CONFIGURATION_BUILD_DIR}/KSPlayer-tvOS/KSResources.bundle
+${PODS_CONFIGURATION_BUILD_DIR}/KSPlayer-tvOS/Metal.bundle

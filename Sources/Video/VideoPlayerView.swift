@@ -18,6 +18,13 @@ enum KSPanDirection {
     case vertical
 }
 
+public protocol LoadingIndector {
+    func startAnimating()
+    func stopAnimating()
+}
+
+extension UIActivityIndicatorView: LoadingIndector {}
+
 open class VideoPlayerView: PlayerView {
     private var delayItem: DispatchWorkItem?
     public let bottomMaskView = LayerContainerView()
@@ -174,8 +181,8 @@ open class VideoPlayerView: PlayerView {
         replayButton.cornerRadius = 32
         replayButton.titleFont = .systemFont(ofSize: 16)
         replayButton.backgroundColor = UIColor.black.withAlphaComponent(0.5)
-        replayButton.setImage(image(named: "KSPlayer_play"), for: .normal)
-        replayButton.setImage(image(named: "KSPlayer_replay"), for: .selected)
+        replayButton.setImage(UIImage(ksName: "KSPlayer_play"), for: .normal)
+        replayButton.setImage(UIImage(ksName: "KSPlayer_replay"), for: .selected)
         replayButton.addTarget(self, action: #selector(onButtonPressed(_:)), for: .touchUpInside)
         replayButton.tag = PlayerButtonType.replay.rawValue
         addSubview(topMaskView)
@@ -361,8 +368,8 @@ extension VideoPlayerView {
         toolBar.playButton.tintColor = .white
         toolBar.playbackRateButton.tintColor = .white
         toolBar.definitionButton.tintColor = .white
-        toolBar.timeSlider.setThumbImage(image(named: "KSPlayer_slider_thumb"), for: .normal)
-        toolBar.timeSlider.setThumbImage(image(named: "KSPlayer_slider_thumb_pressed"), for: .highlighted)
+        toolBar.timeSlider.setThumbImage(UIImage(ksName: "KSPlayer_slider_thumb"), for: .normal)
+        toolBar.timeSlider.setThumbImage(UIImage(ksName: "KSPlayer_slider_thumb_pressed"), for: .highlighted)
         bottomMaskView.addSubview(toolBar.timeSlider)
         toolBar.spacing = 10
         toolBar.addArrangedSubview(toolBar.playButton)

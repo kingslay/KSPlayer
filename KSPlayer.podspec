@@ -16,7 +16,7 @@ Pod::Spec.new do |s|
     s.osx.deployment_target = '10.12'
     # s.watchos.deployment_target = '2.0'
     s.tvos.deployment_target = '10.2'
-    s.swift_version = '5.1'
+    s.swift_version = '5.2'
     s.static_framework = true
     s.subspec 'UXKit' do |ss|
         ss.source_files = 'Sources/UXKit/*.{swift}'
@@ -29,21 +29,9 @@ Pod::Spec.new do |s|
         ss.source_files = 'Sources/Basic/*.{swift}'
         ss.dependency 'KSPlayer/UXKit'
     end
-    s.subspec 'SubtitleCore' do |ss|
-        ss.source_files = 'Sources/SubtitleCore/*.{swift}'
-        ss.frameworks = 'Foundation'
-    end
     s.subspec 'Subtitle' do |ss|
         ss.source_files = 'Sources/Subtitle/*.{swift}'
-        ss.ios.source_files = 'Sources/Subtitle/iOS/*.swift'
-        ss.tvos.source_files = 'Sources/Subtitle/iOS/*.swift'
-        ss.osx.source_files = 'Sources/Subtitle/macOS/*.swift'
-        ss.ios.frameworks  = 'UIKit'
-        ss.tvos.frameworks  = 'UIKit'
-        ss.osx.frameworks  = 'AppKit'
-        ss.dependency 'KSPlayer/Basic'
-        ss.dependency 'KSPlayer/SubtitleCore'
-        ss.dependency 'KSPlayer/Resources'
+        ss.frameworks = 'Foundation'
     end
     s.subspec 'FFmpeg' do |ffmpeg|
 #        ffmpeg.public_header_files = 'Sources/FFmpeg/**/*.{h}'
@@ -81,7 +69,7 @@ Pod::Spec.new do |s|
         ss.dependency 'KSPlayer/FFmpeg'
         ss.dependency 'KSPlayer/AVPlayer'
         ss.dependency 'KSPlayer/Metal'
-        ss.dependency 'KSPlayer/SubtitleCore'
+        ss.dependency 'KSPlayer/Subtitle'
     end
   
     s.subspec 'Core' do |ss|
@@ -90,7 +78,9 @@ Pod::Spec.new do |s|
         ss.tvos.source_files = 'Sources/Core/iOS/*.swift'
         ss.osx.source_files = 'Sources/Core/macOS/*.swift'
         ss.dependency 'KSPlayer/AVPlayer'
-        ss.dependency 'KSPlayer/Resources'
+        ss.resource_bundles = {
+            'KSResources' => ['Sources/Core/Resources/*']
+        } 
     end
     s.subspec 'Audio'do |ss|
         ss.source_files = 'Sources/Audio/*.swift'
@@ -101,7 +91,7 @@ Pod::Spec.new do |s|
         ss.tvos.frameworks  = 'UIKit'
         ss.osx.frameworks  = 'AppKit'
         ss.dependency 'KSPlayer/Core'
-        ss.dependency 'KSPlayer/SubtitleCore'
+        ss.dependency 'KSPlayer/Subtitle'
     end
     s.subspec 'Video' do |ss|
         ss.source_files = 'Sources/Video/*.swift'
@@ -113,11 +103,6 @@ Pod::Spec.new do |s|
         ss.osx.frameworks  = 'AppKit'
         ss.dependency 'KSPlayer/Core'
         ss.dependency 'KSPlayer/Subtitle'
-    end
-    s.subspec 'Resources' do |ss|
-        ss.resource_bundles = {
-            'KSResources' => ['Sources/Resources/*.xcassets']
-        }        
     end
     s.test_spec 'Tests' do |test_spec|
         test_spec.source_files = 'Tests/*.swift'

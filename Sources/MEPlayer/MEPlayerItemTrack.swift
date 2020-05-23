@@ -76,7 +76,7 @@ struct AssetTrack: TrackProtocol {
             fps = mediaType == .audio ? 44 : 24
         }
         if let entry = av_dict_get(stream.pointee.metadata, "language", nil, 0), let title = entry.pointee.value {
-            language = String(cString: title)
+            language = NSLocalizedString(String(cString: title), comment: "")
         } else {
             language = nil
         }
@@ -86,7 +86,7 @@ struct AssetTrack: TrackProtocol {
             if let language = language {
                 name = language
             } else {
-                name = mediaType == .subtitle ? NSLocalizedString("内置字幕", comment: "") : mediaType.rawValue
+                name = mediaType == .subtitle ? NSLocalizedString("built-in subtitles", comment: "") : mediaType.rawValue
             }
         }
     }
