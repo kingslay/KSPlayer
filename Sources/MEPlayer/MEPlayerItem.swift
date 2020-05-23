@@ -185,8 +185,8 @@ extension MEPlayerItem {
             let videos = assetTracks.filter { $0.mediaType == .video }
             let bitRates = videos.map { $0.bitRate }
             let wantedStreamNb: Int32
-            if videos.count > 0, let bitRate = options.wanted(bitRates: bitRates), let track = videos.first(where: { $0.bitRate == bitRate }) {
-                wantedStreamNb = track.streamIndex
+            if videos.count > 0, let index = options.wantedVideo(bitRates: bitRates) {
+                wantedStreamNb = videos[index].streamIndex
             } else {
                 wantedStreamNb = -1
             }
@@ -206,7 +206,14 @@ extension MEPlayerItem {
             }
         }
         if !options.audioDisable {
-            let index = av_find_best_stream(formatCtx, AVMEDIA_TYPE_AUDIO, -1, videoIndex, nil, 0)
+            let audios = assetTracks.filter { $0.mediaType == .audio }
+            let wantedStreamNb: Int32
+            if audios.count > 0, let index = options.wantedAudio(info: audios.map { ($0.bitRate, $0.language) }) {
+                wantedStreamNb = audios[index].streamIndex
+            } else {
+                wantedStreamNb = -1
+            }
+            let index = av_find_best_stream(formatCtx, AVMEDIA_TYPE_AUDIO, wantedStreamNb, videoIndex, nil, 0)
             if let first = assetTracks.first(where: { $0.mediaType == .audio && $0.streamIndex == index }) {
                 first.stream.pointee.discard = AVDISCARD_DEFAULT
                 let track = AsyncPlayerItemTrack(assetTrack: first, options: options)

@@ -234,7 +234,11 @@ public class KSOptions {
         return nil
     }
 
-    open func wanted(bitRates _: [Int64]) -> Int64? {
+    open func wantedVideo(bitRates _: [Int64]) -> Int? {
+        nil
+    }
+
+    open func wantedAudio(info _: [(Int64, String?)]) -> Int? {
         nil
     }
 }
