@@ -192,7 +192,7 @@ open class IOSVideoPlayerView: VideoPlayerView {
         super.change(definitionIndex: definitionIndex)
     }
 
-    override open func panBegan(location point: CGPoint, direction: KSPanDirection) {
+    override open func panGestureBegan(location point: CGPoint, direction: KSPanDirection) {
         if direction == .vertical {
             if point.x > bounds.size.width / 2 {
                 isVolume = true
@@ -201,11 +201,11 @@ open class IOSVideoPlayerView: VideoPlayerView {
                 isVolume = false
             }
         } else {
-            super.panBegan(location: point, direction: direction)
+            super.panGestureBegan(location: point, direction: direction)
         }
     }
 
-    override open func panChanged(velocity point: CGPoint, direction: KSPanDirection) {
+    override open func panGestureChanged(velocity point: CGPoint, direction: KSPanDirection) {
         if direction == .vertical {
             if isVolume {
                 if KSPlayerManager.enableVolumeGestures {
@@ -217,7 +217,7 @@ open class IOSVideoPlayerView: VideoPlayerView {
                 UIScreen.main.brightness -= point.y / 0x2800
             }
         } else {
-            super.panChanged(velocity: point, direction: direction)
+            super.panGestureChanged(velocity: point, direction: direction)
         }
     }
 }
