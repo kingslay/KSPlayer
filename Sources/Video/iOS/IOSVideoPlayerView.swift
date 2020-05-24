@@ -192,7 +192,7 @@ open class IOSVideoPlayerView: VideoPlayerView {
         super.change(definitionIndex: definitionIndex)
     }
 
-    override func panBegan(location point: CGPoint, direction: KSPanDirection) {
+    override open func panBegan(location point: CGPoint, direction: KSPanDirection) {
         if direction == .vertical {
             if point.x > bounds.size.width / 2 {
                 isVolume = true
@@ -205,7 +205,7 @@ open class IOSVideoPlayerView: VideoPlayerView {
         }
     }
 
-    override func panChanged(velocity point: CGPoint, direction: KSPanDirection) {
+    override open func panChanged(velocity point: CGPoint, direction: KSPanDirection) {
         if direction == .vertical {
             if isVolume {
                 if KSPlayerManager.enableVolumeGestures {

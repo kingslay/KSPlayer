@@ -13,7 +13,7 @@ import AppKit
 #endif
 
 /// internal enum to check the pan direction
-enum KSPanDirection {
+public enum KSPanDirection {
     case horizontal
     case vertical
 }
@@ -378,7 +378,7 @@ open class VideoPlayerView: PlayerView {
         }
     }
 
-    func panBegan(location _: CGPoint, direction: KSPanDirection) {
+    open func panBegan(location _: CGPoint, direction: KSPanDirection) {
         if direction == .horizontal {
             // 给tmpPanValue初值
             if totalTime > 0 {
@@ -387,7 +387,7 @@ open class VideoPlayerView: PlayerView {
         }
     }
 
-    func panChanged(velocity point: CGPoint, direction: KSPanDirection) {
+    open func panChanged(velocity point: CGPoint, direction: KSPanDirection) {
         if direction == .horizontal {
             if !KSPlayerManager.enablePlaytimeGestures {
                 return
