@@ -368,17 +368,17 @@ open class VideoPlayerView: PlayerView {
             } else {
                 scrollDirection = .vertical
             }
-            panBegan(location: pan.location(in: self), direction: scrollDirection)
+            panGestureBegan(location: pan.location(in: self), direction: scrollDirection)
         case .changed:
-            panChanged(velocity: velocityPoint, direction: scrollDirection)
+            panGestureChanged(velocity: velocityPoint, direction: scrollDirection)
         case .ended:
-            gestureEnd()
+            panGestureEnded()
         default:
             break
         }
     }
 
-    open func panBegan(location _: CGPoint, direction: KSPanDirection) {
+    open func panGestureBegan(location _: CGPoint, direction: KSPanDirection) {
         if direction == .horizontal {
             // 给tmpPanValue初值
             if totalTime > 0 {
@@ -387,7 +387,7 @@ open class VideoPlayerView: PlayerView {
         }
     }
 
-    open func panChanged(velocity point: CGPoint, direction: KSPanDirection) {
+    open func panGestureChanged(velocity point: CGPoint, direction: KSPanDirection) {
         if direction == .horizontal {
             if !KSPlayerManager.enablePlaytimeGestures {
                 return
@@ -402,7 +402,7 @@ open class VideoPlayerView: PlayerView {
         }
     }
 
-    private func gestureEnd() {
+    open func panGestureEnded() {
         // 移动结束也需要判断垂直或者平移
         // 比如水平移动结束时，要快进到指定位置，如果这里没有判断，当我们调节音量完之后，会出现屏幕跳动的bug
         if scrollDirection == .horizontal, KSPlayerManager.enablePlaytimeGestures {
