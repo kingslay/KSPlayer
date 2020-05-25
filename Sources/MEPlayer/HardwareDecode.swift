@@ -81,10 +81,7 @@ class HardwareDecode: DecodeProtocol {
                 let frame = VideoVTBFrame()
                 frame.corePixelBuffer = imageBuffer
                 frame.timebase = self.timebase
-                frame.position = packet.pointee.pts
-                if frame.position == Int64.min || frame.position < 0 {
-                    frame.position = max(packet.pointee.dts, 0)
-                }
+                frame.position = max(packet.pointee.dts, packet.pointee.pts)
                 frame.duration = packet.pointee.duration
                 frame.size = Int64(packet.pointee.size)
                 result.append(frame)

@@ -42,8 +42,7 @@ public class CircularBuffer<Item: ObjectQueueItem> {
         if destoryed {
             return
         }
-        let currenIndex = Int(tailIndex & mask)
-        _buffer[currenIndex] = value
+        _buffer[Int(tailIndex & mask)] = value
         if sorted {
             // 不用sort进行排序，这个比较高效
             var index = tailIndex
@@ -52,13 +51,11 @@ public class CircularBuffer<Item: ObjectQueueItem> {
                     assertionFailure("value is nil of index: \((index - 1) & mask) headIndex: \(headIndex), tailIndex: \(tailIndex)")
                     break
                 }
-                if item.position < value.position {
+                if item.position < _buffer[Int(index & mask)]!.position {
                     break
                 }
+                _buffer.swapAt(Int((index - 1) & mask), Int(index & mask))
                 index -= 1
-            }
-            if tailIndex != index {
-                _buffer.swapAt(Int(index & mask), currenIndex)
             }
         }
         tailIndex &+= 1
