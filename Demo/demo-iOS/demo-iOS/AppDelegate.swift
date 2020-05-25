@@ -31,8 +31,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UISplitViewControllerDele
             splitViewController.delegate = self
             let detailVC = DetailViewController()
             splitViewController.viewControllers = [UINavigationController(rootViewController: MasterViewController()), UINavigationController(rootViewController: detailVC)]
-            detailVC.navigationItem.leftBarButtonItem = splitViewController.displayModeButtonItem
             #if os(iOS)
+            detailVC.navigationItem.leftBarButtonItem = splitViewController.displayModeButtonItem
             detailVC.navigationItem.leftItemsSupplementBackButton = true
             #endif
             window.rootViewController = splitViewController

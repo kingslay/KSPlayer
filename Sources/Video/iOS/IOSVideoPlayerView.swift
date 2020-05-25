@@ -94,10 +94,6 @@ open class IOSVideoPlayerView: VideoPlayerView {
             lockButton.centerYAnchor.constraint(equalTo: centerYAnchor),
             routeButton.widthAnchor.constraint(equalToConstant: 25),
             landscapeButton.widthAnchor.constraint(equalToConstant: 30),
-            srtControl.view.topAnchor.constraint(equalTo: topAnchor),
-            srtControl.view.leftAnchor.constraint(equalTo: leftAnchor),
-            srtControl.view.bottomAnchor.constraint(equalTo: bottomAnchor),
-            srtControl.view.rightAnchor.constraint(equalTo: rightAnchor),
             airplayStatusView.centerXAnchor.constraint(equalTo: centerXAnchor),
             airplayStatusView.centerYAnchor.constraint(equalTo: centerYAnchor),
         ])
