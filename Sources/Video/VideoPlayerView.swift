@@ -412,6 +412,29 @@ open class VideoPlayerView: PlayerView {
             tmpPanValue = 0.0
         }
     }
+
+    #if !os(macOS) && !targetEnvironment(macCatalyst)
+    override open func pressesBegan(_ presses: Set<UIPress>, with _: UIPressesEvent?) {
+        guard let presse = presses.first else {
+            return
+        }
+        switch presse.type {
+        case .playPause:
+            if playerLayer.state.isPlaying {
+                pause()
+            } else {
+                play()
+            }
+        case .select:
+            if !srtControl.view.isHidden {
+                srtControl.view.isHidden = true
+            }
+        case .menu:
+            isMaskShow.toggle()
+        default: break
+        }
+    }
+    #endif
 }
 
 // MARK: - seekToView
@@ -450,6 +473,15 @@ extension VideoPlayerView {
         addSubview(subtitleBackView)
         addSubview(srtControl.view)
         srtControl.view.translatesAutoresizingMaskIntoConstraints = false
+        srtControl.view.isHidden = true
+        #if !os(macOS)
+        NSLayoutConstraint.activate([
+            srtControl.view.topAnchor.constraint(equalTo: topAnchor),
+            srtControl.view.leftAnchor.constraint(equalTo: leftAnchor),
+            srtControl.view.bottomAnchor.constraint(equalTo: bottomAnchor),
+            srtControl.view.rightAnchor.constraint(equalTo: rightAnchor),
+        ])
+        #endif
         srtControl.selectWithFilePath = { [weak self] result in
             guard let self = self else { return }
             self.resource?.subtitle = try? result.get()

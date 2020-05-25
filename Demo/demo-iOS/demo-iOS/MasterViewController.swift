@@ -125,8 +125,8 @@ class MasterViewController: UIViewController, UITableViewDelegate, UITableViewDa
         tableView.deselectRow(at: indexPath, animated: true)
         if let split = splitViewController, let nav = split.viewControllers.last as? UINavigationController, let detail = nav.topViewController as? DetailProtocol {
             detail.resource = objects[indexPath.row]
-            detail.navigationItem.leftBarButtonItem = split.displayModeButtonItem
             #if os(iOS)
+            detail.navigationItem.leftBarButtonItem = split.displayModeButtonItem
             detail.navigationItem.leftItemsSupplementBackButton = true
             #endif
             split.preferredDisplayMode = .primaryHidden

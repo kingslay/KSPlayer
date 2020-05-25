@@ -3,7 +3,7 @@
 
 # KSPlayer 
 
-- KSPlayer is a powerful media play framework foriOS, tvOS, macOS,maccatalyst.
+- KSPlayer is a powerful media play framework foriOS, tvOS, macOS,Mac Catalyst, SwiftUI.
 
 ## Based On
 
@@ -13,7 +13,7 @@
 
 ## Features
 
-- iOS, tvOS, macOS,maccatalyst.
+- iOS, tvOS, macOS,Mac Catalyst, SwiftUI.
 - 360° panorama video.
 - Background playback.
 - RTMP/RTSP/Dash/HLS streaming.
