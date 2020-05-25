@@ -230,12 +230,12 @@ open class VideoPlayerView: PlayerView {
 
     /// Add Customize functions here
     open func customizeUIComponents() {
-        tapGesture.addTarget(self, action: #selector(onTapGestureTapped(_:)))
+        tapGesture.addTarget(self, action: #selector(tapGestureAction(_:)))
         tapGesture.numberOfTapsRequired = 1
         addGestureRecognizer(tapGesture)
-        panGesture.addTarget(self, action: #selector(panDirection(_:)))
+        panGesture.addTarget(self, action: #selector(panGestureAction(_:)))
         addGestureRecognizer(panGesture)
-        doubleTapGesture.addTarget(self, action: #selector(doubleGestureAction))
+        doubleTapGesture.addTarget(self, action: #selector(doubleTapGestureAction))
         doubleTapGesture.numberOfTapsRequired = 2
         tapGesture.require(toFail: doubleTapGesture)
         addGestureRecognizer(doubleTapGesture)
@@ -346,16 +346,20 @@ open class VideoPlayerView: PlayerView {
         }
     }
 
-    @objc open func doubleGestureAction() {
+    @objc open func doubleTapGestureAction() {
         toolBar.playButton.sendActions(for: .primaryActionTriggered)
         isMaskShow = true
     }
 
-    @objc private func onTapGestureTapped(_: UITapGestureRecognizer) {
-        isMaskShow.toggle()
+    @objc open func tapGestureAction(_: UITapGestureRecognizer) {
+        if srtControl.view.isHidden {
+            isMaskShow.toggle()
+        } else {
+            srtControl.view.isHidden = true
+        }
     }
 
-    @objc private func panDirection(_ pan: UIPanGestureRecognizer) {
+    @objc private func panGestureAction(_ pan: UIPanGestureRecognizer) {
         // 播放结束时，忽略手势,锁屏状态忽略手势
         guard !replayButton.isSelected, !isLock else { return }
         // 根据上次和本次移动的位置，算出一个速率的point
@@ -425,12 +429,6 @@ open class VideoPlayerView: PlayerView {
             } else {
                 play()
             }
-        case .select:
-            if !srtControl.view.isHidden {
-                srtControl.view.isHidden = true
-            }
-        case .menu:
-            isMaskShow.toggle()
         default: break
         }
     }
