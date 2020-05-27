@@ -275,8 +275,75 @@ final class AudioFrame: Frame {
     }
 }
 
-final class VideoVTBFrame: Frame {
-    public var corePixelBuffer: BufferProtocol?
+final class VideoVTBFrame: Frame, BufferProtocol {
+    let format: OSType
+    let planeCount: Int
+    let isFullRangeVideo: Bool
+    let colorAttachments: NSString
+    let drawableSize: CGSize
+    private let widths: [Int]
+    private let heights: [Int]
+    public let textures: [MTLTexture]
+    private var pixelBuffer: CVPixelBuffer?
+    init(pixelBuffer: CVPixelBuffer, textureCache: MetalTextureCache) {
+        format = pixelBuffer.format
+        planeCount = pixelBuffer.planeCount
+        widths = (0 ..< planeCount).map { pixelBuffer.widthOfPlane(at: $0) }
+        heights = (0 ..< planeCount).map { pixelBuffer.heightOfPlane(at: $0) }
+        isFullRangeVideo = pixelBuffer.isFullRangeVideo
+        colorAttachments = pixelBuffer.colorAttachments
+        drawableSize = pixelBuffer.drawableSize
+        self.pixelBuffer = pixelBuffer
+        textures = textureCache.texture(pixelBuffer: pixelBuffer)
+    }
+
+    init(frame: UnsafeMutablePointer<AVFrame>, textureCache: MetalTextureCache) {
+        format = AVPixelFormat(rawValue: frame.pointee.format).format
+        if frame.pointee.colorspace == AVCOL_SPC_BT709 {
+            colorAttachments = kCMFormatDescriptionYCbCrMatrix_ITU_R_709_2
+        } else {
+            //        else if frame.colorspace == AVCOL_SPC_SMPTE170M || frame.colorspace == AVCOL_SPC_BT470BG {
+            colorAttachments = kCMFormatDescriptionYCbCrMatrix_ITU_R_601_4
+        }
+        let width = Int(frame.pointee.width)
+        let height = Int(frame.pointee.height)
+        isFullRangeVideo = format != kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange
+        let vertical = Int(frame.pointee.sample_aspect_ratio.den)
+        let horizontal = Int(frame.pointee.sample_aspect_ratio.num)
+        if vertical > 0, horizontal > 0, vertical != horizontal {
+            drawableSize = CGSize(width: width, height: height * vertical / horizontal)
+        } else {
+            drawableSize = CGSize(width: width, height: height)
+        }
+        let formats: [MTLPixelFormat]
+        switch format {
+        case kCVPixelFormatType_420YpCbCr8Planar:
+            planeCount = 3
+            formats = [.r8Unorm, .r8Unorm, .r8Unorm]
+            widths = [width, width / 2, width / 2]
+            heights = [height, height / 2, height / 2]
+        case kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange, kCVPixelFormatType_420YpCbCr8BiPlanarFullRange:
+            planeCount = 2
+            formats = [.r8Unorm, .rg8Unorm]
+            widths = [width, width / 2]
+            heights = [height, height / 2]
+        default:
+            planeCount = 1
+            formats = [.bgra8Unorm]
+            widths = [width]
+            heights = [height]
+        }
+        let bytesPerRow = Array(tuple: frame.pointee.linesize)
+        textures = textureCache.textures(formats: formats, widths: widths, heights: heights, bytes: Array(tuple: frame.pointee.data), bytesPerRows: bytesPerRow)
+    }
+
+    func widthOfPlane(at planeIndex: Int) -> Int {
+        widths[planeIndex]
+    }
+
+    func heightOfPlane(at planeIndex: Int) -> Int {
+        heights[planeIndex]
+    }
 }
 
 extension Dictionary where Key == String {
