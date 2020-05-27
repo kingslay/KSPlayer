@@ -9,7 +9,7 @@ function InnerBuild() {
     local platform=$1
     local arch=$2
     if [[ $parameter = "debug" && $platform = "macos" ]]; then
-        FFMPEG_CFG_FLAGS="$FFMPEG_CFG_FLAGS --enable-ffmpeg --enable-ffplay --enable-sdl2"
+        FFMPEG_CFG_FLAGS="$FFMPEG_CFG_FLAGS --enable-ffmpeg --enable-ffplay --enable-sdl2 --enable-encoder=mpeg4 --enable-encoder=aac --enable-muxer=m4v --enable-muxer=dash"
     else
         FFMPEG_CFG_FLAGS="$FFMPEG_CFG_FLAGS --disable-programs --disable-ffmpeg --disable-ffplay --disable-ffprobe --disable-avfilter --disable-filters"
     fi

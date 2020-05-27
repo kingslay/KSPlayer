@@ -4,7 +4,7 @@ RED="\033[1;91m"
 MAGENTA="\033[1;35m"
 NOCOLOR="\033[0m"
 
-FF_VERSION="4.2.2"
+FF_VERSION="4.2.3"
 ##### Add Begin #####
 # OpenSSL
 OPENSSL=$(pwd)/OpenSSL
