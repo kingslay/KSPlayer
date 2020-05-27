@@ -17,6 +17,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UISplitViewControllerDele
         KSPlayerManager.canBackgroundPlay = true
         KSPlayerManager.logLevel = .debug
         KSPlayerManager.firstPlayerType = KSMEPlayer.self
+        KSOptions.preferredForwardBufferDuration = 10
         KSOptions.isAutoPlay = true
         KSOptions.isSecondOpen = true
         KSOptions.isAccurateSeek = true

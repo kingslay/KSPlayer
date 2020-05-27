@@ -158,9 +158,8 @@ public class KSOptions {
     private var throttle = mach_absolute_time()
     private let throttleDiff: UInt64
     public init() {
-        formatContextOptions["analyzeduration"] = 2_000_000
-        formatContextOptions["probesize"] = 2_000_000
         formatContextOptions["auto_convert"] = 0
+        formatContextOptions["fps_probe_size"] = 3
         formatContextOptions["reconnect"] = 1
         // There is total different meaning for 'timeout' option in rtmp
         // remove 'timeout' option for rtmp
