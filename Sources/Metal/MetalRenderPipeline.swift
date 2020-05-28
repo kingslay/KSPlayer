@@ -82,10 +82,13 @@ public protocol BufferProtocol: AnyObject {
     var drawableSize: CGSize { get }
     var format: OSType { get }
     var planeCount: Int { get }
+    var width: Int { get }
+    var height: Int { get }
     var isFullRangeVideo: Bool { get }
     var colorAttachments: NSString { get }
     func widthOfPlane(at planeIndex: Int) -> Int
     func heightOfPlane(at planeIndex: Int) -> Int
+    func textures(frome cache: MetalTextureCache) -> [MTLTexture]
 }
 
 extension CVPixelBuffer: BufferProtocol {
