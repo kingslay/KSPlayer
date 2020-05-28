@@ -124,6 +124,8 @@ public class KSOptions {
     public static var isAutoPlay = false
     /// seek完是否自动播放
     public static var isSeekedAutoPlay = true
+    public static let audioFrameMaxCount = 16
+    public static let videoFrameMaxCount = 8
 
     //    public static let shared = KSOptions()
     public var bufferPixelFormatType = KSOptions.bufferPixelFormatType
