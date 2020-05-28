@@ -45,7 +45,6 @@ class HardwareDecode: DecodeProtocol {
     // 刷新Session的话，后续的解码还是会失败，直到遇到I帧
     private var refreshSession = false
     private let options: KSOptions
-    private let textureCache = MetalTextureCache()
     required init(assetTrack: TrackProtocol, options: KSOptions) {
         timebase = assetTrack.timebase
         codecpar = assetTrack.stream.pointee.codecpar.pointee
@@ -79,7 +78,8 @@ class HardwareDecode: DecodeProtocol {
                 guard let imageBuffer = imageBuffer else {
                     return
                 }
-                let frame = VideoVTBFrame(pixelBuffer: imageBuffer, textureCache: self.textureCache)
+                let frame = VideoVTBFrame()
+                frame.corePixelBuffer = imageBuffer
                 frame.timebase = self.timebase
                 frame.position = max(packet.pointee.dts, packet.pointee.pts)
                 frame.duration = packet.pointee.duration

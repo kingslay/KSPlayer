@@ -16,8 +16,7 @@ final class MetalPlayView: MTKView, MTKViewDelegate, FrameOutput {
     init() {
         let device = MetalRender.share.device
         super.init(frame: .zero, device: device)
-        framebufferOnly = true
-        autoResizeDrawable = false
+        framebufferOnly = false
         clearColor = MTLClearColor(red: 0, green: 0, blue: 0, alpha: 1)
         delegate = self
         preferredFramesPerSecond = KSPlayerManager.preferredFramesPerSecond
@@ -46,24 +45,25 @@ final class MetalPlayView: MTKView, MTKViewDelegate, FrameOutput {
     }
 
     func draw(frame: MEFrame) {
-        if let frame = frame as? VideoVTBFrame {
+        if let frame = frame as? VideoVTBFrame, let pixelBuffer = frame.corePixelBuffer {
             renderSource?.setVideo(time: frame.cmtime)
-            let textures = frame.textures
-            let size = display == .plane ? frame.drawableSize : UIScreen.size
-            if drawableSize != size {
-                drawableSize = size
-            }
-            guard isOutput, textures.count > 0, let drawable = currentDrawable, let renderPassDescriptor = currentRenderPassDescriptor else {
+            drawableSize = display == .plane ? pixelBuffer.drawableSize : UIScreen.size
+            guard isOutput, let drawable = currentDrawable, let renderPassDescriptor = currentRenderPassDescriptor else {
                 return
             }
+            let textures = pixelBuffer.textures(frome: textureCache)
             renderPassDescriptor.colorAttachments[0].clearColor = MTLClearColor(red: 0, green: 0, blue: 0, alpha: 0)
             renderPassDescriptor.colorAttachments[0].loadAction = .clear
-            guard let commandBuffer = MetalRender.share.draw(pixelBuffer: frame, display: display, inputTextures: textures, renderPassDescriptor: renderPassDescriptor) else {
+            guard let commandBuffer = MetalRender.share.draw(pixelBuffer: pixelBuffer, display: display, inputTextures: textures, renderPassDescriptor: renderPassDescriptor) else {
                 return
             }
-            commandBuffer.present(drawable)
+            //        commandBuffer.present(drawable)
+            commandBuffer.addScheduledHandler { _ in
+                drawable.present()
+                frame.corePixelBuffer = nil
+            }
             commandBuffer.commit()
-            commandBuffer.waitUntilCompleted()
+//            commandBuffer.waitUntilCompleted()
         }
     }
 

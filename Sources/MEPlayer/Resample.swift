@@ -28,7 +28,6 @@ class VideoSwresample: Swresample {
     private var height: Int32 = 0
     private var width: Int32 = 0
     var dstFrame: UnsafeMutablePointer<AVFrame>?
-    private let textureCache = MetalTextureCache()
     init(dstFormat: AVPixelFormat) {
         self.dstFormat = dstFormat
     }
@@ -45,7 +44,7 @@ class VideoSwresample: Swresample {
         self.format = AVPixelFormat(rawValue: format)
         self.height = height
         self.width = width
-        if [AV_PIX_FMT_NV12, AV_PIX_FMT_YUV420P, AV_PIX_FMT_BGRA].contains(self.format) {
+        if PixelBuffer.isSupported(format: self.format) {
             return true
         }
         imgConvertCtx = sws_getCachedContext(imgConvertCtx, width, height, self.format, width, height, dstFormat, SWS_BICUBIC, nil, nil, nil)
@@ -66,21 +65,20 @@ class VideoSwresample: Swresample {
     }
 
     func transfer(avframe: UnsafeMutablePointer<AVFrame>, timebase: Timebase) -> Frame {
-        let frame: VideoVTBFrame
+        let frame = VideoVTBFrame()
+        frame.timebase = timebase
         if avframe.pointee.format == AV_PIX_FMT_VIDEOTOOLBOX.rawValue {
             // swiftlint:disable force_cast
-            let pixelBuffer = avframe.pointee.data.3 as! CVPixelBuffer
+            frame.corePixelBuffer = avframe.pointee.data.3 as! CVPixelBuffer
             // swiftlint:enable force_cast
-            frame = VideoVTBFrame(pixelBuffer: pixelBuffer, textureCache: textureCache)
         } else {
             if setup(frame: avframe), let dstFrame = dstFrame, swsConvert(data: Array(tuple: avframe.pointee.data), linesize: Array(tuple: avframe.pointee.linesize)) {
                 avframe.pointee.format = dstFrame.pointee.format
                 avframe.pointee.data = dstFrame.pointee.data
                 avframe.pointee.linesize = dstFrame.pointee.linesize
             }
-            frame = VideoVTBFrame(frame: avframe, textureCache: textureCache)
+            frame.corePixelBuffer = PixelBuffer(frame: avframe)
         }
-        frame.timebase = timebase
         frame.position = avframe.pointee.best_effort_timestamp
         if frame.position == Int64.min || frame.position < 0 {
             frame.position = max(avframe.pointee.pkt_dts, 0)
@@ -106,6 +104,99 @@ class VideoSwresample: Swresample {
 
     static func == (lhs: VideoSwresample, rhs: AVFrame) -> Bool {
         lhs.width == rhs.width && lhs.height == rhs.height && lhs.format.rawValue == rhs.format
+    }
+}
+
+class PixelBuffer: BufferProtocol {
+    let format: OSType
+    let width: Int
+    let height: Int
+    let planeCount: Int
+    let isFullRangeVideo: Bool
+    let colorAttachments: NSString
+    let drawableSize: CGSize
+    private let formats: [MTLPixelFormat]
+    private let widths: [Int]
+    private let heights: [Int]
+    private let dataWrap: ByteDataWrap
+    private let bytesPerRow: [Int32]
+    init(frame: UnsafeMutablePointer<AVFrame>) {
+        format = AVPixelFormat(rawValue: frame.pointee.format).format
+        if frame.pointee.colorspace == AVCOL_SPC_BT709 {
+            colorAttachments = kCMFormatDescriptionYCbCrMatrix_ITU_R_709_2
+        } else {
+            //        else if frame.colorspace == AVCOL_SPC_SMPTE170M || frame.colorspace == AVCOL_SPC_BT470BG {
+            colorAttachments = kCMFormatDescriptionYCbCrMatrix_ITU_R_601_4
+        }
+        width = Int(frame.pointee.width)
+        height = Int(frame.pointee.height)
+        isFullRangeVideo = format != kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange
+        bytesPerRow = Array(tuple: frame.pointee.linesize)
+        let vertical = Int(frame.pointee.sample_aspect_ratio.den)
+        let horizontal = Int(frame.pointee.sample_aspect_ratio.num)
+        if vertical > 0, horizontal > 0, vertical != horizontal {
+            drawableSize = CGSize(width: width, height: height * vertical / horizontal)
+        } else {
+            drawableSize = CGSize(width: width, height: height)
+        }
+        switch format {
+        case kCVPixelFormatType_420YpCbCr8Planar:
+            planeCount = 3
+            formats = [.r8Unorm, .r8Unorm, .r8Unorm]
+            widths = [width, width / 2, width / 2]
+            heights = [height, height / 2, height / 2]
+        case kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange, kCVPixelFormatType_420YpCbCr8BiPlanarFullRange:
+            planeCount = 2
+            formats = [.r8Unorm, .rg8Unorm]
+            widths = [width, width / 2]
+            heights = [height, height / 2]
+        default:
+            planeCount = 1
+            formats = [.bgra8Unorm]
+            widths = [width]
+            heights = [height]
+        }
+        dataWrap = ObjectPool.share.object(class: ByteDataWrap.self, key: "VideoData") { ByteDataWrap() }
+        let bytes = Array(tuple: frame.pointee.data)
+        dataWrap.size = (0 ..< planeCount).map { Int(bytesPerRow[$0]) * heights[$0] }
+        (0 ..< planeCount).forEach { i in
+            dataWrap.data[i]?.assign(from: bytes[i]!, count: dataWrap.size[i])
+        }
+    }
+
+    deinit {
+        ObjectPool.share.comeback(item: dataWrap, key: "VideoData")
+    }
+
+    func textures(frome cache: MetalTextureCache) -> [MTLTexture] {
+        cache.textures(formats: formats, widths: widths, heights: heights, bytes: dataWrap.data, bytesPerRows: bytesPerRow)
+    }
+
+    func widthOfPlane(at planeIndex: Int) -> Int {
+        widths[planeIndex]
+    }
+
+    func heightOfPlane(at planeIndex: Int) -> Int {
+        heights[planeIndex]
+    }
+
+    public static func isSupported(format: AVPixelFormat) -> Bool {
+        format == AV_PIX_FMT_NV12 || format == AV_PIX_FMT_YUV420P || format == AV_PIX_FMT_BGRA
+    }
+
+    private func image() -> UIImage? {
+        var image: UIImage?
+        if format.format == AV_PIX_FMT_RGB24 {
+            image = UIImage(rgbData: dataWrap.data[0]!, linesize: Int(bytesPerRow[0]), width: width, height: height)
+        }
+        let scale = VideoSwresample(dstFormat: AV_PIX_FMT_RGB24)
+        if scale.setup(format: format.format.rawValue, width: Int32(width), height: Int32(height)) {
+            if scale.swsConvert(data: dataWrap.data, linesize: bytesPerRow), let frame = scale.dstFrame?.pointee {
+                image = UIImage(rgbData: frame.data.0!, linesize: Int(frame.linesize.0), width: width, height: height)
+            }
+            scale.shutdown()
+        }
+        return image
     }
 }
 
