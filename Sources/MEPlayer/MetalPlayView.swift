@@ -10,13 +10,16 @@ import MetalKit
 
 final class MetalPlayView: MTKView, MTKViewDelegate, FrameOutput {
     private let textureCache = MetalTextureCache()
+    private let renderPassDescriptor = MTLRenderPassDescriptor()
     var display: DisplayEnum = .plane
     weak var renderSource: OutputRenderSourceDelegate?
     var isOutput = true
     init() {
         let device = MetalRender.share.device
         super.init(frame: .zero, device: device)
-        framebufferOnly = false
+        renderPassDescriptor.colorAttachments[0].clearColor = MTLClearColor(red: 0, green: 0, blue: 0, alpha: 0)
+        renderPassDescriptor.colorAttachments[0].loadAction = .clear
+        framebufferOnly = true
         clearColor = MTLClearColor(red: 0, green: 0, blue: 0, alpha: 1)
         delegate = self
         preferredFramesPerSecond = KSPlayerManager.preferredFramesPerSecond
@@ -47,23 +50,22 @@ final class MetalPlayView: MTKView, MTKViewDelegate, FrameOutput {
     func draw(frame: MEFrame) {
         if let frame = frame as? VideoVTBFrame, let pixelBuffer = frame.corePixelBuffer {
             renderSource?.setVideo(time: frame.cmtime)
-            drawableSize = display == .plane ? pixelBuffer.drawableSize : UIScreen.size
-            guard isOutput, let drawable = currentDrawable, let renderPassDescriptor = currentRenderPassDescriptor else {
+            let size = display == .plane ? pixelBuffer.drawableSize : UIScreen.size
+            if drawableSize != size {
+                drawableSize = size
+            }
+            guard isOutput, let drawable = currentDrawable else {
                 return
             }
+            renderPassDescriptor.colorAttachments[0].texture = drawable.texture
             let textures = pixelBuffer.textures(frome: textureCache)
-            renderPassDescriptor.colorAttachments[0].clearColor = MTLClearColor(red: 0, green: 0, blue: 0, alpha: 0)
-            renderPassDescriptor.colorAttachments[0].loadAction = .clear
             guard let commandBuffer = MetalRender.share.draw(pixelBuffer: pixelBuffer, display: display, inputTextures: textures, renderPassDescriptor: renderPassDescriptor) else {
                 return
             }
-            //        commandBuffer.present(drawable)
-            commandBuffer.addScheduledHandler { _ in
-                drawable.present()
-                frame.corePixelBuffer = nil
-            }
+            commandBuffer.present(drawable)
             commandBuffer.commit()
-//            commandBuffer.waitUntilCompleted()
+            commandBuffer.waitUntilCompleted()
+            frame.corePixelBuffer = nil
         }
     }
 
