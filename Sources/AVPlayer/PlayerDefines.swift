@@ -155,6 +155,7 @@ public class KSOptions {
     public var avOptions = [String: Any]()
     public var formatContextOptions = [String: Any]()
     public var decoderOptions = [String: Any]()
+    public var lowres = UInt8(0)
     public internal(set) var formatName = ""
     // 加个节流器，防止频繁的更新加载状态
     private var throttle = mach_absolute_time()
