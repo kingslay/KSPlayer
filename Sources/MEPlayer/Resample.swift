@@ -181,7 +181,7 @@ class PixelBuffer: BufferProtocol {
     }
 
     public static func isSupported(format: AVPixelFormat) -> Bool {
-        format == AV_PIX_FMT_NV12 || format == AV_PIX_FMT_YUV420P || format == AV_PIX_FMT_BGRA
+        [AV_PIX_FMT_NV12, AV_PIX_FMT_YUV420P, AV_PIX_FMT_BGRA].contains(format)
     }
 
     private func image() -> UIImage? {
@@ -237,6 +237,7 @@ extension AVPixelFormat {
         //        case AV_PIX_FMT_YUV422P10: return kCVPixelFormatType_422YpCbCr10
         //        case AV_PIX_FMT_YUV444P10: return kCVPixelFormatType_444YpCbCr10
         case AV_PIX_FMT_YUV420P: return kCVPixelFormatType_420YpCbCr8Planar
+        case AV_PIX_FMT_YUV420P10LE: return kCVPixelFormatType_420YpCbCr10BiPlanarVideoRange
         case AV_PIX_FMT_NV12: return kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange
         case AV_PIX_FMT_YUYV422: return kCVPixelFormatType_422YpCbCr8_yuvs
         case AV_PIX_FMT_GRAY8: return kCVPixelFormatType_OneComponent8

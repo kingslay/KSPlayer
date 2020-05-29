@@ -106,7 +106,7 @@ public struct VideoAdaptationState {
 }
 
 public class KSOptions {
-    /// 视频颜色编码方式 支持kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange kCVPixelFormatType_420YpCbCr8BiPlanarFullRange kCVPixelFormatType_32BGRA kCVPixelFormatType_420YpCbCr8Planar
+    /// 视频颜色编码方式 支持kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange kCVPixelFormatType_420YpCbCr8BiPlanarFullRange kCVPixelFormatType_32BGRA
     public static var bufferPixelFormatType = kCVPixelFormatType_420YpCbCr8BiPlanarFullRange
     public static var hardwareDecodeH264 = true
     public static var hardwareDecodeH265 = true
