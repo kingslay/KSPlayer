@@ -180,7 +180,7 @@ final class AsyncPlayerItemTrack: FFPlayerItemTrack<Frame> {
     // 无缝播放使用的PacketQueue
     private var loopPacketQueue: CircularBuffer<Packet>?
     private var packetQueue = CircularBuffer<Packet>()
-    override var packetCount: Int { packetQueue.count + (loopPacketQueue?.count ?? 0) }
+    override var packetCount: Int { packetQueue.count }
     override var isLoopModel: Bool {
         didSet {
             if isLoopModel {
@@ -229,11 +229,11 @@ final class AsyncPlayerItemTrack: FFPlayerItemTrack<Frame> {
     private func decodeThread() {
         state = .decoding
         while !decodeOperation.isCancelled {
-            if state.contains(.closed) || state.contains(.failed) || (state.contains(.finished) && packetQueue.count == 0) {
-                break
-            } else if state.contains(.flush) {
+            if state.contains(.flush) {
                 decoderMap.values.forEach { $0.doFlushCodec() }
                 state.remove(.flush)
+            } else if state.contains(.closed) || state.contains(.failed) || (state.contains(.finished) && packetQueue.count == 0) {
+                break
             } else if state.contains(.decoding) {
                 guard let packet = packetQueue.pop(wait: true), !state.contains(.flush), !state.contains(.closed) else {
                     continue
@@ -256,6 +256,7 @@ final class AsyncPlayerItemTrack: FFPlayerItemTrack<Frame> {
     }
 
     override func seek(time: TimeInterval) {
+        state.remove(.finished)
         seekTime = time
         packetQueue.flush()
         super.seek(time: time)
@@ -295,7 +296,7 @@ final class AsyncPlayerItemTrack: FFPlayerItemTrack<Frame> {
                 return
             }
             array.forEach { frame in
-                guard !state.contains(.flush), !state.contains(.closed) else {
+                if state.contains(.flush) || state.contains(.closed) {
                     return
                 }
                 if seekTime > 0, options.isAccurateSeek {

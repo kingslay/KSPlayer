@@ -391,7 +391,7 @@ extension MEPlayerItem: MediaPlayback {
             positionTime = time + startTime
             seekingCompletionHandler = handler
             state = .seeking
-            condition.signal()
+            condition.broadcast()
         } else if state == .finished {
             positionTime = time + startTime
             seekingCompletionHandler = handler
@@ -431,7 +431,7 @@ extension MEPlayerItem: CodecCapacityDelegate {
         if track.mediaType == .audio {
             isAudioStalled = true
         }
-        let allSatisfy = videoAudioTracks.allSatisfy { $0.isFinished && $0.frameCount == 0 }
+        let allSatisfy = videoAudioTracks.allSatisfy { $0.isFinished && $0.frameCount == 0 && $0.packetCount == 0 }
         delegate?.sourceDidFinished(type: track.mediaType, allSatisfy: allSatisfy)
         if allSatisfy, options.isLoopPlay {
             isAudioStalled = audioTrack == nil
