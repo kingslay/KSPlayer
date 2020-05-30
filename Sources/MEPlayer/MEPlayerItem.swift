@@ -37,6 +37,7 @@ final class MEPlayerItem {
     private(set) var assetTracks = [TrackProtocol]()
     private var videoAdaptation: VideoAdaptationState?
     private(set) var subtitleTracks = [SubtitlePlayerItemTrack]()
+    var isBackground = false
     var currentPlaybackTime: TimeInterval {
         max(positionTime - startTime, 0)
     }
@@ -407,6 +408,9 @@ extension MEPlayerItem: CodecCapacityDelegate {
         semaphore.wait()
         defer {
             semaphore.signal()
+            if isBackground, let videoTrack = videoTrack, videoTrack.frameCount > videoTrack.frameMaxCount >> 1 {
+                _ = getOutputRender(type: .video, isDependent: true)
+            }
         }
         guard let loadingState = options.playable(capacitys: videoAudioTracks, isFirst: isFirst, isSeek: isSeek) else {
             return
