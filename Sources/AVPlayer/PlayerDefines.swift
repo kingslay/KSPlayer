@@ -197,26 +197,33 @@ public class KSOptions {
         }
         let packetCount = capacitys.map { $0.packetCount }.min() ?? 0
         let frameCount = capacitys.map { $0.frameCount }.min() ?? 0
-        let isFinished = capacitys.allSatisfy { $0.isFinished }
+        let isEndOfFile = capacitys.allSatisfy { $0.isEndOfFile }
         let loadedTime = capacitys.map { TimeInterval($0.packetCount + $0.frameCount) / TimeInterval($0.fps) }.min() ?? 0
         let progress = loadedTime * 100.0 / preferredForwardBufferDuration
         let isPlayable = capacitys.allSatisfy { capacity in
-            if capacity.isFinished {
-                return true
-            }
-            // 让音频能更快的打开
-            if capacity.mediaType == .audio || isSecondOpen, isFirst || isSeek, capacity.frameCount == capacity.frameMaxCount {
-                if isFirst {
-                    return true
-                } else if isSeek {
-                    return capacity.packetCount >= capacity.fps
+            if isFirst || isSeek {
+                if capacity.frameCount >= capacity.frameMaxCount >> 1 {
+                    // 让音频能更快的打开
+                    if capacity.mediaType == .audio || isSecondOpen {
+                        if isFirst {
+                            return true
+                        } else if isSeek, capacity.packetCount >= capacity.fps {
+                            return true
+                        }
+                    }
+                } else {
+                    return false
                 }
+            }
+            if capacity.isEndOfFile {
+                return true
             }
             return capacity.packetCount + capacity.frameCount >= capacity.fps * Int(preferredForwardBufferDuration)
         }
         throttle = mach_absolute_time()
         return LoadingState(loadedTime: loadedTime, progress: progress, packetCount: packetCount,
-                            frameCount: frameCount, isFinished: isFinished, isPlayable: isPlayable, isFirst: isFirst, isSeek: isSeek)
+                            frameCount: frameCount, isEndOfFile: isEndOfFile, isPlayable: isPlayable,
+                            isFirst: isFirst, isSeek: isSeek)
     }
 
     open func adaptable(state: VideoAdaptationState) -> (Int64, Int64)? {
@@ -251,7 +258,7 @@ public protocol CapacityProtocol {
     var packetCount: Int { get }
     var frameCount: Int { get }
     var frameMaxCount: Int { get }
-    var isFinished: Bool { get }
+    var isEndOfFile: Bool { get }
     var mediaType: AVFoundation.AVMediaType { get }
 }
 
@@ -260,7 +267,7 @@ public struct LoadingState {
     public let progress: TimeInterval
     public let packetCount: Int
     public let frameCount: Int
-    public let isFinished: Bool
+    public let isEndOfFile: Bool
     public let isPlayable: Bool
     public let isFirst: Bool
     public let isSeek: Bool

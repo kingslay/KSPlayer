@@ -97,16 +97,17 @@ protocol PlayerItemTrackProtocol: CapacityProtocol, AnyObject {
     init(assetTrack: TrackProtocol, options: KSOptions)
     // 是否无缝循环
     var isLoopModel: Bool { get set }
+    var isEndOfFile: Bool { get set }
     var delegate: CodecCapacityDelegate? { get set }
     func decode()
     func seek(time: TimeInterval)
-    func endOfFile()
     func putPacket(packet: Packet)
     func getOutputRender(where predicate: ((MEFrame) -> Bool)?) -> MEFrame?
     func shutdown()
 }
 
 class FFPlayerItemTrack<Frame: MEFrame>: PlayerItemTrackProtocol, CustomStringConvertible {
+    var isEndOfFile: Bool = false
     var packetCount: Int { 0 }
     var frameCount: Int { outputRenderQueue.count }
     let frameMaxCount: Int
@@ -119,7 +120,6 @@ class FFPlayerItemTrack<Frame: MEFrame>: PlayerItemTrackProtocol, CustomStringCo
     let mediaType: AVFoundation.AVMediaType
     let outputRenderQueue: CircularBuffer<Frame>
     var isLoopModel = false
-    var isFinished: Bool { state.contains(.finished) }
 
     required init(assetTrack: TrackProtocol, options: KSOptions) {
         mediaType = assetTrack.mediaType
@@ -142,8 +142,8 @@ class FFPlayerItemTrack<Frame: MEFrame>: PlayerItemTrackProtocol, CustomStringCo
     }
 
     func seek(time _: TimeInterval) {
-        state.remove(.finished)
-        state.insert(.flush)
+        isEndOfFile = false
+        state = .flush
         outputRenderQueue.flush()
     }
 
@@ -153,10 +153,6 @@ class FFPlayerItemTrack<Frame: MEFrame>: PlayerItemTrackProtocol, CustomStringCo
 
     func getOutputRender(where predicate: ((MEFrame) -> Bool)?) -> MEFrame? {
         outputRenderQueue.pop(where: predicate)
-    }
-
-    func endOfFile() {
-        state.insert(.finished)
     }
 
     func shutdown() {
@@ -185,12 +181,24 @@ final class AsyncPlayerItemTrack: FFPlayerItemTrack<Frame> {
         didSet {
             if isLoopModel {
                 loopPacketQueue = CircularBuffer<Packet>()
-                endOfFile()
+                isEndOfFile = true
             } else {
                 if let loopPacketQueue = loopPacketQueue {
+                    packetQueue.shutdown()
                     packetQueue = loopPacketQueue
                     decode()
                 }
+            }
+        }
+    }
+
+    override var isEndOfFile: Bool {
+        didSet {
+            if isEndOfFile {
+                if packetQueue.count == 0, frameCount == 0 {
+                    delegate?.codecDidFinished(track: self)
+                }
+                delegate?.codecDidChangeCapacity(track: self)
             }
         }
     }
@@ -229,13 +237,13 @@ final class AsyncPlayerItemTrack: FFPlayerItemTrack<Frame> {
     private func decodeThread() {
         state = .decoding
         while !decodeOperation.isCancelled {
-            if state.contains(.flush) {
+            if state == .flush {
                 decoderMap.values.forEach { $0.doFlushCodec() }
-                state.remove(.flush)
-            } else if state.contains(.closed) || state.contains(.failed) || (state.contains(.finished) && packetQueue.count == 0) {
+                state = .decoding
+            } else if state == .closed || state == .failed || (isEndOfFile && packetQueue.count == 0 && loopPacketQueue?.count == 0) {
                 break
-            } else if state.contains(.decoding) {
-                guard let packet = packetQueue.pop(wait: true), !state.contains(.flush), !state.contains(.closed) else {
+            } else if state == .decoding {
+                guard let packet = packetQueue.pop(wait: true), state != .flush, state != .closed else {
                     continue
                 }
                 doDecode(packet: packet)
@@ -246,7 +254,7 @@ final class AsyncPlayerItemTrack: FFPlayerItemTrack<Frame> {
     override func getOutputRender(where predicate: ((MEFrame) -> Bool)?) -> MEFrame? {
         let outputFecthRender = outputRenderQueue.pop(where: predicate)
         if outputFecthRender == nil {
-            if state.contains(.finished), packetQueue.count == 0, frameCount == 0 {
+            if isEndOfFile, packetQueue.count == 0, frameCount == 0 {
                 delegate?.codecDidFinished(track: self)
             }
         } else {
@@ -256,7 +264,7 @@ final class AsyncPlayerItemTrack: FFPlayerItemTrack<Frame> {
     }
 
     override func seek(time: TimeInterval) {
-        state.remove(.finished)
+        isEndOfFile = false
         seekTime = time
         packetQueue.flush()
         super.seek(time: time)
@@ -264,14 +272,6 @@ final class AsyncPlayerItemTrack: FFPlayerItemTrack<Frame> {
         isLoopModel = false
         delegate?.codecDidChangeCapacity(track: self)
         decoderMap.values.forEach { $0.seek(time: time) }
-    }
-
-    override func endOfFile() {
-        super.endOfFile()
-        if packetQueue.count == 0, frameCount == 0 {
-            delegate?.codecDidFinished(track: self)
-        }
-        delegate?.codecDidChangeCapacity(track: self)
     }
 
     override func shutdown() {
@@ -296,7 +296,7 @@ final class AsyncPlayerItemTrack: FFPlayerItemTrack<Frame> {
                 return
             }
             array.forEach { frame in
-                if state.contains(.flush) || state.contains(.closed) {
+                if state == .flush || state == .closed {
                     return
                 }
                 if seekTime > 0, options.isAccurateSeek {

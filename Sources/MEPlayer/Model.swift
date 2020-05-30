@@ -124,7 +124,7 @@ extension KSPlayerManager {
     public static var enableSensor = true
     /// 日志级别
     public static var logLevel = LogLevel.warning
-    public static var stackSize = 16384
+    public static var stackSize = 32768
     public static var audioPlayerMaximumFramesPerSlice = AVAudioFrameCount(4096)
     public static var preferredFramesPerSecond = 60
     #if os(macOS)
@@ -151,15 +151,12 @@ extension KSPlayerManager {
     static let audioDefaultFormat = AVAudioFormat(commonFormat: .pcmFormatFloat32, sampleRate: Double(audioPlayerSampleRate), channels: audioPlayerMaximumChannels, interleaved: false)!
 }
 
-struct MECodecState: OptionSet {
-    public let rawValue: UInt
-    public init(rawValue: UInt) { self.rawValue = rawValue }
-    static let idle = MECodecState(rawValue: 1 << 0)
-    static let decoding = MECodecState(rawValue: 1 << 1)
-    static let flush = MECodecState(rawValue: 1 << 2)
-    static let closed = MECodecState(rawValue: 1 << 3)
-    static let finished = MECodecState(rawValue: 1 << 4)
-    static let failed = MECodecState(rawValue: 1 << 5)
+enum MECodecState {
+    case idle
+    case decoding
+    case flush
+    case closed
+    case failed
 }
 
 struct Timebase {

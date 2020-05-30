@@ -294,7 +294,7 @@ extension MEPlayerItem {
                             allTracks.forEach { $0.isLoopModel = true }
                             _ = av_seek_frame(formatCtx, -1, 0, AVSEEK_FLAG_BACKWARD)
                         } else {
-                            allTracks.forEach { $0.endOfFile() }
+                            allTracks.forEach { $0.isEndOfFile = true }
                             state = .finished
                         }
                     } else {
@@ -431,7 +431,7 @@ extension MEPlayerItem: CodecCapacityDelegate {
         if track.mediaType == .audio {
             isAudioStalled = true
         }
-        let allSatisfy = videoAudioTracks.allSatisfy { $0.isFinished && $0.frameCount == 0 && $0.packetCount == 0 }
+        let allSatisfy = videoAudioTracks.allSatisfy { $0.isEndOfFile && $0.frameCount == 0 && $0.packetCount == 0 }
         delegate?.sourceDidFinished(type: track.mediaType, allSatisfy: allSatisfy)
         if allSatisfy, options.isLoopPlay {
             isAudioStalled = audioTrack == nil
@@ -445,7 +445,7 @@ extension MEPlayerItem: CodecCapacityDelegate {
     }
 
     private func adaptable(track: PlayerItemTrackProtocol, loadingState: LoadingState) {
-        guard var videoAdaptation = videoAdaptation, track.mediaType == .video, !loadingState.isFinished else {
+        guard var videoAdaptation = videoAdaptation, track.mediaType == .video, !loadingState.isEndOfFile else {
             return
         }
         videoAdaptation.loadedCount = track.packetCount + track.frameCount
