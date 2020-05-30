@@ -92,8 +92,7 @@ public protocol ObjectQueueItem {
 
 protocol FrameOutput {
     var renderSource: OutputRenderSourceDelegate? { get set }
-    func play()
-    func pause()
+    var isPaused: Bool { get set }
     func flush()
 }
 

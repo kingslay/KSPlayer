@@ -19,8 +19,7 @@ protocol AudioPlayer: AnyObject {
     var playbackRate: Float { get set }
     var volume: Float { get set }
     var isMuted: Bool { get set }
-    func play()
-    func pause()
+    var isPaused: Bool { get set }
 }
 
 final class AudioGraphPlayer: AudioPlayer {
@@ -28,13 +27,23 @@ final class AudioGraphPlayer: AudioPlayer {
     private var audioUnitForMixer: AudioUnit!
     private var audioUnitForTimePitch: AudioUnit!
     private var audioStreamBasicDescription = KSPlayerManager.outputFormat()
-
-    private var isPlaying: Bool {
-        var running = DarwinBoolean(false)
-        if AUGraphIsRunning(graph, &running) == noErr {
-            return running.boolValue
+    var isPaused: Bool {
+        get {
+            var running = DarwinBoolean(false)
+            if AUGraphIsRunning(graph, &running) == noErr {
+                return !running.boolValue
+            }
+            return true
         }
-        return false
+        set {
+            if newValue != isPaused {
+                if newValue {
+                    AUGraphStop(graph)
+                } else {
+                    AUGraphStart(graph)
+                }
+            }
+        }
     }
 
     private var sampleRate: Float64 { audioStreamBasicDescription.mSampleRate }
@@ -166,18 +175,6 @@ final class AudioGraphPlayer: AudioPlayer {
         }, Unmanaged.passUnretained(self).toOpaque())
     }
 
-    func play() {
-        if !isPlaying {
-            AUGraphStart(graph)
-        }
-    }
-
-    func pause() {
-        if isPlaying {
-            AUGraphStop(graph)
-        }
-    }
-
     deinit {
         AUGraphStop(graph)
         AUGraphUninitialize(graph)
@@ -191,6 +188,23 @@ import AVFoundation
 
 @available(OSX 10.13, tvOS 11.0, iOS 11.0, *)
 final class AudioEnginePlayer: AudioPlayer {
+    var isPaused: Bool {
+        get {
+            engine.isRunning
+        }
+        set {
+            if newValue {
+                if !engine.isRunning {
+                    try? engine.start()
+                }
+                player.play()
+            } else {
+                player.pause()
+                engine.pause()
+            }
+        }
+    }
+
     private let engine = AVAudioEngine()
     private let player = AVAudioPlayerNode()
     private let picth = AVAudioUnitTimePitch()
@@ -232,18 +246,6 @@ final class AudioEnginePlayer: AudioPlayer {
 //        engine.inputNode.setManualRenderingInputPCMFormat(format) { count -> UnsafePointer<AudioBufferList>? in
 //            self.delegate?.audioPlayerShouldInputData(ioData: <#T##UnsafeMutableAudioBufferListPointer#>, numberOfSamples: <#T##UInt32#>, numberOfChannels: <#T##UInt32#>)
 //        }
-    }
-
-    func play() {
-        if !engine.isRunning {
-            try? engine.start()
-        }
-        player.play()
-    }
-
-    func pause() {
-        player.pause()
-        engine.pause()
     }
 
     func audioPlay(buffer: AVAudioPCMBuffer) {
