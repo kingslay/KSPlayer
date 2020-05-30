@@ -11,14 +11,6 @@ import MetalKit
 final class MetalPlayView: MTKView, MTKViewDelegate, FrameOutput {
     private let textureCache = MetalTextureCache()
     private let renderPassDescriptor = MTLRenderPassDescriptor()
-    private lazy var displayLink: CADisplayLink = {
-        let displayLink = CADisplayLink(target: self, selector: #selector(readBuffer(_:)))
-        displayLink.add(to: .main, forMode: RunLoop.Mode.common)
-        displayLink.isPaused = true
-        displayLink.preferredFramesPerSecond = KSPlayerManager.preferredFramesPerSecond
-        return displayLink
-    }()
-
     var display: DisplayEnum = .plane
     weak var renderSource: OutputRenderSourceDelegate?
     var isOutput = true
@@ -35,18 +27,6 @@ final class MetalPlayView: MTKView, MTKViewDelegate, FrameOutput {
 
     required init(coder _: NSCoder) {
         fatalError("init(coder:) has not been implemented")
-    }
-
-    @objc private func readBuffer(_: CADisplayLink) {
-        _ = renderSource?.getOutputRender(type: .video, isDependent: true)
-    }
-
-    func enter(background: Bool) {
-        if background {
-            displayLink.isPaused = isPaused
-        } else {
-            displayLink.isPaused = true
-        }
     }
 
     func flush() {}
