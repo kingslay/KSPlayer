@@ -140,36 +140,36 @@ extension KSMEPlayer: MEPlayerDelegate {
     }
 
     func sourceDidChange(loadingState: LoadingState) {
-        if loadingState.isFinished {
+        if loadingState.isEndOfFile {
             playableTime = duration
-            loadState = .playable
         } else {
             playableTime = currentPlaybackTime + loadingState.loadedTime
-            if loadState == .playable {
-                if loadingState.packetCount == 0, loadingState.frameCount == 0 {
-                    loadState = .loading
-                    if playbackState == .playing {
-                        runInMainqueue { [weak self] in
-                            // 在主线程更新进度
-                            self?.bufferingProgress = 0
-                        }
-                    }
-                }
-            } else {
-                var progress = 100
-                if loadingState.isPlayable {
-                    loadState = .playable
-                } else {
-                    progress = min(100, Int(loadingState.progress))
-                }
+        }
+        if loadState == .playable {
+            if !loadingState.isEndOfFile, loadingState.packetCount == 0, loadingState.frameCount == 0 {
+                loadState = .loading
                 if playbackState == .playing {
                     runInMainqueue { [weak self] in
                         // 在主线程更新进度
-                        self?.bufferingProgress = progress
+                        self?.bufferingProgress = 0
                     }
                 }
             }
+        } else {
+            var progress = 100
+            if loadingState.isPlayable {
+                loadState = .playable
+            } else {
+                progress = min(100, Int(loadingState.progress))
+            }
+            if playbackState == .playing {
+                runInMainqueue { [weak self] in
+                    // 在主线程更新进度
+                    self?.bufferingProgress = progress
+                }
+            }
         }
+
         if needRefreshView, playbackState != .playing {
             DispatchQueue.main.async { [weak self] in
                 guard let self = self else { return }

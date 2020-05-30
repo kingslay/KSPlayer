@@ -131,7 +131,7 @@ public class CircularBuffer<Item: ObjectQueueItem> {
         tailIndex = 0
         _buffer.removeAll(keepingCapacity: true)
         _buffer.append(contentsOf: ContiguousArray<Item?>(repeating: nil, count: maxCount))
-        condition.signal()
+        condition.broadcast()
     }
 
     public func shutdown() {
