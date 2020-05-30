@@ -11,6 +11,15 @@ import CoreMedia
 import QuartzCore
 
 final class AudioOutput: FrameOutput {
+    var isPaused: Bool {
+        get {
+            audioPlayer.isPaused
+        }
+        set {
+            audioPlayer.isPaused = newValue
+        }
+    }
+
     private let semaphore = DispatchSemaphore(value: 1)
     private var currentRenderReadOffset = 0
     private var currentRender: AudioFrame? {
@@ -26,14 +35,6 @@ final class AudioOutput: FrameOutput {
 
     init() {
         audioPlayer.delegate = self
-    }
-
-    func play() {
-        audioPlayer.play()
-    }
-
-    func pause() {
-        audioPlayer.pause()
     }
 
     func flush() {

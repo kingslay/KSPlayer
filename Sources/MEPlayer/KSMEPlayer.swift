@@ -68,7 +68,7 @@ public class KSMEPlayer {
     }
 
     deinit {
-        audioOutput.pause()
+        audioOutput.isPaused = true
     }
 }
 
@@ -79,11 +79,11 @@ extension KSMEPlayer {
         runInMainqueue { [weak self] in
             guard let self = self else { return }
             if self.playbackState == .playing, self.loadState == .playable {
-                self.audioOutput.play()
-                self.videoOutput.play()
+                self.audioOutput.isPaused = false
+                self.videoOutput.isPaused = false
             } else {
-                self.audioOutput.pause()
-                self.videoOutput.pause()
+                self.audioOutput.isPaused = true
+                self.videoOutput.isPaused = true
             }
             self.delegate?.changeLoadState(player: self)
         }
@@ -122,16 +122,16 @@ extension KSMEPlayer: MEPlayerDelegate {
         runInMainqueue { [weak self] in
             guard let self = self else { return }
             if type == .audio {
-                self.audioOutput.pause()
+                self.audioOutput.isPaused = true
             } else if type == .video {
-                self.videoOutput.pause()
+                self.videoOutput.isPaused = true
             }
             if allSatisfy {
                 if self.options.isLoopPlay {
                     self.loopCount += 1
                     self.delegate?.playBack(player: self, loopCount: self.loopCount)
-                    self.audioOutput.play()
-                    self.videoOutput.play()
+                    self.audioOutput.isPaused = false
+                    self.videoOutput.isPaused = false
                 } else {
                     self.playbackState = .finished
                 }
@@ -299,11 +299,11 @@ extension KSMEPlayer: MediaPlayerProtocol {
     }
 
     public func enterBackground() {
-        videoOutput.isOutput = false
+        videoOutput.enter(background: true)
     }
 
     public func enterForeground() {
-        videoOutput.isOutput = true
+        videoOutput.enter(background: false)
     }
 
     public var isMuted: Bool {
