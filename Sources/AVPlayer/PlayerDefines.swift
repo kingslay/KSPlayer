@@ -212,7 +212,7 @@ public class KSOptions {
                         }
                     }
                 } else {
-                    return false
+                    return capacity.isEndOfFile && capacity.packetCount == 0
                 }
             }
             if capacity.isEndOfFile {
