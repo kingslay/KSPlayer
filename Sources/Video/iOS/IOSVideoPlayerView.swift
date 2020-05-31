@@ -251,9 +251,8 @@ extension IOSVideoPlayerView {
     @objc private func wirelessRouteActiveDidChange(notification: Notification) {
         guard let volumeView = notification.object as? MPVolumeView, playerLayer.isWirelessRouteActive != volumeView.isWirelessRouteActive else { return }
         if volumeView.isWirelessRouteActive {
-            if useProxyUrl || !(playerLayer.player?.allowsExternalPlayback ?? false) {
+            if !(playerLayer.player?.allowsExternalPlayback ?? false) {
                 playerLayer.isWirelessRouteActive = true
-                useProxyUrl = false
             }
             playerLayer.player?.usesExternalPlaybackWhileExternalScreenIsActive = true
         }

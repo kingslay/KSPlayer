@@ -140,7 +140,13 @@ extension MEPlayerItem {
 //            return 0
 //        }
         var avOptions = options.formatContextOptions.avOptions
-        var result = avformat_open_input(&self.formatCtx, url.isFileURL ? url.path : url.absoluteString, nil, &avOptions)
+        let urlString: String
+        if url.isFileURL {
+            urlString = url.path
+        } else {
+            urlString = (KSPlayerManager.cache ? "async:cache:" : "") + url.absoluteString
+        }
+        var result = avformat_open_input(&self.formatCtx, urlString, nil, &avOptions)
         av_dict_free(&avOptions)
         if IS_AVERROR_EOF(result) {
             state = .finished
