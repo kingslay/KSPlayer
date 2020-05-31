@@ -239,8 +239,6 @@ extension IOSVideoPlayerView {
     private func addNotification() {
         NotificationCenter.default.addObserver(self, selector: #selector(orientationChanged), name: UIApplication.didChangeStatusBarOrientationNotification, object: nil)
         orientationChanged()
-        NotificationCenter.default.addObserver(self, selector: #selector(enterBackground), name: UIApplication.didEnterBackgroundNotification, object: nil)
-        NotificationCenter.default.addObserver(self, selector: #selector(enterForeground), name: UIApplication.willEnterForegroundNotification, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(routesAvailableDidChange), name: .MPVolumeViewWirelessRoutesAvailableDidChange, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(wirelessRouteActiveDidChange(notification:)), name: .MPVolumeViewWirelessRouteActiveDidChange, object: nil)
         callCenter.setDelegate(self, queue: DispatchQueue.main)
@@ -260,26 +258,6 @@ extension IOSVideoPlayerView {
             playerLayer.player?.usesExternalPlaybackWhileExternalScreenIsActive = true
         }
         playerLayer.isWirelessRouteActive = volumeView.isWirelessRouteActive
-    }
-
-    @objc private func enterBackground() {
-        guard toolBar.playButton.isSelected else {
-            return
-        }
-        if KSPlayerManager.canBackgroundPlay {
-            playerLayer.player?.enterBackground()
-            return
-        }
-        if playerLayer.player?.isExternalPlaybackActive ?? false {
-            return
-        }
-        pause()
-    }
-
-    @objc private func enterForeground() {
-        if KSPlayerManager.canBackgroundPlay {
-            playerLayer.player?.enterForeground()
-        }
     }
 
     @objc private func orientationChanged() {
