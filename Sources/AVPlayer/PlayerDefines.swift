@@ -282,6 +282,8 @@ public struct LoadingState {
 }
 
 public struct KSPlayerManager {
+    /// ffmpeg only cache http
+    public static var cache = false
     /// 日志输出方式
     public static var logFunctionPoint: (String) -> Void = {
         print($0)

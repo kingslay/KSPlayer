@@ -67,7 +67,7 @@ open class KSPlayerLayer: UIView {
     private var bufferedCount = 0
     private var shouldSeekTo: TimeInterval = 0
     private var startTime: TimeInterval = 0
-    private(set) var url: URL?
+    private var url: URL?
     public var isWirelessRouteActive = false
     public weak var delegate: KSPlayerLayerDelegate?
     private lazy var timer: Timer = {

@@ -63,8 +63,6 @@ public class KSPlayerResourceDefinition: Hashable {
     public let url: URL
     public let definition: String
     public let options: KSOptions
-    /// 代理地址
-    public var proxyUrl: URL?
 
     /**
      Video recource item with defination name and specifying options

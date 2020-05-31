@@ -79,28 +79,6 @@ open class VideoPlayerView: PlayerView {
         }
     }
 
-    /// 是否使用代理url播放。
-    var useProxyUrl: Bool {
-        get {
-            guard let resource = resource, currentDefinition < resource.definitions.count else {
-                return false
-            }
-            let asset = resource.definitions[currentDefinition]
-            return playerLayer.url == asset.proxyUrl
-        }
-        set {
-            guard let resource = resource, currentDefinition < resource.definitions.count else {
-                return
-            }
-            let asset = resource.definitions[currentDefinition]
-            var url = asset.url
-            if newValue, !playerLayer.isWirelessRouteActive, let proxyUrl = asset.proxyUrl {
-                url = proxyUrl
-            }
-            playerLayer.set(url: url, options: asset.options)
-        }
-    }
-
     public var navigationBar = UIStackView()
     public var titleLabel = UILabel()
     public var subtitleLabel = UILabel()
@@ -312,15 +290,6 @@ open class VideoPlayerView: PlayerView {
         }
     }
 
-    override open func player(layer: KSPlayerLayer, finish error: Error?) {
-        if let error = error as NSError?, error.domain == KSPlayerErrorDomain, useProxyUrl {
-            useProxyUrl = false
-            play()
-            return
-        }
-        super.player(layer: layer, finish: error)
-    }
-
     open func change(definitionIndex: Int) {
         guard let resource = resource else { return }
         var shouldSeekTo = 0.0
@@ -328,21 +297,19 @@ open class VideoPlayerView: PlayerView {
             shouldSeekTo = currentTime
         }
         currentDefinition = definitionIndex >= resource.definitions.count ? resource.definitions.count - 1 : definitionIndex
-        useProxyUrl = true
+        let asset = resource.definitions[currentDefinition]
+        set(url: asset.url, options: asset.options)
         if shouldSeekTo > 0 {
             seek(time: shouldSeekTo)
         }
-    }
-
-    override open func set(url: URL, options: KSOptions) {
-        set(resource: KSPlayerResource(url: url, options: options))
     }
 
     open func set(resource: KSPlayerResource, definitionIndex: Int = 0, isSetUrl: Bool = true) {
         self.resource = resource
         currentDefinition = definitionIndex >= resource.definitions.count ? resource.definitions.count - 1 : definitionIndex
         if isSetUrl {
-            useProxyUrl = true
+            let asset = resource.definitions[currentDefinition]
+            set(url: asset.url, options: asset.options)
         }
     }
 

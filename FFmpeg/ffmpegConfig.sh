@@ -172,7 +172,7 @@ CONFIGURE_FLAGS="$CONFIGURE_FLAGS --disable-bsfs"
 CONFIGURE_FLAGS="$CONFIGURE_FLAGS --enable-protocols"
 CONFIGURE_FLAGS="$CONFIGURE_FLAGS --enable-protocol=async"
 CONFIGURE_FLAGS="$CONFIGURE_FLAGS --disable-protocol=bluray"
-CONFIGURE_FLAGS="$CONFIGURE_FLAGS --disable-protocol=concat"
+CONFIGURE_FLAGS="$CONFIGURE_FLAGS --enable-protocol=concat"
 CONFIGURE_FLAGS="$CONFIGURE_FLAGS --disable-protocol=crypto"
 CONFIGURE_FLAGS="$CONFIGURE_FLAGS --disable-protocol=ffrtmpcrypt"
 CONFIGURE_FLAGS="$CONFIGURE_FLAGS --enable-protocol=ffrtmphttp"
@@ -203,11 +203,11 @@ CONFIGURE_FLAGS="$CONFIGURE_FLAGS --disable-bzlib"
 
 
 if [ "$X264" ]; then
-    CONFIGURE_FLAGS="$CONFIGURE_FLAGS --enable-gpl --enable-libx264"
+    CONFIGURE_FLAGS="$CONFIGURE_FLAGS --enable-libx264"
 fi
 
 if [ "$FDK_AAC" ]; then
-    CONFIGURE_FLAGS="$CONFIGURE_FLAGS --enable-libfdk-aac --enable-nonfree"
+    CONFIGURE_FLAGS="$CONFIGURE_FLAGS --enable-libfdk-aac"
 fi
 
 if [ "$OPENSSL" ]; then
