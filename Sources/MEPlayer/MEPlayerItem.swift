@@ -165,7 +165,9 @@ extension MEPlayerItem {
         if videoTrack == nil, audioTrack == nil {
             state = .failed
         } else {
-            play()
+            state = .opened
+            state = .reading
+            read()
         }
     }
 
@@ -360,14 +362,6 @@ extension MEPlayerItem: MediaPlayback {
         openOperation?.qualityOfService = .userInteractive
         if let openOperation = openOperation {
             operationQueue.addOperation(openOperation)
-        }
-    }
-
-    func play() {
-        if state == .opening {
-            state = .opened
-            state = .reading
-            read()
         }
     }
 

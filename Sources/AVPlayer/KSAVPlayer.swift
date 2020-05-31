@@ -202,6 +202,7 @@ extension KSAVPlayer {
 
     private func updateStatus(item: AVPlayerItem) {
         if item.status == .readyToPlay {
+            options.findTime = CACurrentMediaTime()
             let videoTracks = item.tracks.filter { $0.assetTrack?.mediaType.rawValue == AVMediaType.video.rawValue }
             if videoTracks.isEmpty || videoTracks.allSatisfy({ $0.assetTrack?.isPlayable == false }) {
                 error = NSError(errorCode: .videoTracksUnplayable)
@@ -386,8 +387,10 @@ extension KSAVPlayer: MediaPlayerProtocol {
         KSLog("prepareToPlay \(self)")
         runInMainqueue { [weak self] in
             guard let self = self else { return }
+            self.options.starTime = CACurrentMediaTime()
             self.bufferingProgress = 0
             let playerItem = AVPlayerItem(asset: self.urlAsset)
+            self.options.openTime = CACurrentMediaTime()
             if self.options.isLoopPlay {
                 self.setPlayerLooper(playerItem: playerItem)
             } else {

@@ -18,7 +18,6 @@ public protocol MediaPlayback: AnyObject {
     var naturalSize: CGSize { get }
     var currentPlaybackTime: TimeInterval { get }
     func prepareToPlay()
-    func play()
     func shutdown()
     func seek(time: TimeInterval, completion handler: ((Bool) -> Void)?)
 }
@@ -42,6 +41,7 @@ public protocol MediaPlayerProtocol: MediaPlayback {
     var subtitleDataSouce: SubtitleDataSouce? { get }
     init(url: URL, options: KSOptions)
     func replace(url: URL, options: KSOptions)
+    func play()
     func pause()
     func enterBackground()
     func enterForeground()
