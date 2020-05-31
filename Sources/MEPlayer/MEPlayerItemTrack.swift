@@ -292,6 +292,12 @@ final class AsyncPlayerItemTrack: FFPlayerItemTrack<Frame> {
         let decoder = decoderMap.value(for: packet.assetTrack.streamIndex, default: packet.assetTrack.makeDecode(options: options))
         do {
             let array = try decoder.doDecode(packet: packet.corePacket)
+            if options.decodeAudioTime == 0, mediaType == .audio {
+                options.decodeAudioTime = CACurrentMediaTime()
+            }
+            if options.decodeVideoTime == 0, mediaType == .video {
+                options.decodeVideoTime = CACurrentMediaTime()
+            }
             guard packet.corePacket.pointee.flags & AV_PKT_FLAG_DISCARD == 0 else {
                 return
             }

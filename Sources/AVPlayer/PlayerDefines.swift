@@ -157,6 +157,14 @@ public class KSOptions {
     public var decoderOptions = [String: Any]()
     public var lowres = UInt8(0)
     public internal(set) var formatName = ""
+    public internal(set) var starTime = 0.0
+    public internal(set) var openTime = 0.0
+    public internal(set) var findTime = 0.0
+    public internal(set) var readAudioTime = 0.0
+    public internal(set) var readVideoTime = 0.0
+    public internal(set) var decodeAudioTime = 0.0
+    public internal(set) var decodeVideoTime = 0.0
+
     // 加个节流器，防止频繁的更新加载状态
     private var throttle = mach_absolute_time()
     private let throttleDiff: UInt64

@@ -114,6 +114,7 @@ final class MEPlayerItem {
 
 extension MEPlayerItem {
     private func openThread() {
+        options.starTime = CACurrentMediaTime()
         avformat_close_input(&self.formatCtx)
         formatCtx = avformat_alloc_context()
         guard let formatCtx = formatCtx else {
@@ -150,12 +151,14 @@ extension MEPlayerItem {
             avformat_close_input(&self.formatCtx)
             return
         }
+        options.openTime = CACurrentMediaTime()
         result = avformat_find_stream_info(formatCtx, nil)
         guard result == 0 else {
             error = .init(errorCode: .formatFindStreamInfo, ffmpegErrnum: result)
             avformat_close_input(&self.formatCtx)
             return
         }
+        options.findTime = CACurrentMediaTime()
         options.formatName = String(cString: formatCtx.pointee.iformat.pointee.name)
         duration = TimeInterval(max(formatCtx.pointee.duration, 0) / Int64(AV_TIME_BASE))
         createCodec(formatCtx: formatCtx)
@@ -271,38 +274,48 @@ extension MEPlayerItem {
                 seekingCompletionHandler = nil
                 state = .reading
             } else if state == .reading {
-                let packet = Packet()
-                let readResult = av_read_frame(formatCtx, packet.corePacket)
-                if readResult == 0 {
-                    if packet.corePacket.pointee.size <= 0 {
-                        continue
+                reading()
+            }
+        }
+    }
+
+    private func reading() {
+        let packet = Packet()
+        let readResult = av_read_frame(formatCtx, packet.corePacket)
+        if readResult == 0 {
+            if packet.corePacket.pointee.size <= 0 {
+                return
+            }
+            packet.fill()
+            let first = assetTracks.first { $0.stream.pointee.index == packet.corePacket.pointee.stream_index }
+            if let first = first, first.isEnabled {
+                packet.assetTrack = first
+                if first.mediaType == .video {
+                    if options.readVideoTime == 0 {
+                        options.readVideoTime = CACurrentMediaTime()
                     }
-                    packet.fill()
-                    let first = assetTracks.first { $0.stream.pointee.index == packet.corePacket.pointee.stream_index }
-                    if let first = first, first.isEnabled {
-                        packet.assetTrack = first
-                        if first.mediaType == .video {
-                            videoTrack?.putPacket(packet: packet)
-                        } else if first.mediaType == .audio {
-                            audioTrack?.putPacket(packet: packet)
-                        } else {
-                            subtitleTracks.first { $0.assetTrack == first }?.putPacket(packet: packet)
-                        }
+                    videoTrack?.putPacket(packet: packet)
+                } else if first.mediaType == .audio {
+                    if options.readAudioTime == 0 {
+                        options.readAudioTime = CACurrentMediaTime()
                     }
+                    audioTrack?.putPacket(packet: packet)
                 } else {
-                    if IS_AVERROR_EOF(readResult) || avio_feof(formatCtx?.pointee.pb) != 0 {
-                        if options.isLoopPlay, allTracks.allSatisfy({ !$0.isLoopModel }) {
-                            allTracks.forEach { $0.isLoopModel = true }
-                            _ = av_seek_frame(formatCtx, -1, 0, AVSEEK_FLAG_BACKWARD)
-                        } else {
-                            allTracks.forEach { $0.isEndOfFile = true }
-                            state = .finished
-                        }
-                    } else {
-                        //                        if IS_AVERROR_INVALIDDATA(readResult)
-                        error = .init(errorCode: .readFrame, ffmpegErrnum: readResult)
-                    }
+                    subtitleTracks.first { $0.assetTrack == first }?.putPacket(packet: packet)
                 }
+            }
+        } else {
+            if IS_AVERROR_EOF(readResult) || avio_feof(formatCtx?.pointee.pb) != 0 {
+                if options.isLoopPlay, allTracks.allSatisfy({ !$0.isLoopModel }) {
+                    allTracks.forEach { $0.isLoopModel = true }
+                    _ = av_seek_frame(formatCtx, -1, 0, AVSEEK_FLAG_BACKWARD)
+                } else {
+                    allTracks.forEach { $0.isEndOfFile = true }
+                    state = .finished
+                }
+            } else {
+                //                        if IS_AVERROR_INVALIDDATA(readResult)
+                error = .init(errorCode: .readFrame, ffmpegErrnum: readResult)
             }
         }
     }
