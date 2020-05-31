@@ -254,7 +254,17 @@ extension KSPlayerLayer: MediaPlayerDelegate {
             let diff = CACurrentMediaTime() - startTime
             delegate?.player(layer: self, bufferedCount: bufferedCount, consumeTime: diff)
             if bufferedCount == 0 {
-                KSLog("首屏耗时：\(diff)")
+                var dic = ["firstTime": diff]
+                if let options = options {
+                    dic["prepareTime"] = options.starTime - startTime
+                    dic["openTime"] = options.openTime - options.starTime
+                    dic["findTime"] = options.findTime - options.starTime
+                    dic["readVideoTime"] = options.readVideoTime - options.starTime
+                    dic["readAudioTime"] = options.readAudioTime - options.starTime
+                    dic["decodeVideoTime"] = options.decodeVideoTime - options.starTime
+                    dic["decodeAudioTime"] = options.decodeAudioTime - options.starTime
+                }
+                KSLog(dic)
             }
             bufferedCount += 1
             startTime = 0
