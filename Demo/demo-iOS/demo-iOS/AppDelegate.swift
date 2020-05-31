@@ -9,9 +9,11 @@
 import ffmpeg
 import KSPlayer
 import UIKit
+@available(iOS 13.0, *)
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate, UISplitViewControllerDelegate {
     var window: UIWindow?
+    private var menuController: MenuController!
     func application(_: UIApplication, didFinishLaunchingWithOptions _: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         let window = UIWindow()
         KSPlayerManager.canBackgroundPlay = true
@@ -41,5 +43,39 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UISplitViewControllerDele
         window.makeKeyAndVisible()
         self.window = window
         return true
+    }
+
+    override func buildMenu(with builder: UIMenuBuilder) {
+        if builder.system == .main {
+            menuController = MenuController(with: builder)
+        }
+    }
+}
+
+@available(iOS 13.0, *)
+class MenuController {
+    init(with builder: UIMenuBuilder) {
+        // First remove the menus in the menu bar you don't want, in our case the Format menu.
+        builder.remove(menu: .format)
+
+        // Create and add "Open" menu command at the beginning of the File menu.
+        builder.insertChild(MenuController.openMenu(), atStartOfMenu: .file)
+    }
+
+    class func openMenu() -> UIMenu {
+        let openCommand =
+            UIKeyCommand(title: NSLocalizedString("Open Movie", comment: ""),
+                         image: nil,
+                         action: #selector(DetailViewController.openAction),
+                         input: "O",
+                         modifierFlags: .command,
+                         propertyList: nil)
+        let openMenu =
+            UIMenu(title: "",
+                   image: nil,
+                   identifier: UIMenu.Identifier("com.example.apple-samplecode.menus.openMenu"),
+                   options: .displayInline,
+                   children: [openCommand])
+        return openMenu
     }
 }

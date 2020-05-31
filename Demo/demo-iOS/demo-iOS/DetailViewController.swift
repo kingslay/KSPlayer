@@ -6,6 +6,7 @@
 //  Copyright © 2018年 kintan. All rights reserved.
 //
 
+import CoreServices
 import KSPlayer
 import UIKit
 protocol DetailProtocol: UIViewController {
@@ -73,6 +74,35 @@ class DetailViewController: UIViewController, DetailProtocol {
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         navigationController?.setNavigationBarHidden(false, animated: true)
+    }
+
+    override open var canBecomeFirstResponder: Bool {
+        true
+    }
+
+    // The responder chain is asking us which commands you support.
+    // Enable/disable certain Edit menu commands.
+    override open func canPerformAction(_ action: Selector, withSender _: Any?) -> Bool {
+        if action == #selector(openAction(_:)) {
+            // User wants to perform a "New" operation.
+            return true
+        }
+        return false
+    }
+
+    /// User chose "Open" from the File menu.
+    @objc public func openAction(_: AnyObject) {
+        let documentPicker = UIDocumentPickerViewController(documentTypes: [kUTTypeMPEG4 as String], in: .open)
+        documentPicker.delegate = self
+        present(documentPicker, animated: true, completion: nil)
+    }
+}
+
+extension DetailViewController: UIDocumentPickerDelegate {
+    func documentPicker(_: UIDocumentPickerViewController, didPickDocumentsAt urls: [URL]) {
+        if let first = urls.first {
+            resource = KSPlayerResource(url: first)
+        }
     }
 }
 
