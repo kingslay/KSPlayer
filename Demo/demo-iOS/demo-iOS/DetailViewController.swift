@@ -92,11 +92,15 @@ class DetailViewController: UIViewController, DetailProtocol {
 
     /// User chose "Open" from the File menu.
     @objc public func openAction(_: AnyObject) {
+        #if os(iOS)
         let documentPicker = UIDocumentPickerViewController(documentTypes: [kUTTypeMPEG4 as String], in: .open)
         documentPicker.delegate = self
         present(documentPicker, animated: true, completion: nil)
+        #endif
     }
 }
+
+#if os(iOS)
 
 extension DetailViewController: UIDocumentPickerDelegate {
     func documentPicker(_: UIDocumentPickerViewController, didPickDocumentsAt urls: [URL]) {
@@ -106,7 +110,6 @@ extension DetailViewController: UIDocumentPickerDelegate {
     }
 }
 
-#if os(iOS)
 class CustomVideoPlayerView: IOSVideoPlayerView {
     override func updateUI(isLandscape: Bool) {
         super.updateUI(isLandscape: isLandscape)

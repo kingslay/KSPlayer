@@ -103,7 +103,22 @@ open class KSPlayerLayer: UIView {
         }
     }
 
+    override public init(frame: CGRect) {
+        super.init(frame: frame)
+        registerRemoteControllEvent()
+        #if canImport(UIKit)
+        NotificationCenter.default.addObserver(self, selector: #selector(enterBackground), name: UIApplication.didEnterBackgroundNotification, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(enterForeground), name: UIApplication.willEnterForegroundNotification, object: nil)
+        #endif
+    }
+
+    public required init?(coder _: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+
     deinit {
+        NotificationCenter.default.removeObserver(self)
+        unregisterRemoteControllEvent()
         resetPlayer()
     }
 
@@ -128,7 +143,6 @@ open class KSPlayerLayer: UIView {
         } else {
             player = firstPlayerType.init(url: url, options: options)
         }
-        registerRemoteControllEvent()
     }
 
     open func play() {
@@ -167,7 +181,6 @@ open class KSPlayerLayer: UIView {
 
     open func resetPlayer() {
         KSLog("resetPlayer")
-        unregisterRemoteControllEvent()
         timer.invalidate()
         state = .notSetURL
         bufferedCount = 0
@@ -357,6 +370,24 @@ extension KSPlayerLayer {
             player.playbackRate = event.playbackRate
         }
         return .success
+    }
+
+    @objc private func enterBackground() {
+        guard let player = player, state.isPlaying, !player.isExternalPlaybackActive else {
+            return
+        }
+
+        if KSPlayerManager.canBackgroundPlay {
+            player.enterBackground()
+            return
+        }
+        pause()
+    }
+
+    @objc private func enterForeground() {
+        if KSPlayerManager.canBackgroundPlay {
+            player?.enterForeground()
+        }
     }
 }
 

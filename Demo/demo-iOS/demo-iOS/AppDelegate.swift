@@ -9,7 +9,7 @@
 import ffmpeg
 import KSPlayer
 import UIKit
-@available(iOS 13.0, *)
+@available(iOS 13.0, tvOS 13.0, *)
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate, UISplitViewControllerDelegate {
     var window: UIWindow?
@@ -52,30 +52,27 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UISplitViewControllerDele
     }
 }
 
-@available(iOS 13.0, *)
+@available(iOS 13.0, tvOS 13.0, *)
 class MenuController {
     init(with builder: UIMenuBuilder) {
         // First remove the menus in the menu bar you don't want, in our case the Format menu.
         builder.remove(menu: .format)
-
+        #if os(iOS)
         // Create and add "Open" menu command at the beginning of the File menu.
         builder.insertChild(MenuController.openMenu(), atStartOfMenu: .file)
+        #endif
     }
 
+    #if os(iOS)
     class func openMenu() -> UIMenu {
-        let openCommand =
-            UIKeyCommand(title: NSLocalizedString("Open Movie", comment: ""),
-                         image: nil,
-                         action: #selector(DetailViewController.openAction),
-                         input: "O",
-                         modifierFlags: .command,
-                         propertyList: nil)
-        let openMenu =
-            UIMenu(title: "",
-                   image: nil,
-                   identifier: UIMenu.Identifier("com.example.apple-samplecode.menus.openMenu"),
-                   options: .displayInline,
-                   children: [openCommand])
+        let openCommand = UIKeyCommand(input: "O", modifierFlags: .command, action: #selector(DetailViewController.openAction))
+        openCommand.title = NSLocalizedString("Open Movie", comment: "")
+        let openMenu = UIMenu(title: "",
+                              image: nil,
+                              identifier: UIMenu.Identifier("com.example.apple-samplecode.menus.openMenu"),
+                              options: .displayInline,
+                              children: [openCommand])
         return openMenu
     }
+    #endif
 }
