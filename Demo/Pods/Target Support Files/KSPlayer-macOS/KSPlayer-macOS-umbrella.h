@@ -10,7 +10,6 @@
 #endif
 #endif
 
-#import "FFmpegError.h"
 #import "ShaderDefinitions.h"
 
 FOUNDATION_EXPORT double KSPlayerVersionNumber;

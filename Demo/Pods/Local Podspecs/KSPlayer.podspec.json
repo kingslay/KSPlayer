@@ -67,7 +67,6 @@
     },
     {
       "name": "FFmpeg",
-      "source_files": "Sources/FFmpegExt/**/*.{h,c}",
       "libraries": [
         "bz2",
         "z",
