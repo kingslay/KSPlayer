@@ -124,11 +124,11 @@ install_xcframework() {
 
 
 if [[ "$CONFIGURATION" == "Debug" ]]; then
-  install_xcframework "${PODS_ROOT}/../../FFmpeg/FFmpeg.xcframework" "" "false" "tvos-x86_64-simulator/FFmpeg.framework" "tvos-arm64/FFmpeg.framework"
+  install_xcframework "${PODS_ROOT}/../../FFmpeg/FFmpeg.xcframework" "" "false" "tvos-arm64/FFmpeg.framework" "tvos-x86_64-simulator/FFmpeg.framework"
   install_xcframework "${PODS_ROOT}/../../FFmpeg/OpenSSL.xcframework" "" "false" "tvos-arm64/OpenSSL.framework" "tvos-x86_64-simulator/OpenSSL.framework"
 fi
 if [[ "$CONFIGURATION" == "Release" ]]; then
-  install_xcframework "${PODS_ROOT}/../../FFmpeg/FFmpeg.xcframework" "" "false" "tvos-x86_64-simulator/FFmpeg.framework" "tvos-arm64/FFmpeg.framework"
+  install_xcframework "${PODS_ROOT}/../../FFmpeg/FFmpeg.xcframework" "" "false" "tvos-arm64/FFmpeg.framework" "tvos-x86_64-simulator/FFmpeg.framework"
   install_xcframework "${PODS_ROOT}/../../FFmpeg/OpenSSL.xcframework" "" "false" "tvos-arm64/OpenSSL.framework" "tvos-x86_64-simulator/OpenSSL.framework"
 fi
 

@@ -4,8 +4,9 @@
 //
 //  Created by kintan on 2018/3/10.
 //
-#include "FFmpegError.h"
-#include "libavutil/error.h"
+#import "FFmpegError.h"
+#import "libavutil/common.h"
+#import "libavutil/error.h"
 int AVERROR_CONVERT(int err) {
     return AVERROR(err);
 }
