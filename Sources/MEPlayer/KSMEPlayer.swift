@@ -96,16 +96,9 @@ extension KSMEPlayer: MEPlayerDelegate {
         runInMainqueue { [weak self] in
             guard let self = self else { return }
             self.videoOutput.drawableSize = self.options.display == .plane ? self.naturalSize : UIScreen.size
+            self.view.centerRotate(byDegrees: self.playerItem.rotation)
             if self.options.isAutoPlay {
                 self.play()
-            }
-            if self.playerItem.rotation != 0.0 {
-                #if os(macOS)
-                self.view.backingLayer?.anchorPoint = CGPoint(x: 0.5, y: 0.5)
-                self.view.rotate(byDegrees: CGFloat(-self.playerItem.rotation))
-                #else
-                self.view.transform = CGAffineTransform(rotationAngle: CGFloat(Double.pi * self.playerItem.rotation / 180.0))
-                #endif
             }
             self.delegate?.preparedToPlay(player: self)
         }
@@ -208,9 +201,9 @@ extension KSMEPlayer: MediaPlayerProtocol {
 
     public func replace(url: URL, options: KSOptions) {
         KSLog("replaceUrl \(self)")
+        audioOutput.clear()
+        videoOutput.clear()
         shutdown()
-        audioOutput.flush()
-        videoOutput.flush()
         playerItem.delegate = nil
         playerItem = MEPlayerItem(url: url, options: options)
         self.options = options
@@ -244,8 +237,7 @@ extension KSMEPlayer: MediaPlayerProtocol {
         }
         playerItem.seek(time: time) { [weak self] result in
             guard let self = self else { return }
-            self.videoOutput.flush()
-            self.audioOutput.flush()
+            self.audioOutput.clear()
             runInMainqueue { [weak self] in
                 guard let self = self else { return }
                 self.playbackState = oldPlaybackState

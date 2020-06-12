@@ -94,6 +94,17 @@ class MetalRender {
         commandQueue = device.makeCommandQueue()
     }
 
+    func clear(renderPassDescriptor: MTLRenderPassDescriptor) -> MTLCommandBuffer? {
+        renderPassDescriptor.colorAttachments[0].clearColor = MTLClearColor(red: 0, green: 0, blue: 0, alpha: 0)
+        renderPassDescriptor.colorAttachments[0].loadAction = .clear
+        guard let commandBuffer = commandQueue?.makeCommandBuffer(),
+            let encoder = commandBuffer.makeRenderCommandEncoder(descriptor: renderPassDescriptor) else {
+            return nil
+        }
+        encoder.endEncoding()
+        return commandBuffer
+    }
+
     func draw(pixelBuffer: BufferProtocol, display: DisplayEnum = .plane, inputTextures: [MTLTexture], renderPassDescriptor: MTLRenderPassDescriptor) -> MTLCommandBuffer? {
         guard inputTextures.count > 0, let commandBuffer = commandQueue?.makeCommandBuffer(),
             let encoder = commandBuffer.makeRenderCommandEncoder(descriptor: renderPassDescriptor) else {

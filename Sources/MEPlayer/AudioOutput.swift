@@ -37,7 +37,7 @@ final class AudioOutput: FrameOutput {
         audioPlayer.delegate = self
     }
 
-    func flush() {
+    func clear() {
         semaphore.wait()
         currentRender = nil
         semaphore.signal()
