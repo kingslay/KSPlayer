@@ -199,4 +199,8 @@ extension UIView {
         }
         return nil
     }
+
+    public func centerRotate(byDegrees: Double) {
+        transform = CGAffineTransform(rotationAngle: CGFloat(Double.pi * byDegrees / 180.0))
+    }
 }

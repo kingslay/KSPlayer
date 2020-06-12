@@ -149,12 +149,11 @@ extension NSView {
         backingLayer?.layoutIfNeeded()
     }
 
-    open var transform: CGAffineTransform {
-        get {
-            backingLayer?.affineTransform() ?? CGAffineTransform.identity
-        }
-        set {
-            backingLayer?.setAffineTransform(newValue)
+    public func centerRotate(byDegrees: Double) {
+        let degrees = CGFloat(-byDegrees)
+        if degrees != boundsRotation {
+            backingLayer?.anchorPoint = CGPoint(x: 0.5, y: 0.5)
+            rotate(byDegrees: degrees - boundsRotation)
         }
     }
 }

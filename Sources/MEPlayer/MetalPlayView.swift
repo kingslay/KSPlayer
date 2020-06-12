@@ -10,6 +10,7 @@ import MetalKit
 
 final class MetalPlayView: MTKView, MTKViewDelegate, FrameOutput {
     private let textureCache = MetalTextureCache()
+    private var needsClear = false
     private let renderPassDescriptor = MTLRenderPassDescriptor()
     var display: DisplayEnum = .plane
     weak var renderSource: OutputRenderSourceDelegate?
@@ -29,13 +30,29 @@ final class MetalPlayView: MTKView, MTKViewDelegate, FrameOutput {
         fatalError("init(coder:) has not been implemented")
     }
 
-    func flush() {}
+    func clear() {
+        needsClear = true
+        draw()
+    }
 
     func mtkView(_: MTKView, drawableSizeWillChange _: CGSize) {}
 
     func draw(in _: MTKView) {
-        if let frame = renderSource?.getOutputRender(type: .video, isDependent: true) {
-            draw(frame: frame)
+        if needsClear {
+            guard let currentRenderPassDescriptor = currentRenderPassDescriptor, let commandBuffer = MetalRender.share.clear(renderPassDescriptor: currentRenderPassDescriptor) else {
+                return
+            }
+            guard let drawable = currentDrawable else {
+                return
+            }
+            commandBuffer.present(drawable)
+            commandBuffer.commit()
+            commandBuffer.waitUntilCompleted()
+            needsClear = false
+        } else {
+            if let frame = renderSource?.getOutputRender(type: .video, isDependent: true) {
+                draw(frame: frame)
+            }
         }
     }
 
