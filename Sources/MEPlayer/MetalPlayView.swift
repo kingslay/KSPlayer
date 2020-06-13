@@ -10,7 +10,6 @@ import MetalKit
 
 final class MetalPlayView: MTKView, MTKViewDelegate, FrameOutput {
     private let textureCache = MetalTextureCache()
-    private var needsClear = false
     private let renderPassDescriptor = MTLRenderPassDescriptor()
     var display: DisplayEnum = .plane
     weak var renderSource: OutputRenderSourceDelegate?
@@ -31,28 +30,17 @@ final class MetalPlayView: MTKView, MTKViewDelegate, FrameOutput {
     }
 
     func clear() {
-        needsClear = true
-        draw()
+        guard let drawable = currentDrawable, let passDescriptor = currentRenderPassDescriptor else {
+            return
+        }
+        MetalRender.share.clear(drawable: drawable, renderPassDescriptor: passDescriptor)
     }
 
     func mtkView(_: MTKView, drawableSizeWillChange _: CGSize) {}
 
     func draw(in _: MTKView) {
-        if needsClear {
-            guard let currentRenderPassDescriptor = currentRenderPassDescriptor, let commandBuffer = MetalRender.share.clear(renderPassDescriptor: currentRenderPassDescriptor) else {
-                return
-            }
-            guard let drawable = currentDrawable else {
-                return
-            }
-            commandBuffer.present(drawable)
-            commandBuffer.commit()
-            commandBuffer.waitUntilCompleted()
-            needsClear = false
-        } else {
-            if let frame = renderSource?.getOutputRender(type: .video, isDependent: true) {
-                draw(frame: frame)
-            }
+        if let frame = renderSource?.getOutputRender(type: .video, isDependent: true) {
+            draw(frame: frame)
         }
     }
 
@@ -66,14 +54,8 @@ final class MetalPlayView: MTKView, MTKViewDelegate, FrameOutput {
             guard let drawable = currentDrawable else {
                 return
             }
-            renderPassDescriptor.colorAttachments[0].texture = drawable.texture
             let textures = pixelBuffer.textures(frome: textureCache)
-            guard let commandBuffer = MetalRender.share.draw(pixelBuffer: pixelBuffer, display: display, inputTextures: textures, renderPassDescriptor: renderPassDescriptor) else {
-                return
-            }
-            commandBuffer.present(drawable)
-            commandBuffer.commit()
-            commandBuffer.waitUntilCompleted()
+            MetalRender.share.draw(pixelBuffer: pixelBuffer, display: display, inputTextures: textures, drawable: drawable, renderPassDescriptor: renderPassDescriptor)
             frame.corePixelBuffer = nil
         }
     }
