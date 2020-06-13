@@ -34,16 +34,9 @@ let package = Package(
         // Targets are the basic building blocks of a package. A target can define a module or a test suite.
         .target(
             name: "KSPlayer",
-            dependencies: ["FFmpegExt"],
             path: ".",
-            exclude: ["Sources/FFmpegExt"],
-            sources: ["Sources"]
-        ),
-        .target(
-            name: "FFmpegExt",
-            dependencies: [],
-            // path: "Sources/FFmpegExt",
-            cSettings: [
+            sources: ["Sources"],
+             cSettings: [
                 .headerSearchPath("FFmpeg/FFmpeg.xcframework/ios-arm64/Headers"),
             ],
             swiftSettings: [

@@ -94,21 +94,24 @@ class MetalRender {
         commandQueue = device.makeCommandQueue()
     }
 
-    func clear(renderPassDescriptor: MTLRenderPassDescriptor) -> MTLCommandBuffer? {
+    func clear(drawable: CAMetalDrawable, renderPassDescriptor: MTLRenderPassDescriptor) {
         renderPassDescriptor.colorAttachments[0].clearColor = MTLClearColor(red: 0, green: 0, blue: 0, alpha: 0)
         renderPassDescriptor.colorAttachments[0].loadAction = .clear
         guard let commandBuffer = commandQueue?.makeCommandBuffer(),
             let encoder = commandBuffer.makeRenderCommandEncoder(descriptor: renderPassDescriptor) else {
-            return nil
+            return
         }
         encoder.endEncoding()
-        return commandBuffer
+        commandBuffer.present(drawable)
+        commandBuffer.commit()
+        commandBuffer.waitUntilCompleted()
     }
 
-    func draw(pixelBuffer: BufferProtocol, display: DisplayEnum = .plane, inputTextures: [MTLTexture], renderPassDescriptor: MTLRenderPassDescriptor) -> MTLCommandBuffer? {
+    func draw(pixelBuffer: BufferProtocol, display: DisplayEnum = .plane, inputTextures: [MTLTexture], drawable: CAMetalDrawable, renderPassDescriptor: MTLRenderPassDescriptor) {
+        renderPassDescriptor.colorAttachments[0].texture = drawable.texture
         guard inputTextures.count > 0, let commandBuffer = commandQueue?.makeCommandBuffer(),
             let encoder = commandBuffer.makeRenderCommandEncoder(descriptor: renderPassDescriptor) else {
-            return nil
+            return
         }
         encoder.pushDebugGroup("RenderFrame")
         encoder.setRenderPipelineState(pipeline(pixelBuffer: pixelBuffer).state)
@@ -121,7 +124,9 @@ class MetalRender {
         display.set(encoder: encoder)
         encoder.popDebugGroup()
         encoder.endEncoding()
-        return commandBuffer
+        commandBuffer.present(drawable)
+        commandBuffer.commit()
+        commandBuffer.waitUntilCompleted()
     }
 
     private func pipeline(pixelBuffer: BufferProtocol) -> MetalRenderPipeline {
