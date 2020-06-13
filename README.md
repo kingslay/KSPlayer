@@ -230,6 +230,20 @@ public protocol PlayerControllerDelegate: class {
 
 ![gif](https://github.com/kingslay/KSPlayer/raw/master/Demo/demo.gif)
 
+## Debug FFmpeg
+
+```bash
+brew install sdl2
+cd FFmpeg
+sh build-openssl.sh
+sh build-ffmpeg.sh debug
+dwarfdump -F --debug-info FFmpeg.xcframework/ios-x86_64-maccatalyst/FFmpeg.framework/FFmpeg | head -n 20
+```
+
+run demo-iOS use Mac Catalyst
+
+![6](https://github.com/kingslay/KSPlayer/blob/develop/documents/6.png?raw=true)
+
 ## Reference
 
 This item references the  [ZFPlayer](https://github.com/renzifeng/ZFPlayer)、**[SGPlayer](https://github.com/libobjc/SGPlayer)**
