@@ -36,7 +36,7 @@ let package = Package(
             name: "KSPlayer",
             path: ".",
             sources: ["Sources"],
-             cSettings: [
+            cSettings: [
                 .headerSearchPath("FFmpeg/FFmpeg.xcframework/ios-arm64/Headers"),
             ],
             swiftSettings: [

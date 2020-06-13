@@ -97,7 +97,7 @@
     },
     {
       "name": "Metal",
-      "source_files": "Sources/Metal/*.{h,swift,metal}",
+      "source_files": "Sources/Metal/*.{swift,metal}",
       "resource_bundles": {
         "Metal": [
           "Sources/Metal/*.metal"

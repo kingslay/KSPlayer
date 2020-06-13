@@ -1,7 +1,6 @@
 //
 //  Shaders.metal
 #include <metal_stdlib>
-#include "ShaderDefinitions.h"
 using namespace metal;
 
 typedef struct {
@@ -10,11 +9,12 @@ typedef struct {
 } TextureMappingVertex;
 
 vertex TextureMappingVertex mapTexture(unsigned int vertex_id [[ vertex_id ]],
-                                       constant Vertex * in [[ buffer(0) ]],
-                                       constant float4x4 *uniforms [[ buffer(1) ]]) {
+                                       constant float4 * pos [[ buffer(0) ]],
+                                       constant float2 * uv [[ buffer(1) ]],
+                                       constant float4x4 *uniforms [[ buffer(2) ]]) {
     TextureMappingVertex outVertex;
-    outVertex.renderedCoordinate = *uniforms * in[vertex_id].pos;
-    outVertex.textureCoordinate = in[vertex_id].uv;
+    outVertex.renderedCoordinate = *uniforms * pos[vertex_id];
+    outVertex.textureCoordinate = uv[vertex_id];
 
     return outVertex;
 }

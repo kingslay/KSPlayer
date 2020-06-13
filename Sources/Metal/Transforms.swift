@@ -106,10 +106,4 @@ extension simd_float4x4 {
     }
 }
 
-extension Vertex {
-    init(_ v0: Float, _ v1: Float, _ v2: Float, _ v3: Float, _ v4: Float, _ v5: Float) {
-        self.init(pos: simd_float4(v0, v1, v2, v3), uv: simd_float2(v4, v5))
-    }
-}
-
 // swiftlint:enable identifier_name
