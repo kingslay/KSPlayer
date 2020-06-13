@@ -42,7 +42,6 @@ open class PlayerView: UIView, KSPlayerLayerDelegate, KSSliderDelegate {
     // Closure fired when play time changed
     public var playTimeDidChange: ((TimeInterval, TimeInterval) -> Void)?
     public var backBlock: (() -> Void)?
-    public let options = KSOptions()
     public convenience init() {
         #if os(macOS)
         self.init(frame: .zero)
@@ -101,7 +100,7 @@ open class PlayerView: UIView, KSPlayerLayerDelegate, KSSliderDelegate {
     }
 
     open func seek(time: TimeInterval, completion handler: ((Bool) -> Void)? = nil) {
-        playerLayer.seek(time: time, autoPlay: options.isSeekedAutoPlay, completion: handler)
+        playerLayer.seek(time: time, autoPlay: KSOptions.isSeekedAutoPlay, completion: handler)
     }
 
     open func resetPlayer() {
