@@ -48,7 +48,7 @@ Pod::Spec.new do |s|
         ffmpeg.dependency 'Openssl'
     end
     s.subspec 'Metal' do |ss|
-        ss.source_files = 'Sources/Metal/*.{h,swift,metal}'
+        ss.source_files = 'Sources/Metal/*.{swift,metal}'
         ss.resource_bundles = {
             'Metal' => ['Sources/Metal/*.metal']
         }

@@ -44,34 +44,43 @@ private class PlaneDisplayModel {
     let indexType = MTLIndexType.uint16
     let primitiveType = MTLPrimitiveType.triangleStrip
     let indexBuffer: MTLBuffer
-    let vertexBuffer: MTLBuffer?
+    let posBuffer: MTLBuffer?
+    let uvBuffer: MTLBuffer?
     let matrixBuffer: MTLBuffer?
 
     fileprivate init() {
-        let (indices, vertices) = PlaneDisplayModel.genSphere()
+        let (indices, positions, uvs) = PlaneDisplayModel.genSphere()
         let device = MetalRender.share.device
-        indexCount = Int(indices.count)
-        indexBuffer = device.makeBuffer(bytes: indices, length: MemoryLayout<UInt16>.size * indices.count, options: .storageModeShared)!
-        vertexBuffer = device.makeBuffer(bytes: vertices, length: MemoryLayout<Vertex>.size * vertices.count, options: .storageModeShared)
+        indexCount = indices.count
+        indexBuffer = device.makeBuffer(bytes: indices, length: MemoryLayout<UInt16>.size * indexCount, options: .storageModeShared)!
+        posBuffer = device.makeBuffer(bytes: positions, length: MemoryLayout<simd_float4>.size * indexCount, options: .storageModeShared)
+        uvBuffer = device.makeBuffer(bytes: uvs, length: MemoryLayout<simd_float2>.size * indexCount, options: .storageModeShared)
         var matrix = matrix_identity_float4x4
         matrixBuffer = device.makeBuffer(bytes: &matrix, length: MemoryLayout<simd_float4x4>.size, options: .storageModeShared)
     }
 
-    private static func genSphere() -> ([UInt16], [Vertex]) {
-        let vertices = [
-            Vertex(-1.0, -1.0, 0.0, 1.0, 0.0, 1.0),
-            Vertex(-1.0, 1.0, 0.0, 1.0, 0.0, 0.0),
-            Vertex(1.0, -1.0, 0.0, 1.0, 1.0, 1.0),
-            Vertex(1.0, 1.0, 0.0, 1.0, 1.0, 0.0),
-        ]
+    private static func genSphere() -> ([UInt16], [simd_float4], [simd_float2]) {
         let indices: [UInt16] = [0, 1, 2, 3]
-        return (indices, vertices)
+        let positions: [simd_float4] = [
+            [-1.0, -1.0, 0.0, 1.0],
+            [-1.0, 1.0, 0.0, 1.0],
+            [1.0, -1.0, 0.0, 1.0],
+            [1.0, 1.0, 0.0, 1.0],
+        ]
+        let uvs: [simd_float2] = [
+            [0.0, 1.0],
+            [0.0, 0.0],
+            [1.0, 1.0],
+            [1.0, 0.0],
+        ]
+        return (indices, positions, uvs)
     }
 
     func set(encoder: MTLRenderCommandEncoder) {
         encoder.setFrontFacing(.clockwise)
-        encoder.setVertexBuffer(vertexBuffer, offset: 0, index: 0)
-        encoder.setVertexBuffer(matrixBuffer, offset: 0, index: 1)
+        encoder.setVertexBuffer(posBuffer, offset: 0, index: 0)
+        encoder.setVertexBuffer(uvBuffer, offset: 0, index: 1)
+        encoder.setVertexBuffer(matrixBuffer, offset: 0, index: 2)
         encoder.drawIndexedPrimitives(type: primitiveType, indexCount: indexCount, indexType: indexType, indexBuffer: indexBuffer, indexBufferOffset: 0)
     }
 }
@@ -84,14 +93,16 @@ private class SphereDisplayModel {
     let indexType = MTLIndexType.uint16
     let primitiveType = MTLPrimitiveType.triangle
     let indexBuffer: MTLBuffer
-    let vertexBuffer: MTLBuffer?
+    let posBuffer: MTLBuffer?
+    let uvBuffer: MTLBuffer?
 
     fileprivate init() {
-        let (indices, vertices) = SphereDisplayModel.genSphere()
+        let (indices, positions, uvs) = SphereDisplayModel.genSphere()
         let device = MetalRender.share.device
-        indexCount = Int(indices.count)
-        indexBuffer = device.makeBuffer(bytes: indices, length: MemoryLayout<UInt16>.size * indices.count, options: .storageModeShared)!
-        vertexBuffer = device.makeBuffer(bytes: vertices, length: MemoryLayout<Vertex>.size * vertices.count, options: .storageModeShared)
+        indexCount = indices.count
+        indexBuffer = device.makeBuffer(bytes: indices, length: MemoryLayout<UInt16>.size * indexCount, options: .storageModeShared)!
+        posBuffer = device.makeBuffer(bytes: positions, length: MemoryLayout<simd_float4>.size * indexCount, options: .storageModeShared)
+        uvBuffer = device.makeBuffer(bytes: uvs, length: MemoryLayout<simd_float2>.size * indexCount, options: .storageModeShared)
         #if os(iOS)
         if KSPlayerManager.enableSensor {
             MotionSensor.shared.start()
@@ -116,13 +127,13 @@ private class SphereDisplayModel {
         modelViewMatrix = matrix_identity_float4x4
     }
 
-    private static func genSphere() -> ([UInt16], [Vertex]) {
+    private static func genSphere() -> ([UInt16], [simd_float4], [simd_float2]) {
         let slicesCount = UInt16(200)
         let parallelsCount = slicesCount / 2
         let indicesCount = Int(slicesCount) * Int(parallelsCount) * 6
-        let verticesCount = (slicesCount + 1) * (parallelsCount + 1)
         var indices = [UInt16](repeating: 0, count: indicesCount)
-        var vertices = [Vertex](repeating: Vertex(), count: Int(verticesCount))
+        var positions = [simd_float4]()
+        var uvs = [simd_float2]()
         var runCount = 0
         let radius = Float(1.0)
         let step = (2.0 * Float.pi) / Float(slicesCount)
@@ -134,7 +145,8 @@ private class SphereDisplayModel {
                 let vertex3 = Float(1.0)
                 let vertex4 = Float(j) / Float(slicesCount)
                 let vertex5 = Float(i) / Float(parallelsCount)
-                vertices[Int(i * (slicesCount + 1) + j)] = Vertex(vertex0, vertex1, vertex2, vertex3, vertex4, vertex5)
+                positions.append([vertex0, vertex1, vertex2, vertex3])
+                uvs.append([vertex4, vertex5])
                 if i < parallelsCount, j < slicesCount {
                     indices[runCount] = i * (slicesCount + 1) + j
                     runCount += 1
@@ -151,7 +163,7 @@ private class SphereDisplayModel {
                 }
             }
         }
-        return (indices, vertices)
+        return (indices, positions, uvs)
     }
 }
 
@@ -168,7 +180,8 @@ private class VRDisplayModel: SphereDisplayModel {
 
     func set(encoder: MTLRenderCommandEncoder) {
         encoder.setFrontFacing(.clockwise)
-        encoder.setVertexBuffer(vertexBuffer, offset: 0, index: 0)
+        encoder.setVertexBuffer(posBuffer, offset: 0, index: 0)
+        encoder.setVertexBuffer(uvBuffer, offset: 0, index: 1)
         #if os(iOS)
         if KSPlayerManager.enableSensor, let matrix = MotionSensor.shared.matrix() {
             modelViewMatrix = matrix
@@ -176,7 +189,7 @@ private class VRDisplayModel: SphereDisplayModel {
         #endif
         var matrix = modelViewProjectionMatrix * modelViewMatrix
         let matrixBuffer = MetalRender.share.device.makeBuffer(bytes: &matrix, length: MemoryLayout<simd_float4x4>.size, options: .storageModeShared)
-        encoder.setVertexBuffer(matrixBuffer, offset: 0, index: 1)
+        encoder.setVertexBuffer(matrixBuffer, offset: 0, index: 2)
         encoder.drawIndexedPrimitives(type: primitiveType, indexCount: indexCount, indexType: indexType, indexBuffer: indexBuffer, indexBufferOffset: 0)
     }
 }
@@ -197,7 +210,8 @@ private class VRBoxDisplayModel: SphereDisplayModel {
 
     func set(encoder: MTLRenderCommandEncoder) {
         encoder.setFrontFacing(.clockwise)
-        encoder.setVertexBuffer(vertexBuffer, offset: 0, index: 0)
+        encoder.setVertexBuffer(posBuffer, offset: 0, index: 0)
+        encoder.setVertexBuffer(uvBuffer, offset: 0, index: 1)
         #if os(iOS)
         if KSPlayerManager.enableSensor, let matrix = MotionSensor.shared.matrix() {
             modelViewMatrix = matrix
@@ -210,7 +224,7 @@ private class VRBoxDisplayModel: SphereDisplayModel {
             encoder.setViewport(viewport)
             var matrix = modelViewProjectionMatrix * modelViewMatrix
             let matrixBuffer = MetalRender.share.device.makeBuffer(bytes: &matrix, length: MemoryLayout<simd_float4x4>.size, options: .storageModeShared)
-            encoder.setVertexBuffer(matrixBuffer, offset: 0, index: 1)
+            encoder.setVertexBuffer(matrixBuffer, offset: 0, index: 2)
             encoder.drawIndexedPrimitives(type: primitiveType, indexCount: indexCount, indexType: indexType, indexBuffer: indexBuffer, indexBufferOffset: 0)
         }
     }
