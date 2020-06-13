@@ -34,7 +34,7 @@ public class PlayerToolBar: UIStackView {
     public var definitionButton = UIButton()
     public var currentTime: TimeInterval = 0 {
         didSet {
-            guard currentTime.isNormal else {
+            guard !currentTime.isNaN else {
                 currentTime = 0
                 return
             }
@@ -49,7 +49,7 @@ public class PlayerToolBar: UIStackView {
 
     public var totalTime: TimeInterval = 0 {
         didSet {
-            guard totalTime.isNormal else {
+            guard !totalTime.isNaN else {
                 totalTime = 0
                 return
             }
