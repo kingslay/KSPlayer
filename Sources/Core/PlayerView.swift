@@ -109,6 +109,8 @@ open class PlayerView: UIView, KSPlayerLayerDelegate, KSSliderDelegate {
     }
 
     open func set(url: URL, options: KSOptions) {
+        toolBar.currentTime = 0
+        totalTime = 0
         playerLayer.set(url: url, options: options)
     }
 
