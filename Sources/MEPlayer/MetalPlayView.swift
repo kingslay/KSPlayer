@@ -46,17 +46,19 @@ final class MetalPlayView: MTKView, MTKViewDelegate, FrameOutput {
 
     func draw(frame: MEFrame) {
         if let frame = frame as? VideoVTBFrame, let pixelBuffer = frame.corePixelBuffer {
-            renderSource?.setVideo(time: frame.cmtime)
-            let size = display == .plane ? pixelBuffer.drawableSize : UIScreen.size
-            if drawableSize != size {
-                drawableSize = size
+            autoreleasepool {
+                renderSource?.setVideo(time: frame.cmtime)
+                let size = display == .plane ? pixelBuffer.drawableSize : UIScreen.size
+                if drawableSize != size {
+                    drawableSize = size
+                }
+                guard let drawable = currentDrawable else {
+                    return
+                }
+                let textures = pixelBuffer.textures(frome: textureCache)
+                MetalRender.share.draw(pixelBuffer: pixelBuffer, display: display, inputTextures: textures, drawable: drawable, renderPassDescriptor: renderPassDescriptor)
+                frame.corePixelBuffer = nil
             }
-            guard let drawable = currentDrawable else {
-                return
-            }
-            let textures = pixelBuffer.textures(frome: textureCache)
-            MetalRender.share.draw(pixelBuffer: pixelBuffer, display: display, inputTextures: textures, drawable: drawable, renderPassDescriptor: renderPassDescriptor)
-            frame.corePixelBuffer = nil
         }
     }
 

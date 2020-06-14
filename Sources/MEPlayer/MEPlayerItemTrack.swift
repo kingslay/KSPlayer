@@ -246,7 +246,9 @@ final class AsyncPlayerItemTrack: FFPlayerItemTrack<Frame> {
                 guard let packet = packetQueue.pop(wait: true), state != .flush, state != .closed else {
                     continue
                 }
-                doDecode(packet: packet)
+                autoreleasepool {
+                    doDecode(packet: packet)
+                }
             }
         }
     }
