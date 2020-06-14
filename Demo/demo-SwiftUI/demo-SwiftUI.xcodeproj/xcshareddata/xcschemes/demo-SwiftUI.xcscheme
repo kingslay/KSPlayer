@@ -14,10 +14,10 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "AC0860DB20B699E100D801FC"
-               BuildableName = "demo-macOS.app"
-               BlueprintName = "demo-macOS"
-               ReferencedContainer = "container:demo-macOS.xcodeproj">
+               BlueprintIdentifier = "AC752B702400301400A127BF"
+               BuildableName = "demo-SwiftUI.app"
+               BlueprintName = "demo-SwiftUI"
+               ReferencedContainer = "container:demo-SwiftUI.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -28,26 +28,6 @@
       selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
       shouldUseLaunchSchemeArgsEnv = "YES">
       <Testables>
-         <TestableReference
-            skipped = "NO">
-            <BuildableReference
-               BuildableIdentifier = "primary"
-               BlueprintIdentifier = "AC0860ED20B699E200D801FC"
-               BuildableName = "demo-macOSTests.xctest"
-               BlueprintName = "demo-macOSTests"
-               ReferencedContainer = "container:demo-macOS.xcodeproj">
-            </BuildableReference>
-         </TestableReference>
-         <TestableReference
-            skipped = "NO">
-            <BuildableReference
-               BuildableIdentifier = "primary"
-               BlueprintIdentifier = "AC0860F820B699E200D801FC"
-               BuildableName = "demo-macOSUITests.xctest"
-               BlueprintName = "demo-macOSUITests"
-               ReferencedContainer = "container:demo-macOS.xcodeproj">
-            </BuildableReference>
-         </TestableReference>
       </Testables>
    </TestAction>
    <LaunchAction
@@ -64,15 +44,15 @@
          runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "AC0860DB20B699E100D801FC"
-            BuildableName = "demo-macOS.app"
-            BlueprintName = "demo-macOS"
-            ReferencedContainer = "container:demo-macOS.xcodeproj">
+            BlueprintIdentifier = "AC752B702400301400A127BF"
+            BuildableName = "demo-SwiftUI.app"
+            BlueprintName = "demo-SwiftUI"
+            ReferencedContainer = "container:demo-SwiftUI.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </LaunchAction>
    <ProfileAction
-      buildConfiguration = "Debug"
+      buildConfiguration = "Release"
       shouldUseLaunchSchemeArgsEnv = "YES"
       savedToolIdentifier = ""
       useCustomWorkingDirectory = "NO"
@@ -81,10 +61,10 @@
          runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "AC0860DB20B699E100D801FC"
-            BuildableName = "demo-macOS.app"
-            BlueprintName = "demo-macOS"
-            ReferencedContainer = "container:demo-macOS.xcodeproj">
+            BlueprintIdentifier = "AC752B702400301400A127BF"
+            BuildableName = "demo-SwiftUI.app"
+            BlueprintName = "demo-SwiftUI"
+            ReferencedContainer = "container:demo-SwiftUI.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>
