@@ -30,40 +30,28 @@ class MetalRender {
     }()
 
     private lazy var colorConversion601VideoRangeMatrixBuffer: MTLBuffer? = {
-        let firstColumn = SIMD3<Float>(1.164, 1.164, 1.164)
-        let secondColumn = SIMD3<Float>(0, -0.392, 2.017)
-        let thirdColumn = SIMD3<Float>(1.596, -0.813, 0)
-        var matrix = simd_float3x3(firstColumn, secondColumn, thirdColumn)
+        var matrix = simd_float3x3([1.164, 1.164, 1.164], [0, -0.392, 2.017], [1.596, -0.813, 0])
         let buffer = device.makeBuffer(bytes: &matrix, length: MemoryLayout<simd_float3x3>.size, options: .storageModeShared)
         buffer?.label = "colorConversionMatrix"
         return buffer
     }()
 
     private lazy var colorConversion601FullRangeMatrixBuffer: MTLBuffer? = {
-        let firstColumn = SIMD3<Float>(1.0, 1.0, 1.0)
-        let secondColumn = SIMD3<Float>(0.0, -0.343, 1.765)
-        let thirdColumn = SIMD3<Float>(1.4, -0.711, 0.0)
-        var matrix = simd_float3x3(firstColumn, secondColumn, thirdColumn)
+        var matrix = simd_float3x3([1.0, 1.0, 1.0], [0.0, -0.343, 1.765], [1.4, -0.711, 0.0])
         let buffer = device.makeBuffer(bytes: &matrix, length: MemoryLayout<simd_float3x3>.size, options: .storageModeShared)
         buffer?.label = "colorConversionMatrix"
         return buffer
     }()
 
     private lazy var colorConversion709VideoRangeMatrixBuffer: MTLBuffer? = {
-        let firstColumn = SIMD3<Float>(1.164, 1.164, 1.164)
-        let secondColumn = SIMD3<Float>(0.0, -0.213, 2.112)
-        let thirdColumn = SIMD3<Float>(1.793, -0.533, 0.0)
-        var matrix = simd_float3x3(firstColumn, secondColumn, thirdColumn)
+        var matrix = simd_float3x3([1.164, 1.164, 1.164], [0.0, -0.213, 2.112], [1.793, -0.533, 0.0])
         let buffer = device.makeBuffer(bytes: &matrix, length: MemoryLayout<simd_float3x3>.size, options: .storageModeShared)
         buffer?.label = "colorConversionMatrix"
         return buffer
     }()
 
     private lazy var colorConversion709FullRangeMatrixBuffer: MTLBuffer? = {
-        let firstColumn = SIMD3<Float>(1, 1, 1)
-        let secondColumn = SIMD3<Float>(0.0, -0.187, 1.856)
-        let thirdColumn = SIMD3<Float>(1.570, -0.467, 0.0)
-        var matrix = simd_float3x3(firstColumn, secondColumn, thirdColumn)
+        var matrix = simd_float3x3([1, 1, 1], [0.0, -0.187, 1.856], [1.570, -0.467, 0.0])
         let buffer = device.makeBuffer(bytes: &matrix, length: MemoryLayout<simd_float3x3>.size, options: .storageModeShared)
         buffer?.label = "colorConversionMatrix"
         return buffer

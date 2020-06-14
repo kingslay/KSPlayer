@@ -24,37 +24,37 @@ extension simd_float4x4 {
     // 0   0   1   tz
     // 0   0   0   1
     init(translate: SIMD3<Float>) {
-        self.init([SIMD4<Float>(1, 0.0, 0.0, translate.x),
-                   SIMD4<Float>(0.0, 1, 0.0, translate.y),
-                   SIMD4<Float>(0.0, 0.0, 1, translate.z),
-                   SIMD4<Float>(0.0, 0.0, 0, 1)])
+        self.init([1, 0.0, 0.0, translate.x],
+                  [0.0, 1, 0.0, translate.y],
+                  [0.0, 0.0, 1, translate.z],
+                  [0.0, 0.0, 0, 1])
     }
 
     init(rotationX radians: Float) {
         let cos = cosf(radians)
         let sin = sinf(radians)
-        self.init([SIMD4<Float>(1, 0.0, 0.0, 0),
-                   SIMD4<Float>(0.0, cos, sin, 0),
-                   SIMD4<Float>(0.0, -sin, cos, 0),
-                   SIMD4<Float>(0.0, 0.0, 0, 1)])
+        self.init([1, 0.0, 0.0, 0],
+                  [0.0, cos, sin, 0],
+                  [0.0, -sin, cos, 0],
+                  [0.0, 0.0, 0, 1])
     }
 
     init(rotationY radians: Float) {
         let cos = cosf(radians)
         let sin = sinf(radians)
-        self.init([SIMD4<Float>(cos, 0.0, -sin, 0),
-                   SIMD4<Float>(0.0, 1, 0, 0),
-                   SIMD4<Float>(sin, 0, cos, 0),
-                   SIMD4<Float>(0.0, 0.0, 0, 1)])
+        self.init([cos, 0.0, -sin, 0],
+                  [0.0, 1, 0, 0],
+                  [sin, 0, cos, 0],
+                  [0.0, 0.0, 0, 1])
     }
 
     init(rotationZ radians: Float) {
         let cos = cosf(radians)
         let sin = sinf(radians)
-        self.init([SIMD4<Float>(cos, sin, 0.0, 0),
-                   SIMD4<Float>(-sin, cos, 0, 0),
-                   SIMD4<Float>(0.0, 0, 1, 0),
-                   SIMD4<Float>(0.0, 0.0, 0, 1)])
+        self.init([cos, sin, 0.0, 0],
+                  [-sin, cos, 0, 0],
+                  [0.0, 0, 1, 0],
+                  [0.0, 0.0, 0, 1])
     }
 
     public init(lookAt eye: SIMD3<Float>, center: SIMD3<Float>, up: SIMD3<Float>) {
@@ -69,10 +69,10 @@ extension simd_float4x4 {
 
     public init(perspective fovyRadians: Float, aspect: Float, nearZ: Float, farZ: Float) {
         let cotan = 1.0 / tanf(fovyRadians / 2.0)
-        self.init([SIMD4<Float>(cotan / aspect, 0.0, 0.0, 0.0),
-                   SIMD4<Float>(0.0, cotan, 0.0, 0.0),
-                   SIMD4<Float>(0.0, 0.0, (farZ + nearZ) / (nearZ - farZ), -1),
-                   SIMD4<Float>(0.0, 0.0, (2.0 * farZ * nearZ) / (nearZ - farZ), 0)])
+        self.init([cotan / aspect, 0.0, 0.0, 0.0],
+                  [0.0, cotan, 0.0, 0.0],
+                  [0.0, 0.0, (farZ + nearZ) / (nearZ - farZ), -1],
+                  [0.0, 0.0, (2.0 * farZ * nearZ) / (nearZ - farZ), 0])
     }
 
     public init(euler x: Float, y: Float, z: Float) {
@@ -87,10 +87,10 @@ extension simd_float4x4 {
         let sz = sin(z)
         let cxsy = cx * sy
         let sxsy = sx * sy
-        self.init([SIMD4<Float>(cy * cz, -cy * sz, sy, 0.0),
-                   SIMD4<Float>(cxsy * cz + cx * sz, -cxsy * sz + cx * cz, -sx * cy, 0.0),
-                   SIMD4<Float>(-sxsy * cz + sx * sz, sxsy * sz + sx * cz, cx * cy, 0),
-                   SIMD4<Float>(0.0, 0.0, 0, 1)])
+        self.init([cy * cz, -cy * sz, sy, 0.0],
+                  [cxsy * cz + cx * sz, -cxsy * sz + cx * cz, -sx * cy, 0.0],
+                  [-sxsy * cz + sx * sz, sxsy * sz + sx * cz, cx * cy, 0],
+                  [0.0, 0.0, 0, 1])
     }
 
     func rotateX(radians: Float) -> simd_float4x4 {
