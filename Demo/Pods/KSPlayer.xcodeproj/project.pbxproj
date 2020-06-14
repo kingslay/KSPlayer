@@ -402,7 +402,7 @@
 		DD244CABD7B831BA4337011B775A688A /* KSPlayer-tvOS-Unit-Tests-resources.sh */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.script.sh; name = "KSPlayer-tvOS-Unit-Tests-resources.sh"; path = "../KSPlayer-tvOS/KSPlayer-tvOS-Unit-Tests-resources.sh"; sourceTree = "<group>"; };
 		E3023C7CE3BCD0DA6CDF523573E900C6 /* Shaders.metal */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.metal; name = Shaders.metal; path = Sources/Metal/Shaders.metal; sourceTree = "<group>"; };
 		F039160BAB17608D1341755CF09A0FA3 /* KSPlayer-macOS-Unit-Tests-prefix.pch */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = "KSPlayer-macOS-Unit-Tests-prefix.pch"; path = "../KSPlayer-macOS/KSPlayer-macOS-Unit-Tests-prefix.pch"; sourceTree = "<group>"; };
-		F2451797988C9C4538E4FA8A4BD599B9 /* KSPlayer-macOS-Unit-Tests */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; name = "KSPlayer-macOS-Unit-Tests"; path = "KSPlayer-macOS-Unit-Tests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		F2451797988C9C4538E4FA8A4BD599B9 /* KSPlayer-macOS-Unit-Tests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "KSPlayer-macOS-Unit-Tests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		F593C3C20FA3B5C4B41B20ED02BEBEE1 /* KSPlayer-tvOS-Unit-Tests-artifacts.sh */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.script.sh; name = "KSPlayer-tvOS-Unit-Tests-artifacts.sh"; path = "../KSPlayer-tvOS/KSPlayer-tvOS-Unit-Tests-artifacts.sh"; sourceTree = "<group>"; };
 		FA9803F47D28027D0D32E80A605D2ADB /* BrightnessVolume.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = BrightnessVolume.swift; path = Sources/Video/BrightnessVolume.swift; sourceTree = "<group>"; };
 		FDA71DF9EF6718867FA3B74ED17EC824 /* 567082ac3ae39699f68de4fd2b7444b1e045515a.mp4 */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = file; name = 567082ac3ae39699f68de4fd2b7444b1e045515a.mp4; path = Tests/Resources/567082ac3ae39699f68de4fd2b7444b1e045515a.mp4; sourceTree = "<group>"; };
@@ -654,7 +654,7 @@
 				880389D99D1EF36F926AA4C3DFAA257C /* KSPlayer.framework */,
 				60C43558171822E74AADF86FBF5AABF3 /* KSPlayer.framework */,
 				C472C97B903FFE1D7C131A47557F2B35 /* KSPlayer-iOS-Unit-Tests */,
-				F2451797988C9C4538E4FA8A4BD599B9 /* KSPlayer-macOS-Unit-Tests */,
+				F2451797988C9C4538E4FA8A4BD599B9 /* KSPlayer-macOS-Unit-Tests.xctest */,
 				0E1FABDC66E96D401CA063825EEACF5A /* KSPlayer-tvOS-Unit-Tests */,
 				BDEE664094192F28407567B2CAB85C51 /* KSResources.bundle */,
 				ACE1B72AD22301AC3AF48A154DA4F031 /* KSResources.bundle */,
@@ -970,7 +970,7 @@
 			);
 			name = "KSPlayer-macOS-Unit-Tests";
 			productName = "KSPlayer-macOS-Unit-Tests";
-			productReference = F2451797988C9C4538E4FA8A4BD599B9 /* KSPlayer-macOS-Unit-Tests */;
+			productReference = F2451797988C9C4538E4FA8A4BD599B9 /* KSPlayer-macOS-Unit-Tests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
 		95DA2FE73CA400BD80E9EC469E8608BA /* KSPlayer-macOS */ = {
@@ -1093,7 +1093,7 @@
 			isa = PBXProject;
 			attributes = {
 				LastSwiftUpdateCheck = 1100;
-				LastUpgradeCheck = 1100;
+				LastUpgradeCheck = 1150;
 			};
 			buildConfigurationList = 2A17BEFFA742E73C67287B4AF4B89A7D /* Build configuration list for PBXProject "KSPlayer" */;
 			compatibilityVersion = "Xcode 11.0";
@@ -1760,7 +1760,6 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 55FE9AC33FCC41182D3603100C1F7BEF /* KSPlayer-macOS.release.xcconfig */;
 			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
 				CLANG_ENABLE_OBJC_WEAK = NO;
 				CODE_SIGN_IDENTITY = "";
 				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
@@ -1894,7 +1893,6 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 122E2969DDCBF044AAA222C671B4107A /* KSPlayer-macOS.unit-tests.release.xcconfig */;
 			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
 				CLANG_ENABLE_OBJC_WEAK = NO;
 				CODE_SIGN_IDENTITY = "";
 				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
@@ -2069,7 +2067,6 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 7A8E61D1CF4581579B236733820CC8A7 /* KSPlayer-macOS.unit-tests.debug.xcconfig */;
 			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
 				CLANG_ENABLE_OBJC_WEAK = NO;
 				CODE_SIGN_IDENTITY = "";
 				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
@@ -2166,7 +2163,6 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRIP_INSTALLED_PRODUCT = NO;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
-				SWIFT_COMPILATION_MODE = wholemodule;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 				SYMROOT = "${SRCROOT}/../build";
@@ -2324,7 +2320,6 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 58DE9D8C9378D780D6515BA0C679541F /* KSPlayer-macOS.debug.xcconfig */;
 			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
 				CLANG_ENABLE_OBJC_WEAK = NO;
 				CODE_SIGN_IDENTITY = "";
 				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
