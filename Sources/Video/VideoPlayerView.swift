@@ -88,6 +88,7 @@ open class VideoPlayerView: PlayerView {
     public var seekToView: UIView & SeekViewProtocol = SeekView()
     public var replayButton = UIButton()
     public let srtControl = KSSubtitleController()
+    public var isLock: Bool { false }
     open var isMaskShow = true {
         didSet {
             let alpha: CGFloat = isMaskShow && !isLock ? 1.0 : 0.0
@@ -106,24 +107,14 @@ open class VideoPlayerView: PlayerView {
         }
     }
 
-    public var isLock: Bool {
-        false
-    }
-
     override public init(frame: CGRect) {
         super.init(frame: frame)
         setupUIComponents()
-        addConstraint()
-        customizeUIComponents()
-        layoutIfNeeded()
     }
 
     public required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
         setupUIComponents()
-        addConstraint()
-        customizeUIComponents()
-        layoutIfNeeded()
     }
 
     // MARK: - Action Response
@@ -204,6 +195,9 @@ open class VideoPlayerView: PlayerView {
         replayButton.tag = PlayerButtonType.replay.rawValue
         addSubview(topMaskView)
         addSubview(bottomMaskView)
+        addConstraint()
+        customizeUIComponents()
+        layoutIfNeeded()
     }
 
     /// Add Customize functions here
@@ -326,29 +320,6 @@ open class VideoPlayerView: PlayerView {
         }
     }
 
-    @objc private func panGestureAction(_ pan: UIPanGestureRecognizer) {
-        // 播放结束时，忽略手势,锁屏状态忽略手势
-        guard !replayButton.isSelected, !isLock else { return }
-        // 根据上次和本次移动的位置，算出一个速率的point
-        let velocityPoint = pan.velocity(in: self)
-        switch pan.state {
-        case .began:
-            // 使用绝对值来判断移动的方向
-            if abs(velocityPoint.x) > abs(velocityPoint.y) {
-                scrollDirection = .horizontal
-            } else {
-                scrollDirection = .vertical
-            }
-            panGestureBegan(location: pan.location(in: self), direction: scrollDirection)
-        case .changed:
-            panGestureChanged(velocity: velocityPoint, direction: scrollDirection)
-        case .ended:
-            panGestureEnded()
-        default:
-            break
-        }
-    }
-
     open func panGestureBegan(location _: CGPoint, direction: KSPanDirection) {
         if direction == .horizontal {
             // 给tmpPanValue初值
@@ -426,6 +397,29 @@ extension VideoPlayerView {
 // MARK: - private functions
 
 extension VideoPlayerView {
+    @objc private func panGestureAction(_ pan: UIPanGestureRecognizer) {
+        // 播放结束时，忽略手势,锁屏状态忽略手势
+        guard !replayButton.isSelected, !isLock else { return }
+        // 根据上次和本次移动的位置，算出一个速率的point
+        let velocityPoint = pan.velocity(in: self)
+        switch pan.state {
+        case .began:
+            // 使用绝对值来判断移动的方向
+            if abs(velocityPoint.x) > abs(velocityPoint.y) {
+                scrollDirection = .horizontal
+            } else {
+                scrollDirection = .vertical
+            }
+            panGestureBegan(location: pan.location(in: self), direction: scrollDirection)
+        case .changed:
+            panGestureChanged(velocity: velocityPoint, direction: scrollDirection)
+        case .ended:
+            panGestureEnded()
+        default:
+            break
+        }
+    }
+
     private func setupSrtControl() {
         subtitleLabel.numberOfLines = 0
         subtitleLabel.textAlignment = .center
@@ -437,16 +431,7 @@ extension VideoPlayerView {
         subtitleBackView.isHidden = true
         addSubview(subtitleBackView)
         addSubview(srtControl.view)
-        srtControl.view.translatesAutoresizingMaskIntoConstraints = false
         srtControl.view.isHidden = true
-        #if !os(macOS)
-        NSLayoutConstraint.activate([
-            srtControl.view.topAnchor.constraint(equalTo: topAnchor),
-            srtControl.view.leftAnchor.constraint(equalTo: leftAnchor),
-            srtControl.view.bottomAnchor.constraint(equalTo: bottomAnchor),
-            srtControl.view.rightAnchor.constraint(equalTo: rightAnchor),
-        ])
-        #endif
         srtControl.selectWithFilePath = { [weak self] result in
             guard let self = self else { return }
             self.resource?.subtitle = try? result.get()
@@ -515,6 +500,7 @@ extension VideoPlayerView {
         subtitleBackView.translatesAutoresizingMaskIntoConstraints = false
         subtitleLabel.translatesAutoresizingMaskIntoConstraints = false
         playerLayer.translatesAutoresizingMaskIntoConstraints = false
+        srtControl.view.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
             playerLayer.topAnchor.constraint(equalTo: topAnchor),
             playerLayer.leftAnchor.constraint(equalTo: leftAnchor),
@@ -554,10 +540,14 @@ extension VideoPlayerView {
             subtitleLabel.rightAnchor.constraint(equalTo: subtitleBackView.rightAnchor, constant: -10),
             subtitleLabel.topAnchor.constraint(equalTo: subtitleBackView.topAnchor, constant: 2),
             subtitleLabel.bottomAnchor.constraint(equalTo: subtitleBackView.bottomAnchor, constant: -2),
+            srtControl.view.topAnchor.constraint(equalTo: topAnchor),
+            srtControl.view.leftAnchor.constraint(equalTo: leftAnchor),
+            srtControl.view.bottomAnchor.constraint(equalTo: bottomAnchor),
+            srtControl.view.rightAnchor.constraint(equalTo: rightAnchor),
         ])
     }
 
-    func preferredStyle() -> UIAlertController.Style {
+    private func preferredStyle() -> UIAlertController.Style {
         #if canImport(UIKit)
         return UIDevice.current.userInterfaceIdiom == .phone ? .actionSheet : .alert
         #else
