@@ -8,7 +8,7 @@ Pod::Spec.new do |s|
     DESC
 
     s.homepage         = 'https://github.com/kingslay/KSPlayer'
-    s.authors = { 'kintan' => '554398854@qq.com' }
+    s.authors = { 'kintan' => 'kingslay@icloud.com' }
     s.license          = 'MIT'
     s.source           = { :git => 'https://github.com/kingslay/KSPlayer.git', :tag => s.version.to_s }
 
@@ -20,9 +20,6 @@ Pod::Spec.new do |s|
     s.static_framework = true
     s.subspec 'UXKit' do |ss|
         ss.source_files = 'Sources/UXKit/*.{swift}'
-        ss.ios.source_files = 'Sources/UXKit/iOS/*.swift'
-        ss.tvos.source_files = 'Sources/UXKit/iOS/*.swift'
-        ss.osx.source_files = 'Sources/UXKit/macOS/*.swift'
         ss.frameworks = 'Foundation'
     end
     s.subspec 'Basic' do |ss|
@@ -58,6 +55,9 @@ Pod::Spec.new do |s|
     s.subspec 'AVPlayer' do |ss|
         ss.source_files = 'Sources/AVPlayer/*.{swift}'
         ss.frameworks = 'AVFoundation'
+        ss.ios.frameworks  = 'UIKit'
+        ss.tvos.frameworks  = 'UIKit'
+        ss.osx.frameworks  = 'AppKit'
         ss.dependency 'KSPlayer/Basic'
     end
     #ffmpeg播放内核
@@ -72,9 +72,6 @@ Pod::Spec.new do |s|
   
     s.subspec 'Core' do |ss|
         ss.source_files = 'Sources/Core/*'
-        ss.ios.source_files = 'Sources/Core/iOS/*.swift'
-        ss.tvos.source_files = 'Sources/Core/iOS/*.swift'
-        ss.osx.source_files = 'Sources/Core/macOS/*.swift'
         ss.dependency 'KSPlayer/AVPlayer'
         ss.resource_bundles = {
             'KSResources' => ['Sources/Core/Resources/*']
@@ -82,31 +79,16 @@ Pod::Spec.new do |s|
     end
     s.subspec 'Audio'do |ss|
         ss.source_files = 'Sources/Audio/*.swift'
-        ss.ios.source_files = 'Sources/Audio/iOS/*.swift'
-        ss.tvos.source_files = 'Sources/Audio/iOS/*.swift'
-        ss.osx.source_files = 'Sources/Audio/macOS/*.swift'
-        ss.ios.frameworks  = 'UIKit'
-        ss.tvos.frameworks  = 'UIKit'
-        ss.osx.frameworks  = 'AppKit'
         ss.dependency 'KSPlayer/Core'
         ss.dependency 'KSPlayer/Subtitle'
     end
     s.subspec 'Video' do |ss|
         ss.source_files = 'Sources/Video/*.swift'
-        ss.ios.source_files = 'Sources/Video/iOS/*.swift'
-        ss.tvos.source_files = 'Sources/Video/tvOS/*.swift', 'Sources/Video/iOS/KSSubtitleView.swift'
-        ss.osx.source_files = 'Sources/Video/macOS/*.swift'
-        ss.ios.frameworks  = 'UIKit'
-        ss.tvos.frameworks  = 'UIKit'
-        ss.osx.frameworks  = 'AppKit'
         ss.dependency 'KSPlayer/Core'
         ss.dependency 'KSPlayer/Subtitle'
     end
     s.test_spec 'Tests' do |test_spec|
         test_spec.source_files = 'Tests/*.swift'
-        test_spec.ios.source_files = 'Tests/iOS/*.swift'
-        test_spec.tvos.source_files = 'Tests/tvOS/*.swift'
-        test_spec.osx.source_files = 'Tests/macOS/*.swift'
         test_spec.resources = 'Tests/Resources/*'
     end    
 end

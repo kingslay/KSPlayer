@@ -4,7 +4,7 @@
 //
 //  Created by kintan on 2018/3/9.
 //
-
+#if canImport(UIKit)
 import UIKit
 extension UIScreen {
     static var size: CGSize {
@@ -204,3 +204,4 @@ extension UIView {
         transform = CGAffineTransform(rotationAngle: CGFloat(Double.pi * byDegrees / 180.0))
     }
 }
+#endif

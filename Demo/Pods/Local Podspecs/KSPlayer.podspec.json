@@ -5,7 +5,7 @@
   "description": "Video Player Using Swift, based on ffmpeg, support for the horizontal screen, vertical screen, the upper and lower slide to adjust the volume, the screen brightness, or so slide to adjust the playback progress.",
   "homepage": "https://github.com/kingslay/KSPlayer",
   "authors": {
-    "kintan": "554398854@qq.com"
+    "kintan": "kingslay@icloud.com"
   },
   "license": "MIT",
   "source": {
@@ -24,15 +24,6 @@
       "name": "Tests",
       "test_type": "unit",
       "source_files": "Tests/*.swift",
-      "ios": {
-        "source_files": "Tests/iOS/*.swift"
-      },
-      "tvos": {
-        "source_files": "Tests/tvOS/*.swift"
-      },
-      "osx": {
-        "source_files": "Tests/macOS/*.swift"
-      },
       "resources": "Tests/Resources/*"
     }
   ],
@@ -40,15 +31,6 @@
     {
       "name": "UXKit",
       "source_files": "Sources/UXKit/*.{swift}",
-      "ios": {
-        "source_files": "Sources/UXKit/iOS/*.swift"
-      },
-      "tvos": {
-        "source_files": "Sources/UXKit/iOS/*.swift"
-      },
-      "osx": {
-        "source_files": "Sources/UXKit/macOS/*.swift"
-      },
       "frameworks": "Foundation"
     },
     {
@@ -109,6 +91,15 @@
       "name": "AVPlayer",
       "source_files": "Sources/AVPlayer/*.{swift}",
       "frameworks": "AVFoundation",
+      "ios": {
+        "frameworks": "UIKit"
+      },
+      "tvos": {
+        "frameworks": "UIKit"
+      },
+      "osx": {
+        "frameworks": "AppKit"
+      },
       "dependencies": {
         "KSPlayer/Basic": [
 
@@ -140,15 +131,6 @@
     {
       "name": "Core",
       "source_files": "Sources/Core/*",
-      "ios": {
-        "source_files": "Sources/Core/iOS/*.swift"
-      },
-      "tvos": {
-        "source_files": "Sources/Core/iOS/*.swift"
-      },
-      "osx": {
-        "source_files": "Sources/Core/macOS/*.swift"
-      },
       "dependencies": {
         "KSPlayer/AVPlayer": [
 
@@ -163,18 +145,6 @@
     {
       "name": "Audio",
       "source_files": "Sources/Audio/*.swift",
-      "ios": {
-        "source_files": "Sources/Audio/iOS/*.swift",
-        "frameworks": "UIKit"
-      },
-      "tvos": {
-        "source_files": "Sources/Audio/iOS/*.swift",
-        "frameworks": "UIKit"
-      },
-      "osx": {
-        "source_files": "Sources/Audio/macOS/*.swift",
-        "frameworks": "AppKit"
-      },
       "dependencies": {
         "KSPlayer/Core": [
 
@@ -187,21 +157,6 @@
     {
       "name": "Video",
       "source_files": "Sources/Video/*.swift",
-      "ios": {
-        "source_files": "Sources/Video/iOS/*.swift",
-        "frameworks": "UIKit"
-      },
-      "tvos": {
-        "source_files": [
-          "Sources/Video/tvOS/*.swift",
-          "Sources/Video/iOS/KSSubtitleView.swift"
-        ],
-        "frameworks": "UIKit"
-      },
-      "osx": {
-        "source_files": "Sources/Video/macOS/*.swift",
-        "frameworks": "AppKit"
-      },
       "dependencies": {
         "KSPlayer/Core": [
 

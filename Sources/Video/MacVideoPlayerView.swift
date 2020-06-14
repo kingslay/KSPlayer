@@ -4,6 +4,7 @@
 //
 //  Created by kintan on 2018/10/31.
 //
+#if os(macOS)
 
 import AppKit
 import AVFoundation
@@ -212,3 +213,4 @@ extension UIActivityIndicatorView: LoadingIndector {
         loadingView.backingLayer?.removeAnimation(forKey: "loading")
     }
 }
+#endif

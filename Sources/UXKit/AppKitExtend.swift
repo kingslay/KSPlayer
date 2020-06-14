@@ -4,7 +4,7 @@
 //
 //  Created by kintan on 2018/3/9.
 //
-
+#if os(macOS)
 import AppKit
 import CoreMedia
 import IOKit.pwr_mgt
@@ -653,3 +653,4 @@ open class UIAlertAction: NSObject {
 extension UIViewController {
     open func present(_: UIViewController, animated _: Bool, completion _: (() -> Void)? = nil) {}
 }
+#endif

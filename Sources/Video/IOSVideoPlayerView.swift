@@ -4,7 +4,7 @@
 //
 //  Created by kintan on 2018/10/31.
 //
-
+#if canImport(UIKit) && canImport(CallKit)
 import CallKit
 import MediaPlayer
 import UIKit
@@ -320,3 +320,4 @@ extension UIApplication {
         }
     }
 }
+#endif

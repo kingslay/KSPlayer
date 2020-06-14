@@ -55,7 +55,7 @@ EXTERNAL SOURCES:
     :path: "../"
 
 SPEC CHECKSUMS:
-  KSPlayer: f3d562fafbc0917f600c1891ded77a262d650d7f
+  KSPlayer: b7110f449ddf37f0037da43cf73d1a6063d4cd52
   Openssl: dc2253a127aac00b10d1e52fb083cedf91ef041f
   SwiftLint: 22ccbbe3b8008684be5955693bab135e0ed6a447
 
