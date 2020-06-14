@@ -19,10 +19,12 @@ protocol DecodeProtocol {
 
 extension TrackProtocol {
     func makeDecode(options: KSOptions) -> DecodeProtocol {
-        if let session = DecompressionSession(codecpar: stream.pointee.codecpar.pointee, options: options) {
-            return HardwareDecode(assetTrack: self, options: options, session: session)
-        } else {
-            return SoftwareDecode(assetTrack: self, options: options)
+        autoreleasepool {
+            if let session = DecompressionSession(codecpar: stream.pointee.codecpar.pointee, options: options) {
+                return HardwareDecode(assetTrack: self, options: options, session: session)
+            } else {
+                return SoftwareDecode(assetTrack: self, options: options)
+            }
         }
     }
 }

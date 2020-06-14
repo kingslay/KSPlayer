@@ -166,10 +166,12 @@ final class AudioGraphPlayer: AudioPlayer {
     private func addRenderNotify(audioUnit: AudioUnit) {
         AudioUnitAddRenderNotify(audioUnit, { refCon, ioActionFlags, inTimeStamp, _, _, _ in
             let `self` = Unmanaged<AudioGraphPlayer>.fromOpaque(refCon).takeUnretainedValue()
-            if ioActionFlags.pointee.contains(.unitRenderAction_PreRender) {
-                self.delegate?.audioPlayerWillRenderSample(sampleTimestamp: inTimeStamp.pointee)
-            } else if ioActionFlags.pointee.contains(.unitRenderAction_PostRender) {
-                self.delegate?.audioPlayerDidRenderSample(sampleTimestamp: inTimeStamp.pointee)
+            autoreleasepool {
+                if ioActionFlags.pointee.contains(.unitRenderAction_PreRender) {
+                    self.delegate?.audioPlayerWillRenderSample(sampleTimestamp: inTimeStamp.pointee)
+                } else if ioActionFlags.pointee.contains(.unitRenderAction_PostRender) {
+                    self.delegate?.audioPlayerDidRenderSample(sampleTimestamp: inTimeStamp.pointee)
+                }
             }
             return noErr
         }, Unmanaged.passUnretained(self).toOpaque())

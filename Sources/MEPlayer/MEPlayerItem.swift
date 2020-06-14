@@ -282,7 +282,9 @@ extension MEPlayerItem {
                 seekingCompletionHandler = nil
                 state = .reading
             } else if state == .reading {
-                reading()
+                autoreleasepool {
+                    reading()
+                }
             }
         }
     }
@@ -290,6 +292,7 @@ extension MEPlayerItem {
     private func reading() {
         let packet = Packet()
         let readResult = av_read_frame(formatCtx, packet.corePacket)
+
         if readResult == 0 {
             if packet.corePacket.pointee.size <= 0 {
                 return
