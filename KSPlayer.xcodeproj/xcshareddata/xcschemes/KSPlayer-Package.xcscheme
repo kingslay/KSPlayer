@@ -14,20 +14,6 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "KSPlayer::FFmpegExt"
-               BuildableName = "FFmpegExt.framework"
-               BlueprintName = "FFmpegExt"
-               ReferencedContainer = "container:KSPlayer.xcodeproj">
-            </BuildableReference>
-         </BuildActionEntry>
-         <BuildActionEntry
-            buildForTesting = "YES"
-            buildForRunning = "YES"
-            buildForProfiling = "YES"
-            buildForArchiving = "YES"
-            buildForAnalyzing = "YES">
-            <BuildableReference
-               BuildableIdentifier = "primary"
                BlueprintIdentifier = "KSPlayer::KSPlayer"
                BuildableName = "KSPlayer.framework"
                BlueprintName = "KSPlayer"

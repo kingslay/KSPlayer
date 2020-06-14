@@ -9,11 +9,11 @@
 /* Begin PBXAggregateTarget section */
 		"KSPlayer::KSPlayerPackageTests::ProductTarget" /* KSPlayerPackageTests */ = {
 			isa = PBXAggregateTarget;
-			buildConfigurationList = OBJ_181 /* Build configuration list for PBXAggregateTarget "KSPlayerPackageTests" */;
+			buildConfigurationList = OBJ_135 /* Build configuration list for PBXAggregateTarget "KSPlayerPackageTests" */;
 			buildPhases = (
 			);
 			dependencies = (
-				OBJ_184 /* PBXTargetDependency */,
+				OBJ_138 /* PBXTargetDependency */,
 			);
 			name = KSPlayerPackageTests;
 			productName = KSPlayerPackageTests;
@@ -21,96 +21,69 @@
 /* End PBXAggregateTarget section */
 
 /* Begin PBXBuildFile section */
-		OBJ_113 /* FFmpegError.c in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_11 /* FFmpegError.c */; };
-		OBJ_120 /* KSAVPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_23 /* KSAVPlayer.swift */; };
-		OBJ_121 /* PlayerDefines.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_24 /* PlayerDefines.swift */; };
-		OBJ_122 /* AudioPlayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_26 /* AudioPlayerView.swift */; };
-		OBJ_123 /* Utility.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_28 /* Utility.swift */; };
-		OBJ_124 /* KSPlayerItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_30 /* KSPlayerItem.swift */; };
-		OBJ_125 /* KSPlayerLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_31 /* KSPlayerLayer.swift */; };
-		OBJ_126 /* PlayerToolBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_32 /* PlayerToolBar.swift */; };
-		OBJ_127 /* PlayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_33 /* PlayerView.swift */; };
-		OBJ_128 /* ATBPlayerItemTrack.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_35 /* ATBPlayerItemTrack.swift */; };
-		OBJ_129 /* AudioOutput.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_36 /* AudioOutput.swift */; };
-		OBJ_130 /* AudioPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_37 /* AudioPlayer.swift */; };
-		OBJ_131 /* AudioPlayerItemTrack.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_38 /* AudioPlayerItemTrack.swift */; };
-		OBJ_132 /* EmbedDataSouce.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_39 /* EmbedDataSouce.swift */; };
-		OBJ_133 /* FFPlayerItemTrack.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_40 /* FFPlayerItemTrack.swift */; };
-		OBJ_134 /* KSMEPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_41 /* KSMEPlayer.swift */; };
-		OBJ_135 /* MEPlayerItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_42 /* MEPlayerItem.swift */; };
-		OBJ_136 /* MEPlayerItemTrack.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_43 /* MEPlayerItemTrack.swift */; };
-		OBJ_137 /* MetalPlayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_44 /* MetalPlayView.swift */; };
-		OBJ_138 /* Model.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_45 /* Model.swift */; };
-		OBJ_139 /* ObjectQueue.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_46 /* ObjectQueue.swift */; };
-		OBJ_140 /* OpenGLPlayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_47 /* OpenGLPlayView.swift */; };
-		OBJ_141 /* OpenGLProgram.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_48 /* OpenGLProgram.swift */; };
-		OBJ_142 /* OpenGLTexture.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_49 /* OpenGLTexture.swift */; };
-		OBJ_143 /* SampleBufferPlayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_50 /* SampleBufferPlayerView.swift */; };
-		OBJ_144 /* SubtitlePlayerItemTrack.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_51 /* SubtitlePlayerItemTrack.swift */; };
-		OBJ_145 /* VTBPlayerItemTrack.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_52 /* VTBPlayerItemTrack.swift */; };
-		OBJ_146 /* VideoOutput.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_53 /* VideoOutput.swift */; };
-		OBJ_147 /* VideoPlayerItemTrack.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_54 /* VideoPlayerItemTrack.swift */; };
-		OBJ_148 /* MetalTexture.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_56 /* MetalTexture.swift */; };
-		OBJ_149 /* DeviceOrientationProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_58 /* DeviceOrientationProvider.swift */; };
-		OBJ_150 /* OrientationNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_59 /* OrientationNode.swift */; };
-		OBJ_151 /* PanoramaPanGestureManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_60 /* PanoramaPanGestureManager.swift */; };
-		OBJ_152 /* PanoramaView.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_61 /* PanoramaView.swift */; };
-		OBJ_153 /* SceneLoadable.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_62 /* SceneLoadable.swift */; };
-		OBJ_154 /* SphericalMediaScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_63 /* SphericalMediaScene.swift */; };
-		OBJ_155 /* KSSubtitleController.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_65 /* KSSubtitleController.swift */; };
-		OBJ_156 /* KSSubtitleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_67 /* KSSubtitleView.swift */; };
-		OBJ_157 /* KSSubtitleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_69 /* KSSubtitleView.swift */; };
-		OBJ_158 /* KSParseProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_71 /* KSParseProtocol.swift */; };
-		OBJ_159 /* KSSubtitle.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_72 /* KSSubtitle.swift */; };
-		OBJ_160 /* SubtitleDataSouce.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_73 /* SubtitleDataSouce.swift */; };
-		OBJ_161 /* UXKit.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_75 /* UXKit.swift */; };
-		OBJ_162 /* UIKitExtend.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_77 /* UIKitExtend.swift */; };
-		OBJ_163 /* AppKitExtend.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_79 /* AppKitExtend.swift */; };
-		OBJ_164 /* KSPanoramaPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_81 /* KSPanoramaPlayer.swift */; };
-		OBJ_165 /* OpenGLVRPlayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_82 /* OpenGLVRPlayView.swift */; };
-		OBJ_166 /* SeekView.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_84 /* SeekView.swift */; };
-		OBJ_167 /* VideoPlayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_85 /* VideoPlayerView.swift */; };
-		OBJ_168 /* BrightnessVolume.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_87 /* BrightnessVolume.swift */; };
-		OBJ_169 /* IOSVideoPlayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_88 /* IOSVideoPlayerView.swift */; };
-		OBJ_170 /* MacVideoPlayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_90 /* MacVideoPlayerView.swift */; };
-		OBJ_172 /* FFmpegExt.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = "KSPlayer::FFmpegExt::Product" /* FFmpegExt.framework */; };
-		OBJ_179 /* Package.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_6 /* Package.swift */; };
-		OBJ_190 /* AudioPlayerViewTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_92 /* AudioPlayerViewTest.swift */; };
-		OBJ_191 /* FormatContextTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_93 /* FormatContextTest.swift */; };
-		OBJ_192 /* KSAVPlayerTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_94 /* KSAVPlayerTest.swift */; };
-		OBJ_193 /* KSMEPlayerTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_95 /* KSMEPlayerTest.swift */; };
-		OBJ_194 /* KSPlayerLayerTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_96 /* KSPlayerLayerTest.swift */; };
-		OBJ_195 /* OpenGLPlayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_97 /* OpenGLPlayView.swift */; };
-		OBJ_196 /* PlayerControllerTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_98 /* PlayerControllerTest.swift */; };
-		OBJ_197 /* VideoPlayerControllerTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_99 /* VideoPlayerControllerTest.swift */; };
-		OBJ_198 /* VideoPlayerViewTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_100 /* VideoPlayerViewTest.swift */; };
-		OBJ_200 /* KSPlayer.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = "KSPlayer::KSPlayer::Product" /* KSPlayer.framework */; };
-		OBJ_201 /* FFmpegExt.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = "KSPlayer::FFmpegExt::Product" /* FFmpegExt.framework */; };
+		OBJ_100 /* MEPlayerItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_29 /* MEPlayerItem.swift */; };
+		OBJ_101 /* MEPlayerItemTrack.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_30 /* MEPlayerItemTrack.swift */; };
+		OBJ_102 /* MetalPlayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_31 /* MetalPlayView.swift */; };
+		OBJ_103 /* Model.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_32 /* Model.swift */; };
+		OBJ_104 /* Resample.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_33 /* Resample.swift */; };
+		OBJ_105 /* SoftwareDecode.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_34 /* SoftwareDecode.swift */; };
+		OBJ_106 /* SubtitlePlayerItemTrack.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_35 /* SubtitlePlayerItemTrack.swift */; };
+		OBJ_107 /* DisplayModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_37 /* DisplayModel.swift */; };
+		OBJ_108 /* MetalRender.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_38 /* MetalRender.swift */; };
+		OBJ_109 /* MetalRenderPipeline.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_39 /* MetalRenderPipeline.swift */; };
+		OBJ_110 /* MetalTexture.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_40 /* MetalTexture.swift */; };
+		OBJ_111 /* MotionSensor.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_41 /* MotionSensor.swift */; };
+		OBJ_112 /* ObjectPool.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_42 /* ObjectPool.swift */; };
+		OBJ_113 /* Transforms.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_43 /* Transforms.swift */; };
+		OBJ_114 /* KSParseProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_45 /* KSParseProtocol.swift */; };
+		OBJ_115 /* KSSubtitle.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_46 /* KSSubtitle.swift */; };
+		OBJ_116 /* SubtitleDataSouce.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_47 /* SubtitleDataSouce.swift */; };
+		OBJ_117 /* AppKitExtend.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_49 /* AppKitExtend.swift */; };
+		OBJ_118 /* UIKitExtend.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_50 /* UIKitExtend.swift */; };
+		OBJ_119 /* UXKit.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_51 /* UXKit.swift */; };
+		OBJ_120 /* BrightnessVolume.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_53 /* BrightnessVolume.swift */; };
+		OBJ_121 /* IOSVideoPlayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_54 /* IOSVideoPlayerView.swift */; };
+		OBJ_122 /* KSSubtitleController.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_55 /* KSSubtitleController.swift */; };
+		OBJ_123 /* KSSubtitleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_56 /* KSSubtitleView.swift */; };
+		OBJ_124 /* MacVideoPlayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_57 /* MacVideoPlayerView.swift */; };
+		OBJ_125 /* SeekView.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_58 /* SeekView.swift */; };
+		OBJ_126 /* VideoPlayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_59 /* VideoPlayerView.swift */; };
+		OBJ_133 /* Package.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_6 /* Package.swift */; };
+		OBJ_144 /* AudioPlayerViewTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_61 /* AudioPlayerViewTest.swift */; };
+		OBJ_145 /* FormatContextTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_62 /* FormatContextTest.swift */; };
+		OBJ_146 /* KSAVPlayerTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_63 /* KSAVPlayerTest.swift */; };
+		OBJ_147 /* KSMEPlayerTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_64 /* KSMEPlayerTest.swift */; };
+		OBJ_148 /* KSPlayerLayerTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_65 /* KSPlayerLayerTest.swift */; };
+		OBJ_149 /* PlayerControllerTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_66 /* PlayerControllerTest.swift */; };
+		OBJ_150 /* VideoPlayerControllerTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_67 /* VideoPlayerControllerTest.swift */; };
+		OBJ_151 /* VideoPlayerViewTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_68 /* VideoPlayerViewTest.swift */; };
+		OBJ_153 /* KSPlayer.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = "KSPlayer::KSPlayer::Product" /* KSPlayer.framework */; };
+		OBJ_85 /* KSAVPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_10 /* KSAVPlayer.swift */; };
+		OBJ_86 /* PlayerDefines.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_11 /* PlayerDefines.swift */; };
+		OBJ_87 /* AudioPlayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_13 /* AudioPlayerView.swift */; };
+		OBJ_88 /* Utility.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_15 /* Utility.swift */; };
+		OBJ_89 /* KSPlayerItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_17 /* KSPlayerItem.swift */; };
+		OBJ_90 /* KSPlayerLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_18 /* KSPlayerLayer.swift */; };
+		OBJ_91 /* PlayerToolBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_19 /* PlayerToolBar.swift */; };
+		OBJ_92 /* PlayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_20 /* PlayerView.swift */; };
+		OBJ_93 /* ATBPlayerItemTrack.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_22 /* ATBPlayerItemTrack.swift */; };
+		OBJ_94 /* AudioOutput.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_23 /* AudioOutput.swift */; };
+		OBJ_95 /* AudioPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_24 /* AudioPlayer.swift */; };
+		OBJ_96 /* CircularBuffer.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_25 /* CircularBuffer.swift */; };
+		OBJ_97 /* EmbedDataSouce.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_26 /* EmbedDataSouce.swift */; };
+		OBJ_98 /* HardwareDecode.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_27 /* HardwareDecode.swift */; };
+		OBJ_99 /* KSMEPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_28 /* KSMEPlayer.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
-		AC0679B62364A91B005665CC /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = OBJ_1 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = "KSPlayer::FFmpegExt";
-			remoteInfo = FFmpegExt;
-		};
-		AC0679B72364A91B005665CC /* PBXContainerItemProxy */ = {
+		ACB31C0E2496278C004EB965 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = "KSPlayer::KSPlayer";
 			remoteInfo = KSPlayer;
 		};
-		AC0679B82364A91B005665CC /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = OBJ_1 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = "KSPlayer::FFmpegExt";
-			remoteInfo = FFmpegExt;
-		};
-		AC0679B92364A91C005665CC /* PBXContainerItemProxy */ = {
+		ACB31C0F2496278D004EB965 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
@@ -119,243 +92,170 @@
 		};
 /* End PBXContainerItemProxy section */
 
-/* Begin PBXCopyFilesBuildPhase section */
-		AC0679C32364AEA5005665CC /* Embed Frameworks */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = "";
-			dstSubfolderSpec = 10;
-			files = (
-			);
-			name = "Embed Frameworks";
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-/* End PBXCopyFilesBuildPhase section */
-
 /* Begin PBXFileReference section */
-		AC0679BD2364AA41005665CC /* FFmpeg.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = FFmpeg.xcframework; path = FFmpeg/FFmpeg.xcframework; sourceTree = "<group>"; };
-		"KSPlayer::FFmpegExt::Product" /* FFmpegExt.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = FFmpegExt.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		"KSPlayer::KSPlayer::Product" /* KSPlayer.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = KSPlayer.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		"KSPlayer::KSPlayer::Product" /* KSPlayer.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = KSPlayer.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		"KSPlayer::KSPlayerTests::Product" /* KSPlayerTests.xctest */ = {isa = PBXFileReference; lastKnownFileType = file; path = KSPlayerTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		OBJ_10 /* FFmpegError.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = FFmpegError.h; sourceTree = "<group>"; };
-		OBJ_100 /* VideoPlayerViewTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoPlayerViewTest.swift; sourceTree = "<group>"; };
-		OBJ_105 /* Demo */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Demo; sourceTree = SOURCE_ROOT; };
-		OBJ_106 /* FFmpeg */ = {isa = PBXFileReference; lastKnownFileType = folder; path = FFmpeg; sourceTree = SOURCE_ROOT; };
-		OBJ_107 /* documents */ = {isa = PBXFileReference; lastKnownFileType = folder; path = documents; sourceTree = SOURCE_ROOT; };
-		OBJ_11 /* FFmpegError.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = FFmpegError.c; sourceTree = "<group>"; };
-		OBJ_13 /* LICENSE */ = {isa = PBXFileReference; lastKnownFileType = text; path = LICENSE; sourceTree = "<group>"; };
-		OBJ_14 /* Openssl.podspec */ = {isa = PBXFileReference; lastKnownFileType = text; path = Openssl.podspec; sourceTree = "<group>"; };
-		OBJ_15 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
-		OBJ_16 /* KSPlayer.podspec */ = {isa = PBXFileReference; lastKnownFileType = text; path = KSPlayer.podspec; sourceTree = "<group>"; };
-		OBJ_17 /* LICENSE */ = {isa = PBXFileReference; lastKnownFileType = text; path = LICENSE; sourceTree = "<group>"; };
-		OBJ_18 /* Openssl.podspec */ = {isa = PBXFileReference; lastKnownFileType = text; path = Openssl.podspec; sourceTree = "<group>"; };
-		OBJ_19 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
-		OBJ_20 /* KSPlayer.podspec */ = {isa = PBXFileReference; lastKnownFileType = text; path = KSPlayer.podspec; sourceTree = "<group>"; };
-		OBJ_23 /* KSAVPlayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KSAVPlayer.swift; sourceTree = "<group>"; };
-		OBJ_24 /* PlayerDefines.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerDefines.swift; sourceTree = "<group>"; };
-		OBJ_26 /* AudioPlayerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioPlayerView.swift; sourceTree = "<group>"; };
-		OBJ_28 /* Utility.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Utility.swift; sourceTree = "<group>"; };
-		OBJ_30 /* KSPlayerItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KSPlayerItem.swift; sourceTree = "<group>"; };
-		OBJ_31 /* KSPlayerLayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KSPlayerLayer.swift; sourceTree = "<group>"; };
-		OBJ_32 /* PlayerToolBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerToolBar.swift; sourceTree = "<group>"; };
-		OBJ_33 /* PlayerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerView.swift; sourceTree = "<group>"; };
-		OBJ_35 /* ATBPlayerItemTrack.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ATBPlayerItemTrack.swift; sourceTree = "<group>"; };
-		OBJ_36 /* AudioOutput.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioOutput.swift; sourceTree = "<group>"; };
-		OBJ_37 /* AudioPlayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioPlayer.swift; sourceTree = "<group>"; };
-		OBJ_38 /* AudioPlayerItemTrack.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioPlayerItemTrack.swift; sourceTree = "<group>"; };
-		OBJ_39 /* EmbedDataSouce.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmbedDataSouce.swift; sourceTree = "<group>"; };
-		OBJ_40 /* FFPlayerItemTrack.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FFPlayerItemTrack.swift; sourceTree = "<group>"; };
-		OBJ_41 /* KSMEPlayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KSMEPlayer.swift; sourceTree = "<group>"; };
-		OBJ_42 /* MEPlayerItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MEPlayerItem.swift; sourceTree = "<group>"; };
-		OBJ_43 /* MEPlayerItemTrack.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MEPlayerItemTrack.swift; sourceTree = "<group>"; };
-		OBJ_44 /* MetalPlayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MetalPlayView.swift; sourceTree = "<group>"; };
-		OBJ_45 /* Model.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Model.swift; sourceTree = "<group>"; };
-		OBJ_46 /* ObjectQueue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ObjectQueue.swift; sourceTree = "<group>"; };
-		OBJ_47 /* OpenGLPlayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenGLPlayView.swift; sourceTree = "<group>"; };
-		OBJ_48 /* OpenGLProgram.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenGLProgram.swift; sourceTree = "<group>"; };
-		OBJ_49 /* OpenGLTexture.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenGLTexture.swift; sourceTree = "<group>"; };
-		OBJ_50 /* SampleBufferPlayerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SampleBufferPlayerView.swift; sourceTree = "<group>"; };
-		OBJ_51 /* SubtitlePlayerItemTrack.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubtitlePlayerItemTrack.swift; sourceTree = "<group>"; };
-		OBJ_52 /* VTBPlayerItemTrack.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VTBPlayerItemTrack.swift; sourceTree = "<group>"; };
-		OBJ_53 /* VideoOutput.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoOutput.swift; sourceTree = "<group>"; };
-		OBJ_54 /* VideoPlayerItemTrack.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoPlayerItemTrack.swift; sourceTree = "<group>"; };
-		OBJ_56 /* MetalTexture.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MetalTexture.swift; sourceTree = "<group>"; };
-		OBJ_58 /* DeviceOrientationProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceOrientationProvider.swift; sourceTree = "<group>"; };
-		OBJ_59 /* OrientationNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OrientationNode.swift; sourceTree = "<group>"; };
+		OBJ_10 /* KSAVPlayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KSAVPlayer.swift; sourceTree = "<group>"; };
+		OBJ_11 /* PlayerDefines.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerDefines.swift; sourceTree = "<group>"; };
+		OBJ_13 /* AudioPlayerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioPlayerView.swift; sourceTree = "<group>"; };
+		OBJ_15 /* Utility.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Utility.swift; sourceTree = "<group>"; };
+		OBJ_17 /* KSPlayerItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KSPlayerItem.swift; sourceTree = "<group>"; };
+		OBJ_18 /* KSPlayerLayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KSPlayerLayer.swift; sourceTree = "<group>"; };
+		OBJ_19 /* PlayerToolBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerToolBar.swift; sourceTree = "<group>"; };
+		OBJ_20 /* PlayerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerView.swift; sourceTree = "<group>"; };
+		OBJ_22 /* ATBPlayerItemTrack.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ATBPlayerItemTrack.swift; sourceTree = "<group>"; };
+		OBJ_23 /* AudioOutput.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioOutput.swift; sourceTree = "<group>"; };
+		OBJ_24 /* AudioPlayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioPlayer.swift; sourceTree = "<group>"; };
+		OBJ_25 /* CircularBuffer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CircularBuffer.swift; sourceTree = "<group>"; };
+		OBJ_26 /* EmbedDataSouce.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmbedDataSouce.swift; sourceTree = "<group>"; };
+		OBJ_27 /* HardwareDecode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HardwareDecode.swift; sourceTree = "<group>"; };
+		OBJ_28 /* KSMEPlayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KSMEPlayer.swift; sourceTree = "<group>"; };
+		OBJ_29 /* MEPlayerItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MEPlayerItem.swift; sourceTree = "<group>"; };
+		OBJ_30 /* MEPlayerItemTrack.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MEPlayerItemTrack.swift; sourceTree = "<group>"; };
+		OBJ_31 /* MetalPlayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MetalPlayView.swift; sourceTree = "<group>"; };
+		OBJ_32 /* Model.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Model.swift; sourceTree = "<group>"; };
+		OBJ_33 /* Resample.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Resample.swift; sourceTree = "<group>"; };
+		OBJ_34 /* SoftwareDecode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SoftwareDecode.swift; sourceTree = "<group>"; };
+		OBJ_35 /* SubtitlePlayerItemTrack.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubtitlePlayerItemTrack.swift; sourceTree = "<group>"; };
+		OBJ_37 /* DisplayModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DisplayModel.swift; sourceTree = "<group>"; };
+		OBJ_38 /* MetalRender.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MetalRender.swift; sourceTree = "<group>"; };
+		OBJ_39 /* MetalRenderPipeline.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MetalRenderPipeline.swift; sourceTree = "<group>"; };
+		OBJ_40 /* MetalTexture.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MetalTexture.swift; sourceTree = "<group>"; };
+		OBJ_41 /* MotionSensor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MotionSensor.swift; sourceTree = "<group>"; };
+		OBJ_42 /* ObjectPool.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ObjectPool.swift; sourceTree = "<group>"; };
+		OBJ_43 /* Transforms.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Transforms.swift; sourceTree = "<group>"; };
+		OBJ_45 /* KSParseProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KSParseProtocol.swift; sourceTree = "<group>"; };
+		OBJ_46 /* KSSubtitle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KSSubtitle.swift; sourceTree = "<group>"; };
+		OBJ_47 /* SubtitleDataSouce.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubtitleDataSouce.swift; sourceTree = "<group>"; };
+		OBJ_49 /* AppKitExtend.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppKitExtend.swift; sourceTree = "<group>"; };
+		OBJ_50 /* UIKitExtend.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIKitExtend.swift; sourceTree = "<group>"; };
+		OBJ_51 /* UXKit.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UXKit.swift; sourceTree = "<group>"; };
+		OBJ_53 /* BrightnessVolume.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrightnessVolume.swift; sourceTree = "<group>"; };
+		OBJ_54 /* IOSVideoPlayerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IOSVideoPlayerView.swift; sourceTree = "<group>"; };
+		OBJ_55 /* KSSubtitleController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KSSubtitleController.swift; sourceTree = "<group>"; };
+		OBJ_56 /* KSSubtitleView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KSSubtitleView.swift; sourceTree = "<group>"; };
+		OBJ_57 /* MacVideoPlayerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MacVideoPlayerView.swift; sourceTree = "<group>"; };
+		OBJ_58 /* SeekView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SeekView.swift; sourceTree = "<group>"; };
+		OBJ_59 /* VideoPlayerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoPlayerView.swift; sourceTree = "<group>"; };
 		OBJ_6 /* Package.swift */ = {isa = PBXFileReference; explicitFileType = sourcecode.swift; path = Package.swift; sourceTree = "<group>"; };
-		OBJ_60 /* PanoramaPanGestureManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PanoramaPanGestureManager.swift; sourceTree = "<group>"; };
-		OBJ_61 /* PanoramaView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PanoramaView.swift; sourceTree = "<group>"; };
-		OBJ_62 /* SceneLoadable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneLoadable.swift; sourceTree = "<group>"; };
-		OBJ_63 /* SphericalMediaScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SphericalMediaScene.swift; sourceTree = "<group>"; };
-		OBJ_65 /* KSSubtitleController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KSSubtitleController.swift; sourceTree = "<group>"; };
-		OBJ_67 /* KSSubtitleView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KSSubtitleView.swift; sourceTree = "<group>"; };
-		OBJ_69 /* KSSubtitleView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KSSubtitleView.swift; sourceTree = "<group>"; };
-		OBJ_71 /* KSParseProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KSParseProtocol.swift; sourceTree = "<group>"; };
-		OBJ_72 /* KSSubtitle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KSSubtitle.swift; sourceTree = "<group>"; };
-		OBJ_73 /* SubtitleDataSouce.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubtitleDataSouce.swift; sourceTree = "<group>"; };
-		OBJ_75 /* UXKit.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UXKit.swift; sourceTree = "<group>"; };
-		OBJ_77 /* UIKitExtend.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIKitExtend.swift; sourceTree = "<group>"; };
-		OBJ_79 /* AppKitExtend.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppKitExtend.swift; sourceTree = "<group>"; };
-		OBJ_81 /* KSPanoramaPlayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KSPanoramaPlayer.swift; sourceTree = "<group>"; };
-		OBJ_82 /* OpenGLVRPlayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenGLVRPlayView.swift; sourceTree = "<group>"; };
-		OBJ_84 /* SeekView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SeekView.swift; sourceTree = "<group>"; };
-		OBJ_85 /* VideoPlayerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoPlayerView.swift; sourceTree = "<group>"; };
-		OBJ_87 /* BrightnessVolume.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrightnessVolume.swift; sourceTree = "<group>"; };
-		OBJ_88 /* IOSVideoPlayerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IOSVideoPlayerView.swift; sourceTree = "<group>"; };
-		OBJ_9 /* FFmpegError.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = FFmpegError.h; sourceTree = "<group>"; };
-		OBJ_90 /* MacVideoPlayerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MacVideoPlayerView.swift; sourceTree = "<group>"; };
-		OBJ_92 /* AudioPlayerViewTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioPlayerViewTest.swift; sourceTree = "<group>"; };
-		OBJ_93 /* FormatContextTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FormatContextTest.swift; sourceTree = "<group>"; };
-		OBJ_94 /* KSAVPlayerTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KSAVPlayerTest.swift; sourceTree = "<group>"; };
-		OBJ_95 /* KSMEPlayerTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KSMEPlayerTest.swift; sourceTree = "<group>"; };
-		OBJ_96 /* KSPlayerLayerTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KSPlayerLayerTest.swift; sourceTree = "<group>"; };
-		OBJ_97 /* OpenGLPlayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenGLPlayView.swift; sourceTree = "<group>"; };
-		OBJ_98 /* PlayerControllerTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerControllerTest.swift; sourceTree = "<group>"; };
-		OBJ_99 /* VideoPlayerControllerTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoPlayerControllerTest.swift; sourceTree = "<group>"; };
+		OBJ_61 /* AudioPlayerViewTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioPlayerViewTest.swift; sourceTree = "<group>"; };
+		OBJ_62 /* FormatContextTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FormatContextTest.swift; sourceTree = "<group>"; };
+		OBJ_63 /* KSAVPlayerTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KSAVPlayerTest.swift; sourceTree = "<group>"; };
+		OBJ_64 /* KSMEPlayerTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KSMEPlayerTest.swift; sourceTree = "<group>"; };
+		OBJ_65 /* KSPlayerLayerTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KSPlayerLayerTest.swift; sourceTree = "<group>"; };
+		OBJ_66 /* PlayerControllerTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerControllerTest.swift; sourceTree = "<group>"; };
+		OBJ_67 /* VideoPlayerControllerTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoPlayerControllerTest.swift; sourceTree = "<group>"; };
+		OBJ_68 /* VideoPlayerViewTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoPlayerViewTest.swift; sourceTree = "<group>"; };
+		OBJ_72 /* Demo */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Demo; sourceTree = SOURCE_ROOT; };
+		OBJ_73 /* FFmpeg */ = {isa = PBXFileReference; lastKnownFileType = folder; path = FFmpeg; sourceTree = SOURCE_ROOT; };
+		OBJ_74 /* documents */ = {isa = PBXFileReference; lastKnownFileType = folder; path = documents; sourceTree = SOURCE_ROOT; };
+		OBJ_75 /* LICENSE */ = {isa = PBXFileReference; lastKnownFileType = text; path = LICENSE; sourceTree = "<group>"; };
+		OBJ_76 /* Openssl.podspec */ = {isa = PBXFileReference; lastKnownFileType = text; path = Openssl.podspec; sourceTree = "<group>"; };
+		OBJ_77 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
+		OBJ_78 /* README_CN.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README_CN.md; sourceTree = "<group>"; };
+		OBJ_79 /* KSPlayer.podspec */ = {isa = PBXFileReference; lastKnownFileType = text; path = KSPlayer.podspec; sourceTree = "<group>"; };
+		OBJ_8 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		OBJ_114 /* Frameworks */ = {
+		OBJ_127 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 0;
 			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		OBJ_171 /* Frameworks */ = {
+		OBJ_152 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 0;
 			files = (
-				OBJ_172 /* FFmpegExt.framework in Frameworks */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		OBJ_199 /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 0;
-			files = (
-				OBJ_200 /* KSPlayer.framework in Frameworks */,
-				OBJ_201 /* FFmpegExt.framework in Frameworks */,
+				OBJ_153 /* KSPlayer.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		AC0679BC2364AA41005665CC /* Frameworks */ = {
+		OBJ_12 /* Audio */ = {
 			isa = PBXGroup;
 			children = (
-				AC0679BD2364AA41005665CC /* FFmpeg.xcframework */,
-			);
-			name = Frameworks;
-			sourceTree = "<group>";
-		};
-		OBJ_101 /* Products */ = {
-			isa = PBXGroup;
-			children = (
-				"KSPlayer::FFmpegExt::Product" /* FFmpegExt.framework */,
-				"KSPlayer::KSPlayerTests::Product" /* KSPlayerTests.xctest */,
-				"KSPlayer::KSPlayer::Product" /* KSPlayer.framework */,
-			);
-			name = Products;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		OBJ_12 /* KSPlayer */ = {
-			isa = PBXGroup;
-			children = (
-				OBJ_13 /* LICENSE */,
-				OBJ_14 /* Openssl.podspec */,
-				OBJ_15 /* README.md */,
-				OBJ_16 /* KSPlayer.podspec */,
-				OBJ_17 /* LICENSE */,
-				OBJ_18 /* Openssl.podspec */,
-				OBJ_19 /* README.md */,
-				OBJ_20 /* KSPlayer.podspec */,
-				OBJ_21 /* Sources */,
-			);
-			name = KSPlayer;
-			sourceTree = SOURCE_ROOT;
-		};
-		OBJ_21 /* Sources */ = {
-			isa = PBXGroup;
-			children = (
-				OBJ_22 /* AVPlayer */,
-				OBJ_25 /* Audio */,
-				OBJ_27 /* Basic */,
-				OBJ_29 /* Core */,
-				OBJ_34 /* MEPlayer */,
-				OBJ_55 /* Metal */,
-				OBJ_57 /* Panorama */,
-				OBJ_64 /* Subtitle */,
-				OBJ_70 /* SubtitleCore */,
-				OBJ_74 /* UXKit */,
-				OBJ_80 /* VRPlayer */,
-				OBJ_83 /* Video */,
-			);
-			path = Sources;
-			sourceTree = "<group>";
-		};
-		OBJ_22 /* AVPlayer */ = {
-			isa = PBXGroup;
-			children = (
-				OBJ_23 /* KSAVPlayer.swift */,
-				OBJ_24 /* PlayerDefines.swift */,
-			);
-			path = AVPlayer;
-			sourceTree = "<group>";
-		};
-		OBJ_25 /* Audio */ = {
-			isa = PBXGroup;
-			children = (
-				OBJ_26 /* AudioPlayerView.swift */,
+				OBJ_13 /* AudioPlayerView.swift */,
 			);
 			path = Audio;
 			sourceTree = "<group>";
 		};
-		OBJ_27 /* Basic */ = {
+		OBJ_14 /* Basic */ = {
 			isa = PBXGroup;
 			children = (
-				OBJ_28 /* Utility.swift */,
+				OBJ_15 /* Utility.swift */,
 			);
 			path = Basic;
 			sourceTree = "<group>";
 		};
-		OBJ_29 /* Core */ = {
+		OBJ_16 /* Core */ = {
 			isa = PBXGroup;
 			children = (
-				OBJ_30 /* KSPlayerItem.swift */,
-				OBJ_31 /* KSPlayerLayer.swift */,
-				OBJ_32 /* PlayerToolBar.swift */,
-				OBJ_33 /* PlayerView.swift */,
+				OBJ_17 /* KSPlayerItem.swift */,
+				OBJ_18 /* KSPlayerLayer.swift */,
+				OBJ_19 /* PlayerToolBar.swift */,
+				OBJ_20 /* PlayerView.swift */,
 			);
 			path = Core;
 			sourceTree = "<group>";
 		};
-		OBJ_34 /* MEPlayer */ = {
+		OBJ_21 /* MEPlayer */ = {
 			isa = PBXGroup;
 			children = (
-				OBJ_35 /* ATBPlayerItemTrack.swift */,
-				OBJ_36 /* AudioOutput.swift */,
-				OBJ_37 /* AudioPlayer.swift */,
-				OBJ_38 /* AudioPlayerItemTrack.swift */,
-				OBJ_39 /* EmbedDataSouce.swift */,
-				OBJ_40 /* FFPlayerItemTrack.swift */,
-				OBJ_41 /* KSMEPlayer.swift */,
-				OBJ_42 /* MEPlayerItem.swift */,
-				OBJ_43 /* MEPlayerItemTrack.swift */,
-				OBJ_44 /* MetalPlayView.swift */,
-				OBJ_45 /* Model.swift */,
-				OBJ_46 /* ObjectQueue.swift */,
-				OBJ_47 /* OpenGLPlayView.swift */,
-				OBJ_48 /* OpenGLProgram.swift */,
-				OBJ_49 /* OpenGLTexture.swift */,
-				OBJ_50 /* SampleBufferPlayerView.swift */,
-				OBJ_51 /* SubtitlePlayerItemTrack.swift */,
-				OBJ_52 /* VTBPlayerItemTrack.swift */,
-				OBJ_53 /* VideoOutput.swift */,
-				OBJ_54 /* VideoPlayerItemTrack.swift */,
+				OBJ_22 /* ATBPlayerItemTrack.swift */,
+				OBJ_23 /* AudioOutput.swift */,
+				OBJ_24 /* AudioPlayer.swift */,
+				OBJ_25 /* CircularBuffer.swift */,
+				OBJ_26 /* EmbedDataSouce.swift */,
+				OBJ_27 /* HardwareDecode.swift */,
+				OBJ_28 /* KSMEPlayer.swift */,
+				OBJ_29 /* MEPlayerItem.swift */,
+				OBJ_30 /* MEPlayerItemTrack.swift */,
+				OBJ_31 /* MetalPlayView.swift */,
+				OBJ_32 /* Model.swift */,
+				OBJ_33 /* Resample.swift */,
+				OBJ_34 /* SoftwareDecode.swift */,
+				OBJ_35 /* SubtitlePlayerItemTrack.swift */,
 			);
 			path = MEPlayer;
+			sourceTree = "<group>";
+		};
+		OBJ_36 /* Metal */ = {
+			isa = PBXGroup;
+			children = (
+				OBJ_37 /* DisplayModel.swift */,
+				OBJ_38 /* MetalRender.swift */,
+				OBJ_39 /* MetalRenderPipeline.swift */,
+				OBJ_40 /* MetalTexture.swift */,
+				OBJ_41 /* MotionSensor.swift */,
+				OBJ_42 /* ObjectPool.swift */,
+				OBJ_43 /* Transforms.swift */,
+			);
+			path = Metal;
+			sourceTree = "<group>";
+		};
+		OBJ_44 /* Subtitle */ = {
+			isa = PBXGroup;
+			children = (
+				OBJ_45 /* KSParseProtocol.swift */,
+				OBJ_46 /* KSSubtitle.swift */,
+				OBJ_47 /* SubtitleDataSouce.swift */,
+			);
+			path = Subtitle;
+			sourceTree = "<group>";
+		};
+		OBJ_48 /* UXKit */ = {
+			isa = PBXGroup;
+			children = (
+				OBJ_49 /* AppKitExtend.swift */,
+				OBJ_50 /* UIKitExtend.swift */,
+				OBJ_51 /* UXKit.swift */,
+			);
+			path = UXKit;
 			sourceTree = "<group>";
 		};
 		OBJ_5 /*  */ = {
@@ -363,203 +263,97 @@
 			children = (
 				OBJ_6 /* Package.swift */,
 				OBJ_7 /* Sources */,
-				OBJ_91 /* Tests */,
-				OBJ_101 /* Products */,
-				OBJ_105 /* Demo */,
-				OBJ_106 /* FFmpeg */,
-				OBJ_107 /* documents */,
-				AC0679BC2364AA41005665CC /* Frameworks */,
+				OBJ_60 /* Tests */,
+				OBJ_69 /* Products */,
+				OBJ_72 /* Demo */,
+				OBJ_73 /* FFmpeg */,
+				OBJ_74 /* documents */,
+				OBJ_75 /* LICENSE */,
+				OBJ_76 /* Openssl.podspec */,
+				OBJ_77 /* README.md */,
+				OBJ_78 /* README_CN.md */,
+				OBJ_79 /* KSPlayer.podspec */,
 			);
 			name = "";
 			sourceTree = "<group>";
 		};
-		OBJ_55 /* Metal */ = {
+		OBJ_52 /* Video */ = {
 			isa = PBXGroup;
 			children = (
-				OBJ_56 /* MetalTexture.swift */,
-			);
-			path = Metal;
-			sourceTree = "<group>";
-		};
-		OBJ_57 /* Panorama */ = {
-			isa = PBXGroup;
-			children = (
-				OBJ_58 /* DeviceOrientationProvider.swift */,
-				OBJ_59 /* OrientationNode.swift */,
-				OBJ_60 /* PanoramaPanGestureManager.swift */,
-				OBJ_61 /* PanoramaView.swift */,
-				OBJ_62 /* SceneLoadable.swift */,
-				OBJ_63 /* SphericalMediaScene.swift */,
-			);
-			path = Panorama;
-			sourceTree = "<group>";
-		};
-		OBJ_64 /* Subtitle */ = {
-			isa = PBXGroup;
-			children = (
-				OBJ_65 /* KSSubtitleController.swift */,
-				OBJ_66 /* iOS */,
-				OBJ_68 /* macOS */,
-			);
-			path = Subtitle;
-			sourceTree = "<group>";
-		};
-		OBJ_66 /* iOS */ = {
-			isa = PBXGroup;
-			children = (
-				OBJ_67 /* KSSubtitleView.swift */,
-			);
-			path = iOS;
-			sourceTree = "<group>";
-		};
-		OBJ_68 /* macOS */ = {
-			isa = PBXGroup;
-			children = (
-				OBJ_69 /* KSSubtitleView.swift */,
-			);
-			path = macOS;
-			sourceTree = "<group>";
-		};
-		OBJ_7 /* Sources */ = {
-			isa = PBXGroup;
-			children = (
-				OBJ_8 /* FFmpegExt */,
-				OBJ_12 /* KSPlayer */,
-			);
-			name = Sources;
-			sourceTree = SOURCE_ROOT;
-		};
-		OBJ_70 /* SubtitleCore */ = {
-			isa = PBXGroup;
-			children = (
-				OBJ_71 /* KSParseProtocol.swift */,
-				OBJ_72 /* KSSubtitle.swift */,
-				OBJ_73 /* SubtitleDataSouce.swift */,
-			);
-			path = SubtitleCore;
-			sourceTree = "<group>";
-		};
-		OBJ_74 /* UXKit */ = {
-			isa = PBXGroup;
-			children = (
-				OBJ_75 /* UXKit.swift */,
-				OBJ_76 /* iOS */,
-				OBJ_78 /* macOS */,
-			);
-			path = UXKit;
-			sourceTree = "<group>";
-		};
-		OBJ_76 /* iOS */ = {
-			isa = PBXGroup;
-			children = (
-				OBJ_77 /* UIKitExtend.swift */,
-			);
-			path = iOS;
-			sourceTree = "<group>";
-		};
-		OBJ_78 /* macOS */ = {
-			isa = PBXGroup;
-			children = (
-				OBJ_79 /* AppKitExtend.swift */,
-			);
-			path = macOS;
-			sourceTree = "<group>";
-		};
-		OBJ_8 /* FFmpegExt */ = {
-			isa = PBXGroup;
-			children = (
-				OBJ_9 /* FFmpegError.h */,
-				OBJ_10 /* FFmpegError.h */,
-				OBJ_11 /* FFmpegError.c */,
-			);
-			name = FFmpegExt;
-			path = Sources/FFmpegExt;
-			sourceTree = SOURCE_ROOT;
-		};
-		OBJ_80 /* VRPlayer */ = {
-			isa = PBXGroup;
-			children = (
-				OBJ_81 /* KSPanoramaPlayer.swift */,
-				OBJ_82 /* OpenGLVRPlayView.swift */,
-			);
-			path = VRPlayer;
-			sourceTree = "<group>";
-		};
-		OBJ_83 /* Video */ = {
-			isa = PBXGroup;
-			children = (
-				OBJ_84 /* SeekView.swift */,
-				OBJ_85 /* VideoPlayerView.swift */,
-				OBJ_86 /* iOS */,
-				OBJ_89 /* macOS */,
+				OBJ_53 /* BrightnessVolume.swift */,
+				OBJ_54 /* IOSVideoPlayerView.swift */,
+				OBJ_55 /* KSSubtitleController.swift */,
+				OBJ_56 /* KSSubtitleView.swift */,
+				OBJ_57 /* MacVideoPlayerView.swift */,
+				OBJ_58 /* SeekView.swift */,
+				OBJ_59 /* VideoPlayerView.swift */,
 			);
 			path = Video;
 			sourceTree = "<group>";
 		};
-		OBJ_86 /* iOS */ = {
+		OBJ_60 /* Tests */ = {
 			isa = PBXGroup;
 			children = (
-				OBJ_87 /* BrightnessVolume.swift */,
-				OBJ_88 /* IOSVideoPlayerView.swift */,
-			);
-			path = iOS;
-			sourceTree = "<group>";
-		};
-		OBJ_89 /* macOS */ = {
-			isa = PBXGroup;
-			children = (
-				OBJ_90 /* MacVideoPlayerView.swift */,
-			);
-			path = macOS;
-			sourceTree = "<group>";
-		};
-		OBJ_91 /* Tests */ = {
-			isa = PBXGroup;
-			children = (
-				OBJ_92 /* AudioPlayerViewTest.swift */,
-				OBJ_93 /* FormatContextTest.swift */,
-				OBJ_94 /* KSAVPlayerTest.swift */,
-				OBJ_95 /* KSMEPlayerTest.swift */,
-				OBJ_96 /* KSPlayerLayerTest.swift */,
-				OBJ_97 /* OpenGLPlayView.swift */,
-				OBJ_98 /* PlayerControllerTest.swift */,
-				OBJ_99 /* VideoPlayerControllerTest.swift */,
-				OBJ_100 /* VideoPlayerViewTest.swift */,
+				OBJ_61 /* AudioPlayerViewTest.swift */,
+				OBJ_62 /* FormatContextTest.swift */,
+				OBJ_63 /* KSAVPlayerTest.swift */,
+				OBJ_64 /* KSMEPlayerTest.swift */,
+				OBJ_65 /* KSPlayerLayerTest.swift */,
+				OBJ_66 /* PlayerControllerTest.swift */,
+				OBJ_67 /* VideoPlayerControllerTest.swift */,
+				OBJ_68 /* VideoPlayerViewTest.swift */,
 			);
 			path = Tests;
 			sourceTree = SOURCE_ROOT;
 		};
+		OBJ_69 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				"KSPlayer::KSPlayer::Product" /* KSPlayer.framework */,
+				"KSPlayer::KSPlayerTests::Product" /* KSPlayerTests.xctest */,
+			);
+			name = Products;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		OBJ_7 /* Sources */ = {
+			isa = PBXGroup;
+			children = (
+				OBJ_8 /* Info.plist */,
+				OBJ_9 /* AVPlayer */,
+				OBJ_12 /* Audio */,
+				OBJ_14 /* Basic */,
+				OBJ_16 /* Core */,
+				OBJ_21 /* MEPlayer */,
+				OBJ_36 /* Metal */,
+				OBJ_44 /* Subtitle */,
+				OBJ_48 /* UXKit */,
+				OBJ_52 /* Video */,
+			);
+			path = Sources;
+			sourceTree = SOURCE_ROOT;
+		};
+		OBJ_9 /* AVPlayer */ = {
+			isa = PBXGroup;
+			children = (
+				OBJ_10 /* KSAVPlayer.swift */,
+				OBJ_11 /* PlayerDefines.swift */,
+			);
+			path = AVPlayer;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		"KSPlayer::FFmpegExt" /* FFmpegExt */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = OBJ_109 /* Build configuration list for PBXNativeTarget "FFmpegExt" */;
-			buildPhases = (
-				OBJ_112 /* Sources */,
-				OBJ_114 /* Frameworks */,
-				AC0679C32364AEA5005665CC /* Embed Frameworks */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-			);
-			name = FFmpegExt;
-			productName = FFmpegExt;
-			productReference = "KSPlayer::FFmpegExt::Product" /* FFmpegExt.framework */;
-			productType = "com.apple.product-type.framework";
-		};
 		"KSPlayer::KSPlayer" /* KSPlayer */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = OBJ_116 /* Build configuration list for PBXNativeTarget "KSPlayer" */;
+			buildConfigurationList = OBJ_81 /* Build configuration list for PBXNativeTarget "KSPlayer" */;
 			buildPhases = (
-				OBJ_119 /* Sources */,
-				OBJ_171 /* Frameworks */,
+				OBJ_84 /* Sources */,
+				OBJ_127 /* Frameworks */,
 			);
 			buildRules = (
 			);
 			dependencies = (
-				OBJ_173 /* PBXTargetDependency */,
 			);
 			name = KSPlayer;
 			productName = KSPlayer;
@@ -568,16 +362,15 @@
 		};
 		"KSPlayer::KSPlayerTests" /* KSPlayerTests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = OBJ_186 /* Build configuration list for PBXNativeTarget "KSPlayerTests" */;
+			buildConfigurationList = OBJ_140 /* Build configuration list for PBXNativeTarget "KSPlayerTests" */;
 			buildPhases = (
-				OBJ_189 /* Sources */,
-				OBJ_199 /* Frameworks */,
+				OBJ_143 /* Sources */,
+				OBJ_152 /* Frameworks */,
 			);
 			buildRules = (
 			);
 			dependencies = (
-				OBJ_202 /* PBXTargetDependency */,
-				OBJ_203 /* PBXTargetDependency */,
+				OBJ_154 /* PBXTargetDependency */,
 			);
 			name = KSPlayerTests;
 			productName = KSPlayerTests;
@@ -586,9 +379,9 @@
 		};
 		"KSPlayer::SwiftPMPackageDescription" /* KSPlayerPackageDescription */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = OBJ_175 /* Build configuration list for PBXNativeTarget "KSPlayerPackageDescription" */;
+			buildConfigurationList = OBJ_129 /* Build configuration list for PBXNativeTarget "KSPlayerPackageDescription" */;
 			buildPhases = (
-				OBJ_178 /* Sources */,
+				OBJ_132 /* Sources */,
 			);
 			buildRules = (
 			);
@@ -615,11 +408,10 @@
 				en,
 			);
 			mainGroup = OBJ_5 /*  */;
-			productRefGroup = OBJ_101 /* Products */;
+			productRefGroup = OBJ_69 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				"KSPlayer::FFmpegExt" /* FFmpegExt */,
 				"KSPlayer::KSPlayer" /* KSPlayer */,
 				"KSPlayer::SwiftPMPackageDescription" /* KSPlayerPackageDescription */,
 				"KSPlayer::KSPlayerPackageTests::ProductTarget" /* KSPlayerPackageTests */,
@@ -629,287 +421,125 @@
 /* End PBXProject section */
 
 /* Begin PBXSourcesBuildPhase section */
-		OBJ_112 /* Sources */ = {
+		OBJ_132 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 0;
 			files = (
-				OBJ_113 /* FFmpegError.c in Sources */,
+				OBJ_133 /* Package.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		OBJ_119 /* Sources */ = {
+		OBJ_143 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 0;
 			files = (
-				OBJ_120 /* KSAVPlayer.swift in Sources */,
-				OBJ_121 /* PlayerDefines.swift in Sources */,
-				OBJ_122 /* AudioPlayerView.swift in Sources */,
-				OBJ_123 /* Utility.swift in Sources */,
-				OBJ_124 /* KSPlayerItem.swift in Sources */,
-				OBJ_125 /* KSPlayerLayer.swift in Sources */,
-				OBJ_126 /* PlayerToolBar.swift in Sources */,
-				OBJ_127 /* PlayerView.swift in Sources */,
-				OBJ_128 /* ATBPlayerItemTrack.swift in Sources */,
-				OBJ_129 /* AudioOutput.swift in Sources */,
-				OBJ_130 /* AudioPlayer.swift in Sources */,
-				OBJ_131 /* AudioPlayerItemTrack.swift in Sources */,
-				OBJ_132 /* EmbedDataSouce.swift in Sources */,
-				OBJ_133 /* FFPlayerItemTrack.swift in Sources */,
-				OBJ_134 /* KSMEPlayer.swift in Sources */,
-				OBJ_135 /* MEPlayerItem.swift in Sources */,
-				OBJ_136 /* MEPlayerItemTrack.swift in Sources */,
-				OBJ_137 /* MetalPlayView.swift in Sources */,
-				OBJ_138 /* Model.swift in Sources */,
-				OBJ_139 /* ObjectQueue.swift in Sources */,
-				OBJ_140 /* OpenGLPlayView.swift in Sources */,
-				OBJ_141 /* OpenGLProgram.swift in Sources */,
-				OBJ_142 /* OpenGLTexture.swift in Sources */,
-				OBJ_143 /* SampleBufferPlayerView.swift in Sources */,
-				OBJ_144 /* SubtitlePlayerItemTrack.swift in Sources */,
-				OBJ_145 /* VTBPlayerItemTrack.swift in Sources */,
-				OBJ_146 /* VideoOutput.swift in Sources */,
-				OBJ_147 /* VideoPlayerItemTrack.swift in Sources */,
-				OBJ_148 /* MetalTexture.swift in Sources */,
-				OBJ_149 /* DeviceOrientationProvider.swift in Sources */,
-				OBJ_150 /* OrientationNode.swift in Sources */,
-				OBJ_151 /* PanoramaPanGestureManager.swift in Sources */,
-				OBJ_152 /* PanoramaView.swift in Sources */,
-				OBJ_153 /* SceneLoadable.swift in Sources */,
-				OBJ_154 /* SphericalMediaScene.swift in Sources */,
-				OBJ_155 /* KSSubtitleController.swift in Sources */,
-				OBJ_156 /* KSSubtitleView.swift in Sources */,
-				OBJ_157 /* KSSubtitleView.swift in Sources */,
-				OBJ_158 /* KSParseProtocol.swift in Sources */,
-				OBJ_159 /* KSSubtitle.swift in Sources */,
-				OBJ_160 /* SubtitleDataSouce.swift in Sources */,
-				OBJ_161 /* UXKit.swift in Sources */,
-				OBJ_162 /* UIKitExtend.swift in Sources */,
-				OBJ_163 /* AppKitExtend.swift in Sources */,
-				OBJ_164 /* KSPanoramaPlayer.swift in Sources */,
-				OBJ_165 /* OpenGLVRPlayView.swift in Sources */,
-				OBJ_166 /* SeekView.swift in Sources */,
-				OBJ_167 /* VideoPlayerView.swift in Sources */,
-				OBJ_168 /* BrightnessVolume.swift in Sources */,
-				OBJ_169 /* IOSVideoPlayerView.swift in Sources */,
-				OBJ_170 /* MacVideoPlayerView.swift in Sources */,
+				OBJ_144 /* AudioPlayerViewTest.swift in Sources */,
+				OBJ_145 /* FormatContextTest.swift in Sources */,
+				OBJ_146 /* KSAVPlayerTest.swift in Sources */,
+				OBJ_147 /* KSMEPlayerTest.swift in Sources */,
+				OBJ_148 /* KSPlayerLayerTest.swift in Sources */,
+				OBJ_149 /* PlayerControllerTest.swift in Sources */,
+				OBJ_150 /* VideoPlayerControllerTest.swift in Sources */,
+				OBJ_151 /* VideoPlayerViewTest.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		OBJ_178 /* Sources */ = {
+		OBJ_84 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 0;
 			files = (
-				OBJ_179 /* Package.swift in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		OBJ_189 /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 0;
-			files = (
-				OBJ_190 /* AudioPlayerViewTest.swift in Sources */,
-				OBJ_191 /* FormatContextTest.swift in Sources */,
-				OBJ_192 /* KSAVPlayerTest.swift in Sources */,
-				OBJ_193 /* KSMEPlayerTest.swift in Sources */,
-				OBJ_194 /* KSPlayerLayerTest.swift in Sources */,
-				OBJ_195 /* OpenGLPlayView.swift in Sources */,
-				OBJ_196 /* PlayerControllerTest.swift in Sources */,
-				OBJ_197 /* VideoPlayerControllerTest.swift in Sources */,
-				OBJ_198 /* VideoPlayerViewTest.swift in Sources */,
+				OBJ_85 /* KSAVPlayer.swift in Sources */,
+				OBJ_86 /* PlayerDefines.swift in Sources */,
+				OBJ_87 /* AudioPlayerView.swift in Sources */,
+				OBJ_88 /* Utility.swift in Sources */,
+				OBJ_89 /* KSPlayerItem.swift in Sources */,
+				OBJ_90 /* KSPlayerLayer.swift in Sources */,
+				OBJ_91 /* PlayerToolBar.swift in Sources */,
+				OBJ_92 /* PlayerView.swift in Sources */,
+				OBJ_93 /* ATBPlayerItemTrack.swift in Sources */,
+				OBJ_94 /* AudioOutput.swift in Sources */,
+				OBJ_95 /* AudioPlayer.swift in Sources */,
+				OBJ_96 /* CircularBuffer.swift in Sources */,
+				OBJ_97 /* EmbedDataSouce.swift in Sources */,
+				OBJ_98 /* HardwareDecode.swift in Sources */,
+				OBJ_99 /* KSMEPlayer.swift in Sources */,
+				OBJ_100 /* MEPlayerItem.swift in Sources */,
+				OBJ_101 /* MEPlayerItemTrack.swift in Sources */,
+				OBJ_102 /* MetalPlayView.swift in Sources */,
+				OBJ_103 /* Model.swift in Sources */,
+				OBJ_104 /* Resample.swift in Sources */,
+				OBJ_105 /* SoftwareDecode.swift in Sources */,
+				OBJ_106 /* SubtitlePlayerItemTrack.swift in Sources */,
+				OBJ_107 /* DisplayModel.swift in Sources */,
+				OBJ_108 /* MetalRender.swift in Sources */,
+				OBJ_109 /* MetalRenderPipeline.swift in Sources */,
+				OBJ_110 /* MetalTexture.swift in Sources */,
+				OBJ_111 /* MotionSensor.swift in Sources */,
+				OBJ_112 /* ObjectPool.swift in Sources */,
+				OBJ_113 /* Transforms.swift in Sources */,
+				OBJ_114 /* KSParseProtocol.swift in Sources */,
+				OBJ_115 /* KSSubtitle.swift in Sources */,
+				OBJ_116 /* SubtitleDataSouce.swift in Sources */,
+				OBJ_117 /* AppKitExtend.swift in Sources */,
+				OBJ_118 /* UIKitExtend.swift in Sources */,
+				OBJ_119 /* UXKit.swift in Sources */,
+				OBJ_120 /* BrightnessVolume.swift in Sources */,
+				OBJ_121 /* IOSVideoPlayerView.swift in Sources */,
+				OBJ_122 /* KSSubtitleController.swift in Sources */,
+				OBJ_123 /* KSSubtitleView.swift in Sources */,
+				OBJ_124 /* MacVideoPlayerView.swift in Sources */,
+				OBJ_125 /* SeekView.swift in Sources */,
+				OBJ_126 /* VideoPlayerView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
-		OBJ_173 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = "KSPlayer::FFmpegExt" /* FFmpegExt */;
-			targetProxy = AC0679B62364A91B005665CC /* PBXContainerItemProxy */;
-		};
-		OBJ_184 /* PBXTargetDependency */ = {
+		OBJ_138 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "KSPlayer::KSPlayerTests" /* KSPlayerTests */;
-			targetProxy = AC0679B92364A91C005665CC /* PBXContainerItemProxy */;
+			targetProxy = ACB31C0F2496278D004EB965 /* PBXContainerItemProxy */;
 		};
-		OBJ_202 /* PBXTargetDependency */ = {
+		OBJ_154 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "KSPlayer::KSPlayer" /* KSPlayer */;
-			targetProxy = AC0679B72364A91B005665CC /* PBXContainerItemProxy */;
-		};
-		OBJ_203 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = "KSPlayer::FFmpegExt" /* FFmpegExt */;
-			targetProxy = AC0679B82364A91B005665CC /* PBXContainerItemProxy */;
+			targetProxy = ACB31C0E2496278C004EB965 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
-		OBJ_110 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ENABLE_TESTABILITY = YES;
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(PLATFORM_DIR)/Developer/Library/Frameworks",
-					/Users/kintan/Documents/gitlab/KSPlayer/FFmpeg/FFmpeg.xcframework,
-				);
-				HEADER_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(SRCROOT)/Sources/FFmpegExt/include",
-					"FFmpeg/FFmpeg.xcframework/ios-arm64/Headers",
-				);
-				INFOPLIST_FILE = KSPlayer.xcodeproj/FFmpegExt_Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) $(TOOLCHAIN_DIR)/usr/lib/swift/macosx";
-				MACOSX_DEPLOYMENT_TARGET = 10.11;
-				OTHER_CFLAGS = "$(inherited)";
-				OTHER_LDFLAGS = (
-					"$(inherited)",
-					"-framework",
-					FFmpeg,
-				);
-				OTHER_SWIFT_FLAGS = "$(inherited) -F FFmpeg";
-				PRODUCT_BUNDLE_IDENTIFIER = FFmpegExt;
-				PRODUCT_MODULE_NAME = "$(TARGET_NAME:c99extidentifier)";
-				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
-				SKIP_INSTALL = YES;
-				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited)";
-				TARGET_NAME = FFmpegExt;
-				TVOS_DEPLOYMENT_TARGET = 10.2;
-				WATCHOS_DEPLOYMENT_TARGET = 2.0;
-			};
-			name = Debug;
-		};
-		OBJ_111 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ENABLE_TESTABILITY = YES;
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(PLATFORM_DIR)/Developer/Library/Frameworks",
-					/Users/kintan/Documents/gitlab/KSPlayer/FFmpeg/FFmpeg.xcframework,
-				);
-				HEADER_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(SRCROOT)/Sources/FFmpegExt/include",
-					"FFmpeg/FFmpeg.xcframework/ios-arm64/Headers",
-				);
-				INFOPLIST_FILE = KSPlayer.xcodeproj/FFmpegExt_Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) $(TOOLCHAIN_DIR)/usr/lib/swift/macosx";
-				MACOSX_DEPLOYMENT_TARGET = 10.11;
-				OTHER_CFLAGS = "$(inherited)";
-				OTHER_LDFLAGS = (
-					"$(inherited)",
-					"-framework",
-					FFmpeg,
-				);
-				OTHER_SWIFT_FLAGS = "$(inherited) -F FFmpeg";
-				PRODUCT_BUNDLE_IDENTIFIER = FFmpegExt;
-				PRODUCT_MODULE_NAME = "$(TARGET_NAME:c99extidentifier)";
-				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
-				SKIP_INSTALL = YES;
-				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited)";
-				TARGET_NAME = FFmpegExt;
-				TVOS_DEPLOYMENT_TARGET = 10.2;
-				WATCHOS_DEPLOYMENT_TARGET = 2.0;
-			};
-			name = Release;
-		};
-		OBJ_117 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ENABLE_TESTABILITY = YES;
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(PLATFORM_DIR)/Developer/Library/Frameworks",
-				);
-				HEADER_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(SRCROOT)/Sources/FFmpegExt/include",
-				);
-				INFOPLIST_FILE = KSPlayer.xcodeproj/KSPlayer_Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) $(TOOLCHAIN_DIR)/usr/lib/swift/macosx";
-				MACOSX_DEPLOYMENT_TARGET = 10.11;
-				OTHER_CFLAGS = "$(inherited)";
-				OTHER_LDFLAGS = "$(inherited)";
-				OTHER_SWIFT_FLAGS = "$(inherited)";
-				PRODUCT_BUNDLE_IDENTIFIER = KSPlayer;
-				PRODUCT_MODULE_NAME = "$(TARGET_NAME:c99extidentifier)";
-				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
-				SKIP_INSTALL = YES;
-				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited)";
-				SWIFT_VERSION = 5.0;
-				TARGET_NAME = KSPlayer;
-				TVOS_DEPLOYMENT_TARGET = 10.2;
-				WATCHOS_DEPLOYMENT_TARGET = 2.0;
-			};
-			name = Debug;
-		};
-		OBJ_118 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ENABLE_TESTABILITY = YES;
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(PLATFORM_DIR)/Developer/Library/Frameworks",
-				);
-				HEADER_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(SRCROOT)/Sources/FFmpegExt/include",
-				);
-				INFOPLIST_FILE = KSPlayer.xcodeproj/KSPlayer_Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) $(TOOLCHAIN_DIR)/usr/lib/swift/macosx";
-				MACOSX_DEPLOYMENT_TARGET = 10.11;
-				OTHER_CFLAGS = "$(inherited)";
-				OTHER_LDFLAGS = "$(inherited)";
-				OTHER_SWIFT_FLAGS = "$(inherited)";
-				PRODUCT_BUNDLE_IDENTIFIER = KSPlayer;
-				PRODUCT_MODULE_NAME = "$(TARGET_NAME:c99extidentifier)";
-				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
-				SKIP_INSTALL = YES;
-				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited)";
-				SWIFT_VERSION = 5.0;
-				TARGET_NAME = KSPlayer;
-				TVOS_DEPLOYMENT_TARGET = 10.2;
-				WATCHOS_DEPLOYMENT_TARGET = 2.0;
-			};
-			name = Release;
-		};
-		OBJ_176 /* Debug */ = {
+		OBJ_130 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				LD = /usr/bin/true;
-				OTHER_SWIFT_FLAGS = "-swift-version 5 -I $(TOOLCHAIN_DIR)/usr/lib/swift/pm/4_2 -target x86_64-apple-macosx10.10 -sdk /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk -package-description-version 5.1";
+				OTHER_SWIFT_FLAGS = "-swift-version 5 -I $(TOOLCHAIN_DIR)/usr/lib/swift/pm/4_2 -target x86_64-apple-macosx10.10 -sdk /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk -package-description-version 5.2.0";
 				SWIFT_VERSION = 5.0;
 			};
 			name = Debug;
 		};
-		OBJ_177 /* Release */ = {
+		OBJ_131 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				LD = /usr/bin/true;
-				OTHER_SWIFT_FLAGS = "-swift-version 5 -I $(TOOLCHAIN_DIR)/usr/lib/swift/pm/4_2 -target x86_64-apple-macosx10.10 -sdk /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk -package-description-version 5.1";
+				OTHER_SWIFT_FLAGS = "-swift-version 5 -I $(TOOLCHAIN_DIR)/usr/lib/swift/pm/4_2 -target x86_64-apple-macosx10.10 -sdk /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk -package-description-version 5.2.0";
 				SWIFT_VERSION = 5.0;
 			};
 			name = Release;
 		};
-		OBJ_182 /* Debug */ = {
+		OBJ_136 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 			};
 			name = Debug;
 		};
-		OBJ_183 /* Release */ = {
+		OBJ_137 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 			};
 			name = Release;
 		};
-		OBJ_187 /* Debug */ = {
+		OBJ_141 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CLANG_ENABLE_MODULES = YES;
@@ -918,10 +548,7 @@
 					"$(inherited)",
 					"$(PLATFORM_DIR)/Developer/Library/Frameworks",
 				);
-				HEADER_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(SRCROOT)/Sources/FFmpegExt/include",
-				);
+				HEADER_SEARCH_PATHS = "$(inherited)";
 				INFOPLIST_FILE = KSPlayer.xcodeproj/KSPlayerTests_Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @loader_path/../Frameworks @loader_path/Frameworks";
@@ -937,7 +564,7 @@
 			};
 			name = Debug;
 		};
-		OBJ_188 /* Release */ = {
+		OBJ_142 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CLANG_ENABLE_MODULES = YES;
@@ -946,10 +573,7 @@
 					"$(inherited)",
 					"$(PLATFORM_DIR)/Developer/Library/Frameworks",
 				);
-				HEADER_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(SRCROOT)/Sources/FFmpegExt/include",
-				);
+				HEADER_SEARCH_PATHS = "$(inherited)";
 				INFOPLIST_FILE = KSPlayer.xcodeproj/KSPlayerTests_Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @loader_path/../Frameworks @loader_path/Frameworks";
@@ -1016,50 +640,94 @@
 			};
 			name = Release;
 		};
+		OBJ_82 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ENABLE_TESTABILITY = YES;
+				HEADER_SEARCH_PATHS = (
+					"$(inherited)",
+					"FFmpeg/FFmpeg.xcframework/ios-arm64/Headers",
+				);
+				INFOPLIST_FILE = KSPlayer.xcodeproj/KSPlayer_Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) $(TOOLCHAIN_DIR)/usr/lib/swift/macosx";
+				MACOSX_DEPLOYMENT_TARGET = 10.11;
+				OTHER_CFLAGS = "$(inherited)";
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					"-framework",
+					FFmpeg,
+				);
+				OTHER_SWIFT_FLAGS = "$(inherited) -F FFmpeg";
+				PRODUCT_BUNDLE_IDENTIFIER = KSPlayer;
+				PRODUCT_MODULE_NAME = "$(TARGET_NAME:c99extidentifier)";
+				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				SKIP_INSTALL = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited)";
+				SWIFT_VERSION = 5.0;
+				TARGET_NAME = KSPlayer;
+				TVOS_DEPLOYMENT_TARGET = 10.2;
+				WATCHOS_DEPLOYMENT_TARGET = 2.0;
+			};
+			name = Debug;
+		};
+		OBJ_83 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ENABLE_TESTABILITY = YES;
+				HEADER_SEARCH_PATHS = (
+					"$(inherited)",
+					"FFmpeg/FFmpeg.xcframework/ios-arm64/Headers",
+				);
+				INFOPLIST_FILE = KSPlayer.xcodeproj/KSPlayer_Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) $(TOOLCHAIN_DIR)/usr/lib/swift/macosx";
+				MACOSX_DEPLOYMENT_TARGET = 10.11;
+				OTHER_CFLAGS = "$(inherited)";
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					"-framework",
+					FFmpeg,
+				);
+				OTHER_SWIFT_FLAGS = "$(inherited) -F FFmpeg";
+				PRODUCT_BUNDLE_IDENTIFIER = KSPlayer;
+				PRODUCT_MODULE_NAME = "$(TARGET_NAME:c99extidentifier)";
+				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				SKIP_INSTALL = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited)";
+				SWIFT_VERSION = 5.0;
+				TARGET_NAME = KSPlayer;
+				TVOS_DEPLOYMENT_TARGET = 10.2;
+				WATCHOS_DEPLOYMENT_TARGET = 2.0;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		OBJ_109 /* Build configuration list for PBXNativeTarget "FFmpegExt" */ = {
+		OBJ_129 /* Build configuration list for PBXNativeTarget "KSPlayerPackageDescription" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				OBJ_110 /* Debug */,
-				OBJ_111 /* Release */,
+				OBJ_130 /* Debug */,
+				OBJ_131 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		OBJ_116 /* Build configuration list for PBXNativeTarget "KSPlayer" */ = {
+		OBJ_135 /* Build configuration list for PBXAggregateTarget "KSPlayerPackageTests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				OBJ_117 /* Debug */,
-				OBJ_118 /* Release */,
+				OBJ_136 /* Debug */,
+				OBJ_137 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		OBJ_175 /* Build configuration list for PBXNativeTarget "KSPlayerPackageDescription" */ = {
+		OBJ_140 /* Build configuration list for PBXNativeTarget "KSPlayerTests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				OBJ_176 /* Debug */,
-				OBJ_177 /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		OBJ_181 /* Build configuration list for PBXAggregateTarget "KSPlayerPackageTests" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				OBJ_182 /* Debug */,
-				OBJ_183 /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		OBJ_186 /* Build configuration list for PBXNativeTarget "KSPlayerTests" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				OBJ_187 /* Debug */,
-				OBJ_188 /* Release */,
+				OBJ_141 /* Debug */,
+				OBJ_142 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
@@ -1069,6 +737,15 @@
 			buildConfigurations = (
 				OBJ_3 /* Debug */,
 				OBJ_4 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		OBJ_81 /* Build configuration list for PBXNativeTarget "KSPlayer" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				OBJ_82 /* Debug */,
+				OBJ_83 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

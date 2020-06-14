@@ -2,19 +2,6 @@
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 
 import PackageDescription
-#if os(macOS)
-
-let excludes = ["iOS", "Linux"]
-
-#elseif os(iOS)
-
-let excludes = ["Linux", "macOS"]
-
-#elseif os(Linux)
-
-let excludes = ["iOS", "macOS"]
-
-#endif
 
 let package = Package(
     name: "KSPlayer",
@@ -34,8 +21,7 @@ let package = Package(
         // Targets are the basic building blocks of a package. A target can define a module or a test suite.
         .target(
             name: "KSPlayer",
-            path: ".",
-            sources: ["Sources"],
+            path: "Sources",
             cSettings: [
                 .headerSearchPath("FFmpeg/FFmpeg.xcframework/ios-arm64/Headers"),
             ],
