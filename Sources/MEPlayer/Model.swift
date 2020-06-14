@@ -13,21 +13,6 @@ import UIKit
 #else
 import AppKit
 #endif
-func canUseMetal() -> Bool {
-    #if arch(arm)
-    return false
-    #else
-    #if targetEnvironment(simulator)
-    if #available(iOS 13.0, tvOS 13.0, *) {
-        return true
-    } else {
-        return false
-    }
-    #else
-    return true
-    #endif
-    #endif
-}
 
 // MARK: enum
 
@@ -160,8 +145,8 @@ enum MECodecState {
 
 struct Timebase {
     static let defaultValue = Timebase(num: 1, den: 1)
-    public var num: Int32
-    public var den: Int32
+    public let num: Int32
+    public let den: Int32
     func getPosition(from seconds: TimeInterval) -> Int64 { Int64(seconds * TimeInterval(den) / TimeInterval(num)) }
 
     func cmtime(for timestamp: Int64) -> CMTime { CMTime(value: timestamp * Int64(num), timescale: den) }
@@ -174,17 +159,6 @@ extension Timebase {
         num = rational.num
         den = rational.den
     }
-}
-
-struct METime {
-    public var timestamp: Int64
-    public var timebase: Timebase
-}
-
-extension METime {
-    public var seconds: TimeInterval { cmtime.seconds }
-
-    public var cmtime: CMTime { timebase.cmtime(for: timestamp) }
 }
 
 final class Packet: ObjectQueueItem {
