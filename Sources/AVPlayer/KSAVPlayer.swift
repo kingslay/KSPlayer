@@ -88,7 +88,7 @@ public class KSAVPlayer {
     private let playerView = KSAVPlayerView()
     private var urlAsset: AVURLAsset
     private var shouldSeekTo = TimeInterval(0)
-    private var playerLooper: NSObject?
+    private var playerLooper: AVPlayerLooper?
     private var statusObservation: NSKeyValueObservation?
     private var loadedTimeRangesObservation: NSKeyValueObservation?
     private var bufferEmptyObservation: NSKeyValueObservation?
@@ -418,6 +418,7 @@ extension KSAVPlayer: MediaPlayerProtocol {
         loadState = .idle
         player.currentItem?.cancelPendingSeeks()
         urlAsset.cancelLoading()
+        playerLooper?.disableLooping()
         player.replaceCurrentItem(with: nil)
     }
 
