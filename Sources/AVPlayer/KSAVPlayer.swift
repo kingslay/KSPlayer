@@ -243,22 +243,30 @@ extension KSAVPlayer {
         delegate?.changeLoadState(player: self)
     }
 
-    private func setPlayerLooper(playerItem: AVPlayerItem) {
-        player.actionAtItemEnd = .advance
-        let playerLooper = AVPlayerLooper(player: player, templateItem: playerItem)
-        loopCountObservation?.invalidate()
-        loopCountObservation = playerLooper.observe(\.loopCount) { [weak self] playerLooper, _ in
-            guard let self = self else { return }
-            self.delegate?.playBack(player: self, loopCount: playerLooper.loopCount)
-        }
-        loopStatusObservation?.invalidate()
-        loopStatusObservation = playerLooper.observe(\.status) { [weak self] playerLooper, _ in
-            guard let self = self else { return }
-            if playerLooper.status == .failed {
-                self.error = playerLooper.error
+    private func replaceCurrentItem(playerItem: AVPlayerItem?) {
+        player.currentItem?.cancelPendingSeeks()
+        if options.isLoopPlay {
+            loopCountObservation?.invalidate()
+            loopStatusObservation?.invalidate()
+            playerLooper?.disableLooping()
+            guard let playerItem = playerItem else {
+                playerLooper = nil
+                return
             }
+            playerLooper = AVPlayerLooper(player: player, templateItem: playerItem)
+            loopCountObservation = playerLooper?.observe(\.loopCount) { [weak self] playerLooper, _ in
+                guard let self = self else { return }
+                self.delegate?.playBack(player: self, loopCount: playerLooper.loopCount)
+            }
+            loopStatusObservation = playerLooper?.observe(\.status) { [weak self] playerLooper, _ in
+                guard let self = self else { return }
+                if playerLooper.status == .failed {
+                    self.error = playerLooper.error
+                }
+            }
+        } else {
+            player.replaceCurrentItem(with: playerItem)
         }
-        self.playerLooper = playerLooper
     }
 
     private func observer(playerItem: AVPlayerItem?) {
@@ -391,12 +399,8 @@ extension KSAVPlayer: MediaPlayerProtocol {
             self.bufferingProgress = 0
             let playerItem = AVPlayerItem(asset: self.urlAsset)
             self.options.openTime = CACurrentMediaTime()
-            if self.options.isLoopPlay {
-                self.setPlayerLooper(playerItem: playerItem)
-            } else {
-                self.player.replaceCurrentItem(with: playerItem)
-                self.player.actionAtItemEnd = .pause
-            }
+            self.replaceCurrentItem(playerItem: playerItem)
+            self.player.actionAtItemEnd = .pause
             self.player.volume = self.playbackVolume
         }
     }
@@ -416,10 +420,8 @@ extension KSAVPlayer: MediaPlayerProtocol {
         isPreparedToPlay = false
         playbackState = .stopped
         loadState = .idle
-        player.currentItem?.cancelPendingSeeks()
         urlAsset.cancelLoading()
-        playerLooper?.disableLooping()
-        player.replaceCurrentItem(with: nil)
+        replaceCurrentItem(playerItem: nil)
     }
 
     public func replace(url: URL, options: KSOptions) {
