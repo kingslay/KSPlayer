@@ -79,10 +79,6 @@ class VideoSwresample: Swresample {
             }
             frame.corePixelBuffer = PixelBuffer(frame: avframe)
         }
-        frame.position = avframe.pointee.best_effort_timestamp
-        if frame.position == Int64.min || frame.position < 0 {
-            frame.position = max(avframe.pointee.pkt_dts, 0)
-        }
         frame.duration = avframe.pointee.pkt_duration
         frame.size = Int64(avframe.pointee.pkt_size)
         return frame
@@ -349,7 +345,6 @@ class AudioSwresample: Swresample {
         if frame.duration == 0 {
             frame.duration = Int64(avframe.pointee.nb_samples) * Int64(frame.timebase.den) / (Int64(avframe.pointee.sample_rate) * Int64(frame.timebase.num))
         }
-        frame.position = avframe.pointee.pts
         return frame
     }
 

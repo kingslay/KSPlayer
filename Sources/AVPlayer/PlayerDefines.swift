@@ -99,9 +99,10 @@ public struct VideoAdaptationState {
 
     public let bitRates: [Int64]
     public let duration: TimeInterval
-    public var currentPlaybackTime: TimeInterval
-    public var fps: Int
+    public internal(set) var fps: Int
     public internal(set) var bitRateStates: [BitRateState]
+    public internal(set) var currentPlaybackTime: TimeInterval = 0
+    public internal(set) var isPlayable: Bool = false
     public internal(set) var loadedCount: Int = 0
 }
 
@@ -239,6 +240,9 @@ public class KSOptions {
             return nil
         }
         let isUp = state.loadedCount > (state.fps * Int(maxBufferDuration)) / 2
+        if isUp != state.isPlayable {
+            return nil
+        }
         if isUp {
             if index < state.bitRates.endIndex - 1 {
                 return (last.bitRate, state.bitRates[index + 1])

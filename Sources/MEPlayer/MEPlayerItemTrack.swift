@@ -299,9 +299,6 @@ final class AsyncPlayerItemTrack: FFPlayerItemTrack<Frame> {
             if options.decodeVideoTime == 0, mediaType == .video {
                 options.decodeVideoTime = CACurrentMediaTime()
             }
-            guard packet.corePacket.pointee.flags & AV_PKT_FLAG_DISCARD == 0 else {
-                return
-            }
             array.forEach { frame in
                 if state == .flush || state == .closed {
                     return
@@ -321,6 +318,7 @@ final class AsyncPlayerItemTrack: FFPlayerItemTrack<Frame> {
             if decoder is HardwareDecode {
                 decoderMap[packet.assetTrack.streamIndex] = SoftwareDecode(assetTrack: packet.assetTrack, options: options)
                 KSLog("VideoCodec switch to software decompression")
+                doDecode(packet: packet)
             } else {
                 state = .failed
             }
