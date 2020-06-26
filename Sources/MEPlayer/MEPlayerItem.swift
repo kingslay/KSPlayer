@@ -144,7 +144,11 @@ extension MEPlayerItem {
         if url.isFileURL {
             urlString = url.path
         } else {
-            urlString = (KSPlayerManager.cache ? "async:cache:" : "") + url.absoluteString
+            if url.absoluteString.hasPrefix("https") || !KSPlayerManager.cache {
+                urlString = url.absoluteString
+            } else {
+                urlString = "async:cache:" + url.absoluteString
+            }
         }
         var result = avformat_open_input(&self.formatCtx, urlString, nil, &avOptions)
         av_dict_free(&avOptions)
