@@ -44,9 +44,9 @@ class HardwareDecode: DecodeProtocol {
     private var session: DecompressionSession?
     private let codecpar: AVCodecParameters
     private let timebase: Timebase
-    // 刷新Session的话，后续的解码还是会失败，直到遇到I帧
-    private var refreshSession = false
     private let options: KSOptions
+    private var startTime = Int64(0)
+    private var lastPosition = Int64(0)
     required init(assetTrack: TrackProtocol, options: KSOptions) {
         timebase = assetTrack.timebase
         codecpar = assetTrack.stream.pointee.codecpar.pointee
@@ -66,45 +66,38 @@ class HardwareDecode: DecodeProtocol {
             return []
         }
         let sampleBuffer = try session.formatDescription.getSampleBuffer(isConvertNALSize: session.isConvertNALSize, data: data, size: Int(packet.pointee.size))
-        if refreshSession, packet.pointee.flags & AV_PKT_FLAG_KEY == 1 {
-            refreshSession = false
-        }
         var result = [VideoVTBFrame]()
-        var error: NSError?
         let flags = options.asynchronousDecompression ? VTDecodeFrameFlags._EnableAsynchronousDecompression : VTDecodeFrameFlags(rawValue: 0)
+        var vtStatus = noErr
         let status = VTDecompressionSessionDecodeFrame(session.decompressionSession, sampleBuffer: sampleBuffer, flags: flags, infoFlagsOut: nil) { [weak self] status, _, imageBuffer, _, _ in
-            guard let self = self else {
+            vtStatus = status
+            guard let self = self, status == noErr, let imageBuffer = imageBuffer else {
                 return
             }
-            if status == noErr {
-                guard let imageBuffer = imageBuffer else {
-                    return
-                }
-                let frame = VideoVTBFrame()
-                frame.corePixelBuffer = imageBuffer
-                frame.timebase = self.timebase
-                frame.position = max(packet.pointee.dts, packet.pointee.pts)
-                frame.duration = packet.pointee.duration
-                frame.size = Int64(packet.pointee.size)
-                result.append(frame)
-            } else {
-                if !self.refreshSession {
-                    error = .init(errorCode: .codecVideoReceiveFrame, ffmpegErrnum: status)
-                }
+            let frame = VideoVTBFrame()
+            frame.corePixelBuffer = imageBuffer
+            frame.timebase = self.timebase
+            let timestamp = packet.pointee.pts
+            if packet.pointee.flags & AV_PKT_FLAG_KEY == 1, packet.pointee.flags & AV_PKT_FLAG_DISCARD != 0, self.lastPosition > 0 {
+                self.startTime = self.lastPosition - timestamp
             }
+            self.lastPosition = max(self.lastPosition, timestamp)
+            frame.position = self.startTime + timestamp
+            frame.duration = packet.pointee.duration
+            frame.size = Int64(packet.pointee.size)
+            self.lastPosition += frame.duration
+            result.append(frame)
         }
-        if let error = error {
-            throw error
-        } else {
-            if status == kVTInvalidSessionErr || status == kVTVideoDecoderMalfunctionErr {
+        if vtStatus != noErr {
+//            status == kVTInvalidSessionErr || status == kVTVideoDecoderMalfunctionErr || status == kVTVideoDecoderBadDataErr
+            if packet.pointee.flags & AV_PKT_FLAG_KEY == 1 {
+                throw NSError(errorCode: .codecVideoReceiveFrame, ffmpegErrnum: vtStatus)
+            } else {
                 // 解决从后台切换到前台，解码失败的问题
                 doFlushCodec()
-                refreshSession = true
-            } else if status != noErr {
-                throw NSError(errorCode: .codecVideoReceiveFrame, ffmpegErrnum: status)
             }
-            return result
         }
+        return result
     }
 
     func doFlushCodec() {
@@ -115,9 +108,15 @@ class HardwareDecode: DecodeProtocol {
         session = nil
     }
 
-    func seek(time _: TimeInterval) {}
+    func seek(time _: TimeInterval) {
+        lastPosition = 0
+        startTime = 0
+    }
 
-    func decode() {}
+    func decode() {
+        lastPosition = 0
+        startTime = 0
+    }
 }
 
 class DecompressionSession {

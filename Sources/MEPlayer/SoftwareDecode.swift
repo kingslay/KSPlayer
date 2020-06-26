@@ -49,14 +49,12 @@ class SoftwareDecode: DecodeProtocol {
             do {
                 let result = avcodec_receive_frame(codecContext, coreFrame)
                 if result == 0, let avframe = coreFrame {
-                    let timestamp = avframe.pointee.best_effort_timestamp
+                    let timestamp = max(avframe.pointee.best_effort_timestamp, avframe.pointee.pts, avframe.pointee.pkt_dts)
                     if timestamp >= bestEffortTimestamp {
                         bestEffortTimestamp = timestamp
                     }
                     let frame = swresample.transfer(avframe: avframe, timebase: timebase)
-                    if frame.position < 0 {
-                        frame.position = bestEffortTimestamp
-                    }
+                    frame.position = bestEffortTimestamp
                     bestEffortTimestamp += frame.duration
                     array.append(frame)
                 } else {
