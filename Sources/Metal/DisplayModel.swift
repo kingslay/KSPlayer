@@ -53,8 +53,8 @@ private class PlaneDisplayModel {
         let device = MetalRender.share.device
         indexCount = indices.count
         indexBuffer = device.makeBuffer(bytes: indices, length: MemoryLayout<UInt16>.size * indexCount, options: .storageModeShared)!
-        posBuffer = device.makeBuffer(bytes: positions, length: MemoryLayout<simd_float4>.size * indexCount, options: .storageModeShared)
-        uvBuffer = device.makeBuffer(bytes: uvs, length: MemoryLayout<simd_float2>.size * indexCount, options: .storageModeShared)
+        posBuffer = device.makeBuffer(bytes: positions, length: MemoryLayout<simd_float4>.size * positions.count, options: .storageModeShared)
+        uvBuffer = device.makeBuffer(bytes: uvs, length: MemoryLayout<simd_float2>.size * uvs.count, options: .storageModeShared)
         var matrix = matrix_identity_float4x4
         matrixBuffer = device.makeBuffer(bytes: &matrix, length: MemoryLayout<simd_float4x4>.size, options: .storageModeShared)
     }
@@ -101,8 +101,8 @@ private class SphereDisplayModel {
         let device = MetalRender.share.device
         indexCount = indices.count
         indexBuffer = device.makeBuffer(bytes: indices, length: MemoryLayout<UInt16>.size * indexCount, options: .storageModeShared)!
-        posBuffer = device.makeBuffer(bytes: positions, length: MemoryLayout<simd_float4>.size * indexCount, options: .storageModeShared)
-        uvBuffer = device.makeBuffer(bytes: uvs, length: MemoryLayout<simd_float2>.size * indexCount, options: .storageModeShared)
+        posBuffer = device.makeBuffer(bytes: positions, length: MemoryLayout<simd_float4>.size * positions.count, options: .storageModeShared)
+        uvBuffer = device.makeBuffer(bytes: uvs, length: MemoryLayout<simd_float2>.size * uvs.count, options: .storageModeShared)
         #if os(iOS)
         if KSPlayerManager.enableSensor {
             MotionSensor.shared.start()

@@ -52,6 +52,6 @@ extension SeekView: SeekViewProtocol {
             seekToViewImage.backingLayer?.position = CGPoint(x: seekToViewImage.backingLayer!.frame.midX, y: seekToViewImage.backingLayer!.frame.midY)
             seekToViewImage.backingLayer?.anchorPoint = CGPoint(x: 0.5, y: 0.5)
         }
-        seekToViewImage.centerRotate(byDegrees: isAdd ? 0.0 : Double.pi)
+        seekToViewImage.centerRotate(byDegrees: isAdd ? 0.0 : 180)
     }
 }
