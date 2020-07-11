@@ -1,3 +1,3 @@
 ${PODS_ROOT}/Target Support Files/KSPlayer-tvOS/KSPlayer-tvOS-Unit-Tests-artifacts.sh
-${PODS_ROOT}/../../FFmpeg/FFmpeg.xcframework
-${PODS_ROOT}/../../FFmpeg/OpenSSL.xcframework
+${PODS_ROOT}/../../Sources/FFmpeg.xcframework
+${PODS_ROOT}/../../Sources/OpenSSL.xcframework

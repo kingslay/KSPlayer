@@ -1,0 +1,16 @@
+/*
+  Localized.strings
+  demo-iOS
+
+  Created by kintan on 2020/5/23.
+  Copyright © 2020 kintan. All rights reserved.
+*/
+"speed"="倍速";
+"subtitle"="字幕";
+"select speed"="选择倍速";
+"cancel"="取消";
+"built-in subtitles"="内置字幕";
+"select video quality"="选择画质";
+"brightness"="亮度";
+"volume"="音量";
+"no show subtitle"="不显示字幕";

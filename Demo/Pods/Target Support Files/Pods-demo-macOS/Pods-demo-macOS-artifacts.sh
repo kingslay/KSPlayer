@@ -124,12 +124,12 @@ install_xcframework() {
 
 
 if [[ "$CONFIGURATION" == "Debug" ]]; then
-  install_xcframework "${PODS_ROOT}/../../FFmpeg/FFmpeg.xcframework" "" "false" "macos-x86_64/FFmpeg.framework"
-  install_xcframework "${PODS_ROOT}/../../FFmpeg/OpenSSL.xcframework" "" "false" "macos-x86_64/OpenSSL.framework"
+  install_xcframework "${PODS_ROOT}/../../Sources/FFmpeg.xcframework" "" "false" "macos-x86_64/FFmpeg.framework"
+  install_xcframework "${PODS_ROOT}/../../Sources/OpenSSL.xcframework" "" "false" "macos-x86_64/OpenSSL.framework"
 fi
 if [[ "$CONFIGURATION" == "Release" ]]; then
-  install_xcframework "${PODS_ROOT}/../../FFmpeg/FFmpeg.xcframework" "" "false" "macos-x86_64/FFmpeg.framework"
-  install_xcframework "${PODS_ROOT}/../../FFmpeg/OpenSSL.xcframework" "" "false" "macos-x86_64/OpenSSL.framework"
+  install_xcframework "${PODS_ROOT}/../../Sources/FFmpeg.xcframework" "" "false" "macos-x86_64/FFmpeg.framework"
+  install_xcframework "${PODS_ROOT}/../../Sources/OpenSSL.xcframework" "" "false" "macos-x86_64/OpenSSL.framework"
 fi
 
 echo "Artifact list stored at $ARTIFACT_LIST_FILE"

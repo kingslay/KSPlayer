@@ -234,10 +234,10 @@ public protocol PlayerControllerDelegate: class {
 
 ```bash
 brew install sdl2
-cd FFmpeg
+cd Script
 sh build-openssl.sh
 sh build-ffmpeg.sh debug
-dwarfdump -F --debug-info FFmpeg.xcframework/ios-x86_64-maccatalyst/FFmpeg.framework/FFmpeg | head -n 20
+dwarfdump -F --debug-info ../Sources/FFmpeg.xcframework/ios-x86_64-maccatalyst/FFmpeg.framework/FFmpeg | head -n 20
 ```
 
 run demo-iOS use Mac Catalyst

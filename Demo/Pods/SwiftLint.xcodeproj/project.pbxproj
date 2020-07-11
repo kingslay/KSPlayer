@@ -15,7 +15,6 @@
 			dependencies = (
 			);
 			name = "SwiftLint-macOS";
-			productName = "SwiftLint-macOS";
 		};
 		85BF42A508B024DBC10149113DE26FF0 /* SwiftLint-iOS */ = {
 			isa = PBXAggregateTarget;
@@ -25,7 +24,6 @@
 			dependencies = (
 			);
 			name = "SwiftLint-iOS";
-			productName = "SwiftLint-iOS";
 		};
 		FBD8E00DAB35E7CDDC6F82CDC59FEDF8 /* SwiftLint-tvOS */ = {
 			isa = PBXAggregateTarget;
@@ -35,7 +33,6 @@
 			dependencies = (
 			);
 			name = "SwiftLint-tvOS";
-			productName = "SwiftLint-tvOS";
 		};
 /* End PBXAggregateTarget section */
 
@@ -91,6 +88,7 @@
 			children = (
 				9061A0CE6D977FC2BB10B33D5EBB859C /* Support Files */,
 			);
+			name = SwiftLint;
 			path = SwiftLint;
 			sourceTree = "<group>";
 		};
@@ -101,7 +99,7 @@
 			isa = PBXProject;
 			attributes = {
 				LastSwiftUpdateCheck = 1100;
-				LastUpgradeCheck = 1150;
+				LastUpgradeCheck = 1100;
 			};
 			buildConfigurationList = 4FB14426193C9C27F7C8689611A6338E /* Build configuration list for PBXProject "SwiftLint" */;
 			compatibilityVersion = "Xcode 11.0";
@@ -144,6 +142,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = B27B7F48793A94F20241567799DE42AA /* SwiftLint-macOS.debug.xcconfig */;
 			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_OBJC_WEAK = NO;
 				CODE_SIGN_IDENTITY = "-";
@@ -339,6 +338,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 8889FF4E25D067C4FF3F3EE9325862F6 /* SwiftLint-macOS.release.xcconfig */;
 			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_OBJC_WEAK = NO;
 				CODE_SIGN_IDENTITY = "-";

@@ -29,11 +29,3 @@ target 'demo-tvOS' do
   platform :tvos, 10.2
   common
 end
-
-post_install do |installer|
-  installer.generated_projects.each do |project|
-    project.build_configurations.each do |config|
-      config.build_settings['SWIFT_COMPILATION_MODE'] = 'wholemodule'
-    end
-  end
-end
