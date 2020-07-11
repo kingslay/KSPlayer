@@ -7,20 +7,20 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		5B4483D96DC416B6E2098D77 /* Pods_demo_iOS.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 652FADC7FD99912D1B883FB1 /* Pods_demo_iOS.framework */; };
 		AC08614F20B69A4500D801FC /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC08614E20B69A4500D801FC /* AppDelegate.swift */; };
 		AC08615620B69A4500D801FC /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AC08615520B69A4500D801FC /* Assets.xcassets */; };
-		AC08615920B69A4500D801FC /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = AC08615720B69A4500D801FC /* LaunchScreen.storyboard */; };
 		AC08616420B69A4500D801FC /* demo_iOSTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC08616320B69A4500D801FC /* demo_iOSTests.swift */; };
 		AC08616F20B69A4500D801FC /* demo_iOSUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC08616E20B69A4500D801FC /* demo_iOSUITests.swift */; };
 		AC08619620B69AB400D801FC /* DetailViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC08619420B69AB400D801FC /* DetailViewController.swift */; };
 		AC08619720B69AB400D801FC /* MasterViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC08619520B69AB400D801FC /* MasterViewController.swift */; };
+		AC3E54AB24B9E810002B6B1B /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = AC3E498E24B9CB5E002B6B1B /* LaunchScreen.storyboard */; };
+		AC3E54AC24B9E815002B6B1B /* Localized.strings in Resources */ = {isa = PBXBuildFile; fileRef = AC3E491D24B98CEB002B6B1B /* Localized.strings */; };
 		AC458DE621DF830F00BD4CF9 /* AudioViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC458DE521DF830F00BD4CF9 /* AudioViewController.swift */; };
-		AC7D6A63247912F300EEDA24 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = AC7D6A65247912F300EEDA24 /* Localizable.strings */; };
-		ACEF02B82194670F003E75E4 /* Polonaise.flac in Resources */ = {isa = PBXBuildFile; fileRef = ACEF02B42194670F003E75E4 /* Polonaise.flac */; };
-		ACEF02B92194670F003E75E4 /* google-help-vr.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = ACEF02B52194670F003E75E4 /* google-help-vr.mp4 */; };
-		ACEF02BA2194670F003E75E4 /* 567082ac3ae39699f68de4fd2b7444b1e045515a.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = ACEF02B62194670F003E75E4 /* 567082ac3ae39699f68de4fd2b7444b1e045515a.mp4 */; };
-		ACEF02BB2194670F003E75E4 /* video-h265.mkv in Resources */ = {isa = PBXBuildFile; fileRef = ACEF02B72194670F003E75E4 /* video-h265.mkv */; };
-		BA0B8CC62AB0AFCAC873BA32 /* Pods_demo_iOS.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 652FADC7FD99912D1B883FB1 /* Pods_demo_iOS.framework */; };
+		AC80331F24BA1A2F002B3D40 /* Polonaise.flac in Resources */ = {isa = PBXBuildFile; fileRef = AC80331B24BA1A2F002B3D40 /* Polonaise.flac */; };
+		AC80332024BA1A2F002B3D40 /* google-help-vr.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = AC80331C24BA1A2F002B3D40 /* google-help-vr.mp4 */; };
+		AC80332124BA1A2F002B3D40 /* 567082ac3ae39699f68de4fd2b7444b1e045515a.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = AC80331D24BA1A2F002B3D40 /* 567082ac3ae39699f68de4fd2b7444b1e045515a.mp4 */; };
+		AC80332224BA1A2F002B3D40 /* video-h265.mkv in Resources */ = {isa = PBXBuildFile; fileRef = AC80331E24BA1A2F002B3D40 /* video-h265.mkv */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -48,7 +48,6 @@
 		AC08614B20B69A4500D801FC /* demo-iOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "demo-iOS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		AC08614E20B69A4500D801FC /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		AC08615520B69A4500D801FC /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		AC08615820B69A4500D801FC /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		AC08615A20B69A4500D801FC /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		AC08615F20B69A4500D801FC /* demo-iOSTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "demo-iOSTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		AC08616320B69A4500D801FC /* demo_iOSTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = demo_iOSTests.swift; sourceTree = "<group>"; };
@@ -59,15 +58,14 @@
 		AC08619420B69AB400D801FC /* DetailViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DetailViewController.swift; sourceTree = "<group>"; };
 		AC08619520B69AB400D801FC /* MasterViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MasterViewController.swift; sourceTree = "<group>"; };
 		AC155F1223AFA9F40092D004 /* demo-iOS.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "demo-iOS.entitlements"; sourceTree = "<group>"; };
+		AC3E498C24B9CA67002B6B1B /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "zh-Hans.lproj/Localized.strings"; sourceTree = "<group>"; };
+		AC3E498E24B9CB5E002B6B1B /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = LaunchScreen.storyboard; sourceTree = "<group>"; };
 		AC458DE521DF830F00BD4CF9 /* AudioViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioViewController.swift; sourceTree = "<group>"; };
-		AC7D6A64247912F300EEDA24 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
-		AC7D6A662479130200EEDA24 /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "zh-Hans.lproj/LaunchScreen.strings"; sourceTree = "<group>"; };
-		AC7D6A672479130200EEDA24 /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "zh-Hans.lproj/Localizable.strings"; sourceTree = "<group>"; };
 		AC7E04DB2414DA5E00B0F540 /* libxml2.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libxml2.tbd; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk/usr/lib/libxml2.tbd; sourceTree = DEVELOPER_DIR; };
-		ACEF02B42194670F003E75E4 /* Polonaise.flac */ = {isa = PBXFileReference; lastKnownFileType = file; path = Polonaise.flac; sourceTree = "<group>"; };
-		ACEF02B52194670F003E75E4 /* google-help-vr.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = "google-help-vr.mp4"; sourceTree = "<group>"; };
-		ACEF02B62194670F003E75E4 /* 567082ac3ae39699f68de4fd2b7444b1e045515a.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = 567082ac3ae39699f68de4fd2b7444b1e045515a.mp4; sourceTree = "<group>"; };
-		ACEF02B72194670F003E75E4 /* video-h265.mkv */ = {isa = PBXFileReference; lastKnownFileType = file; path = "video-h265.mkv"; sourceTree = "<group>"; };
+		AC80331B24BA1A2F002B3D40 /* Polonaise.flac */ = {isa = PBXFileReference; lastKnownFileType = file; path = Polonaise.flac; sourceTree = "<group>"; };
+		AC80331C24BA1A2F002B3D40 /* google-help-vr.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = "google-help-vr.mp4"; sourceTree = "<group>"; };
+		AC80331D24BA1A2F002B3D40 /* 567082ac3ae39699f68de4fd2b7444b1e045515a.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = 567082ac3ae39699f68de4fd2b7444b1e045515a.mp4; sourceTree = "<group>"; };
+		AC80331E24BA1A2F002B3D40 /* video-h265.mkv */ = {isa = PBXFileReference; lastKnownFileType = file; path = "video-h265.mkv"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -75,7 +73,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				BA0B8CC62AB0AFCAC873BA32 /* Pods_demo_iOS.framework in Frameworks */,
+				5B4483D96DC416B6E2098D77 /* Pods_demo_iOS.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -136,10 +134,11 @@
 				AC08619420B69AB400D801FC /* DetailViewController.swift */,
 				AC08619520B69AB400D801FC /* MasterViewController.swift */,
 				AC458DE521DF830F00BD4CF9 /* AudioViewController.swift */,
+				AC3E498E24B9CB5E002B6B1B /* LaunchScreen.storyboard */,
 				AC08615520B69A4500D801FC /* Assets.xcassets */,
-				AC08615720B69A4500D801FC /* LaunchScreen.storyboard */,
 				AC08615A20B69A4500D801FC /* Info.plist */,
-				ACEF02B32194670F003E75E4 /* Resources */,
+				AC3E491D24B98CEB002B6B1B /* Localized.strings */,
+				AC80331A24BA1A2F002B3D40 /* Resources */,
 			);
 			path = "demo-iOS";
 			sourceTree = "<group>";
@@ -162,17 +161,16 @@
 			path = "demo-iOSUITests";
 			sourceTree = "<group>";
 		};
-		ACEF02B32194670F003E75E4 /* Resources */ = {
+		AC80331A24BA1A2F002B3D40 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
-				ACEF02B42194670F003E75E4 /* Polonaise.flac */,
-				ACEF02B52194670F003E75E4 /* google-help-vr.mp4 */,
-				ACEF02B62194670F003E75E4 /* 567082ac3ae39699f68de4fd2b7444b1e045515a.mp4 */,
-				ACEF02B72194670F003E75E4 /* video-h265.mkv */,
-				AC7D6A65247912F300EEDA24 /* Localizable.strings */,
+				AC80331B24BA1A2F002B3D40 /* Polonaise.flac */,
+				AC80331C24BA1A2F002B3D40 /* google-help-vr.mp4 */,
+				AC80331D24BA1A2F002B3D40 /* 567082ac3ae39699f68de4fd2b7444b1e045515a.mp4 */,
+				AC80331E24BA1A2F002B3D40 /* video-h265.mkv */,
 			);
 			name = Resources;
-			path = ../../../Tests/Resources;
+			path = ../../../Tests/KSPlayerTests/Resources;
 			sourceTree = "<group>";
 		};
 		F16DE5BE42F78427E632B228 /* Pods */ = {
@@ -297,13 +295,13 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				ACEF02BA2194670F003E75E4 /* 567082ac3ae39699f68de4fd2b7444b1e045515a.mp4 in Resources */,
-				AC08615920B69A4500D801FC /* LaunchScreen.storyboard in Resources */,
-				ACEF02B92194670F003E75E4 /* google-help-vr.mp4 in Resources */,
-				ACEF02BB2194670F003E75E4 /* video-h265.mkv in Resources */,
-				AC7D6A63247912F300EEDA24 /* Localizable.strings in Resources */,
+				AC80331F24BA1A2F002B3D40 /* Polonaise.flac in Resources */,
+				AC80332124BA1A2F002B3D40 /* 567082ac3ae39699f68de4fd2b7444b1e045515a.mp4 in Resources */,
+				AC80332224BA1A2F002B3D40 /* video-h265.mkv in Resources */,
+				AC3E54AC24B9E815002B6B1B /* Localized.strings in Resources */,
+				AC80332024BA1A2F002B3D40 /* google-help-vr.mp4 in Resources */,
+				AC3E54AB24B9E810002B6B1B /* LaunchScreen.storyboard in Resources */,
 				AC08615620B69A4500D801FC /* Assets.xcassets in Resources */,
-				ACEF02B82194670F003E75E4 /* Polonaise.flac in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -452,22 +450,12 @@
 /* End PBXTargetDependency section */
 
 /* Begin PBXVariantGroup section */
-		AC08615720B69A4500D801FC /* LaunchScreen.storyboard */ = {
+		AC3E491D24B98CEB002B6B1B /* Localized.strings */ = {
 			isa = PBXVariantGroup;
 			children = (
-				AC08615820B69A4500D801FC /* Base */,
-				AC7D6A662479130200EEDA24 /* zh-Hans */,
+				AC3E498C24B9CA67002B6B1B /* zh-Hans */,
 			);
-			name = LaunchScreen.storyboard;
-			sourceTree = "<group>";
-		};
-		AC7D6A65247912F300EEDA24 /* Localizable.strings */ = {
-			isa = PBXVariantGroup;
-			children = (
-				AC7D6A64247912F300EEDA24 /* en */,
-				AC7D6A672479130200EEDA24 /* zh-Hans */,
-			);
-			name = Localizable.strings;
+			name = Localized.strings;
 			sourceTree = "<group>";
 		};
 /* End PBXVariantGroup section */
@@ -506,7 +494,6 @@
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				CODE_SIGN_IDENTITY = "iPhone Developer";
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
@@ -529,10 +516,10 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
+				OTHER_CODE_SIGN_FLAGS = "--deep";
 				SDKROOT = iphoneos;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
-				SWIFT_VERSION = 4.2;
 			};
 			name = Debug;
 		};
@@ -569,7 +556,6 @@
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				CODE_SIGN_IDENTITY = "iPhone Developer";
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
@@ -585,10 +571,10 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
+				OTHER_CODE_SIGN_FLAGS = "--deep";
 				SDKROOT = iphoneos;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
-				SWIFT_VERSION = 4.2;
 				VALIDATE_PRODUCT = YES;
 			};
 			name = Release;
@@ -599,9 +585,8 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = "demo-iOS/demo-iOS.entitlements";
-				CODE_SIGN_IDENTITY = "Apple Development";
-				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "-";
 				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1.1.1.1;
 				DERIVE_MACCATALYST_PRODUCT_BUNDLE_IDENTIFIER = YES;
 				DEVELOPMENT_TEAM = 6A4WSM8YTR;
 				INFOPLIST_FILE = "demo-iOS/Info.plist";
@@ -609,6 +594,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
+				MARKETING_VERSION = 1.1.1;
 				PRODUCT_BUNDLE_IDENTIFIER = kintan.player.demo;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
@@ -626,9 +612,8 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = "demo-iOS/demo-iOS.entitlements";
-				CODE_SIGN_IDENTITY = "Apple Development";
-				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "-";
 				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1.1.1.1;
 				DERIVE_MACCATALYST_PRODUCT_BUNDLE_IDENTIFIER = YES;
 				DEVELOPMENT_TEAM = 6A4WSM8YTR;
 				INFOPLIST_FILE = "demo-iOS/Info.plist";
@@ -636,6 +621,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
+				MARKETING_VERSION = 1.1.1;
 				PRODUCT_BUNDLE_IDENTIFIER = kintan.player.demo;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
@@ -653,7 +639,7 @@
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "-";
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = 6A4WSM8YTR;
 				INFOPLIST_FILE = "demo-iOSTests/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -674,7 +660,7 @@
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "-";
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = 6A4WSM8YTR;
 				INFOPLIST_FILE = "demo-iOSTests/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -695,7 +681,7 @@
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "-";
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = 6A4WSM8YTR;
 				INFOPLIST_FILE = "demo-iOSUITests/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -716,7 +702,7 @@
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "-";
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = 6A4WSM8YTR;
 				INFOPLIST_FILE = "demo-iOSUITests/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",

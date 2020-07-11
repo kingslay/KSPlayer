@@ -20,6 +20,6 @@ Pod::Spec.new do |s|
     s.swift_version = '5.1'
     s.static_framework = true
     s.subspec 'Openssl' do |openssl|
-        openssl.vendored_frameworks = 'FFmpeg/OpenSSL.xcframework'
+        openssl.vendored_frameworks = 'Sources/OpenSSL.xcframework'
     end
 end

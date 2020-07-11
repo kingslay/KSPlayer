@@ -23,7 +23,7 @@
   "subspecs": [
     {
       "name": "Openssl",
-      "vendored_frameworks": "FFmpeg/OpenSSL.xcframework"
+      "vendored_frameworks": "Sources/OpenSSL.xcframework"
     }
   ],
   "swift_version": "5.1"
