@@ -356,7 +356,7 @@ open class VideoPlayerView: PlayerView {
     }
 
     #if !os(macOS) && !targetEnvironment(macCatalyst)
-    override open func pressesBegan(_ presses: Set<UIPress>, with _: UIPressesEvent?) {
+    override open func pressesBegan(_ presses: Set<UIPress>, with event: UIPressesEvent?) {
         guard let presse = presses.first else {
             return
         }
@@ -367,7 +367,7 @@ open class VideoPlayerView: PlayerView {
             } else {
                 play()
             }
-        default: break
+        default: super.pressesBegan(presses, with: event)
         }
     }
     #endif
