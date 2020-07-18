@@ -307,7 +307,7 @@ open class VideoPlayerView: PlayerView {
         }
     }
 
-    open override func set(url: URL, options: KSOptions) {
+    override open func set(url: URL, options: KSOptions) {
         set(resource: KSPlayerResource(url: url, options: options))
     }
 
@@ -585,6 +585,6 @@ extension KSPlayerManager {
     /// 播放内核选择策略 先使用firstPlayer，失败了自动切换到secondPlayer，播放内核有KSAVPlayer、KSMEPlayer两个选项
     /// 是否能后台播放视频
     public static var canBackgroundPlay = false
-    
+
     public static var autoSelectEmbedSubtitle = true
 }
