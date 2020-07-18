@@ -159,15 +159,19 @@ public protocol PlayerControllerDelegate: class {
 - ### Selecting Tracks
 
   ```swift
-    let player: MediaPlayerProtocol
-    let tracks = player.tracks(mediaType: .audio)
-    let track = tracks[1]
-    /// the name of the track
-    let name = track.name
-    /// the language of the track
-    let language = track.language
-    /// selecting the one
-    player.select(track: track)
+     override open func player(layer: KSPlayerLayer, state: KSPlayerState) {
+          super.player(layer: layer, state: state)
+          if state == .readyToPlay, let player = layer.player {
+              let tracks = player.tracks(mediaType: .audio)
+              let track = tracks[1]
+              /// the name of the track
+              let name = track.name
+              /// the language of the track
+              let language = track.language
+              /// selecting the one
+              player.select(track: track)
+          }
+     }
   ```
 
 - ### Set the properties in KSPlayerManager and KSOptions.
