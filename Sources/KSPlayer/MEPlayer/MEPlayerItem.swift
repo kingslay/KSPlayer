@@ -226,7 +226,7 @@ extension MEPlayerItem {
         if !options.audioDisable {
             let audios = assetTracks.filter { $0.mediaType == .audio }
             let wantedStreamNb: Int32
-            if audios.count > 0, let index = options.wantedAudio(info: audios.map { ($0.bitRate, $0.language) }) {
+            if audios.count > 0, let index = options.wantedAudio(infos: audios.map { ($0.bitRate, $0.language) }) {
                 wantedStreamNb = audios[index].streamIndex
             } else {
                 wantedStreamNb = -1

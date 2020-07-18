@@ -255,11 +255,17 @@ public class KSOptions {
         return nil
     }
 
+    ///  wanted video stream index, or nil for automatic selection
+    /// - Parameter : video bitRate
+    /// - Returns: The index of the bitRates
     open func wantedVideo(bitRates _: [Int64]) -> Int? {
         nil
     }
 
-    open func wantedAudio(info _: [(Int64, String?)]) -> Int? {
+    /// wanted audio stream index, or nil for automatic selection
+    /// - Parameter :  audio bitRate and language
+    /// - Returns: The index of the infos
+    open func wantedAudio(infos _: [(bitRate: Int64, language: String?)]) -> Int? {
         nil
     }
 }
