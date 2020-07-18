@@ -292,7 +292,7 @@ open class VideoPlayerView: PlayerView {
         }
         currentDefinition = definitionIndex >= resource.definitions.count ? resource.definitions.count - 1 : definitionIndex
         let asset = resource.definitions[currentDefinition]
-        set(url: asset.url, options: asset.options)
+        super.set(url: asset.url, options: asset.options)
         if shouldSeekTo > 0 {
             seek(time: shouldSeekTo)
         }
@@ -303,8 +303,12 @@ open class VideoPlayerView: PlayerView {
         currentDefinition = definitionIndex >= resource.definitions.count ? resource.definitions.count - 1 : definitionIndex
         if isSetUrl {
             let asset = resource.definitions[currentDefinition]
-            set(url: asset.url, options: asset.options)
+            super.set(url: asset.url, options: asset.options)
         }
+    }
+
+    open override func set(url: URL, options: KSOptions) {
+        set(resource: KSPlayerResource(url: url, options: options))
     }
 
     @objc open func doubleTapGestureAction() {
