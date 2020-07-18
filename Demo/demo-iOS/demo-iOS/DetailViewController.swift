@@ -21,7 +21,7 @@ class DetailViewController: UIViewController, DetailProtocol {
 
     private let playerView = IOSVideoPlayerView()
     #else
-    private let playerView = VideoPlayerView()
+    private let playerView = CustomVideoPlayerView()
     #endif
     var resource: KSPlayerResource? {
         didSet {
@@ -109,11 +109,22 @@ extension DetailViewController: UIDocumentPickerDelegate {
         }
     }
 }
+#endif
 
-class CustomVideoPlayerView: IOSVideoPlayerView {
-    override func updateUI(isLandscape: Bool) {
-        super.updateUI(isLandscape: isLandscape)
-        toolBar.playbackRateButton.isHidden = true
+class CustomVideoPlayerView: VideoPlayerView {
+    override func customizeUIComponents() {
+        super.customizeUIComponents()
+        toolBar.isHidden = true
+        toolBar.timeSlider.isHidden = true
+    }
+
+    override open func player(layer: KSPlayerLayer, state: KSPlayerState) {
+        super.player(layer: layer, state: state)
+        if state == .readyToPlay, let player = layer.player {
+            for track in player.tracks(mediaType: .audio) {
+                print("audio name: \(track.name) language: \(track.language ?? "")")
+            }
+        }
     }
 
     override func onButtonPressed(type: PlayerButtonType, button: UIButton) {
@@ -124,4 +135,3 @@ class CustomVideoPlayerView: IOSVideoPlayerView {
         }
     }
 }
-#endif
