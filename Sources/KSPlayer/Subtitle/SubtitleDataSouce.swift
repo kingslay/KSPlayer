@@ -12,9 +12,6 @@ public protocol SubtitleInfo: AnyObject {
     var name: String { get }
     var subtitleID: String { get }
     var comment: String? { get }
-}
-
-public protocol MakeSubtitle {
     func makeSubtitle(completion: @escaping (Result<KSSubtitleProtocol?, NSError>) -> Void)
 }
 
@@ -29,9 +26,7 @@ public class URLSubtitleInfo: SubtitleInfo {
         self.subtitleID = subtitleID
         self.name = name
     }
-}
 
-extension URLSubtitleInfo: MakeSubtitle {
     public func makeSubtitle(completion: @escaping (Result<KSSubtitleProtocol?, NSError>) -> Void) {
         let block = { (url: URL) in
             let subtitles = KSURLSubtitle()

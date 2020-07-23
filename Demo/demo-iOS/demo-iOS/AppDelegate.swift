@@ -20,9 +20,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UISplitViewControllerDele
         KSPlayerManager.logLevel = .debug
         KSPlayerManager.firstPlayerType = KSMEPlayer.self
         KSPlayerManager.secondPlayerType = KSMEPlayer.self
-        #if !targetEnvironment(macCatalyst)
-        KSPlayerManager.cache = true
-        #endif
         KSOptions.preferredForwardBufferDuration = 10
         KSOptions.isAutoPlay = true
         KSOptions.isSecondOpen = true
