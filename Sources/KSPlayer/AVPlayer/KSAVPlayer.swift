@@ -311,6 +311,9 @@ extension KSAVPlayer: MediaPlayerProtocol {
     public var isPlaying: Bool { player.rate > 0 ? true : playbackState == .playing }
 
     public var view: UIView { playerView }
+    public var nominalFrameRate: Float {
+        urlAsset.tracks(withMediaType: .video).first { $0.isEnabled }?.nominalFrameRate ?? 0.0
+    }
 
     public var allowsExternalPlayback: Bool {
         get {
@@ -339,11 +342,7 @@ extension KSAVPlayer: MediaPlayerProtocol {
     public var isExternalPlaybackActive: Bool { player.isExternalPlaybackActive }
 
     public var naturalSize: CGSize {
-        if let videoTrack = urlAsset.tracks(withMediaType: .video).first {
-            return videoTrack.naturalSize
-        } else {
-            return .zero
-        }
+        urlAsset.tracks(withMediaType: .video).first { $0.isEnabled }?.naturalSize ?? .zero
     }
 
     public var currentPlaybackTime: TimeInterval {

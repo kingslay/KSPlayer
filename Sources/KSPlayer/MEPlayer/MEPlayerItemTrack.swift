@@ -113,7 +113,6 @@ class FFPlayerItemTrack<Frame: MEFrame>: PlayerItemTrackProtocol, CustomStringCo
     let description: String
     fileprivate var state = MECodecState.idle
     weak var delegate: CodecCapacityDelegate?
-//    var track: TrackProtocol
     let fps: Int
     let options: KSOptions
     let mediaType: AVFoundation.AVMediaType
