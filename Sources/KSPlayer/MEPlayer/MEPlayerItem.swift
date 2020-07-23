@@ -144,7 +144,7 @@ extension MEPlayerItem {
         if url.isFileURL {
             urlString = url.path
         } else {
-            if url.absoluteString.hasPrefix("https") || !KSPlayerManager.cache {
+            if url.absoluteString.hasPrefix("https") || !options.cache {
                 urlString = url.absoluteString
             } else {
                 urlString = "async:cache:" + url.absoluteString

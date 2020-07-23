@@ -148,6 +148,8 @@ public class KSOptions {
     public var isAutoPlay = KSOptions.isAutoPlay
     /// seek完是否自动播放
     public var isSeekedAutoPlay = KSOptions.isSeekedAutoPlay
+//    ffmpeg only cache http
+    public var cache = false
     public var display = DisplayEnum.plane
     public var videoDisable = false
     public var audioDisable = false
@@ -293,8 +295,6 @@ public struct LoadingState {
 }
 
 public struct KSPlayerManager {
-    /// ffmpeg only cache http
-    public static var cache = false
     /// 日志输出方式
     public static var logFunctionPoint: (String) -> Void = {
         print($0)

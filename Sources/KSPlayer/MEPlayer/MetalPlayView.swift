@@ -52,10 +52,10 @@ final class MetalPlayView: MTKView, MTKViewDelegate, FrameOutput {
                 if drawableSize != size {
                     drawableSize = size
                 }
+                let textures = pixelBuffer.textures(frome: textureCache)
                 guard let drawable = currentDrawable else {
                     return
                 }
-                let textures = pixelBuffer.textures(frome: textureCache)
                 MetalRender.share.draw(pixelBuffer: pixelBuffer, display: display, inputTextures: textures, drawable: drawable, renderPassDescriptor: renderPassDescriptor)
                 frame.corePixelBuffer = nil
             }

@@ -42,9 +42,7 @@ public class KSSubtitleController {
                 guard let self = self else { return }
                 self.view.isHidden = true
             }
-            if let info = info as? MakeSubtitle {
-                info.makeSubtitle(completion: selectWithFilePath)
-            }
+            info.makeSubtitle(completion: selectWithFilePath)
         }
     }
 

@@ -18,9 +18,7 @@ public class EmbedSubtitleInfo: SubtitleInfo {
         self.name = name
         self.subtitle = subtitle
     }
-}
 
-extension EmbedSubtitleInfo: MakeSubtitle {
     public func makeSubtitle(completion: @escaping (Result<KSSubtitleProtocol?, NSError>) -> Void) {
         completion(.success(subtitle))
     }
