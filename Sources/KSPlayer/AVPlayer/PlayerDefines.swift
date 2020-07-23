@@ -25,6 +25,7 @@ public protocol MediaPlayback: AnyObject {
 public protocol MediaPlayerProtocol: MediaPlayback {
     var delegate: MediaPlayerDelegate? { get set }
     var view: UIView { get }
+    var nominalFrameRate: Float { get }
     var playableTime: TimeInterval { get }
     var isPreparedToPlay: Bool { get }
     var playbackState: MediaPlaybackState { get }
