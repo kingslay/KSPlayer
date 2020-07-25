@@ -89,6 +89,7 @@ public protocol BufferProtocol: AnyObject {
     func widthOfPlane(at planeIndex: Int) -> Int
     func heightOfPlane(at planeIndex: Int) -> Int
     func textures(frome cache: MetalTextureCache) -> [MTLTexture]
+    func image() -> UIImage?
 }
 
 extension CVPixelBuffer: BufferProtocol {

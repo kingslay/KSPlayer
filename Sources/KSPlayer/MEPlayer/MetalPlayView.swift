@@ -13,7 +13,29 @@ final class MetalPlayView: MTKView, MTKViewDelegate, FrameOutput {
     private let renderPassDescriptor = MTLRenderPassDescriptor()
     var display: DisplayEnum = .plane
     weak var renderSource: OutputRenderSourceDelegate?
-    var isOutput = true
+    var pixelBuffer: BufferProtocol? {
+        didSet {
+            if let pixelBuffer = pixelBuffer {
+                autoreleasepool {
+                    let size = display == .plane ? pixelBuffer.drawableSize : UIScreen.size
+                    if drawableSize != size {
+                        drawableSize = size
+                    }
+                    let textures = pixelBuffer.textures(frome: textureCache)
+                    guard let drawable = currentDrawable else {
+                        return
+                    }
+                    MetalRender.share.draw(pixelBuffer: pixelBuffer, display: display, inputTextures: textures, drawable: drawable, renderPassDescriptor: renderPassDescriptor)
+                }
+            } else {
+                guard let drawable = currentDrawable, let passDescriptor = currentRenderPassDescriptor else {
+                    return
+                }
+                MetalRender.share.clear(drawable: drawable, renderPassDescriptor: passDescriptor)
+            }
+        }
+    }
+
     init() {
         let device = MetalRender.share.device
         super.init(frame: .zero, device: device)
@@ -30,35 +52,15 @@ final class MetalPlayView: MTKView, MTKViewDelegate, FrameOutput {
     }
 
     func clear() {
-        guard let drawable = currentDrawable, let passDescriptor = currentRenderPassDescriptor else {
-            return
-        }
-        MetalRender.share.clear(drawable: drawable, renderPassDescriptor: passDescriptor)
+        pixelBuffer = nil
     }
 
     func mtkView(_: MTKView, drawableSizeWillChange _: CGSize) {}
 
     func draw(in _: MTKView) {
-        if let frame = renderSource?.getOutputRender(type: .video, isDependent: true) {
-            draw(frame: frame)
-        }
-    }
-
-    func draw(frame: MEFrame) {
-        if let frame = frame as? VideoVTBFrame, let pixelBuffer = frame.corePixelBuffer {
-            autoreleasepool {
-                renderSource?.setVideo(time: frame.cmtime)
-                let size = display == .plane ? pixelBuffer.drawableSize : UIScreen.size
-                if drawableSize != size {
-                    drawableSize = size
-                }
-                let textures = pixelBuffer.textures(frome: textureCache)
-                guard let drawable = currentDrawable else {
-                    return
-                }
-                MetalRender.share.draw(pixelBuffer: pixelBuffer, display: display, inputTextures: textures, drawable: drawable, renderPassDescriptor: renderPassDescriptor)
-                frame.corePixelBuffer = nil
-            }
+        if let frame = renderSource?.getOutputRender(type: .video, isDependent: true) as? VideoVTBFrame, let corePixelBuffer = frame.corePixelBuffer {
+            renderSource?.setVideo(time: frame.cmtime)
+            pixelBuffer = corePixelBuffer
         }
     }
 
@@ -71,4 +73,7 @@ final class MetalPlayView: MTKView, MTKViewDelegate, FrameOutput {
         }
     }
     #endif
+    func toImage() -> UIImage? {
+        pixelBuffer?.image()
+    }
 }
