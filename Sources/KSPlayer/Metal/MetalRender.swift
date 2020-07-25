@@ -92,7 +92,6 @@ class MetalRender {
         encoder.endEncoding()
         commandBuffer.present(drawable)
         commandBuffer.commit()
-        commandBuffer.waitUntilCompleted()
     }
 
     func draw(pixelBuffer: BufferProtocol, display: DisplayEnum = .plane, inputTextures: [MTLTexture], drawable: CAMetalDrawable, renderPassDescriptor: MTLRenderPassDescriptor) {
@@ -114,7 +113,6 @@ class MetalRender {
         encoder.endEncoding()
         commandBuffer.present(drawable)
         commandBuffer.commit()
-        commandBuffer.waitUntilCompleted()
     }
 
     private func pipeline(pixelBuffer: BufferProtocol) -> MetalRenderPipeline {

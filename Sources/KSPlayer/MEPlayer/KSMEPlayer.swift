@@ -166,9 +166,9 @@ extension KSMEPlayer: MEPlayerDelegate {
         if needRefreshView, playbackState != .playing {
             DispatchQueue.main.async { [weak self] in
                 guard let self = self else { return }
-                if self.needRefreshView, let render = self.playerItem.getOutputRender(type: .video) {
+                if self.needRefreshView, let render = self.playerItem.getOutputRender(type: .video) as? VideoVTBFrame, let pixelBuffer = render.corePixelBuffer {
                     self.needRefreshView = false
-                    self.videoOutput.draw(frame: render)
+                    self.videoOutput.pixelBuffer = pixelBuffer
                 }
             }
         }
@@ -289,9 +289,8 @@ extension KSMEPlayer: MediaPlayerProtocol {
     }
 
     public func thumbnailImageAtCurrentTime(handler: @escaping (UIImage?) -> Void) {
-        DispatchQueue.global().async { [weak self] in
-            handler(self?.videoOutput.image())
-        }
+        let image = videoOutput.toImage()
+        handler(image)
     }
 
     public func enterBackground() {

@@ -27,9 +27,11 @@ class VideoSwresample: Swresample {
     private var format: AVPixelFormat = AV_PIX_FMT_NONE
     private var height: Int32 = 0
     private var width: Int32 = 0
+    private var forceTransfer: Bool
     var dstFrame: UnsafeMutablePointer<AVFrame>?
-    init(dstFormat: AVPixelFormat) {
+    init(dstFormat: AVPixelFormat, forceTransfer: Bool = false) {
         self.dstFormat = dstFormat
+        self.forceTransfer = forceTransfer
     }
 
     private func setup(frame: UnsafeMutablePointer<AVFrame>) -> Bool {
@@ -44,7 +46,7 @@ class VideoSwresample: Swresample {
         self.format = AVPixelFormat(rawValue: format)
         self.height = height
         self.width = width
-        if PixelBuffer.isSupported(format: self.format) {
+        if !forceTransfer, PixelBuffer.isSupported(format: self.format) {
             return true
         }
         imgConvertCtx = sws_getCachedContext(imgConvertCtx, width, height, self.format, width, height, dstFormat, SWS_BICUBIC, nil, nil, nil)
@@ -180,12 +182,12 @@ class PixelBuffer: BufferProtocol {
         [AV_PIX_FMT_NV12, AV_PIX_FMT_YUV420P, AV_PIX_FMT_BGRA].contains(format)
     }
 
-    private func image() -> UIImage? {
+    func image() -> UIImage? {
         var image: UIImage?
         if format.format == AV_PIX_FMT_RGB24 {
             image = UIImage(rgbData: dataWrap.data[0]!, linesize: Int(bytesPerRow[0]), width: width, height: height)
         }
-        let scale = VideoSwresample(dstFormat: AV_PIX_FMT_RGB24)
+        let scale = VideoSwresample(dstFormat: AV_PIX_FMT_RGB24, forceTransfer: true)
         if scale.setup(format: format.format.rawValue, width: Int32(width), height: Int32(height)) {
             if scale.swsConvert(data: dataWrap.data, linesize: bytesPerRow), let frame = scale.dstFrame?.pointee {
                 image = UIImage(rgbData: frame.data.0!, linesize: Int(frame.linesize.0), width: width, height: height)
@@ -293,7 +295,7 @@ extension CVPixelBufferPool {
 }
 
 extension UIImage {
-    convenience init?(rgbData: UnsafeMutablePointer<UInt8>, linesize: Int, width: Int, height: Int) {
+    convenience init?(rgbData: UnsafePointer<UInt8>, linesize: Int, width: Int, height: Int) {
         let colorSpace = CGColorSpaceCreateDeviceRGB()
         guard let data = CFDataCreate(kCFAllocatorDefault, rgbData, linesize * height),
             let provider = CGDataProvider(data: data),
