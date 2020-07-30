@@ -211,6 +211,10 @@ open class VideoPlayerView: PlayerView {
         doubleTapGesture.numberOfTapsRequired = 2
         tapGesture.require(toFail: doubleTapGesture)
         addGestureRecognizer(doubleTapGesture)
+        #if os(tvOS)
+        toolBar.isHidden = true
+        toolBar.timeSlider.isHidden = true
+        #endif
     }
 
     override open func player(layer: KSPlayerLayer, currentTime: TimeInterval, totalTime: TimeInterval) {
