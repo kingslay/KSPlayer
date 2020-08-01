@@ -231,7 +231,7 @@ extension KSMEPlayer: MediaPlayerProtocol {
     public var seekable: Bool { playerItem.seekable }
 
     public func seek(time: TimeInterval, completion handler: ((Bool) -> Void)? = nil) {
-        guard time > 0 else {
+        guard time >= 0 else {
             return
         }
         let oldPlaybackState = playbackState

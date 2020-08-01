@@ -184,7 +184,6 @@ final class AsyncPlayerItemTrack: FFPlayerItemTrack<Frame> {
                 if let loopPacketQueue = loopPacketQueue {
                     packetQueue.shutdown()
                     packetQueue = loopPacketQueue
-                    decode()
                 }
             }
         }
@@ -229,16 +228,16 @@ final class AsyncPlayerItemTrack: FFPlayerItemTrack<Frame> {
         decodeOperation.queuePriority = .veryHigh
         decodeOperation.qualityOfService = .userInteractive
         operationQueue.addOperation(decodeOperation)
-        decoderMap.values.forEach { $0.decode() }
     }
 
     private func decodeThread() {
         state = .decoding
+        decoderMap.values.forEach { $0.decode() }
         while !decodeOperation.isCancelled {
             if state == .flush {
                 decoderMap.values.forEach { $0.doFlushCodec() }
                 state = .decoding
-            } else if state == .closed || state == .failed || (isEndOfFile && packetQueue.count == 0 && loopPacketQueue?.count == 0) {
+            } else if state == .closed || state == .failed || (isEndOfFile && packetQueue.count == 0) {
                 break
             } else if state == .decoding {
                 guard let packet = packetQueue.pop(wait: true), state != .flush, state != .closed else {
