@@ -205,12 +205,12 @@ open class IOSVideoPlayerView: VideoPlayerView {
         if direction == .vertical {
             if isVolume {
                 if KSPlayerManager.enableVolumeGestures {
-                    tmpPanValue -= Float(point.y) / 0x2800
+                    tmpPanValue += panValue(velocity: point, direction: direction, currentTime: Float(toolBar.currentTime), totalTime: Float(totalTime))
                     tmpPanValue = max(min(tmpPanValue, 1), 0)
                     volumeViewSlider.value = tmpPanValue
                 }
             } else if KSPlayerManager.enableBrightnessGestures {
-                UIScreen.main.brightness -= point.y / 0x2800
+                UIScreen.main.brightness += CGFloat(panValue(velocity: point, direction: direction, currentTime: Float(toolBar.currentTime), totalTime: Float(totalTime)))
             }
         } else {
             super.panGestureChanged(velocity: point, direction: direction)
