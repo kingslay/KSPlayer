@@ -341,11 +341,15 @@ open class VideoPlayerView: PlayerView {
             isSliderSliding = true
             if totalTime > 0 {
                 // 每次滑动需要叠加时间，通过一定的比例，使滑动一直处于统一水平
-                tmpPanValue += max(min(Float(point.x) / 0x40000, 0.01), -0.01) * Float(totalTime)
+                tmpPanValue += seekSpeed(velocity: point, currentTime: Float(toolBar.currentTime), totalTime: Float(totalTime))
                 tmpPanValue = max(min(tmpPanValue, Float(totalTime)), 0)
                 showSeekToView(second: Double(tmpPanValue), isAdd: point.x > 0)
             }
         }
+    }
+
+    open func seekSpeed(velocity point: CGPoint, currentTime _: Float, totalTime: Float) -> Float {
+        max(min(Float(point.x) / 0x40000, 0.01), -0.01) * totalTime
     }
 
     open func panGestureEnded() {
