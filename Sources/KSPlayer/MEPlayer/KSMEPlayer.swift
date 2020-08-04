@@ -205,9 +205,9 @@ extension KSMEPlayer: MediaPlayerProtocol {
 
     public func replace(url: URL, options: KSOptions) {
         KSLog("replaceUrl \(self)")
+        shutdown()
         audioOutput.clear()
         videoOutput.clear()
-        shutdown()
         playerItem.delegate = nil
         playerItem = MEPlayerItem(url: url, options: options)
         self.options = options

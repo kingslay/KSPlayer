@@ -28,10 +28,10 @@ final class MetalPlayView: MTKView, MTKViewDelegate, FrameOutput {
                     MetalRender.share.draw(pixelBuffer: pixelBuffer, display: display, inputTextures: textures, drawable: drawable, renderPassDescriptor: renderPassDescriptor)
                 }
             } else {
-                guard let drawable = currentDrawable, let passDescriptor = currentRenderPassDescriptor else {
+                guard let drawable = currentDrawable else {
                     return
                 }
-                MetalRender.share.clear(drawable: drawable, renderPassDescriptor: passDescriptor)
+                MetalRender.share.clear(drawable: drawable, renderPassDescriptor: renderPassDescriptor)
             }
         }
     }
@@ -52,7 +52,8 @@ final class MetalPlayView: MTKView, MTKViewDelegate, FrameOutput {
     }
 
     func clear() {
-        pixelBuffer = nil
+//        no use the way to clear texture
+//        pixelBuffer = nil
     }
 
     func mtkView(_: MTKView, drawableSizeWillChange _: CGSize) {}
