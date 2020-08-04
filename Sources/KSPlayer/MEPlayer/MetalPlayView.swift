@@ -27,12 +27,13 @@ final class MetalPlayView: MTKView, MTKViewDelegate, FrameOutput {
                     }
                     MetalRender.share.draw(pixelBuffer: pixelBuffer, display: display, inputTextures: textures, drawable: drawable, renderPassDescriptor: renderPassDescriptor)
                 }
-            } else {
-                guard let drawable = currentDrawable else {
-                    return
-                }
-                MetalRender.share.clear(drawable: drawable, renderPassDescriptor: renderPassDescriptor)
             }
+//            else {
+//                guard let drawable = currentDrawable else {
+//                    return
+//                }
+//                MetalRender.share.clear(drawable: drawable, renderPassDescriptor: renderPassDescriptor)
+//            }
         }
     }
 
