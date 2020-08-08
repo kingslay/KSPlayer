@@ -13,7 +13,7 @@ final class MetalPlayView: MTKView, MTKViewDelegate, FrameOutput {
     private let renderPassDescriptor = MTLRenderPassDescriptor()
     var display: DisplayEnum = .plane
     weak var renderSource: OutputRenderSourceDelegate?
-    var pixelBuffer: BufferProtocol? {
+    private var pixelBuffer: BufferProtocol? {
         didSet {
             if let pixelBuffer = pixelBuffer {
                 autoreleasepool {
@@ -46,6 +46,7 @@ final class MetalPlayView: MTKView, MTKViewDelegate, FrameOutput {
         clearColor = MTLClearColor(red: 0, green: 0, blue: 0, alpha: 1)
         delegate = self
         preferredFramesPerSecond = KSPlayerManager.preferredFramesPerSecond
+        isPaused = true
     }
 
     required init(coder _: NSCoder) {
@@ -59,7 +60,7 @@ final class MetalPlayView: MTKView, MTKViewDelegate, FrameOutput {
     func mtkView(_: MTKView, drawableSizeWillChange _: CGSize) {}
 
     func draw(in _: MTKView) {
-        if let frame = renderSource?.getOutputRender(type: .video, isDependent: true) as? VideoVTBFrame, let corePixelBuffer = frame.corePixelBuffer {
+        if let frame = renderSource?.getOutputRender(type: .video) as? VideoVTBFrame, let corePixelBuffer = frame.corePixelBuffer {
             renderSource?.setVideo(time: frame.cmtime)
             pixelBuffer = corePixelBuffer
         }

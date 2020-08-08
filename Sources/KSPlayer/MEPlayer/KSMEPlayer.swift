@@ -163,13 +163,11 @@ extension KSMEPlayer: MEPlayerDelegate {
             }
         }
 
-        if needRefreshView, playbackState != .playing {
+        if needRefreshView, loadingState.frameCount > 0, playbackState != .playing {
             DispatchQueue.main.async { [weak self] in
-                guard let self = self else { return }
-                if self.needRefreshView, let render = self.playerItem.getOutputRender(type: .video) as? VideoVTBFrame, let pixelBuffer = render.corePixelBuffer {
-                    self.needRefreshView = false
-                    self.videoOutput.pixelBuffer = pixelBuffer
-                }
+                guard let self = self, self.needRefreshView else { return }
+                self.needRefreshView = false
+                self.videoOutput.draw()
             }
         }
     }
