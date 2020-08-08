@@ -43,15 +43,9 @@ enum MESourceState {
 
 protocol OutputRenderSourceDelegate: AnyObject {
     var currentPlaybackTime: TimeInterval { get }
-    func getOutputRender(type: AVFoundation.AVMediaType, isDependent: Bool) -> MEFrame?
+    func getOutputRender(type: AVFoundation.AVMediaType) -> MEFrame?
     func setVideo(time: CMTime)
     func setAudio(time: CMTime)
-}
-
-extension OutputRenderSourceDelegate {
-    func getOutputRender(type: AVFoundation.AVMediaType) -> MEFrame? {
-        getOutputRender(type: type, isDependent: false)
-    }
 }
 
 protocol CodecCapacityDelegate: AnyObject {

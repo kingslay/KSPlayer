@@ -428,7 +428,7 @@ extension MEPlayerItem: CodecCapacityDelegate {
         defer {
             semaphore.signal()
             if isBackground, let videoTrack = videoTrack, videoTrack.frameCount > videoTrack.frameMaxCount >> 1 {
-                _ = getOutputRender(type: .video, isDependent: true)
+                _ = getOutputRender(type: .video)
             }
         }
         guard let loadingState = options.playable(capacitys: videoAudioTracks, isFirst: isFirst, isSeek: isSeek) else {
@@ -508,9 +508,9 @@ extension MEPlayerItem: OutputRenderSourceDelegate {
         }
     }
 
-    func getOutputRender(type: AVFoundation.AVMediaType, isDependent: Bool) -> MEFrame? {
+    func getOutputRender(type: AVFoundation.AVMediaType) -> MEFrame? {
         var predicate: ((MEFrame) -> Bool)?
-        if isDependent {
+        if type == .video {
             predicate = { [weak self] (frame) -> Bool in
                 guard let self = self else { return true }
                 var desire = self.positionTime
