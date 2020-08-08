@@ -15,8 +15,6 @@ import AppKit
 public class KSMEPlayer {
     private var loopCount = 1
     private let audioOutput = AudioOutput()
-    // 为了及时显示页面
-    private var needRefreshView = true
     private var playerItem: MEPlayerItem
     private let videoOutput = MetalPlayView()
     private var options: KSOptions
@@ -49,6 +47,7 @@ public class KSMEPlayer {
     public private(set) var playbackState = MediaPlaybackState.idle {
         didSet {
             if playbackState != oldValue {
+                videoOutput.isPaused = playbackState != .playing
                 playOrPause()
                 if playbackState == .finished {
                     delegate?.finish(player: self, error: nil)
@@ -78,13 +77,7 @@ extension KSMEPlayer {
     private func playOrPause() {
         runInMainqueue { [weak self] in
             guard let self = self else { return }
-            if self.playbackState == .playing, self.loadState == .playable {
-                self.audioOutput.isPaused = false
-                self.videoOutput.isPaused = false
-            } else {
-                self.audioOutput.isPaused = true
-                self.videoOutput.isPaused = true
-            }
+            self.audioOutput.isPaused = !(self.playbackState == .playing && self.loadState == .playable)
             self.delegate?.changeLoadState(player: self)
         }
     }
@@ -97,6 +90,7 @@ extension KSMEPlayer: MEPlayerDelegate {
             guard let self = self else { return }
             self.videoOutput.drawableSize = self.options.display == .plane ? self.naturalSize : UIScreen.size
             self.view.centerRotate(byDegrees: self.playerItem.rotation)
+            self.videoOutput.isPaused = false
             if self.options.isAutoPlay {
                 self.play()
             }
@@ -160,14 +154,6 @@ extension KSMEPlayer: MEPlayerDelegate {
                     // 在主线程更新进度
                     self?.bufferingProgress = progress
                 }
-            }
-        }
-
-        if needRefreshView, loadingState.frameCount > 0, playbackState != .playing {
-            DispatchQueue.main.async { [weak self] in
-                guard let self = self, self.needRefreshView else { return }
-                self.needRefreshView = false
-                self.videoOutput.draw()
             }
         }
     }
@@ -237,6 +223,7 @@ extension KSMEPlayer: MediaPlayerProtocol {
         runInMainqueue { [weak self] in
             self?.bufferingProgress = 0
         }
+        audioOutput.clear()
         playerItem.seek(time: time) { [weak self] result in
             guard let self = self else { return }
             self.audioOutput.clear()
@@ -244,9 +231,6 @@ extension KSMEPlayer: MediaPlayerProtocol {
                 guard let self = self else { return }
                 self.playbackState = oldPlaybackState
                 handler?(result)
-                if self.playbackState != .playing {
-                    self.needRefreshView = true
-                }
             }
         }
     }
@@ -272,7 +256,6 @@ extension KSMEPlayer: MediaPlayerProtocol {
         playbackState = .stopped
         loadState = .idle
         isPreparedToPlay = false
-        needRefreshView = true
         loopCount = 0
         playerItem.shutdown()
     }
