@@ -302,7 +302,7 @@ final class AsyncPlayerItemTrack: FFPlayerItemTrack<Frame> {
                     return
                 }
                 if seekTime > 0, options.isAccurateSeek {
-                    if frame.seconds < seekTime {
+                    if frame.timebase.cmtime(for: frame.position + frame.duration).seconds < seekTime {
                         return
                     } else {
                         seekTime = 0.0

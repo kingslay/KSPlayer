@@ -276,9 +276,8 @@ extension MEPlayerItem {
             }
             if state == .seeking {
                 let timeStamp = Int64(positionTime * TimeInterval(AV_TIME_BASE))
-                // 不要用avformat_seek_file，否则可能会向前跳
-                //                let tolerance: Int64 = KSPlayerManager.isAccurateSeek ? 0 : 2
-                //                let result = avformat_seek_file(formatCtx, -1, timeStamp - tolerance, timeStamp, timeStamp, AVSEEK_FLAG_BACKWARD)
+                // can not seek to key frame
+//                let result = avformat_seek_file(formatCtx, -1, timeStamp - 2, timeStamp, timeStamp + 2, AVSEEK_FLAG_BACKWARD)
                 let result = av_seek_frame(formatCtx, -1, timeStamp, AVSEEK_FLAG_BACKWARD)
                 allTracks.forEach { $0.seek(time: positionTime) }
                 isSeek = true
