@@ -120,7 +120,7 @@ public class KSOptions {
     public static var isSecondOpen = false
     /// 开启精确seek
     public static var isAccurateSeek = true
-    /// 开启无缝循环播放
+    /// Applies to short videos only
     public static var isLoopPlay = false
     /// 是否自动播放，默认false
     public static var isAutoPlay = false
@@ -142,7 +142,7 @@ public class KSOptions {
     public var isSecondOpen = KSOptions.isSecondOpen
     /// 开启精确seek
     public var isAccurateSeek = KSOptions.isAccurateSeek
-    /// 开启无缝循环播放
+    /// Applies to short videos only
     public var isLoopPlay = KSOptions.isLoopPlay
     /// 是否自动播放，默认false
     public var isAutoPlay = KSOptions.isAutoPlay

@@ -53,8 +53,7 @@ final class MetalPlayView: MTKView, MTKViewDelegate, FrameOutput {
     }
 
     func clear() {
-//        no use the way to clear texture
-//        pixelBuffer = nil
+        pixelBuffer = nil
     }
 
     func mtkView(_: MTKView, drawableSizeWillChange _: CGSize) {}
