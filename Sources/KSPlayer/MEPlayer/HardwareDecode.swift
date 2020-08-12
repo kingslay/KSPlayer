@@ -10,9 +10,7 @@ import VideoToolbox
 
 protocol DecodeProtocol {
     init(assetTrack: TrackProtocol, options: KSOptions)
-    func decode()
     func doDecode(packet: UnsafeMutablePointer<AVPacket>) throws -> [Frame]
-    func seek(time: TimeInterval)
     func doFlushCodec()
     func shutdown()
 }
@@ -94,7 +92,7 @@ class HardwareDecode: DecodeProtocol {
                 throw NSError(errorCode: .codecVideoReceiveFrame, ffmpegErrnum: vtStatus)
             } else {
                 // 解决从后台切换到前台，解码失败的问题
-                doFlushCodec()
+                self.session = DecompressionSession(codecpar: codecpar, options: options)
             }
         }
         return result
@@ -102,20 +100,12 @@ class HardwareDecode: DecodeProtocol {
 
     func doFlushCodec() {
         session = DecompressionSession(codecpar: codecpar, options: options)
+        lastPosition = 0
+        startTime = 0
     }
 
     func shutdown() {
         session = nil
-    }
-
-    func seek(time _: TimeInterval) {
-        lastPosition = 0
-        startTime = 0
-    }
-
-    func decode() {
-        lastPosition = 0
-        startTime = 0
     }
 }
 
@@ -196,23 +186,22 @@ extension CMFormatDescription {
         if isConvertNALSize {
             var ioContext: UnsafeMutablePointer<AVIOContext>?
             let status = avio_open_dyn_buf(&ioContext)
-            if status == 0 {
-                var nalSize: UInt32 = 0
-                let end = data + size
-                var nalStart = data
-                while nalStart < end {
-                    nalSize = UInt32(UInt32(nalStart[0]) << 16 | UInt32(nalStart[1]) << 8 | UInt32(nalStart[2]))
-                    avio_wb32(ioContext, nalSize)
-                    nalStart += 3
-                    avio_write(ioContext, nalStart, Int32(nalSize))
-                    nalStart += Int(nalSize)
-                }
-                var demuxBuffer: UnsafeMutablePointer<UInt8>?
-                let demuxSze = avio_close_dyn_buf(ioContext, &demuxBuffer)
-                return try createSampleBuffer(data: demuxBuffer, size: Int(demuxSze))
-            } else {
+            guard status == 0 else {
                 throw NSError(errorCode: .codecVideoReceiveFrame, ffmpegErrnum: status)
             }
+            var nalSize: UInt32 = 0
+            let end = data + size
+            var nalStart = data
+            while nalStart < end {
+                nalSize = UInt32(UInt32(nalStart[0]) << 16 | UInt32(nalStart[1]) << 8 | UInt32(nalStart[2]))
+                avio_wb32(ioContext, nalSize)
+                nalStart += 3
+                avio_write(ioContext, nalStart, Int32(nalSize))
+                nalStart += Int(nalSize)
+            }
+            var demuxBuffer: UnsafeMutablePointer<UInt8>?
+            let demuxSze = avio_close_dyn_buf(ioContext, &demuxBuffer)
+            return try createSampleBuffer(data: demuxBuffer, size: Int(demuxSze))
         } else {
             return try createSampleBuffer(data: data, size: size)
         }

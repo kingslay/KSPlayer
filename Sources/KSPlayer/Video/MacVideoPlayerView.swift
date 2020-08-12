@@ -128,7 +128,8 @@ extension MacVideoPlayerView {
     override open func performDragOperation(_ sender: NSDraggingInfo) -> Bool {
         if let url = sender.getUrl() {
             if let set = MacVideoPlayerView.supportedFileExt[.subtitle],
-                set.contains(url.pathExtension.lowercased()) {
+                set.contains(url.pathExtension.lowercased())
+            {
                 resource?.subtitle = KSURLSubtitle(url: url)
                 return true
             } else if MacVideoPlayerView.playableFileExt.contains(url.pathExtension.lowercased()) {

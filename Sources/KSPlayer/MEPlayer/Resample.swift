@@ -86,7 +86,14 @@ class VideoSwresample: Swresample {
         return frame
     }
 
-    func swsConvert(data: [UnsafeMutablePointer<UInt8>?], linesize: [Int32]) -> Bool {
+    func transfer(format: AVPixelFormat, width: Int32, height: Int32, data: [UnsafeMutablePointer<UInt8>?], linesize: [Int32]) -> UIImage? {
+        if setup(format: format.rawValue, width: width, height: height), swsConvert(data: data, linesize: linesize), let frame = dstFrame?.pointee {
+            return UIImage(rgbData: frame.data.0!, linesize: Int(frame.linesize.0), width: Int(width), height: Int(height), isAlpha: dstFormat == AV_PIX_FMT_RGBA)
+        }
+        return nil
+    }
+
+    private func swsConvert(data: [UnsafeMutablePointer<UInt8>?], linesize: [Int32]) -> Bool {
         guard let dstFrame = dstFrame else {
             return false
         }
@@ -188,12 +195,8 @@ class PixelBuffer: BufferProtocol {
             image = UIImage(rgbData: dataWrap.data[0]!, linesize: Int(bytesPerRow[0]), width: width, height: height)
         }
         let scale = VideoSwresample(dstFormat: AV_PIX_FMT_RGB24, forceTransfer: true)
-        if scale.setup(format: format.format.rawValue, width: Int32(width), height: Int32(height)) {
-            if scale.swsConvert(data: dataWrap.data, linesize: bytesPerRow), let frame = scale.dstFrame?.pointee {
-                image = UIImage(rgbData: frame.data.0!, linesize: Int(frame.linesize.0), width: width, height: height)
-            }
-            scale.shutdown()
-        }
+        image = scale.transfer(format: format.format, width: Int32(width), height: Int32(height), data: dataWrap.data, linesize: bytesPerRow)
+        scale.shutdown()
         return image
     }
 }
@@ -295,12 +298,14 @@ extension CVPixelBufferPool {
 }
 
 extension UIImage {
-    convenience init?(rgbData: UnsafePointer<UInt8>, linesize: Int, width: Int, height: Int) {
+    convenience init?(rgbData: UnsafePointer<UInt8>, linesize: Int, width: Int, height: Int, isAlpha: Bool = false) {
         let colorSpace = CGColorSpaceCreateDeviceRGB()
+        let bitmapInfo: CGBitmapInfo = isAlpha ? CGBitmapInfo(rawValue: CGImageAlphaInfo.last.rawValue) : []
         guard let data = CFDataCreate(kCFAllocatorDefault, rgbData, linesize * height),
             let provider = CGDataProvider(data: data),
             // swiftlint:disable line_length
-            let imageRef = CGImage(width: width, height: height, bitsPerComponent: 8, bitsPerPixel: 24, bytesPerRow: linesize, space: colorSpace, bitmapInfo: [], provider: provider, decode: nil, shouldInterpolate: false, intent: .defaultIntent) else {
+            let imageRef = CGImage(width: width, height: height, bitsPerComponent: 8, bitsPerPixel: isAlpha ? 32 : 24, bytesPerRow: linesize, space: colorSpace, bitmapInfo: bitmapInfo, provider: provider, decode: nil, shouldInterpolate: false, intent: .defaultIntent)
+        else {
             // swiftlint:enable line_length
             return nil
         }

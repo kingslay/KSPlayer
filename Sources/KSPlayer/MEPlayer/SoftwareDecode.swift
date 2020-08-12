@@ -82,20 +82,12 @@ class SoftwareDecode: DecodeProtocol {
         } else {
             avcodec_flush_buffers(codecContext)
         }
+        bestEffortTimestamp = Int64(0)
     }
 
     func shutdown() {
         av_frame_free(&coreFrame)
         avcodec_free_context(&codecContext)
-    }
-
-    func seek(time _: TimeInterval) {
-        bestEffortTimestamp = Int64(0)
-    }
-
-    func decode() {
-        bestEffortTimestamp = Int64(0)
-        avcodec_flush_buffers(codecContext)
     }
 
     deinit {
