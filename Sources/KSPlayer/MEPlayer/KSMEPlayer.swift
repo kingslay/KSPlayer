@@ -258,6 +258,13 @@ extension KSMEPlayer: MediaPlayerProtocol {
         isPreparedToPlay = false
         loopCount = 0
         playerItem.shutdown()
+        options.starTime = 0
+        options.openTime = 0
+        options.findTime = 0
+        options.readAudioTime = 0
+        options.readVideoTime = 0
+        options.decodeAudioTime = 0
+        options.decodeVideoTime = 0
     }
 
     public var contentMode: UIViewContentMode {
