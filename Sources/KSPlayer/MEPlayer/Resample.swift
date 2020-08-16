@@ -140,7 +140,7 @@ class PixelBuffer: BufferProtocol {
         let vertical = Int(frame.pointee.sample_aspect_ratio.den)
         let horizontal = Int(frame.pointee.sample_aspect_ratio.num)
         if vertical > 0, horizontal > 0, vertical != horizontal {
-            drawableSize = CGSize(width: width * horizontal, height: height * vertical)
+            drawableSize = CGSize(width: width, height: height * vertical / horizontal)
         } else {
             drawableSize = CGSize(width: width, height: height)
         }

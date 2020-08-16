@@ -112,7 +112,7 @@ extension CVPixelBuffer: BufferProtocol {
             let vertical = (ratio[kCVImageBufferPixelAspectRatioVerticalSpacingKey] as? NSNumber)?.intValue,
             horizontal > 0, vertical > 0, horizontal != vertical
         {
-            return CGSize(width: width * horizontal, height: height * vertical)
+            return CGSize(width: width, height: height * vertical / horizontal)
         } else {
             return size
         }
