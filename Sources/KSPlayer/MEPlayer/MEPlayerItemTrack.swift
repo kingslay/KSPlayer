@@ -46,8 +46,7 @@ struct AssetTrack: TrackProtocol {
     init?(stream: UnsafeMutablePointer<AVStream>) {
         self.stream = stream
         if let bitrateEntry = av_dict_get(stream.pointee.metadata, "variant_bitrate", nil, 0) ?? av_dict_get(stream.pointee.metadata, "BPS", nil, 0),
-            let bitRate = Int64(String(cString: bitrateEntry.pointee.value))
-        {
+            let bitRate = Int64(String(cString: bitrateEntry.pointee.value)) {
             self.bitRate = bitRate
         } else {
             bitRate = stream.pointee.codecpar.pointee.bit_rate
@@ -233,7 +232,7 @@ final class AsyncPlayerItemTrack: FFPlayerItemTrack<Frame> {
 
     private func decodeThread() {
         state = .decoding
-        decoderMap.values.forEach { $0.doFlushCodec() }
+        decoderMap.values.forEach { $0.decode() }
         while !decodeOperation.isCancelled {
             if state == .flush {
                 decoderMap.values.forEach { $0.doFlushCodec() }
@@ -271,6 +270,7 @@ final class AsyncPlayerItemTrack: FFPlayerItemTrack<Frame> {
         loopPacketQueue = nil
         isLoopModel = false
         delegate?.codecDidChangeCapacity(track: self)
+        decoderMap.values.forEach { $0.seek(time: time) }
     }
 
     override func shutdown() {

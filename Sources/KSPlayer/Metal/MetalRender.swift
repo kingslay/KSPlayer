@@ -86,8 +86,7 @@ class MetalRender {
         renderPassDescriptor.colorAttachments[0].clearColor = MTLClearColor(red: 0, green: 0, blue: 0, alpha: 0)
         renderPassDescriptor.colorAttachments[0].loadAction = .clear
         guard let commandBuffer = commandQueue?.makeCommandBuffer(),
-            let encoder = commandBuffer.makeRenderCommandEncoder(descriptor: renderPassDescriptor)
-        else {
+            let encoder = commandBuffer.makeRenderCommandEncoder(descriptor: renderPassDescriptor) else {
             return
         }
         encoder.endEncoding()
@@ -98,8 +97,7 @@ class MetalRender {
     func draw(pixelBuffer: BufferProtocol, display: DisplayEnum = .plane, inputTextures: [MTLTexture], drawable: CAMetalDrawable, renderPassDescriptor: MTLRenderPassDescriptor) {
         renderPassDescriptor.colorAttachments[0].texture = drawable.texture
         guard inputTextures.count > 0, let commandBuffer = commandQueue?.makeCommandBuffer(),
-            let encoder = commandBuffer.makeRenderCommandEncoder(descriptor: renderPassDescriptor)
-        else {
+            let encoder = commandBuffer.makeRenderCommandEncoder(descriptor: renderPassDescriptor) else {
             return
         }
         encoder.pushDebugGroup("RenderFrame")
