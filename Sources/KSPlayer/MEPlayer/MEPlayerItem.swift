@@ -161,7 +161,6 @@ extension MEPlayerItem {
             avformat_close_input(&self.formatCtx)
             return
         }
-        av_format_inject_global_side_data(formatCtx)
         options.openTime = CACurrentMediaTime()
         result = avformat_find_stream_info(formatCtx, nil)
         guard result == 0 else {
@@ -280,9 +279,6 @@ extension MEPlayerItem {
                 // can not seek to key frame
 //                let result = avformat_seek_file(formatCtx, -1, timeStamp - 2, timeStamp, timeStamp + 2, AVSEEK_FLAG_BACKWARD)
                 let result = av_seek_frame(formatCtx, -1, timeStamp, AVSEEK_FLAG_BACKWARD)
-                guard state == .seeking else {
-                    return
-                }
                 allTracks.forEach { $0.seek(time: positionTime) }
                 isSeek = true
                 seekingCompletionHandler?(result >= 0)
@@ -299,9 +295,6 @@ extension MEPlayerItem {
     private func reading() {
         let packet = Packet()
         let readResult = av_read_frame(formatCtx, packet.corePacket)
-        guard state == .reading else {
-            return
-        }
         if readResult == 0 {
             if packet.corePacket.pointee.size <= 0 {
                 return
