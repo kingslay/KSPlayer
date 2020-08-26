@@ -136,6 +136,7 @@ class FFPlayerItemTrack<Frame: MEFrame>: PlayerItemTrackProtocol, CustomStringCo
     }
 
     func decode() {
+        isEndOfFile = false
         state = .decoding
     }
 
@@ -184,6 +185,7 @@ final class AsyncPlayerItemTrack: FFPlayerItemTrack<Frame> {
                 if let loopPacketQueue = loopPacketQueue {
                     packetQueue.shutdown()
                     packetQueue = loopPacketQueue
+                    self.loopPacketQueue = nil
                 }
             }
         }
@@ -232,6 +234,7 @@ final class AsyncPlayerItemTrack: FFPlayerItemTrack<Frame> {
 
     private func decodeThread() {
         state = .decoding
+        isEndOfFile = false
         decoderMap.values.forEach { $0.decode() }
         while !decodeOperation.isCancelled {
             if state == .flush {
