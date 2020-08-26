@@ -135,6 +135,7 @@ enum MECodecState {
     case flush
     case closed
     case failed
+    case finished
 }
 
 struct Timebase {
