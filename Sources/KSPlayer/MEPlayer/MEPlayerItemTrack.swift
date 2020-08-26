@@ -194,7 +194,7 @@ final class AsyncPlayerItemTrack: FFPlayerItemTrack<Frame> {
     override var isEndOfFile: Bool {
         didSet {
             if isEndOfFile {
-                if packetQueue.count == 0, frameCount == 0 {
+                if state == .finished, frameCount == 0 {
                     delegate?.codecDidFinished(track: self)
                 }
                 delegate?.codecDidChangeCapacity(track: self)
@@ -240,7 +240,8 @@ final class AsyncPlayerItemTrack: FFPlayerItemTrack<Frame> {
             if state == .flush {
                 decoderMap.values.forEach { $0.doFlushCodec() }
                 state = .decoding
-            } else if state == .closed || state == .failed || (isEndOfFile && packetQueue.count == 0) {
+            } else if isEndOfFile && packetQueue.count == 0 {
+                state = .finished
                 break
             } else if state == .decoding {
                 guard let packet = packetQueue.pop(wait: true), state != .flush, state != .closed else {
@@ -249,6 +250,8 @@ final class AsyncPlayerItemTrack: FFPlayerItemTrack<Frame> {
                 autoreleasepool {
                     doDecode(packet: packet)
                 }
+            } else {
+                break
             }
         }
     }
@@ -256,7 +259,7 @@ final class AsyncPlayerItemTrack: FFPlayerItemTrack<Frame> {
     override func getOutputRender(where predicate: ((MEFrame) -> Bool)?) -> MEFrame? {
         let outputFecthRender = outputRenderQueue.pop(where: predicate)
         if outputFecthRender == nil {
-            if isEndOfFile, packetQueue.count == 0, frameCount == 0 {
+            if state == .finished, frameCount == 0 {
                 delegate?.codecDidFinished(track: self)
             }
         } else {
