@@ -224,7 +224,13 @@ extension KSMEPlayer: MediaPlayerProtocol {
             self?.bufferingProgress = 0
         }
         audioOutput.clear()
-        playerItem.seek(time: time) { [weak self] result in
+        let seekTime: TimeInterval
+        if time >= duration, options.isLoopPlay {
+            seekTime = 0
+        } else {
+            seekTime = time
+        }
+        playerItem.seek(time: seekTime) { [weak self] result in
             guard let self = self else { return }
             self.audioOutput.clear()
             runInMainqueue { [weak self] in
