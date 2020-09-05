@@ -9,12 +9,7 @@ import CoreMedia
 import ffmpeg
 protocol TrackProtocol: MediaPlayerTrack, CustomStringConvertible {
     var stream: UnsafeMutablePointer<AVStream> { get }
-    var mediaType: AVFoundation.AVMediaType { get }
     var timebase: Timebase { get }
-    var fps: Int { get }
-    var rotation: Double { get }
-    var bitRate: Int64 { get }
-    var naturalSize: CGSize { get }
 }
 
 extension TrackProtocol {

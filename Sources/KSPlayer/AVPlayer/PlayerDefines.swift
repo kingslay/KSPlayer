@@ -63,6 +63,11 @@ public protocol MediaPlayerDelegate: AnyObject {
 public protocol MediaPlayerTrack {
     var name: String { get }
     var language: String? { get }
+    var mediaType: AVFoundation.AVMediaType { get }
+    var fps: Int { get }
+    var rotation: Double { get }
+    var bitRate: Int64 { get }
+    var naturalSize: CGSize { get }
 }
 
 extension MediaPlayerProtocol {

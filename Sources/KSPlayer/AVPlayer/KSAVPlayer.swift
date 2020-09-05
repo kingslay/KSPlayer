@@ -486,10 +486,17 @@ extension AVMediaType {
 }
 
 struct AVMediaPlayerTrack: MediaPlayerTrack {
+    let fps: Int = 0
+    let rotation: Double = 0
+    let bitRate: Int64 = 0
+    let naturalSize: CGSize = .zero
     let option: AVMediaSelectionOption
     let group: AVMediaSelectionGroup
     let name: String
     let language: String?
+    var mediaType: AVMediaType {
+        option.mediaType
+    }
     init(option: AVMediaSelectionOption, group: AVMediaSelectionGroup) {
         self.option = option
         self.group = group
