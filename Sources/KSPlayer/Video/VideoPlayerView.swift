@@ -474,7 +474,7 @@ extension VideoPlayerView {
         loadingIndector.stopAnimating()
     }
 
-    private func showSubtile(from subtitle: KSSubtitleProtocol, at time: TimeInterval) {
+    open func showSubtile(from subtitle: KSSubtitleProtocol, at time: TimeInterval) {
         if let text = subtitle.search(for: time) {
             subtitleBackView.isHidden = false
             subtitleLabel.attributedText = text
