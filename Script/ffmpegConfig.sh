@@ -95,6 +95,7 @@ CONFIGURE_FLAGS="$CONFIGURE_FLAGS --enable-decoder=vp6f"
 CONFIGURE_FLAGS="$CONFIGURE_FLAGS --enable-decoder=vp7"
 CONFIGURE_FLAGS="$CONFIGURE_FLAGS --enable-decoder=vp8"
 CONFIGURE_FLAGS="$CONFIGURE_FLAGS --enable-decoder=vp9"
+CONFIGURE_FLAGS="$CONFIGURE_FLAGS --enable-decoder=rtsp"
 #音频
 CONFIGURE_FLAGS="$CONFIGURE_FLAGS --enable-decoder=aac"
 CONFIGURE_FLAGS="$CONFIGURE_FLAGS --enable-decoder=aac_latm"
