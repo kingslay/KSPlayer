@@ -183,7 +183,7 @@ public class KSOptions {
         formatContextOptions["reconnect"] = 1
         // There is total different meaning for 'timeout' option in rtmp
         // remove 'timeout' option for rtmp、rtsp
-//        formatContextOptions["timeout"] = 30_000_000
+        formatContextOptions["timeout"] = 30_000_000
         formatContextOptions["rw_timeout"] = 30_000_000
         formatContextOptions["user_agent"] = "ksplayer"
         decoderOptions["threads"] = "auto"

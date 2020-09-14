@@ -25,7 +25,11 @@ struct ContentView: View {
                     }
                     alert.addAction(UIAlertAction(title: "Done", style: .default) { _ in
                         if let text = alert.textFields?[0].text, let url = URL(string: text.trimmingCharacters(in: .whitespacesAndNewlines)) {
-                            self.resources.insert(KSPlayerResource(url: url, name: "new add"), at: 0)
+                            let options = KSOptions()
+                            if url.absoluteString.hasSuffix("rtmp") || url.absoluteString.hasSuffix("rtsp") {
+                                options.formatContextOptions["timeout"] = 0
+                            }
+                            self.resources.insert(KSPlayerResource(url: url, options: options, name: "new add"), at: 0)
                         } else if let list = alert.textFields?[1].text {
                             self.updatem3u8(list.trimmingCharacters(in: .whitespacesAndNewlines))
                         }
