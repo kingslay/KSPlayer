@@ -26,7 +26,7 @@ struct ContentView: View {
                     alert.addAction(UIAlertAction(title: "Done", style: .default) { _ in
                         if let text = alert.textFields?[0].text, let url = URL(string: text.trimmingCharacters(in: .whitespacesAndNewlines)) {
                             let options = KSOptions()
-                            if url.absoluteString.hasSuffix("rtmp") || url.absoluteString.hasSuffix("rtsp") {
+                            if url.absoluteString.hasPrefix("rtmp") || url.absoluteString.hasPrefix("rtsp") {
                                 options.formatContextOptions["timeout"] = 0
                             }
                             self.resources.insert(KSPlayerResource(url: url, options: options, name: "new add"), at: 0)
