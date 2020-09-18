@@ -95,7 +95,9 @@ class SoftwareDecode: DecodeProtocol {
 
     func decode() {
         bestEffortTimestamp = Int64(0)
-        avcodec_flush_buffers(codecContext)
+        if codecContext != nil {
+            avcodec_flush_buffers(codecContext)
+        }
     }
 
     deinit {
