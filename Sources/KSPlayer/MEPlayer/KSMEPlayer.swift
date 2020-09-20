@@ -67,7 +67,7 @@ public class KSMEPlayer {
     }
 
     deinit {
-        audioOutput.isPaused = true
+        shutdown()
     }
 }
 

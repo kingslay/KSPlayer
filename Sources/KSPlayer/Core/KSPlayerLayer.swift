@@ -77,7 +77,6 @@ open class KSPlayerLayer: UIView {
     public var player: MediaPlayerProtocol? {
         didSet {
             oldValue?.view.removeFromSuperview()
-            oldValue?.shutdown()
             if let player = player {
                 KSLog("player is \(player)")
                 player.delegate = self
@@ -187,7 +186,6 @@ open class KSPlayerLayer: UIView {
         shouldSeekTo = 0
         player?.playbackRate = 1
         player?.playbackVolume = 1
-        player?.shutdown()
         UIApplication.shared.isIdleTimerDisabled = false
     }
 
