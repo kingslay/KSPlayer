@@ -457,15 +457,13 @@ extension KSAVPlayer: MediaPlayerProtocol {
     }
 
     public func tracks(mediaType: AVMediaType) -> [MediaPlayerTrack] {
-        guard let group = player.currentItem?.asset.mediaSelectionGroup(forMediaCharacteristic: mediaType.mediaCharacteristic) else {
-            return []
-        }
-        return group.options.map { AVMediaPlayerTrack(option: $0, group: group) }
+        return player.currentItem?.tracks.filter { $0.assetTrack?.mediaType == mediaType }.map { AVMediaPlayerTrack(track: $0) } ?? []
     }
 
     public func select(track: MediaPlayerTrack) {
         if let track = track as? AVMediaPlayerTrack {
-            player.currentItem?.select(track.option, in: track.group)
+            player.currentItem?.tracks.filter { $0.assetTrack?.mediaType.rawValue == AVMediaType.audio.rawValue }.dropFirst().forEach { $0.isEnabled = false }
+            track.track.isEnabled = true
         }
     }
 }
@@ -486,21 +484,23 @@ extension AVMediaType {
 }
 
 struct AVMediaPlayerTrack: MediaPlayerTrack {
-    let fps: Int = 0
+    fileprivate let track: AVPlayerItemTrack
+    let fps: Int
     let rotation: Double = 0
     let bitRate: Int64 = 0
-    let naturalSize: CGSize = .zero
-    let option: AVMediaSelectionOption
-    let group: AVMediaSelectionGroup
+    let naturalSize: CGSize
     let name: String
     let language: String?
-    var mediaType: AVMediaType {
-        option.mediaType
+    let mediaType: AVMediaType
+    var isEnabled: Bool {
+        track.isEnabled
     }
-    init(option: AVMediaSelectionOption, group: AVMediaSelectionGroup) {
-        self.option = option
-        self.group = group
-        name = option.displayName
-        language = option.extendedLanguageTag
+    init(track: AVPlayerItemTrack) {
+        self.track = track
+        mediaType = track.assetTrack?.mediaType ?? .video
+        name = track.assetTrack?.languageCode ?? ""
+        language = track.assetTrack?.extendedLanguageTag
+        fps = Int(track.assetTrack?.nominalFrameRate ?? 24.0)
+        naturalSize = track.assetTrack?.naturalSize ?? .zero
     }
 }

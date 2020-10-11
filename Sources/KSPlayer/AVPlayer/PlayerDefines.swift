@@ -68,6 +68,7 @@ public protocol MediaPlayerTrack {
     var rotation: Double { get }
     var bitRate: Int64 { get }
     var naturalSize: CGSize { get }
+    var isEnabled: Bool { get }
 }
 
 extension MediaPlayerProtocol {
