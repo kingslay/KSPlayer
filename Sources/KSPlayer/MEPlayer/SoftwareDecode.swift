@@ -80,7 +80,9 @@ class SoftwareDecode: DecodeProtocol {
         if firstSeek {
             firstSeek = false
         } else {
-            avcodec_flush_buffers(codecContext)
+            if codecContext != nil {
+                avcodec_flush_buffers(codecContext)
+            }
         }
     }
 
