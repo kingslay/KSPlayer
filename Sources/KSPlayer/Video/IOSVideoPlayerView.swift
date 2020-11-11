@@ -147,8 +147,12 @@ open class IOSVideoPlayerView: VideoPlayerView {
             landscapeButton.isHidden = true
         }
         if UIApplication.isLandscape != isLandscape {
-            UIDevice.current.setValue(UIDevice.current.orientation.rawValue, forKey: "orientation")
-            UIDevice.current.setValue((isLandscape ? UIInterfaceOrientation.landscapeRight : UIInterfaceOrientation.portrait).rawValue, forKey: "orientation")
+            UIDevice.current.setValue(UIInterfaceOrientation.unknown.rawValue, forKey: "orientation")
+            UIDevice.current.setValue((isLandscape ? UIInterfaceOrientation.landscapeRight : .portrait).rawValue, forKey: "orientation")
+            if KSPlayerManager.supportedInterfaceOrientations != .all {
+                KSPlayerManager.supportedInterfaceOrientations = isLandscape ?  UIInterfaceOrientationMask.landscapeRight : .portrait
+                UIViewController.attemptRotationToDeviceOrientation()
+            }
         }
         lockButton.isHidden = !isLandscape
         judgePanGesture()
@@ -309,6 +313,11 @@ public class AirplayStatusView: UIView {
     required init?(coder _: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
+}
+extension KSPlayerManager {
+    /// func application(_ application: UIApplication, supportedInterfaceOrientationsFor window: UIWindow?) -> UIInterfaceOrientationMask
+    public static var supportedInterfaceOrientations = UIInterfaceOrientationMask.portrait
+
 }
 
 extension UIApplication {
