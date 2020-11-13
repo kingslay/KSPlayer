@@ -15,19 +15,19 @@
 #import "libswscale/swscale.h"
 #import "libswresample/swresample.h"
 
-int AVERROR_CONVERT(int err) {
+static __inline__ int AVERROR_CONVERT(int err) {
     return AVERROR(err);
 }
 
-bool IS_AVERROR_EOF(int err) {
+static __inline__ bool IS_AVERROR_EOF(int err) {
     return err == AVERROR_EOF;
 }
 
-bool IS_AVERROR_INVALIDDATA(int err) {
+static __inline__ bool IS_AVERROR_INVALIDDATA(int err) {
     return err == AVERROR_INVALIDDATA;
 }
 
-bool AVFILTER_EOF(int ret) {
+static __inline__ bool AVFILTER_EOF(int ret) {
     return ret == AVERROR(EAGAIN) || IS_AVERROR_EOF(ret);
 }
 
