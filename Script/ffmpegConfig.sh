@@ -114,6 +114,9 @@ CONFIGURE_FLAGS="$CONFIGURE_FLAGS --enable-decoder=opus"
 CONFIGURE_FLAGS="$CONFIGURE_FLAGS --enable-decoder=pcm*"
 CONFIGURE_FLAGS="$CONFIGURE_FLAGS --enable-decoder=wma*"
 CONFIGURE_FLAGS="$CONFIGURE_FLAGS --enable-decoder=vorbis"
+CONFIGURE_FLAGS="$CONFIGURE_FLAGS --enable-decoder=truehd"
+CONFIGURE_FLAGS="$CONFIGURE_FLAGS --enable-decoder=dolby_e"
+
 #字幕
 CONFIGURE_FLAGS="$CONFIGURE_FLAGS --enable-decoder=ass"
 CONFIGURE_FLAGS="$CONFIGURE_FLAGS --enable-decoder=srt"
