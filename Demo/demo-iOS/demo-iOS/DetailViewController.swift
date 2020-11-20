@@ -19,6 +19,9 @@ class DetailViewController: UIViewController, DetailProtocol {
         .lightContent
     }
 
+    override var prefersStatusBarHidden: Bool {
+        !playerView.isMaskShow
+    }
     private let playerView = IOSVideoPlayerView()
     #else
     private let playerView = CustomVideoPlayerView()
@@ -34,6 +37,7 @@ class DetailViewController: UIViewController, DetailProtocol {
     override func viewDidLoad() {
         super.viewDidLoad()
         view.addSubview(playerView)
+        playerView.delegate = self
         playerView.translatesAutoresizingMaskIntoConstraints = false
         #if os(iOS)
         NSLayoutConstraint.activate([
@@ -98,6 +102,32 @@ class DetailViewController: UIViewController, DetailProtocol {
         present(documentPicker, animated: true, completion: nil)
         #endif
     }
+}
+extension DetailViewController: PlayerControllerDelegate {
+    func playerController(state: KSPlayerState) {
+        
+    }
+    
+    func playerController(currentTime: TimeInterval, totalTime: TimeInterval) {
+        
+    }
+    
+    func playerController(finish error: Error?) {
+        
+    }
+    
+    func playerController(maskShow: Bool) {
+        setNeedsStatusBarAppearanceUpdate()
+    }
+    
+    func playerController(action: PlayerButtonType) {
+        
+    }
+    
+    func playerController(bufferedCount: Int, consumeTime: TimeInterval) {
+        
+    }
+    
 }
 
 #if os(iOS)
