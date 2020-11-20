@@ -42,7 +42,7 @@ Pod::Spec.new do |s|
             'HEADER_SEARCH_PATHS' => "${PODS_ROOT}/#{s.name}/Sources/FFmpeg.xcframework/macos-x86_64/FFmpeg.framework/Headers ${PODS_ROOT}/../../Sources/FFmpeg.xcframework/macos-x86_64/FFmpeg.framework/Headers"
         }
         ffmpeg.vendored_frameworks = 'Sources/FFmpeg.xcframework'
-        ffmpeg.dependency 'Openssl'
+        ffmpeg.dependency 'OpenSSL'
     end
     s.subspec 'Metal' do |ss|
         ss.source_files = 'Sources/KSPlayer/Metal/*.{swift,metal}'

@@ -5,7 +5,7 @@
 //  Created by kintan on 2018/3/10.
 //
 
-import ffmpeg
+import FFmpeg
 import VideoToolbox
 
 protocol DecodeProtocol {

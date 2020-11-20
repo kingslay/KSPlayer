@@ -6,7 +6,7 @@
 //
 
 import AVFoundation
-import ffmpeg
+import FFmpeg
 import Foundation
 
 class SoftwareDecode: DecodeProtocol {

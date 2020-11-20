@@ -6,7 +6,7 @@
 //
 
 import AVFoundation
-import ffmpeg
+import FFmpeg
 import VideoToolbox
 
 final class MEPlayerItem {

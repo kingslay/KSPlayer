@@ -107,7 +107,7 @@ function PackageToLibrary() {
 function CreateModulemap() {
     local framework=$1
     mkdir -p $framework/Modules
-	cp ffmpeg-umbrella.h $framework/Headers
+	cp FFmpeg.h $framework/Headers
     cp module.modulemap $framework/Modules
 }
 PrepareYasm

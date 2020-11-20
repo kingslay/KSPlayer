@@ -8,7 +8,7 @@
 import AVFoundation
 import CoreGraphics
 import CoreMedia
-import ffmpeg
+import FFmpeg
 import VideoToolbox
 #if canImport(UIKit)
 import UIKit
