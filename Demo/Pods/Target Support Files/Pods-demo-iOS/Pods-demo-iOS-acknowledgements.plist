@@ -1036,7 +1036,7 @@ That's all there is to it!
 			<key>License</key>
 			<string>MIT</string>
 			<key>Title</key>
-			<string>Openssl</string>
+			<string>OpenSSL</string>
 			<key>Type</key>
 			<string>PSGroupSpecifier</string>
 		</dict>

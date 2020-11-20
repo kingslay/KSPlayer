@@ -509,7 +509,7 @@ necessary.  Here is a sample; alter the names:
 That's all there is to it!
 
 
-## Openssl
+## OpenSSL
 
                   GNU LESSER GENERAL PUBLIC LICENSE
                        Version 2.1, February 1999

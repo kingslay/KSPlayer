@@ -103,6 +103,7 @@ class DetailViewController: UIViewController, DetailProtocol {
         #endif
     }
 }
+
 extension DetailViewController: PlayerControllerDelegate {
     func playerController(state: KSPlayerState) {
         
@@ -117,7 +118,9 @@ extension DetailViewController: PlayerControllerDelegate {
     }
     
     func playerController(maskShow: Bool) {
+        #if os(iOS)
         setNeedsStatusBarAppearanceUpdate()
+        #endif
     }
     
     func playerController(action: PlayerButtonType) {

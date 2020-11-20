@@ -6,7 +6,7 @@
 //  Copyright © 2018年 kintan. All rights reserved.
 //
 
-import ffmpeg
+import FFmpeg
 import KSPlayer
 import UIKit
 @available(iOS 13.0, tvOS 13.0, *)

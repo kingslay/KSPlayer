@@ -6,7 +6,7 @@
 //
 import AVFoundation
 import CoreMedia
-import ffmpeg
+import FFmpeg
 protocol TrackProtocol: MediaPlayerTrack, CustomStringConvertible {
     var stream: UnsafeMutablePointer<AVStream> { get }
     var timebase: Timebase { get }

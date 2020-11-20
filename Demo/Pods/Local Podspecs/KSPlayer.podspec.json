@@ -72,7 +72,7 @@
       },
       "vendored_frameworks": "Sources/FFmpeg.xcframework",
       "dependencies": {
-        "Openssl": [
+        "OpenSSL": [
 
         ]
       }

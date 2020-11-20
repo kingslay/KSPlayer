@@ -1,5 +1,4 @@
-framework module ffmpeg [system] {
-    umbrella header "ffmpeg-umbrella.h"
+framework module FFmpeg [system] {
+    header "FFmpeg.h"
     export *
-    module * { export * }
 }

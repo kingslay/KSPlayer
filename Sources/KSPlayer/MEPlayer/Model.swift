@@ -7,7 +7,7 @@
 
 import AVFoundation
 import CoreMedia
-import ffmpeg
+import FFmpeg
 #if canImport(UIKit)
 import UIKit
 #else

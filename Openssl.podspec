@@ -1,10 +1,10 @@
 Pod::Spec.new do |s|
-    s.name             = 'Openssl'
+    s.name             = 'OpenSSL'
     s.version          = '1.1.1'
-    s.summary          = 'Openssl'
+    s.summary          = 'OpenSSL'
 
     s.description      = <<-DESC
-    Openssl
+    OpenSSL
     DESC
 
     s.homepage         = 'https://github.com/kingslay/KSPlayer'
@@ -16,10 +16,10 @@ Pod::Spec.new do |s|
     s.osx.deployment_target = '10.11'
     # s.watchos.deployment_target = '2.0'
     s.tvos.deployment_target = '10.2'
-    s.default_subspec = 'Openssl'
+    s.default_subspec = 'OpenSSL'
     s.swift_version = '5.1'
     s.static_framework = true
-    s.subspec 'Openssl' do |openssl|
+    s.subspec 'OpenSSL' do |openssl|
         openssl.vendored_frameworks = 'Sources/OpenSSL.xcframework'
     end
 end
