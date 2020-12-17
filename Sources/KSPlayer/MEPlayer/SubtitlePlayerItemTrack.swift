@@ -60,11 +60,11 @@ final class SubtitlePlayerItemTrack: FFPlayerItemTrack<SubtitleFrame> {
             let seconds = frame.seconds
             var end = seconds
             if subtitle.end_display_time > 0 {
-                end += TimeInterval(subtitle.end_display_time) / 1000
+                end += TimeInterval(subtitle.end_display_time) / 1000.0
             } else if packet.duration > 0 {
                 end += frame.timebase.cmtime(for: packet.duration).seconds
             }
-            let part = SubtitlePart(seconds + TimeInterval(subtitle.start_display_time) / 1000, end, attributedString.string)
+            let part = SubtitlePart(seconds + TimeInterval(subtitle.start_display_time) / 1000.0, end, attributedString.string)
             if let preSubtitleFrame = preSubtitleFrame, preSubtitleFrame.part == part {
                 preSubtitleFrame.part?.text.append(NSAttributedString(string: "\n"))
                 preSubtitleFrame.part?.text.append(attributedString)
