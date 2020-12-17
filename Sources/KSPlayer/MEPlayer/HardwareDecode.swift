@@ -201,7 +201,7 @@ extension CMFormatDescription {
                 let end = data + size
                 var nalStart = data
                 while nalStart < end {
-                    nalSize = UInt32(UInt32(nalStart[0]) << 16 | UInt32(nalStart[1]) << 8 | UInt32(nalStart[2]))
+                    nalSize = UInt32(nalStart[0]) << 16 | UInt32(nalStart[1]) << 8 | UInt32(nalStart[2])
                     avio_wb32(ioContext, nalSize)
                     nalStart += 3
                     avio_write(ioContext, nalStart, Int32(nalSize))
