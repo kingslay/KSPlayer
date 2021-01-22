@@ -1,0 +1,6 @@
+framework module libavutil [system] {
+   header "avutil.h"
+    header "display.h"
+    header "imgutils.h"
+    export *
+}

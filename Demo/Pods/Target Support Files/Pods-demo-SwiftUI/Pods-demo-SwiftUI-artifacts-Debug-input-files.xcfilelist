@@ -1,3 +1,8 @@
 ${PODS_ROOT}/Target Support Files/Pods-demo-SwiftUI/Pods-demo-SwiftUI-artifacts.sh
-${PODS_ROOT}/../../Sources/FFmpeg.xcframework
-${PODS_ROOT}/../../Sources/OpenSSL.xcframework
+${PODS_ROOT}/../../Sources/libavcodec.xcframework
+${PODS_ROOT}/../../Sources/libavformat.xcframework
+${PODS_ROOT}/../../Sources/libavutil.xcframework
+${PODS_ROOT}/../../Sources/libswresample.xcframework
+${PODS_ROOT}/../../Sources/libswscale.xcframework
+${PODS_ROOT}/../../Sources/libssl.xcframework
+${PODS_ROOT}/../../Sources/libcrypto.xcframework

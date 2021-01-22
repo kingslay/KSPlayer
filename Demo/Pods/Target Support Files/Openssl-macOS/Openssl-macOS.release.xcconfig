@@ -1,5 +1,5 @@
 CONFIGURATION_BUILD_DIR = ${PODS_CONFIGURATION_BUILD_DIR}/OpenSSL-macOS
-FRAMEWORK_SEARCH_PATHS = $(inherited) "${PODS_ROOT}/../../Sources" "${PODS_ROOT}/../../Sources/OpenSSL.xcframework/macos-x86_64"
+FRAMEWORK_SEARCH_PATHS = $(inherited) "${PODS_ROOT}/../../Sources" "${PODS_ROOT}/../../Sources/libcrypto.xcframework/macos-x86_64" "${PODS_ROOT}/../../Sources/libssl.xcframework/macos-x86_64"
 GCC_PREPROCESSOR_DEFINITIONS = $(inherited) COCOAPODS=1
 PODS_BUILD_DIR = ${BUILD_DIR}
 PODS_CONFIGURATION_BUILD_DIR = ${PODS_BUILD_DIR}/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)

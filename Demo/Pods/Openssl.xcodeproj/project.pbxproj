@@ -42,12 +42,21 @@
 		62772B2E34C4F911AF759BD9D5681B13 /* OpenSSL-tvOS.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "OpenSSL-tvOS.debug.xcconfig"; path = "../OpenSSL-tvOS/OpenSSL-tvOS.debug.xcconfig"; sourceTree = "<group>"; };
 		AC16898D7CE82F6CBD58904108B6D4D8 /* OpenSSL-macOS.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "OpenSSL-macOS.release.xcconfig"; path = "../OpenSSL-macOS/OpenSSL-macOS.release.xcconfig"; sourceTree = "<group>"; };
 		AF932CE5367220054C6A8251D453CCAD /* OpenSSL-tvOS.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "OpenSSL-tvOS.release.xcconfig"; path = "../OpenSSL-tvOS/OpenSSL-tvOS.release.xcconfig"; sourceTree = "<group>"; };
+		B5DCC1BEBDE672B8286F5C8F85CA2B4C /* libcrypto.xcframework */ = {isa = PBXFileReference; includeInIndex = 1; name = libcrypto.xcframework; path = Sources/libcrypto.xcframework; sourceTree = "<group>"; };
 		B8D6E0EE2C9451CB697057425530F5B2 /* OpenSSL.podspec */ = {isa = PBXFileReference; explicitFileType = text.script.ruby; includeInIndex = 1; indentWidth = 2; lastKnownFileType = text; path = OpenSSL.podspec; sourceTree = "<group>"; tabWidth = 2; xcLanguageSpecificationIdentifier = xcode.lang.ruby; };
-		C2FD67050090DB48504B5504005DEEE8 /* OpenSSL.xcframework */ = {isa = PBXFileReference; includeInIndex = 1; name = OpenSSL.xcframework; path = Sources/OpenSSL.xcframework; sourceTree = "<group>"; };
 		C4174494D876CDF5211146CF527E73BC /* OpenSSL-iOS.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "OpenSSL-iOS.release.xcconfig"; sourceTree = "<group>"; };
+		FF4B731F245F9CC7E52A980ACEEAC3D5 /* libssl.xcframework */ = {isa = PBXFileReference; includeInIndex = 1; name = libssl.xcframework; path = Sources/libssl.xcframework; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
+		240896016DAE3CC63037320F1F643296 /* OpenSSL */ = {
+			isa = PBXGroup;
+			children = (
+				E80392C66129039E6E24CA88E8731601 /* Frameworks */,
+			);
+			name = OpenSSL;
+			sourceTree = "<group>";
+		};
 		5DF0E38D88508EAD75A2C4B3A4B00C5A /* Pod */ = {
 			isa = PBXGroup;
 			children = (
@@ -86,14 +95,6 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
-		A6C62BFC9F863436878A6C5498E91891 /* OpenSSL */ = {
-			isa = PBXGroup;
-			children = (
-				EE60F46A8854F0303221D47E93ECEB33 /* Frameworks */,
-			);
-			name = OpenSSL;
-			sourceTree = "<group>";
-		};
 		CA3A86144F06B61FC7614A6692CFF9D7 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
@@ -104,7 +105,7 @@
 		D8A2886446DE545D5EC73B13C5FB7DF5 /* OpenSSL */ = {
 			isa = PBXGroup;
 			children = (
-				A6C62BFC9F863436878A6C5498E91891 /* OpenSSL */,
+				240896016DAE3CC63037320F1F643296 /* OpenSSL */,
 				5DF0E38D88508EAD75A2C4B3A4B00C5A /* Pod */,
 				8D3008133B468EB9613724B8D880EA4F /* Support Files */,
 			);
@@ -112,10 +113,11 @@
 			path = ../..;
 			sourceTree = "<group>";
 		};
-		EE60F46A8854F0303221D47E93ECEB33 /* Frameworks */ = {
+		E80392C66129039E6E24CA88E8731601 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				C2FD67050090DB48504B5504005DEEE8 /* OpenSSL.xcframework */,
+				B5DCC1BEBDE672B8286F5C8F85CA2B4C /* libcrypto.xcframework */,
+				FF4B731F245F9CC7E52A980ACEEAC3D5 /* libssl.xcframework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";

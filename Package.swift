@@ -13,6 +13,9 @@ let package = Package(
             name: "KSPlayer",
             targets: ["KSPlayer"]
         ),
+        .library(
+            name: "Script",
+            targets: ["Script"]),
     ],
     dependencies: [
         // Dependencies declare other packages that this package depends on.
@@ -22,7 +25,16 @@ let package = Package(
         // Targets are the basic building blocks of a package. A target can define a module or a test suite.
         .target(
             name: "KSPlayer",
-            dependencies: ["FFmpeg", "OpenSSL"]
+            dependencies: ["FFmpeg", "libcrypto", "libssl"]
+        ),
+        .target(
+            name: "FFmpeg",
+            dependencies: ["libavcodec", "libavformat", "libavutil", "libswresample", "libswscale"]
+        ),
+        .target(
+            name: "Script",
+            dependencies: [],
+            sources: ["main.swift"]
         ),
         .testTarget(
             name: "KSPlayerTests",
@@ -30,12 +42,32 @@ let package = Package(
             resources: [.process("Resources")]
         ),
         .binaryTarget(
-            name: "FFmpeg",
-            path: "Sources/FFmpeg.xcframework"
+            name: "libavcodec",
+            path: "Sources/libavcodec.xcframework"
         ),
         .binaryTarget(
-            name: "OpenSSL",
-            path: "Sources/OpenSSL.xcframework"
+            name: "libavformat",
+            path: "Sources/libavformat.xcframework"
+        ),
+        .binaryTarget(
+            name: "libavutil",
+            path: "Sources/libavutil.xcframework"
+        ),
+          .binaryTarget(
+            name: "libswresample",
+            path: "Sources/libswresample.xcframework"
+        ),
+        .binaryTarget(
+            name: "libswscale",
+            path: "Sources/libswscale.xcframework"
+        ),
+        .binaryTarget(
+            name: "libssl",
+            path: "Sources/libssl.xcframework"
+        ),
+        .binaryTarget(
+            name: "libcrypto",
+            path: "Sources/libcrypto.xcframework"
         ),
     ]
 )

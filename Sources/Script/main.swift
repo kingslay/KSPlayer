@@ -1,0 +1,440 @@
+import Foundation
+
+let array = Array(CommandLine.arguments.dropFirst())
+let isDebug = array.firstIndex(of: "debug") != nil
+let xcodePath = Utility.shell("xcode-select -p", isOutput: true) ?? ""
+FileManager.default.changeCurrentDirectoryPath("/Users/kintan/Documents/GitLab/KSPlayer/Script")
+BuildSSL().buildALL()
+// BuildBoringSSL().buildALL()
+BuildFFMPEG().buildALL()
+open class BaseBuild {
+    private let platforms = PlatformType.allCases
+    // private let platforms = [PlatformType.maccatalyst]
+    let library: String
+    init(library: String) {
+        self.library = library
+    }
+    func buildALL() {
+        let url = Utility.splice(paths: [library])
+        if FileManager.default.fileExists(atPath: url.path) {
+            try? FileManager.default.removeItem(at: url)
+        }
+        for platform in platforms {
+            for arch in platform.architectures() {
+                build(platform: platform, arch: arch)
+            }
+        }
+        createXCFramework()
+    }
+
+    func build(platform: PlatformType, arch: ArchType) {
+        let url = Utility.splice(paths: [library, platform.rawValue, "scratch", arch.rawValue])
+        try? FileManager.default.createDirectory(at: url, withIntermediateDirectories: true, attributes: nil)
+        var cflags = "-arch \(arch.rawValue) \(platform.deploymentTarget(arch: arch))"
+        cflags += " -fembed-bitcode"
+        innerBuid(platform: platform, arch: arch, cflags: cflags, buildDir: url)
+    }
+    func innerBuid(platform: PlatformType, arch: ArchType, cflags: String, buildDir: URL) {
+
+    }
+    func createXCFramework() {
+        for framework in frameworks() {
+            var arguments = ""
+            let XCFrameworkFile = Utility.splice(paths: ["../Sources", framework + ".xcframework"])
+            try? FileManager.default.removeItem(at: XCFrameworkFile)
+            for platform in platforms {
+                for arch in platform.architectures() {
+                    let prefix = thinDir(platform: platform, arch: arch)
+                    let frameworkDir = prefix + "\(framework).framework"
+                    try? FileManager.default.removeItem(at: frameworkDir)
+                    try? FileManager.default.createDirectory(at: frameworkDir, withIntermediateDirectories: true, attributes: nil)
+                    try? FileManager.default.copyItem(at: prefix + "lib/\(framework).a", to: frameworkDir + framework)
+                    var headerURL = prefix + "include" + framework
+                    if !FileManager.default.fileExists(atPath: headerURL.path) {
+                        headerURL =  prefix + "include"
+                    }
+                    try? FileManager.default.copyItem(at: headerURL, to: frameworkDir + "Headers")
+                    try? FileManager.default.createDirectory(at: frameworkDir + "Modules", withIntermediateDirectories: true, attributes: nil)
+                    let modulemap = "framework module \(framework) [system] {\n   \(frameworkHeader(framework))\n    export *\n}"
+                    FileManager.default.createFile(atPath: frameworkDir.path + "/Modules/module.modulemap", contents: modulemap.data(using: .utf8), attributes: nil)
+                    arguments += " -framework \(frameworkDir.path)"
+                }
+            }
+            Utility.shell("xcodebuild -create-xcframework\(arguments) -output \(XCFrameworkFile.path)")
+        }
+    }
+    func thinDir(platform: PlatformType, arch: ArchType) -> URL {
+        return Utility.splice(paths: [library, platform.rawValue, "thin", arch.rawValue])
+    }
+    func frameworks() -> [String] {
+        return []
+    }
+
+    func frameworkHeader(_ framework: String) -> String {
+        return "header \"\(framework.replacingOccurrences(of: "lib", with: "")).h\""
+    }
+}
+
+class BuildFFMPEG: BaseBuild {
+    let ffmpegFile = "ffmpeg-4.3.1"
+    init() {
+        super.init(library: "FFmpeg")
+    }
+    override func innerBuid(platform: PlatformType, arch: ArchType, cflags: String, buildDir: URL) {
+        var ffmpegcflags = ffmpegConfiguers
+        if isDebug && platform == .macos {
+            ffmpegcflags.append("--enable-ffmpeg")
+            ffmpegcflags.append("--enable-ffplay")
+            ffmpegcflags.append("--enable-sdl2")
+            ffmpegcflags.append("--enable-encoder=mpeg4")
+            ffmpegcflags.append("--enable-encoder=aac")
+            ffmpegcflags.append("--enable-muxer=m4v")
+            ffmpegcflags.append("--enable-muxer=dash")
+        } else {
+            ffmpegcflags.append("--disable-programs")
+            ffmpegcflags.append("--disable-ffmpeg")
+            ffmpegcflags.append("--disable-ffplay")
+            ffmpegcflags.append("--disable-ffprobe")
+            ffmpegcflags.append("--disable-avfilter")
+            ffmpegcflags.append("--disable-filters")
+        }
+        if !(isDebug && platform == .maccatalyst) {
+            ffmpegcflags.append("--disable-debug")
+        }
+        if arch == .x86_64 {
+            ffmpegcflags.append("--disable-asm")
+            if platform == .ios || platform == .tvos {
+                ffmpegcflags.append("--disable-mmx")
+                ffmpegcflags.append("--assert-level=2")
+            }
+        } else if arch == .arm64 {
+            ffmpegcflags.append("--enable-pic")
+            ffmpegcflags.append("--enable-neon")
+            if platform == .ios {
+                ffmpegcflags.append("--enable-small")
+            }
+        }
+        var cflags = cflags
+        var ldflags = "-arch \(arch.rawValue)"
+        if platform == .maccatalyst {
+            let syslibroot = platform.isysroot(arch: arch)
+            cflags += " -isysroot \(syslibroot) -iframework \(syslibroot)/System/iOSSupport/System/Library/Frameworks"
+            ldflags = cflags
+        }
+        let opensslPath = Utility.splice(paths: ["OpenSSL", platform.rawValue, "thin", arch.rawValue])
+        if FileManager.default.fileExists(atPath: opensslPath.path) {
+            cflags += " -I\(opensslPath.path)/include"
+            ldflags += " -L\(opensslPath.path)/lib"
+            ffmpegcflags.append("--enable-openssl")
+        }
+        let prefix = thinDir(platform: platform, arch: arch)
+        var args = ["set -o noglob &&", Utility.splice(paths: [ffmpegFile, "configure"]).path, "--target-os=darwin", "--arch=\(arch)", "--cc='xcrun -sdk \(platform.sdk(arch: arch).lowercased()) clang'", "--extra-cflags='\(cflags)'", "--extra-ldflags='\(ldflags)'", "--prefix=\(prefix.path)"]
+        args.append(contentsOf: ffmpegcflags)
+        print(args.joined(separator: " "))
+        Utility.shell(args.joined(separator: " "), currentDirectoryURL: buildDir)
+        Utility.shell("make -j8 install\(arch == .arm64 ? " GASPP_FIX_XCODE5=1" : "") >>\(buildDir.path).log", currentDirectoryURL: buildDir)
+        if isDebug && platform == .macos {
+            try? FileManager.default.copyItem(at: Utility.splice(paths: ["bin", "ffmpeg"], current: prefix), to: URL(fileURLWithPath: "/usr/local/bin/ffmpeg"))
+            try? FileManager.default.copyItem(at: Utility.splice(paths: ["bin", "ffplay"], current: prefix), to: URL(fileURLWithPath: "/usr/local/bin/ffplay"))
+            try? FileManager.default.copyItem(at: Utility.splice(paths: ["bin", "ffprobe"], current: prefix), to: URL(fileURLWithPath: "/usr/local/bin/ffprobe"))
+        }
+    }
+    override func frameworks() -> [String] {
+        return ["libavcodec", "libavformat", "libavutil", "libswresample", "libswscale"]
+    }
+    override func buildALL() {
+        prepareYasm()
+        if !FileManager.default.fileExists(atPath: Utility.splice(paths: [ffmpegFile]).path) {
+            Utility.shell("curl http://www.ffmpeg.org/releases/\(ffmpegFile).tar.bz2 | tar xj")
+        }
+        super.buildALL()
+    }
+    func prepareYasm() {
+        if Utility.shell("which brew") == nil {
+            Utility.shell("ruby -e \"$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)\"")
+        }
+        if Utility.shell("which yasm") == nil {
+            Utility.shell("brew install yasm")
+        }
+        if Utility.shell("which pkg-config") == nil {
+            Utility.shell("brew install pkg-config")
+        }
+    }
+    override func frameworkHeader(_ framework: String) -> String {
+        if framework == "libavutil" {
+            return super.frameworkHeader(framework) + "\n    header \"display.h\"\n    header \"imgutils.h\""
+        } else {
+            return super.frameworkHeader(framework)
+        }
+    }
+    let ffmpegConfiguers = ["--enable-optimizations", "--enable-gpl", "--enable-version3", "--enable-nonfree"
+                            // Configuration options:
+                            ,"--enable-cross-compile", "--enable-stripping", "--enable-libxml2", "--enable-thumb", "--enable-static", "--disable-shared", "--enable-runtime-cpudetect", "--disable-gray", "--disable-swscale-alpha"
+                            // Documentation options:
+                            ,"--disable-doc", "--disable-htmlpages", "--disable-manpages", "--disable-podpages", "--disable-txtpages"
+                            // Component options:
+                            ,"--disable-avdevice", "--enable-avcodec", "--enable-avformat", "--enable-avutil", "--enable-swresample", "--enable-swscale", "--disable-postproc", "--disable-avresample"
+                            // ,"--disable-pthreads"
+                            // ,"--disable-w32threads"
+                            // ,"--disable-os2threads"
+                            ,"--enable-network"
+                            ,"--disable-securetransport"
+                            // ,"--disable-dct"
+                            // ,"--disable-dwt"
+                            // ,"--disable-lsp"
+                            // ,"--disable-lzo"
+                            // ,"--disable-mdct"
+                            // ,"--disable-rdft"
+                            // ,"--disable-fft"
+                            // Hardware accelerators:
+                            ,"--disable-d3d11va", "--disable-dxva2", "--disable-vaapi", "--disable-vdpau"
+                            // Individual component options:
+                            // ,"--disable-everything"
+                            ,"--disable-encoders"
+                            // ./configure --list-decoders
+                            ,"--disable-decoders", "--enable-decoder=dca", "--enable-decoder=flv", "--enable-decoder=h263", "--enable-decoder=h263i", "--enable-decoder=h263p", "--enable-decoder=h264", "--enable-decoder=hevc", "--enable-decoder=mjpeg", "--enable-decoder=mjpegb", "--enable-decoder=mpeg1video", "--enable-decoder=mpeg2video", "--enable-decoder=mpeg4", "--enable-decoder=mpegvideo", "--enable-decoder=rv30", "--enable-decoder=rv40", "--enable-decoder=tscc", "--enable-decoder=wmv1", "--enable-decoder=wmv2", "--enable-decoder=wmv3", "--enable-decoder=vc1", "--enable-decoder=vp6", "--enable-decoder=vp6a", "--enable-decoder=vp6f", "--enable-decoder=vp7", "--enable-decoder=vp8", "--enable-decoder=vp9"
+                            // 音频
+                            ,"--enable-decoder=aac", "--enable-decoder=aac_latm", "--enable-decoder=ac3", "--enable-decoder=alac", "--enable-decoder=amrnb", "--enable-decoder=amrwb", "--enable-decoder=ape", "--enable-decoder=cook", "--enable-decoder=dca", "--enable-decoder=eac3", "--enable-decoder=flac", "--enable-decoder=mp1", "--enable-decoder=mp2", "--enable-decoder=mp3*", "--enable-decoder=opus", "--enable-decoder=pcm*", "--enable-decoder=wma*", "--enable-decoder=vorbis", "--enable-decoder=truehd", "--enable-decoder=dolby_e"
+                            // 字幕
+                            ,"--enable-decoder=ass", "--enable-decoder=srt", "--enable-decoder=ssa", "--enable-decoder=movtext", "--enable-decoder=subrip", "--enable-decoder=dvdsub", "--enable-decoder=dvbsub", "--enable-decoder=webvtt", "--disable-hwaccels"
+                            // ./configure --list-muxers
+                            ,"--disable-muxers"
+                            // ,"--enable-muxer=mpegts"
+                            // ,"--enable-muxer=mp4"
+                            // ./configure --list-demuxers
+                            ,"--disable-demuxers", "--enable-demuxer=aac", "--enable-demuxer=concat", "--enable-demuxer=data", "--enable-demuxer=flv", "--enable-demuxer=hls"
+                            // ,"--enable-demuxer=latm"
+                            ,"--enable-demuxer=live_flv", "--enable-demuxer=loas", "--enable-demuxer=m4v", "--enable-demuxer=mov", "--enable-demuxer=mp3", "--enable-demuxer=mpegps", "--enable-demuxer=mpegts", "--enable-demuxer=mpegvideo", "--enable-demuxer=hevc", "--enable-demuxer=dash", "--enable-demuxer=wav", "--enable-demuxer=ogg", "--enable-demuxer=ape", "--enable-demuxer=aiff", "--enable-demuxer=flac", "--enable-demuxer=amr", "--enable-demuxer=rtsp", "--enable-demuxer=asf", "--enable-demuxer=avi", "--enable-demuxer=matroska", "--enable-demuxer=rm"
+                            // ,"--enable-demuxer=webm_dash_manifest"
+                            ,"--enable-demuxer=vc1"
+                            // ./configure --list-bsf
+                            ,"--disable-bsfs"
+                            // ,"--disable-bsf=mjpeg2jpeg"
+                            // ,"--disable-bsf=mjpeg2jpeg"
+                            // ,"--disable-bsf=mjpega_dump_header"
+                            // ,"--disable-bsf=mov2textsub"
+                            // ,"--disable-bsf=text2movsub"
+
+                            // ./configure --list-protocols
+                            ,"--enable-protocols", "--disable-protocol=bluray", "--disable-protocol=ffrtmpcrypt", "--disable-protocol=gopher", "--disable-protocol=icecast", "--disable-protocol=librtmp*", "--disable-protocol=libssh", "--disable-protocol=md5", "--disable-protocol=mmsh", "--disable-protocol=mmst", "--disable-protocol=sctp", "--disable-protocol=srtp", "--disable-protocol=subfile", "--disable-protocol=unix", "--disable-devices", "--disable-indevs", "--disable-outdevs", "--disable-iconv", "--disable-audiotoolbox", "--disable-videotoolbox", "--disable-linux-perf", "--disable-bzlib"]
+}
+
+class BuildSSL: BaseBuild {
+    let sslFile = "openssl-1.1.1i"
+    init() {
+        super.init(library: "OpenSSL")
+    }
+    override func buildALL() {
+        if !FileManager.default.fileExists(atPath: Utility.splice(paths: [sslFile]).path) {
+            Utility.shell("curl https://www.openssl.org/source/\(sslFile).tar.gz | tar xj")
+        }
+        super.buildALL()
+    }
+    override func innerBuid(platform: PlatformType, arch: ArchType, cflags: String, buildDir: URL) {
+        let directoryURL = Utility.splice(paths: [sslFile])
+        var ccFlags = "/usr/bin/clang " + cflags
+        if platform == .macos || platform == .maccatalyst {
+            ccFlags += " -fno-common"
+        } else {
+            ccFlags += " -isysroot \(platform.isysroot(arch: arch))"
+        }
+        let target = platform.target(arch: arch)
+        let environment = ["LC_CTYPE": "C", "CROSS_TOP": platform.crossTop(arch: arch), "CROSS_SDK": platform.crossSDK(arch: arch), "CC": ccFlags]
+        let args = ["./Configure", target, "--prefix=\(thinDir(platform: platform, arch: arch).path)", "no-async no-shared", "--openssldir=\(buildDir.path)", ">>\(buildDir.path).log"]
+        Utility.shell(args.joined(separator: " "), currentDirectoryURL: directoryURL, environment: environment)
+        Utility.shell("make >>\(buildDir.path).log", currentDirectoryURL: directoryURL, environment: environment)
+        Utility.shell("make install_sw >>\(buildDir.path).log", currentDirectoryURL: directoryURL, environment: environment)
+        Utility.shell("make clean >>\(buildDir.path).log", currentDirectoryURL: directoryURL, environment: environment)
+    }
+    override func frameworks() -> [String] {
+        return ["libcrypto", "libssl"]
+    }
+    override func frameworkHeader(_ framework: String) -> String {
+        return "header \"openssl/\(framework.replacingOccurrences(of: "lib", with: "")).h\""
+    }
+}
+
+class BuildBoringSSL: BaseBuild {
+    let sslFile = "boringssl"
+    init() {
+        super.init(library: "SSL")
+    }
+    override func buildALL() {
+        if !FileManager.default.fileExists(atPath: Utility.splice(paths: [sslFile]).path) {
+            Utility.shell("git clone https://github.com/google/boringssl.git")
+        }
+        super.buildALL()
+    }
+    override func innerBuid(platform: PlatformType, arch: ArchType, cflags: String, buildDir: URL) {
+        let directoryURL = Utility.splice(paths: [sslFile])
+        var ccFlags = "/usr/bin/clang " + cflags
+        if platform == .macos || platform == .maccatalyst {
+            ccFlags += " -fno-common"
+        } else {
+            ccFlags += " -isysroot \(platform.isysroot(arch: arch))"
+        }
+        let target = platform.target(arch: arch)
+        let environment = ["LC_CTYPE": "C", "CROSS_TOP": platform.crossTop(arch: arch), "CROSS_SDK": platform.crossSDK(arch: arch), "CC": ccFlags]
+        let args = ["./Configure", target, "--prefix=\(thinDir(platform: platform, arch: arch).path)", "no-async no-shared", "--openssldir=\(buildDir.path)", ">>\(buildDir.path).log"]
+        Utility.shell(args.joined(separator: " "), currentDirectoryURL: directoryURL, environment: environment)
+        Utility.shell("make >>\(buildDir.path).log", currentDirectoryURL: directoryURL, environment: environment)
+        Utility.shell("make install_sw >>\(buildDir.path).log", currentDirectoryURL: directoryURL, environment: environment)
+        Utility.shell("make clean >>\(buildDir.path).log", currentDirectoryURL: directoryURL, environment: environment)
+    }
+    override func frameworks() -> [String] {
+        return ["libcrypto", "libssl"]
+    }
+    override func frameworkHeader(_ framework: String) -> String {
+        return "header \"openssl/\(framework.replacingOccurrences(of: "lib", with: "")).h\""
+    }
+}
+enum PlatformType: String, CaseIterable {
+    case ios, tvos, macos, maccatalyst
+    func architectures() -> [ArchType] {
+        switch self {
+            case .ios, .tvos:
+                return ArchType.allCases
+            case .macos, .maccatalyst:
+                return [.x86_64]
+        }
+    }
+    func deploymentTarget(arch: ArchType) -> String {
+        switch self {
+            case .ios:
+                if arch == .arm64 {
+                    return "-mios-version-min=9.0"
+                } else {
+                    return "-mios-simulator-version-min=9.0"
+                }
+            case .tvos:
+                if arch == .arm64 {
+                    return "-mtvos-version-min=12.0"
+                } else {
+                    return "-mtvos-simulator-version-min=12.0"
+                }
+            case .macos:
+                return "-mmacosx-version-min=10.14"
+            case .maccatalyst:
+                return "-target x86_64-apple-ios13.0-macabi"
+        }
+    }
+    func sdk(arch: ArchType) -> String {
+        switch self {
+            case .ios:
+                if arch == .arm64 {
+                    return "iPhoneOS"
+                } else {
+                    return "iPhoneSimulator"
+                }
+            case .tvos:
+                if arch == .arm64 {
+                    return "AppleTVOS"
+                } else {
+                    return "AppleTVSimulator"
+                }
+            case .macos:
+                return "MacOSX"
+            case .maccatalyst:
+                return "iPhoneOS"
+        }
+    }
+
+    func crossSDK(arch: ArchType) -> String {
+        if self == .maccatalyst {
+            return PlatformType.macos.crossSDK(arch: arch)
+        } else {
+            return sdk(arch: arch)+".sdk"
+        }
+    }
+    func crossTop(arch: ArchType) -> String {
+        if self == .maccatalyst {
+            return PlatformType.macos.crossTop(arch: arch)
+        } else {
+            return "\(xcodePath)/Platforms/\(sdk(arch: arch)).platform/Developer"
+        }
+    }
+    func isysroot(arch: ArchType) -> String {
+        return crossTop(arch: arch) + "/SDKs/" + crossSDK(arch: arch)
+    }
+    func target(arch: ArchType) -> String {
+        if arch == .arm64 {
+            return self == .maccatalyst ? "darwin64-arm64-cc" : "iphoneos-cross"
+        } else {
+            return "darwin64-x86_64-cc no-asm"
+        }
+
+    }
+}
+enum ArchType: String, CaseIterable {
+    // swiftlint:disable identifier_name
+    case arm64, x86_64
+    // swiftlint:enable identifier_name
+}
+
+struct Utility {
+
+    @discardableResult
+    static func shell(_ command: String, isOutput: Bool = false, currentDirectoryURL: URL? = nil, environment: [String: String] = [:]) -> String? {
+        let task = Process()
+        var environment = environment
+        environment["PATH"] = "/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+        task.environment = environment
+        if #available(OSX 10.13, *) {
+            task.currentDirectoryURL = currentDirectoryURL
+        }
+        let pipe = Pipe()
+//        task.standardError = pipe
+        if isOutput {
+            task.standardOutput = pipe
+        }
+        task.arguments = ["-c", command]
+        task.launchPath = "/bin/zsh"
+        task.launch()
+        task.waitUntilExit()
+        if task.terminationStatus == 0 {
+            if isOutput {
+                let data = pipe.fileHandleForReading.readDataToEndOfFile()
+                return String(data: data, encoding: .utf8)?.trimmingCharacters(in: .newlines)
+            } else {
+                return ""
+            }
+        } else {
+            return nil
+        }
+    }
+
+//    @discardableResult
+//    static func exec(_ args: [String], currentDirectoryURL: URL? = nil) -> String? {
+//        let task = Process()
+//        task.environment = ["PATH": "/bin:/usr/bin:/usr/local/bin"]
+//        if #available(OSX 10.13, *) {
+//            task.currentDirectoryURL = currentDirectoryURL
+//        }
+//        let pipe = Pipe()
+//        task.standardOutput = pipe
+//        task.launchPath = "/usr/bin/env"
+//        task.arguments = args
+//        task.launch()
+//        task.waitUntilExit()
+//        if task.terminationStatus == 0 {
+//            let data = pipe.fileHandleForReading.readDataToEndOfFile()
+//            return String(data: data, encoding: .utf8)?.trimmingCharacters(in: .newlines) ?? ""
+//        } else {
+//            return nil
+//        }
+//    }
+    static func splice(paths: [String], current: URL = URL(fileURLWithPath: FileManager.default.currentDirectoryPath)) -> URL {
+        var url = current
+        paths.forEach {
+            url.appendPathComponent($0)
+        }
+        return url
+    }
+}
+extension URL {
+    static func + (left: URL, right: String) -> URL {
+        var url = left
+        url.appendPathComponent(right)
+        return url
+    }
+}
