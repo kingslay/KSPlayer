@@ -40,8 +40,9 @@ Make sure to use the latest version **cocoapods 1.9**, which can be installed us
 ```ruby
 target 'ProjectName' do
     use_frameworks!
-    pod 'KSPlayer',:git => 'https://github.com/kingslay/KSPlayer.git', :branch => 'master'
-    pod 'Openssl',:git => 'https://github.com/kingslay/KSPlayer.git', :branch => 'master'
+    pod 'KSPlayer',:git => 'https://github.com/kingslay/KSPlayer.git', :branch => 'develop'
+    pod 'FFmpeg',:git => 'https://github.com/kingslay/KSPlayer.git', :branch => 'develop'
+    pod 'Openssl',:git => 'https://github.com/kingslay/KSPlayer.git', :branch => 'develop'
 end
 ```
 
