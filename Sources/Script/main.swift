@@ -3,8 +3,7 @@ import Foundation
 let array = Array(CommandLine.arguments.dropFirst())
 let isDebug = array.firstIndex(of: "debug") != nil
 let xcodePath = Utility.shell("xcode-select -p", isOutput: true) ?? ""
-FileManager.default.changeCurrentDirectoryPath("/Users/kintan/Documents/GitLab/KSPlayer/Script")
-BuildSSL().buildALL()
+BuildOpenSSL().buildALL()
 // BuildBoringSSL().buildALL()
 BuildFFMPEG().buildALL()
 open class BaseBuild {
@@ -121,7 +120,7 @@ class BuildFFMPEG: BaseBuild {
             cflags += " -isysroot \(syslibroot) -iframework \(syslibroot)/System/iOSSupport/System/Library/Frameworks"
             ldflags = cflags
         }
-        let opensslPath = Utility.splice(paths: ["OpenSSL", platform.rawValue, "thin", arch.rawValue])
+        let opensslPath = Utility.splice(paths: ["SSL", platform.rawValue, "thin", arch.rawValue])
         if FileManager.default.fileExists(atPath: opensslPath.path) {
             cflags += " -I\(opensslPath.path)/include"
             ldflags += " -L\(opensslPath.path)/lib"
@@ -219,10 +218,10 @@ class BuildFFMPEG: BaseBuild {
                             ,"--enable-protocols", "--disable-protocol=bluray", "--disable-protocol=ffrtmpcrypt", "--disable-protocol=gopher", "--disable-protocol=icecast", "--disable-protocol=librtmp*", "--disable-protocol=libssh", "--disable-protocol=md5", "--disable-protocol=mmsh", "--disable-protocol=mmst", "--disable-protocol=sctp", "--disable-protocol=srtp", "--disable-protocol=subfile", "--disable-protocol=unix", "--disable-devices", "--disable-indevs", "--disable-outdevs", "--disable-iconv", "--disable-audiotoolbox", "--disable-videotoolbox", "--disable-linux-perf", "--disable-bzlib"]
 }
 
-class BuildSSL: BaseBuild {
+class BuildOpenSSL: BaseBuild {
     let sslFile = "openssl-1.1.1i"
     init() {
-        super.init(library: "OpenSSL")
+        super.init(library: "SSL")
     }
     override func buildALL() {
         if !FileManager.default.fileExists(atPath: Utility.splice(paths: [sslFile]).path) {
@@ -266,20 +265,18 @@ class BuildBoringSSL: BaseBuild {
         super.buildALL()
     }
     override func innerBuid(platform: PlatformType, arch: ArchType, cflags: String, buildDir: URL) {
-        let directoryURL = Utility.splice(paths: [sslFile])
-        var ccFlags = "/usr/bin/clang " + cflags
-        if platform == .macos || platform == .maccatalyst {
-            ccFlags += " -fno-common"
-        } else {
-            ccFlags += " -isysroot \(platform.isysroot(arch: arch))"
+        var command = "cmake -DCMAKE_OSX_SYSROOT=\(platform.sdk(arch: arch).lowercased()) -DCMAKE_OSX_ARCHITECTURES=\(arch.rawValue)"
+        if platform == .maccatalyst {
+            command = "cmake -DCMAKE_C_FLAGS='\(cflags)'"
         }
-        let target = platform.target(arch: arch)
-        let environment = ["LC_CTYPE": "C", "CROSS_TOP": platform.crossTop(arch: arch), "CROSS_SDK": platform.crossSDK(arch: arch), "CC": ccFlags]
-        let args = ["./Configure", target, "--prefix=\(thinDir(platform: platform, arch: arch).path)", "no-async no-shared", "--openssldir=\(buildDir.path)", ">>\(buildDir.path).log"]
-        Utility.shell(args.joined(separator: " "), currentDirectoryURL: directoryURL, environment: environment)
-        Utility.shell("make >>\(buildDir.path).log", currentDirectoryURL: directoryURL, environment: environment)
-        Utility.shell("make install_sw >>\(buildDir.path).log", currentDirectoryURL: directoryURL, environment: environment)
-        Utility.shell("make clean >>\(buildDir.path).log", currentDirectoryURL: directoryURL, environment: environment)
+        command += " -GNinja ../../../../boringssl"
+        Utility.shell(command, currentDirectoryURL: buildDir)
+        Utility.shell("ninja >>\(buildDir.path).log", currentDirectoryURL: buildDir)
+        let thin = thinDir(platform: platform, arch: arch)
+        try? FileManager.default.createDirectory(at: thin + "lib", withIntermediateDirectories: true, attributes: nil)
+        try? FileManager.default.copyItem(at: Utility.splice(paths: [sslFile, "include"]), to: thin + "include")
+        try? FileManager.default.copyItem(at: buildDir + "ssl/libssl.a", to: thin + "lib/libssl.a")
+        try? FileManager.default.copyItem(at: buildDir + "crypto/libcrypto.a", to: thin + "lib/libcrypto.a")
     }
     override func frameworks() -> [String] {
         return ["libcrypto", "libssl"]
