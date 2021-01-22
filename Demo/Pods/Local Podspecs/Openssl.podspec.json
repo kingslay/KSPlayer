@@ -23,7 +23,10 @@
   "subspecs": [
     {
       "name": "OpenSSL",
-      "vendored_frameworks": "Sources/OpenSSL.xcframework"
+      "vendored_frameworks": [
+        "Sources/libssl.xcframework",
+        "Sources/libcrypto.xcframework"
+      ]
     }
   ],
   "swift_version": "5.1"

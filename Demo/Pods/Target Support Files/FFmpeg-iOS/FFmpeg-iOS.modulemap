@@ -1,0 +1,6 @@
+framework module FFmpeg {
+  umbrella header "FFmpeg-iOS-umbrella.h"
+
+  export *
+  module * { export * }
+}

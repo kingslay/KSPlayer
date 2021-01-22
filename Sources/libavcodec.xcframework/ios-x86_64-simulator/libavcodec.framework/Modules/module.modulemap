@@ -1,0 +1,4 @@
+framework module libavcodec [system] {
+   header "avcodec.h"
+    export *
+}

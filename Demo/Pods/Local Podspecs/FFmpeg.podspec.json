@@ -1,0 +1,48 @@
+{
+  "name": "FFmpeg",
+  "version": "4.3.1",
+  "summary": "FFmpeg",
+  "description": "OpenSSL",
+  "homepage": "https://github.com/kingslay/KSPlayer",
+  "authors": {
+    "kintan": "554398854@qq.com"
+  },
+  "license": "MIT",
+  "source": {
+    "git": "https://github.com/kingslay/KSPlayer.git",
+    "tag": "4.3.1"
+  },
+  "platforms": {
+    "ios": "9.0",
+    "osx": "10.11",
+    "tvos": "10.2"
+  },
+  "default_subspecs": "FFmpeg",
+  "swift_versions": "5.1",
+  "static_framework": true,
+  "source_files": "Sources/FFmpeg/**/*.{h,c}",
+  "subspecs": [
+    {
+      "name": "FFmpeg",
+      "libraries": [
+        "bz2",
+        "z",
+        "iconv",
+        "xml2"
+      ],
+      "vendored_frameworks": [
+        "Sources/libavcodec.xcframework",
+        "Sources/libavformat.xcframework",
+        "Sources/libavutil.xcframework",
+        "Sources/libswresample.xcframework",
+        "Sources/libswscale.xcframework"
+      ],
+      "dependencies": {
+        "OpenSSL": [
+
+        ]
+      }
+    }
+  ],
+  "swift_version": "5.1"
+}

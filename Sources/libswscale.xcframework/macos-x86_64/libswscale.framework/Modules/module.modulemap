@@ -1,0 +1,4 @@
+framework module libswscale [system] {
+   header "swscale.h"
+    export *
+}
