@@ -135,6 +135,9 @@ class BuildFFMPEG: BaseBuild {
         Utility.shell(args.joined(separator: " "), currentDirectoryURL: buildDir)
         Utility.shell("make -j8 install\(arch == .arm64 ? " GASPP_FIX_XCODE5=1" : "") >>\(buildDir.path).log", currentDirectoryURL: buildDir)
         if isDebug && platform == .macos {
+            try? FileManager.default.removeItem(at: URL(fileURLWithPath: "/usr/local/bin/ffmpeg"))
+            try? FileManager.default.removeItem(at: URL(fileURLWithPath: "/usr/local/bin/ffplay"))
+            try? FileManager.default.removeItem(at: URL(fileURLWithPath: "/usr/local/bin/ffprobe"))
             try? FileManager.default.copyItem(at: Utility.splice(paths: ["bin", "ffmpeg"], current: prefix), to: URL(fileURLWithPath: "/usr/local/bin/ffmpeg"))
             try? FileManager.default.copyItem(at: Utility.splice(paths: ["bin", "ffplay"], current: prefix), to: URL(fileURLWithPath: "/usr/local/bin/ffplay"))
             try? FileManager.default.copyItem(at: Utility.splice(paths: ["bin", "ffprobe"], current: prefix), to: URL(fileURLWithPath: "/usr/local/bin/ffprobe"))
