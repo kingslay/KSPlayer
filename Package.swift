@@ -6,7 +6,7 @@ import PackageDescription
 let package = Package(
     name: "KSPlayer",
     defaultLocalization: "en",
-    platforms: [.macOS(.v10_11), .iOS(.v9), .tvOS("10.2")],
+    platforms: [.macOS(.v10_12), .iOS(.v10), .tvOS("10.2")],
     products: [
         // Products define the executables and libraries produced by a package, and make them visible to other packages.
         .library(
@@ -15,7 +15,7 @@ let package = Package(
         ),
         .library(
             name: "Script",
-            targets: ["Script"]),
+            targets: ["Script"])
     ],
     dependencies: [
         // Dependencies declare other packages that this package depends on.
@@ -29,7 +29,8 @@ let package = Package(
         ),
         .target(
             name: "FFmpeg",
-            dependencies: ["libavcodec", "libavformat", "libavutil", "libswresample", "libswscale"]
+            dependencies: ["libavcodec", "libavformat", "libavutil", "libswresample", "libswscale"],
+            linkerSettings: [.linkedLibrary("bz2"), .linkedLibrary("iconv"), .linkedLibrary("xml2"), .linkedLibrary("z")]
         ),
         .target(
             name: "Script",
@@ -68,6 +69,6 @@ let package = Package(
         .binaryTarget(
             name: "libcrypto",
             path: "Sources/libcrypto.xcframework"
-        ),
+        )
     ]
 )

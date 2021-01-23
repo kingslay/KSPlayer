@@ -167,7 +167,7 @@ open class KSPlayerLayer: UIView {
             if let player = player {
                 MPNowPlayingInfoCenter.default().nowPlayingInfo = [
                     MPNowPlayingInfoPropertyElapsedPlaybackTime: player.currentPlaybackTime,
-                    MPMediaItemPropertyPlaybackDuration: player.duration,
+                    MPMediaItemPropertyPlaybackDuration: player.duration
                 ]
             }
         }
@@ -230,7 +230,7 @@ extension KSPlayerLayer: MediaPlayerDelegate {
     public func preparedToPlay(player: MediaPlayerProtocol) {
         if #available(OSX 10.12.2, *) {
             MPNowPlayingInfoCenter.default().nowPlayingInfo = [
-                MPMediaItemPropertyPlaybackDuration: player.duration,
+                MPMediaItemPropertyPlaybackDuration: player.duration
             ]
         }
         state = .readyToPlay

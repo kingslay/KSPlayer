@@ -1,4 +1,4 @@
-//: A UIKit based Playground for presenting user interface
+// : A UIKit based Playground for presenting user interface
 
 import PlaygroundSupport
 import UIKit

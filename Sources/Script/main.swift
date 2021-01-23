@@ -127,7 +127,9 @@ class BuildFFMPEG: BaseBuild {
             ffmpegcflags.append("--enable-openssl")
         }
         let prefix = thinDir(platform: platform, arch: arch)
-        var args = ["set -o noglob &&", Utility.splice(paths: [ffmpegFile, "configure"]).path, "--target-os=darwin", "--arch=\(arch)", "--cc='xcrun -sdk \(platform.sdk(arch: arch).lowercased()) clang'", "--extra-cflags='\(cflags)'", "--extra-ldflags='\(ldflags)'", "--prefix=\(prefix.path)"]
+        var args = ["set -o noglob &&", Utility.splice(paths: [ffmpegFile, "configure"]).path, "--target-os=darwin",
+                    "--arch=\(arch)", "--cc='xcrun -sdk \(platform.sdk(arch: arch).lowercased()) clang'",
+                    "--extra-cflags='\(cflags)'", "--extra-ldflags='\(ldflags)'", "--prefix=\(prefix.path)"]
         args.append(contentsOf: ffmpegcflags)
         print(args.joined(separator: " "))
         Utility.shell(args.joined(separator: " "), currentDirectoryURL: buildDir)
@@ -166,18 +168,18 @@ class BuildFFMPEG: BaseBuild {
             return super.frameworkHeader(framework)
         }
     }
-    let ffmpegConfiguers = ["--enable-optimizations", "--enable-gpl", "--enable-version3", "--enable-nonfree"
+    let ffmpegConfiguers = ["--enable-optimizations", "--enable-gpl", "--enable-version3", "--enable-nonfree",
                             // Configuration options:
-                            ,"--enable-cross-compile", "--enable-stripping", "--enable-libxml2", "--enable-thumb", "--enable-static", "--disable-shared", "--enable-runtime-cpudetect", "--disable-gray", "--disable-swscale-alpha"
+                            "--enable-cross-compile", "--enable-stripping", "--enable-libxml2", "--enable-thumb",
+                            "--enable-static", "--disable-shared", "--enable-runtime-cpudetect", "--disable-gray", "--disable-swscale-alpha",
                             // Documentation options:
-                            ,"--disable-doc", "--disable-htmlpages", "--disable-manpages", "--disable-podpages", "--disable-txtpages"
+                            "--disable-doc", "--disable-htmlpages", "--disable-manpages", "--disable-podpages", "--disable-txtpages",
                             // Component options:
-                            ,"--disable-avdevice", "--enable-avcodec", "--enable-avformat", "--enable-avutil", "--enable-swresample", "--enable-swscale", "--disable-postproc", "--disable-avresample"
+                            "--disable-avdevice", "--enable-avcodec", "--enable-avformat", "--enable-avutil", "--enable-swresample", "--enable-swscale", "--disable-postproc", "--disable-avresample",
                             // ,"--disable-pthreads"
                             // ,"--disable-w32threads"
                             // ,"--disable-os2threads"
-                            ,"--enable-network"
-                            ,"--disable-securetransport"
+                            "--enable-network", "--disable-securetransport",
                             // ,"--disable-dct"
                             // ,"--disable-dwt"
                             // ,"--disable-lsp"
@@ -186,28 +188,44 @@ class BuildFFMPEG: BaseBuild {
                             // ,"--disable-rdft"
                             // ,"--disable-fft"
                             // Hardware accelerators:
-                            ,"--disable-d3d11va", "--disable-dxva2", "--disable-vaapi", "--disable-vdpau"
+                            "--disable-d3d11va", "--disable-dxva2", "--disable-vaapi", "--disable-vdpau",
                             // Individual component options:
                             // ,"--disable-everything"
-                            ,"--disable-encoders"
+                            "--disable-encoders",
                             // ./configure --list-decoders
-                            ,"--disable-decoders", "--enable-decoder=dca", "--enable-decoder=flv", "--enable-decoder=h263", "--enable-decoder=h263i", "--enable-decoder=h263p", "--enable-decoder=h264", "--enable-decoder=hevc", "--enable-decoder=mjpeg", "--enable-decoder=mjpegb", "--enable-decoder=mpeg1video", "--enable-decoder=mpeg2video", "--enable-decoder=mpeg4", "--enable-decoder=mpegvideo", "--enable-decoder=rv30", "--enable-decoder=rv40", "--enable-decoder=tscc", "--enable-decoder=wmv1", "--enable-decoder=wmv2", "--enable-decoder=wmv3", "--enable-decoder=vc1", "--enable-decoder=vp6", "--enable-decoder=vp6a", "--enable-decoder=vp6f", "--enable-decoder=vp7", "--enable-decoder=vp8", "--enable-decoder=vp9"
+                            "--disable-decoders", "--enable-decoder=dca", "--enable-decoder=flv", "--enable-decoder=h263",
+                            "--enable-decoder=h263i", "--enable-decoder=h263p", "--enable-decoder=h264", "--enable-decoder=hevc",
+                            "--enable-decoder=mjpeg", "--enable-decoder=mjpegb", "--enable-decoder=mpeg1video", "--enable-decoder=mpeg2video",
+                            "--enable-decoder=mpeg4", "--enable-decoder=mpegvideo", "--enable-decoder=rv30", "--enable-decoder=rv40",
+                            "--enable-decoder=tscc", "--enable-decoder=wmv1", "--enable-decoder=wmv2", "--enable-decoder=wmv3",
+                            "--enable-decoder=vc1", "--enable-decoder=vp6", "--enable-decoder=vp6a", "--enable-decoder=vp6f",
+                            "--enable-decoder=vp7", "--enable-decoder=vp8", "--enable-decoder=vp9",
                             // 音频
-                            ,"--enable-decoder=aac", "--enable-decoder=aac_latm", "--enable-decoder=ac3", "--enable-decoder=alac", "--enable-decoder=amrnb", "--enable-decoder=amrwb", "--enable-decoder=ape", "--enable-decoder=cook", "--enable-decoder=dca", "--enable-decoder=eac3", "--enable-decoder=flac", "--enable-decoder=mp1", "--enable-decoder=mp2", "--enable-decoder=mp3*", "--enable-decoder=opus", "--enable-decoder=pcm*", "--enable-decoder=wma*", "--enable-decoder=vorbis", "--enable-decoder=truehd", "--enable-decoder=dolby_e"
+                            "--enable-decoder=aac", "--enable-decoder=aac_latm", "--enable-decoder=ac3", "--enable-decoder=alac",
+                            "--enable-decoder=amrnb", "--enable-decoder=amrwb", "--enable-decoder=ape", "--enable-decoder=cook",
+                            "--enable-decoder=dca", "--enable-decoder=eac3", "--enable-decoder=flac", "--enable-decoder=mp1",
+                            "--enable-decoder=mp2", "--enable-decoder=mp3*", "--enable-decoder=opus", "--enable-decoder=pcm*",
+                            "--enable-decoder=wma*", "--enable-decoder=vorbis", "--enable-decoder=truehd", "--enable-decoder=dolby_e"
                             // 字幕
-                            ,"--enable-decoder=ass", "--enable-decoder=srt", "--enable-decoder=ssa", "--enable-decoder=movtext", "--enable-decoder=subrip", "--enable-decoder=dvdsub", "--enable-decoder=dvbsub", "--enable-decoder=webvtt", "--disable-hwaccels"
+                            ,"--enable-decoder=ass", "--enable-decoder=srt", "--enable-decoder=ssa", "--enable-decoder=movtext",
+                            "--enable-decoder=subrip", "--enable-decoder=dvdsub", "--enable-decoder=dvbsub", "--enable-decoder=webvtt", "--disable-hwaccels",
                             // ./configure --list-muxers
-                            ,"--disable-muxers"
+                            "--disable-muxers",
                             // ,"--enable-muxer=mpegts"
                             // ,"--enable-muxer=mp4"
                             // ./configure --list-demuxers
-                            ,"--disable-demuxers", "--enable-demuxer=aac", "--enable-demuxer=concat", "--enable-demuxer=data", "--enable-demuxer=flv", "--enable-demuxer=hls"
+                            "--disable-demuxers", "--enable-demuxer=aac", "--enable-demuxer=concat", "--enable-demuxer=data", "--enable-demuxer=flv", "--enable-demuxer=hls",
                             // ,"--enable-demuxer=latm"
-                            ,"--enable-demuxer=live_flv", "--enable-demuxer=loas", "--enable-demuxer=m4v", "--enable-demuxer=mov", "--enable-demuxer=mp3", "--enable-demuxer=mpegps", "--enable-demuxer=mpegts", "--enable-demuxer=mpegvideo", "--enable-demuxer=hevc", "--enable-demuxer=dash", "--enable-demuxer=wav", "--enable-demuxer=ogg", "--enable-demuxer=ape", "--enable-demuxer=aiff", "--enable-demuxer=flac", "--enable-demuxer=amr", "--enable-demuxer=rtsp", "--enable-demuxer=asf", "--enable-demuxer=avi", "--enable-demuxer=matroska", "--enable-demuxer=rm"
+                            "--enable-demuxer=live_flv", "--enable-demuxer=loas", "--enable-demuxer=m4v", "--enable-demuxer=mov",
+                            "--enable-demuxer=mp3", "--enable-demuxer=mpegps", "--enable-demuxer=mpegts", "--enable-demuxer=mpegvideo",
+                            "--enable-demuxer=hevc", "--enable-demuxer=dash", "--enable-demuxer=wav", "--enable-demuxer=ogg",
+                            "--enable-demuxer=ape", "--enable-demuxer=aiff", "--enable-demuxer=flac", "--enable-demuxer=amr",
+                            "--enable-demuxer=rtsp", "--enable-demuxer=asf", "--enable-demuxer=avi", "--enable-demuxer=matroska",
+                            "--enable-demuxer=rm", "--enable-demuxer=vc1",
+
                             // ,"--enable-demuxer=webm_dash_manifest"
-                            ,"--enable-demuxer=vc1"
                             // ./configure --list-bsf
-                            ,"--disable-bsfs"
+                            "--disable-bsfs",
                             // ,"--disable-bsf=mjpeg2jpeg"
                             // ,"--disable-bsf=mjpeg2jpeg"
                             // ,"--disable-bsf=mjpega_dump_header"
@@ -215,7 +233,11 @@ class BuildFFMPEG: BaseBuild {
                             // ,"--disable-bsf=text2movsub"
 
                             // ./configure --list-protocols
-                            ,"--enable-protocols", "--disable-protocol=bluray", "--disable-protocol=ffrtmpcrypt", "--disable-protocol=gopher", "--disable-protocol=icecast", "--disable-protocol=librtmp*", "--disable-protocol=libssh", "--disable-protocol=md5", "--disable-protocol=mmsh", "--disable-protocol=mmst", "--disable-protocol=sctp", "--disable-protocol=srtp", "--disable-protocol=subfile", "--disable-protocol=unix", "--disable-devices", "--disable-indevs", "--disable-outdevs", "--disable-iconv", "--disable-audiotoolbox", "--disable-videotoolbox", "--disable-linux-perf", "--disable-bzlib"]
+                            "--enable-protocols", "--disable-protocol=bluray", "--disable-protocol=ffrtmpcrypt", "--disable-protocol=gopher",
+                            "--disable-protocol=icecast", "--disable-protocol=librtmp*", "--disable-protocol=libssh", "--disable-protocol=md5",
+                            "--disable-protocol=mmsh", "--disable-protocol=mmst", "--disable-protocol=sctp", "--disable-protocol=srtp",
+                            "--disable-protocol=subfile", "--disable-protocol=unix", "--disable-devices", "--disable-indevs",
+                            "--disable-outdevs", "--disable-iconv", "--disable-audiotoolbox", "--disable-videotoolbox", "--disable-linux-perf", "--disable-bzlib"]
 }
 
 class BuildOpenSSL: BaseBuild {
@@ -289,49 +311,49 @@ enum PlatformType: String, CaseIterable {
     case ios, tvos, macos, maccatalyst
     func architectures() -> [ArchType] {
         switch self {
-            case .ios, .tvos:
+        case .ios, .tvos:
                 return ArchType.allCases
-            case .macos, .maccatalyst:
+        case .macos, .maccatalyst:
                 return [.x86_64]
         }
     }
     func deploymentTarget(arch: ArchType) -> String {
         switch self {
-            case .ios:
+        case .ios:
                 if arch == .arm64 {
                     return "-mios-version-min=9.0"
                 } else {
                     return "-mios-simulator-version-min=9.0"
                 }
-            case .tvos:
+        case .tvos:
                 if arch == .arm64 {
                     return "-mtvos-version-min=12.0"
                 } else {
                     return "-mtvos-simulator-version-min=12.0"
                 }
-            case .macos:
+        case .macos:
                 return "-mmacosx-version-min=10.14"
-            case .maccatalyst:
+        case .maccatalyst:
                 return "-target x86_64-apple-ios13.0-macabi"
         }
     }
     func sdk(arch: ArchType) -> String {
         switch self {
-            case .ios:
+        case .ios:
                 if arch == .arm64 {
                     return "iPhoneOS"
                 } else {
                     return "iPhoneSimulator"
                 }
-            case .tvos:
+        case .tvos:
                 if arch == .arm64 {
                     return "AppleTVOS"
                 } else {
                     return "AppleTVSimulator"
                 }
-            case .macos:
+        case .macos:
                 return "MacOSX"
-            case .maccatalyst:
+        case .maccatalyst:
                 return "iPhoneOS"
         }
     }

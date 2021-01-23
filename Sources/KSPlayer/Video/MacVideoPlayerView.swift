@@ -30,7 +30,7 @@ open class MacVideoPlayerView: VideoPlayerView {
     static let supportedFileExt: [AVMediaType: [String]] = [
         .video: ["mkv", "mp4", "avi", "m4v", "mov", "3gp", "ts", "mts", "m2ts", "wmv", "flv", "f4v", "asf", "webm", "rm", "rmvb", "qt", "dv", "mpg", "mpeg", "mxf", "vob", "gif"],
         .audio: ["mp3", "aac", "mka", "dts", "flac", "ogg", "oga", "mogg", "m4a", "ac3", "opus", "wav", "wv", "aiff", "ape", "tta", "tak"],
-        .subtitle: ["utf", "utf8", "utf-8", "idx", "sub", "srt", "smi", "rt", "ssa", "aqt", "jss", "js", "ass", "mks", "vtt", "sup", "scc"],
+        .subtitle: ["utf", "utf8", "utf-8", "idx", "sub", "srt", "smi", "rt", "ssa", "aqt", "jss", "js", "ass", "mks", "vtt", "sup", "scc"]
     ]
 
     static let playableFileExt = supportedFileExt[.video]! + supportedFileExt[.audio]!
@@ -181,7 +181,7 @@ class UIActivityIndicatorView: UIView {
             imageView.bottomAnchor.constraint(equalTo: loadingView.bottomAnchor),
             imageView.leftAnchor.constraint(equalTo: loadingView.leftAnchor),
             imageView.heightAnchor.constraint(equalTo: widthAnchor),
-            imageView.widthAnchor.constraint(equalTo: heightAnchor),
+            imageView.widthAnchor.constraint(equalTo: heightAnchor)
         ])
         progressLabel.alignment = .center
         progressLabel.font = NSFont.systemFont(ofSize: 18, weight: .medium)
@@ -191,7 +191,7 @@ class UIActivityIndicatorView: UIView {
             progressLabel.centerXAnchor.constraint(equalTo: centerXAnchor),
             progressLabel.topAnchor.constraint(equalTo: loadingView.bottomAnchor, constant: 20),
             progressLabel.widthAnchor.constraint(equalToConstant: 100),
-            progressLabel.heightAnchor.constraint(equalToConstant: 22),
+            progressLabel.heightAnchor.constraint(equalToConstant: 22)
         ])
         startAnimating()
     }
