@@ -7,7 +7,6 @@
 //
 
 import Cocoa
-import FFmpeg
 import KSPlayer
 class MainWindow: NSWindow {
     let vc: ViewController
