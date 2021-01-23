@@ -1,10 +1,10 @@
-#import <libavcodec/avcodec.h>
-#import <libavutil/avutil.h>
+//#import <libavcodec/avcodec.h>
+//#import <libavutil/avutil.h>
+//#import <libavutil/imgutils.h>
+//#import <libavformat/avformat.h>
+//#import <libswresample/swresample.h>
+//#import <libswscale/swscale.h>
 #import <libavutil/display.h>
-#import <libavutil/imgutils.h>
-#import <libavformat/avformat.h>
-#import <libswresample/swresample.h>
-#import <libswscale/swscale.h>
 #import <stdbool.h>
 
 static __inline__ int AVERROR_CONVERT(int err) {
