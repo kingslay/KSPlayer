@@ -1,11 +1,11 @@
-#include <stdbool.h>
-#include "libavutil/imgutils.h"
-#include "libavutil/display.h"
-#include "libavcodec/avcodec.h"
-#include "libavformat/avformat.h"
-#include "libavutil/avutil.h"
-#include "libswscale/swscale.h"
-#include "libswresample/swresample.h"
+#import <libavcodec/avcodec.h>
+#import <libavutil/avutil.h>
+#import <libavutil/display.h>
+#import <libavutil/imgutils.h>
+#import <libavformat/avformat.h>
+#import <libswresample/swresample.h>
+#import <libswscale/swscale.h>
+#import <stdbool.h>
 
 static __inline__ int AVERROR_CONVERT(int err) {
     return AVERROR(err);

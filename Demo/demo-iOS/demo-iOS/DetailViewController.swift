@@ -106,31 +106,31 @@ class DetailViewController: UIViewController, DetailProtocol {
 
 extension DetailViewController: PlayerControllerDelegate {
     func playerController(state: KSPlayerState) {
-        
+
     }
-    
+
     func playerController(currentTime: TimeInterval, totalTime: TimeInterval) {
-        
+
     }
-    
+
     func playerController(finish error: Error?) {
-        
+
     }
-    
+
     func playerController(maskShow: Bool) {
         #if os(iOS)
         setNeedsStatusBarAppearanceUpdate()
         #endif
     }
-    
+
     func playerController(action: PlayerButtonType) {
-        
+
     }
-    
+
     func playerController(bufferedCount: Int, consumeTime: TimeInterval) {
-        
+
     }
-    
+
 }
 
 #if os(iOS)

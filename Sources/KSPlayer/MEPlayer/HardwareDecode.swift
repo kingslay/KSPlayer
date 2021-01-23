@@ -147,8 +147,8 @@ class DecompressionSession {
             kCVImageBufferChromaLocationTopFieldKey: "left",
             kCMFormatDescriptionExtension_FullRangeVideo: options.bufferPixelFormatType != kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange,
             kCMFormatDescriptionExtension_SampleDescriptionExtensionAtoms: [
-                codecpar.codec_id.rawValue == AV_CODEC_ID_HEVC.rawValue ? "hvcC" : "avcC": NSData(bytes: extradata, length: Int(extradataSize)),
-            ],
+                codecpar.codec_id.rawValue == AV_CODEC_ID_HEVC.rawValue ? "hvcC" : "avcC": NSData(bytes: extradata, length: Int(extradataSize))
+            ]
         ]
         if let aspectRatio = codecpar.aspectRatio {
             dic[kCVImageBufferPixelAspectRatioKey] = aspectRatio
@@ -173,7 +173,7 @@ class DecompressionSession {
             kCVPixelBufferMetalCompatibilityKey: true,
             kCVPixelBufferCGImageCompatibilityKey: true,
             kCVPixelBufferCGBitmapContextCompatibilityKey: true,
-            kCVPixelBufferIOSurfacePropertiesKey: NSDictionary(),
+            kCVPixelBufferIOSurfacePropertiesKey: NSDictionary()
         ]
         var session: VTDecompressionSession?
         // swiftlint:disable line_length
