@@ -42,25 +42,40 @@ open class BaseBuild {
             let XCFrameworkFile = Utility.splice(paths: ["../Sources", framework + ".xcframework"])
             try? FileManager.default.removeItem(at: XCFrameworkFile)
             for platform in platforms {
-                for arch in platform.architectures() {
-                    let prefix = thinDir(platform: platform, arch: arch)
-                    let frameworkDir = prefix + "\(framework).framework"
-                    try? FileManager.default.removeItem(at: frameworkDir)
-                    try? FileManager.default.createDirectory(at: frameworkDir, withIntermediateDirectories: true, attributes: nil)
-                    try? FileManager.default.copyItem(at: prefix + "lib/\(framework).a", to: frameworkDir + framework)
-                    var headerURL = prefix + "include" + framework
-                    if !FileManager.default.fileExists(atPath: headerURL.path) {
-                        headerURL =  prefix + "include"
-                    }
-                    try? FileManager.default.copyItem(at: headerURL, to: frameworkDir + "Headers")
-                    try? FileManager.default.createDirectory(at: frameworkDir + "Modules", withIntermediateDirectories: true, attributes: nil)
-                    let modulemap = "framework module \(framework) [system] {\n   \(frameworkHeader(framework))\n    export *\n}"
-                    FileManager.default.createFile(atPath: frameworkDir.path + "/Modules/module.modulemap", contents: modulemap.data(using: .utf8), attributes: nil)
-                    arguments += " -framework \(frameworkDir.path)"
+                if platform == .ios || platform == .tvos {
+                    arguments += " -framework \(createFramework(framework: framework, platform: platform, archs: [.x86_64]))"
+                    let archs = platform.architectures().filter{ $0 != .x86_64}
+                    arguments += " -framework \(createFramework(framework: framework, platform: platform, archs: archs))"
+                } else {
+                    arguments += " -framework \(createFramework(framework: framework, platform: platform, archs: platform.architectures()))"
                 }
+
             }
             Utility.shell("xcodebuild -create-xcframework\(arguments) -output \(XCFrameworkFile.path)")
         }
+    }
+    private func createFramework(framework: String, platform: PlatformType, archs: [ArchType]) -> String {
+        let frameworkDir = Utility.splice(paths: [library, platform.rawValue, archs.map({$0.rawValue}).joined(separator: "_"), "\(framework).framework"])
+        try? FileManager.default.removeItem(at: frameworkDir)
+        try? FileManager.default.createDirectory(at: frameworkDir, withIntermediateDirectories: true, attributes: nil)
+        var command = "lipo -create"
+        for arch in archs {
+            let prefix = thinDir(platform: platform, arch: arch)
+            command += " "
+            command += (prefix + "lib/\(framework).a").path
+            var headerURL = prefix + "include" + framework
+            if !FileManager.default.fileExists(atPath: headerURL.path) {
+                headerURL = prefix + "include"
+            }
+            try? FileManager.default.copyItem(at: headerURL, to: frameworkDir + "Headers")
+        }
+        command += " -output "
+        command += (frameworkDir + framework).path
+        Utility.shell(command)
+        try? FileManager.default.createDirectory(at: frameworkDir + "Modules", withIntermediateDirectories: true, attributes: nil)
+        let modulemap = "framework module \(framework) [system] {\n   \(frameworkHeader(framework))\n    export *\n}"
+        FileManager.default.createFile(atPath: frameworkDir.path + "/Modules/module.modulemap", contents: modulemap.data(using: .utf8), attributes: nil)
+        return frameworkDir.path
     }
     func thinDir(platform: PlatformType, arch: ArchType) -> URL {
         return Utility.splice(paths: [library, platform.rawValue, "thin", arch.rawValue])
@@ -106,7 +121,7 @@ class BuildFFMPEG: BaseBuild {
                 ffmpegcflags.append("--disable-mmx")
                 ffmpegcflags.append("--assert-level=2")
             }
-        } else if arch == .arm64 {
+        } else {
             ffmpegcflags.append("--enable-pic")
             ffmpegcflags.append("--enable-neon")
             if platform == .ios {
@@ -133,7 +148,7 @@ class BuildFFMPEG: BaseBuild {
         args.append(contentsOf: ffmpegcflags)
         print(args.joined(separator: " "))
         Utility.shell(args.joined(separator: " "), currentDirectoryURL: buildDir)
-        Utility.shell("make -j8 install\(arch == .arm64 ? " GASPP_FIX_XCODE5=1" : "") >>\(buildDir.path).log", currentDirectoryURL: buildDir)
+        Utility.shell("make -j8 install\(arch == .x86_64 ? "" : " GASPP_FIX_XCODE5=1") >>\(buildDir.path).log", currentDirectoryURL: buildDir)
         if isDebug && platform == .macos {
             try? FileManager.default.removeItem(at: URL(fileURLWithPath: "/usr/local/bin/ffmpeg"))
             try? FileManager.default.removeItem(at: URL(fileURLWithPath: "/usr/local/bin/ffplay"))
@@ -314,50 +329,52 @@ enum PlatformType: String, CaseIterable {
     case ios, tvos, macos, maccatalyst
     func architectures() -> [ArchType] {
         switch self {
-        case .ios, .tvos:
-                return ArchType.allCases
-        case .macos, .maccatalyst:
-                return [.x86_64]
+        case .ios:
+            return [.arm64, .x86_64]
+        case .tvos, .macos:
+            return [.arm64, .x86_64]
+        case .maccatalyst:
+            return [.x86_64]
         }
     }
     func deploymentTarget(arch: ArchType) -> String {
         switch self {
         case .ios:
-                if arch == .arm64 {
-                    return "-mios-version-min=9.0"
-                } else {
-                    return "-mios-simulator-version-min=9.0"
-                }
+            if arch == .x86_64 {
+                return "-mios-simulator-version-min=9.0"
+            } else {
+                return "-mios-version-min=9.0"
+            }
         case .tvos:
-                if arch == .arm64 {
-                    return "-mtvos-version-min=12.0"
-                } else {
-                    return "-mtvos-simulator-version-min=12.0"
-                }
+            if arch == .x86_64 {
+                return "-mtvos-simulator-version-min=12.0"
+            } else {
+                return "-mtvos-version-min=12.0"
+            }
         case .macos:
-                return "-mmacosx-version-min=10.14"
+            return "-mmacosx-version-min=10.14"
         case .maccatalyst:
-                return "-target x86_64-apple-ios13.0-macabi"
+            return "-target x86_64-apple-ios13.0-macabi"
         }
     }
     func sdk(arch: ArchType) -> String {
         switch self {
         case .ios:
-                if arch == .arm64 {
-                    return "iPhoneOS"
-                } else {
-                    return "iPhoneSimulator"
-                }
-        case .tvos:
-                if arch == .arm64 {
-                    return "AppleTVOS"
-                } else {
-                    return "AppleTVSimulator"
-                }
-        case .macos:
-                return "MacOSX"
-        case .maccatalyst:
+            if arch == .x86_64 {
+                return "iPhoneSimulator"
+            } else {
                 return "iPhoneOS"
+            }
+        case .tvos:
+            if arch == .x86_64 {
+                return "AppleTVSimulator"
+            } else {
+                return "AppleTVOS"
+            }
+        case .macos:
+            return "MacOSX"
+        case .maccatalyst:
+            return "iPhoneOS"
         }
     }
 
@@ -379,17 +396,16 @@ enum PlatformType: String, CaseIterable {
         return crossTop(arch: arch) + "/SDKs/" + crossSDK(arch: arch)
     }
     func target(arch: ArchType) -> String {
-        if arch == .arm64 {
-            return self == .maccatalyst ? "darwin64-arm64-cc" : "iphoneos-cross"
-        } else {
+        if arch == .x86_64 {
             return "darwin64-x86_64-cc no-asm"
+        } else {
+            return self == .maccatalyst ? "darwin64-arm64-cc" : "iphoneos-cross"
         }
-
     }
 }
 enum ArchType: String, CaseIterable {
     // swiftlint:disable identifier_name
-    case arm64, x86_64
+    case arm64, x86_64, arm64e
     // swiftlint:enable identifier_name
 }
 

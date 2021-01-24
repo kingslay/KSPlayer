@@ -149,5 +149,6 @@ install_xcframework() {
   echo "Copied $source to $destination"
 }
 
-install_xcframework "${PODS_ROOT}/../../Sources/OpenSSL.xcframework" "OpenSSL" "framework" "ios-x86_64-simulator" "ios-x86_64-maccatalyst" "ios-arm64"
+install_xcframework "${PODS_ROOT}/../../Sources/libssl.xcframework" "libssl" "framework" "ios-x86_64-maccatalyst" "ios-x86_64-simulator" "ios-arm64"
+install_xcframework "${PODS_ROOT}/../../Sources/libcrypto.xcframework" "libcrypto" "framework" "ios-x86_64-simulator" "ios-arm64" "ios-x86_64-maccatalyst"
 
