@@ -239,7 +239,7 @@ public protocol PlayerControllerDelegate: class {
 
 ```bash
 brew install sdl2
-swift ../Sources/Script/main.swift debug
+mkdir -p Script && cd Script && swift ../Sources/Script/main.swift debug
 dwarfdump -F --debug-info ../Sources/libavformat.xcframework/ios-x86_64-maccatalyst/FFmpeg.framework/FFmpeg | head -n 20
 ```
 
