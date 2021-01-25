@@ -179,7 +179,7 @@ public class KSAVPlayer {
 
 extension KSAVPlayer {
     public var player: AVQueuePlayer { playerView.player }
-
+    public var playerLayer: AVPlayerLayer { playerView.playerLayer }
     @objc private func moviePlayDidEnd(notification _: Notification) {
         if !options.isLoopPlay {
             playbackState = .finished
