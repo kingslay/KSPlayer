@@ -29,7 +29,7 @@ open class BaseBuild {
     func build(platform: PlatformType, arch: ArchType) {
         let url = Utility.splice(paths: [library, platform.rawValue, "scratch", arch.rawValue])
         try? FileManager.default.createDirectory(at: url, withIntermediateDirectories: true, attributes: nil)
-        var cflags = "-arch \(arch.rawValue) \(platform.deploymentTarget(arch: arch))"
+        var cflags = "-arch \(arch.rawValue) \(platform.deploymentTarget())"
         cflags += " -fembed-bitcode"
         innerBuid(platform: platform, arch: arch, cflags: cflags, buildDir: url)
     }
@@ -42,20 +42,14 @@ open class BaseBuild {
             let XCFrameworkFile = Utility.splice(paths: ["../Sources", framework + ".xcframework"])
             try? FileManager.default.removeItem(at: XCFrameworkFile)
             for platform in platforms {
-                if platform == .ios || platform == .tvos {
-                    arguments += " -framework \(createFramework(framework: framework, platform: platform, archs: [.x86_64]))"
-                    let archs = platform.architectures().filter{ $0 != .x86_64}
-                    arguments += " -framework \(createFramework(framework: framework, platform: platform, archs: archs))"
-                } else {
-                    arguments += " -framework \(createFramework(framework: framework, platform: platform, archs: platform.architectures()))"
-                }
+                arguments += " -framework \(createFramework(framework: framework, platform: platform, archs: platform.architectures()))"
 
             }
             Utility.shell("xcodebuild -create-xcframework\(arguments) -output \(XCFrameworkFile.path)")
         }
     }
     private func createFramework(framework: String, platform: PlatformType, archs: [ArchType]) -> String {
-        let frameworkDir = Utility.splice(paths: [library, platform.rawValue, archs.map({$0.rawValue}).joined(separator: "_"), "\(framework).framework"])
+        let frameworkDir = Utility.splice(paths: [library, platform.rawValue, "\(framework).framework"])
         try? FileManager.default.removeItem(at: frameworkDir)
         try? FileManager.default.createDirectory(at: frameworkDir, withIntermediateDirectories: true, attributes: nil)
         var command = "lipo -create"
@@ -131,7 +125,7 @@ class BuildFFMPEG: BaseBuild {
         var cflags = cflags
         var ldflags = "-arch \(arch.rawValue)"
         if platform == .maccatalyst {
-            let syslibroot = platform.isysroot(arch: arch)
+            let syslibroot = platform.isysroot()
             cflags += " -isysroot \(syslibroot) -iframework \(syslibroot)/System/iOSSupport/System/Library/Frameworks"
             ldflags = cflags
         }
@@ -143,7 +137,7 @@ class BuildFFMPEG: BaseBuild {
         }
         let prefix = thinDir(platform: platform, arch: arch)
         var args = ["set -o noglob &&", Utility.splice(paths: [ffmpegFile, "configure"]).path, "--target-os=darwin",
-                    "--arch=\(arch)", "--cc='xcrun -sdk \(platform.sdk(arch: arch).lowercased()) clang'",
+                    "--arch=\(arch)", "--cc='xcrun -sdk \(platform.sdk().lowercased()) clang'",
                     "--extra-cflags='\(cflags)'", "--extra-ldflags='\(ldflags)'", "--prefix=\(prefix.path)"]
         args.append(contentsOf: ffmpegcflags)
         print(args.joined(separator: " "))
@@ -197,7 +191,7 @@ class BuildFFMPEG: BaseBuild {
                             // ,"--disable-pthreads"
                             // ,"--disable-w32threads"
                             // ,"--disable-os2threads"
-                            "--enable-network", "--disable-securetransport",
+                            "--enable-network",
                             // ,"--disable-dct"
                             // ,"--disable-dwt"
                             // ,"--disable-lsp"
@@ -275,11 +269,11 @@ class BuildOpenSSL: BaseBuild {
         if platform == .macos || platform == .maccatalyst {
             ccFlags += " -fno-common"
         } else {
-            ccFlags += " -isysroot \(platform.isysroot(arch: arch))"
+            ccFlags += " -isysroot \(platform.isysroot())"
         }
         let target = platform.target(arch: arch)
-        let environment = ["LC_CTYPE": "C", "CROSS_TOP": platform.crossTop(arch: arch), "CROSS_SDK": platform.crossSDK(arch: arch), "CC": ccFlags]
-        let args = ["./Configure", target, "--prefix=\(thinDir(platform: platform, arch: arch).path)", "no-async no-shared", "--openssldir=\(buildDir.path)", ">>\(buildDir.path).log"]
+        let environment = ["LC_CTYPE": "C", "CROSS_TOP": platform.crossTop(), "CROSS_SDK": platform.crossSDK(), "CC": ccFlags]
+        let args = ["./Configure", target, "--prefix=\(thinDir(platform: platform, arch: arch).path)", "no-asm no-async no-shared", "--openssldir=\(buildDir.path)", ">>\(buildDir.path).log"]
         Utility.shell(args.joined(separator: " "), currentDirectoryURL: directoryURL, environment: environment)
         Utility.shell("make >>\(buildDir.path).log", currentDirectoryURL: directoryURL, environment: environment)
         Utility.shell("make install_sw >>\(buildDir.path).log", currentDirectoryURL: directoryURL, environment: environment)
@@ -305,7 +299,7 @@ class BuildBoringSSL: BaseBuild {
         super.buildALL()
     }
     override func innerBuid(platform: PlatformType, arch: ArchType, cflags: String, buildDir: URL) {
-        var command = "cmake -DCMAKE_OSX_SYSROOT=\(platform.sdk(arch: arch).lowercased()) -DCMAKE_OSX_ARCHITECTURES=\(arch.rawValue)"
+        var command = "cmake -DCMAKE_OSX_SYSROOT=\(platform.sdk().lowercased()) -DCMAKE_OSX_ARCHITECTURES=\(arch.rawValue)"
         if platform == .maccatalyst {
             command = "cmake -DCMAKE_C_FLAGS='\(cflags)'"
         }
@@ -326,51 +320,58 @@ class BuildBoringSSL: BaseBuild {
     }
 }
 enum PlatformType: String, CaseIterable {
-    case ios, tvos, macos, maccatalyst
+    case ios, isimulator, tvos, tvsimulator, macos, maccatalyst
     func architectures() -> [ArchType] {
         switch self {
         case .ios:
+            return [.arm64]
+        case .tvos:
+            return [.arm64]
+        case .isimulator, .tvsimulator:
             return [.arm64, .x86_64]
-        case .tvos, .macos:
+        case .macos:
             return [.arm64, .x86_64]
         case .maccatalyst:
             return [.x86_64]
         }
     }
-    func deploymentTarget(arch: ArchType) -> String {
+    func os() -> String {
+        switch self {
+            case .isimulator:
+                return "ios"
+            case .tvsimulator:
+                return "tvos"
+            default:
+            return self.rawValue
+
+        }
+    }
+    func deploymentTarget() -> String {
         switch self {
         case .ios:
-            if arch == .x86_64 {
-                return "-mios-simulator-version-min=9.0"
-            } else {
-                return "-mios-version-min=9.0"
-            }
+            return "-mios-version-min=9.0"
+        case .isimulator:
+            return "-mios-simulator-version-min=9.0"
         case .tvos:
-            if arch == .x86_64 {
-                return "-mtvos-simulator-version-min=12.0"
-            } else {
-                return "-mtvos-version-min=12.0"
-            }
+            return "-mtvos-version-min=12.0"
+        case .tvsimulator:
+            return "-mtvos-simulator-version-min=12.0"
         case .macos:
             return "-mmacosx-version-min=10.14"
         case .maccatalyst:
             return "-target x86_64-apple-ios13.0-macabi"
         }
     }
-    func sdk(arch: ArchType) -> String {
+    func sdk() -> String {
         switch self {
         case .ios:
-            if arch == .x86_64 {
-                return "iPhoneSimulator"
-            } else {
-                return "iPhoneOS"
-            }
+            return "iPhoneOS"
+        case .isimulator:
+            return "iPhoneSimulator"
         case .tvos:
-            if arch == .x86_64 {
-                return "AppleTVSimulator"
-            } else {
-                return "AppleTVOS"
-            }
+            return "AppleTVOS"
+        case .tvsimulator:
+            return "AppleTVSimulator"
         case .macos:
             return "MacOSX"
         case .maccatalyst:
@@ -378,29 +379,47 @@ enum PlatformType: String, CaseIterable {
         }
     }
 
-    func crossSDK(arch: ArchType) -> String {
+    func crossSDK() -> String {
         if self == .maccatalyst {
-            return PlatformType.macos.crossSDK(arch: arch)
+            return PlatformType.macos.crossSDK()
         } else {
-            return sdk(arch: arch)+".sdk"
+            return sdk()+".sdk"
         }
     }
-    func crossTop(arch: ArchType) -> String {
+    func crossTop() -> String {
         if self == .maccatalyst {
-            return PlatformType.macos.crossTop(arch: arch)
+            return PlatformType.macos.crossTop()
         } else {
-            return "\(xcodePath)/Platforms/\(sdk(arch: arch)).platform/Developer"
+            return "\(xcodePath)/Platforms/\(sdk()).platform/Developer"
         }
     }
-    func isysroot(arch: ArchType) -> String {
-        return crossTop(arch: arch) + "/SDKs/" + crossSDK(arch: arch)
+    func isysroot() -> String {
+        return crossTop() + "/SDKs/" + crossSDK()
     }
     func target(arch: ArchType) -> String {
-        if arch == .x86_64 {
-            return "darwin64-x86_64-cc no-asm"
+        if arch == .arm64 && (self == .macos || self == .tvsimulator || self == .isimulator) {
+            return "darwin64-arm64-cc"
         } else {
-            return self == .maccatalyst ? "darwin64-arm64-cc" : "iphoneos-cross"
+            if arch == .x86_64 {
+                return "darwin64-x86_64-cc"
+            } else {
+                return "iphoneos-cross"
+            }
         }
+        // switch self {
+        //     case .ios:
+        //         return "ios-cros-\(arch)"
+        //     case .isimulator:
+        //         return "ios64-sim-cross-\(arch)"
+        //     case .tvos:
+        //         return "tvos64-cross-\(arch)"
+        //     case .tvsimulator:
+        //         return "tvos-sim-cross--\(arch)"
+        //     case .macos:
+        //         return "macos-\(arch)"
+        //     case .maccatalyst:
+        //         return "mac-catalyst-\(arch)"
+        // }
     }
 }
 enum ArchType: String, CaseIterable {

@@ -3,7 +3,7 @@
 
 # KSPlayer 
 
-- KSPlayer is a powerful media play framework foriOS, tvOS, macOS,Mac Catalyst, SwiftUI.
+- KSPlayer is a powerful media play framework foriOS, tvOS, macOS,Mac Catalyst, SwiftUI,  Apple Silicon M1 .
 
 ## Based On
 
@@ -13,7 +13,7 @@
 
 ## Features
 
-- iOS, tvOS, macOS,Mac Catalyst, SwiftUI.
+- iOS, tvOS, macOS,Mac Catalyst,  Apple Silicon M1, SwiftUI.
 - 360° panorama video.
 - Background playback.
 - RTMP/RTSP/Dash/HLS streaming.
@@ -24,8 +24,8 @@
 ## Requirements
 
 - iOS 10 +,  macOS 10.12 +, tvOS 10.2 +
-- Xcode 11
-- Swift 5.2
+- Xcode 12
+- Swift 5.3
 
 ## Demo
 
@@ -35,7 +35,7 @@
 
 #### CocoaPods
 
-Make sure to use the latest version **cocoapods 1.9**, which can be installed using the command `brew install cocoapods`
+Make sure to use the latest version **cocoapods 1.9.3**, which can be installed using the command `brew install cocoapods`
 
 ```ruby
 target 'ProjectName' do
