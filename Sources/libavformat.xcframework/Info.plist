@@ -6,17 +6,18 @@
 	<array>
 		<dict>
 			<key>LibraryIdentifier</key>
-			<string>ios-x86_64-maccatalyst</string>
+			<string>ios-arm64_x86_64-simulator</string>
 			<key>LibraryPath</key>
 			<string>libavformat.framework</string>
 			<key>SupportedArchitectures</key>
 			<array>
+				<string>arm64</string>
 				<string>x86_64</string>
 			</array>
 			<key>SupportedPlatform</key>
 			<string>ios</string>
 			<key>SupportedPlatformVariant</key>
-			<string>maccatalyst</string>
+			<string>simulator</string>
 		</dict>
 		<dict>
 			<key>LibraryIdentifier</key>
@@ -32,15 +33,16 @@
 		</dict>
 		<dict>
 			<key>LibraryIdentifier</key>
-			<string>ios-x86_64-simulator</string>
+			<string>tvos-arm64_x86_64-simulator</string>
 			<key>LibraryPath</key>
 			<string>libavformat.framework</string>
 			<key>SupportedArchitectures</key>
 			<array>
+				<string>arm64</string>
 				<string>x86_64</string>
 			</array>
 			<key>SupportedPlatform</key>
-			<string>ios</string>
+			<string>tvos</string>
 			<key>SupportedPlatformVariant</key>
 			<string>simulator</string>
 		</dict>
@@ -58,20 +60,6 @@
 		</dict>
 		<dict>
 			<key>LibraryIdentifier</key>
-			<string>tvos-x86_64-simulator</string>
-			<key>LibraryPath</key>
-			<string>libavformat.framework</string>
-			<key>SupportedArchitectures</key>
-			<array>
-				<string>x86_64</string>
-			</array>
-			<key>SupportedPlatform</key>
-			<string>tvos</string>
-			<key>SupportedPlatformVariant</key>
-			<string>simulator</string>
-		</dict>
-		<dict>
-			<key>LibraryIdentifier</key>
 			<string>macos-arm64_x86_64</string>
 			<key>LibraryPath</key>
 			<string>libavformat.framework</string>
@@ -82,6 +70,20 @@
 			</array>
 			<key>SupportedPlatform</key>
 			<string>macos</string>
+		</dict>
+		<dict>
+			<key>LibraryIdentifier</key>
+			<string>ios-x86_64-maccatalyst</string>
+			<key>LibraryPath</key>
+			<string>libavformat.framework</string>
+			<key>SupportedArchitectures</key>
+			<array>
+				<string>x86_64</string>
+			</array>
+			<key>SupportedPlatform</key>
+			<string>ios</string>
+			<key>SupportedPlatformVariant</key>
+			<string>maccatalyst</string>
 		</dict>
 	</array>
 	<key>CFBundlePackageType</key>
