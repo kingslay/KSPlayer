@@ -88,7 +88,9 @@ extension AudioOutput: AudioPlayerDelegate {
     func audioPlayerDidRenderSample(sampleTimestamp _: AudioTimeStamp) {
         if let currentRender = currentRender {
             let currentPreparePosition = currentRender.position + currentRender.duration * Int64(currentRenderReadOffset) / Int64(currentRender.numberOfSamples)
-            renderSource?.setAudio(time: currentRender.timebase.cmtime(for: currentPreparePosition))
+            if currentPreparePosition > 0 {
+                renderSource?.setAudio(time: currentRender.timebase.cmtime(for: currentPreparePosition))
+            }
         }
     }
 }

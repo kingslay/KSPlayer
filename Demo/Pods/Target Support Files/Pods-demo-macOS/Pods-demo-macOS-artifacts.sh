@@ -124,12 +124,22 @@ install_xcframework() {
 
 
 if [[ "$CONFIGURATION" == "Debug" ]]; then
-  install_xcframework "${PODS_ROOT}/../../Sources/FFmpeg.xcframework" "" "false" "macos-x86_64/FFmpeg.framework"
-  install_xcframework "${PODS_ROOT}/../../Sources/OpenSSL.xcframework" "" "false" "macos-x86_64/OpenSSL.framework"
+  install_xcframework "${PODS_ROOT}/../../Sources/Libavcodec.xcframework" "" "false" "macos-arm64_x86_64/Libavcodec.framework"
+  install_xcframework "${PODS_ROOT}/../../Sources/Libavformat.xcframework" "" "false" "macos-arm64_x86_64/Libavformat.framework"
+  install_xcframework "${PODS_ROOT}/../../Sources/Libavutil.xcframework" "" "false" "macos-arm64_x86_64/Libavutil.framework"
+  install_xcframework "${PODS_ROOT}/../../Sources/Libswresample.xcframework" "" "false" "macos-arm64_x86_64/Libswresample.framework"
+  install_xcframework "${PODS_ROOT}/../../Sources/Libswscale.xcframework" "" "false" "macos-arm64_x86_64/Libswscale.framework"
+  install_xcframework "${PODS_ROOT}/../../Sources/Libssl.xcframework" "" "false" "macos-arm64_x86_64/libssl.framework"
+  install_xcframework "${PODS_ROOT}/../../Sources/Libcrypto.xcframework" "" "false" "macos-arm64_x86_64/libcrypto.framework"
 fi
 if [[ "$CONFIGURATION" == "Release" ]]; then
-  install_xcframework "${PODS_ROOT}/../../Sources/FFmpeg.xcframework" "" "false" "macos-x86_64/FFmpeg.framework"
-  install_xcframework "${PODS_ROOT}/../../Sources/OpenSSL.xcframework" "" "false" "macos-x86_64/OpenSSL.framework"
+  install_xcframework "${PODS_ROOT}/../../Sources/Libavcodec.xcframework" "" "false" "macos-arm64_x86_64/Libavcodec.framework"
+  install_xcframework "${PODS_ROOT}/../../Sources/Libavformat.xcframework" "" "false" "macos-arm64_x86_64/Libavformat.framework"
+  install_xcframework "${PODS_ROOT}/../../Sources/Libavutil.xcframework" "" "false" "macos-arm64_x86_64/Libavutil.framework"
+  install_xcframework "${PODS_ROOT}/../../Sources/Libswresample.xcframework" "" "false" "macos-arm64_x86_64/Libswresample.framework"
+  install_xcframework "${PODS_ROOT}/../../Sources/Libswscale.xcframework" "" "false" "macos-arm64_x86_64/Libswscale.framework"
+  install_xcframework "${PODS_ROOT}/../../Sources/Libssl.xcframework" "" "false" "macos-arm64_x86_64/libssl.framework"
+  install_xcframework "${PODS_ROOT}/../../Sources/Libcrypto.xcframework" "" "false" "macos-arm64_x86_64/libcrypto.framework"
 fi
 
 echo "Artifact list stored at $ARTIFACT_LIST_FILE"

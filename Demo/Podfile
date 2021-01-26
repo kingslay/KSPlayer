@@ -4,6 +4,7 @@ install! 'cocoapods', :generate_multiple_pod_projects => true
 def common
   pod 'KSPlayer', :path => '../', :testspecs => ['Tests']
   pod 'OpenSSL', :path => '../'
+  pod 'FFmpeg', :path => '../'
   pod 'SwiftLint'
 end
 target 'demo-iOS' do

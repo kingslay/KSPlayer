@@ -95,7 +95,7 @@ open class IOSVideoPlayerView: VideoPlayerView {
             routeButton.widthAnchor.constraint(equalToConstant: 25),
             landscapeButton.widthAnchor.constraint(equalToConstant: 30),
             airplayStatusView.centerXAnchor.constraint(equalTo: centerXAnchor),
-            airplayStatusView.centerYAnchor.constraint(equalTo: centerYAnchor),
+            airplayStatusView.centerYAnchor.constraint(equalTo: centerYAnchor)
         ])
         addNotification()
     }
@@ -305,7 +305,7 @@ public class AirplayStatusView: UIView {
             airplaymessage.bottomAnchor.constraint(equalTo: bottomAnchor),
             airplaymessage.leftAnchor.constraint(equalTo: leftAnchor),
             airplaymessage.rightAnchor.constraint(equalTo: rightAnchor),
-            airplaymessage.heightAnchor.constraint(equalToConstant: 15),
+            airplaymessage.heightAnchor.constraint(equalToConstant: 15)
         ])
         isHidden = true
     }
