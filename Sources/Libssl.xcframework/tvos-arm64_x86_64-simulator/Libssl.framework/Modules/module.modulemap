@@ -1,0 +1,4 @@
+framework module Libssl [system] {
+   header "openssl/ssl.h"
+    export *
+}
