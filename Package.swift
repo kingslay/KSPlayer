@@ -25,11 +25,11 @@ let package = Package(
         // Targets are the basic building blocks of a package. A target can define a module or a test suite.
         .target(
             name: "KSPlayer",
-            dependencies: ["FFmpeg", "libcrypto", "libssl"]
+            dependencies: ["FFmpeg", "Libcrypto", "Libssl"]
         ),
         .target(
             name: "FFmpeg",
-            dependencies: ["libavcodec", "libavformat", "libavutil", "libswresample", "libswscale"],
+            dependencies: ["Libavcodec", "Libavformat", "Libavutil", "Libswresample", "Libswscale"],
             linkerSettings: [.linkedLibrary("bz2"), .linkedLibrary("iconv"), .linkedLibrary("xml2"), .linkedLibrary("z")]
         ),
         .target(
@@ -43,32 +43,32 @@ let package = Package(
             resources: [.process("Resources")]
         ),
         .binaryTarget(
-            name: "libavcodec",
-            path: "Sources/libavcodec.xcframework"
+            name: "Libavcodec",
+            path: "Sources/Libavcodec.xcframework"
         ),
         .binaryTarget(
-            name: "libavformat",
-            path: "Sources/libavformat.xcframework"
+            name: "Libavformat",
+            path: "Sources/Libavformat.xcframework"
         ),
         .binaryTarget(
-            name: "libavutil",
-            path: "Sources/libavutil.xcframework"
+            name: "Libavutil",
+            path: "Sources/Libavutil.xcframework"
         ),
           .binaryTarget(
-            name: "libswresample",
-            path: "Sources/libswresample.xcframework"
+            name: "Libswresample",
+            path: "Sources/Libswresample.xcframework"
         ),
         .binaryTarget(
-            name: "libswscale",
-            path: "Sources/libswscale.xcframework"
+            name: "Libswscale",
+            path: "Sources/Libswscale.xcframework"
         ),
         .binaryTarget(
-            name: "libssl",
-            path: "Sources/libssl.xcframework"
+            name: "Libssl",
+            path: "Sources/Libssl.xcframework"
         ),
         .binaryTarget(
-            name: "libcrypto",
-            path: "Sources/libcrypto.xcframework"
+            name: "Libcrypto",
+            path: "Sources/Libcrypto.xcframework"
         )
     ]
 )

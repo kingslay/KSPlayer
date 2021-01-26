@@ -110,10 +110,12 @@
 			buildConfigurationList = AC752B852400301500A127BF /* Build configuration list for PBXNativeTarget "demo-SwiftUI" */;
 			buildPhases = (
 				5B2C54B8E547A04C03DA435E /* [CP] Check Pods Manifest.lock */,
+				C9B817DB7E753873387D3927 /* [CP] Prepare Artifacts */,
 				AC752B6D2400301400A127BF /* Sources */,
 				AC752B6E2400301400A127BF /* Frameworks */,
 				AC752B6F2400301400A127BF /* Resources */,
 				5D846D416007F4D02819D804 /* [CP] Copy Pods Resources */,
+				A1D11B36094E16B68B363854 /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -208,6 +210,40 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-demo-SwiftUI/Pods-demo-SwiftUI-resources.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		A1D11B36094E16B68B363854 /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-demo-SwiftUI/Pods-demo-SwiftUI-frameworks-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-demo-SwiftUI/Pods-demo-SwiftUI-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-demo-SwiftUI/Pods-demo-SwiftUI-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		C9B817DB7E753873387D3927 /* [CP] Prepare Artifacts */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-demo-SwiftUI/Pods-demo-SwiftUI-artifacts-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Prepare Artifacts";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-demo-SwiftUI/Pods-demo-SwiftUI-artifacts-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-demo-SwiftUI/Pods-demo-SwiftUI-artifacts.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
 /* End PBXShellScriptBuildPhase section */

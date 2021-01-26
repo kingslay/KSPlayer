@@ -124,22 +124,22 @@ install_xcframework() {
 
 
 if [[ "$CONFIGURATION" == "Debug" ]]; then
-  install_xcframework "${PODS_ROOT}/../../Sources/libavcodec.xcframework" "" "false" "tvos-arm64/libavcodec.framework" "tvos-x86_64-simulator/libavcodec.framework"
-  install_xcframework "${PODS_ROOT}/../../Sources/libavformat.xcframework" "" "false" "tvos-x86_64-simulator/libavformat.framework" "tvos-arm64/libavformat.framework"
-  install_xcframework "${PODS_ROOT}/../../Sources/libavutil.xcframework" "" "false" "tvos-arm64/libavutil.framework" "tvos-x86_64-simulator/libavutil.framework"
-  install_xcframework "${PODS_ROOT}/../../Sources/libswresample.xcframework" "" "false" "tvos-x86_64-simulator/libswresample.framework" "tvos-arm64/libswresample.framework"
-  install_xcframework "${PODS_ROOT}/../../Sources/libswscale.xcframework" "" "false" "tvos-arm64/libswscale.framework" "tvos-x86_64-simulator/libswscale.framework"
-  install_xcframework "${PODS_ROOT}/../../Sources/libssl.xcframework" "" "false" "tvos-arm64/libssl.framework" "tvos-x86_64-simulator/libssl.framework"
-  install_xcframework "${PODS_ROOT}/../../Sources/libcrypto.xcframework" "" "false" "tvos-arm64/libcrypto.framework" "tvos-x86_64-simulator/libcrypto.framework"
+  install_xcframework "${PODS_ROOT}/../../Sources/Libavcodec.xcframework" "" "false" "tvos-arm64_x86_64-simulator/Libavcodec.framework" "tvos-arm64/Libavcodec.framework"
+  install_xcframework "${PODS_ROOT}/../../Sources/Libavformat.xcframework" "" "false" "tvos-arm64_x86_64-simulator/Libavformat.framework" "tvos-arm64/Libavformat.framework"
+  install_xcframework "${PODS_ROOT}/../../Sources/Libavutil.xcframework" "" "false" "tvos-arm64_x86_64-simulator/Libavutil.framework" "tvos-arm64/Libavutil.framework"
+  install_xcframework "${PODS_ROOT}/../../Sources/Libswresample.xcframework" "" "false" "tvos-arm64/Libswresample.framework" "tvos-arm64_x86_64-simulator/Libswresample.framework"
+  install_xcframework "${PODS_ROOT}/../../Sources/Libswscale.xcframework" "" "false" "tvos-arm64_x86_64-simulator/Libswscale.framework" "tvos-arm64/Libswscale.framework"
+  install_xcframework "${PODS_ROOT}/../../Sources/Libssl.xcframework" "" "false" "tvos-arm64/libssl.framework" "tvos-arm64_x86_64-simulator/libssl.framework"
+  install_xcframework "${PODS_ROOT}/../../Sources/Libcrypto.xcframework" "" "false" "tvos-arm64_x86_64-simulator/libcrypto.framework" "tvos-arm64/libcrypto.framework"
 fi
 if [[ "$CONFIGURATION" == "Release" ]]; then
-  install_xcframework "${PODS_ROOT}/../../Sources/libavcodec.xcframework" "" "false" "tvos-arm64/libavcodec.framework" "tvos-x86_64-simulator/libavcodec.framework"
-  install_xcframework "${PODS_ROOT}/../../Sources/libavformat.xcframework" "" "false" "tvos-x86_64-simulator/libavformat.framework" "tvos-arm64/libavformat.framework"
-  install_xcframework "${PODS_ROOT}/../../Sources/libavutil.xcframework" "" "false" "tvos-arm64/libavutil.framework" "tvos-x86_64-simulator/libavutil.framework"
-  install_xcframework "${PODS_ROOT}/../../Sources/libswresample.xcframework" "" "false" "tvos-x86_64-simulator/libswresample.framework" "tvos-arm64/libswresample.framework"
-  install_xcframework "${PODS_ROOT}/../../Sources/libswscale.xcframework" "" "false" "tvos-arm64/libswscale.framework" "tvos-x86_64-simulator/libswscale.framework"
-  install_xcframework "${PODS_ROOT}/../../Sources/libssl.xcframework" "" "false" "tvos-arm64/libssl.framework" "tvos-x86_64-simulator/libssl.framework"
-  install_xcframework "${PODS_ROOT}/../../Sources/libcrypto.xcframework" "" "false" "tvos-arm64/libcrypto.framework" "tvos-x86_64-simulator/libcrypto.framework"
+  install_xcframework "${PODS_ROOT}/../../Sources/Libavcodec.xcframework" "" "false" "tvos-arm64_x86_64-simulator/Libavcodec.framework" "tvos-arm64/Libavcodec.framework"
+  install_xcframework "${PODS_ROOT}/../../Sources/Libavformat.xcframework" "" "false" "tvos-arm64_x86_64-simulator/Libavformat.framework" "tvos-arm64/Libavformat.framework"
+  install_xcframework "${PODS_ROOT}/../../Sources/Libavutil.xcframework" "" "false" "tvos-arm64_x86_64-simulator/Libavutil.framework" "tvos-arm64/Libavutil.framework"
+  install_xcframework "${PODS_ROOT}/../../Sources/Libswresample.xcframework" "" "false" "tvos-arm64/Libswresample.framework" "tvos-arm64_x86_64-simulator/Libswresample.framework"
+  install_xcframework "${PODS_ROOT}/../../Sources/Libswscale.xcframework" "" "false" "tvos-arm64_x86_64-simulator/Libswscale.framework" "tvos-arm64/Libswscale.framework"
+  install_xcframework "${PODS_ROOT}/../../Sources/Libssl.xcframework" "" "false" "tvos-arm64/libssl.framework" "tvos-arm64_x86_64-simulator/libssl.framework"
+  install_xcframework "${PODS_ROOT}/../../Sources/Libcrypto.xcframework" "" "false" "tvos-arm64_x86_64-simulator/libcrypto.framework" "tvos-arm64/libcrypto.framework"
 fi
 
 echo "Artifact list stored at $ARTIFACT_LIST_FILE"
