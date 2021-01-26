@@ -5,7 +5,7 @@
 //  Created by kintan on 2018/3/10.
 //
 
-import libavformat
+import Libavformat
 import VideoToolbox
 
 protocol DecodeProtocol {
