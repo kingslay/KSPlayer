@@ -24,8 +24,8 @@
     {
       "name": "OpenSSL",
       "vendored_frameworks": [
-        "Sources/libssl.xcframework",
-        "Sources/libcrypto.xcframework"
+        "Sources/Libssl.xcframework",
+        "Sources/Libcrypto.xcframework"
       ]
     }
   ],
