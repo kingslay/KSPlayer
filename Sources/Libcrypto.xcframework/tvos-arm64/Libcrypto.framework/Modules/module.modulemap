@@ -1,0 +1,4 @@
+framework module Libcrypto [system] {
+   header "openssl/crypto.h"
+    export *
+}

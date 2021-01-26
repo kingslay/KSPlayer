@@ -1,0 +1,4 @@
+framework module Libavformat [system] {
+   header "avformat.h"
+    export *
+}
