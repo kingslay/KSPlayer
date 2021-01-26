@@ -5,7 +5,7 @@ KSPlayer 是一款基于 AVPlayer、FFmpeg 的媒体资源播放器框架。支�
 
 ## 一、整体架构
 
-![1](https://github.com/kingslay/KSPlayer/raw/master/documents/1.png)
+![1](https://github.com/kingslay/KSPlayer/raw/master/Documents/1.png)
 
 上图展示了 KSPlayer 的主要组件，一共分为四层。每一个层都是解耦的，都可以单独拿出来使用。下面简单介绍图中各组件的分工
 
@@ -42,7 +42,7 @@ MediaPlayerProtocol是播放器内核接口。只要遵守MediaPlayerProtocol协
 
 ## 二、KSMEPlayer组织结构
 
-![1](https://github.com/kingslay/KSPlayer/raw/master/documents/2.png)
+![1](https://github.com/kingslay/KSPlayer/raw/master/Documents/2.png)
 
 上图展示了 KSMEPlayer 的主要组件，下面简单介绍图中各组件的分工
 
@@ -77,7 +77,7 @@ SampleBufferPlayerView不在真机使用，是因为它有一个问题，如果�
 
 ## 三、KSMEPlayer 运作流程
 
-![1](https://github.com/kingslay/KSPlayer/raw/master/documents/3.png)
+![1](https://github.com/kingslay/KSPlayer/raw/master/Documents/3.png)
 
 上图展示了 KSMEPlayer 的协作流程图，下面简单介绍图中各组件
 
