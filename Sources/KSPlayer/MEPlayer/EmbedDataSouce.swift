@@ -4,7 +4,7 @@
 //
 //  Created by kintan on 2018/8/7.
 //
-import libavutil
+import Libavutil
 import Foundation
 public class EmbedSubtitleInfo: SubtitleInfo {
     private let subtitle: SubtitlePlayerItemTrack

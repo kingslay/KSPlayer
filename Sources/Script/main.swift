@@ -8,16 +8,12 @@ BuildOpenSSL().buildALL()
 BuildFFMPEG().buildALL()
 open class BaseBuild {
     private let platforms = PlatformType.allCases
-    // private let platforms = [PlatformType.maccatalyst]
+    // private let platforms = [PlatformType.maccatalyst, PlatformType.macos]
     let library: String
     init(library: String) {
         self.library = library
     }
     func buildALL() {
-        let url = Utility.splice(paths: [library])
-        if FileManager.default.fileExists(atPath: url.path) {
-            try? FileManager.default.removeItem(at: url)
-        }
         for platform in platforms {
             for arch in platform.architectures() {
                 build(platform: platform, arch: arch)
@@ -79,7 +75,7 @@ open class BaseBuild {
     }
 
     func frameworkHeader(_ framework: String) -> String {
-        return "header \"\(framework.replacingOccurrences(of: "lib", with: "")).h\""
+        return "header \"\(framework.replacingOccurrences(of: "Lib", with: "")).h\""
     }
 }
 
@@ -153,7 +149,7 @@ class BuildFFMPEG: BaseBuild {
         }
     }
     override func frameworks() -> [String] {
-        return ["libavcodec", "libavformat", "libavutil", "libswresample", "libswscale"]
+        return ["Libavcodec", "Libavformat", "Libavutil", "Libswresample", "Libswscale"]
     }
     override func buildALL() {
         prepareYasm()
@@ -174,7 +170,7 @@ class BuildFFMPEG: BaseBuild {
         }
     }
     override func frameworkHeader(_ framework: String) -> String {
-        if framework == "libavutil" {
+        if framework == "Libavutil" {
             return super.frameworkHeader(framework) + "\n    header \"display.h\"\n    header \"imgutils.h\""
         } else {
             return super.frameworkHeader(framework)
@@ -280,10 +276,10 @@ class BuildOpenSSL: BaseBuild {
         Utility.shell("make clean >>\(buildDir.path).log", currentDirectoryURL: directoryURL, environment: environment)
     }
     override func frameworks() -> [String] {
-        return ["libcrypto", "libssl"]
+        return ["Libcrypto", "Libssl"]
     }
     override func frameworkHeader(_ framework: String) -> String {
-        return "header \"openssl/\(framework.replacingOccurrences(of: "lib", with: "")).h\""
+        return "header \"openssl/\(framework.replacingOccurrences(of: "Lib", with: "")).h\""
     }
 }
 
@@ -313,10 +309,10 @@ class BuildBoringSSL: BaseBuild {
         try? FileManager.default.copyItem(at: buildDir + "crypto/libcrypto.a", to: thin + "lib/libcrypto.a")
     }
     override func frameworks() -> [String] {
-        return ["libcrypto", "libssl"]
+        return ["Libcrypto", "Libssl"]
     }
     override func frameworkHeader(_ framework: String) -> String {
-        return "header \"openssl/\(framework.replacingOccurrences(of: "lib", with: "")).h\""
+        return "header \"openssl/\(framework.replacingOccurrences(of: "Lib", with: "")).h\""
     }
 }
 enum PlatformType: String, CaseIterable {

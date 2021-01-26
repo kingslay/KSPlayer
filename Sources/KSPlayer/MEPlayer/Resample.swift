@@ -8,9 +8,9 @@
 import AVFoundation
 import CoreGraphics
 import CoreMedia
-import libavcodec
-import libswscale
-import libswresample
+import Libavcodec
+import Libswscale
+import Libswresample
 import VideoToolbox
 #if canImport(UIKit)
 import UIKit

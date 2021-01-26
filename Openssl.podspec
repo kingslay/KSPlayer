@@ -20,6 +20,6 @@ Pod::Spec.new do |s|
     s.swift_version = '5.1'
     s.static_framework = true
     s.subspec 'OpenSSL' do |openssl|
-        openssl.vendored_frameworks = 'Sources/libssl.xcframework', 'Sources/libcrypto.xcframework'
+        openssl.vendored_frameworks = 'Sources/Libssl.xcframework', 'Sources/Libcrypto.xcframework'
     end
 end

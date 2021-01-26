@@ -7,7 +7,7 @@
 
 import AVFoundation
 import CoreMedia
-import libavcodec
+import Libavcodec
 #if canImport(UIKit)
 import UIKit
 #else

@@ -1,4 +1,4 @@
-framework module libswresample [system] {
+framework module Libswresample [system] {
    header "swresample.h"
     export *
 }

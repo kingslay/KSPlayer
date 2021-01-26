@@ -1,4 +1,4 @@
-framework module libswscale [system] {
+framework module Libswscale [system] {
    header "swscale.h"
     export *
 }

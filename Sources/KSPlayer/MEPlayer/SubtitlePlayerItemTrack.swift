@@ -5,7 +5,7 @@
 //  Created by kintan on 2018/3/11.
 //
 
-import libavformat
+import Libavformat
 import Foundation
 final class SubtitlePlayerItemTrack: FFPlayerItemTrack<SubtitleFrame> {
     private let reg = try? NSRegularExpression(pattern: "\\{[^}]+\\}", options: .caseInsensitive)

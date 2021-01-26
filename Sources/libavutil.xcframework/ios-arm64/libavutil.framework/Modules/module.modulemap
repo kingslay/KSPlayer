@@ -1,4 +1,4 @@
-framework module libavutil [system] {
+framework module Libavutil [system] {
    header "avutil.h"
     header "display.h"
     header "imgutils.h"

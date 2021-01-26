@@ -6,7 +6,7 @@
 //
 
 import AVFoundation
-import libavcodec
+import Libavcodec
 import FFmpeg
 import Foundation
 
