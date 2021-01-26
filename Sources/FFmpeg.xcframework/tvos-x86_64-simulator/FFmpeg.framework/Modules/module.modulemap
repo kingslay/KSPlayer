@@ -1,4 +1,0 @@
-framework module FFmpeg [system] {
-    header "FFmpeg.h"
-    export *
-}

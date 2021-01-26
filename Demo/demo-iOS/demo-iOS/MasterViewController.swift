@@ -84,7 +84,7 @@ class MasterViewController: UIViewController, UITableViewDelegate, UITableViewDa
             options.formatContextOptions["timeout"] = 0
             objects.append(KSPlayerResource(url: url, options: options, name: "https视频"))
         }
-        
+
         if let url = URL(string: "rtsp://wowzaec2demo.streamlock.net/vod/mp4:BigBuckBunny_115k.mov") {
             let options = KSOptions()
             options.formatContextOptions["timeout"] = 0

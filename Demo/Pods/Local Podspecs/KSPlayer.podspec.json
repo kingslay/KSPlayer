@@ -48,36 +48,6 @@
       "frameworks": "Foundation"
     },
     {
-      "name": "FFmpeg",
-      "libraries": [
-        "bz2",
-        "z",
-        "iconv",
-        "xml2"
-      ],
-      "ios": {
-        "xcconfig": {
-          "HEADER_SEARCH_PATHS": "${PODS_ROOT}/KSPlayer/Sources/FFmpeg.xcframework/ios-arm64/FFmpeg.framework/Headers ${PODS_ROOT}/../../Sources/FFmpeg.xcframework/ios-arm64/FFmpeg.framework/Headers"
-        }
-      },
-      "tvos": {
-        "xcconfig": {
-          "HEADER_SEARCH_PATHS": "${PODS_ROOT}/KSPlayer/Sources/FFmpeg.xcframework/tvos-arm64/FFmpeg.framework/Headers ${PODS_ROOT}/../../Sources/FFmpeg.xcframework/tvos-arm64/FFmpeg.framework/Headers"
-        }
-      },
-      "osx": {
-        "xcconfig": {
-          "HEADER_SEARCH_PATHS": "${PODS_ROOT}/KSPlayer/Sources/FFmpeg.xcframework/macos-x86_64/FFmpeg.framework/Headers ${PODS_ROOT}/../../Sources/FFmpeg.xcframework/macos-x86_64/FFmpeg.framework/Headers"
-        }
-      },
-      "vendored_frameworks": "Sources/FFmpeg.xcframework",
-      "dependencies": {
-        "OpenSSL": [
-
-        ]
-      }
-    },
-    {
       "name": "Metal",
       "source_files": "Sources/KSPlayer/Metal/*.{swift,metal}",
       "resource_bundles": {
@@ -114,7 +84,7 @@
         "VideoToolbox"
       ],
       "dependencies": {
-        "KSPlayer/FFmpeg": [
+        "FFmpeg": [
 
         ],
         "KSPlayer/AVPlayer": [

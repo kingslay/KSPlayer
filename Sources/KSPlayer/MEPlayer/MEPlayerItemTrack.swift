@@ -6,7 +6,8 @@
 //
 import AVFoundation
 import CoreMedia
-import FFmpeg
+import Libavformat
+
 protocol TrackProtocol: MediaPlayerTrack, CustomStringConvertible {
     var stream: UnsafeMutablePointer<AVStream> { get }
     var timebase: Timebase { get }
@@ -303,7 +304,8 @@ final class AsyncPlayerItemTrack: FFPlayerItemTrack<Frame> {
                     return
                 }
                 if seekTime > 0, options.isAccurateSeek {
-                    if frame.timebase.cmtime(for: frame.position + frame.duration).seconds < seekTime {
+                    let timestamp = frame.position + frame.duration
+                    if timestamp <= 0 || frame.timebase.cmtime(for: timestamp).seconds < seekTime {
                         return
                     } else {
                         seekTime = 0.0

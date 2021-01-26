@@ -149,5 +149,6 @@ install_xcframework() {
   echo "Copied $source to $destination"
 }
 
-install_xcframework "${PODS_ROOT}/../../Sources/OpenSSL.xcframework" "OpenSSL" "framework" "tvos-arm64" "tvos-x86_64-simulator"
+install_xcframework "${PODS_ROOT}/../../Sources/libssl.xcframework" "libssl" "framework" "tvos-x86_64-simulator" "tvos-arm64"
+install_xcframework "${PODS_ROOT}/../../Sources/libcrypto.xcframework" "libcrypto" "framework" "tvos-x86_64-simulator" "tvos-arm64"
 

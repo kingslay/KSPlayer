@@ -5,7 +5,7 @@
 //  Created by kintan on 2018/3/10.
 //
 
-import FFmpeg
+import Libavformat
 import VideoToolbox
 
 protocol DecodeProtocol {
@@ -147,8 +147,8 @@ class DecompressionSession {
             kCVImageBufferChromaLocationTopFieldKey: "left",
             kCMFormatDescriptionExtension_FullRangeVideo: options.bufferPixelFormatType != kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange,
             kCMFormatDescriptionExtension_SampleDescriptionExtensionAtoms: [
-                codecpar.codec_id.rawValue == AV_CODEC_ID_HEVC.rawValue ? "hvcC" : "avcC": NSData(bytes: extradata, length: Int(extradataSize)),
-            ],
+                codecpar.codec_id.rawValue == AV_CODEC_ID_HEVC.rawValue ? "hvcC" : "avcC": NSData(bytes: extradata, length: Int(extradataSize))
+            ]
         ]
         if let aspectRatio = codecpar.aspectRatio {
             dic[kCVImageBufferPixelAspectRatioKey] = aspectRatio
@@ -173,7 +173,7 @@ class DecompressionSession {
             kCVPixelBufferMetalCompatibilityKey: true,
             kCVPixelBufferCGImageCompatibilityKey: true,
             kCVPixelBufferCGBitmapContextCompatibilityKey: true,
-            kCVPixelBufferIOSurfacePropertiesKey: NSDictionary(),
+            kCVPixelBufferIOSurfacePropertiesKey: NSDictionary()
         ]
         var session: VTDecompressionSession?
         // swiftlint:disable line_length
@@ -201,7 +201,7 @@ extension CMFormatDescription {
                 let end = data + size
                 var nalStart = data
                 while nalStart < end {
-                    nalSize = UInt32(UInt32(nalStart[0]) << 16 | UInt32(nalStart[1]) << 8 | UInt32(nalStart[2]))
+                    nalSize = UInt32(nalStart[0]) << 16 | UInt32(nalStart[1]) << 8 | UInt32(nalStart[2])
                     avio_wb32(ioContext, nalSize)
                     nalStart += 3
                     avio_write(ioContext, nalStart, Int32(nalSize))

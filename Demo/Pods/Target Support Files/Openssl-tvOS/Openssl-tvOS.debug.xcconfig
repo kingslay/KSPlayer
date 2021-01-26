@@ -1,5 +1,5 @@
 CONFIGURATION_BUILD_DIR = ${PODS_CONFIGURATION_BUILD_DIR}/OpenSSL-tvOS
-FRAMEWORK_SEARCH_PATHS = $(inherited) "${PODS_ROOT}/../../Sources" "${PODS_ROOT}/../../Sources/OpenSSL.xcframework/tvos-arm64" "${PODS_ROOT}/../../Sources/OpenSSL.xcframework/tvos-x86_64-simulator"
+FRAMEWORK_SEARCH_PATHS = $(inherited) "${PODS_ROOT}/../../Sources" "${PODS_ROOT}/../../Sources/Libcrypto.xcframework/tvos-arm64" "${PODS_ROOT}/../../Sources/Libcrypto.xcframework/tvos-arm64_x86_64-simulator" "${PODS_ROOT}/../../Sources/Libssl.xcframework/tvos-arm64" "${PODS_ROOT}/../../Sources/Libssl.xcframework/tvos-arm64_x86_64-simulator"
 GCC_PREPROCESSOR_DEFINITIONS = $(inherited) COCOAPODS=1
 PODS_BUILD_DIR = ${BUILD_DIR}
 PODS_CONFIGURATION_BUILD_DIR = ${PODS_BUILD_DIR}/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)

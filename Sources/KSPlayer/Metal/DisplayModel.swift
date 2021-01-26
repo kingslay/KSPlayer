@@ -8,6 +8,9 @@
 import Foundation
 import Metal
 import simd
+#if canImport(UIKit)
+import UIKit
+#endif
 
 extension DisplayEnum {
     private static var planeDisplay = PlaneDisplayModel()
@@ -65,13 +68,13 @@ private class PlaneDisplayModel {
             [-1.0, -1.0, 0.0, 1.0],
             [-1.0, 1.0, 0.0, 1.0],
             [1.0, -1.0, 0.0, 1.0],
-            [1.0, 1.0, 0.0, 1.0],
+            [1.0, 1.0, 0.0, 1.0]
         ]
         let uvs: [simd_float2] = [
             [0.0, 1.0],
             [0.0, 0.0],
             [1.0, 1.0],
-            [1.0, 0.0],
+            [1.0, 0.0]
         ]
         return (indices, positions, uvs)
     }
