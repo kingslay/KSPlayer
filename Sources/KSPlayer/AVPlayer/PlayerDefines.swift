@@ -276,11 +276,15 @@ public class KSOptions {
         nil
     }
 
-    open func bestPixelFormatType(colorDepth: Int32, isFullRangeVideo: Bool) -> OSType {
+    open func bestPixelFormatType(colorDepth: Int32, isFullRangeVideo: Bool, isBiPlanar: Bool) -> OSType {
         if colorDepth > 8 {
             return isFullRangeVideo ? kCVPixelFormatType_420YpCbCr10BiPlanarFullRange : kCVPixelFormatType_420YpCbCr10BiPlanarVideoRange
         } else {
-            return isFullRangeVideo ? kCVPixelFormatType_420YpCbCr8BiPlanarFullRange: kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange
+            if isBiPlanar {
+                return isFullRangeVideo ? kCVPixelFormatType_420YpCbCr8BiPlanarFullRange: kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange
+            } else {
+                return isFullRangeVideo ? kCVPixelFormatType_420YpCbCr8PlanarFullRange: kCVPixelFormatType_420YpCbCr8Planar
+            }
         }
     }
 }

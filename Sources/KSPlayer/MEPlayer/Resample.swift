@@ -124,7 +124,7 @@ class PixelBuffer: BufferProtocol {
     let height: Int
     let planeCount: Int
     let isFullRangeVideo: Bool
-    let colorAttachments: NSString
+    let colorAttachments: CFString?
     let drawableSize: CGSize
     private let formats: [MTLPixelFormat]
     private let widths: [Int]
@@ -133,12 +133,7 @@ class PixelBuffer: BufferProtocol {
     private let bytesPerRow: [Int32]
     init(frame: UnsafeMutablePointer<AVFrame>) {
         format = AVPixelFormat(rawValue: frame.pointee.format)
-        if frame.pointee.colorspace == AVCOL_SPC_BT709 {
-            colorAttachments = kCMFormatDescriptionYCbCrMatrix_ITU_R_709_2
-        } else {
-            //        else if frame.colorspace == AVCOL_SPC_SMPTE170M || frame.colorspace == AVCOL_SPC_BT470BG {
-            colorAttachments = kCMFormatDescriptionYCbCrMatrix_ITU_R_601_4
-        }
+        colorAttachments = frame.pointee.colorspace.ycbcrMatrix
         width = Int(frame.pointee.width)
         height = Int(frame.pointee.height)
         isFullRangeVideo = frame.pointee.color_range == AVCOL_RANGE_JPEG
