@@ -492,6 +492,7 @@ struct AVMediaPlayerTrack: MediaPlayerTrack {
     let name: String
     let language: String?
     let mediaType: AVMediaType
+    let colorDepth: Int32
     var isEnabled: Bool {
         track.isEnabled
     }
@@ -502,5 +503,6 @@ struct AVMediaPlayerTrack: MediaPlayerTrack {
         language = track.assetTrack?.extendedLanguageTag
         fps = Int(track.assetTrack?.nominalFrameRate ?? 24.0)
         naturalSize = track.assetTrack?.naturalSize ?? .zero
+        colorDepth = 8
     }
 }

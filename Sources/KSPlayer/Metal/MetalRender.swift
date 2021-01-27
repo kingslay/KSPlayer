@@ -129,8 +129,7 @@ class MetalRender {
     }
 
     private func setFragmentBuffer(pixelBuffer: BufferProtocol, encoder: MTLRenderCommandEncoder) {
-        let pixelFormatType = pixelBuffer.format
-        if pixelFormatType != kCVPixelFormatType_32BGRA {
+        if pixelBuffer.planeCount > 1 {
             var buffer = colorConversion601FullRangeMatrixBuffer
             let isFullRangeVideo = pixelBuffer.isFullRangeVideo
             let colorAttachments = pixelBuffer.colorAttachments

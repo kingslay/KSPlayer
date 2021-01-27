@@ -123,9 +123,8 @@ class DecompressionSession {
     fileprivate let isConvertNALSize: Bool
     fileprivate let formatDescription: CMFormatDescription
     fileprivate let decompressionSession: VTDecompressionSession
-
     init?(codecpar: AVCodecParameters, options: KSOptions) {
-        let formats = [AV_PIX_FMT_YUV420P, AV_PIX_FMT_YUV420P9BE, AV_PIX_FMT_YUV420P9LE,
+        let formats = [AV_PIX_FMT_NV12, AV_PIX_FMT_P010LE, AV_PIX_FMT_P010BE, AV_PIX_FMT_YUV420P, AV_PIX_FMT_YUV420P9BE, AV_PIX_FMT_YUV420P9LE,
                        AV_PIX_FMT_YUV420P10BE, AV_PIX_FMT_YUV420P10LE, AV_PIX_FMT_YUV420P12BE, AV_PIX_FMT_YUV420P12LE,
                        AV_PIX_FMT_YUV420P14BE, AV_PIX_FMT_YUV420P14LE, AV_PIX_FMT_YUV420P16BE, AV_PIX_FMT_YUV420P16LE]
         guard options.canHardwareDecode(codecpar: codecpar), formats.contains(AVPixelFormat(codecpar.format)), let extradata = codecpar.extradata else {
@@ -142,10 +141,11 @@ class DecompressionSession {
         } else {
             isConvertNALSize = false
         }
+        let isFullRangeVideo = codecpar.color_range == AVCOL_RANGE_JPEG
         let dic: NSMutableDictionary = [
             kCVImageBufferChromaLocationBottomFieldKey: "left",
             kCVImageBufferChromaLocationTopFieldKey: "left",
-            kCMFormatDescriptionExtension_FullRangeVideo: options.bufferPixelFormatType != kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange,
+            kCMFormatDescriptionExtension_FullRangeVideo: isFullRangeVideo,
             kCMFormatDescriptionExtension_SampleDescriptionExtensionAtoms: [
                 codecpar.codec_id.rawValue == AV_CODEC_ID_HEVC.rawValue ? "hvcC" : "avcC": NSData(bytes: extradata, length: Int(extradataSize))
             ]
@@ -156,7 +156,6 @@ class DecompressionSession {
         if codecpar.color_space == AVCOL_SPC_BT709 {
             dic[kCMFormatDescriptionExtension_YCbCrMatrix] = kCMFormatDescriptionColorPrimaries_ITU_R_709_2
         }
-        // codecpar.pointee.color_range == AVCOL_RANGE_JPEG kCVPixelFormatType_420YpCbCr8BiPlanarFullRange
         let type = codecpar.codec_id.rawValue == AV_CODEC_ID_HEVC.rawValue ? kCMVideoCodecType_HEVC : kCMVideoCodecType_H264
         // swiftlint:disable line_length
         var description: CMFormatDescription?
@@ -167,7 +166,7 @@ class DecompressionSession {
         }
         self.formatDescription = formatDescription
         let attributes: NSDictionary = [
-            kCVPixelBufferPixelFormatTypeKey: options.bufferPixelFormatType,
+            kCVPixelBufferPixelFormatTypeKey: options.bestPixelFormatType(colorDepth: AVPixelFormat(rawValue: codecpar.format).colorDepth(), isFullRangeVideo: isFullRangeVideo),
             kCVPixelBufferWidthKey: codecpar.width,
             kCVPixelBufferHeightKey: codecpar.height,
             kCVPixelBufferMetalCompatibilityKey: true,

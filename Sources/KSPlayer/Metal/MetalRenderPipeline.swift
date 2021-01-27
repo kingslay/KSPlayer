@@ -80,7 +80,6 @@ struct YUVMetalRenderPipeline: MetalRenderPipeline {
 
 public protocol BufferProtocol: AnyObject {
     var drawableSize: CGSize { get }
-    var format: OSType { get }
     var planeCount: Int { get }
     var width: Int { get }
     var height: Int { get }
@@ -102,8 +101,6 @@ extension CVPixelBuffer: BufferProtocol {
     public var isPlanar: Bool { CVPixelBufferIsPlanar(self) }
 
     public var planeCount: Int { isPlanar ? CVPixelBufferGetPlaneCount(self) : 1 }
-
-    public var format: OSType { CVPixelBufferGetPixelFormatType(self) }
 
     public var drawableSize: CGSize {
         // Check if the pixel buffer exists

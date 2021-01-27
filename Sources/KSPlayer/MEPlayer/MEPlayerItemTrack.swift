@@ -39,6 +39,7 @@ struct AssetTrack: TrackProtocol {
     let bitRate: Int64
     let rotation: Double
     let naturalSize: CGSize
+    let colorDepth: Int32
     init?(stream: UnsafeMutablePointer<AVStream>) {
         self.stream = stream
         if let bitrateEntry = av_dict_get(stream.pointee.metadata, "variant_bitrate", nil, 0) ?? av_dict_get(stream.pointee.metadata, "BPS", nil, 0),
@@ -47,6 +48,7 @@ struct AssetTrack: TrackProtocol {
         } else {
             bitRate = stream.pointee.codecpar.pointee.bit_rate
         }
+        colorDepth = AVPixelFormat(rawValue: stream.pointee.codecpar.pointee.format).colorDepth()
         if stream.pointee.codecpar.pointee.codec_type == AVMEDIA_TYPE_AUDIO {
             mediaType = .audio
         } else if stream.pointee.codecpar.pointee.codec_type == AVMEDIA_TYPE_VIDEO {
