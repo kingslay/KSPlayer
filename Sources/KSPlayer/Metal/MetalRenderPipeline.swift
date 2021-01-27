@@ -84,7 +84,7 @@ public protocol BufferProtocol: AnyObject {
     var width: Int { get }
     var height: Int { get }
     var isFullRangeVideo: Bool { get }
-    var colorAttachments: NSString { get }
+    var colorAttachments: CFString? { get }
     func widthOfPlane(at planeIndex: Int) -> Int
     func heightOfPlane(at planeIndex: Int) -> Int
     func textures(frome cache: MetalTextureCache) -> [MTLTexture]
@@ -118,8 +118,8 @@ extension CVPixelBuffer: BufferProtocol {
         CVBufferGetAttachment(self, kCMFormatDescriptionExtension_FullRangeVideo, nil)?.takeUnretainedValue() as? Bool ?? true
     }
 
-    public var colorAttachments: NSString {
-        CVBufferGetAttachment(self, kCVImageBufferYCbCrMatrixKey, nil)?.takeUnretainedValue() as? NSString ?? kCVImageBufferYCbCrMatrix_ITU_R_709_2
+    public var colorAttachments: CFString? {
+        CVBufferGetAttachment(self, kCVImageBufferYCbCrMatrixKey, nil)?.takeUnretainedValue() as? NSString
     }
 
     public func image() -> UIImage? {

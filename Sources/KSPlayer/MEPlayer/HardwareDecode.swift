@@ -127,7 +127,8 @@ class DecompressionSession {
         let formats = [AV_PIX_FMT_NV12, AV_PIX_FMT_P010LE, AV_PIX_FMT_P010BE, AV_PIX_FMT_YUV420P, AV_PIX_FMT_YUV420P9BE, AV_PIX_FMT_YUV420P9LE,
                        AV_PIX_FMT_YUV420P10BE, AV_PIX_FMT_YUV420P10LE, AV_PIX_FMT_YUV420P12BE, AV_PIX_FMT_YUV420P12LE,
                        AV_PIX_FMT_YUV420P14BE, AV_PIX_FMT_YUV420P14LE, AV_PIX_FMT_YUV420P16BE, AV_PIX_FMT_YUV420P16LE]
-        guard options.canHardwareDecode(codecpar: codecpar), formats.contains(AVPixelFormat(codecpar.format)), let extradata = codecpar.extradata else {
+        let format = AVPixelFormat(codecpar.format)
+        guard options.canHardwareDecode(codecpar: codecpar), formats.contains(format), let extradata = codecpar.extradata else {
             return nil
         }
         let extradataSize = codecpar.extradata_size
@@ -165,8 +166,9 @@ class DecompressionSession {
             return nil
         }
         self.formatDescription = formatDescription
-        let attributes: NSDictionary = [
-            kCVPixelBufferPixelFormatTypeKey: options.bestPixelFormatType(colorDepth: AVPixelFormat(rawValue: codecpar.format).colorDepth(), isFullRangeVideo: isFullRangeVideo),
+
+        let attributes: NSMutableDictionary = [
+            kCVPixelBufferPixelFormatTypeKey: options.bestPixelFormatType(colorDepth: format.colorDepth(), isFullRangeVideo: isFullRangeVideo, isBiPlanar: format != AV_PIX_FMT_YUV420P),
             kCVPixelBufferWidthKey: codecpar.width,
             kCVPixelBufferHeightKey: codecpar.height,
             kCVPixelBufferMetalCompatibilityKey: true,
@@ -174,6 +176,9 @@ class DecompressionSession {
             kCVPixelBufferCGBitmapContextCompatibilityKey: true,
             kCVPixelBufferIOSurfacePropertiesKey: NSDictionary()
         ]
+        attributes[kCVImageBufferColorPrimariesKey] = codecpar.color_primaries.colorPrimaries
+        attributes[kCVImageBufferTransferFunctionKey] = codecpar.color_trc.transferFunction
+        attributes[kCVImageBufferYCbCrMatrixKey] = codecpar.color_space.ycbcrMatrix
         var session: VTDecompressionSession?
         // swiftlint:disable line_length
         status = VTDecompressionSessionCreate(allocator: kCFAllocatorDefault, formatDescription: formatDescription, decoderSpecification: nil, imageBufferAttributes: attributes, outputCallback: nil, decompressionSessionOut: &session)
@@ -230,5 +235,67 @@ extension CMFormatDescription {
         }
         throw NSError(errorCode: .codecVideoReceiveFrame, ffmpegErrnum: status)
         // swiftlint:enable line_length
+    }
+}
+
+extension AVColorPrimaries {
+    var colorPrimaries: CFString? {
+        switch self {
+        case AVCOL_PRI_BT470BG:
+            return kCVImageBufferColorPrimaries_EBU_3213
+        case AVCOL_PRI_SMPTE170M:
+            return kCVImageBufferColorPrimaries_SMPTE_C
+        case AVCOL_PRI_BT709:
+            return kCVImageBufferColorPrimaries_EBU_3213
+        case AVCOL_PRI_BT2020:
+            return kCVImageBufferColorPrimaries_ITU_R_2020
+        default:
+            return nil
+        }
+    }
+}
+extension AVColorTransferCharacteristic {
+    var transferFunction: CFString? {
+        switch self {
+        case AVCOL_TRC_BT709:
+            return kCVImageBufferTransferFunction_ITU_R_709_2
+        case AVCOL_TRC_SMPTE240M:
+            return kCVImageBufferTransferFunction_SMPTE_240M_1995
+        case AVCOL_TRC_SMPTE2084:
+            if #available(iOS 11.0, *) {
+                return kCVImageBufferTransferFunction_SMPTE_ST_2084_PQ
+            }
+        case AVCOL_TRC_LINEAR:
+            if #available(iOS 12.0, *) {
+                return kCVImageBufferTransferFunction_Linear
+            }
+        case AVCOL_TRC_ARIB_STD_B67:
+            if #available(iOS 11.0, *) {
+                return kCVImageBufferTransferFunction_ITU_R_2100_HLG
+            }
+        case AVCOL_TRC_GAMMA22, AVCOL_TRC_GAMMA28:
+            return kCVImageBufferTransferFunction_UseGamma
+        case AVCOL_TRC_BT2020_10, AVCOL_TRC_BT2020_12:
+            return kCVImageBufferTransferFunction_ITU_R_2020
+        default:
+            return nil
+        }
+        return nil
+    }
+}
+extension AVColorSpace {
+    var ycbcrMatrix: CFString? {
+        switch self {
+        case AVCOL_SPC_BT709:
+            return kCVImageBufferYCbCrMatrix_ITU_R_709_2
+        case AVCOL_SPC_BT470BG, AVCOL_SPC_SMPTE170M:
+            return kCVImageBufferYCbCrMatrix_ITU_R_601_4
+        case AVCOL_SPC_SMPTE240M:
+            return kCVImageBufferYCbCrMatrix_SMPTE_240M_1995
+        case AVCOL_SPC_BT2020_NCL:
+            return kCVImageBufferYCbCrMatrix_ITU_R_2020
+        default:
+            return nil
+        }
     }
 }
