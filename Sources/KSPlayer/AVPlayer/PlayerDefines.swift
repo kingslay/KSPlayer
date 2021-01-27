@@ -69,6 +69,7 @@ public protocol MediaPlayerTrack {
     var bitRate: Int64 { get }
     var naturalSize: CGSize { get }
     var isEnabled: Bool { get }
+    var colorDepth: Int32 { get }
 }
 
 extension MediaPlayerProtocol {
@@ -114,8 +115,6 @@ public struct VideoAdaptationState {
 }
 
 public class KSOptions {
-    /// 视频颜色编码方式 支持kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange kCVPixelFormatType_420YpCbCr8BiPlanarFullRange kCVPixelFormatType_32BGRA
-    public static var bufferPixelFormatType = kCVPixelFormatType_420YpCbCr8BiPlanarFullRange
     public static var hardwareDecodeH264 = true
     public static var hardwareDecodeH265 = true
     /// 最低缓存视频时间
@@ -136,7 +135,6 @@ public class KSOptions {
     public static let videoFrameMaxCount = 8
 
     //    public static let shared = KSOptions()
-    public var bufferPixelFormatType = KSOptions.bufferPixelFormatType
     public var hardwareDecodeH264 = KSOptions.hardwareDecodeH264
     public var hardwareDecodeH265 = KSOptions.hardwareDecodeH265
     /// 最低缓存视频时间
@@ -276,6 +274,14 @@ public class KSOptions {
     /// - Returns: The index of the infos
     open func wantedAudio(infos _: [(bitRate: Int64, language: String?)]) -> Int? {
         nil
+    }
+
+    open func bestPixelFormatType(colorDepth: Int32, isFullRangeVideo: Bool) -> OSType {
+        if colorDepth > 8 {
+            return isFullRangeVideo ? kCVPixelFormatType_420YpCbCr10BiPlanarFullRange : kCVPixelFormatType_420YpCbCr10BiPlanarVideoRange
+        } else {
+            return isFullRangeVideo ? kCVPixelFormatType_420YpCbCr8BiPlanarFullRange: kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange
+        }
     }
 }
 
