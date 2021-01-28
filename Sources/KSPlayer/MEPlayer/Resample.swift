@@ -119,12 +119,14 @@ class VideoSwresample: Swresample {
 }
 
 class PixelBuffer: BufferProtocol {
+    let colorDepth: Int32
     let format: AVPixelFormat
     let width: Int
     let height: Int
     let planeCount: Int
     let isFullRangeVideo: Bool
     let colorAttachments: CFString?
+    let colorPrimaries: CFString?
     let drawableSize: CGSize
     private let formats: [MTLPixelFormat]
     private let widths: [Int]
@@ -134,10 +136,12 @@ class PixelBuffer: BufferProtocol {
     init(frame: UnsafeMutablePointer<AVFrame>) {
         format = AVPixelFormat(rawValue: frame.pointee.format)
         colorAttachments = frame.pointee.colorspace.ycbcrMatrix
+        colorPrimaries = frame.pointee.color_primaries.colorPrimaries
         width = Int(frame.pointee.width)
         height = Int(frame.pointee.height)
         isFullRangeVideo = frame.pointee.color_range == AVCOL_RANGE_JPEG
         bytesPerRow = Array(tuple: frame.pointee.linesize)
+        colorDepth = format.colorDepth()
         let vertical = Int(frame.pointee.sample_aspect_ratio.den)
         let horizontal = Int(frame.pointee.sample_aspect_ratio.num)
         if vertical > 0, horizontal > 0, vertical != horizontal {

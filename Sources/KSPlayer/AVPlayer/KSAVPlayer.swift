@@ -503,6 +503,12 @@ struct AVMediaPlayerTrack: MediaPlayerTrack {
         language = track.assetTrack?.extendedLanguageTag
         fps = Int(track.assetTrack?.nominalFrameRate ?? 24.0)
         naturalSize = track.assetTrack?.naturalSize ?? .zero
-        colorDepth = 8
+        let dictionary = track.assetTrack?.formatDescriptions.first.flatMap {
+            // swiftlint:disable force_cast
+            return CMFormatDescriptionGetExtensions($0 as! CMFormatDescription)
+            // swiftlint:enable force_cast
+        } as NSDictionary?
+
+        colorDepth = dictionary?["BitsPerComponent"] as? Int32 ?? 8
     }
 }

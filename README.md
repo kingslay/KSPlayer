@@ -20,6 +20,7 @@
 - Setting playback speed.
 - Multiple audio/video tracks.
 - H.264/H.265 hardware accelerator.
+- HDR
 
 ## Requirements
 

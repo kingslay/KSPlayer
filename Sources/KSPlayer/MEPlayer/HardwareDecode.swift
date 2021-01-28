@@ -144,8 +144,8 @@ class DecompressionSession {
         }
         let isFullRangeVideo = codecpar.color_range == AVCOL_RANGE_JPEG
         let dic: NSMutableDictionary = [
-            kCVImageBufferChromaLocationBottomFieldKey: "left",
-            kCVImageBufferChromaLocationTopFieldKey: "left",
+            kCVImageBufferChromaLocationBottomFieldKey: kCVImageBufferChromaLocation_Left,
+            kCVImageBufferChromaLocationTopFieldKey: kCVImageBufferChromaLocation_Left,
             kCMFormatDescriptionExtension_FullRangeVideo: isFullRangeVideo,
             kCMFormatDescriptionExtension_SampleDescriptionExtensionAtoms: [
                 codecpar.codec_id.rawValue == AV_CODEC_ID_HEVC.rawValue ? "hvcC" : "avcC": NSData(bytes: extradata, length: Int(extradataSize))
@@ -154,9 +154,9 @@ class DecompressionSession {
         if let aspectRatio = codecpar.aspectRatio {
             dic[kCVImageBufferPixelAspectRatioKey] = aspectRatio
         }
-        if codecpar.color_space == AVCOL_SPC_BT709 {
-            dic[kCMFormatDescriptionExtension_YCbCrMatrix] = kCMFormatDescriptionColorPrimaries_ITU_R_709_2
-        }
+        dic[kCVImageBufferColorPrimariesKey] = codecpar.color_primaries.colorPrimaries
+        dic[kCVImageBufferTransferFunctionKey] = codecpar.color_trc.transferFunction
+        dic[kCVImageBufferYCbCrMatrixKey] = codecpar.color_space.ycbcrMatrix
         let type = codecpar.codec_id.rawValue == AV_CODEC_ID_HEVC.rawValue ? kCMVideoCodecType_HEVC : kCMVideoCodecType_H264
         // swiftlint:disable line_length
         var description: CMFormatDescription?
@@ -176,9 +176,6 @@ class DecompressionSession {
             kCVPixelBufferCGBitmapContextCompatibilityKey: true,
             kCVPixelBufferIOSurfacePropertiesKey: NSDictionary()
         ]
-        attributes[kCVImageBufferColorPrimariesKey] = codecpar.color_primaries.colorPrimaries
-        attributes[kCVImageBufferTransferFunctionKey] = codecpar.color_trc.transferFunction
-        attributes[kCVImageBufferYCbCrMatrixKey] = codecpar.color_space.ycbcrMatrix
         var session: VTDecompressionSession?
         // swiftlint:disable line_length
         status = VTDecompressionSessionCreate(allocator: kCFAllocatorDefault, formatDescription: formatDescription, decoderSpecification: nil, imageBufferAttributes: attributes, outputCallback: nil, decompressionSessionOut: &session)
@@ -246,7 +243,7 @@ extension AVColorPrimaries {
         case AVCOL_PRI_SMPTE170M:
             return kCVImageBufferColorPrimaries_SMPTE_C
         case AVCOL_PRI_BT709:
-            return kCVImageBufferColorPrimaries_EBU_3213
+            return kCVImageBufferColorPrimaries_ITU_R_709_2
         case AVCOL_PRI_BT2020:
             return kCVImageBufferColorPrimaries_ITU_R_2020
         default:

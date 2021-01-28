@@ -16,7 +16,9 @@ class MetalRender {
     private let commandQueue: MTLCommandQueue?
     private let library: MTLLibrary
     private lazy var yuv = YUVMetalRenderPipeline(device: device, library: library)
+    private lazy var yuvp010LE = YUVMetalRenderPipeline(device: device, library: library, colorDepth: 10)
     private lazy var nv12 = NV12MetalRenderPipeline(device: device, library: library)
+    private lazy var p010LE = NV12MetalRenderPipeline(device: device, library: library, colorDepth: 10)
     private lazy var bgra = BGRAMetalRenderPipeline(device: device, library: library)
     private lazy var samplerState: MTLSamplerState? = {
         let samplerDescriptor = MTLSamplerDescriptor()
@@ -52,6 +54,13 @@ class MetalRender {
 
     private lazy var colorConversion709FullRangeMatrixBuffer: MTLBuffer? = {
         var matrix = simd_float3x3([1, 1, 1], [0.0, -0.187, 1.856], [1.570, -0.467, 0.0])
+        let buffer = device.makeBuffer(bytes: &matrix, length: MemoryLayout<simd_float3x3>.size, options: .storageModeShared)
+        buffer?.label = "colorConversionMatrix"
+        return buffer
+    }()
+
+    private lazy var colorConversion2020MatrixBuffer: MTLBuffer? = {
+        var matrix = simd_float3x3([1.168, 1.168, 1.168], [0, -0.188, 2.148], [1.683, -0.652, 0])
         let buffer = device.makeBuffer(bytes: &matrix, length: MemoryLayout<simd_float3x3>.size, options: .storageModeShared)
         buffer?.label = "colorConversionMatrix"
         return buffer
@@ -118,9 +127,17 @@ class MetalRender {
     private func pipeline(pixelBuffer: BufferProtocol) -> MetalRenderPipeline {
         switch pixelBuffer.planeCount {
         case 3:
-            return yuv
+            if pixelBuffer.colorDepth == 10 {
+                return yuvp010LE
+            } else {
+                return yuv
+            }
         case 2:
-            return nv12
+            if pixelBuffer.colorDepth == 10 {
+                return p010LE
+            } else {
+                return nv12
+            }
         case 1:
             return bgra
         default:
@@ -137,6 +154,8 @@ class MetalRender {
                 buffer = isFullRangeVideo ? colorConversion601FullRangeMatrixBuffer : colorConversion601VideoRangeMatrixBuffer
             } else if colorAttachments == kCVImageBufferYCbCrMatrix_ITU_R_709_2 {
                 buffer = isFullRangeVideo ? colorConversion709FullRangeMatrixBuffer : colorConversion709VideoRangeMatrixBuffer
+            } else if colorAttachments == kCVImageBufferYCbCrMatrix_ITU_R_2020 {
+                buffer = colorConversion2020MatrixBuffer
             }
             encoder.setFragmentBuffer(buffer, offset: 0, index: 0)
             let colorOffset = isFullRangeVideo ? colorOffsetFullRangeMatrixBuffer : colorOffsetVideoRangeMatrixBuffer
