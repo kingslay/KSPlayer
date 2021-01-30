@@ -16,9 +16,9 @@ class MetalRender {
     private let commandQueue: MTLCommandQueue?
     private let library: MTLLibrary
     private lazy var yuv = YUVMetalRenderPipeline(device: device, library: library)
-    private lazy var yuvp010LE = YUVMetalRenderPipeline(device: device, library: library, colorDepth: 10)
+    private lazy var yuvp010LE = YUVMetalRenderPipeline(device: device, library: library, bitDepth: 10)
     private lazy var nv12 = NV12MetalRenderPipeline(device: device, library: library)
-    private lazy var p010LE = NV12MetalRenderPipeline(device: device, library: library, colorDepth: 10)
+    private lazy var p010LE = NV12MetalRenderPipeline(device: device, library: library, bitDepth: 10)
     private lazy var bgra = BGRAMetalRenderPipeline(device: device, library: library)
     private lazy var samplerState: MTLSamplerState? = {
         let samplerDescriptor = MTLSamplerDescriptor()
@@ -127,13 +127,13 @@ class MetalRender {
     private func pipeline(pixelBuffer: BufferProtocol) -> MetalRenderPipeline {
         switch pixelBuffer.planeCount {
         case 3:
-            if pixelBuffer.colorDepth == 10 {
+            if pixelBuffer.bitDepth == 10 {
                 return yuvp010LE
             } else {
                 return yuv
             }
         case 2:
-            if pixelBuffer.colorDepth == 10 {
+            if pixelBuffer.bitDepth == 10 {
                 return p010LE
             } else {
                 return nv12

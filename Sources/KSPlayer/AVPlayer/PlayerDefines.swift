@@ -64,12 +64,29 @@ public protocol MediaPlayerTrack {
     var name: String { get }
     var language: String? { get }
     var mediaType: AVFoundation.AVMediaType { get }
-    var fps: Int { get }
+    var codecType: FourCharCode { get }
+    var fps: Float { get }
     var rotation: Double { get }
     var bitRate: Int64 { get }
     var naturalSize: CGSize { get }
     var isEnabled: Bool { get }
-    var colorDepth: Int32 { get }
+    var bitDepth: Int32 { get }
+    var colorPrimaries: String? { get }
+    var transferFunction: String? { get }
+    var yCbCrMatrix: String? { get }
+}
+
+extension FourCharCode {
+    public var string: String {
+        let cString: [CChar] = [
+            CChar(self >> 24 & 0xFF),
+            CChar(self >> 16 & 0xFF),
+            CChar(self >> 8 & 0xFF),
+            CChar(self & 0xFF),
+            0
+        ]
+        return String(cString: cString)
+    }
 }
 
 extension MediaPlayerProtocol {
@@ -107,7 +124,7 @@ public struct VideoAdaptationState {
 
     public let bitRates: [Int64]
     public let duration: TimeInterval
-    public internal(set) var fps: Int
+    public internal(set) var fps: Float
     public internal(set) var bitRateStates: [BitRateState]
     public internal(set) var currentPlaybackTime: TimeInterval = 0
     public internal(set) var isPlayable: Bool = false
@@ -223,7 +240,7 @@ public class KSOptions {
                     if capacity.mediaType == .audio || isSecondOpen {
                         if isFirst {
                             return true
-                        } else if isSeek, capacity.packetCount >= capacity.fps {
+                        } else if isSeek, capacity.packetCount >= Int(capacity.fps) {
                             return true
                         }
                     }
@@ -234,7 +251,7 @@ public class KSOptions {
             if capacity.isEndOfFile {
                 return true
             }
-            return capacity.packetCount + capacity.frameCount >= capacity.fps * Int(preferredForwardBufferDuration)
+            return capacity.packetCount + capacity.frameCount >= Int(capacity.fps * Float(preferredForwardBufferDuration))
         }
         throttle = mach_absolute_time()
         return LoadingState(loadedTime: loadedTime, progress: progress, packetCount: packetCount,
@@ -246,7 +263,7 @@ public class KSOptions {
         guard let last = state.bitRateStates.last, CACurrentMediaTime() - last.time > maxBufferDuration / 2, let index = state.bitRates.firstIndex(of: last.bitRate) else {
             return nil
         }
-        let isUp = state.loadedCount > (state.fps * Int(maxBufferDuration)) / 2
+        let isUp = state.loadedCount > Int(Double(state.fps) * maxBufferDuration / 2)
         if isUp != state.isPlayable {
             return nil
         }
@@ -276,22 +293,18 @@ public class KSOptions {
         nil
     }
 
-    open func bestPixelFormatType(colorDepth: Int32, isFullRangeVideo: Bool, isBiPlanar: Bool) -> OSType {
-        if colorDepth > 8 {
+    open func bestPixelFormatType(bitDepth: Int32, isFullRangeVideo: Bool, planeCount: UInt8) -> OSType {
+        if bitDepth > 8 {
             return isFullRangeVideo ? kCVPixelFormatType_420YpCbCr10BiPlanarFullRange : kCVPixelFormatType_420YpCbCr10BiPlanarVideoRange
         } else {
-            if isBiPlanar {
-                return isFullRangeVideo ? kCVPixelFormatType_420YpCbCr8BiPlanarFullRange: kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange
-            } else {
-                return isFullRangeVideo ? kCVPixelFormatType_420YpCbCr8PlanarFullRange: kCVPixelFormatType_420YpCbCr8Planar
-            }
+            return isFullRangeVideo ? kCVPixelFormatType_420YpCbCr8BiPlanarFullRange: kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange
         }
     }
 }
 
 // 缓冲情况
 public protocol CapacityProtocol {
-    var fps: Int { get }
+    var fps: Float { get }
     var packetCount: Int { get }
     var frameCount: Int { get }
     var frameMaxCount: Int { get }
