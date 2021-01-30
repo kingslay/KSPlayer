@@ -509,7 +509,9 @@ struct AVMediaPlayerTrack: MediaPlayerTrack {
         fps = track.assetTrack?.nominalFrameRate ?? 24.0
         naturalSize = track.assetTrack?.naturalSize ?? .zero
         if let formatDescription = track.assetTrack?.formatDescriptions.first {
+            // swiftlint:disable force_cast
             let desc = formatDescription as! CMFormatDescription
+            // swiftlint:enable force_cast
             codecType = CMFormatDescriptionGetMediaSubType(desc)
             let dictionary = CMFormatDescriptionGetExtensions(desc) as NSDictionary?
             bitDepth = dictionary?["BitsPerComponent"] as? Int32 ?? 8

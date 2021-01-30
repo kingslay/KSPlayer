@@ -224,7 +224,18 @@ extension AVPixelFormat {
     }
 
     func planeCount() -> UInt8 {
-        return av_pix_fmt_desc_get(self)?.pointee.nb_components ?? 1
+        if let desc = av_pix_fmt_desc_get(self) {
+            switch desc.pointee.nb_components {
+            case 3:
+                return UInt8(desc.pointee.comp.2.plane + 1)
+            case 2:
+                return UInt8(desc.pointee.comp.1.plane + 1)
+            default:
+                return UInt8(desc.pointee.comp.0.plane + 1)
+            }
+        } else {
+            return 1
+        }
     }
 
     func bestPixelFormat() -> AVPixelFormat {
