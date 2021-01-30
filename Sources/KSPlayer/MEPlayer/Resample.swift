@@ -125,8 +125,10 @@ class PixelBuffer: BufferProtocol {
     let height: Int
     let planeCount: Int
     let isFullRangeVideo: Bool
-    let colorAttachments: CFString?
     let colorPrimaries: CFString?
+    let transferFunction: CFString?
+    let yCbCrMatrix: CFString?
+
     let drawableSize: CGSize
     private let formats: [MTLPixelFormat]
     private let widths: [Int]
@@ -135,8 +137,9 @@ class PixelBuffer: BufferProtocol {
     private let bytesPerRow: [Int32]
     init(frame: UnsafeMutablePointer<AVFrame>) {
         format = AVPixelFormat(rawValue: frame.pointee.format)
-        colorAttachments = frame.pointee.colorspace.ycbcrMatrix
+        yCbCrMatrix = frame.pointee.colorspace.ycbcrMatrix
         colorPrimaries = frame.pointee.color_primaries.colorPrimaries
+        transferFunction = frame.pointee.color_trc.transferFunction
         width = Int(frame.pointee.width)
         height = Int(frame.pointee.height)
         isFullRangeVideo = frame.pointee.color_range == AVCOL_RANGE_JPEG
