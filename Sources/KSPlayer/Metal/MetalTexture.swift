@@ -21,7 +21,7 @@ public final class MetalTextureCache {
         if pixelBuffer.planeCount == 3 {
             formats = [.r8Unorm, .r8Unorm, .r8Unorm]
         } else if pixelBuffer.planeCount == 2 {
-            if pixelBuffer.colorDepth > 8 {
+            if pixelBuffer.bitDepth > 8 {
                 formats = [.r16Unorm, .rg16Unorm]
             } else {
                 formats = [.r8Unorm, .rg8Unorm]

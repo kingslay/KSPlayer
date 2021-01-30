@@ -485,14 +485,19 @@ extension AVMediaType {
 
 struct AVMediaPlayerTrack: MediaPlayerTrack {
     fileprivate let track: AVPlayerItemTrack
-    let fps: Int
+    let fps: Float
+    let codecType: FourCharCode
     let rotation: Double = 0
     let bitRate: Int64 = 0
     let naturalSize: CGSize
     let name: String
     let language: String?
     let mediaType: AVMediaType
-    let colorDepth: Int32
+    let bitDepth: Int32
+    let colorPrimaries: String?
+    let transferFunction: String?
+    let yCbCrMatrix: String?
+
     var isEnabled: Bool {
         track.isEnabled
     }
@@ -501,14 +506,22 @@ struct AVMediaPlayerTrack: MediaPlayerTrack {
         mediaType = track.assetTrack?.mediaType ?? .video
         name = track.assetTrack?.languageCode ?? ""
         language = track.assetTrack?.extendedLanguageTag
-        fps = Int(track.assetTrack?.nominalFrameRate ?? 24.0)
+        fps = track.assetTrack?.nominalFrameRate ?? 24.0
         naturalSize = track.assetTrack?.naturalSize ?? .zero
-        let dictionary = track.assetTrack?.formatDescriptions.first.flatMap {
-            // swiftlint:disable force_cast
-            return CMFormatDescriptionGetExtensions($0 as! CMFormatDescription)
-            // swiftlint:enable force_cast
-        } as NSDictionary?
-
-        colorDepth = dictionary?["BitsPerComponent"] as? Int32 ?? 8
+        if let formatDescription = track.assetTrack?.formatDescriptions.first {
+            let desc = formatDescription as! CMFormatDescription
+            codecType = CMFormatDescriptionGetMediaSubType(desc)
+            let dictionary = CMFormatDescriptionGetExtensions(desc) as NSDictionary?
+            bitDepth = dictionary?["BitsPerComponent"] as? Int32 ?? 8
+            colorPrimaries = dictionary?[kCVImageBufferColorPrimariesKey] as? String
+            transferFunction = dictionary?[kCVImageBufferTransferFunctionKey] as? String
+            yCbCrMatrix = dictionary?[kCVImageBufferYCbCrMatrixKey] as? String
+        } else {
+            bitDepth = 8
+            colorPrimaries = nil
+            transferFunction = nil
+            yCbCrMatrix = nil
+            codecType = 0
+        }
     }
 }

@@ -28,12 +28,12 @@ struct NV12MetalRenderPipeline: MetalRenderPipeline {
     let library: MTLLibrary
     let state: MTLRenderPipelineState
     let descriptor: MTLRenderPipelineDescriptor
-    init(device: MTLDevice, library: MTLLibrary, colorDepth: Int32 = 8) {
+    init(device: MTLDevice, library: MTLLibrary, bitDepth: Int32 = 8) {
         self.device = device
         self.library = library
         descriptor = MTLRenderPipelineDescriptor()
         descriptor.vertexFunction = library.makeFunction(name: "mapTexture")
-        descriptor.colorAttachments[0].pixelFormat = KSOptions.colorPixelFormat(colorDepth: colorDepth)
+        descriptor.colorAttachments[0].pixelFormat = KSOptions.colorPixelFormat(bitDepth: bitDepth)
         descriptor.fragmentFunction = library.makeFunction(name: "displayNV12Texture")
         // swiftlint:disable force_try
         try! state = device.makeRenderPipelineState(descriptor: descriptor)
@@ -64,12 +64,12 @@ struct YUVMetalRenderPipeline: MetalRenderPipeline {
     let library: MTLLibrary
     let state: MTLRenderPipelineState
     let descriptor: MTLRenderPipelineDescriptor
-    init(device: MTLDevice, library: MTLLibrary, colorDepth: Int32 = 8) {
+    init(device: MTLDevice, library: MTLLibrary, bitDepth: Int32 = 8) {
         self.device = device
         self.library = library
         descriptor = MTLRenderPipelineDescriptor()
         descriptor.vertexFunction = library.makeFunction(name: "mapTexture")
-        descriptor.colorAttachments[0].pixelFormat = KSOptions.colorPixelFormat(colorDepth: colorDepth)
+        descriptor.colorAttachments[0].pixelFormat = KSOptions.colorPixelFormat(bitDepth: bitDepth)
         descriptor.fragmentFunction = library.makeFunction(name: "displayYUVTexture")
         // swiftlint:disable force_try
         try! state = device.makeRenderPipelineState(descriptor: descriptor)
@@ -82,7 +82,7 @@ public protocol BufferProtocol: AnyObject {
     var planeCount: Int { get }
     var width: Int { get }
     var height: Int { get }
-    var colorDepth: Int32 { get }
+    var bitDepth: Int32 { get }
     var isFullRangeVideo: Bool { get }
     var colorAttachments: CFString? { get }
     var colorPrimaries: CFString? { get }
@@ -127,7 +127,7 @@ extension CVPixelBuffer: BufferProtocol {
         CVBufferGetAttachment(self, kCVImageBufferColorPrimariesKey, nil)?.takeUnretainedValue() as? NSString
     }
 
-    public var colorDepth: Int32 {
+    public var bitDepth: Int32 {
         switch CVPixelBufferGetPixelFormatType(self) {
         case kCVPixelFormatType_420YpCbCr10BiPlanarFullRange, kCVPixelFormatType_420YpCbCr10BiPlanarVideoRange:
             return 10
@@ -164,8 +164,8 @@ extension CVPixelBuffer: BufferProtocol {
 }
 
 extension KSOptions {
-    static func colorPixelFormat(colorDepth: Int32) -> MTLPixelFormat {
-        if colorDepth == 10 {
+    static func colorPixelFormat(bitDepth: Int32) -> MTLPixelFormat {
+        if bitDepth == 10 {
             #if os(macOS) || targetEnvironment(macCatalyst)
             if #available(OSX 10.13, *) {
                 return .bgr10a2Unorm

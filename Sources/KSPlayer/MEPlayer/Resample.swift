@@ -119,7 +119,7 @@ class VideoSwresample: Swresample {
 }
 
 class PixelBuffer: BufferProtocol {
-    let colorDepth: Int32
+    let bitDepth: Int32
     let format: AVPixelFormat
     let width: Int
     let height: Int
@@ -141,7 +141,7 @@ class PixelBuffer: BufferProtocol {
         height = Int(frame.pointee.height)
         isFullRangeVideo = frame.pointee.color_range == AVCOL_RANGE_JPEG
         bytesPerRow = Array(tuple: frame.pointee.linesize)
-        colorDepth = format.colorDepth()
+        bitDepth = format.bitDepth()
         let vertical = Int(frame.pointee.sample_aspect_ratio.den)
         let horizontal = Int(frame.pointee.sample_aspect_ratio.num)
         if vertical > 0, horizontal > 0, vertical != horizontal {
@@ -149,29 +149,17 @@ class PixelBuffer: BufferProtocol {
         } else {
             drawableSize = CGSize(width: width, height: height)
         }
-        switch format {
-        case AV_PIX_FMT_YUV420P:
-            planeCount = 3
-            formats = [.r8Unorm, .r8Unorm, .r8Unorm]
+        planeCount = Int(format.planeCount())
+        switch planeCount {
+        case 3:
+            formats = bitDepth > 8 ? [.r16Unorm, .r16Unorm, .r16Unorm] : [.r8Unorm, .r8Unorm, .r8Unorm]
             widths = [width, width / 2, width / 2]
             heights = [height, height / 2, height / 2]
-        case AV_PIX_FMT_YUV420P10LE:
-            planeCount = 3
-            formats = [.r16Unorm, .r16Unorm, .r16Unorm]
-            widths = [width, width / 2, width / 2]
-            heights = [height, height / 2, height / 2]
-        case AV_PIX_FMT_NV12:
-            planeCount = 2
-            formats = [.r8Unorm, .rg8Unorm]
-            widths = [width, width / 2]
-            heights = [height, height / 2]
-        case AV_PIX_FMT_P010LE:
-            planeCount = 2
-            formats = [.r16Unorm, .rg16Unorm]
+        case 2:
+            formats =  bitDepth > 8 ? [.r16Unorm, .rg16Unorm] : [.r8Unorm, .rg8Unorm]
             widths = [width, width / 2]
             heights = [height, height / 2]
         default:
-            planeCount = 1
             formats = [.bgra8Unorm]
             widths = [width]
             heights = [height]
@@ -230,13 +218,17 @@ extension AVCodecParameters {
 }
 
 extension AVPixelFormat {
-    func colorDepth() -> Int32 {
+    func bitDepth() -> Int32 {
         let descriptor = av_pix_fmt_desc_get(self)
         return descriptor?.pointee.comp.0.depth ?? 8
     }
 
+    func planeCount() -> UInt8 {
+        return av_pix_fmt_desc_get(self)?.pointee.nb_components ?? 1
+    }
+
     func bestPixelFormat() -> AVPixelFormat {
-        return colorDepth() > 8 ? AV_PIX_FMT_P010LE : AV_PIX_FMT_NV12
+        return bitDepth() > 8 ? AV_PIX_FMT_P010LE : AV_PIX_FMT_NV12
     }
 }
 
