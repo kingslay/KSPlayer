@@ -149,12 +149,12 @@ class MetalRender {
         if pixelBuffer.planeCount > 1 {
             var buffer = colorConversion601FullRangeMatrixBuffer
             let isFullRangeVideo = pixelBuffer.isFullRangeVideo
-            let colorAttachments = pixelBuffer.colorAttachments
-            if colorAttachments == kCVImageBufferYCbCrMatrix_ITU_R_601_4 {
+            let yCbCrMatrix = pixelBuffer.yCbCrMatrix
+            if yCbCrMatrix == kCVImageBufferYCbCrMatrix_ITU_R_601_4 {
                 buffer = isFullRangeVideo ? colorConversion601FullRangeMatrixBuffer : colorConversion601VideoRangeMatrixBuffer
-            } else if colorAttachments == kCVImageBufferYCbCrMatrix_ITU_R_709_2 {
+            } else if yCbCrMatrix == kCVImageBufferYCbCrMatrix_ITU_R_709_2 {
                 buffer = isFullRangeVideo ? colorConversion709FullRangeMatrixBuffer : colorConversion709VideoRangeMatrixBuffer
-            } else if colorAttachments == kCVImageBufferYCbCrMatrix_ITU_R_2020 {
+            } else if yCbCrMatrix == kCVImageBufferYCbCrMatrix_ITU_R_2020 {
                 buffer = colorConversion2020MatrixBuffer
             }
             encoder.setFragmentBuffer(buffer, offset: 0, index: 0)

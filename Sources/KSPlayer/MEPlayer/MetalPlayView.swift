@@ -92,7 +92,20 @@ extension BufferProtocol {
         switch colorPrimaries {
         case kCVImageBufferColorPrimaries_ITU_R_2020:
             if #available(OSX 10.14.6, iOS 12.6, tvOS 12.6, *) {
-                return CGColorSpace(name: CGColorSpace.itur_2020_PQ_EOTF)
+                switch transferFunction {
+                    case kCVImageBufferTransferFunction_SMPTE_ST_2084_PQ:
+                        return CGColorSpace(name: CGColorSpace.itur_2020_PQ_EOTF)
+                    case kCVImageBufferTransferFunction_ITU_R_2100_HLG:
+                        if #available(OSX 10.15.6, *) {
+                            return CGColorSpace(name: CGColorSpace.itur_2020_HLG)
+                        } else {
+                            return CGColorSpace(name: CGColorSpace.itur_2020_PQ_EOTF)
+                        }
+                    case kCVImageBufferTransferFunction_Linear:
+                        return CGColorSpace(name: CGColorSpace.extendedLinearITUR_2020)
+                    default:
+                        return CGColorSpace(name: CGColorSpace.itur_2020)
+                }
             }
         case kCVImageBufferColorPrimaries_ITU_R_709_2:
             return CGColorSpace(name: CGColorSpace.itur_709)

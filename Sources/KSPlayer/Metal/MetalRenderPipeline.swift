@@ -84,8 +84,9 @@ public protocol BufferProtocol: AnyObject {
     var height: Int { get }
     var bitDepth: Int32 { get }
     var isFullRangeVideo: Bool { get }
-    var colorAttachments: CFString? { get }
     var colorPrimaries: CFString? { get }
+    var transferFunction: CFString? { get }
+    var yCbCrMatrix: CFString? { get }
     func widthOfPlane(at planeIndex: Int) -> Int
     func heightOfPlane(at planeIndex: Int) -> Int
     func textures(frome cache: MetalTextureCache) -> [MTLTexture]
@@ -119,12 +120,16 @@ extension CVPixelBuffer: BufferProtocol {
         CVBufferGetAttachment(self, kCMFormatDescriptionExtension_FullRangeVideo, nil)?.takeUnretainedValue() as? Bool ?? true
     }
 
-    public var colorAttachments: CFString? {
+    public var yCbCrMatrix: CFString? {
         CVBufferGetAttachment(self, kCVImageBufferYCbCrMatrixKey, nil)?.takeUnretainedValue() as? NSString
     }
 
     public var colorPrimaries: CFString? {
         CVBufferGetAttachment(self, kCVImageBufferColorPrimariesKey, nil)?.takeUnretainedValue() as? NSString
+    }
+
+    public var transferFunction: CFString? {
+        CVBufferGetAttachment(self, kCVImageBufferTransferFunctionKey, nil)?.takeUnretainedValue() as? NSString
     }
 
     public var bitDepth: Int32 {
