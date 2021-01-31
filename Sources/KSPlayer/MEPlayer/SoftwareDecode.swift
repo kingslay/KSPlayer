@@ -31,7 +31,7 @@ class SoftwareDecode: DecodeProtocol {
         }
         codecContext?.pointee.time_base = timebase.rational
         if mediaType == .video {
-            swresample = VideoSwresample(dstFormat: options.bufferPixelFormatType.format)
+            swresample = VideoSwresample()
         } else {
             swresample = AudioSwresample()
         }
@@ -125,7 +125,7 @@ extension UnsafeMutablePointer where Pointee == AVCodecParameters {
                 guard let fmt = fmt, let ctx = ctx else {
                     return AV_PIX_FMT_NONE
                 }
-                let options = Unmanaged<KSOptions>.fromOpaque(ctx.pointee.opaque).takeUnretainedValue()
+//                let options = Unmanaged<KSOptions>.fromOpaque(ctx.pointee.opaque).takeUnretainedValue()
                 var i = 0
                 while fmt[i] != AV_PIX_FMT_NONE {
                     if fmt[i] == AV_PIX_FMT_VIDEOTOOLBOX {
@@ -139,7 +139,7 @@ extension UnsafeMutablePointer where Pointee == AVCodecParameters {
                             let framesCtxData = UnsafeMutableRawPointer(framesCtx.pointee.data)
                                 .bindMemory(to: AVHWFramesContext.self, capacity: 1)
                             framesCtxData.pointee.format = AV_PIX_FMT_VIDEOTOOLBOX
-                            framesCtxData.pointee.sw_format = options.bufferPixelFormatType.format
+//                            framesCtxData.pointee.sw_format = AVPixelFormat(rawValue: pointee.format).bestPixelFormat()
                             framesCtxData.pointee.width = ctx.pointee.width
                             framesCtxData.pointee.height = ctx.pointee.height
                         }

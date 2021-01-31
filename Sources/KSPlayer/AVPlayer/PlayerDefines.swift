@@ -64,11 +64,29 @@ public protocol MediaPlayerTrack {
     var name: String { get }
     var language: String? { get }
     var mediaType: AVFoundation.AVMediaType { get }
-    var fps: Int { get }
+    var codecType: FourCharCode { get }
+    var fps: Float { get }
     var rotation: Double { get }
     var bitRate: Int64 { get }
     var naturalSize: CGSize { get }
     var isEnabled: Bool { get }
+    var bitDepth: Int32 { get }
+    var colorPrimaries: String? { get }
+    var transferFunction: String? { get }
+    var yCbCrMatrix: String? { get }
+}
+
+extension FourCharCode {
+    public var string: String {
+        let cString: [CChar] = [
+            CChar(self >> 24 & 0xFF),
+            CChar(self >> 16 & 0xFF),
+            CChar(self >> 8 & 0xFF),
+            CChar(self & 0xFF),
+            0
+        ]
+        return String(cString: cString)
+    }
 }
 
 extension MediaPlayerProtocol {
@@ -106,7 +124,7 @@ public struct VideoAdaptationState {
 
     public let bitRates: [Int64]
     public let duration: TimeInterval
-    public internal(set) var fps: Int
+    public internal(set) var fps: Float
     public internal(set) var bitRateStates: [BitRateState]
     public internal(set) var currentPlaybackTime: TimeInterval = 0
     public internal(set) var isPlayable: Bool = false
@@ -114,8 +132,6 @@ public struct VideoAdaptationState {
 }
 
 public class KSOptions {
-    /// 视频颜色编码方式 支持kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange kCVPixelFormatType_420YpCbCr8BiPlanarFullRange kCVPixelFormatType_32BGRA
-    public static var bufferPixelFormatType = kCVPixelFormatType_420YpCbCr8BiPlanarFullRange
     public static var hardwareDecodeH264 = true
     public static var hardwareDecodeH265 = true
     /// 最低缓存视频时间
@@ -132,11 +148,8 @@ public class KSOptions {
     public static var isAutoPlay = false
     /// seek完是否自动播放
     public static var isSeekedAutoPlay = true
-    public static let audioFrameMaxCount = 16
-    public static let videoFrameMaxCount = 8
 
     //    public static let shared = KSOptions()
-    public var bufferPixelFormatType = KSOptions.bufferPixelFormatType
     public var hardwareDecodeH264 = KSOptions.hardwareDecodeH264
     public var hardwareDecodeH265 = KSOptions.hardwareDecodeH265
     /// 最低缓存视频时间
@@ -219,24 +232,23 @@ public class KSOptions {
         let loadedTime = capacitys.map { TimeInterval($0.packetCount + $0.frameCount) / TimeInterval($0.fps) }.min() ?? 0
         let progress = loadedTime * 100.0 / preferredForwardBufferDuration
         let isPlayable = capacitys.allSatisfy { capacity in
-            if isFirst || isSeek {
-                if capacity.frameCount >= capacity.frameMaxCount >> 1 {
-                    // 让音频能更快的打开
-                    if capacity.mediaType == .audio || isSecondOpen {
-                        if isFirst {
-                            return true
-                        } else if isSeek, capacity.packetCount >= capacity.fps {
-                            return true
-                        }
-                    }
-                } else {
-                    return capacity.isEndOfFile && capacity.packetCount == 0
-                }
-            }
-            if capacity.isEndOfFile {
+            if capacity.isEndOfFile && capacity.packetCount == 0 {
                 return true
             }
-            return capacity.packetCount + capacity.frameCount >= capacity.fps * Int(preferredForwardBufferDuration)
+            guard capacity.frameCount >= capacity.frameMaxCount >> 1 else {
+                return false;
+            }
+            if isFirst || isSeek {
+                // 让音频能更快的打开
+                if capacity.mediaType == .audio || isSecondOpen {
+                    if isFirst {
+                        return true
+                    } else if isSeek, capacity.packetCount >= Int(capacity.fps) {
+                        return true
+                    }
+                }
+            }
+            return capacity.packetCount + capacity.frameCount >= Int(capacity.fps * Float(preferredForwardBufferDuration))
         }
         throttle = mach_absolute_time()
         return LoadingState(loadedTime: loadedTime, progress: progress, packetCount: packetCount,
@@ -248,7 +260,7 @@ public class KSOptions {
         guard let last = state.bitRateStates.last, CACurrentMediaTime() - last.time > maxBufferDuration / 2, let index = state.bitRates.firstIndex(of: last.bitRate) else {
             return nil
         }
-        let isUp = state.loadedCount > (state.fps * Int(maxBufferDuration)) / 2
+        let isUp = state.loadedCount > Int(Double(state.fps) * maxBufferDuration / 2)
         if isUp != state.isPlayable {
             return nil
         }
@@ -277,11 +289,26 @@ public class KSOptions {
     open func wantedAudio(infos _: [(bitRate: Int64, language: String?)]) -> Int? {
         nil
     }
+
+    open func bestPixelFormatType(bitDepth: Int32, isFullRangeVideo: Bool, planeCount: UInt8) -> OSType {
+        if bitDepth > 8 {
+            return isFullRangeVideo ? kCVPixelFormatType_420YpCbCr10BiPlanarFullRange : kCVPixelFormatType_420YpCbCr10BiPlanarVideoRange
+        } else {
+            return isFullRangeVideo ? kCVPixelFormatType_420YpCbCr8BiPlanarFullRange: kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange
+        }
+    }
+    open func videoFrameMaxCount(fps: Float) -> Int {
+        return 8
+    }
+
+    open func audioFrameMaxCount(fps: Float) -> Int {
+        return 16
+    }
 }
 
 // 缓冲情况
 public protocol CapacityProtocol {
-    var fps: Int { get }
+    var fps: Float { get }
     var packetCount: Int { get }
     var frameCount: Int { get }
     var frameMaxCount: Int { get }
