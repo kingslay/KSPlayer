@@ -148,8 +148,6 @@ public class KSOptions {
     public static var isAutoPlay = false
     /// seek完是否自动播放
     public static var isSeekedAutoPlay = true
-    public static let audioFrameMaxCount = 16
-    public static let videoFrameMaxCount = 8
 
     //    public static let shared = KSOptions()
     public var hardwareDecodeH264 = KSOptions.hardwareDecodeH264
@@ -234,22 +232,21 @@ public class KSOptions {
         let loadedTime = capacitys.map { TimeInterval($0.packetCount + $0.frameCount) / TimeInterval($0.fps) }.min() ?? 0
         let progress = loadedTime * 100.0 / preferredForwardBufferDuration
         let isPlayable = capacitys.allSatisfy { capacity in
-            if isFirst || isSeek {
-                if capacity.frameCount >= capacity.frameMaxCount >> 1 {
-                    // 让音频能更快的打开
-                    if capacity.mediaType == .audio || isSecondOpen {
-                        if isFirst {
-                            return true
-                        } else if isSeek, capacity.packetCount >= Int(capacity.fps) {
-                            return true
-                        }
-                    }
-                } else {
-                    return capacity.isEndOfFile && capacity.packetCount == 0
-                }
-            }
-            if capacity.isEndOfFile {
+            if capacity.isEndOfFile && capacity.packetCount == 0 {
                 return true
+            }
+            guard capacity.frameCount >= capacity.frameMaxCount >> 1 else {
+                return false;
+            }
+            if isFirst || isSeek {
+                // 让音频能更快的打开
+                if capacity.mediaType == .audio || isSecondOpen {
+                    if isFirst {
+                        return true
+                    } else if isSeek, capacity.packetCount >= Int(capacity.fps) {
+                        return true
+                    }
+                }
             }
             return capacity.packetCount + capacity.frameCount >= Int(capacity.fps * Float(preferredForwardBufferDuration))
         }
@@ -299,6 +296,13 @@ public class KSOptions {
         } else {
             return isFullRangeVideo ? kCVPixelFormatType_420YpCbCr8BiPlanarFullRange: kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange
         }
+    }
+    open func videoFrameMaxCount(fps: Float) -> Int {
+        return 8
+    }
+
+    open func audioFrameMaxCount(fps: Float) -> Int {
+        return 16
     }
 }
 

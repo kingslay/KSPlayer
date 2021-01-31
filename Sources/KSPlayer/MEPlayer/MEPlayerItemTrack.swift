@@ -133,9 +133,9 @@ class FFPlayerItemTrack<Frame: MEFrame>: PlayerItemTrackProtocol, CustomStringCo
         self.options = options
         // 默认缓存队列大小跟帧率挂钩,经测试除以4，最优
         if mediaType == .audio {
-            outputRenderQueue = CircularBuffer(initialCapacity: KSOptions.audioFrameMaxCount, expanding: false)
+            outputRenderQueue = CircularBuffer(initialCapacity: options.audioFrameMaxCount(fps: fps), expanding: false)
         } else if mediaType == .video {
-            outputRenderQueue = CircularBuffer(initialCapacity: KSOptions.videoFrameMaxCount, sorted: true, expanding: false)
+            outputRenderQueue = CircularBuffer(initialCapacity: options.videoFrameMaxCount(fps: fps), sorted: true, expanding: false)
         } else {
             outputRenderQueue = CircularBuffer()
         }
