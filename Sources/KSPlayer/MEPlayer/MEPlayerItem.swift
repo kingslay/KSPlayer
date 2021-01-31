@@ -525,8 +525,14 @@ extension MEPlayerItem: OutputRenderSourceDelegate {
                 }
                 return frame.cmtime.seconds <= desire
             }
+            let frame = videoTrack?.getOutputRender(where: predicate)
+            if let frame = frame, frame.seconds + 0.1 < positionTime {
+                _ = videoTrack?.getOutputRender(where: nil)
+            }
+            return frame
+        } else {
+            return audioTrack?.getOutputRender(where: nil)
         }
-        return (type == .video ? videoTrack : audioTrack)?.getOutputRender(where: predicate)
     }
 }
 
