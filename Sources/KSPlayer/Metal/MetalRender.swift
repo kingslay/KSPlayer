@@ -122,6 +122,7 @@ class MetalRender {
         encoder.endEncoding()
         commandBuffer.present(drawable)
         commandBuffer.commit()
+        commandBuffer.waitUntilCompleted()
     }
 
     private func pipeline(pixelBuffer: BufferProtocol) -> MetalRenderPipeline {
