@@ -168,13 +168,7 @@ class DecompressionSession {
         self.formatDescription = formatDescription
 
         let attributes: NSMutableDictionary = [
-            kCVPixelBufferPixelFormatTypeKey: options.bestPixelFormatType(bitDepth: format.bitDepth(), isFullRangeVideo: isFullRangeVideo, planeCount: format.planeCount()),
-            kCVPixelBufferWidthKey: codecpar.width,
-            kCVPixelBufferHeightKey: codecpar.height,
-            kCVPixelBufferMetalCompatibilityKey: true,
-            kCVPixelBufferCGImageCompatibilityKey: true,
-            kCVPixelBufferCGBitmapContextCompatibilityKey: true,
-            kCVPixelBufferIOSurfacePropertiesKey: NSDictionary()
+            kCVPixelBufferPixelFormatTypeKey: options.bestPixelFormatType(bitDepth: format.bitDepth(), isFullRangeVideo: isFullRangeVideo, planeCount: format.planeCount())
         ]
         var session: VTDecompressionSession?
         // swiftlint:disable line_length
