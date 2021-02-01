@@ -19,6 +19,9 @@ class DetailViewController: UIViewController, DetailProtocol {
         .lightContent
     }
 
+    override var prefersStatusBarHidden: Bool {
+        !playerView.isMaskShow
+    }
     private let playerView = IOSVideoPlayerView()
     #else
     private let playerView = CustomVideoPlayerView()
@@ -34,6 +37,7 @@ class DetailViewController: UIViewController, DetailProtocol {
     override func viewDidLoad() {
         super.viewDidLoad()
         view.addSubview(playerView)
+        playerView.delegate = self
         playerView.translatesAutoresizingMaskIntoConstraints = false
         #if os(iOS)
         NSLayoutConstraint.activate([
@@ -100,6 +104,35 @@ class DetailViewController: UIViewController, DetailProtocol {
     }
 }
 
+extension DetailViewController: PlayerControllerDelegate {
+    func playerController(state: KSPlayerState) {
+
+    }
+
+    func playerController(currentTime: TimeInterval, totalTime: TimeInterval) {
+
+    }
+
+    func playerController(finish error: Error?) {
+
+    }
+
+    func playerController(maskShow: Bool) {
+        #if os(iOS)
+        setNeedsStatusBarAppearanceUpdate()
+        #endif
+    }
+
+    func playerController(action: PlayerButtonType) {
+
+    }
+
+    func playerController(bufferedCount: Int, consumeTime: TimeInterval) {
+
+    }
+
+}
+
 #if os(iOS)
 
 extension DetailViewController: UIDocumentPickerDelegate {
@@ -132,6 +165,9 @@ class CustomVideoPlayerView: VideoPlayerView {
             }
             for track in player.tracks(mediaType: .audio) {
                 print("audio name: \(track.name) language: \(track.language ?? "")")
+            }
+            for track in player.tracks(mediaType: .video) {
+                print("video name: \(track.name) bitRate: \(track.bitRate) fps: \(track.fps) bitDepth: \(track.bitDepth) colorPrimaries: \(track.colorPrimaries ?? "") colorPrimaries: \(track.transferFunction  ?? "") yCbCrMatrix: \(track.yCbCrMatrix ?? "") codecType:  \(track.codecType.string)")
             }
         }
     }

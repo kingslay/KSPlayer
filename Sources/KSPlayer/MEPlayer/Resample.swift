@@ -8,7 +8,9 @@
 import AVFoundation
 import CoreGraphics
 import CoreMedia
-import ffmpeg
+import Libavcodec
+import Libswscale
+import Libswresample
 import VideoToolbox
 #if canImport(UIKit)
 import UIKit
@@ -22,32 +24,36 @@ protocol Swresample {
 }
 
 class VideoSwresample: Swresample {
-    private let dstFormat: AVPixelFormat
+    private var dstFormat: AVPixelFormat
     private var imgConvertCtx: OpaquePointer?
     private var format: AVPixelFormat = AV_PIX_FMT_NONE
     private var height: Int32 = 0
     private var width: Int32 = 0
     private var forceTransfer: Bool
     var dstFrame: UnsafeMutablePointer<AVFrame>?
-    init(dstFormat: AVPixelFormat, forceTransfer: Bool = false) {
-        self.dstFormat = dstFormat
+    init(dstFormat: AVPixelFormat = AV_PIX_FMT_NV12, forceTransfer: Bool = false) {
+        self.dstFormat = AV_PIX_FMT_NV12
         self.forceTransfer = forceTransfer
     }
 
     private func setup(frame: UnsafeMutablePointer<AVFrame>) -> Bool {
-        setup(format: frame.pointee.format, width: frame.pointee.width, height: frame.pointee.height)
+        setup(format: AVPixelFormat(rawValue: frame.pointee.format), width: frame.pointee.width, height: frame.pointee.height)
     }
 
-    func setup(format: Int32, width: Int32, height: Int32) -> Bool {
-        if self.format.rawValue == format, self.width == width, self.height == height {
+    func setup(format: AVPixelFormat, width: Int32, height: Int32) -> Bool {
+        if self.format == format, self.width == width, self.height == height {
             return true
         }
         shutdown()
-        self.format = AVPixelFormat(rawValue: format)
+        self.format = format
         self.height = height
         self.width = width
-        if !forceTransfer, PixelBuffer.isSupported(format: self.format) {
-            return true
+        if !forceTransfer {
+            if PixelBuffer.isSupported(format: self.format) {
+                return true
+            } else {
+                dstFormat = self.format.bestPixelFormat()
+            }
         }
         imgConvertCtx = sws_getCachedContext(imgConvertCtx, width, height, self.format, width, height, dstFormat, SWS_BICUBIC, nil, nil, nil)
         guard imgConvertCtx != nil else {
@@ -87,7 +93,7 @@ class VideoSwresample: Swresample {
     }
 
     func transfer(format: AVPixelFormat, width: Int32, height: Int32, data: [UnsafeMutablePointer<UInt8>?], linesize: [Int32]) -> UIImage? {
-        if setup(format: format.rawValue, width: width, height: height), swsConvert(data: data, linesize: linesize), let frame = dstFrame?.pointee {
+        if setup(format: format, width: width, height: height), swsConvert(data: data, linesize: linesize), let frame = dstFrame?.pointee {
             return UIImage(rgbData: frame.data.0!, linesize: Int(frame.linesize.0), width: Int(width), height: Int(height), isAlpha: dstFormat == AV_PIX_FMT_RGBA)
         }
         return nil
@@ -113,12 +119,16 @@ class VideoSwresample: Swresample {
 }
 
 class PixelBuffer: BufferProtocol {
-    let format: OSType
+    let bitDepth: Int32
+    let format: AVPixelFormat
     let width: Int
     let height: Int
     let planeCount: Int
     let isFullRangeVideo: Bool
-    let colorAttachments: NSString
+    let colorPrimaries: CFString?
+    let transferFunction: CFString?
+    let yCbCrMatrix: CFString?
+
     let drawableSize: CGSize
     private let formats: [MTLPixelFormat]
     private let widths: [Int]
@@ -126,17 +136,15 @@ class PixelBuffer: BufferProtocol {
     private let dataWrap: ByteDataWrap
     private let bytesPerRow: [Int32]
     init(frame: UnsafeMutablePointer<AVFrame>) {
-        format = AVPixelFormat(rawValue: frame.pointee.format).format
-        if frame.pointee.colorspace == AVCOL_SPC_BT709 {
-            colorAttachments = kCMFormatDescriptionYCbCrMatrix_ITU_R_709_2
-        } else {
-            //        else if frame.colorspace == AVCOL_SPC_SMPTE170M || frame.colorspace == AVCOL_SPC_BT470BG {
-            colorAttachments = kCMFormatDescriptionYCbCrMatrix_ITU_R_601_4
-        }
+        format = AVPixelFormat(rawValue: frame.pointee.format)
+        yCbCrMatrix = frame.pointee.colorspace.ycbcrMatrix
+        colorPrimaries = frame.pointee.color_primaries.colorPrimaries
+        transferFunction = frame.pointee.color_trc.transferFunction
         width = Int(frame.pointee.width)
         height = Int(frame.pointee.height)
-        isFullRangeVideo = format != kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange
+        isFullRangeVideo = frame.pointee.color_range == AVCOL_RANGE_JPEG
         bytesPerRow = Array(tuple: frame.pointee.linesize)
+        bitDepth = format.bitDepth()
         let vertical = Int(frame.pointee.sample_aspect_ratio.den)
         let horizontal = Int(frame.pointee.sample_aspect_ratio.num)
         if vertical > 0, horizontal > 0, vertical != horizontal {
@@ -144,19 +152,17 @@ class PixelBuffer: BufferProtocol {
         } else {
             drawableSize = CGSize(width: width, height: height)
         }
-        switch format {
-        case kCVPixelFormatType_420YpCbCr8Planar:
-            planeCount = 3
-            formats = [.r8Unorm, .r8Unorm, .r8Unorm]
+        planeCount = Int(format.planeCount())
+        switch planeCount {
+        case 3:
+            formats = bitDepth > 8 ? [.r16Unorm, .r16Unorm, .r16Unorm] : [.r8Unorm, .r8Unorm, .r8Unorm]
             widths = [width, width / 2, width / 2]
             heights = [height, height / 2, height / 2]
-        case kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange, kCVPixelFormatType_420YpCbCr8BiPlanarFullRange:
-            planeCount = 2
-            formats = [.r8Unorm, .rg8Unorm]
+        case 2:
+            formats =  bitDepth > 8 ? [.r16Unorm, .rg16Unorm] : [.r8Unorm, .rg8Unorm]
             widths = [width, width / 2]
             heights = [height, height / 2]
         default:
-            planeCount = 1
             formats = [.bgra8Unorm]
             widths = [width]
             heights = [height]
@@ -186,16 +192,16 @@ class PixelBuffer: BufferProtocol {
     }
 
     public static func isSupported(format: AVPixelFormat) -> Bool {
-        [AV_PIX_FMT_NV12, AV_PIX_FMT_YUV420P, AV_PIX_FMT_BGRA].contains(format)
+        [AV_PIX_FMT_BGRA, AV_PIX_FMT_NV12, AV_PIX_FMT_P010BE, AV_PIX_FMT_YUV420P].contains(format)
     }
 
     func image() -> UIImage? {
         var image: UIImage?
-        if format.format == AV_PIX_FMT_RGB24 {
+        if format == AV_PIX_FMT_RGB24 {
             image = UIImage(rgbData: dataWrap.data[0]!, linesize: Int(bytesPerRow[0]), width: width, height: height)
         }
         let scale = VideoSwresample(dstFormat: AV_PIX_FMT_RGB24, forceTransfer: true)
-        image = scale.transfer(format: format.format, width: Int32(width), height: Int32(height), data: dataWrap.data, linesize: bytesPerRow)
+        image = scale.transfer(format: format, width: Int32(width), height: Int32(height), data: dataWrap.data, linesize: bytesPerRow)
         scale.shutdown()
         return image
     }
@@ -215,63 +221,28 @@ extension AVCodecParameters {
 }
 
 extension AVPixelFormat {
-    var format: OSType {
-        switch self {
-        case AV_PIX_FMT_MONOBLACK: return kCVPixelFormatType_1Monochrome
-        case AV_PIX_FMT_RGB555BE: return kCVPixelFormatType_16BE555
-        case AV_PIX_FMT_RGB555LE: return kCVPixelFormatType_16LE555
-        case AV_PIX_FMT_RGB565BE: return kCVPixelFormatType_16BE565
-        case AV_PIX_FMT_RGB565LE: return kCVPixelFormatType_16LE565
-        case AV_PIX_FMT_RGB24: return kCVPixelFormatType_24RGB
-        case AV_PIX_FMT_BGR24: return kCVPixelFormatType_24BGR
-        case AV_PIX_FMT_0RGB: return kCVPixelFormatType_32ARGB
-        case AV_PIX_FMT_BGR0: return kCVPixelFormatType_32BGRA
-        case AV_PIX_FMT_0BGR: return kCVPixelFormatType_32ABGR
-        case AV_PIX_FMT_RGB0: return kCVPixelFormatType_32RGBA
-        case AV_PIX_FMT_BGRA: return kCVPixelFormatType_32BGRA
-        case AV_PIX_FMT_BGR48BE: return kCVPixelFormatType_48RGB
-        case AV_PIX_FMT_UYVY422: return kCVPixelFormatType_422YpCbCr8
-        case AV_PIX_FMT_YUVA444P: return kCVPixelFormatType_4444YpCbCrA8R
-        case AV_PIX_FMT_YUVA444P16LE: return kCVPixelFormatType_4444AYpCbCr16
-        case AV_PIX_FMT_YUV444P: return kCVPixelFormatType_444YpCbCr8
-        //        case AV_PIX_FMT_YUV422P16: return kCVPixelFormatType_422YpCbCr16
-        //        case AV_PIX_FMT_YUV422P10: return kCVPixelFormatType_422YpCbCr10
-        //        case AV_PIX_FMT_YUV444P10: return kCVPixelFormatType_444YpCbCr10
-        case AV_PIX_FMT_YUV420P: return kCVPixelFormatType_420YpCbCr8Planar
-        case AV_PIX_FMT_YUV420P10LE: return kCVPixelFormatType_420YpCbCr10BiPlanarVideoRange
-        case AV_PIX_FMT_NV12: return kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange
-        case AV_PIX_FMT_YUYV422: return kCVPixelFormatType_422YpCbCr8_yuvs
-        case AV_PIX_FMT_GRAY8: return kCVPixelFormatType_OneComponent8
-        default:
-            return 0
+    func bitDepth() -> Int32 {
+        let descriptor = av_pix_fmt_desc_get(self)
+        return descriptor?.pointee.comp.0.depth ?? 8
+    }
+
+    func planeCount() -> UInt8 {
+        if let desc = av_pix_fmt_desc_get(self) {
+            switch desc.pointee.nb_components {
+            case 3:
+                return UInt8(desc.pointee.comp.2.plane + 1)
+            case 2:
+                return UInt8(desc.pointee.comp.1.plane + 1)
+            default:
+                return UInt8(desc.pointee.comp.0.plane + 1)
+            }
+        } else {
+            return 1
         }
     }
-}
 
-extension OSType {
-    var format: AVPixelFormat {
-        switch self {
-        case kCVPixelFormatType_32ARGB: return AV_PIX_FMT_ARGB
-        case kCVPixelFormatType_32BGRA: return AV_PIX_FMT_BGRA
-        case kCVPixelFormatType_24RGB: return AV_PIX_FMT_RGB24
-        case kCVPixelFormatType_16BE555: return AV_PIX_FMT_RGB555BE
-        case kCVPixelFormatType_16BE565: return AV_PIX_FMT_RGB565BE
-        case kCVPixelFormatType_16LE555: return AV_PIX_FMT_RGB555LE
-        case kCVPixelFormatType_16LE565: return AV_PIX_FMT_RGB565LE
-        case kCVPixelFormatType_422YpCbCr8: return AV_PIX_FMT_UYVY422
-        case kCVPixelFormatType_422YpCbCr8_yuvs: return AV_PIX_FMT_YUYV422
-        case kCVPixelFormatType_444YpCbCr8: return AV_PIX_FMT_YUV444P
-        case kCVPixelFormatType_4444YpCbCrA8: return AV_PIX_FMT_YUV444P16LE
-        case kCVPixelFormatType_422YpCbCr16: return AV_PIX_FMT_YUV422P16LE
-        case kCVPixelFormatType_422YpCbCr10: return AV_PIX_FMT_YUV422P10LE
-        case kCVPixelFormatType_444YpCbCr10: return AV_PIX_FMT_YUV444P10LE
-        case kCVPixelFormatType_420YpCbCr8Planar: return AV_PIX_FMT_YUV420P
-        case kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange: return AV_PIX_FMT_NV12
-        case kCVPixelFormatType_420YpCbCr8BiPlanarFullRange: return AV_PIX_FMT_NV12
-        case kCVPixelFormatType_422YpCbCr8_yuvs: return AV_PIX_FMT_YUYV422
-        default:
-            return AV_PIX_FMT_NONE
-        }
+    func bestPixelFormat() -> AVPixelFormat {
+        return bitDepth() > 8 ? AV_PIX_FMT_P010LE : AV_PIX_FMT_NV12
     }
 }
 

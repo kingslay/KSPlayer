@@ -6,7 +6,6 @@
 //  Copyright © 2018年 kintan. All rights reserved.
 //
 
-import ffmpeg
 import KSPlayer
 import UIKit
 @available(iOS 13.0, tvOS 13.0, *)
@@ -20,6 +19,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UISplitViewControllerDele
         KSPlayerManager.logLevel = .debug
         KSPlayerManager.firstPlayerType = KSMEPlayer.self
         KSPlayerManager.secondPlayerType = KSMEPlayer.self
+//        KSPlayerManager.supportedInterfaceOrientations = .all
         KSOptions.preferredForwardBufferDuration = 10
         KSOptions.isAutoPlay = true
         KSOptions.isSecondOpen = true
@@ -45,6 +45,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UISplitViewControllerDele
         self.window = window
         return true
     }
+    #if os(iOS)
+    func application(_ application: UIApplication, supportedInterfaceOrientationsFor window: UIWindow?) -> UIInterfaceOrientationMask {
+        return KSPlayerManager.supportedInterfaceOrientations
+    }
+    #endif
 
     override func buildMenu(with builder: UIMenuBuilder) {
         if builder.system == .main {

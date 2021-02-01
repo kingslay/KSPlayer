@@ -30,7 +30,7 @@ open class AudioPlayerView: PlayerView {
             toolBar.leftAnchor.constraint(equalTo: leftAnchor, constant: 7),
             toolBar.rightAnchor.constraint(equalTo: rightAnchor, constant: -12),
             toolBar.topAnchor.constraint(equalTo: topAnchor),
-            toolBar.bottomAnchor.constraint(equalTo: bottomAnchor),
+            toolBar.bottomAnchor.constraint(equalTo: bottomAnchor)
         ])
     }
 

@@ -103,7 +103,7 @@ public class PlayerToolBar: UIStackView {
         NSLayoutConstraint.activate([
             playButton.widthAnchor.constraint(equalToConstant: 30),
             heightAnchor.constraint(equalToConstant: 49),
-            srtButton.widthAnchor.constraint(equalToConstant: 40),
+            srtButton.widthAnchor.constraint(equalToConstant: 40)
         ])
     }
 

@@ -64,14 +64,14 @@ public class KSSubtitleView: UIControl, SubtitleViewProtocol {
             tableView.topAnchor.constraint(equalTo: topAnchor),
             tableView.bottomAnchor.constraint(equalTo: bottomAnchor),
             tableView.widthAnchor.constraint(equalToConstant: tableWidth),
-            tableViewRightConstraint,
+            tableViewRightConstraint
         ])
         #else
         NSLayoutConstraint.activate([
             tableView.topAnchor.constraint(equalTo: topAnchor),
 //          tableView.bottomAnchor.constraint(equalTo: bottomAnchor),
             tableView.widthAnchor.constraint(equalToConstant: tableWidth),
-            tableViewRightConstraint,
+            tableViewRightConstraint
         ])
         #endif
 
@@ -168,7 +168,7 @@ public class SrtListCell: UITableViewCell {
             checkView.widthAnchor.constraint(equalToConstant: 20),
             checkView.heightAnchor.constraint(equalToConstant: 20),
             checkView.centerYAnchor.constraint(equalTo: contentView.centerYAnchor),
-            checkView.rightAnchor.constraint(equalTo: contentView.rightAnchor, constant: -15),
+            checkView.rightAnchor.constraint(equalTo: contentView.rightAnchor, constant: -15)
         ])
     }
 

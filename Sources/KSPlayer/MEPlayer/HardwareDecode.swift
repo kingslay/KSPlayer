@@ -5,7 +5,7 @@
 //  Created by kintan on 2018/3/10.
 //
 
-import ffmpeg
+import Libavformat
 import VideoToolbox
 
 protocol DecodeProtocol {
@@ -123,12 +123,12 @@ class DecompressionSession {
     fileprivate let isConvertNALSize: Bool
     fileprivate let formatDescription: CMFormatDescription
     fileprivate let decompressionSession: VTDecompressionSession
-
     init?(codecpar: AVCodecParameters, options: KSOptions) {
-        let formats = [AV_PIX_FMT_YUV420P, AV_PIX_FMT_YUV420P9BE, AV_PIX_FMT_YUV420P9LE,
+        let formats = [AV_PIX_FMT_NV12, AV_PIX_FMT_P010LE, AV_PIX_FMT_P010BE, AV_PIX_FMT_YUV420P, AV_PIX_FMT_YUV420P9BE, AV_PIX_FMT_YUV420P9LE,
                        AV_PIX_FMT_YUV420P10BE, AV_PIX_FMT_YUV420P10LE, AV_PIX_FMT_YUV420P12BE, AV_PIX_FMT_YUV420P12LE,
                        AV_PIX_FMT_YUV420P14BE, AV_PIX_FMT_YUV420P14LE, AV_PIX_FMT_YUV420P16BE, AV_PIX_FMT_YUV420P16LE]
-        guard options.canHardwareDecode(codecpar: codecpar), formats.contains(AVPixelFormat(codecpar.format)), let extradata = codecpar.extradata else {
+        let format = AVPixelFormat(codecpar.format)
+        guard options.canHardwareDecode(codecpar: codecpar), formats.contains(format), let extradata = codecpar.extradata else {
             return nil
         }
         let extradataSize = codecpar.extradata_size
@@ -142,21 +142,21 @@ class DecompressionSession {
         } else {
             isConvertNALSize = false
         }
+        let isFullRangeVideo = codecpar.color_range == AVCOL_RANGE_JPEG
         let dic: NSMutableDictionary = [
-            kCVImageBufferChromaLocationBottomFieldKey: "left",
-            kCVImageBufferChromaLocationTopFieldKey: "left",
-            kCMFormatDescriptionExtension_FullRangeVideo: options.bufferPixelFormatType != kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange,
+            kCVImageBufferChromaLocationBottomFieldKey: kCVImageBufferChromaLocation_Left,
+            kCVImageBufferChromaLocationTopFieldKey: kCVImageBufferChromaLocation_Left,
+            kCMFormatDescriptionExtension_FullRangeVideo: isFullRangeVideo,
             kCMFormatDescriptionExtension_SampleDescriptionExtensionAtoms: [
-                codecpar.codec_id.rawValue == AV_CODEC_ID_HEVC.rawValue ? "hvcC" : "avcC": NSData(bytes: extradata, length: Int(extradataSize)),
-            ],
+                codecpar.codec_id.rawValue == AV_CODEC_ID_HEVC.rawValue ? "hvcC" : "avcC": NSData(bytes: extradata, length: Int(extradataSize))
+            ]
         ]
         if let aspectRatio = codecpar.aspectRatio {
             dic[kCVImageBufferPixelAspectRatioKey] = aspectRatio
         }
-        if codecpar.color_space == AVCOL_SPC_BT709 {
-            dic[kCMFormatDescriptionExtension_YCbCrMatrix] = kCMFormatDescriptionColorPrimaries_ITU_R_709_2
-        }
-        // codecpar.pointee.color_range == AVCOL_RANGE_JPEG kCVPixelFormatType_420YpCbCr8BiPlanarFullRange
+        dic[kCVImageBufferColorPrimariesKey] = codecpar.color_primaries.colorPrimaries
+        dic[kCVImageBufferTransferFunctionKey] = codecpar.color_trc.transferFunction
+        dic[kCVImageBufferYCbCrMatrixKey] = codecpar.color_space.ycbcrMatrix
         let type = codecpar.codec_id.rawValue == AV_CODEC_ID_HEVC.rawValue ? kCMVideoCodecType_HEVC : kCMVideoCodecType_H264
         // swiftlint:disable line_length
         var description: CMFormatDescription?
@@ -166,14 +166,9 @@ class DecompressionSession {
             return nil
         }
         self.formatDescription = formatDescription
-        let attributes: NSDictionary = [
-            kCVPixelBufferPixelFormatTypeKey: options.bufferPixelFormatType,
-            kCVPixelBufferWidthKey: codecpar.width,
-            kCVPixelBufferHeightKey: codecpar.height,
-            kCVPixelBufferMetalCompatibilityKey: true,
-            kCVPixelBufferCGImageCompatibilityKey: true,
-            kCVPixelBufferCGBitmapContextCompatibilityKey: true,
-            kCVPixelBufferIOSurfacePropertiesKey: NSDictionary(),
+
+        let attributes: NSMutableDictionary = [
+            kCVPixelBufferPixelFormatTypeKey: options.bestPixelFormatType(bitDepth: format.bitDepth(), isFullRangeVideo: isFullRangeVideo, planeCount: format.planeCount())
         ]
         var session: VTDecompressionSession?
         // swiftlint:disable line_length
@@ -201,7 +196,7 @@ extension CMFormatDescription {
                 let end = data + size
                 var nalStart = data
                 while nalStart < end {
-                    nalSize = UInt32(UInt32(nalStart[0]) << 16 | UInt32(nalStart[1]) << 8 | UInt32(nalStart[2]))
+                    nalSize = UInt32(nalStart[0]) << 16 | UInt32(nalStart[1]) << 8 | UInt32(nalStart[2])
                     avio_wb32(ioContext, nalSize)
                     nalStart += 3
                     avio_write(ioContext, nalStart, Int32(nalSize))
@@ -231,5 +226,67 @@ extension CMFormatDescription {
         }
         throw NSError(errorCode: .codecVideoReceiveFrame, ffmpegErrnum: status)
         // swiftlint:enable line_length
+    }
+}
+
+extension AVColorPrimaries {
+    var colorPrimaries: CFString? {
+        switch self {
+        case AVCOL_PRI_BT470BG:
+            return kCVImageBufferColorPrimaries_EBU_3213
+        case AVCOL_PRI_SMPTE170M:
+            return kCVImageBufferColorPrimaries_SMPTE_C
+        case AVCOL_PRI_BT709:
+            return kCVImageBufferColorPrimaries_ITU_R_709_2
+        case AVCOL_PRI_BT2020:
+            return kCVImageBufferColorPrimaries_ITU_R_2020
+        default:
+            return nil
+        }
+    }
+}
+extension AVColorTransferCharacteristic {
+    var transferFunction: CFString? {
+        switch self {
+        case AVCOL_TRC_BT709:
+            return kCVImageBufferTransferFunction_ITU_R_709_2
+        case AVCOL_TRC_SMPTE240M:
+            return kCVImageBufferTransferFunction_SMPTE_240M_1995
+        case AVCOL_TRC_SMPTE2084:
+            if #available(iOS 11.0, tvOS 11.0, OSX 10.13, *) {
+                return kCVImageBufferTransferFunction_SMPTE_ST_2084_PQ
+            }
+        case AVCOL_TRC_LINEAR:
+            if #available(iOS 12.0, tvOS 12.0, OSX 10.14, *) {
+                return kCVImageBufferTransferFunction_Linear
+            }
+        case AVCOL_TRC_ARIB_STD_B67:
+            if #available(iOS 11.0, tvOS 11.0, OSX 10.13, *) {
+                return kCVImageBufferTransferFunction_ITU_R_2100_HLG
+            }
+        case AVCOL_TRC_GAMMA22, AVCOL_TRC_GAMMA28:
+            return kCVImageBufferTransferFunction_UseGamma
+        case AVCOL_TRC_BT2020_10, AVCOL_TRC_BT2020_12:
+            return kCVImageBufferTransferFunction_ITU_R_2020
+        default:
+            return nil
+        }
+        return nil
+    }
+}
+extension AVColorSpace {
+    var ycbcrMatrix: CFString? {
+        switch self {
+        case AVCOL_SPC_BT709:
+            return kCVImageBufferYCbCrMatrix_ITU_R_709_2
+        case AVCOL_SPC_BT470BG, AVCOL_SPC_SMPTE170M:
+            return kCVImageBufferYCbCrMatrix_ITU_R_601_4
+        case AVCOL_SPC_SMPTE240M:
+            return kCVImageBufferYCbCrMatrix_SMPTE_240M_1995
+        case AVCOL_SPC_BT2020_NCL:
+            return kCVImageBufferYCbCrMatrix_ITU_R_2020
+        default:
+            return nil
+        }
     }
 }

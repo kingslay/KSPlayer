@@ -124,12 +124,22 @@ install_xcframework() {
 
 
 if [[ "$CONFIGURATION" == "Debug" ]]; then
-  install_xcframework "${PODS_ROOT}/../../Sources/FFmpeg.xcframework" "" "false" "ios-x86_64-maccatalyst/FFmpeg.framework" "ios-x86_64-simulator/FFmpeg.framework" "ios-arm64/FFmpeg.framework"
-  install_xcframework "${PODS_ROOT}/../../Sources/OpenSSL.xcframework" "" "false" "ios-x86_64-simulator/OpenSSL.framework" "ios-x86_64-maccatalyst/OpenSSL.framework" "ios-arm64/OpenSSL.framework"
+  install_xcframework "${PODS_ROOT}/../../Sources/Libavcodec.xcframework" "" "false" "ios-x86_64-maccatalyst/Libavcodec.framework" "ios-arm64/Libavcodec.framework" "ios-arm64_x86_64-simulator/Libavcodec.framework"
+  install_xcframework "${PODS_ROOT}/../../Sources/Libavformat.xcframework" "" "false" "ios-arm64/Libavformat.framework" "ios-x86_64-maccatalyst/Libavformat.framework" "ios-arm64_x86_64-simulator/Libavformat.framework"
+  install_xcframework "${PODS_ROOT}/../../Sources/Libavutil.xcframework" "" "false" "ios-x86_64-maccatalyst/Libavutil.framework" "ios-arm64/Libavutil.framework" "ios-arm64_x86_64-simulator/Libavutil.framework"
+  install_xcframework "${PODS_ROOT}/../../Sources/Libswresample.xcframework" "" "false" "ios-arm64/Libswresample.framework" "ios-arm64_x86_64-simulator/Libswresample.framework" "ios-x86_64-maccatalyst/Libswresample.framework"
+  install_xcframework "${PODS_ROOT}/../../Sources/Libswscale.xcframework" "" "false" "ios-arm64/Libswscale.framework" "ios-arm64_x86_64-simulator/Libswscale.framework" "ios-x86_64-maccatalyst/Libswscale.framework"
+  install_xcframework "${PODS_ROOT}/../../Sources/Libssl.xcframework" "" "false" "ios-arm64/libssl.framework" "ios-arm64_x86_64-simulator/libssl.framework" "ios-x86_64-maccatalyst/libssl.framework"
+  install_xcframework "${PODS_ROOT}/../../Sources/Libcrypto.xcframework" "" "false" "ios-arm64_x86_64-simulator/libcrypto.framework" "ios-arm64/libcrypto.framework" "ios-x86_64-maccatalyst/libcrypto.framework"
 fi
 if [[ "$CONFIGURATION" == "Release" ]]; then
-  install_xcframework "${PODS_ROOT}/../../Sources/FFmpeg.xcframework" "" "false" "ios-x86_64-maccatalyst/FFmpeg.framework" "ios-x86_64-simulator/FFmpeg.framework" "ios-arm64/FFmpeg.framework"
-  install_xcframework "${PODS_ROOT}/../../Sources/OpenSSL.xcframework" "" "false" "ios-x86_64-simulator/OpenSSL.framework" "ios-x86_64-maccatalyst/OpenSSL.framework" "ios-arm64/OpenSSL.framework"
+  install_xcframework "${PODS_ROOT}/../../Sources/Libavcodec.xcframework" "" "false" "ios-x86_64-maccatalyst/Libavcodec.framework" "ios-arm64/Libavcodec.framework" "ios-arm64_x86_64-simulator/Libavcodec.framework"
+  install_xcframework "${PODS_ROOT}/../../Sources/Libavformat.xcframework" "" "false" "ios-arm64/Libavformat.framework" "ios-x86_64-maccatalyst/Libavformat.framework" "ios-arm64_x86_64-simulator/Libavformat.framework"
+  install_xcframework "${PODS_ROOT}/../../Sources/Libavutil.xcframework" "" "false" "ios-x86_64-maccatalyst/Libavutil.framework" "ios-arm64/Libavutil.framework" "ios-arm64_x86_64-simulator/Libavutil.framework"
+  install_xcframework "${PODS_ROOT}/../../Sources/Libswresample.xcframework" "" "false" "ios-arm64/Libswresample.framework" "ios-arm64_x86_64-simulator/Libswresample.framework" "ios-x86_64-maccatalyst/Libswresample.framework"
+  install_xcframework "${PODS_ROOT}/../../Sources/Libswscale.xcframework" "" "false" "ios-arm64/Libswscale.framework" "ios-arm64_x86_64-simulator/Libswscale.framework" "ios-x86_64-maccatalyst/Libswscale.framework"
+  install_xcframework "${PODS_ROOT}/../../Sources/Libssl.xcframework" "" "false" "ios-arm64/libssl.framework" "ios-arm64_x86_64-simulator/libssl.framework" "ios-x86_64-maccatalyst/libssl.framework"
+  install_xcframework "${PODS_ROOT}/../../Sources/Libcrypto.xcframework" "" "false" "ios-arm64_x86_64-simulator/libcrypto.framework" "ios-arm64/libcrypto.framework" "ios-x86_64-maccatalyst/libcrypto.framework"
 fi
 
 echo "Artifact list stored at $ARTIFACT_LIST_FILE"
