@@ -67,7 +67,7 @@ class MetalRender {
     }()
 
     private lazy var colorOffsetVideoRangeMatrixBuffer: MTLBuffer? = {
-        var firstColumn = SIMD3<Float>(-(16.0 / 255.0), -0.5, -0.5)
+        var firstColumn = SIMD3<Float>(-16.0 / 256.0, -0.5, -0.5)
         let buffer = device.makeBuffer(bytes: &firstColumn, length: MemoryLayout<SIMD3<Float>>.size, options: .storageModeShared)
         buffer?.label = "colorOffset"
         return buffer
