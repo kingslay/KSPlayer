@@ -526,7 +526,7 @@ extension MEPlayerItem: OutputRenderSourceDelegate {
                 return frame.cmtime.seconds <= desire
             }
             let frame = videoTrack?.getOutputRender(where: predicate)
-            if let frame = frame, frame.seconds + 0.1 < positionTime {
+            if let frame = frame, frame.seconds + 0.4 < positionTime {
                 _ = videoTrack?.getOutputRender(where: nil)
             }
             return frame
