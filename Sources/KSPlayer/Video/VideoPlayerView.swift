@@ -555,7 +555,7 @@ extension VideoPlayerView {
             srtControl.view.topAnchor.constraint(equalTo: topAnchor),
             srtControl.view.leftAnchor.constraint(equalTo: leftAnchor),
             srtControl.view.bottomAnchor.constraint(equalTo: bottomAnchor),
-            srtControl.view.rightAnchor.constraint(equalTo: rightAnchor),
+            srtControl.view.rightAnchor.constraint(equalTo: rightAnchor)
         ])
     }
 

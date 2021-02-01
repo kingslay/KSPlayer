@@ -111,13 +111,13 @@ public class CircularBuffer<Item: ObjectQueueItem> {
         condition.lock()
         defer { condition.unlock() }
         for i in headIndex ..< tailIndex {
-            if let item = _buffer[Int(i)] {
+            if i < _buffer.count, let item = _buffer[Int(i)] {
                 if predicate(item) {
                     headIndex = i
                     return item
                 }
             } else {
-                assertionFailure("value is nil of index: \(i) headIndex: \(headIndex), tailIndex: \(tailIndex)")
+                assertionFailure("value is nil of index: \(i) headIndex: \(headIndex), tailIndex: \(tailIndex), bufferCount: \(_buffer.count)")
                 return nil
             }
         }

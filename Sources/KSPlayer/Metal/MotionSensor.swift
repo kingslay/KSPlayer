@@ -87,10 +87,10 @@ extension simd_float4x4 {
     }
 
     public init(rotation: CMRotationMatrix) {
-        self.init([SIMD4<Float>(Float(rotation.m11), Float(rotation.m12), Float(rotation.m13), 0.0),
+        self.init(SIMD4<Float>(Float(rotation.m11), Float(rotation.m12), Float(rotation.m13), 0.0),
                    SIMD4<Float>(Float(rotation.m21), Float(rotation.m22), Float(rotation.m23), 0.0),
                    SIMD4<Float>(Float(rotation.m31), Float(rotation.m32), Float(rotation.m33), -1),
-                   SIMD4<Float>(0, 0, 0, 1)])
+                   SIMD4<Float>(0, 0, 0, 1))
     }
 }
 #endif

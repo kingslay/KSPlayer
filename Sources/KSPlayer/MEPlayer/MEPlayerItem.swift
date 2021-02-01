@@ -6,7 +6,8 @@
 //
 
 import AVFoundation
-import ffmpeg
+import Libavformat
+import FFmpeg
 import VideoToolbox
 
 final class MEPlayerItem {
@@ -524,8 +525,14 @@ extension MEPlayerItem: OutputRenderSourceDelegate {
                 }
                 return frame.cmtime.seconds <= desire
             }
+            let frame = videoTrack?.getOutputRender(where: predicate)
+            if let frame = frame, frame.seconds + 0.4 < positionTime {
+                _ = videoTrack?.getOutputRender(where: nil)
+            }
+            return frame
+        } else {
+            return audioTrack?.getOutputRender(where: nil)
         }
-        return (type == .video ? videoTrack : audioTrack)?.getOutputRender(where: predicate)
     }
 }
 

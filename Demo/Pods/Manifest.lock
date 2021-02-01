@@ -1,10 +1,13 @@
 PODS:
+  - FFmpeg (4.3.1):
+    - FFmpeg/FFmpeg (= 4.3.1)
+  - FFmpeg/FFmpeg (4.3.1):
+    - OpenSSL
   - KSPlayer (1.0):
     - KSPlayer/Audio (= 1.0)
     - KSPlayer/AVPlayer (= 1.0)
     - KSPlayer/Basic (= 1.0)
     - KSPlayer/Core (= 1.0)
-    - KSPlayer/FFmpeg (= 1.0)
     - KSPlayer/MEPlayer (= 1.0)
     - KSPlayer/Metal (= 1.0)
     - KSPlayer/Subtitle (= 1.0)
@@ -19,11 +22,9 @@ PODS:
     - KSPlayer/UXKit
   - KSPlayer/Core (1.0):
     - KSPlayer/AVPlayer
-  - KSPlayer/FFmpeg (1.0):
-    - Openssl
   - KSPlayer/MEPlayer (1.0):
+    - FFmpeg
     - KSPlayer/AVPlayer
-    - KSPlayer/FFmpeg
     - KSPlayer/Metal
     - KSPlayer/Subtitle
   - KSPlayer/Metal (1.0)
@@ -33,15 +34,16 @@ PODS:
   - KSPlayer/Video (1.0):
     - KSPlayer/Core
     - KSPlayer/Subtitle
-  - Openssl (1.1.1):
-    - Openssl/Openssl (= 1.1.1)
-  - Openssl/Openssl (1.1.1)
+  - OpenSSL (1.1.1):
+    - OpenSSL/OpenSSL (= 1.1.1)
+  - OpenSSL/OpenSSL (1.1.1)
   - SwiftLint (0.39.2)
 
 DEPENDENCIES:
+  - FFmpeg (from `../`)
   - KSPlayer (from `../`)
   - KSPlayer/Tests (from `../`)
-  - Openssl (from `../`)
+  - OpenSSL (from `../`)
   - SwiftLint
 
 SPEC REPOS:
@@ -49,16 +51,19 @@ SPEC REPOS:
     - SwiftLint
 
 EXTERNAL SOURCES:
+  FFmpeg:
+    :path: "../"
   KSPlayer:
     :path: "../"
-  Openssl:
+  OpenSSL:
     :path: "../"
 
 SPEC CHECKSUMS:
-  KSPlayer: 2a221bcedffaae80ff42799030736752d988d112
-  Openssl: f5e9a3f6024ae963afe8f90d2968259ae2ce35f8
+  FFmpeg: 69b7575af81bbf2ca792462beac52b5292080ec4
+  KSPlayer: 6af3de757002b987e014abe09a25d9731aec3468
+  OpenSSL: 1d5bdeda2310512dea181e2821e3ed536e7164be
   SwiftLint: 22ccbbe3b8008684be5955693bab135e0ed6a447
 
-PODFILE CHECKSUM: c3cf510b07ed28e4883966ddf1cc720175df8f6e
+PODFILE CHECKSUM: 5e4ac224fc6c0851ebadbff75951cef81c90a75a
 
 COCOAPODS: 1.9.3

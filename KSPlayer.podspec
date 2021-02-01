@@ -30,20 +30,6 @@ Pod::Spec.new do |s|
         ss.source_files = 'Sources/KSPlayer/Subtitle/*.{swift}'
         ss.frameworks = 'Foundation'
     end
-    s.subspec 'FFmpeg' do |ffmpeg|
-        ffmpeg.libraries   = 'bz2', 'z', 'iconv', 'xml2'
-        ffmpeg.ios.xcconfig = {
-            'HEADER_SEARCH_PATHS' => "${PODS_ROOT}/#{s.name}/Sources/FFmpeg.xcframework/ios-arm64/FFmpeg.framework/Headers ${PODS_ROOT}/../../Sources/FFmpeg.xcframework/ios-arm64/FFmpeg.framework/Headers"
-        }
-        ffmpeg.tvos.xcconfig = {
-            'HEADER_SEARCH_PATHS' => "${PODS_ROOT}/#{s.name}/Sources/FFmpeg.xcframework/tvos-arm64/FFmpeg.framework/Headers ${PODS_ROOT}/../../Sources/FFmpeg.xcframework/tvos-arm64/FFmpeg.framework/Headers"
-        }
-        ffmpeg.osx.xcconfig = {
-            'HEADER_SEARCH_PATHS' => "${PODS_ROOT}/#{s.name}/Sources/FFmpeg.xcframework/macos-x86_64/FFmpeg.framework/Headers ${PODS_ROOT}/../../Sources/FFmpeg.xcframework/macos-x86_64/FFmpeg.framework/Headers"
-        }
-        ffmpeg.vendored_frameworks = 'Sources/FFmpeg.xcframework'
-        ffmpeg.dependency 'Openssl'
-    end
     s.subspec 'Metal' do |ss|
         ss.source_files = 'Sources/KSPlayer/Metal/*.{swift,metal}'
         ss.resource_bundles = {
@@ -64,7 +50,7 @@ Pod::Spec.new do |s|
     s.subspec 'MEPlayer' do |ss|
         ss.source_files = 'Sources/KSPlayer/MEPlayer/**/*.{swift}'
         ss.frameworks  = 'AudioToolbox', 'VideoToolbox'
-        ss.dependency 'KSPlayer/FFmpeg'
+        ss.dependency 'FFmpeg'
         ss.dependency 'KSPlayer/AVPlayer'
         ss.dependency 'KSPlayer/Metal'
         ss.dependency 'KSPlayer/Subtitle'

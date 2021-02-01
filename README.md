@@ -3,7 +3,7 @@
 
 # KSPlayer 
 
-- KSPlayer is a powerful media play framework foriOS, tvOS, macOS,Mac Catalyst, SwiftUI.
+- KSPlayer is a powerful media play framework foriOS, tvOS, macOS,Mac Catalyst, SwiftUI,  Apple Silicon M1 .
 
 ## Based On
 
@@ -13,19 +13,20 @@
 
 ## Features
 
-- iOS, tvOS, macOS,Mac Catalyst, SwiftUI.
+- iOS, tvOS, macOS,Mac Catalyst,  Apple Silicon M1, SwiftUI.
 - 360° panorama video.
 - Background playback.
 - RTMP/RTSP/Dash/HLS streaming.
 - Setting playback speed.
 - Multiple audio/video tracks.
 - H.264/H.265 hardware accelerator.
+- HDR
 
 ## Requirements
 
 - iOS 10 +,  macOS 10.12 +, tvOS 10.2 +
-- Xcode 11
-- Swift 5.2
+- Xcode 12
+- Swift 5.3
 
 ## Demo
 
@@ -35,13 +36,14 @@
 
 #### CocoaPods
 
-Make sure to use the latest version **cocoapods 1.9**, which can be installed using the command `brew install cocoapods`
+Make sure to use the latest version **cocoapods 1.9.3**, which can be installed using the command `brew install cocoapods`
 
 ```ruby
 target 'ProjectName' do
     use_frameworks!
-    pod 'KSPlayer',:git => 'https://github.com/kingslay/KSPlayer.git', :branch => 'master'
-    pod 'Openssl',:git => 'https://github.com/kingslay/KSPlayer.git', :branch => 'master'
+    pod 'KSPlayer',:git => 'https://github.com/kingslay/KSPlayer.git', :branch => 'develop'
+    pod 'FFmpeg',:git => 'https://github.com/kingslay/KSPlayer.git', :branch => 'develop'
+    pod 'Openssl',:git => 'https://github.com/kingslay/KSPlayer.git', :branch => 'develop'
 end
 ```
 
@@ -238,10 +240,8 @@ public protocol PlayerControllerDelegate: class {
 
 ```bash
 brew install sdl2
-cd Script
-sh build-openssl.sh
-sh build-ffmpeg.sh debug
-dwarfdump -F --debug-info ../Sources/FFmpeg.xcframework/ios-x86_64-maccatalyst/FFmpeg.framework/FFmpeg | head -n 20
+mkdir -p Script && cd Script && swift ../Sources/Script/main.swift debug
+dwarfdump -F --debug-info ../Sources/libavformat.xcframework/ios-x86_64-maccatalyst/FFmpeg.framework/FFmpeg | head -n 20
 ```
 
 run demo-iOS use Mac Catalyst

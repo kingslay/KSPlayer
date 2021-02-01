@@ -6,7 +6,8 @@
 //
 import AVFoundation
 import CoreMedia
-import ffmpeg
+import Libavformat
+
 protocol TrackProtocol: MediaPlayerTrack, CustomStringConvertible {
     var stream: UnsafeMutablePointer<AVStream> { get }
     var timebase: Timebase { get }
@@ -34,10 +35,15 @@ struct AssetTrack: TrackProtocol {
     let stream: UnsafeMutablePointer<AVStream>
     let mediaType: AVFoundation.AVMediaType
     let timebase: Timebase
-    let fps: Int
+    let fps: Float
     let bitRate: Int64
     let rotation: Double
     let naturalSize: CGSize
+    let bitDepth: Int32
+    let colorPrimaries: String?
+    let transferFunction: String?
+    let yCbCrMatrix: String?
+    let codecType: FourCharCode
     init?(stream: UnsafeMutablePointer<AVStream>) {
         self.stream = stream
         if let bitrateEntry = av_dict_get(stream.pointee.metadata, "variant_bitrate", nil, 0) ?? av_dict_get(stream.pointee.metadata, "BPS", nil, 0),
@@ -46,6 +52,12 @@ struct AssetTrack: TrackProtocol {
         } else {
             bitRate = stream.pointee.codecpar.pointee.bit_rate
         }
+        let format = AVPixelFormat(rawValue: stream.pointee.codecpar.pointee.format)
+        bitDepth = format.bitDepth()
+        colorPrimaries = stream.pointee.codecpar.pointee.color_primaries.colorPrimaries as String?
+        transferFunction = stream.pointee.codecpar.pointee.color_trc.transferFunction as String?
+        yCbCrMatrix = stream.pointee.codecpar.pointee.color_space.ycbcrMatrix as String?
+        codecType = stream.pointee.codecpar.pointee.codec_tag
         if stream.pointee.codecpar.pointee.codec_type == AVMEDIA_TYPE_AUDIO {
             mediaType = .audio
         } else if stream.pointee.codecpar.pointee.codec_type == AVMEDIA_TYPE_VIDEO {
@@ -64,9 +76,9 @@ struct AssetTrack: TrackProtocol {
         naturalSize = CGSize(width: Int(stream.pointee.codecpar.pointee.width), height: Int(stream.pointee.codecpar.pointee.height))
         let frameRate = av_guess_frame_rate(nil, stream, nil)
         if stream.pointee.duration > 0, stream.pointee.nb_frames > 0, stream.pointee.nb_frames != stream.pointee.duration {
-            fps = Int(stream.pointee.nb_frames * Int64(timebase.den) / (stream.pointee.duration * Int64(timebase.num)))
+            fps = Float(stream.pointee.nb_frames) * Float(timebase.den) / Float(stream.pointee.duration) * Float(timebase.num)
         } else if frameRate.den > 0, frameRate.num > 0 {
-            fps = Int(frameRate.num / frameRate.den)
+            fps = Float(frameRate.num) / Float(frameRate.den)
         } else {
             fps = mediaType == .audio ? 44 : 24
         }
@@ -108,7 +120,7 @@ class FFPlayerItemTrack<Frame: MEFrame>: PlayerItemTrackProtocol, CustomStringCo
     let description: String
     fileprivate var state = MECodecState.idle
     weak var delegate: CodecCapacityDelegate?
-    let fps: Int
+    let fps: Float
     let options: KSOptions
     let mediaType: AVFoundation.AVMediaType
     let outputRenderQueue: CircularBuffer<Frame>
@@ -121,9 +133,9 @@ class FFPlayerItemTrack<Frame: MEFrame>: PlayerItemTrackProtocol, CustomStringCo
         self.options = options
         // 默认缓存队列大小跟帧率挂钩,经测试除以4，最优
         if mediaType == .audio {
-            outputRenderQueue = CircularBuffer(initialCapacity: KSOptions.audioFrameMaxCount, expanding: false)
+            outputRenderQueue = CircularBuffer(initialCapacity: options.audioFrameMaxCount(fps: fps), expanding: false)
         } else if mediaType == .video {
-            outputRenderQueue = CircularBuffer(initialCapacity: KSOptions.videoFrameMaxCount, sorted: true, expanding: false)
+            outputRenderQueue = CircularBuffer(initialCapacity: options.videoFrameMaxCount(fps: fps), sorted: true, expanding: false)
         } else {
             outputRenderQueue = CircularBuffer()
         }
@@ -303,7 +315,8 @@ final class AsyncPlayerItemTrack: FFPlayerItemTrack<Frame> {
                     return
                 }
                 if seekTime > 0, options.isAccurateSeek {
-                    if frame.timebase.cmtime(for: frame.position + frame.duration).seconds < seekTime {
+                    let timestamp = frame.position + frame.duration
+                    if timestamp <= 0 || frame.timebase.cmtime(for: timestamp).seconds < seekTime {
                         return
                     } else {
                         seekTime = 0.0
