@@ -149,9 +149,9 @@ install_xcframework() {
   echo "Copied $source to $destination"
 }
 
-install_xcframework "${PODS_ROOT}/../../Sources/libavcodec.xcframework" "libavcodec" "framework" "macos-arm64_x86_64"
-install_xcframework "${PODS_ROOT}/../../Sources/libavformat.xcframework" "libavformat" "framework" "macos-arm64_x86_64"
-install_xcframework "${PODS_ROOT}/../../Sources/libavutil.xcframework" "libavutil" "framework" "macos-arm64_x86_64"
-install_xcframework "${PODS_ROOT}/../../Sources/libswresample.xcframework" "libswresample" "framework" "macos-arm64_x86_64"
-install_xcframework "${PODS_ROOT}/../../Sources/libswscale.xcframework" "libswscale" "framework" "macos-arm64_x86_64"
+install_xcframework "${PODS_ROOT}/../../Sources/Libavcodec.xcframework" "Libavcodec" "framework" "macos-arm64_x86_64"
+install_xcframework "${PODS_ROOT}/../../Sources/Libavformat.xcframework" "Libavformat" "framework" "macos-arm64_x86_64"
+install_xcframework "${PODS_ROOT}/../../Sources/Libavutil.xcframework" "Libavutil" "framework" "macos-arm64_x86_64"
+install_xcframework "${PODS_ROOT}/../../Sources/Libswresample.xcframework" "Libswresample" "framework" "macos-arm64_x86_64"
+install_xcframework "${PODS_ROOT}/../../Sources/Libswscale.xcframework" "Libswscale" "framework" "macos-arm64_x86_64"
 

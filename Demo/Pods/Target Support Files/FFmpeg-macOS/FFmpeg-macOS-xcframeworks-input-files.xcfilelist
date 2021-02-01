@@ -1,6 +1,6 @@
 ${PODS_ROOT}/Target Support Files/FFmpeg-macOS/FFmpeg-macOS-xcframeworks.sh
-${PODS_ROOT}/../../Sources/libavcodec.xcframework
-${PODS_ROOT}/../../Sources/libavformat.xcframework
-${PODS_ROOT}/../../Sources/libavutil.xcframework
-${PODS_ROOT}/../../Sources/libswresample.xcframework
-${PODS_ROOT}/../../Sources/libswscale.xcframework
+${PODS_ROOT}/../../Sources/Libavcodec.xcframework
+${PODS_ROOT}/../../Sources/Libavformat.xcframework
+${PODS_ROOT}/../../Sources/Libavutil.xcframework
+${PODS_ROOT}/../../Sources/Libswresample.xcframework
+${PODS_ROOT}/../../Sources/Libswscale.xcframework
