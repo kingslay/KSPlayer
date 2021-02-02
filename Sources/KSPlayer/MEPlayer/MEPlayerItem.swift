@@ -162,6 +162,8 @@ extension MEPlayerItem {
             avformat_close_input(&self.formatCtx)
             return
         }
+        formatCtx.pointee.flags |= AVFMT_FLAG_GENPTS
+        av_format_inject_global_side_data(formatCtx)
         options.openTime = CACurrentMediaTime()
         result = avformat_find_stream_info(formatCtx, nil)
         guard result == 0 else {

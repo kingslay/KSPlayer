@@ -119,42 +119,9 @@ extension UnsafeMutablePointer where Pointee == AVCodecParameters {
             avcodec_free_context(&codecContextOption)
             throw NSError(errorCode: .codecContextSetParam, ffmpegErrnum: result)
         }
-        if options.canHardwareDecode(codecpar: pointee) {
-            codecContext.pointee.opaque = Unmanaged.passUnretained(options).toOpaque()
-            codecContext.pointee.get_format = { ctx, fmt -> AVPixelFormat in
-                guard let fmt = fmt, let ctx = ctx else {
-                    return AV_PIX_FMT_NONE
-                }
-//                let options = Unmanaged<KSOptions>.fromOpaque(ctx.pointee.opaque).takeUnretainedValue()
-                var i = 0
-                while fmt[i] != AV_PIX_FMT_NONE {
-                    if fmt[i] == AV_PIX_FMT_VIDEOTOOLBOX {
-                        var deviceCtx = av_hwdevice_ctx_alloc(AV_HWDEVICE_TYPE_VIDEOTOOLBOX)
-                        if deviceCtx == nil {
-                            break
-                        }
-                        av_buffer_unref(&deviceCtx)
-                        var framesCtx = av_hwframe_ctx_alloc(deviceCtx)
-                        if let framesCtx = framesCtx {
-                            let framesCtxData = UnsafeMutableRawPointer(framesCtx.pointee.data)
-                                .bindMemory(to: AVHWFramesContext.self, capacity: 1)
-                            framesCtxData.pointee.format = AV_PIX_FMT_VIDEOTOOLBOX
-//                            framesCtxData.pointee.sw_format = AVPixelFormat(rawValue: pointee.format).bestPixelFormat()
-                            framesCtxData.pointee.width = ctx.pointee.width
-                            framesCtxData.pointee.height = ctx.pointee.height
-                        }
-                        if av_hwframe_ctx_init(framesCtx) != 0 {
-                            av_buffer_unref(&framesCtx)
-                            break
-                        }
-                        ctx.pointee.hw_frames_ctx = framesCtx
-                        return fmt[i]
-                    }
-                    i += 1
-                }
-                return fmt[0]
-            }
-        }
+//        if options.canHardwareDecode(codecpar: pointee) {
+//            codecContext.getFormat()
+//        }
         guard let codec = avcodec_find_decoder(codecContext.pointee.codec_id) else {
             avcodec_free_context(&codecContextOption)
             throw NSError(errorCode: .codecContextFindDecoder, ffmpegErrnum: result)
@@ -176,5 +143,42 @@ extension UnsafeMutablePointer where Pointee == AVCodecParameters {
             throw NSError(errorCode: .codesContextOpen, ffmpegErrnum: result)
         }
         return codecContext
+    }
+}
+
+extension UnsafeMutablePointer where Pointee == AVCodecContext {
+    func getFormat() {
+        pointee.get_format = { ctx, fmt -> AVPixelFormat in
+            guard let fmt = fmt, let ctx = ctx else {
+                return AV_PIX_FMT_NONE
+            }
+            var i = 0
+            while fmt[i] != AV_PIX_FMT_NONE {
+                if fmt[i] == AV_PIX_FMT_VIDEOTOOLBOX {
+                    var deviceCtx = av_hwdevice_ctx_alloc(AV_HWDEVICE_TYPE_VIDEOTOOLBOX)
+                    if deviceCtx == nil {
+                        break
+                    }
+                    av_buffer_unref(&deviceCtx)
+                    var framesCtx = av_hwframe_ctx_alloc(deviceCtx)
+                    if let framesCtx = framesCtx {
+                        let framesCtxData = UnsafeMutableRawPointer(framesCtx.pointee.data)
+                            .bindMemory(to: AVHWFramesContext.self, capacity: 1)
+                        framesCtxData.pointee.format = AV_PIX_FMT_VIDEOTOOLBOX
+                        framesCtxData.pointee.sw_format = ctx.pointee.pix_fmt.bestPixelFormat()
+                        framesCtxData.pointee.width = ctx.pointee.width
+                        framesCtxData.pointee.height = ctx.pointee.height
+                    }
+                    if av_hwframe_ctx_init(framesCtx) != 0 {
+                        av_buffer_unref(&framesCtx)
+                        break
+                    }
+                    ctx.pointee.hw_frames_ctx = framesCtx
+                    return fmt[i]
+                }
+                i += 1
+            }
+            return fmt[0]
+        }
     }
 }
