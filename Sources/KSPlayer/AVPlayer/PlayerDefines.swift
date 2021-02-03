@@ -236,7 +236,7 @@ public class KSOptions {
                 return true
             }
             guard capacity.frameCount >= capacity.frameMaxCount >> 1 else {
-                return false;
+                return false
             }
             if isFirst || isSeek {
                 // 让音频能更快的打开
@@ -292,9 +292,9 @@ public class KSOptions {
 
     open func bestPixelFormatType(bitDepth: Int32, isFullRangeVideo: Bool, planeCount: UInt8) -> OSType {
         if bitDepth > 8 {
-            return isFullRangeVideo ? kCVPixelFormatType_420YpCbCr10BiPlanarFullRange : kCVPixelFormatType_420YpCbCr10BiPlanarVideoRange
+            return kCVPixelFormatType_420YpCbCr10BiPlanarFullRange
         } else {
-            return isFullRangeVideo ? kCVPixelFormatType_420YpCbCr8BiPlanarFullRange: kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange
+            return kCVPixelFormatType_420YpCbCr8BiPlanarFullRange
         }
     }
     open func videoFrameMaxCount(fps: Float) -> Int {
