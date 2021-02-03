@@ -69,7 +69,7 @@ class HardwareDecode: DecodeProtocol {
         var result = [VideoVTBFrame]()
         let flags = options.asynchronousDecompression ? VTDecodeFrameFlags._EnableAsynchronousDecompression : VTDecodeFrameFlags(rawValue: 0)
         var vtStatus = noErr
-        let status = VTDecompressionSessionDecodeFrame(session.decompressionSession, sampleBuffer: sampleBuffer, flags: flags, infoFlagsOut: nil) { [weak self] status, _, imageBuffer, _, _ in
+        _ = VTDecompressionSessionDecodeFrame(session.decompressionSession, sampleBuffer: sampleBuffer, flags: flags, infoFlagsOut: nil) { [weak self] status, _, imageBuffer, _, _ in
             vtStatus = status
             guard let self = self, status == noErr, let imageBuffer = imageBuffer else {
                 return
@@ -169,7 +169,7 @@ class DecompressionSession {
 
         let attributes: NSMutableDictionary = [
             kCVPixelBufferPixelFormatTypeKey: options.bestPixelFormatType(bitDepth: format.bitDepth(), isFullRangeVideo: isFullRangeVideo, planeCount: format.planeCount()),
-            kCVPixelBufferMetalCompatibilityKey: true,
+            kCVPixelBufferMetalCompatibilityKey: true
         ]
         var session: VTDecompressionSession?
         // swiftlint:disable line_length

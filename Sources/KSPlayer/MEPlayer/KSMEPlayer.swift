@@ -274,11 +274,11 @@ extension KSMEPlayer: MediaPlayerProtocol {
     }
 
     public var contentMode: UIViewContentMode {
-        set {
-            view.contentMode = newValue
-        }
         get {
             view.contentMode
+        }
+        set {
+            view.contentMode = newValue
         }
     }
 
@@ -296,11 +296,11 @@ extension KSMEPlayer: MediaPlayerProtocol {
     }
 
     public var isMuted: Bool {
-        set {
-            audioOutput.audioPlayer.isMuted = newValue
-        }
         get {
             audioOutput.audioPlayer.isMuted
+        }
+        set {
+            audioOutput.audioPlayer.isMuted = newValue
         }
     }
 

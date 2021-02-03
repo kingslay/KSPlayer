@@ -333,13 +333,12 @@ enum PlatformType: String, CaseIterable {
     }
     func os() -> String {
         switch self {
-            case .isimulator:
-                return "ios"
-            case .tvsimulator:
-                return "tvos"
-            default:
-            return self.rawValue
-
+        case .isimulator:
+            return "ios"
+        case .tvsimulator:
+            return "tvos"
+        default:
+        return self.rawValue
         }
     }
     func deploymentTarget() -> String {
