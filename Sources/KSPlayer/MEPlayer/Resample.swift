@@ -119,6 +119,7 @@ class VideoSwresample: Swresample {
 }
 
 class PixelBuffer: BufferProtocol {
+    var attachmentsDic: CFDictionary?
     let bitDepth: Int32
     let format: AVPixelFormat
     let width: Int
@@ -140,6 +141,11 @@ class PixelBuffer: BufferProtocol {
         yCbCrMatrix = frame.pointee.colorspace.ycbcrMatrix
         colorPrimaries = frame.pointee.color_primaries.colorPrimaries
         transferFunction = frame.pointee.color_trc.transferFunction
+        var attachments = [CFString: CFString]()
+        attachments[kCVImageBufferColorPrimariesKey] = colorPrimaries
+        attachments[kCVImageBufferTransferFunctionKey] = transferFunction
+        attachments[kCVImageBufferYCbCrMatrixKey] = yCbCrMatrix
+        attachmentsDic = attachments as CFDictionary
         width = Int(frame.pointee.width)
         height = Int(frame.pointee.height)
         isFullRangeVideo = frame.pointee.color_range == AVCOL_RANGE_JPEG
