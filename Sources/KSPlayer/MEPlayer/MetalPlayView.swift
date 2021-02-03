@@ -22,9 +22,13 @@ final class MetalPlayView: MTKView, MTKViewDelegate, FrameOutput {
                         drawableSize = size
                     }
                     colorPixelFormat = KSOptions.colorPixelFormat(bitDepth: pixelBuffer.bitDepth)
+                    #if targetEnvironment(simulator)
                     if #available(iOS 13.0, tvOS 13.0, *) {
                         (layer as? CAMetalLayer)?.colorspace = pixelBuffer.colorspace
                     }
+                    #else
+                    (layer as? CAMetalLayer)?.colorspace = pixelBuffer.colorspace
+                    #endif
                     #if os(macOS) || targetEnvironment(macCatalyst)
                     (layer as? CAMetalLayer)?.wantsExtendedDynamicRangeContent = true
                     #endif
@@ -89,29 +93,6 @@ final class MetalPlayView: MTKView, MTKViewDelegate, FrameOutput {
 
 extension BufferProtocol {
     var colorspace: CGColorSpace? {
-        switch colorPrimaries {
-        case kCVImageBufferColorPrimaries_ITU_R_2020:
-            if #available(OSX 10.14.6, iOS 12.6, tvOS 12.6, *) {
-                switch transferFunction {
-                case kCVImageBufferTransferFunction_SMPTE_ST_2084_PQ:
-                    return CGColorSpace(name: CGColorSpace.itur_2020_PQ_EOTF)
-                case kCVImageBufferTransferFunction_ITU_R_2100_HLG:
-                    if #available(OSX 10.15.6, *) {
-                        return CGColorSpace(name: CGColorSpace.itur_2020_HLG)
-                    } else {
-                        return CGColorSpace(name: CGColorSpace.itur_2020_PQ_EOTF)
-                    }
-                case kCVImageBufferTransferFunction_Linear:
-                    return CGColorSpace(name: CGColorSpace.extendedLinearITUR_2020)
-                default:
-                    return CGColorSpace(name: CGColorSpace.itur_2020)
-                }
-            }
-        case kCVImageBufferColorPrimaries_ITU_R_709_2:
-            return CGColorSpace(name: CGColorSpace.itur_709)
-        default:
-            return CGColorSpace(name: CGColorSpace.sRGB)
-        }
-        return CGColorSpace(name: CGColorSpace.sRGB)
+        attachmentsDic.flatMap { CVImageBufferCreateColorSpaceFromAttachments($0)?.takeUnretainedValue() }
     }
 }
