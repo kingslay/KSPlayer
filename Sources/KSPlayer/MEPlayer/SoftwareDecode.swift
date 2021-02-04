@@ -127,7 +127,7 @@ extension UnsafeMutablePointer where Pointee == AVCodecParameters {
             throw NSError(errorCode: .codecContextFindDecoder, ffmpegErrnum: result)
         }
         codecContext.pointee.codec_id = codec.pointee.id
-        codecContext.pointee.flags |= AV_CODEC_FLAG2_FAST
+        codecContext.pointee.flags2 |= AV_CODEC_FLAG2_FAST
         var lowres = options.lowres
         if lowres > codec.pointee.max_lowres {
             lowres = codec.pointee.max_lowres
