@@ -1542,6 +1542,23 @@
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
+		0279FC80C5DD3E005537F2EC0D33FEFB /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = EB93BEA7A66BC1CF5AA9F2498EE94594 /* KSPlayer-macOS.debug.xcconfig */;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				CONFIGURATION_BUILD_DIR = "$(BUILD_DIR)/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)/KSPlayer-macOS";
+				IBSC_MODULE = KSPlayer;
+				INFOPLIST_FILE = "Target Support Files/KSPlayer-macOS/ResourceBundle-Metal-KSPlayer-macOS-Info.plist";
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Bundles";
+				MACOSX_DEPLOYMENT_TARGET = 10.13;
+				PRODUCT_NAME = Metal;
+				SDKROOT = macosx;
+				SKIP_INSTALL = YES;
+				WRAPPER_EXTENSION = bundle;
+			};
+			name = Debug;
+		};
 		0B51B7B2423D074D62D672B4805C1C5B /* Release */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 70B4584BEF4F2F72B39CE62155156E1C /* KSPlayer-tvOS.release.xcconfig */;
@@ -1558,44 +1575,7 @@
 			};
 			name = Release;
 		};
-		0E9B6F678392B5E29DAB2FFDCBF8DDEF /* Release */ = {
-			isa = XCBuildConfiguration;
-			baseConfigurationReference = B29DFB81651BC27CF1057397DF55B311 /* KSPlayer-macOS.release.xcconfig */;
-			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
-				CLANG_ENABLE_OBJC_WEAK = NO;
-				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
-				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
-				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 1;
-				DEFINES_MODULE = YES;
-				DYLIB_COMPATIBILITY_VERSION = 1;
-				DYLIB_CURRENT_VERSION = 1;
-				DYLIB_INSTALL_NAME_BASE = "@rpath";
-				GCC_PREFIX_HEADER = "Target Support Files/KSPlayer-macOS/KSPlayer-macOS-prefix.pch";
-				INFOPLIST_FILE = "Target Support Files/KSPlayer-macOS/KSPlayer-macOS-Info.plist";
-				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/../Frameworks",
-					"@loader_path/Frameworks",
-				);
-				MACH_O_TYPE = staticlib;
-				MACOSX_DEPLOYMENT_TARGET = 10.12;
-				MODULEMAP_FILE = "Target Support Files/KSPlayer-macOS/KSPlayer-macOS.modulemap";
-				PRODUCT_MODULE_NAME = KSPlayer;
-				PRODUCT_NAME = KSPlayer;
-				SDKROOT = macosx;
-				SKIP_INSTALL = YES;
-				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) ";
-				SWIFT_VERSION = 5.2;
-				VERSIONING_SYSTEM = "apple-generic";
-				VERSION_INFO_PREFIX = "";
-			};
-			name = Release;
-		};
-		2728C92EEF289662534A0E800A19AF1F /* Debug */ = {
+		13172AD8A0A62E0C8DF70A6FABEC97EF /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -1649,7 +1629,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
-				MACOSX_DEPLOYMENT_TARGET = 10.12;
+				MACOSX_DEPLOYMENT_TARGET = 10.13;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -1660,6 +1640,30 @@
 				SWIFT_VERSION = 5.0;
 				SYMROOT = "${SRCROOT}/../build";
 				TVOS_DEPLOYMENT_TARGET = 10.2;
+			};
+			name = Debug;
+		};
+		25BC768D3579ABEAC2D597208C72B164 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = D75631A2ACEA81FC5A5E8CB87806FDC9 /* KSPlayer-macOS.unit-tests.debug.xcconfig */;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				CODE_SIGN_IDENTITY = "";
+				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
+				GCC_PREFIX_HEADER = "Target Support Files/KSPlayer-macOS/KSPlayer-macOS-Unit-Tests-prefix.pch";
+				INFOPLIST_FILE = "Target Support Files/KSPlayer-macOS/KSPlayer-macOS-Unit-Tests-Info.plist";
+				MACOSX_DEPLOYMENT_TARGET = 10.13;
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					"-lswiftSwiftOnoneSupport",
+				);
+				PRODUCT_NAME = "KSPlayer-macOS-Unit-Tests";
+				SDKROOT = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) ";
+				SWIFT_VERSION = 5.2;
 			};
 			name = Debug;
 		};
@@ -1704,68 +1708,7 @@
 			};
 			name = Release;
 		};
-		31C3EF945F6B8FD72D9FCB74B591D8D9 /* Release */ = {
-			isa = XCBuildConfiguration;
-			baseConfigurationReference = D986C628712A2C5A99C9B1EB8C273889 /* KSPlayer-tvOS.unit-tests.release.xcconfig */;
-			buildSettings = {
-				CODE_SIGNING_ALLOWED = YES;
-				CODE_SIGNING_REQUIRED = YES;
-				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
-				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
-				GCC_PREFIX_HEADER = "Target Support Files/KSPlayer-tvOS/KSPlayer-tvOS-Unit-Tests-prefix.pch";
-				INFOPLIST_FILE = "Target Support Files/KSPlayer-tvOS/KSPlayer-tvOS-Unit-Tests-Info.plist";
-				PRODUCT_NAME = "KSPlayer-tvOS-Unit-Tests";
-				SDKROOT = appletvos;
-				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) ";
-				SWIFT_VERSION = 5.2;
-				TVOS_DEPLOYMENT_TARGET = 10.2;
-				VALIDATE_PRODUCT = YES;
-			};
-			name = Release;
-		};
-		334BFB309B577CD25575515AFA9A23E1 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			baseConfigurationReference = D75631A2ACEA81FC5A5E8CB87806FDC9 /* KSPlayer-macOS.unit-tests.debug.xcconfig */;
-			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
-				CLANG_ENABLE_OBJC_WEAK = NO;
-				CODE_SIGN_IDENTITY = "";
-				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
-				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
-				GCC_PREFIX_HEADER = "Target Support Files/KSPlayer-macOS/KSPlayer-macOS-Unit-Tests-prefix.pch";
-				INFOPLIST_FILE = "Target Support Files/KSPlayer-macOS/KSPlayer-macOS-Unit-Tests-Info.plist";
-				MACOSX_DEPLOYMENT_TARGET = 10.12;
-				OTHER_LDFLAGS = (
-					"$(inherited)",
-					"-lswiftSwiftOnoneSupport",
-				);
-				PRODUCT_NAME = "KSPlayer-macOS-Unit-Tests";
-				SDKROOT = macosx;
-				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) ";
-				SWIFT_VERSION = 5.2;
-			};
-			name = Debug;
-		};
-		36D18BD9417ED6BA68F69E1F936AFEA3 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			baseConfigurationReference = EB93BEA7A66BC1CF5AA9F2498EE94594 /* KSPlayer-macOS.debug.xcconfig */;
-			buildSettings = {
-				COMBINE_HIDPI_IMAGES = YES;
-				CONFIGURATION_BUILD_DIR = "$(BUILD_DIR)/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)/KSPlayer-macOS";
-				IBSC_MODULE = KSPlayer;
-				INFOPLIST_FILE = "Target Support Files/KSPlayer-macOS/ResourceBundle-Metal-KSPlayer-macOS-Info.plist";
-				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Bundles";
-				MACOSX_DEPLOYMENT_TARGET = 10.12;
-				PRODUCT_NAME = Metal;
-				SDKROOT = macosx;
-				SKIP_INSTALL = YES;
-				WRAPPER_EXTENSION = bundle;
-			};
-			name = Debug;
-		};
-		36FFEC5AC21EABCE8070E72BE0C0819A /* Release */ = {
+		2B20B5630208A20C4798A8A1EAEAA8AF /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -1816,7 +1759,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
-				MACOSX_DEPLOYMENT_TARGET = 10.12;
+				MACOSX_DEPLOYMENT_TARGET = 10.13;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -1826,6 +1769,26 @@
 				SWIFT_VERSION = 5.0;
 				SYMROOT = "${SRCROOT}/../build";
 				TVOS_DEPLOYMENT_TARGET = 10.2;
+			};
+			name = Release;
+		};
+		31C3EF945F6B8FD72D9FCB74B591D8D9 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = D986C628712A2C5A99C9B1EB8C273889 /* KSPlayer-tvOS.unit-tests.release.xcconfig */;
+			buildSettings = {
+				CODE_SIGNING_ALLOWED = YES;
+				CODE_SIGNING_REQUIRED = YES;
+				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
+				GCC_PREFIX_HEADER = "Target Support Files/KSPlayer-tvOS/KSPlayer-tvOS-Unit-Tests-prefix.pch";
+				INFOPLIST_FILE = "Target Support Files/KSPlayer-tvOS/KSPlayer-tvOS-Unit-Tests-Info.plist";
+				PRODUCT_NAME = "KSPlayer-tvOS-Unit-Tests";
+				SDKROOT = appletvos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) ";
+				SWIFT_VERSION = 5.2;
+				TVOS_DEPLOYMENT_TARGET = 10.2;
+				VALIDATE_PRODUCT = YES;
 			};
 			name = Release;
 		};
@@ -1861,6 +1824,43 @@
 			};
 			name = Debug;
 		};
+		4251A02C0AEEBA48A3D504CBF616BEE8 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = B29DFB81651BC27CF1057397DF55B311 /* KSPlayer-macOS.release.xcconfig */;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DEFINES_MODULE = YES;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				GCC_PREFIX_HEADER = "Target Support Files/KSPlayer-macOS/KSPlayer-macOS-prefix.pch";
+				INFOPLIST_FILE = "Target Support Files/KSPlayer-macOS/KSPlayer-macOS-Info.plist";
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MACH_O_TYPE = staticlib;
+				MACOSX_DEPLOYMENT_TARGET = 10.13;
+				MODULEMAP_FILE = "Target Support Files/KSPlayer-macOS/KSPlayer-macOS.modulemap";
+				PRODUCT_MODULE_NAME = KSPlayer;
+				PRODUCT_NAME = KSPlayer;
+				SDKROOT = macosx;
+				SKIP_INSTALL = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) ";
+				SWIFT_VERSION = 5.2;
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Release;
+		};
 		563257B18312B8E5E7642C7BF586866E /* Release */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = E79E24E1E0D7AD2E9419A42E2B9391B5 /* KSPlayer-iOS.release.xcconfig */;
@@ -1877,37 +1877,23 @@
 			};
 			name = Release;
 		};
-		676409C0A5FBD6EFBD6961F602F37EDC /* Release */ = {
+		62508EB06CCAF68FA03B9A33FDD1C4E0 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = B29DFB81651BC27CF1057397DF55B311 /* KSPlayer-macOS.release.xcconfig */;
+			baseConfigurationReference = EC9603698838A282E0B6AB692DB2A31D /* KSPlayer-macOS.unit-tests.release.xcconfig */;
 			buildSettings = {
-				COMBINE_HIDPI_IMAGES = YES;
-				CONFIGURATION_BUILD_DIR = "$(BUILD_DIR)/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)/KSPlayer-macOS";
-				IBSC_MODULE = KSPlayer;
-				INFOPLIST_FILE = "Target Support Files/KSPlayer-macOS/ResourceBundle-Metal-KSPlayer-macOS-Info.plist";
-				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Bundles";
-				MACOSX_DEPLOYMENT_TARGET = 10.12;
-				PRODUCT_NAME = Metal;
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				CODE_SIGN_IDENTITY = "";
+				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
+				GCC_PREFIX_HEADER = "Target Support Files/KSPlayer-macOS/KSPlayer-macOS-Unit-Tests-prefix.pch";
+				INFOPLIST_FILE = "Target Support Files/KSPlayer-macOS/KSPlayer-macOS-Unit-Tests-Info.plist";
+				MACOSX_DEPLOYMENT_TARGET = 10.13;
+				PRODUCT_NAME = "KSPlayer-macOS-Unit-Tests";
 				SDKROOT = macosx;
-				SKIP_INSTALL = YES;
-				WRAPPER_EXTENSION = bundle;
-			};
-			name = Release;
-		};
-		6CA9B62391296E90087FE12FC6737BD2 /* Release */ = {
-			isa = XCBuildConfiguration;
-			baseConfigurationReference = B29DFB81651BC27CF1057397DF55B311 /* KSPlayer-macOS.release.xcconfig */;
-			buildSettings = {
-				COMBINE_HIDPI_IMAGES = YES;
-				CONFIGURATION_BUILD_DIR = "$(BUILD_DIR)/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)/KSPlayer-macOS";
-				IBSC_MODULE = KSPlayer;
-				INFOPLIST_FILE = "Target Support Files/KSPlayer-macOS/ResourceBundle-KSResources-KSPlayer-macOS-Info.plist";
-				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Bundles";
-				MACOSX_DEPLOYMENT_TARGET = 10.12;
-				PRODUCT_NAME = KSResources;
-				SDKROOT = macosx;
-				SKIP_INSTALL = YES;
-				WRAPPER_EXTENSION = bundle;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) ";
+				SWIFT_VERSION = 5.2;
 			};
 			name = Release;
 		};
@@ -1947,6 +1933,43 @@
 			};
 			name = Debug;
 		};
+		8D75B3F13A1AAC03E6F069A5CD23CCEB /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = EB93BEA7A66BC1CF5AA9F2498EE94594 /* KSPlayer-macOS.debug.xcconfig */;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DEFINES_MODULE = YES;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				GCC_PREFIX_HEADER = "Target Support Files/KSPlayer-macOS/KSPlayer-macOS-prefix.pch";
+				INFOPLIST_FILE = "Target Support Files/KSPlayer-macOS/KSPlayer-macOS-Info.plist";
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MACH_O_TYPE = staticlib;
+				MACOSX_DEPLOYMENT_TARGET = 10.13;
+				MODULEMAP_FILE = "Target Support Files/KSPlayer-macOS/KSPlayer-macOS.modulemap";
+				PRODUCT_MODULE_NAME = KSPlayer;
+				PRODUCT_NAME = KSPlayer;
+				SDKROOT = macosx;
+				SKIP_INSTALL = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) ";
+				SWIFT_VERSION = 5.2;
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Debug;
+		};
 		924255C43B2E3A8D1EE169E3BB60BC08 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 16E1299ADF80D8E2782D89CCF88B8601 /* KSPlayer-tvOS.debug.xcconfig */;
@@ -1962,26 +1985,6 @@
 				WRAPPER_EXTENSION = bundle;
 			};
 			name = Debug;
-		};
-		925654AEB8B31F293201914821612DCA /* Release */ = {
-			isa = XCBuildConfiguration;
-			baseConfigurationReference = EC9603698838A282E0B6AB692DB2A31D /* KSPlayer-macOS.unit-tests.release.xcconfig */;
-			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
-				CLANG_ENABLE_OBJC_WEAK = NO;
-				CODE_SIGN_IDENTITY = "";
-				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
-				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
-				GCC_PREFIX_HEADER = "Target Support Files/KSPlayer-macOS/KSPlayer-macOS-Unit-Tests-prefix.pch";
-				INFOPLIST_FILE = "Target Support Files/KSPlayer-macOS/KSPlayer-macOS-Unit-Tests-Info.plist";
-				MACOSX_DEPLOYMENT_TARGET = 10.12;
-				PRODUCT_NAME = "KSPlayer-macOS-Unit-Tests";
-				SDKROOT = macosx;
-				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) ";
-				SWIFT_VERSION = 5.2;
-			};
-			name = Release;
 		};
 		95E8122EC678CF2211DCDD72CFDFE39F /* Debug */ = {
 			isa = XCBuildConfiguration;
@@ -2043,22 +2046,39 @@
 			};
 			name = Release;
 		};
-		A2EA4F94373AF2803AA8BBF0BB6B33BB /* Debug */ = {
+		A0A8519FA639537A0DACF3BA1E8DB680 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = EB93BEA7A66BC1CF5AA9F2498EE94594 /* KSPlayer-macOS.debug.xcconfig */;
+			baseConfigurationReference = B29DFB81651BC27CF1057397DF55B311 /* KSPlayer-macOS.release.xcconfig */;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				CONFIGURATION_BUILD_DIR = "$(BUILD_DIR)/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)/KSPlayer-macOS";
+				IBSC_MODULE = KSPlayer;
+				INFOPLIST_FILE = "Target Support Files/KSPlayer-macOS/ResourceBundle-Metal-KSPlayer-macOS-Info.plist";
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Bundles";
+				MACOSX_DEPLOYMENT_TARGET = 10.13;
+				PRODUCT_NAME = Metal;
+				SDKROOT = macosx;
+				SKIP_INSTALL = YES;
+				WRAPPER_EXTENSION = bundle;
+			};
+			name = Release;
+		};
+		A5D1F23B0AA209B8023CBB884FF99CF1 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = B29DFB81651BC27CF1057397DF55B311 /* KSPlayer-macOS.release.xcconfig */;
 			buildSettings = {
 				COMBINE_HIDPI_IMAGES = YES;
 				CONFIGURATION_BUILD_DIR = "$(BUILD_DIR)/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)/KSPlayer-macOS";
 				IBSC_MODULE = KSPlayer;
 				INFOPLIST_FILE = "Target Support Files/KSPlayer-macOS/ResourceBundle-KSResources-KSPlayer-macOS-Info.plist";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Bundles";
-				MACOSX_DEPLOYMENT_TARGET = 10.12;
+				MACOSX_DEPLOYMENT_TARGET = 10.13;
 				PRODUCT_NAME = KSResources;
 				SDKROOT = macosx;
 				SKIP_INSTALL = YES;
 				WRAPPER_EXTENSION = bundle;
 			};
-			name = Debug;
+			name = Release;
 		};
 		AB88CCB322AC13C888AC200401E2074E /* Release */ = {
 			isa = XCBuildConfiguration;
@@ -2096,43 +2116,6 @@
 			};
 			name = Release;
 		};
-		C7BE1A9524BDE6E498432185CD82173D /* Debug */ = {
-			isa = XCBuildConfiguration;
-			baseConfigurationReference = EB93BEA7A66BC1CF5AA9F2498EE94594 /* KSPlayer-macOS.debug.xcconfig */;
-			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
-				CLANG_ENABLE_OBJC_WEAK = NO;
-				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
-				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
-				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 1;
-				DEFINES_MODULE = YES;
-				DYLIB_COMPATIBILITY_VERSION = 1;
-				DYLIB_CURRENT_VERSION = 1;
-				DYLIB_INSTALL_NAME_BASE = "@rpath";
-				GCC_PREFIX_HEADER = "Target Support Files/KSPlayer-macOS/KSPlayer-macOS-prefix.pch";
-				INFOPLIST_FILE = "Target Support Files/KSPlayer-macOS/KSPlayer-macOS-Info.plist";
-				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/../Frameworks",
-					"@loader_path/Frameworks",
-				);
-				MACH_O_TYPE = staticlib;
-				MACOSX_DEPLOYMENT_TARGET = 10.12;
-				MODULEMAP_FILE = "Target Support Files/KSPlayer-macOS/KSPlayer-macOS.modulemap";
-				PRODUCT_MODULE_NAME = KSPlayer;
-				PRODUCT_NAME = KSPlayer;
-				SDKROOT = macosx;
-				SKIP_INSTALL = YES;
-				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) ";
-				SWIFT_VERSION = 5.2;
-				VERSIONING_SYSTEM = "apple-generic";
-				VERSION_INFO_PREFIX = "";
-			};
-			name = Debug;
-		};
 		C8F42ACC7ECB73CBEA80B2D97952BBB5 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 16E1299ADF80D8E2782D89CCF88B8601 /* KSPlayer-tvOS.debug.xcconfig */;
@@ -2165,6 +2148,23 @@
 				TVOS_DEPLOYMENT_TARGET = 10.2;
 				VERSIONING_SYSTEM = "apple-generic";
 				VERSION_INFO_PREFIX = "";
+			};
+			name = Debug;
+		};
+		CAE1AE5A805332CD9EACF5BE019F2A27 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = EB93BEA7A66BC1CF5AA9F2498EE94594 /* KSPlayer-macOS.debug.xcconfig */;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				CONFIGURATION_BUILD_DIR = "$(BUILD_DIR)/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)/KSPlayer-macOS";
+				IBSC_MODULE = KSPlayer;
+				INFOPLIST_FILE = "Target Support Files/KSPlayer-macOS/ResourceBundle-KSResources-KSPlayer-macOS-Info.plist";
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Bundles";
+				MACOSX_DEPLOYMENT_TARGET = 10.13;
+				PRODUCT_NAME = KSResources;
+				SDKROOT = macosx;
+				SKIP_INSTALL = YES;
+				WRAPPER_EXTENSION = bundle;
 			};
 			name = Debug;
 		};
@@ -2246,8 +2246,8 @@
 		19007B5B2A1B2D92D2140EB4C55C64D0 /* Build configuration list for PBXNativeTarget "KSPlayer-macOS-KSResources" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				A2EA4F94373AF2803AA8BBF0BB6B33BB /* Debug */,
-				6CA9B62391296E90087FE12FC6737BD2 /* Release */,
+				CAE1AE5A805332CD9EACF5BE019F2A27 /* Debug */,
+				A5D1F23B0AA209B8023CBB884FF99CF1 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
@@ -2273,8 +2273,8 @@
 		2A17BEFFA742E73C67287B4AF4B89A7D /* Build configuration list for PBXProject "KSPlayer" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				2728C92EEF289662534A0E800A19AF1F /* Debug */,
-				36FFEC5AC21EABCE8070E72BE0C0819A /* Release */,
+				13172AD8A0A62E0C8DF70A6FABEC97EF /* Debug */,
+				2B20B5630208A20C4798A8A1EAEAA8AF /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
@@ -2282,8 +2282,8 @@
 		4297C9658AF50A1E9EFE2FBB4417DB90 /* Build configuration list for PBXNativeTarget "KSPlayer-macOS" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				C7BE1A9524BDE6E498432185CD82173D /* Debug */,
-				0E9B6F678392B5E29DAB2FFDCBF8DDEF /* Release */,
+				8D75B3F13A1AAC03E6F069A5CD23CCEB /* Debug */,
+				4251A02C0AEEBA48A3D504CBF616BEE8 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
@@ -2291,8 +2291,8 @@
 		564A9266E1DB4B4575D877ACA6ED1C04 /* Build configuration list for PBXNativeTarget "KSPlayer-macOS-Unit-Tests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				334BFB309B577CD25575515AFA9A23E1 /* Debug */,
-				925654AEB8B31F293201914821612DCA /* Release */,
+				25BC768D3579ABEAC2D597208C72B164 /* Debug */,
+				62508EB06CCAF68FA03B9A33FDD1C4E0 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
@@ -2327,8 +2327,8 @@
 		B2A3CF4D746185FB002E65371CFD5A10 /* Build configuration list for PBXNativeTarget "KSPlayer-macOS-Metal" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				36D18BD9417ED6BA68F69E1F936AFEA3 /* Debug */,
-				676409C0A5FBD6EFBD6961F602F37EDC /* Release */,
+				0279FC80C5DD3E005537F2EC0D33FEFB /* Debug */,
+				A0A8519FA639537A0DACF3BA1E8DB680 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

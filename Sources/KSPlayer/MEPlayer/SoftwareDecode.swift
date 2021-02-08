@@ -38,41 +38,33 @@ class SoftwareDecode: DecodeProtocol {
     }
 
     func doDecode(packet: UnsafeMutablePointer<AVPacket>) throws -> [Frame] {
-        guard let codecContext = codecContext else {
-            return []
-        }
-        let result = avcodec_send_packet(codecContext, packet)
-        guard result == 0 else {
+        guard let codecContext = codecContext, avcodec_send_packet(codecContext, packet) == 0 else {
             return []
         }
         var array = [Frame]()
         while true {
-            do {
-                let result = avcodec_receive_frame(codecContext, coreFrame)
-                if result == 0, let avframe = coreFrame {
-                    let timestamp = max(avframe.pointee.best_effort_timestamp, avframe.pointee.pts, avframe.pointee.pkt_dts)
-                    if timestamp >= bestEffortTimestamp {
-                        bestEffortTimestamp = timestamp
-                    }
-                    let frame = swresample.transfer(avframe: avframe, timebase: timebase)
-                    frame.position = bestEffortTimestamp
-                    bestEffortTimestamp += frame.duration
-                    array.append(frame)
-                } else {
-                    throw result
+            let result = avcodec_receive_frame(codecContext, coreFrame)
+            if result == 0, let avframe = coreFrame {
+                let timestamp = max(avframe.pointee.best_effort_timestamp, avframe.pointee.pts, avframe.pointee.pkt_dts)
+                if timestamp >= bestEffortTimestamp {
+                    bestEffortTimestamp = timestamp
                 }
-            } catch let code as Int32 {
-                if code == 0 || AVFILTER_EOF(code) {
-                    if IS_AVERROR_EOF(code) {
+                let frame = swresample.transfer(avframe: avframe, timebase: timebase)
+                frame.position = bestEffortTimestamp
+                bestEffortTimestamp += frame.duration
+                array.append(frame)
+            } else {
+                if AVFILTER_EOF(result) {
+                    if IS_AVERROR_EOF(result) {
                         avcodec_flush_buffers(codecContext)
                     }
                     break
                 } else {
-                    let error = NSError(errorCode: mediaType == .audio ? .codecAudioReceiveFrame : .codecVideoReceiveFrame, ffmpegErrnum: code)
+                    let error = NSError(errorCode: mediaType == .audio ? .codecAudioReceiveFrame : .codecVideoReceiveFrame, ffmpegErrnum: result)
                     KSLog(error)
                     throw error
                 }
-            } catch {}
+            }
         }
         return array
     }

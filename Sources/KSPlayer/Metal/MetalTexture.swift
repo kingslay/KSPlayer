@@ -48,6 +48,21 @@ public final class MetalTextureCache {
         return inputTexture
     }
 
+    func textures(formats: [MTLPixelFormat], widths: [Int], heights: [Int], buffers: [MTLBuffer?], lineSizes: [Int]) -> [MTLTexture] {
+        var textures = [MTLTexture]()
+        for i in 0 ..< formats.count {
+            let descriptor = MTLTextureDescriptor.texture2DDescriptor(pixelFormat: formats[i], width: widths[i], height: heights[i], mipmapped: false)
+            guard let buffer = buffers[i] else {
+                continue
+            }
+            descriptor.storageMode = buffer.storageMode
+            if let texture = buffer.makeTexture(descriptor: descriptor, offset: 0, bytesPerRow: lineSizes[i]) {
+                textures.append(texture)
+            }
+        }
+        return textures
+    }
+
     func textures(formats: [MTLPixelFormat], widths: [Int], heights: [Int], bytes: [UnsafeMutablePointer<UInt8>?], bytesPerRows: [Int32]) -> [MTLTexture] {
         let planeCount = formats.count
         if textures.count > planeCount {

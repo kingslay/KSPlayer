@@ -304,6 +304,13 @@ public class KSOptions {
     open func audioFrameMaxCount(fps: Float) -> Int {
         return 16
     }
+
+    private class func deviceCpuCount() -> Int {
+        var ncpu: UInt = UInt(0)
+        var len: size_t = MemoryLayout.size(ofValue: ncpu)
+        sysctlbyname("hw.ncpu", &ncpu, &len, nil, 0)
+        return Int(ncpu)
+    }
 }
 
 // 缓冲情况
