@@ -105,12 +105,8 @@ class BuildFFMPEG: BaseBuild {
         if !(isDebug && platform == .maccatalyst) {
             ffmpegcflags.append("--disable-debug")
         }
-        if arch == .x86_64 {
-            ffmpegcflags.append("--disable-asm")
-            if platform == .ios || platform == .tvos {
-                ffmpegcflags.append("--disable-mmx")
-                ffmpegcflags.append("--assert-level=2")
-            }
+        if platform == .isimulator || platform == .tvsimulator {
+            ffmpegcflags.append("--assert-level=2")
         } else {
             ffmpegcflags.append("--enable-pic")
             ffmpegcflags.append("--enable-neon")
@@ -344,15 +340,15 @@ enum PlatformType: String, CaseIterable {
     func deploymentTarget() -> String {
         switch self {
         case .ios:
-            return "-mios-version-min=9.0"
+            return "-mios-version-min=10.0"
         case .isimulator:
-            return "-mios-simulator-version-min=9.0"
+            return "-mios-simulator-version-min=10.0"
         case .tvos:
-            return "-mtvos-version-min=12.0"
+            return "-mtvos-version-min=10.2"
         case .tvsimulator:
-            return "-mtvos-simulator-version-min=12.0"
+            return "-mtvos-simulator-version-min=10.2"
         case .macos:
-            return "-mmacosx-version-min=10.14"
+            return "-mmacosx-version-min=10.13"
         case .maccatalyst:
             return "-target x86_64-apple-ios13.0-macabi"
         }

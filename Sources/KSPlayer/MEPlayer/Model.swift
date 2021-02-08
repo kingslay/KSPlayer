@@ -198,14 +198,14 @@ final class ByteDataWrap {
     var size: [Int] = [0] {
         didSet {
             if size.description != oldValue.description {
-                (0 ..< data.count).forEach { i in
+                for i in (0 ..< data.count) {
                     if oldValue[i] > 0 {
                         data[i]?.deinitialize(count: oldValue[i])
                         data[i]?.deallocate()
                     }
                 }
                 data.removeAll()
-                (0 ..< size.count).forEach { i in
+                for i in (0 ..< size.count) {
                     data.append(UnsafeMutablePointer<UInt8>.allocate(capacity: Int(size[i])))
                 }
             }
@@ -217,9 +217,31 @@ final class ByteDataWrap {
     }
 
     deinit {
-        (0 ..< data.count).forEach { i in
+        for i in (0 ..< data.count) {
             data[i]?.deinitialize(count: size[i])
             data[i]?.deallocate()
+        }
+        data.removeAll()
+    }
+}
+
+final class MTLBufferWrap {
+    var data: [MTLBuffer?]
+    var size: [Int] {
+        didSet {
+            if size.description != oldValue.description {
+                data = size.map { MetalRender.share.device.makeBuffer(length: $0, options: .storageModeShared) }
+            }
+        }
+    }
+    public init(size: [Int]) {
+        self.size = size
+        data = size.map { MetalRender.share.device.makeBuffer(length: $0, options: .storageModeShared) }
+    }
+
+    deinit {
+        (0 ..< data.count).forEach { i in
+            data[i] = nil
         }
         data.removeAll()
     }

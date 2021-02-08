@@ -92,8 +92,8 @@ class VideoSwresample: Swresample {
         return frame
     }
 
-    func transfer(format: AVPixelFormat, width: Int32, height: Int32, data: [UnsafeMutablePointer<UInt8>?], linesize: [Int32]) -> UIImage? {
-        if setup(format: format, width: width, height: height), swsConvert(data: data, linesize: linesize), let frame = dstFrame?.pointee {
+    func transfer(format: AVPixelFormat, width: Int32, height: Int32, data: [UnsafeMutablePointer<UInt8>?], linesize: [Int]) -> UIImage? {
+        if setup(format: format, width: width, height: height), swsConvert(data: data, linesize: linesize.compactMap({Int32($0)})), let frame = dstFrame?.pointee {
             return UIImage(rgbData: frame.data.0!, linesize: Int(frame.linesize.0), width: Int(width), height: Int(height), isAlpha: dstFormat == AV_PIX_FMT_RGBA)
         }
         return nil
@@ -134,8 +134,8 @@ class PixelBuffer: BufferProtocol {
     private let formats: [MTLPixelFormat]
     private let widths: [Int]
     private let heights: [Int]
-    private let dataWrap: ByteDataWrap
-    private let bytesPerRow: [Int32]
+    private let dataWrap: MTLBufferWrap
+    private var lineSize = [Int]()
     init(frame: UnsafeMutablePointer<AVFrame>) {
         format = AVPixelFormat(rawValue: frame.pointee.format)
         yCbCrMatrix = frame.pointee.colorspace.ycbcrMatrix
@@ -149,7 +149,7 @@ class PixelBuffer: BufferProtocol {
         width = Int(frame.pointee.width)
         height = Int(frame.pointee.height)
         isFullRangeVideo = frame.pointee.color_range == AVCOL_RANGE_JPEG
-        bytesPerRow = Array(tuple: frame.pointee.linesize)
+        let bytesPerRow = Array(tuple: frame.pointee.linesize).compactMap { Int($0) }
         bitDepth = format.bitDepth()
         let vertical = Int(frame.pointee.sample_aspect_ratio.den)
         let horizontal = Int(frame.pointee.sample_aspect_ratio.num)
@@ -173,11 +173,31 @@ class PixelBuffer: BufferProtocol {
             widths = [width]
             heights = [height]
         }
-        dataWrap = ObjectPool.share.object(class: ByteDataWrap.self, key: "VideoData") { ByteDataWrap() }
+        var size = [Int]()
+        for i in 0 ..< planeCount {
+            if #available(iOS 11.0, tvOS 11.0, *) {
+                let alignment = MetalRender.share.device.minimumLinearTextureAlignment(for: formats[i])
+                let remainder = bytesPerRow[i] % alignment
+                lineSize.append(remainder == 0 ? bytesPerRow[i] : bytesPerRow[i] + alignment - remainder)
+            } else {
+                lineSize.append(bytesPerRow[i])
+            }
+            size.append(lineSize[i] * heights[i])
+
+        }
+        dataWrap = ObjectPool.share.object(class: MTLBufferWrap.self, key: "VideoData") { MTLBufferWrap(size: size) }
+        dataWrap.size = size
         let bytes = Array(tuple: frame.pointee.data)
-        dataWrap.size = (0 ..< planeCount).map { Int(bytesPerRow[$0]) * heights[$0] }
-        (0 ..< planeCount).forEach { i in
-            dataWrap.data[i]?.assign(from: bytes[i]!, count: dataWrap.size[i])
+        for i in 0 ..< planeCount {
+            if bytesPerRow[i] == lineSize[i] {
+                dataWrap.data[i]?.contents().copyMemory(from: bytes[i]!, byteCount: heights[i]*lineSize[i])
+            } else {
+                let contents = dataWrap.data[i]?.contents()
+                let source = bytes[i]!
+                for j in 0 ..< heights[i] {
+                    contents?.advanced(by: j*lineSize[i]).copyMemory(from: source.advanced(by: j*bytesPerRow[i]), byteCount: bytesPerRow[i])
+                }
+            }
         }
     }
 
@@ -186,7 +206,7 @@ class PixelBuffer: BufferProtocol {
     }
 
     func textures(frome cache: MetalTextureCache) -> [MTLTexture] {
-        cache.textures(formats: formats, widths: widths, heights: heights, bytes: dataWrap.data, bytesPerRows: bytesPerRow)
+        cache.textures(formats: formats, widths: widths, heights: heights, buffers: dataWrap.data, lineSizes: lineSize)
     }
 
     func widthOfPlane(at planeIndex: Int) -> Int {
@@ -204,10 +224,10 @@ class PixelBuffer: BufferProtocol {
     func image() -> UIImage? {
         var image: UIImage?
         if format == AV_PIX_FMT_RGB24 {
-            image = UIImage(rgbData: dataWrap.data[0]!, linesize: Int(bytesPerRow[0]), width: width, height: height)
+            image = UIImage(rgbData: dataWrap.data[0]!.contents().assumingMemoryBound(to: UInt8.self), linesize: Int(lineSize[0]), width: width, height: height)
         }
         let scale = VideoSwresample(dstFormat: AV_PIX_FMT_RGB24, forceTransfer: true)
-        image = scale.transfer(format: format, width: Int32(width), height: Int32(height), data: dataWrap.data, linesize: bytesPerRow)
+        image = scale.transfer(format: format, width: Int32(width), height: Int32(height), data: dataWrap.data.map({ $0?.contents().assumingMemoryBound(to: UInt8.self) }), linesize: lineSize)
         scale.shutdown()
         return image
     }
