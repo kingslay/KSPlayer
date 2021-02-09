@@ -8,7 +8,7 @@
 import CoreMedia
 import MetalKit
 
-final class MetalPlayView: MTKView, MTKViewDelegate, FrameOutput {
+final class MetalPlayView: MTKView, FrameOutput {
     private let textureCache = MetalTextureCache()
     private let renderPassDescriptor = MTLRenderPassDescriptor()
     var display: DisplayEnum = .plane
@@ -49,13 +49,8 @@ final class MetalPlayView: MTKView, MTKViewDelegate, FrameOutput {
     }
 
     init() {
-        let device = MetalRender.share.device
-        super.init(frame: .zero, device: device)
-        renderPassDescriptor.colorAttachments[0].clearColor = MTLClearColor(red: 0, green: 0, blue: 0, alpha: 0)
-        renderPassDescriptor.colorAttachments[0].loadAction = .clear
+        super.init(frame: .zero, device: MetalRender.share.device)
         framebufferOnly = true
-        clearColor = MTLClearColor(red: 0, green: 0, blue: 0, alpha: 1)
-        delegate = self
         preferredFramesPerSecond = KSPlayerManager.preferredFramesPerSecond
         isPaused = true
     }
@@ -68,9 +63,7 @@ final class MetalPlayView: MTKView, MTKViewDelegate, FrameOutput {
         pixelBuffer = nil
     }
 
-    func mtkView(_: MTKView, drawableSizeWillChange _: CGSize) {}
-
-    func draw(in _: MTKView) {
+    override func draw(_ dirtyRect: CGRect) {
         if let frame = renderSource?.getOutputRender(type: .video) as? VideoVTBFrame, let corePixelBuffer = frame.corePixelBuffer {
             renderSource?.setVideo(time: frame.cmtime)
             pixelBuffer = corePixelBuffer

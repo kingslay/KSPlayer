@@ -108,7 +108,7 @@ extension UIColor {
         #if os(macOS)
         let image = NSImage(size: size)
         image.lockFocus()
-        drawSwatch(in: NSRect(origin: .zero, size: size))
+        drawSwatch(in: CGRect(origin: .zero, size: size))
         image.unlockFocus()
         return image
         #else

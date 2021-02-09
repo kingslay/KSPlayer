@@ -223,7 +223,7 @@ public class KSOptions {
 
     // 缓冲算法函数
     open func playable(capacitys: [CapacityProtocol], isFirst: Bool, isSeek: Bool) -> LoadingState? {
-        guard isFirst || isSeek || mach_absolute_time() - throttle > throttleDiff else {
+        guard isFirst || isSeek || (mach_absolute_time() - throttle > throttleDiff) else {
             return nil
         }
         let packetCount = capacitys.map { $0.packetCount }.min() ?? 0

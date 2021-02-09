@@ -69,7 +69,7 @@ class HardwareDecode: DecodeProtocol {
         var result = [VideoVTBFrame]()
         let flags = options.asynchronousDecompression ? VTDecodeFrameFlags._EnableAsynchronousDecompression : VTDecodeFrameFlags(rawValue: 0)
         var vtStatus = noErr
-        _ = VTDecompressionSessionDecodeFrame(session.decompressionSession, sampleBuffer: sampleBuffer, flags: flags, infoFlagsOut: nil) { [weak self] status, _, imageBuffer, _, _ in
+        let status = VTDecompressionSessionDecodeFrame(session.decompressionSession, sampleBuffer: sampleBuffer, flags: flags, infoFlagsOut: nil) { [weak self] status, _, imageBuffer, _, _ in
             vtStatus = status
             guard let self = self, status == noErr, let imageBuffer = imageBuffer else {
                 return
@@ -88,8 +88,7 @@ class HardwareDecode: DecodeProtocol {
             self.lastPosition += frame.duration
             result.append(frame)
         }
-        if vtStatus != noErr {
-//            status == kVTInvalidSessionErr || status == kVTVideoDecoderMalfunctionErr || status == kVTVideoDecoderBadDataErr
+        if vtStatus != noErr || status == kVTInvalidSessionErr || status == kVTVideoDecoderMalfunctionErr || status == kVTVideoDecoderBadDataErr {
             if packet.pointee.flags & AV_PKT_FLAG_KEY == 1 {
                 throw NSError(errorCode: .codecVideoReceiveFrame, ffmpegErrnum: vtStatus)
             } else {

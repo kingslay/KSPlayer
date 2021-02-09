@@ -14,7 +14,6 @@ final class MEPlayerItem {
     private let url: URL
     private let options: KSOptions
     private let operationQueue = OperationQueue()
-    private let semaphore = DispatchSemaphore(value: 1)
     private let condition = NSCondition()
     private var formatCtx: UnsafeMutablePointer<AVFormatContext>?
     private var openOperation: BlockOperation?
@@ -432,13 +431,6 @@ extension MEPlayerItem: MediaPlayback {
 
 extension MEPlayerItem: CodecCapacityDelegate {
     func codecDidChangeCapacity(track: PlayerItemTrackProtocol) {
-        semaphore.wait()
-        defer {
-            semaphore.signal()
-            if isBackground, let videoTrack = videoTrack, videoTrack.frameCount > videoTrack.frameMaxCount >> 1 {
-                _ = getOutputRender(type: .video)
-            }
-        }
         guard let loadingState = options.playable(capacitys: videoAudioTracks, isFirst: isFirst, isSeek: isSeek) else {
             return
         }
@@ -497,7 +489,7 @@ extension MEPlayerItem: CodecCapacityDelegate {
             }
         }
         let bitRateState = VideoAdaptationState.BitRateState(bitRate: newBitrate, time: CACurrentMediaTime())
-        self.videoAdaptation?.bitRateStates.append(bitRateState)
+        videoAdaptation.bitRateStates.append(bitRateState)
         delegate?.sourceDidChange(oldBitRate: oldBitRate, newBitrate: newBitrate)
     }
 }
@@ -533,6 +525,9 @@ extension MEPlayerItem: OutputRenderSourceDelegate {
             }
             return frame
         } else {
+            if isBackground, videoTrack != nil {
+                _ = getOutputRender(type: .video)
+            }
             return audioTrack?.getOutputRender(where: nil)
         }
     }
