@@ -292,9 +292,9 @@ public class KSOptions {
 
     open func bestPixelFormatType(bitDepth: Int32, isFullRangeVideo: Bool, planeCount: UInt8) -> OSType {
         if bitDepth > 8 {
-            return kCVPixelFormatType_420YpCbCr10BiPlanarFullRange
+            return isFullRangeVideo ? kCVPixelFormatType_420YpCbCr10BiPlanarFullRange : kCVPixelFormatType_420YpCbCr10BiPlanarVideoRange
         } else {
-            return kCVPixelFormatType_420YpCbCr8BiPlanarFullRange
+            return isFullRangeVideo ? kCVPixelFormatType_420YpCbCr8BiPlanarFullRange: kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange
         }
     }
     open func videoFrameMaxCount(fps: Float) -> Int {
