@@ -395,7 +395,7 @@ public struct State: OptionSet {
 
 extension State: Hashable {}
 public class UILabel: NSTextField {
-    override init(frame frameRect: NSRect) {
+    override init(frame frameRect: CGRect) {
         super.init(frame: frameRect)
         alignment = .left
         isBordered = false
@@ -418,7 +418,7 @@ public class UIButton: NSButton {
     private var titleColors = [State: UIColor]()
     private var targetActions = [ControlEvents: (AnyObject?, Selector)]()
 
-    override public init(frame frameRect: NSRect) {
+    override public init(frame frameRect: CGRect) {
         super.init(frame: frameRect)
         isBordered = false
     }
@@ -521,7 +521,7 @@ public class KSSlider: NSSlider {
         self.init(frame: .zero)
     }
 
-    override public init(frame frameRect: NSRect) {
+    override public init(frame frameRect: CGRect) {
         super.init(frame: frameRect)
         target = self
         action = #selector(progressSliderTouchEnded(_:))

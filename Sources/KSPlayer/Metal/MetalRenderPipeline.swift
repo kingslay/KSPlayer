@@ -177,11 +177,7 @@ extension KSOptions {
     static func colorPixelFormat(bitDepth: Int32) -> MTLPixelFormat {
         if bitDepth == 10 {
             #if os(macOS) || targetEnvironment(macCatalyst)
-            if #available(OSX 10.13, *) {
-                return .bgr10a2Unorm
-            } else {
-                return .bgra8Unorm
-            }
+            return .bgr10a2Unorm
             #else
             #if targetEnvironment(simulator)
             return .bgra8Unorm
@@ -192,6 +188,5 @@ extension KSOptions {
         } else {
             return .bgra8Unorm
         }
-
     }
 }

@@ -30,14 +30,14 @@ fragment half4 displayYUVTexture(TextureMappingVertex in [[ stage_in ]],
                                   texture2d<half> uTexture [[ texture(1) ]],
                                   texture2d<half> vTexture [[ texture(2) ]],
                                   sampler textureSampler [[ sampler(0) ]],
-                                  constant float3x3& yuvToRGBMatrix [[ buffer(0) ]],
+                                  constant float3x3& yuvToBGRMatrix [[ buffer(0) ]],
                                   constant float3& colorOffset [[ buffer(1) ]])
 {
     half3 yuv;
     yuv.x = yTexture.sample(textureSampler, in.textureCoordinate).r;
     yuv.y = uTexture.sample(textureSampler, in.textureCoordinate).r;
     yuv.z = vTexture.sample(textureSampler, in.textureCoordinate).r;
-    return half4(half3x3(yuvToRGBMatrix) * (yuv+half3(colorOffset)), 1);
+    return half4(half3x3(yuvToBGRMatrix) * (yuv+half3(colorOffset)), 1);
 }
 
 
@@ -45,12 +45,12 @@ fragment half4 displayNV12Texture(TextureMappingVertex in [[ stage_in ]],
                                   texture2d<half> lumaTexture [[ texture(0) ]],
                                   texture2d<half> chromaTexture [[ texture(1) ]],
                                   sampler textureSampler [[ sampler(0) ]],
-                                  constant float3x3& yuvToRGBMatrix [[ buffer(0) ]],
+                                  constant float3x3& yuvToBGRMatrix [[ buffer(0) ]],
                                   constant float3& colorOffset [[ buffer(1) ]])
 {
     half3 yuv;
     yuv.x = lumaTexture.sample(textureSampler, in.textureCoordinate).r;
     yuv.yz = chromaTexture.sample(textureSampler, in.textureCoordinate).rg;
-    return half4(half3x3(yuvToRGBMatrix) * (yuv+half3(colorOffset)), 1);
+    return half4(half3x3(yuvToBGRMatrix) * (yuv+half3(colorOffset)), 1);
 }
 

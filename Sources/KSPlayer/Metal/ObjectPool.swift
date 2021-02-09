@@ -37,7 +37,7 @@ class ObjectPool {
 
     func removeValue(forKey: String) {
         semaphore.wait()
-        for key in pool.keys.filter { $0.hasPrefix(forKey) } {
+        for key in pool.keys.filter({ $0.hasPrefix(forKey) }) {
             pool.removeValue(forKey: key)
         }
         semaphore.signal()
