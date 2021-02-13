@@ -29,8 +29,12 @@ let package = Package(
         ),
         .target(
             name: "FFmpeg",
-            dependencies: ["Libavcodec", "Libavformat", "Libavutil", "Libswresample", "Libswscale"],
+            dependencies: ["Libavcodec", "Libavformat", "Libavutil", "Libswresample", "Libswscale", "OpenSSL"],
             linkerSettings: [.linkedLibrary("bz2"), .linkedLibrary("iconv"), .linkedLibrary("xml2"), .linkedLibrary("z")]
+        ),
+        .target(
+            name: "OpenSSL",
+            dependencies: ["Libssl", "Libcrypto"]
         ),
         .target(
             name: "Script",
