@@ -157,9 +157,6 @@ public class KSAVPlayer {
         didSet {
             if isPreparedToPlay != oldValue {
                 if isPreparedToPlay {
-                    if options.isAutoPlay {
-                        play()
-                    }
                     delegate?.preparedToPlay(player: self)
                 }
             }

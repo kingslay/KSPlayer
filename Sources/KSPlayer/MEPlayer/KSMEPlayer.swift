@@ -91,9 +91,6 @@ extension KSMEPlayer: MEPlayerDelegate {
             self.videoOutput.drawableSize = self.options.display == .plane ? self.naturalSize : UIScreen.size
             self.view.centerRotate(byDegrees: self.playerItem.rotation)
             self.videoOutput.isPaused = false
-            if self.options.isAutoPlay {
-                self.play()
-            }
             self.delegate?.preparedToPlay(player: self)
         }
     }
