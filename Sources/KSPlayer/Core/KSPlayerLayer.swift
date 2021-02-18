@@ -59,6 +59,8 @@ public protocol KSPlayerLayerDelegate: AnyObject {
 }
 
 open class KSPlayerLayer: UIView {
+    public var isWirelessRouteActive = false
+    public weak var delegate: KSPlayerLayerDelegate?
     @KSObservable
     public var bufferingProgress: Int = 0
     @KSObservable
@@ -67,9 +69,33 @@ open class KSPlayerLayer: UIView {
     private var bufferedCount = 0
     private var shouldSeekTo: TimeInterval = 0
     private var startTime: TimeInterval = 0
-    private var url: URL?
-    public var isWirelessRouteActive = false
-    public weak var delegate: KSPlayerLayerDelegate?
+    private var url: URL? {
+        didSet {
+            guard let url = url, let options = options else {
+                return
+            }
+            let firstPlayerType: MediaPlayerProtocol.Type
+            if isWirelessRouteActive {
+                // airplay的话，默认使用KSAVPlayer
+                firstPlayerType = KSAVPlayer.self
+            } else if options.display != .plane {
+                // AR模式只能用KSMEPlayer
+                // swiftlint:disable force_cast
+                firstPlayerType = NSClassFromString("KSPlayer.KSMEPlayer") as! MediaPlayerProtocol.Type
+                // swiftlint:enable force_cast
+            } else {
+                firstPlayerType = KSPlayerManager.firstPlayerType
+            }
+            if let player = player, type(of: player) == firstPlayerType {
+                player.replace(url: url, options: options)
+                prepareToPlay()
+            } else {
+                player = firstPlayerType.init(url: url, options: options)
+            }
+        }
+    }
+    private var urls = [URL]()
+    private var isAutoPlay = false
     private lazy var timer: Timer = {
         Timer.scheduledTimer(timeInterval: 0.5, target: self, selector: #selector(playerTimerAction), userInfo: nil, repeats: true)
     }()
@@ -122,31 +148,22 @@ open class KSPlayerLayer: UIView {
     }
 
     public func set(url: URL, options: KSOptions) {
-        self.url = url
+        isAutoPlay = options.isAutoPlay
         self.options = options
-        let firstPlayerType: MediaPlayerProtocol.Type
-        if isWirelessRouteActive {
-            // airplay的话，默认使用KSAVPlayer
-            firstPlayerType = KSAVPlayer.self
-        } else if options.display != .plane {
-            // AR模式只能用KSMEPlayer
-            // swiftlint:disable force_cast
-            firstPlayerType = NSClassFromString("KSPlayer.KSMEPlayer") as! MediaPlayerProtocol.Type
-            // swiftlint:enable force_cast
-        } else {
-            firstPlayerType = KSPlayerManager.firstPlayerType
-        }
-        if let player = player, type(of: player) == firstPlayerType {
-            player.replace(url: url, options: options)
-            prepareToPlay()
-        } else {
-            player = firstPlayerType.init(url: url, options: options)
-        }
+        self.url = url
+    }
+
+    public func set(urls: [URL], options: KSOptions) {
+        isAutoPlay = options.isAutoPlay
+        self.options = options
+        self.urls.removeAll()
+        self.urls.append(contentsOf: urls)
+        url = urls.first
     }
 
     open func play() {
         UIApplication.shared.isIdleTimerDisabled = true
-        options?.isAutoPlay = true
+        isAutoPlay = true
         if let player = player {
             if player.isPreparedToPlay {
                 player.play()
@@ -171,7 +188,7 @@ open class KSPlayerLayer: UIView {
                 ]
             }
         }
-        options?.isAutoPlay = false
+        isAutoPlay = false
         player?.pause()
         timer.fireDate = Date.distantFuture
         state = .paused
@@ -205,7 +222,7 @@ open class KSPlayerLayer: UIView {
                 handler?(finished)
             }
         } else {
-            options?.isAutoPlay = autoPlay
+            isAutoPlay = autoPlay
             shouldSeekTo = time
         }
     }
@@ -234,7 +251,7 @@ extension KSPlayerLayer: MediaPlayerDelegate {
             ]
         }
         state = .readyToPlay
-        if options?.isAutoPlay ?? false {
+        if isAutoPlay {
             if shouldSeekTo > 0 {
                 seek(time: shouldSeekTo, autoPlay: true) { [weak self] _ in
                     guard let self = self else { return }
@@ -288,7 +305,7 @@ extension KSPlayerLayer: MediaPlayerDelegate {
 
     public func finish(player: MediaPlayerProtocol, error: Error?) {
         if let error = error {
-            if type(of: player) == KSPlayerManager.firstPlayerType, let secondPlayerType = KSPlayerManager.secondPlayerType {
+            if type(of: player) != KSPlayerManager.secondPlayerType, let secondPlayerType = KSPlayerManager.secondPlayerType {
                 self.player = secondPlayerType.init(url: url!, options: options!)
                 return
             }
@@ -302,6 +319,10 @@ extension KSPlayerLayer: MediaPlayerDelegate {
         timer.fireDate = Date.distantFuture
         bufferedCount = 1
         delegate?.player(layer: self, finish: error)
+        if error == nil, urls.count > 1, let url = url, let index = urls.firstIndex(of: url), index < urls.count-1 {
+            isAutoPlay = true
+            self.url = urls[index+1]
+        }
     }
 }
 
@@ -312,7 +333,7 @@ extension KSPlayerLayer {
         startTime = CACurrentMediaTime()
         bufferedCount = 0
         player?.prepareToPlay()
-        if options?.isAutoPlay ?? false {
+        if isAutoPlay {
             state = .buffering
         } else {
             state = .notSetURL
