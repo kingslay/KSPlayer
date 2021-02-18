@@ -226,6 +226,7 @@ public class KSOptions {
         guard isFirst || isSeek || (mach_absolute_time() - throttle > throttleDiff) else {
             return nil
         }
+        throttle = mach_absolute_time()
         let packetCount = capacitys.map { $0.packetCount }.min() ?? 0
         let frameCount = capacitys.map { $0.frameCount }.min() ?? 0
         let isEndOfFile = capacitys.allSatisfy { $0.isEndOfFile }
@@ -250,7 +251,6 @@ public class KSOptions {
             }
             return capacity.packetCount + capacity.frameCount >= Int(capacity.fps * Float(preferredForwardBufferDuration))
         }
-        throttle = mach_absolute_time()
         return LoadingState(loadedTime: loadedTime, progress: progress, packetCount: packetCount,
                             frameCount: frameCount, isEndOfFile: isEndOfFile, isPlayable: isPlayable,
                             isFirst: isFirst, isSeek: isSeek)
