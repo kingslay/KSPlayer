@@ -215,9 +215,9 @@ extension MEPlayerItem {
                 first.stream.pointee.discard = AVDISCARD_DEFAULT
                 rotation = first.rotation
                 naturalSize = first.naturalSize
-                let track = AsyncPlayerItemTrack(assetTrack: first, options: options)
-                videoAudioTracks.append(track)
+                let track = options.syncDecodeVideo ? FFPlayerItemTrack<VideoVTBFrame>(assetTrack: first, options: options) : AsyncPlayerItemTrack<VideoVTBFrame>(assetTrack: first, options: options)
                 track.delegate = self
+                videoAudioTracks.append(track)
                 videoTrack = track
                 if videos.count > 1, options.videoAdaptable {
                     let bitRateState = VideoAdaptationState.BitRateState(bitRate: first.bitRate, time: CACurrentMediaTime())
@@ -236,7 +236,7 @@ extension MEPlayerItem {
             let index = av_find_best_stream(formatCtx, AVMEDIA_TYPE_AUDIO, wantedStreamNb, videoIndex, nil, 0)
             if let first = assetTracks.first(where: { $0.mediaType == .audio && $0.streamIndex == index }) {
                 first.stream.pointee.discard = AVDISCARD_DEFAULT
-                let track = AsyncPlayerItemTrack(assetTrack: first, options: options)
+                let track = options.syncDecodeAudio ? FFPlayerItemTrack<AudioFrame>(assetTrack: first, options: options) : AsyncPlayerItemTrack<AudioFrame>(assetTrack: first, options: options)
                 track.delegate = self
                 videoAudioTracks.append(track)
                 audioTrack = track
@@ -419,6 +419,7 @@ extension MEPlayerItem: MediaPlayback {
             seekingCompletionHandler = handler
             state = .seeking
             condition.broadcast()
+            allTracks.forEach { $0.seek(time: positionTime) }
         } else if state == .finished {
             positionTime = time + startTime
             seekingCompletionHandler = handler

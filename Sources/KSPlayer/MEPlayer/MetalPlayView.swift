@@ -80,7 +80,7 @@ final class MetalPlayView: MTKView, FrameOutput {
     }
     #endif
     func toImage() -> UIImage? {
-        pixelBuffer?.image()
+        pixelBuffer?.image().flatMap { UIImage(cgImage: $0) }
     }
 }
 

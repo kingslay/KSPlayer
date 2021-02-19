@@ -8,11 +8,6 @@
 import AVFoundation
 import CoreMedia
 import Libavcodec
-#if canImport(UIKit)
-import UIKit
-#else
-import AppKit
-#endif
 
 // MARK: enum
 
@@ -24,8 +19,6 @@ extension NSError {
         self.init(errorCode: errorCode, userInfo: [NSUnderlyingErrorKey: underlyingError])
     }
 }
-
-extension Int32: Error {}
 
 enum MESourceState {
     case idle
@@ -77,6 +70,7 @@ protocol FrameOutput {
 
 protocol MEFrame: ObjectQueueItem {
     var timebase: Timebase { get set }
+    var position: Int64 { get set}
 }
 
 extension MEFrame {
@@ -182,14 +176,11 @@ final class Packet: ObjectQueueItem {
     }
 }
 
-class Frame: MEFrame {
+final class SubtitleFrame: MEFrame {
     public var timebase = Timebase.defaultValue
     public var duration: Int64 = 0
     public var size: Int64 = 0
     public var position: Int64 = 0
-}
-
-final class SubtitleFrame: Frame {
     public var part: SubtitlePart?
 }
 
@@ -198,11 +189,9 @@ final class ByteDataWrap {
     var size: [Int] = [0] {
         didSet {
             if size.description != oldValue.description {
-                for i in (0 ..< data.count) {
-                    if oldValue[i] > 0 {
-                        data[i]?.deinitialize(count: oldValue[i])
-                        data[i]?.deallocate()
-                    }
+                for i in (0 ..< data.count) where oldValue[i] > 0 {
+                    data[i]?.deinitialize(count: oldValue[i])
+                    data[i]?.deallocate()
                 }
                 data.removeAll()
                 for i in (0 ..< size.count) {
@@ -247,7 +236,11 @@ final class MTLBufferWrap {
     }
 }
 
-final class AudioFrame: Frame {
+final class AudioFrame: MEFrame {
+    public var timebase = Timebase.defaultValue
+    public var duration: Int64 = 0
+    public var size: Int64 = 0
+    public var position: Int64 = 0
     public var numberOfSamples = 0
     let dataWrap: ByteDataWrap
     public init(bufferSize: Int32) {
@@ -262,7 +255,11 @@ final class AudioFrame: Frame {
     }
 }
 
-final class VideoVTBFrame: Frame {
+final class VideoVTBFrame: MEFrame {
+    public var timebase = Timebase.defaultValue
+    public var duration: Int64 = 0
+    public var size: Int64 = 0
+    public var position: Int64 = 0
     public var corePixelBuffer: BufferProtocol?
 }
 
