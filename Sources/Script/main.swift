@@ -208,9 +208,9 @@ class BuildFFMPEG: BaseBuild {
         "--enable-decoder=amrnb", "--enable-decoder=amrwb", "--enable-decoder=ape", "--enable-decoder=cook",
         "--enable-decoder=dca", "--enable-decoder=eac3", "--enable-decoder=flac", "--enable-decoder=mp1",
         "--enable-decoder=mp2", "--enable-decoder=mp3*", "--enable-decoder=opus", "--enable-decoder=pcm*",
-        "--enable-decoder=wma*", "--enable-decoder=vorbis", "--enable-decoder=truehd", "--enable-decoder=dolby_e"
+        "--enable-decoder=wma*", "--enable-decoder=vorbis", "--enable-decoder=truehd", "--enable-decoder=dolby_e",
         // 字幕
-        ,"--enable-decoder=ass", "--enable-decoder=srt", "--enable-decoder=ssa", "--enable-decoder=movtext",
+        "--enable-decoder=ass", "--enable-decoder=srt", "--enable-decoder=ssa", "--enable-decoder=movtext",
         "--enable-decoder=subrip", "--enable-decoder=dvdsub", "--enable-decoder=dvbsub", "--enable-decoder=webvtt", "--disable-hwaccels",
         // ./configure --list-muxers
         "--disable-muxers",
@@ -218,21 +218,21 @@ class BuildFFMPEG: BaseBuild {
         // ,"--enable-muxer=mp4"
         // ./configure --list-demuxers
         "--disable-demuxers", "--enable-demuxer=aac", "--enable-demuxer=concat", "--enable-demuxer=data", "--enable-demuxer=flv", "--enable-demuxer=hls",
-        //"--enable-demuxer=latm",
+        // "--enable-demuxer=latm",
         "--enable-demuxer=live_flv", "--enable-demuxer=loas", "--enable-demuxer=m4v", "--enable-demuxer=mov",
         "--enable-demuxer=mp3", "--enable-demuxer=mpegps", "--enable-demuxer=mpegts", "--enable-demuxer=mpegvideo",
         "--enable-demuxer=hevc", "--enable-demuxer=dash", "--enable-demuxer=wav", "--enable-demuxer=ogg",
         "--enable-demuxer=ape", "--enable-demuxer=aiff", "--enable-demuxer=flac", "--enable-demuxer=amr",
         "--enable-demuxer=rtsp", "--enable-demuxer=asf", "--enable-demuxer=avi", "--enable-demuxer=matroska",
         "--enable-demuxer=rm", "--enable-demuxer=vc1",
-        //"--enable-demuxer=webm_dash_manifest",
+        // "--enable-demuxer=webm_dash_manifest",
 
         // ./configure --list-protocols
         "--enable-protocols", "--disable-protocol=bluray", "--disable-protocol=ffrtmpcrypt", "--disable-protocol=gopher",
-        "--disable-protocol=icecast", "--disable-protocol=librtmp*", "--disable-protocol=libssh", "--disable-protocol=md5",
-        "--disable-protocol=mmsh", "--disable-protocol=mmst", "--disable-protocol=sctp", "--disable-protocol=srtp",
-        "--disable-protocol=subfile", "--disable-protocol=unix",
-        "--disable-devices", "--disable-indevs","--disable-outdevs", "--disable-iconv", "--disable-bsfs",
+        "--disable-protocol=icecast", "--disable-protocol=librtmp*", "--disable-protocol=libssh",
+        "--disable-protocol=md5", "--disable-protocol=mmsh", "--disable-protocol=mmst", "--disable-protocol=sctp",
+        "--disable-protocol=srtp", "--disable-protocol=subfile", "--disable-protocol=unix",
+        "--disable-devices", "--disable-indevs", "--disable-outdevs", "--disable-iconv", "--disable-bsfs",
         "--disable-audiotoolbox", "--disable-videotoolbox", "--disable-linux-perf", "--disable-bzlib"]
 }
 

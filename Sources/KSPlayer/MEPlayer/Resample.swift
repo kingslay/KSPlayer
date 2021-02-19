@@ -12,14 +12,9 @@ import Libavcodec
 import Libswscale
 import Libswresample
 import VideoToolbox
-#if canImport(UIKit)
-import UIKit
-#else
-import AppKit
-#endif
 
 protocol Swresample {
-    func transfer(avframe: UnsafeMutablePointer<AVFrame>, timebase: Timebase) -> Frame
+    func transfer(avframe: UnsafeMutablePointer<AVFrame>, timebase: Timebase) -> MEFrame
     func shutdown()
 }
 
@@ -72,7 +67,7 @@ class VideoSwresample: Swresample {
         return true
     }
 
-    func transfer(avframe: UnsafeMutablePointer<AVFrame>, timebase: Timebase) -> Frame {
+    func transfer(avframe: UnsafeMutablePointer<AVFrame>, timebase: Timebase) -> MEFrame {
         let frame = VideoVTBFrame()
         frame.timebase = timebase
         if avframe.pointee.format == AV_PIX_FMT_VIDEOTOOLBOX.rawValue {
@@ -92,9 +87,9 @@ class VideoSwresample: Swresample {
         return frame
     }
 
-    func transfer(format: AVPixelFormat, width: Int32, height: Int32, data: [UnsafeMutablePointer<UInt8>?], linesize: [Int]) -> UIImage? {
+    func transfer(format: AVPixelFormat, width: Int32, height: Int32, data: [UnsafeMutablePointer<UInt8>?], linesize: [Int]) -> CGImage? {
         if setup(format: format, width: width, height: height), swsConvert(data: data, linesize: linesize.compactMap({Int32($0)})), let frame = dstFrame?.pointee {
-            return UIImage(rgbData: frame.data.0!, linesize: Int(frame.linesize.0), width: Int(width), height: Int(height), isAlpha: dstFormat == AV_PIX_FMT_RGBA)
+            return CGImage.make(rgbData: frame.data.0!, linesize: Int(frame.linesize.0), width: Int(width), height: Int(height), isAlpha: dstFormat == AV_PIX_FMT_RGBA)
         }
         return nil
     }
@@ -221,10 +216,10 @@ class PixelBuffer: BufferProtocol {
         [AV_PIX_FMT_BGRA, AV_PIX_FMT_NV12, AV_PIX_FMT_P010BE, AV_PIX_FMT_YUV420P].contains(format)
     }
 
-    func image() -> UIImage? {
-        var image: UIImage?
+    func image() -> CGImage? {
+        var image: CGImage?
         if format == AV_PIX_FMT_RGB24 {
-            image = UIImage(rgbData: dataWrap.data[0]!.contents().assumingMemoryBound(to: UInt8.self), linesize: Int(lineSize[0]), width: width, height: height)
+            image =  CGImage.make(rgbData: dataWrap.data[0]!.contents().assumingMemoryBound(to: UInt8.self), linesize: Int(lineSize[0]), width: width, height: height)
         }
         let scale = VideoSwresample(dstFormat: AV_PIX_FMT_RGB24, forceTransfer: true)
         image = scale.transfer(format: format, width: Int32(width), height: Int32(height), data: dataWrap.data.map({ $0?.contents().assumingMemoryBound(to: UInt8.self) }), linesize: lineSize)
@@ -294,19 +289,16 @@ extension CVPixelBufferPool {
     }
 }
 
-extension UIImage {
-    convenience init?(rgbData: UnsafePointer<UInt8>, linesize: Int, width: Int, height: Int, isAlpha: Bool = false) {
+extension CGImage {
+    static func make(rgbData: UnsafePointer<UInt8>, linesize: Int, width: Int, height: Int, isAlpha: Bool = false) -> CGImage? {
         let colorSpace = CGColorSpaceCreateDeviceRGB()
         let bitmapInfo: CGBitmapInfo = isAlpha ? CGBitmapInfo(rawValue: CGImageAlphaInfo.last.rawValue) : []
-        guard let data = CFDataCreate(kCFAllocatorDefault, rgbData, linesize * height),
-            let provider = CGDataProvider(data: data),
-            // swiftlint:disable line_length
-            let imageRef = CGImage(width: width, height: height, bitsPerComponent: 8, bitsPerPixel: isAlpha ? 32 : 24, bytesPerRow: linesize, space: colorSpace, bitmapInfo: bitmapInfo, provider: provider, decode: nil, shouldInterpolate: false, intent: .defaultIntent)
-        else {
-            // swiftlint:enable line_length
+        guard let data = CFDataCreate(kCFAllocatorDefault, rgbData, linesize * height), let provider = CGDataProvider(data: data) else {
             return nil
         }
-        self.init(cgImage: imageRef)
+        // swiftlint:disable line_length
+        return CGImage(width: width, height: height, bitsPerComponent: 8, bitsPerPixel: isAlpha ? 32 : 24, bytesPerRow: linesize, space: colorSpace, bitmapInfo: bitmapInfo, provider: provider, decode: nil, shouldInterpolate: false, intent: .defaultIntent)
+        // swiftlint:enable line_length
     }
 }
 
@@ -333,7 +325,7 @@ class AudioSwresample: Swresample {
         }
     }
 
-    func transfer(avframe: UnsafeMutablePointer<AVFrame>, timebase: Timebase) -> Frame {
+    func transfer(avframe: UnsafeMutablePointer<AVFrame>, timebase: Timebase) -> MEFrame {
         _ = setup(frame: avframe)
         var numberOfSamples = avframe.pointee.nb_samples
         let nbSamples = swr_get_out_samples(swrContext, numberOfSamples)

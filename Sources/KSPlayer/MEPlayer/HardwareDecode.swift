@@ -11,7 +11,7 @@ import VideoToolbox
 protocol DecodeProtocol {
     init(assetTrack: TrackProtocol, options: KSOptions)
     func decode()
-    func doDecode(packet: UnsafeMutablePointer<AVPacket>) throws -> [Frame]
+    func doDecode(packet: UnsafeMutablePointer<AVPacket>) throws -> [MEFrame]
     func seek(time: TimeInterval)
     func doFlushCodec()
     func shutdown()
@@ -61,7 +61,7 @@ class HardwareDecode: DecodeProtocol {
         self.session = session
     }
 
-    func doDecode(packet: UnsafeMutablePointer<AVPacket>) throws -> [Frame] {
+    func doDecode(packet: UnsafeMutablePointer<AVPacket>) throws -> [MEFrame] {
         guard let data = packet.pointee.data, let session = session else {
             return []
         }

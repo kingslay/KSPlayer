@@ -11,11 +11,7 @@ import Foundation
 import Metal
 import simd
 import VideoToolbox
-#if canImport(UIKit)
-import UIKit
-#else
-import AppKit
-#endif
+
 protocol MetalRenderPipeline {
     var device: MTLDevice { get }
     var library: MTLLibrary { get }
@@ -91,7 +87,7 @@ public protocol BufferProtocol: AnyObject {
     func widthOfPlane(at planeIndex: Int) -> Int
     func heightOfPlane(at planeIndex: Int) -> Int
     func textures(frome cache: MetalTextureCache) -> [MTLTexture]
-    func image() -> UIImage?
+    func image() -> CGImage?
 }
 
 extension CVPixelBuffer: BufferProtocol {
@@ -146,14 +142,10 @@ extension CVPixelBuffer: BufferProtocol {
         }
     }
 
-    public func image() -> UIImage? {
+    public func image() -> CGImage? {
         let ciImage = CIImage(cvImageBuffer: self)
         let context = CIContext(options: nil)
-        if let videoImage = context.createCGImage(ciImage, from: CGRect(origin: .zero, size: size)) {
-            return UIImage(cgImage: videoImage)
-        } else {
-            return nil
-        }
+        return context.createCGImage(ciImage, from: CGRect(origin: .zero, size: size))
     }
 
     public func widthOfPlane(at planeIndex: Int) -> Int {

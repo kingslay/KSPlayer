@@ -175,6 +175,8 @@ public class KSOptions {
     public var subtitleDisable = false
     public var asynchronousDecompression = false
     public var videoAdaptable = true
+    public var syncDecodeAudio = false
+    public var syncDecodeVideo = false
     public var avOptions = [String: Any]()
     public var formatContextOptions = [String: Any]()
     public var decoderOptions = [String: Any]()
@@ -238,6 +240,9 @@ public class KSOptions {
             }
             guard capacity.frameCount >= capacity.frameMaxCount >> 1 else {
                 return false
+            }
+            if (syncDecodeVideo && capacity.mediaType == .video) || (syncDecodeAudio && capacity.mediaType == .audio) {
+                return true
             }
             if isFirst || isSeek {
                 // 让音频能更快的打开

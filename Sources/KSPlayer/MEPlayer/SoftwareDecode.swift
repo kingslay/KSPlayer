@@ -37,11 +37,11 @@ class SoftwareDecode: DecodeProtocol {
         }
     }
 
-    func doDecode(packet: UnsafeMutablePointer<AVPacket>) throws -> [Frame] {
+    func doDecode(packet: UnsafeMutablePointer<AVPacket>) throws -> [MEFrame] {
         guard let codecContext = codecContext, avcodec_send_packet(codecContext, packet) == 0 else {
             return []
         }
-        var array = [Frame]()
+        var array = [MEFrame]()
         while true {
             let result = avcodec_receive_frame(codecContext, coreFrame)
             if result == 0, let avframe = coreFrame {
@@ -49,7 +49,7 @@ class SoftwareDecode: DecodeProtocol {
                 if timestamp >= bestEffortTimestamp {
                     bestEffortTimestamp = timestamp
                 }
-                let frame = swresample.transfer(avframe: avframe, timebase: timebase)
+                var frame = swresample.transfer(avframe: avframe, timebase: timebase)
                 frame.position = bestEffortTimestamp
                 bestEffortTimestamp += frame.duration
                 array.append(frame)
