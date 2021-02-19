@@ -192,6 +192,7 @@ public class KSOptions {
 
     // 加个节流器，防止频繁的更新加载状态
     private var throttle = mach_absolute_time()
+    private let concurrentQueue = DispatchQueue(label: "throttle", attributes: .concurrent)
     private let throttleDiff: UInt64
     public init() {
         formatContextOptions["auto_convert"] = 0
@@ -225,10 +226,12 @@ public class KSOptions {
 
     // 缓冲算法函数
     open func playable(capacitys: [CapacityProtocol], isFirst: Bool, isSeek: Bool) -> LoadingState? {
-        guard isFirst || isSeek || (mach_absolute_time() - throttle > throttleDiff) else {
+        guard isFirst || isSeek || !isThrottle() else {
             return nil
         }
-        throttle = mach_absolute_time()
+        concurrentQueue.sync(flags: .barrier) {
+            self.throttle = mach_absolute_time()
+        }
         let packetCount = capacitys.map { $0.packetCount }.min() ?? 0
         let frameCount = capacitys.map { $0.frameCount }.min() ?? 0
         let isEndOfFile = capacitys.allSatisfy { $0.isEndOfFile }
@@ -259,6 +262,14 @@ public class KSOptions {
         return LoadingState(loadedTime: loadedTime, progress: progress, packetCount: packetCount,
                             frameCount: frameCount, isEndOfFile: isEndOfFile, isPlayable: isPlayable,
                             isFirst: isFirst, isSeek: isSeek)
+    }
+
+    private func isThrottle() -> Bool {
+        var isThrottle = false
+        concurrentQueue.sync {
+            isThrottle = mach_absolute_time() - self.throttle < throttleDiff
+        }
+        return isThrottle
     }
 
     open func adaptable(state: VideoAdaptationState) -> (Int64, Int64)? {
