@@ -29,7 +29,7 @@ struct NV12MetalRenderPipeline: MetalRenderPipeline {
         self.library = library
         descriptor = MTLRenderPipelineDescriptor()
         descriptor.vertexFunction = library.makeFunction(name: "mapTexture")
-        descriptor.colorAttachments[0].pixelFormat = KSOptions.colorPixelFormat(bitDepth: bitDepth)
+        descriptor.colorAttachments[0].pixelFormat = .bgra8Unorm
         descriptor.fragmentFunction = library.makeFunction(name: "displayNV12Texture")
         // swiftlint:disable force_try
         try! state = device.makeRenderPipelineState(descriptor: descriptor)
@@ -65,7 +65,7 @@ struct YUVMetalRenderPipeline: MetalRenderPipeline {
         self.library = library
         descriptor = MTLRenderPipelineDescriptor()
         descriptor.vertexFunction = library.makeFunction(name: "mapTexture")
-        descriptor.colorAttachments[0].pixelFormat = KSOptions.colorPixelFormat(bitDepth: bitDepth)
+        descriptor.colorAttachments[0].pixelFormat = .bgra8Unorm
         descriptor.fragmentFunction = library.makeFunction(name: "displayYUVTexture")
         // swiftlint:disable force_try
         try! state = device.makeRenderPipelineState(descriptor: descriptor)

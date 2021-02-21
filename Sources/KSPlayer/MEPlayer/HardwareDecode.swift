@@ -149,7 +149,7 @@ class DecompressionSession {
             kCVImageBufferChromaLocationTopFieldKey: kCVImageBufferChromaLocation_Left,
             kCMFormatDescriptionExtension_FullRangeVideo: isFullRangeVideo,
             kCMFormatDescriptionExtension_SampleDescriptionExtensionAtoms: [
-                codecpar.codec_id.rawValue == AV_CODEC_ID_HEVC.rawValue ? "hvcC" : "avcC": NSData(bytes: extradata, length: Int(extradataSize))
+                codecpar.codec_id == AV_CODEC_ID_HEVC ? "hvcC" : "avcC": NSData(bytes: extradata, length: Int(extradataSize))
             ]
         ]
         if let aspectRatio = codecpar.aspectRatio {
@@ -158,7 +158,7 @@ class DecompressionSession {
         dic[kCVImageBufferColorPrimariesKey] = codecpar.color_primaries.colorPrimaries
         dic[kCVImageBufferTransferFunctionKey] = codecpar.color_trc.transferFunction
         dic[kCVImageBufferYCbCrMatrixKey] = codecpar.color_space.ycbcrMatrix
-        let type = codecpar.codec_id.rawValue == AV_CODEC_ID_HEVC.rawValue ? kCMVideoCodecType_HEVC : kCMVideoCodecType_H264
+        let type = codecpar.codec_id == AV_CODEC_ID_HEVC ? kCMVideoCodecType_HEVC : kCMVideoCodecType_H264
         // swiftlint:disable line_length
         var description: CMFormatDescription?
         var status = CMVideoFormatDescriptionCreate(allocator: kCFAllocatorDefault, codecType: type, width: codecpar.width, height: codecpar.height, extensions: dic, formatDescriptionOut: &description)
