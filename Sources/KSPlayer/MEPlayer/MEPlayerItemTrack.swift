@@ -104,6 +104,7 @@ protocol PlayerItemTrackProtocol: CapacityProtocol, AnyObject {
     // 是否无缝循环
     var isLoopModel: Bool { get set }
     var isEndOfFile: Bool { get set }
+    var assetTrack: TrackProtocol { get }
     var delegate: CodecCapacityDelegate? { get set }
     func decode()
     func seek(time: TimeInterval)
@@ -113,6 +114,7 @@ protocol PlayerItemTrackProtocol: CapacityProtocol, AnyObject {
 }
 
 class FFPlayerItemTrack<Frame: MEFrame>: PlayerItemTrackProtocol, CustomStringConvertible {
+    private let options: KSOptions
     private var seekTime = 0.0
     fileprivate var decoderMap = [Int32: DecodeProtocol]()
     fileprivate var state = MECodecState.idle
@@ -127,12 +129,13 @@ class FFPlayerItemTrack<Frame: MEFrame>: PlayerItemTrackProtocol, CustomStringCo
     let description: String
     weak var delegate: CodecCapacityDelegate?
     let fps: Float
-    let options: KSOptions
+    let assetTrack: TrackProtocol
     let mediaType: AVFoundation.AVMediaType
     let outputRenderQueue: CircularBuffer<Frame>
     var isLoopModel = false
 
     required init(assetTrack: TrackProtocol, options: KSOptions) {
+        self.assetTrack = assetTrack
         decoderMap[assetTrack.streamIndex] = assetTrack.makeDecode(options: options)
         mediaType = assetTrack.mediaType
         description = mediaType.rawValue
@@ -183,6 +186,9 @@ class FFPlayerItemTrack<Frame: MEFrame>: PlayerItemTrackProtocol, CustomStringCo
     }
 
     func getOutputRender(where predicate: ((MEFrame) -> Bool)?) -> MEFrame? {
+        if mediaType == .subtitle {
+            return outputRenderQueue.search(where: predicate ?? { _ in true })
+        }
         let outputFecthRender = outputRenderQueue.pop(where: predicate)
         if outputFecthRender == nil {
             if state == .finished, frameCount == 0 {

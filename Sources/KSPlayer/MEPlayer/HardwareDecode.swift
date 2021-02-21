@@ -20,7 +20,9 @@ protocol DecodeProtocol {
 extension TrackProtocol {
     func makeDecode(options: KSOptions) -> DecodeProtocol {
         autoreleasepool {
-            if let session = DecompressionSession(codecpar: stream.pointee.codecpar.pointee, options: options) {
+            if mediaType == .subtitle {
+                return SubtitleDecode(assetTrack: self, options: options)
+            } else if let session = DecompressionSession(codecpar: stream.pointee.codecpar.pointee, options: options) {
                 return HardwareDecode(assetTrack: self, options: options, session: session)
             } else {
                 return SoftwareDecode(assetTrack: self, options: options)

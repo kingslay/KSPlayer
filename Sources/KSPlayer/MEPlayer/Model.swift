@@ -181,7 +181,10 @@ final class SubtitleFrame: MEFrame {
     public var duration: Int64 = 0
     public var size: Int64 = 0
     public var position: Int64 = 0
-    public var part: SubtitlePart?
+    public let part: SubtitlePart
+    init(part: SubtitlePart) {
+        self.part = part
+    }
 }
 
 final class ByteDataWrap {

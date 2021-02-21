@@ -7,15 +7,15 @@
 
 import Libavformat
 import Foundation
-final class SubtitlePlayerItemTrack: FFPlayerItemTrack<SubtitleFrame> {
-    private let reg = try? NSRegularExpression(pattern: "\\{[^}]+\\}", options: .caseInsensitive)
+class SubtitleDecode: DecodeProtocol {
+    private let reg = AssParse.patternReg()
     private var codecContext: UnsafeMutablePointer<AVCodecContext>?
+    private let scale = VideoSwresample(dstFormat: AV_PIX_FMT_RGBA, forceTransfer: true)
     private var subtitle = AVSubtitle()
     private var preSubtitleFrame: SubtitleFrame?
-    let assetTrack: TrackProtocol
+    private let timebase: Timebase
     required init(assetTrack: TrackProtocol, options: KSOptions) {
-        self.assetTrack = assetTrack
-        super.init(assetTrack: assetTrack, options: options)
+        timebase = assetTrack.timebase
         do {
             codecContext = try assetTrack.stream.pointee.codecpar.ceateContext(options: options)
         } catch {
@@ -23,8 +23,60 @@ final class SubtitlePlayerItemTrack: FFPlayerItemTrack<SubtitleFrame> {
         }
     }
 
-    override func shutdown() {
-        super.shutdown()
+    func decode() {
+
+    }
+
+    func doDecode(packet: UnsafeMutablePointer<AVPacket>) throws -> [MEFrame] {
+        guard let codecContext = codecContext else { return [] }
+        var pktSize = packet.pointee.size
+        var error: NSError?
+        var array = [MEFrame]()
+        while pktSize > 0 {
+            var gotsubtitle = Int32(0)
+            let len = avcodec_decode_subtitle2(codecContext, &subtitle, &gotsubtitle, packet)
+            if len < 0 {
+                error = .init(errorCode: .codecSubtitleSendPacket, ffmpegErrnum: len)
+                KSLog(error!)
+                break
+            }
+            let (attributedString, image) = text(subtitle: subtitle)
+            let position = max(packet.pointee.pts == Int64.min ? packet.pointee.dts : packet.pointee.pts, 0)
+            let seconds = timebase.cmtime(for: position).seconds
+            var end = seconds
+            if subtitle.end_display_time > 0 {
+                end += TimeInterval(subtitle.end_display_time) / 1000.0
+            } else if packet.pointee.duration > 0 {
+                end += timebase.cmtime(for: packet.pointee.duration).seconds
+            }
+            let part = SubtitlePart(seconds + TimeInterval(subtitle.start_display_time) / 1000.0, end, attributedString.string)
+            part.image = image
+            let frame = SubtitleFrame(part: part)
+            frame.position = position
+            frame.timebase = timebase
+            if let preSubtitleFrame = preSubtitleFrame, preSubtitleFrame.part == part {
+                preSubtitleFrame.part.text.append(NSAttributedString(string: "\n"))
+                preSubtitleFrame.part.text.append(attributedString)
+            } else {
+                preSubtitleFrame = frame
+                array.append(frame)
+            }
+            if len == 0 {
+                break
+            }
+            pktSize -= len
+        }
+        return array
+    }
+
+    func seek(time: TimeInterval) {
+    }
+
+    func doFlushCodec() {
+    }
+
+    func shutdown() {
+        scale.shutdown()
         avsubtitle_free(&subtitle)
         if let codecContext = self.codecContext {
             avcodec_close(codecContext)
@@ -32,60 +84,11 @@ final class SubtitlePlayerItemTrack: FFPlayerItemTrack<SubtitleFrame> {
         }
     }
 
-    override func getOutputRender(where predicate: ((MEFrame) -> Bool)?) -> MEFrame? {
-        outputRenderQueue.search(where: predicate ?? { _ in true })
-    }
-
-    // todo 无缝循环的话，无法处理字幕，导致字幕的内存一直增加。一个暴力的方法是判断数据里面有没有这个数据了
-    override func putPacket(packet: Packet) {
-        guard let codecContext = codecContext else { return }
-        let corePacket = packet.corePacket
-        var pktSize = corePacket.pointee.size
-        var error: NSError?
-        while pktSize > 0 {
-            var gotsubtitle = Int32(0)
-            let len = avcodec_decode_subtitle2(codecContext, &subtitle, &gotsubtitle, corePacket)
-            if len < 0 {
-                error = .init(errorCode: .codecSubtitleSendPacket, ffmpegErrnum: len)
-                KSLog(error!)
-                break
-            }
-            let attributedString = subtitle.text(reg: reg)
-            let frame = SubtitleFrame()
-            frame.timebase = packet.assetTrack.timebase
-            frame.position = subtitle.pts
-            if frame.position == Int64.min {
-                frame.position = max(packet.position, 0)
-            }
-            let seconds = frame.seconds
-            var end = seconds
-            if subtitle.end_display_time > 0 {
-                end += TimeInterval(subtitle.end_display_time) / 1000.0
-            } else if packet.duration > 0 {
-                end += frame.timebase.cmtime(for: packet.duration).seconds
-            }
-            let part = SubtitlePart(seconds + TimeInterval(subtitle.start_display_time) / 1000.0, end, attributedString.string)
-            if let preSubtitleFrame = preSubtitleFrame, preSubtitleFrame.part == part {
-                preSubtitleFrame.part?.text.append(NSAttributedString(string: "\n"))
-                preSubtitleFrame.part?.text.append(attributedString)
-            } else {
-                frame.part = part
-                preSubtitleFrame = frame
-                outputRenderQueue.push(frame)
-            }
-            if len == 0 {
-                break
-            }
-            pktSize -= len
-        }
-    }
-}
-
-extension AVSubtitle {
-    func text(reg: NSRegularExpression?) -> NSMutableAttributedString {
+    private func text(subtitle: AVSubtitle) -> (NSMutableAttributedString, CGImage?) {
         let attributedString = NSMutableAttributedString()
-        for i in 0 ..< Int(num_rects) {
-            guard let rect = rects[i] else {
+        var image: CGImage?
+        for i in 0 ..< Int(subtitle.num_rects) {
+            guard let rect = subtitle.rects[i] else {
                 continue
             }
             if let text = rect.pointee.text {
@@ -95,9 +98,11 @@ extension AVSubtitle {
                 if let group = AssParse.parse(scanner: scanner, reg: reg) {
                     attributedString.append(group.text)
                 }
+            } else if rect.pointee.type == SUBTITLE_BITMAP {
+                image = scale.transfer(format: AV_PIX_FMT_PAL8, width: Int32(rect.pointee.w), height: Int32(rect.pointee.h), data: Array(tuple: rect.pointee.data), linesize: Array(tuple: rect.pointee.linesize).map{Int($0)})
             }
         }
-        return attributedString
+        return (attributedString, image)
     }
 }
 

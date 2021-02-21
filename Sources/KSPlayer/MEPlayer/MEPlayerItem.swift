@@ -36,7 +36,7 @@ final class MEPlayerItem {
 
     private(set) var assetTracks = [TrackProtocol]()
     private var videoAdaptation: VideoAdaptationState?
-    private(set) var subtitleTracks = [SubtitlePlayerItemTrack]()
+    private(set) var subtitleTracks = [FFPlayerItemTrack<SubtitleFrame>]()
     var isBackground = false
     var currentPlaybackTime: TimeInterval {
         max(positionTime - startTime, 0)
@@ -246,7 +246,8 @@ extension MEPlayerItem {
         if !options.subtitleDisable {
             subtitleTracks = assetTracks.filter { $0.mediaType == .subtitle }.map {
                 $0.stream.pointee.discard = AVDISCARD_DEFAULT
-                return SubtitlePlayerItemTrack(assetTrack: $0, options: options)
+                return FFPlayerItemTrack<
+                    SubtitleFrame>(assetTrack: $0, options: options)
             }
             allTracks.append(contentsOf: subtitleTracks)
         }
