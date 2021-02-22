@@ -82,9 +82,3 @@ final class MetalPlayView: MTKView, FrameOutput {
         pixelBuffer?.image().flatMap { UIImage(cgImage: $0) }
     }
 }
-
-extension BufferProtocol {
-    var colorspace: CGColorSpace? {
-        attachmentsDic.flatMap { CVImageBufferCreateColorSpaceFromAttachments($0)?.takeUnretainedValue() }
-    }
-}

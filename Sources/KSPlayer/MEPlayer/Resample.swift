@@ -131,6 +131,10 @@ class PixelBuffer: BufferProtocol {
     private let heights: [Int]
     private let dataWrap: MTLBufferWrap
     private var lineSize = [Int]()
+    public var colorspace: CGColorSpace? {
+       attachmentsDic.flatMap { CVImageBufferCreateColorSpaceFromAttachments($0)?.takeUnretainedValue() }
+    }
+
     init(frame: UnsafeMutablePointer<AVFrame>) {
         format = AVPixelFormat(rawValue: frame.pointee.format)
         yCbCrMatrix = frame.pointee.colorspace.ycbcrMatrix
