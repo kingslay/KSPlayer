@@ -99,7 +99,7 @@ class SubtitleDecode: DecodeProtocol {
                     attributedString.append(group.text)
                 }
             } else if rect.pointee.type == SUBTITLE_BITMAP {
-                image = scale.transfer(format: AV_PIX_FMT_PAL8, width: Int32(rect.pointee.w), height: Int32(rect.pointee.h), data: Array(tuple: rect.pointee.data), linesize: Array(tuple: rect.pointee.linesize).map{Int($0)})
+                image = scale.transfer(format: AV_PIX_FMT_PAL8, width: Int32(rect.pointee.w), height: Int32(rect.pointee.h), data: Array(tuple: rect.pointee.data), linesize: Array(tuple: rect.pointee.linesize).map {Int($0)})
             }
         }
         return (attributedString, image)

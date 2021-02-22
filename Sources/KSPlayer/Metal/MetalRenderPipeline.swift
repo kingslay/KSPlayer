@@ -84,6 +84,7 @@ public protocol BufferProtocol: AnyObject {
 //    var transferFunction: CFString? { get }
     var yCbCrMatrix: CFString? { get }
     var attachmentsDic: CFDictionary? { get }
+    var colorspace: CGColorSpace? { get }
     func widthOfPlane(at planeIndex: Int) -> Int
     func heightOfPlane(at planeIndex: Int) -> Int
     func textures(frome cache: MetalTextureCache) -> [MTLTexture]
@@ -131,6 +132,10 @@ extension CVPixelBuffer: BufferProtocol {
 
     public var transferFunction: CFString? {
         CVBufferGetAttachment(self, kCVImageBufferTransferFunctionKey, nil)?.takeUnretainedValue() as? NSString
+    }
+
+    public var colorspace: CGColorSpace? {
+        CVImageBufferGetColorSpace(self)?.takeUnretainedValue() ?? attachmentsDic.flatMap { CVImageBufferCreateColorSpaceFromAttachments($0)?.takeUnretainedValue() }
     }
 
     public var bitDepth: Int32 {
