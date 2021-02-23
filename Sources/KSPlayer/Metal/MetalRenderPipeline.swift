@@ -135,10 +135,10 @@ extension CVPixelBuffer: BufferProtocol {
     }
 
     public var colorspace: CGColorSpace? {
-        #if os(tvOS)
-        return attachmentsDic.flatMap { CVImageBufferCreateColorSpaceFromAttachments($0)?.takeUnretainedValue() }
-        #else
+        #if os(macOS)
         return CVImageBufferGetColorSpace(self)?.takeUnretainedValue() ?? attachmentsDic.flatMap { CVImageBufferCreateColorSpaceFromAttachments($0)?.takeUnretainedValue() }
+        #else
+        return attachmentsDic.flatMap { CVImageBufferCreateColorSpaceFromAttachments($0)?.takeUnretainedValue() }
         #endif
     }
 
