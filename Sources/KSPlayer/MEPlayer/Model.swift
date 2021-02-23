@@ -8,11 +8,6 @@
 import AVFoundation
 import CoreMedia
 import Libavcodec
-#if canImport(UIKit)
-import UIKit
-#else
-import AppKit
-#endif
 
 // MARK: enum
 
@@ -24,8 +19,6 @@ extension NSError {
         self.init(errorCode: errorCode, userInfo: [NSUnderlyingErrorKey: underlyingError])
     }
 }
-
-extension Int32: Error {}
 
 enum MESourceState {
     case idle
@@ -72,11 +65,11 @@ public protocol ObjectQueueItem {
 protocol FrameOutput {
     var renderSource: OutputRenderSourceDelegate? { get set }
     var isPaused: Bool { get set }
-    func clear()
 }
 
 protocol MEFrame: ObjectQueueItem {
     var timebase: Timebase { get set }
+    var position: Int64 { get set}
 }
 
 extension MEFrame {
@@ -182,15 +175,15 @@ final class Packet: ObjectQueueItem {
     }
 }
 
-class Frame: MEFrame {
+final class SubtitleFrame: MEFrame {
     public var timebase = Timebase.defaultValue
     public var duration: Int64 = 0
     public var size: Int64 = 0
     public var position: Int64 = 0
-}
-
-final class SubtitleFrame: Frame {
-    public var part: SubtitlePart?
+    public let part: SubtitlePart
+    init(part: SubtitlePart) {
+        self.part = part
+    }
 }
 
 final class ByteDataWrap {
@@ -198,14 +191,12 @@ final class ByteDataWrap {
     var size: [Int] = [0] {
         didSet {
             if size.description != oldValue.description {
-                (0 ..< data.count).forEach { i in
-                    if oldValue[i] > 0 {
-                        data[i]?.deinitialize(count: oldValue[i])
-                        data[i]?.deallocate()
-                    }
+                for i in (0 ..< data.count) where oldValue[i] > 0 {
+                    data[i]?.deinitialize(count: oldValue[i])
+                    data[i]?.deallocate()
                 }
                 data.removeAll()
-                (0 ..< size.count).forEach { i in
+                for i in (0 ..< size.count) {
                     data.append(UnsafeMutablePointer<UInt8>.allocate(capacity: Int(size[i])))
                 }
             }
@@ -217,7 +208,7 @@ final class ByteDataWrap {
     }
 
     deinit {
-        (0 ..< data.count).forEach { i in
+        for i in (0 ..< data.count) {
             data[i]?.deinitialize(count: size[i])
             data[i]?.deallocate()
         }
@@ -225,7 +216,33 @@ final class ByteDataWrap {
     }
 }
 
-final class AudioFrame: Frame {
+final class MTLBufferWrap {
+    var data: [MTLBuffer?]
+    var size: [Int] {
+        didSet {
+            if size.description != oldValue.description {
+                data = size.map { MetalRender.share.device.makeBuffer(length: $0, options: .storageModeShared) }
+            }
+        }
+    }
+    public init(size: [Int]) {
+        self.size = size
+        data = size.map { MetalRender.share.device.makeBuffer(length: $0, options: .storageModeShared) }
+    }
+
+    deinit {
+        (0 ..< data.count).forEach { i in
+            data[i] = nil
+        }
+        data.removeAll()
+    }
+}
+
+final class AudioFrame: MEFrame {
+    public var timebase = Timebase.defaultValue
+    public var duration: Int64 = 0
+    public var size: Int64 = 0
+    public var position: Int64 = 0
     public var numberOfSamples = 0
     let dataWrap: ByteDataWrap
     public init(bufferSize: Int32) {
@@ -240,7 +257,11 @@ final class AudioFrame: Frame {
     }
 }
 
-final class VideoVTBFrame: Frame {
+final class VideoVTBFrame: MEFrame {
+    public var timebase = Timebase.defaultValue
+    public var duration: Int64 = 0
+    public var size: Int64 = 0
+    public var position: Int64 = 0
     public var corePixelBuffer: BufferProtocol?
 }
 

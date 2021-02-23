@@ -12,14 +12,9 @@ import Libavcodec
 import Libswscale
 import Libswresample
 import VideoToolbox
-#if canImport(UIKit)
-import UIKit
-#else
-import AppKit
-#endif
 
 protocol Swresample {
-    func transfer(avframe: UnsafeMutablePointer<AVFrame>, timebase: Timebase) -> Frame
+    func transfer(avframe: UnsafeMutablePointer<AVFrame>, timebase: Timebase) -> MEFrame
     func shutdown()
 }
 
@@ -32,7 +27,7 @@ class VideoSwresample: Swresample {
     private var forceTransfer: Bool
     var dstFrame: UnsafeMutablePointer<AVFrame>?
     init(dstFormat: AVPixelFormat = AV_PIX_FMT_NV12, forceTransfer: Bool = false) {
-        self.dstFormat = AV_PIX_FMT_NV12
+        self.dstFormat = dstFormat
         self.forceTransfer = forceTransfer
     }
 
@@ -72,7 +67,7 @@ class VideoSwresample: Swresample {
         return true
     }
 
-    func transfer(avframe: UnsafeMutablePointer<AVFrame>, timebase: Timebase) -> Frame {
+    func transfer(avframe: UnsafeMutablePointer<AVFrame>, timebase: Timebase) -> MEFrame {
         let frame = VideoVTBFrame()
         frame.timebase = timebase
         if avframe.pointee.format == AV_PIX_FMT_VIDEOTOOLBOX.rawValue {
@@ -92,9 +87,9 @@ class VideoSwresample: Swresample {
         return frame
     }
 
-    func transfer(format: AVPixelFormat, width: Int32, height: Int32, data: [UnsafeMutablePointer<UInt8>?], linesize: [Int32]) -> UIImage? {
-        if setup(format: format, width: width, height: height), swsConvert(data: data, linesize: linesize), let frame = dstFrame?.pointee {
-            return UIImage(rgbData: frame.data.0!, linesize: Int(frame.linesize.0), width: Int(width), height: Int(height), isAlpha: dstFormat == AV_PIX_FMT_RGBA)
+    func transfer(format: AVPixelFormat, width: Int32, height: Int32, data: [UnsafeMutablePointer<UInt8>?], linesize: [Int]) -> CGImage? {
+        if setup(format: format, width: width, height: height), swsConvert(data: data, linesize: linesize.compactMap({Int32($0)})), let frame = dstFrame?.pointee {
+            return CGImage.make(rgbData: frame.data.0!, linesize: Int(frame.linesize.0), width: Int(width), height: Int(height), isAlpha: dstFormat == AV_PIX_FMT_RGBA)
         }
         return nil
     }
@@ -119,6 +114,7 @@ class VideoSwresample: Swresample {
 }
 
 class PixelBuffer: BufferProtocol {
+    var attachmentsDic: CFDictionary?
     let bitDepth: Int32
     let format: AVPixelFormat
     let width: Int
@@ -133,17 +129,26 @@ class PixelBuffer: BufferProtocol {
     private let formats: [MTLPixelFormat]
     private let widths: [Int]
     private let heights: [Int]
-    private let dataWrap: ByteDataWrap
-    private let bytesPerRow: [Int32]
+    private let dataWrap: MTLBufferWrap
+    private var lineSize = [Int]()
+    public var colorspace: CGColorSpace? {
+       attachmentsDic.flatMap { CVImageBufferCreateColorSpaceFromAttachments($0)?.takeUnretainedValue() }
+    }
+
     init(frame: UnsafeMutablePointer<AVFrame>) {
         format = AVPixelFormat(rawValue: frame.pointee.format)
         yCbCrMatrix = frame.pointee.colorspace.ycbcrMatrix
         colorPrimaries = frame.pointee.color_primaries.colorPrimaries
         transferFunction = frame.pointee.color_trc.transferFunction
+        var attachments = [CFString: CFString]()
+        attachments[kCVImageBufferColorPrimariesKey] = colorPrimaries
+        attachments[kCVImageBufferTransferFunctionKey] = transferFunction
+        attachments[kCVImageBufferYCbCrMatrixKey] = yCbCrMatrix
+        attachmentsDic = attachments as CFDictionary
         width = Int(frame.pointee.width)
         height = Int(frame.pointee.height)
         isFullRangeVideo = frame.pointee.color_range == AVCOL_RANGE_JPEG
-        bytesPerRow = Array(tuple: frame.pointee.linesize)
+        let bytesPerRow = Array(tuple: frame.pointee.linesize).compactMap { Int($0) }
         bitDepth = format.bitDepth()
         let vertical = Int(frame.pointee.sample_aspect_ratio.den)
         let horizontal = Int(frame.pointee.sample_aspect_ratio.num)
@@ -167,11 +172,31 @@ class PixelBuffer: BufferProtocol {
             widths = [width]
             heights = [height]
         }
-        dataWrap = ObjectPool.share.object(class: ByteDataWrap.self, key: "VideoData") { ByteDataWrap() }
+        var size = [Int]()
+        for i in 0 ..< planeCount {
+            if #available(iOS 11.0, tvOS 11.0, *) {
+                let alignment = MetalRender.share.device.minimumLinearTextureAlignment(for: formats[i])
+                let remainder = bytesPerRow[i] % alignment
+                lineSize.append(remainder == 0 ? bytesPerRow[i] : bytesPerRow[i] + alignment - remainder)
+            } else {
+                lineSize.append(bytesPerRow[i])
+            }
+            size.append(lineSize[i] * heights[i])
+
+        }
+        dataWrap = ObjectPool.share.object(class: MTLBufferWrap.self, key: "VideoData") { MTLBufferWrap(size: size) }
+        dataWrap.size = size
         let bytes = Array(tuple: frame.pointee.data)
-        dataWrap.size = (0 ..< planeCount).map { Int(bytesPerRow[$0]) * heights[$0] }
-        (0 ..< planeCount).forEach { i in
-            dataWrap.data[i]?.assign(from: bytes[i]!, count: dataWrap.size[i])
+        for i in 0 ..< planeCount {
+            if bytesPerRow[i] == lineSize[i] {
+                dataWrap.data[i]?.contents().copyMemory(from: bytes[i]!, byteCount: heights[i]*lineSize[i])
+            } else {
+                let contents = dataWrap.data[i]?.contents()
+                let source = bytes[i]!
+                for j in 0 ..< heights[i] {
+                    contents?.advanced(by: j*lineSize[i]).copyMemory(from: source.advanced(by: j*bytesPerRow[i]), byteCount: bytesPerRow[i])
+                }
+            }
         }
     }
 
@@ -180,7 +205,7 @@ class PixelBuffer: BufferProtocol {
     }
 
     func textures(frome cache: MetalTextureCache) -> [MTLTexture] {
-        cache.textures(formats: formats, widths: widths, heights: heights, bytes: dataWrap.data, bytesPerRows: bytesPerRow)
+        cache.textures(formats: formats, widths: widths, heights: heights, buffers: dataWrap.data, lineSizes: lineSize)
     }
 
     func widthOfPlane(at planeIndex: Int) -> Int {
@@ -195,14 +220,15 @@ class PixelBuffer: BufferProtocol {
         [AV_PIX_FMT_BGRA, AV_PIX_FMT_NV12, AV_PIX_FMT_P010BE, AV_PIX_FMT_YUV420P].contains(format)
     }
 
-    func image() -> UIImage? {
-        var image: UIImage?
+    func image() -> CGImage? {
+        let image: CGImage?
         if format == AV_PIX_FMT_RGB24 {
-            image = UIImage(rgbData: dataWrap.data[0]!, linesize: Int(bytesPerRow[0]), width: width, height: height)
+            image =  CGImage.make(rgbData: dataWrap.data[0]!.contents().assumingMemoryBound(to: UInt8.self), linesize: Int(lineSize[0]), width: width, height: height)
+        } else {
+            let scale = VideoSwresample(dstFormat: AV_PIX_FMT_RGB24, forceTransfer: true)
+            image = scale.transfer(format: format, width: Int32(width), height: Int32(height), data: dataWrap.data.map({ $0?.contents().assumingMemoryBound(to: UInt8.self) }), linesize: lineSize)
+            scale.shutdown()
         }
-        let scale = VideoSwresample(dstFormat: AV_PIX_FMT_RGB24, forceTransfer: true)
-        image = scale.transfer(format: format, width: Int32(width), height: Int32(height), data: dataWrap.data, linesize: bytesPerRow)
-        scale.shutdown()
         return image
     }
 }
@@ -268,19 +294,16 @@ extension CVPixelBufferPool {
     }
 }
 
-extension UIImage {
-    convenience init?(rgbData: UnsafePointer<UInt8>, linesize: Int, width: Int, height: Int, isAlpha: Bool = false) {
+extension CGImage {
+    static func make(rgbData: UnsafePointer<UInt8>, linesize: Int, width: Int, height: Int, isAlpha: Bool = false) -> CGImage? {
         let colorSpace = CGColorSpaceCreateDeviceRGB()
-        let bitmapInfo: CGBitmapInfo = isAlpha ? CGBitmapInfo(rawValue: CGImageAlphaInfo.last.rawValue) : []
-        guard let data = CFDataCreate(kCFAllocatorDefault, rgbData, linesize * height),
-            let provider = CGDataProvider(data: data),
-            // swiftlint:disable line_length
-            let imageRef = CGImage(width: width, height: height, bitsPerComponent: 8, bitsPerPixel: isAlpha ? 32 : 24, bytesPerRow: linesize, space: colorSpace, bitmapInfo: bitmapInfo, provider: provider, decode: nil, shouldInterpolate: false, intent: .defaultIntent)
-        else {
-            // swiftlint:enable line_length
+        let bitmapInfo: CGBitmapInfo = isAlpha ? CGBitmapInfo(rawValue: CGImageAlphaInfo.last.rawValue) : CGBitmapInfo.byteOrderMask
+        guard let data = CFDataCreate(kCFAllocatorDefault, rgbData, linesize * height), let provider = CGDataProvider(data: data) else {
             return nil
         }
-        self.init(cgImage: imageRef)
+        // swiftlint:disable line_length
+        return CGImage(width: width, height: height, bitsPerComponent: 8, bitsPerPixel: isAlpha ? 32 : 24, bytesPerRow: linesize, space: colorSpace, bitmapInfo: bitmapInfo, provider: provider, decode: nil, shouldInterpolate: false, intent: .defaultIntent)
+        // swiftlint:enable line_length
     }
 }
 
@@ -307,7 +330,7 @@ class AudioSwresample: Swresample {
         }
     }
 
-    func transfer(avframe: UnsafeMutablePointer<AVFrame>, timebase: Timebase) -> Frame {
+    func transfer(avframe: UnsafeMutablePointer<AVFrame>, timebase: Timebase) -> MEFrame {
         _ = setup(frame: avframe)
         var numberOfSamples = avframe.pointee.nb_samples
         let nbSamples = swr_get_out_samples(swrContext, numberOfSamples)

@@ -1,3 +1,3 @@
 ${PODS_ROOT}/Target Support Files/OpenSSL-tvOS/OpenSSL-tvOS-xcframeworks.sh
-${PODS_ROOT}/../../Sources/libssl.xcframework
-${PODS_ROOT}/../../Sources/libcrypto.xcframework
+${PODS_ROOT}/../../Sources/Libssl.xcframework
+${PODS_ROOT}/../../Sources/Libcrypto.xcframework

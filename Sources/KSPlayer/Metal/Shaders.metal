@@ -25,32 +25,32 @@ fragment half4 displayTexture(TextureMappingVertex mappingVertex [[ stage_in ]],
     return half4(texture.sample(s, mappingVertex.textureCoordinate));
 }
 
-fragment float4 displayYUVTexture(TextureMappingVertex in [[ stage_in ]],
-                                  texture2d<float> yTexture [[ texture(0) ]],
-                                  texture2d<float> uTexture [[ texture(1) ]],
-                                  texture2d<float> vTexture [[ texture(2) ]],
+fragment half4 displayYUVTexture(TextureMappingVertex in [[ stage_in ]],
+                                  texture2d<half> yTexture [[ texture(0) ]],
+                                  texture2d<half> uTexture [[ texture(1) ]],
+                                  texture2d<half> vTexture [[ texture(2) ]],
                                   sampler textureSampler [[ sampler(0) ]],
-                                  constant float3x3& yuvToRGBMatrix [[ buffer(0) ]],
+                                  constant float3x3& yuvToBGRMatrix [[ buffer(0) ]],
                                   constant float3& colorOffset [[ buffer(1) ]])
 {
-    float3 yuv;
+    half3 yuv;
     yuv.x = yTexture.sample(textureSampler, in.textureCoordinate).r;
     yuv.y = uTexture.sample(textureSampler, in.textureCoordinate).r;
     yuv.z = vTexture.sample(textureSampler, in.textureCoordinate).r;
-    return float4(yuvToRGBMatrix * (yuv+colorOffset), 1);
+    return half4(half3x3(yuvToBGRMatrix) * (yuv+half3(colorOffset)), 1);
 }
 
 
-fragment float4 displayNV12Texture(TextureMappingVertex in [[ stage_in ]],
-                                  texture2d<float> lumaTexture [[ texture(0) ]],
-                                  texture2d<float> chromaTexture [[ texture(1) ]],
+fragment half4 displayNV12Texture(TextureMappingVertex in [[ stage_in ]],
+                                  texture2d<half> lumaTexture [[ texture(0) ]],
+                                  texture2d<half> chromaTexture [[ texture(1) ]],
                                   sampler textureSampler [[ sampler(0) ]],
-                                  constant float3x3& yuvToRGBMatrix [[ buffer(0) ]],
+                                  constant float3x3& yuvToBGRMatrix [[ buffer(0) ]],
                                   constant float3& colorOffset [[ buffer(1) ]])
 {
-    float3 yuv;
+    half3 yuv;
     yuv.x = lumaTexture.sample(textureSampler, in.textureCoordinate).r;
     yuv.yz = chromaTexture.sample(textureSampler, in.textureCoordinate).rg;
-    return float4(yuvToRGBMatrix * (yuv+colorOffset), 1);
+    return half4(half3x3(yuvToBGRMatrix) * (yuv+half3(colorOffset)), 1);
 }
 

@@ -157,9 +157,6 @@ public class KSAVPlayer {
         didSet {
             if isPreparedToPlay != oldValue {
                 if isPreparedToPlay {
-                    if options.isAutoPlay {
-                        play()
-                    }
                     delegate?.preparedToPlay(player: self)
                 }
             }
@@ -431,11 +428,11 @@ extension KSAVPlayer: MediaPlayerProtocol {
     }
 
     public var contentMode: UIViewContentMode {
-        set {
-            view.contentMode = newValue
-        }
         get {
             view.contentMode
+        }
+        set {
+            view.contentMode = newValue
         }
     }
 
@@ -448,11 +445,11 @@ extension KSAVPlayer: MediaPlayerProtocol {
     }
 
     public var isMuted: Bool {
-        set {
-            player.isMuted = newValue
-        }
         get {
             player.isMuted
+        }
+        set {
+            player.isMuted = newValue
         }
     }
 

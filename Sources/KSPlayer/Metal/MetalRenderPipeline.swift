@@ -11,11 +11,7 @@ import Foundation
 import Metal
 import simd
 import VideoToolbox
-#if canImport(UIKit)
-import UIKit
-#else
-import AppKit
-#endif
+
 protocol MetalRenderPipeline {
     var device: MTLDevice { get }
     var library: MTLLibrary { get }
@@ -33,7 +29,7 @@ struct NV12MetalRenderPipeline: MetalRenderPipeline {
         self.library = library
         descriptor = MTLRenderPipelineDescriptor()
         descriptor.vertexFunction = library.makeFunction(name: "mapTexture")
-        descriptor.colorAttachments[0].pixelFormat = KSOptions.colorPixelFormat(bitDepth: bitDepth)
+        descriptor.colorAttachments[0].pixelFormat = .bgra8Unorm
         descriptor.fragmentFunction = library.makeFunction(name: "displayNV12Texture")
         // swiftlint:disable force_try
         try! state = device.makeRenderPipelineState(descriptor: descriptor)
@@ -69,7 +65,7 @@ struct YUVMetalRenderPipeline: MetalRenderPipeline {
         self.library = library
         descriptor = MTLRenderPipelineDescriptor()
         descriptor.vertexFunction = library.makeFunction(name: "mapTexture")
-        descriptor.colorAttachments[0].pixelFormat = KSOptions.colorPixelFormat(bitDepth: bitDepth)
+        descriptor.colorAttachments[0].pixelFormat = .bgra8Unorm
         descriptor.fragmentFunction = library.makeFunction(name: "displayYUVTexture")
         // swiftlint:disable force_try
         try! state = device.makeRenderPipelineState(descriptor: descriptor)
@@ -84,13 +80,15 @@ public protocol BufferProtocol: AnyObject {
     var height: Int { get }
     var bitDepth: Int32 { get }
     var isFullRangeVideo: Bool { get }
-    var colorPrimaries: CFString? { get }
-    var transferFunction: CFString? { get }
+//    var colorPrimaries: CFString? { get }
+//    var transferFunction: CFString? { get }
     var yCbCrMatrix: CFString? { get }
+    var attachmentsDic: CFDictionary? { get }
+    var colorspace: CGColorSpace? { get }
     func widthOfPlane(at planeIndex: Int) -> Int
     func heightOfPlane(at planeIndex: Int) -> Int
     func textures(frome cache: MetalTextureCache) -> [MTLTexture]
-    func image() -> UIImage?
+    func image() -> CGImage?
 }
 
 extension CVPixelBuffer: BufferProtocol {
@@ -120,6 +118,10 @@ extension CVPixelBuffer: BufferProtocol {
         CVBufferGetAttachment(self, kCMFormatDescriptionExtension_FullRangeVideo, nil)?.takeUnretainedValue() as? Bool ?? true
     }
 
+    public var attachmentsDic: CFDictionary? {
+        CVBufferGetAttachments(self, .shouldPropagate)
+    }
+
     public var yCbCrMatrix: CFString? {
         CVBufferGetAttachment(self, kCVImageBufferYCbCrMatrixKey, nil)?.takeUnretainedValue() as? NSString
     }
@@ -132,6 +134,14 @@ extension CVPixelBuffer: BufferProtocol {
         CVBufferGetAttachment(self, kCVImageBufferTransferFunctionKey, nil)?.takeUnretainedValue() as? NSString
     }
 
+    public var colorspace: CGColorSpace? {
+        #if os(macOS)
+        return CVImageBufferGetColorSpace(self)?.takeUnretainedValue() ?? attachmentsDic.flatMap { CVImageBufferCreateColorSpaceFromAttachments($0)?.takeUnretainedValue() }
+        #else
+        return attachmentsDic.flatMap { CVImageBufferCreateColorSpaceFromAttachments($0)?.takeUnretainedValue() }
+        #endif
+    }
+
     public var bitDepth: Int32 {
         switch CVPixelBufferGetPixelFormatType(self) {
         case kCVPixelFormatType_420YpCbCr10BiPlanarFullRange, kCVPixelFormatType_420YpCbCr10BiPlanarVideoRange:
@@ -141,14 +151,10 @@ extension CVPixelBuffer: BufferProtocol {
         }
     }
 
-    public func image() -> UIImage? {
+    public func image() -> CGImage? {
         let ciImage = CIImage(cvImageBuffer: self)
         let context = CIContext(options: nil)
-        if let videoImage = context.createCGImage(ciImage, from: CGRect(origin: .zero, size: size)) {
-            return UIImage(cgImage: videoImage)
-        } else {
-            return nil
-        }
+        return context.createCGImage(ciImage, from: CGRect(origin: .zero, size: size))
     }
 
     public func widthOfPlane(at planeIndex: Int) -> Int {
@@ -172,11 +178,7 @@ extension KSOptions {
     static func colorPixelFormat(bitDepth: Int32) -> MTLPixelFormat {
         if bitDepth == 10 {
             #if os(macOS) || targetEnvironment(macCatalyst)
-            if #available(OSX 10.13, *) {
-                return .bgr10a2Unorm
-            } else {
-                return .bgra8Unorm
-            }
+            return .bgr10a2Unorm
             #else
             #if targetEnvironment(simulator)
             return .bgra8Unorm
@@ -187,6 +189,5 @@ extension KSOptions {
         } else {
             return .bgra8Unorm
         }
-
     }
 }

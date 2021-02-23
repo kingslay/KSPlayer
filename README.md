@@ -246,12 +246,16 @@ dwarfdump -F --debug-info ../Sources/libavformat.xcframework/ios-x86_64-maccatal
 
 run demo-iOS use Mac Catalyst
 
-![6](https://github.com/kingslay/KSPlayer/blob/develop/documents/6.png?raw=true)
+![6](https://github.com/kingslay/KSPlayer/blob/develop/Documents/6.png?raw=true)
 
-## Reference
+## Developments and Tests
 
-This item references the  [ZFPlayer](https://github.com/renzifeng/ZFPlayer)、**[SGPlayer](https://github.com/libobjc/SGPlayer)**
+Any contributing and pull requests are warmly welcome. However, before you plan to implement some features or try to fix an uncertain issue, it is recommended to open a discussion first. It would be appreciated if your pull requests could build and with all tests green. :)
 
 ## Communication
 
 - Email : kingslay@icloud.com
+
+## Reference
+
+This item references the  [ZFPlayer](https://github.com/renzifeng/ZFPlayer)、**[SGPlayer](https://github.com/libobjc/SGPlayer)**
