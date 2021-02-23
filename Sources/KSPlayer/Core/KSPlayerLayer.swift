@@ -51,6 +51,16 @@ public enum KSPlayerState: CustomStringConvertible {
     public var isPlaying: Bool { self == .buffering || self == .bufferFinished }
 }
 
+public struct KSNowPlayableMetadata {
+    let mediaType: MPNowPlayingInfoMediaType
+    let isLiveStream: Bool
+    let title: String
+    let artist: String?
+    let artwork: MPMediaItemArtwork?
+    let albumArtist: String?
+    let albumTitle: String?
+}
+
 public protocol KSPlayerLayerDelegate: AnyObject {
     func player(layer: KSPlayerLayer, state: KSPlayerState)
     func player(layer: KSPlayerLayer, currentTime: TimeInterval, totalTime: TimeInterval)
@@ -159,6 +169,10 @@ open class KSPlayerLayer: UIView {
         self.urls.removeAll()
         self.urls.append(contentsOf: urls)
         url = urls.first
+    }
+    
+    public func set(metadata:KSNowPlayableMetadata?) {
+        self.setNowPlaingInfo(metadata: metadata)
     }
 
     open func play() {
@@ -327,7 +341,6 @@ extension KSPlayerLayer: MediaPlayerDelegate {
 }
 
 // MARK: - private functions
-
 extension KSPlayerLayer {
     private func prepareToPlay() {
         startTime = CACurrentMediaTime()
@@ -338,6 +351,26 @@ extension KSPlayerLayer {
         } else {
             state = .notSetURL
         }
+    }
+    
+    func setNowPlaingInfo(metadata: KSNowPlayableMetadata?) {
+        let nowPlayingInfoCenter = MPNowPlayingInfoCenter.default()
+        guard let metadata = metadata else {
+            nowPlayingInfoCenter.nowPlayingInfo = nil
+            return
+        }
+        
+        var nowPlayingInfo = [String: Any]()
+
+        nowPlayingInfo[MPNowPlayingInfoPropertyMediaType] = metadata.mediaType.rawValue
+        nowPlayingInfo[MPNowPlayingInfoPropertyIsLiveStream] = metadata.isLiveStream
+        nowPlayingInfo[MPMediaItemPropertyTitle] = metadata.title
+        nowPlayingInfo[MPMediaItemPropertyArtist] = metadata.artist
+        nowPlayingInfo[MPMediaItemPropertyArtwork] = metadata.artwork
+        nowPlayingInfo[MPMediaItemPropertyAlbumArtist] = metadata.albumArtist
+        nowPlayingInfo[MPMediaItemPropertyAlbumTitle] = metadata.albumTitle
+        
+        nowPlayingInfoCenter.nowPlayingInfo = nowPlayingInfo
     }
 
     @objc private func playerTimerAction() {
@@ -350,30 +383,25 @@ extension KSPlayerLayer {
     }
 
     private func registerRemoteControllEvent() {
-        if #available(OSX 10.12.2, *) {
-            MPRemoteCommandCenter.shared().playCommand.addTarget(self, action: #selector(remoteCommandAction(event:)))
-            MPRemoteCommandCenter.shared().pauseCommand.addTarget(self, action: #selector(remoteCommandAction(event:)))
-            MPRemoteCommandCenter.shared().togglePlayPauseCommand.addTarget(self, action: #selector(remoteCommandAction(event:)))
-            MPRemoteCommandCenter.shared().seekForwardCommand.addTarget(self, action: #selector(remoteCommandAction(event:)))
-            MPRemoteCommandCenter.shared().seekBackwardCommand.addTarget(self, action: #selector(remoteCommandAction(event:)))
-            MPRemoteCommandCenter.shared().changePlaybackRateCommand.addTarget(self, action: #selector(remoteCommandAction(event:)))
-            MPRemoteCommandCenter.shared().changePlaybackPositionCommand.addTarget(self, action: #selector(remoteCommandAction(event:)))
-        }
+        MPRemoteCommandCenter.shared().playCommand.addTarget(self, action: #selector(remoteCommandAction(event:)))
+        MPRemoteCommandCenter.shared().pauseCommand.addTarget(self, action: #selector(remoteCommandAction(event:)))
+        MPRemoteCommandCenter.shared().togglePlayPauseCommand.addTarget(self, action: #selector(remoteCommandAction(event:)))
+        MPRemoteCommandCenter.shared().seekForwardCommand.addTarget(self, action: #selector(remoteCommandAction(event:)))
+        MPRemoteCommandCenter.shared().seekBackwardCommand.addTarget(self, action: #selector(remoteCommandAction(event:)))
+        MPRemoteCommandCenter.shared().changePlaybackRateCommand.addTarget(self, action: #selector(remoteCommandAction(event:)))
+        MPRemoteCommandCenter.shared().changePlaybackPositionCommand.addTarget(self, action: #selector(remoteCommandAction(event:)))
     }
 
     private func unregisterRemoteControllEvent() {
-        if #available(OSX 10.12.2, *) {
-            MPRemoteCommandCenter.shared().playCommand.removeTarget(self)
-            MPRemoteCommandCenter.shared().pauseCommand.removeTarget(self)
-            MPRemoteCommandCenter.shared().togglePlayPauseCommand.removeTarget(self)
-            MPRemoteCommandCenter.shared().seekForwardCommand.removeTarget(self)
-            MPRemoteCommandCenter.shared().seekBackwardCommand.removeTarget(self)
-            MPRemoteCommandCenter.shared().changePlaybackRateCommand.removeTarget(self)
-            MPRemoteCommandCenter.shared().changePlaybackPositionCommand.removeTarget(self)
-        }
+        MPRemoteCommandCenter.shared().playCommand.removeTarget(self)
+        MPRemoteCommandCenter.shared().pauseCommand.removeTarget(self)
+        MPRemoteCommandCenter.shared().togglePlayPauseCommand.removeTarget(self)
+        MPRemoteCommandCenter.shared().seekForwardCommand.removeTarget(self)
+        MPRemoteCommandCenter.shared().seekBackwardCommand.removeTarget(self)
+        MPRemoteCommandCenter.shared().changePlaybackRateCommand.removeTarget(self)
+        MPRemoteCommandCenter.shared().changePlaybackPositionCommand.removeTarget(self)
     }
 
-    @available(OSX 10.12.2, *)
     @objc private func remoteCommandAction(event: MPRemoteCommandEvent) -> MPRemoteCommandHandlerStatus {
         guard let player = player else {
             return .noSuchContent
