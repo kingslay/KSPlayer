@@ -366,7 +366,9 @@ extension KSPlayerLayer {
         nowPlayingInfo[MPNowPlayingInfoPropertyIsLiveStream] = metadata.isLiveStream
         nowPlayingInfo[MPMediaItemPropertyTitle] = metadata.title
         nowPlayingInfo[MPMediaItemPropertyArtist] = metadata.artist
-        nowPlayingInfo[MPMediaItemPropertyArtwork] = metadata.artwork
+        if #available(OSX 10.13.2, *) {
+            nowPlayingInfo[MPMediaItemPropertyArtwork] = metadata.artwork
+        }
         nowPlayingInfo[MPMediaItemPropertyAlbumArtist] = metadata.albumArtist
         nowPlayingInfo[MPMediaItemPropertyAlbumTitle] = metadata.albumTitle
         
