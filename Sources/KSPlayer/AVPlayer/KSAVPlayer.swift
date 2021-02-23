@@ -443,6 +443,16 @@ extension KSAVPlayer: MediaPlayerProtocol {
     public func enterForeground() {
         playerView.playerLayer.player = playerView.player
     }
+    
+    public var seekable: Bool {
+        get {
+            if let items = player.currentItem?.seekableTimeRanges,
+               !items.isEmpty {
+                return true
+            }
+            return false
+        }
+    }
 
     public var isMuted: Bool {
         get {
