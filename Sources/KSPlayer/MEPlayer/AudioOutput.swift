@@ -20,7 +20,6 @@ final class AudioOutput: FrameOutput {
         }
     }
 
-    private let semaphore = DispatchSemaphore(value: 1)
     private var currentRenderReadOffset = 0
     private var currentRender: AudioFrame? {
         didSet {
@@ -36,20 +35,10 @@ final class AudioOutput: FrameOutput {
     init() {
         audioPlayer.delegate = self
     }
-
-    func clear() {
-        semaphore.wait()
-        currentRender = nil
-        semaphore.signal()
-    }
 }
 
 extension AudioOutput: AudioPlayerDelegate {
     func audioPlayerShouldInputData(ioData: UnsafeMutableAudioBufferListPointer, numberOfFrames: UInt32, numberOfChannels _: UInt32) {
-        semaphore.wait()
-        defer {
-            semaphore.signal()
-        }
         var ioDataWriteOffset = 0
         var numberOfSamples = Int(numberOfFrames)
         while numberOfSamples > 0 {

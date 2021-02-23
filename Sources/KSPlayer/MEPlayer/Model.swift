@@ -65,7 +65,6 @@ public protocol ObjectQueueItem {
 protocol FrameOutput {
     var renderSource: OutputRenderSourceDelegate? { get set }
     var isPaused: Bool { get set }
-    func clear()
 }
 
 protocol MEFrame: ObjectQueueItem {
