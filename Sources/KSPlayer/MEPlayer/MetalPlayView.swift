@@ -38,12 +38,6 @@ final class MetalPlayView: MTKView, FrameOutput {
                     MetalRender.share.draw(pixelBuffer: pixelBuffer, display: display, inputTextures: textures, drawable: drawable, renderPassDescriptor: renderPassDescriptor)
                 }
             }
-//            else {
-//                guard let drawable = currentDrawable else {
-//                    return
-//                }
-//                MetalRender.share.clear(drawable: drawable, renderPassDescriptor: renderPassDescriptor)
-//            }
         }
     }
 
@@ -56,10 +50,6 @@ final class MetalPlayView: MTKView, FrameOutput {
 
     required init(coder _: NSCoder) {
         fatalError("init(coder:) has not been implemented")
-    }
-
-    func clear() {
-        pixelBuffer = nil
     }
 
     override func draw(_ dirtyRect: CGRect) {

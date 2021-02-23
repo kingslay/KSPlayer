@@ -187,8 +187,6 @@ extension KSMEPlayer: MediaPlayerProtocol {
     public func replace(url: URL, options: KSOptions) {
         KSLog("replaceUrl \(self)")
         shutdown()
-        audioOutput.clear()
-        videoOutput.clear()
         playerItem.delegate = nil
         playerItem = MEPlayerItem(url: url, options: options)
         self.options = options
@@ -220,7 +218,6 @@ extension KSMEPlayer: MediaPlayerProtocol {
         runInMainqueue { [weak self] in
             self?.bufferingProgress = 0
         }
-        audioOutput.clear()
         let seekTime: TimeInterval
         if time >= duration, options.isLoopPlay {
             seekTime = 0
@@ -229,7 +226,6 @@ extension KSMEPlayer: MediaPlayerProtocol {
         }
         playerItem.seek(time: seekTime) { [weak self] result in
             guard let self = self else { return }
-            self.audioOutput.clear()
             runInMainqueue { [weak self] in
                 guard let self = self else { return }
                 self.playbackState = oldPlaybackState
