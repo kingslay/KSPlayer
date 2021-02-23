@@ -150,7 +150,7 @@ class UIActivityIndicatorView: UIView {
         }
     }
 
-    override init(frame frameRect: NSRect) {
+    override init(frame frameRect: CGRect) {
         super.init(frame: frameRect)
         wantsLayer = true
         backingLayer?.backgroundColor = UIColor(white: 0, alpha: 0.2).cgColor

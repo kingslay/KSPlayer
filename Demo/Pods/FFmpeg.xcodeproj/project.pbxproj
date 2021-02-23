@@ -7,114 +7,149 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		02A32872566B4ABAEFD2FE48324128B5 /* FFmpeg-iOS-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = CE5121F1AF20F59C9043617DC1A611BC /* FFmpeg-iOS-dummy.m */; };
-		06164196D02246B3070453C831E0BCDB /* FFmpeg-macOS-umbrella.h in Headers */ = {isa = PBXBuildFile; fileRef = 34DC180C045746CD60AE1A589975974E /* FFmpeg-macOS-umbrella.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		0E07FC64CB234E023C5E3283C59777AB /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1C217DDDB32ED125DBCC32A4F98BA852 /* Cocoa.framework */; };
-		1A8F6C6039F9DC5F42483BE3FD929CD4 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A067120533E10B8A76819E59DF303531 /* Foundation.framework */; };
-		1F120FF76058DF7BB710F530AABAA0B0 /* FFmpeg.c in Sources */ = {isa = PBXBuildFile; fileRef = F4851D92EE5D343DF8FADE388A2EE281 /* FFmpeg.c */; };
-		25066D76A6C57D6A868C93989AA1E410 /* FFmpeg-tvOS-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = 5001F9CA5337742788DAA7368F2D78B6 /* FFmpeg-tvOS-dummy.m */; };
-		297640ABB28987088FAAF9EE487479CB /* FFmpeg-iOS-umbrella.h in Headers */ = {isa = PBXBuildFile; fileRef = 18217E654E9320CFABE6413E6106613E /* FFmpeg-iOS-umbrella.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		3EEAA502CD1DAA05E5491B3E3E9E5DE2 /* FFmpeg.c in Sources */ = {isa = PBXBuildFile; fileRef = F4851D92EE5D343DF8FADE388A2EE281 /* FFmpeg.c */; };
-		60D50A343C9A5A9F71222A06DEB76564 /* FFmpeg.h in Headers */ = {isa = PBXBuildFile; fileRef = 8F5B6463FB43499CCE4AF484DFE51EC9 /* FFmpeg.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		6C7361310394B28D4FAAFA998C5EBDF1 /* FFmpeg-tvOS-umbrella.h in Headers */ = {isa = PBXBuildFile; fileRef = B483CA168841897392346C0F9B424112 /* FFmpeg-tvOS-umbrella.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		8738C81D21D64006BF8BC43B1083C93C /* FFmpeg.h in Headers */ = {isa = PBXBuildFile; fileRef = 8F5B6463FB43499CCE4AF484DFE51EC9 /* FFmpeg.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		881A02813F7E6CEC82C4954E6850B1BC /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DCEFA5711795BB9351798690696A3A99 /* Foundation.framework */; };
-		9DB2483A3BE9764D0BD68390961FB628 /* FFmpeg.h in Headers */ = {isa = PBXBuildFile; fileRef = 8F5B6463FB43499CCE4AF484DFE51EC9 /* FFmpeg.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		9F6DEE5A3A4B794E73CA84A6E976C76D /* FFmpeg.c in Sources */ = {isa = PBXBuildFile; fileRef = F4851D92EE5D343DF8FADE388A2EE281 /* FFmpeg.c */; };
-		E57649E5086F5353D005571B559D1528 /* FFmpeg-macOS-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = C7C443DBFDB260C7BBA1119B3EC770DA /* FFmpeg-macOS-dummy.m */; };
+		09A1291CD0E05B48B27B5F6567485783 /* FFmpeg.c in Sources */ = {isa = PBXBuildFile; fileRef = E6A237B254AB8BC3E702C6E44FA2F084 /* FFmpeg.c */; };
+		2343137C7CA6861191B6C678886D78B8 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A067120533E10B8A76819E59DF303531 /* Foundation.framework */; };
+		2C0997A1FE8080B28D95AF0DCEBF6A1E /* FFmpeg-macOS-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = A63ABE046B126142F02E5EB09FD9A633 /* FFmpeg-macOS-dummy.m */; };
+		2DB24107FE7D178621F2EB8452A6E1CE /* FFmpeg-macOS-umbrella.h in Headers */ = {isa = PBXBuildFile; fileRef = 73E0E0ECD4B840E34F47E9AA7F67135F /* FFmpeg-macOS-umbrella.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		3B86E6109C6A1ACBD0F69EF6EF76C81C /* FFmpeg.c in Sources */ = {isa = PBXBuildFile; fileRef = E6A237B254AB8BC3E702C6E44FA2F084 /* FFmpeg.c */; };
+		4ADB1BDDF3C0E8B525DF33FB2EA7BC15 /* FFmpeg-tvOS-umbrella.h in Headers */ = {isa = PBXBuildFile; fileRef = CCB9A55A0BA275A4ECA0BFBF2DF2B5CE /* FFmpeg-tvOS-umbrella.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		90B35CFDEF4B02D798AC5B0E23CBEAEB /* FFmpeg.h in Headers */ = {isa = PBXBuildFile; fileRef = 16B3AC81B1317DFAD6CB6F81DCF7F205 /* FFmpeg.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		91ED169365A37D948F2786BB59340C86 /* FFmpeg-iOS-umbrella.h in Headers */ = {isa = PBXBuildFile; fileRef = 466AF70C545BB0E080DB3ECB617CE4EB /* FFmpeg-iOS-umbrella.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		99326C7016EBAFC1453A7D987E4F30A3 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DCEFA5711795BB9351798690696A3A99 /* Foundation.framework */; };
+		A945EF5CCEA5296E973A4F6A74449AA0 /* FFmpeg.c in Sources */ = {isa = PBXBuildFile; fileRef = E6A237B254AB8BC3E702C6E44FA2F084 /* FFmpeg.c */; };
+		C39AA913CB84F0193A60A7DE54D80E65 /* FFmpeg.h in Headers */ = {isa = PBXBuildFile; fileRef = 16B3AC81B1317DFAD6CB6F81DCF7F205 /* FFmpeg.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		C94CB4D5954DD5F169FDB06165CBDA13 /* FFmpeg-tvOS-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = 1F624DA95192B868832874B08610DD09 /* FFmpeg-tvOS-dummy.m */; };
+		DF52C2C7E9F220D0B33A8FDC0DB409AF /* FFmpeg-iOS-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = E72FC7731D0907BAEF22F2E301D847F8 /* FFmpeg-iOS-dummy.m */; };
+		E93BDC00693604C4E839B2CE028B93D3 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1C217DDDB32ED125DBCC32A4F98BA852 /* Cocoa.framework */; };
+		F8E0B9688874A24EEAD4792538595037 /* FFmpeg.h in Headers */ = {isa = PBXBuildFile; fileRef = 16B3AC81B1317DFAD6CB6F81DCF7F205 /* FFmpeg.h */; settings = {ATTRIBUTES = (Public, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
-		04C32C2DCCFCB8541101408A067DE762 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 5354E19B870FAC98C6B886C8A7B31731 /* OpenSSL.xcodeproj */;
-			proxyType = 1;
-			remoteGlobalIDString = 991EE7C8B5B9FB326DB1290119072DB8;
-			remoteInfo = "OpenSSL-macOS";
-		};
-		2ECB267DF7B9D9D5E83E60048FA7943A /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 5354E19B870FAC98C6B886C8A7B31731 /* OpenSSL.xcodeproj */;
-			proxyType = 1;
-			remoteGlobalIDString = 7B6EF2D08D36375BC7EDC372D2ED03FA;
-			remoteInfo = "OpenSSL-iOS";
-		};
-		AD9B0959F23E6A9B87CE224DF8C93BD7 /* PBXContainerItemProxy */ = {
+		2A94B7833BBFD4B51FA062D7D37FD5BB /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 5354E19B870FAC98C6B886C8A7B31731 /* OpenSSL.xcodeproj */;
 			proxyType = 1;
 			remoteGlobalIDString = 6D5AF030E2CBDC8E539466AA3E9F5832;
 			remoteInfo = "OpenSSL-tvOS";
 		};
+		3FBD3464C422DD9ADE1BB3B1FC1852D8 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 5354E19B870FAC98C6B886C8A7B31731 /* OpenSSL.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = 7B6EF2D08D36375BC7EDC372D2ED03FA;
+			remoteInfo = "OpenSSL-iOS";
+		};
+		62D3BEC3E4EBC5A426C59D94430067C2 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 5354E19B870FAC98C6B886C8A7B31731 /* OpenSSL.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = 991EE7C8B5B9FB326DB1290119072DB8;
+			remoteInfo = "OpenSSL-macOS";
+		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		03895E0BC8E6308624DEB1DAF7470FCD /* FFmpeg-tvOS.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "FFmpeg-tvOS.release.xcconfig"; path = "../FFmpeg-tvOS/FFmpeg-tvOS.release.xcconfig"; sourceTree = "<group>"; };
-		172C0E5AE1CC8ACE451F42DD102069C2 /* FFmpeg-tvOS-Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; name = "FFmpeg-tvOS-Info.plist"; path = "../FFmpeg-tvOS/FFmpeg-tvOS-Info.plist"; sourceTree = "<group>"; };
-		18217E654E9320CFABE6413E6106613E /* FFmpeg-iOS-umbrella.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "FFmpeg-iOS-umbrella.h"; sourceTree = "<group>"; };
+		08536E3422AA09C3BF342D68EBE23877 /* FFmpeg-iOS.modulemap */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.module; path = "FFmpeg-iOS.modulemap"; sourceTree = "<group>"; };
+		127D9B44AAC60EFC4C5F410BDC0C964E /* FFmpeg-iOS-prefix.pch */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "FFmpeg-iOS-prefix.pch"; sourceTree = "<group>"; };
+		16B3AC81B1317DFAD6CB6F81DCF7F205 /* FFmpeg.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = FFmpeg.h; sourceTree = "<group>"; };
+		1AD188B5D36D10135142B4BD5A912C55 /* FFmpeg-tvOS-prefix.pch */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = "FFmpeg-tvOS-prefix.pch"; path = "../FFmpeg-tvOS/FFmpeg-tvOS-prefix.pch"; sourceTree = "<group>"; };
 		1C217DDDB32ED125DBCC32A4F98BA852 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk/System/Library/Frameworks/Cocoa.framework; sourceTree = DEVELOPER_DIR; };
-		24B24313EE3FF67B563BE06CFBEED59E /* FFmpeg-macOS.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "FFmpeg-macOS.debug.xcconfig"; path = "../FFmpeg-macOS/FFmpeg-macOS.debug.xcconfig"; sourceTree = "<group>"; };
-		34DC180C045746CD60AE1A589975974E /* FFmpeg-macOS-umbrella.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = "FFmpeg-macOS-umbrella.h"; path = "../FFmpeg-macOS/FFmpeg-macOS-umbrella.h"; sourceTree = "<group>"; };
-		394EA7B4A6AA478F3E9B0D9E0D790E12 /* FFmpeg-tvOS.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "FFmpeg-tvOS.debug.xcconfig"; path = "../FFmpeg-tvOS/FFmpeg-tvOS.debug.xcconfig"; sourceTree = "<group>"; };
-		41E58D49DE6E7800C5C4A13574E2C337 /* FFmpeg-iOS-prefix.pch */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "FFmpeg-iOS-prefix.pch"; sourceTree = "<group>"; };
-		5001F9CA5337742788DAA7368F2D78B6 /* FFmpeg-tvOS-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = "FFmpeg-tvOS-dummy.m"; path = "../FFmpeg-tvOS/FFmpeg-tvOS-dummy.m"; sourceTree = "<group>"; };
-		50986E35F19C302F42A4E08C5326710F /* FFmpeg-iOS-Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "FFmpeg-iOS-Info.plist"; sourceTree = "<group>"; };
+		1EA46E32037DD951B0B75387DBA2033F /* FFmpeg-iOS.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "FFmpeg-iOS.release.xcconfig"; sourceTree = "<group>"; };
+		1F624DA95192B868832874B08610DD09 /* FFmpeg-tvOS-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = "FFmpeg-tvOS-dummy.m"; path = "../FFmpeg-tvOS/FFmpeg-tvOS-dummy.m"; sourceTree = "<group>"; };
+		208BB72DF13B554BDB404222368D0666 /* FFmpeg-macOS.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "FFmpeg-macOS.release.xcconfig"; path = "../FFmpeg-macOS/FFmpeg-macOS.release.xcconfig"; sourceTree = "<group>"; };
+		3666E416CA74A38D63766957F1DA73EE /* FFmpeg-iOS-Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "FFmpeg-iOS-Info.plist"; sourceTree = "<group>"; };
+		3BBA2868DA9D9A756D5E9500247F8DD3 /* FFmpeg-tvOS.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "FFmpeg-tvOS.release.xcconfig"; path = "../FFmpeg-tvOS/FFmpeg-tvOS.release.xcconfig"; sourceTree = "<group>"; };
+		466AF70C545BB0E080DB3ECB617CE4EB /* FFmpeg-iOS-umbrella.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "FFmpeg-iOS-umbrella.h"; sourceTree = "<group>"; };
 		5354E19B870FAC98C6B886C8A7B31731 /* OpenSSL */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = OpenSSL; path = OpenSSL.xcodeproj; sourceTree = "<group>"; };
-		5EF0615272BDEF15A82904CE0B325AB2 /* FFmpeg-macOS-prefix.pch */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = "FFmpeg-macOS-prefix.pch"; path = "../FFmpeg-macOS/FFmpeg-macOS-prefix.pch"; sourceTree = "<group>"; };
+		6592C48DA791CEDAEAEAC89EE2DCB12A /* FFmpeg-macOS-Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; name = "FFmpeg-macOS-Info.plist"; path = "../FFmpeg-macOS/FFmpeg-macOS-Info.plist"; sourceTree = "<group>"; };
 		6602FF17B4BF9C51F8BC46A1255C62B7 /* FFmpeg.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; name = FFmpeg.framework; path = "FFmpeg-macOS.framework"; sourceTree = BUILT_PRODUCTS_DIR; };
-		78530B3DC03BB12E59CEE10075FB6B13 /* FFmpeg-iOS.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "FFmpeg-iOS.release.xcconfig"; sourceTree = "<group>"; };
-		8894A3302DF943A411490793F1EB0A2A /* Libavutil.xcframework */ = {isa = PBXFileReference; includeInIndex = 1; name = Libavutil.xcframework; path = Sources/Libavutil.xcframework; sourceTree = "<group>"; };
-		8AE5ECE5F5B2DF0452E609459357FF2E /* FFmpeg-macOS.modulemap */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.module; name = "FFmpeg-macOS.modulemap"; path = "../FFmpeg-macOS/FFmpeg-macOS.modulemap"; sourceTree = "<group>"; };
-		8B1F481FE47C765435B41ECBE8E643F0 /* Libavcodec.xcframework */ = {isa = PBXFileReference; includeInIndex = 1; name = Libavcodec.xcframework; path = Sources/Libavcodec.xcframework; sourceTree = "<group>"; };
-		8E70F073997EB383C99D12D78A77D9FC /* FFmpeg-macOS-Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; name = "FFmpeg-macOS-Info.plist"; path = "../FFmpeg-macOS/FFmpeg-macOS-Info.plist"; sourceTree = "<group>"; };
-		8F5B6463FB43499CCE4AF484DFE51EC9 /* FFmpeg.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = FFmpeg.h; sourceTree = "<group>"; };
-		9BF537C7893D85FB29CC12CE11055901 /* FFmpeg.podspec */ = {isa = PBXFileReference; explicitFileType = text.script.ruby; includeInIndex = 1; indentWidth = 2; lastKnownFileType = text; path = FFmpeg.podspec; sourceTree = "<group>"; tabWidth = 2; xcLanguageSpecificationIdentifier = xcode.lang.ruby; };
-		9F2DE81C2D226676F8515F6998926632 /* Libavformat.xcframework */ = {isa = PBXFileReference; includeInIndex = 1; name = Libavformat.xcframework; path = Sources/Libavformat.xcframework; sourceTree = "<group>"; };
+		7283133A963CB0EAAA72B4C7B53B8EC3 /* FFmpeg-macOS-prefix.pch */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = "FFmpeg-macOS-prefix.pch"; path = "../FFmpeg-macOS/FFmpeg-macOS-prefix.pch"; sourceTree = "<group>"; };
+		73E0E0ECD4B840E34F47E9AA7F67135F /* FFmpeg-macOS-umbrella.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = "FFmpeg-macOS-umbrella.h"; path = "../FFmpeg-macOS/FFmpeg-macOS-umbrella.h"; sourceTree = "<group>"; };
+		8C0005AFE1EFB4902366C27DCD27A036 /* Libswscale.xcframework */ = {isa = PBXFileReference; includeInIndex = 1; name = Libswscale.xcframework; path = Sources/Libswscale.xcframework; sourceTree = "<group>"; };
+		8E47B9EC469AFFDFFFB6C811D4EC21C4 /* FFmpeg-iOS-xcframeworks.sh */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.script.sh; path = "FFmpeg-iOS-xcframeworks.sh"; sourceTree = "<group>"; };
+		94A24C8C400CC9036938B828168C8DDF /* Libavformat.xcframework */ = {isa = PBXFileReference; includeInIndex = 1; name = Libavformat.xcframework; path = Sources/Libavformat.xcframework; sourceTree = "<group>"; };
+		95CB7A242BE7615F35E89357D7B9A7A4 /* Libswresample.xcframework */ = {isa = PBXFileReference; includeInIndex = 1; name = Libswresample.xcframework; path = Sources/Libswresample.xcframework; sourceTree = "<group>"; };
 		9F4A7F82DDECF71512A2A7A778B45EDF /* FFmpeg.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; name = FFmpeg.framework; path = "FFmpeg-tvOS.framework"; sourceTree = BUILT_PRODUCTS_DIR; };
 		A067120533E10B8A76819E59DF303531 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/AppleTVOS.platform/Developer/SDKs/AppleTVOS14.0.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
+		A63ABE046B126142F02E5EB09FD9A633 /* FFmpeg-macOS-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = "FFmpeg-macOS-dummy.m"; path = "../FFmpeg-macOS/FFmpeg-macOS-dummy.m"; sourceTree = "<group>"; };
 		A970205C51AF1A7C0881E4C42C21531F /* FFmpeg.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; name = FFmpeg.framework; path = "FFmpeg-iOS.framework"; sourceTree = BUILT_PRODUCTS_DIR; };
-		B483CA168841897392346C0F9B424112 /* FFmpeg-tvOS-umbrella.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = "FFmpeg-tvOS-umbrella.h"; path = "../FFmpeg-tvOS/FFmpeg-tvOS-umbrella.h"; sourceTree = "<group>"; };
-		BC5CEC1EB7FA0943BADC020DA8206816 /* FFmpeg-macOS.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "FFmpeg-macOS.release.xcconfig"; path = "../FFmpeg-macOS/FFmpeg-macOS.release.xcconfig"; sourceTree = "<group>"; };
-		C7C443DBFDB260C7BBA1119B3EC770DA /* FFmpeg-macOS-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = "FFmpeg-macOS-dummy.m"; path = "../FFmpeg-macOS/FFmpeg-macOS-dummy.m"; sourceTree = "<group>"; };
-		C85988DD5232B50A3F9A104113F42FF2 /* FFmpeg-iOS.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "FFmpeg-iOS.debug.xcconfig"; sourceTree = "<group>"; };
-		CCA244A62D783173170155F693D2D227 /* FFmpeg-tvOS.modulemap */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.module; name = "FFmpeg-tvOS.modulemap"; path = "../FFmpeg-tvOS/FFmpeg-tvOS.modulemap"; sourceTree = "<group>"; };
-		CE5121F1AF20F59C9043617DC1A611BC /* FFmpeg-iOS-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "FFmpeg-iOS-dummy.m"; sourceTree = "<group>"; };
+		B5DAFE187A0509F932820F2DEC6F0F0A /* FFmpeg-tvOS.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "FFmpeg-tvOS.debug.xcconfig"; path = "../FFmpeg-tvOS/FFmpeg-tvOS.debug.xcconfig"; sourceTree = "<group>"; };
+		B6FB04F06329588AC1EC76DF20B15ACB /* FFmpeg-tvOS-xcframeworks.sh */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.script.sh; name = "FFmpeg-tvOS-xcframeworks.sh"; path = "../FFmpeg-tvOS/FFmpeg-tvOS-xcframeworks.sh"; sourceTree = "<group>"; };
+		C652178B90E0AA3C28FC1F898967EBB8 /* FFmpeg-macOS.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "FFmpeg-macOS.debug.xcconfig"; path = "../FFmpeg-macOS/FFmpeg-macOS.debug.xcconfig"; sourceTree = "<group>"; };
+		CCB9A55A0BA275A4ECA0BFBF2DF2B5CE /* FFmpeg-tvOS-umbrella.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = "FFmpeg-tvOS-umbrella.h"; path = "../FFmpeg-tvOS/FFmpeg-tvOS-umbrella.h"; sourceTree = "<group>"; };
+		D1B4A1C2E7DAE522354D17C11FD1D3D1 /* FFmpeg-iOS.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "FFmpeg-iOS.debug.xcconfig"; sourceTree = "<group>"; };
+		D37065D68D3EDB4B730B33DB48750C92 /* FFmpeg-macOS.modulemap */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.module; name = "FFmpeg-macOS.modulemap"; path = "../FFmpeg-macOS/FFmpeg-macOS.modulemap"; sourceTree = "<group>"; };
+		D7C767F53DDF433F3BDC812CCBF0A306 /* FFmpeg-tvOS.modulemap */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.module; name = "FFmpeg-tvOS.modulemap"; path = "../FFmpeg-tvOS/FFmpeg-tvOS.modulemap"; sourceTree = "<group>"; };
+		D8A726D7D64E02358579969236C51D95 /* FFmpeg-tvOS-Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; name = "FFmpeg-tvOS-Info.plist"; path = "../FFmpeg-tvOS/FFmpeg-tvOS-Info.plist"; sourceTree = "<group>"; };
 		DCEFA5711795BB9351798690696A3A99 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS14.0.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
-		DD0742E20AF6018FACF867EE7FE73E32 /* Libswscale.xcframework */ = {isa = PBXFileReference; includeInIndex = 1; name = Libswscale.xcframework; path = Sources/Libswscale.xcframework; sourceTree = "<group>"; };
-		E00A6EED987EBDBEE5648A39C82502E8 /* Libswresample.xcframework */ = {isa = PBXFileReference; includeInIndex = 1; name = Libswresample.xcframework; path = Sources/Libswresample.xcframework; sourceTree = "<group>"; };
-		E1FC7D12CF740F438518B20F602D8E8C /* FFmpeg-iOS.modulemap */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.module; path = "FFmpeg-iOS.modulemap"; sourceTree = "<group>"; };
-		E95FA1C88748D6B43A0C8D0B20E98ACE /* FFmpeg-tvOS-prefix.pch */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = "FFmpeg-tvOS-prefix.pch"; path = "../FFmpeg-tvOS/FFmpeg-tvOS-prefix.pch"; sourceTree = "<group>"; };
-		F4851D92EE5D343DF8FADE388A2EE281 /* FFmpeg.c */ = {isa = PBXFileReference; includeInIndex = 1; name = FFmpeg.c; path = Sources/FFmpeg/FFmpeg.c; sourceTree = "<group>"; };
+		E6A237B254AB8BC3E702C6E44FA2F084 /* FFmpeg.c */ = {isa = PBXFileReference; includeInIndex = 1; name = FFmpeg.c; path = Sources/FFmpeg/FFmpeg.c; sourceTree = "<group>"; };
+		E72FC7731D0907BAEF22F2E301D847F8 /* FFmpeg-iOS-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "FFmpeg-iOS-dummy.m"; sourceTree = "<group>"; };
+		ECB0B8743D994F918A4B00D93C17570D /* FFmpeg-macOS-xcframeworks.sh */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.script.sh; name = "FFmpeg-macOS-xcframeworks.sh"; path = "../FFmpeg-macOS/FFmpeg-macOS-xcframeworks.sh"; sourceTree = "<group>"; };
+		ECC7584657F567DE7537559167C6B431 /* Libavcodec.xcframework */ = {isa = PBXFileReference; includeInIndex = 1; name = Libavcodec.xcframework; path = Sources/Libavcodec.xcframework; sourceTree = "<group>"; };
+		F39BE016F958594093BAF2B4B51947F5 /* Libavutil.xcframework */ = {isa = PBXFileReference; includeInIndex = 1; name = Libavutil.xcframework; path = Sources/Libavutil.xcframework; sourceTree = "<group>"; };
+		F59372639D02CDC011C4B94949DD5070 /* FFmpeg.podspec */ = {isa = PBXFileReference; explicitFileType = text.script.ruby; includeInIndex = 1; indentWidth = 2; lastKnownFileType = text; path = FFmpeg.podspec; sourceTree = "<group>"; tabWidth = 2; xcLanguageSpecificationIdentifier = xcode.lang.ruby; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		0998D033885E1BE6D235159801C4BBBC /* Frameworks */ = {
+		2E3F4F522D7782FE01A792822271FAEB /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				0E07FC64CB234E023C5E3283C59777AB /* Cocoa.framework in Frameworks */,
+				99326C7016EBAFC1453A7D987E4F30A3 /* Foundation.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		19643808B4B7ECC662B0C46266FA26AB /* Frameworks */ = {
+		4F339D0C8AFCA2612DE6348A24CB19F8 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				881A02813F7E6CEC82C4954E6850B1BC /* Foundation.framework in Frameworks */,
+				2343137C7CA6861191B6C678886D78B8 /* Foundation.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		3FFFAB1F5B744CBF59B15627E67F8E2F /* Frameworks */ = {
+		EF6D12B57178F27B081804E14227D444 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				1A8F6C6039F9DC5F42483BE3FD929CD4 /* Foundation.framework in Frameworks */,
+				E93BDC00693604C4E839B2CE028B93D3 /* Cocoa.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		04763B9E589F30D07DFE417D1CEF60CC /* Support Files */ = {
+			isa = PBXGroup;
+			children = (
+				08536E3422AA09C3BF342D68EBE23877 /* FFmpeg-iOS.modulemap */,
+				E72FC7731D0907BAEF22F2E301D847F8 /* FFmpeg-iOS-dummy.m */,
+				3666E416CA74A38D63766957F1DA73EE /* FFmpeg-iOS-Info.plist */,
+				127D9B44AAC60EFC4C5F410BDC0C964E /* FFmpeg-iOS-prefix.pch */,
+				466AF70C545BB0E080DB3ECB617CE4EB /* FFmpeg-iOS-umbrella.h */,
+				8E47B9EC469AFFDFFFB6C811D4EC21C4 /* FFmpeg-iOS-xcframeworks.sh */,
+				D1B4A1C2E7DAE522354D17C11FD1D3D1 /* FFmpeg-iOS.debug.xcconfig */,
+				1EA46E32037DD951B0B75387DBA2033F /* FFmpeg-iOS.release.xcconfig */,
+				D37065D68D3EDB4B730B33DB48750C92 /* FFmpeg-macOS.modulemap */,
+				A63ABE046B126142F02E5EB09FD9A633 /* FFmpeg-macOS-dummy.m */,
+				6592C48DA791CEDAEAEAC89EE2DCB12A /* FFmpeg-macOS-Info.plist */,
+				7283133A963CB0EAAA72B4C7B53B8EC3 /* FFmpeg-macOS-prefix.pch */,
+				73E0E0ECD4B840E34F47E9AA7F67135F /* FFmpeg-macOS-umbrella.h */,
+				ECB0B8743D994F918A4B00D93C17570D /* FFmpeg-macOS-xcframeworks.sh */,
+				C652178B90E0AA3C28FC1F898967EBB8 /* FFmpeg-macOS.debug.xcconfig */,
+				208BB72DF13B554BDB404222368D0666 /* FFmpeg-macOS.release.xcconfig */,
+				D7C767F53DDF433F3BDC812CCBF0A306 /* FFmpeg-tvOS.modulemap */,
+				1F624DA95192B868832874B08610DD09 /* FFmpeg-tvOS-dummy.m */,
+				D8A726D7D64E02358579969236C51D95 /* FFmpeg-tvOS-Info.plist */,
+				1AD188B5D36D10135142B4BD5A912C55 /* FFmpeg-tvOS-prefix.pch */,
+				CCB9A55A0BA275A4ECA0BFBF2DF2B5CE /* FFmpeg-tvOS-umbrella.h */,
+				B6FB04F06329588AC1EC76DF20B15ACB /* FFmpeg-tvOS-xcframeworks.sh */,
+				B5DAFE187A0509F932820F2DEC6F0F0A /* FFmpeg-tvOS.debug.xcconfig */,
+				3BBA2868DA9D9A756D5E9500247F8DD3 /* FFmpeg-tvOS.release.xcconfig */,
+			);
+			name = "Support Files";
+			path = "Demo/Pods/Target Support Files/FFmpeg-iOS";
+			sourceTree = "<group>";
+		};
 		34885751515CEB809F2D4AC08DB6E508 /* iOS */ = {
 			isa = PBXGroup;
 			children = (
@@ -123,29 +158,25 @@
 			name = iOS;
 			sourceTree = "<group>";
 		};
-		6CEB0B67D2F8D3669B54F9A18430E217 /* FFmpeg */ = {
+		5E951AD4071D4DCF4345982595D0479A /* FFmpeg */ = {
 			isa = PBXGroup;
 			children = (
-				F4851D92EE5D343DF8FADE388A2EE281 /* FFmpeg.c */,
-				C6BC6AFA6E41F5BBCD02EF540BC7F7A0 /* FFmpeg */,
-				A022B0642131E422039FED27E956EC5F /* include */,
-				B16796A714DD3300A8B8CB54BA61F63B /* Pod */,
-				B4FD816F5ECBE6FE6271D16E40312C0A /* Support Files */,
+				E6A237B254AB8BC3E702C6E44FA2F084 /* FFmpeg.c */,
+				7BBB755172E2D9A06EA48813D417F693 /* FFmpeg */,
+				F572F102B5B23E0D50A8C47B02EE2C49 /* include */,
+				EA35ED8C8305C2D58C6743D51879A144 /* Pod */,
+				04763B9E589F30D07DFE417D1CEF60CC /* Support Files */,
 			);
 			name = FFmpeg;
 			path = ../..;
 			sourceTree = "<group>";
 		};
-		7A9E8FC9D6B9066F3826B55407A76CE3 /* Frameworks */ = {
+		7BBB755172E2D9A06EA48813D417F693 /* FFmpeg */ = {
 			isa = PBXGroup;
 			children = (
-				8B1F481FE47C765435B41ECBE8E643F0 /* Libavcodec.xcframework */,
-				9F2DE81C2D226676F8515F6998926632 /* Libavformat.xcframework */,
-				8894A3302DF943A411490793F1EB0A2A /* Libavutil.xcframework */,
-				E00A6EED987EBDBEE5648A39C82502E8 /* Libswresample.xcframework */,
-				DD0742E20AF6018FACF867EE7FE73E32 /* Libswscale.xcframework */,
+				DA329CDE236E7DB0B2B2410C439F30C1 /* Frameworks */,
 			);
-			name = Frameworks;
+			name = FFmpeg;
 			sourceTree = "<group>";
 		};
 		7E13D7139385F17A8830730F702D11A8 /* Frameworks */ = {
@@ -158,29 +189,12 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
-		A022B0642131E422039FED27E956EC5F /* include */ = {
-			isa = PBXGroup;
-			children = (
-				8F5B6463FB43499CCE4AF484DFE51EC9 /* FFmpeg.h */,
-			);
-			name = include;
-			path = Sources/FFmpeg/include;
-			sourceTree = "<group>";
-		};
 		AEC46DBDDAE1365810E3B597C46312CF /* Dependencies */ = {
 			isa = PBXGroup;
 			children = (
 				5354E19B870FAC98C6B886C8A7B31731 /* OpenSSL */,
 			);
 			name = Dependencies;
-			sourceTree = "<group>";
-		};
-		B16796A714DD3300A8B8CB54BA61F63B /* Pod */ = {
-			isa = PBXGroup;
-			children = (
-				9BF537C7893D85FB29CC12CE11055901 /* FFmpeg.podspec */,
-			);
-			name = Pod;
 			sourceTree = "<group>";
 		};
 		B2B266A3CAA28B539CF744F7C0CAFC22 /* Products */ = {
@@ -193,51 +207,43 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
-		B4FD816F5ECBE6FE6271D16E40312C0A /* Support Files */ = {
+		DA329CDE236E7DB0B2B2410C439F30C1 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				E1FC7D12CF740F438518B20F602D8E8C /* FFmpeg-iOS.modulemap */,
-				CE5121F1AF20F59C9043617DC1A611BC /* FFmpeg-iOS-dummy.m */,
-				50986E35F19C302F42A4E08C5326710F /* FFmpeg-iOS-Info.plist */,
-				41E58D49DE6E7800C5C4A13574E2C337 /* FFmpeg-iOS-prefix.pch */,
-				18217E654E9320CFABE6413E6106613E /* FFmpeg-iOS-umbrella.h */,
-				C85988DD5232B50A3F9A104113F42FF2 /* FFmpeg-iOS.debug.xcconfig */,
-				78530B3DC03BB12E59CEE10075FB6B13 /* FFmpeg-iOS.release.xcconfig */,
-				8AE5ECE5F5B2DF0452E609459357FF2E /* FFmpeg-macOS.modulemap */,
-				C7C443DBFDB260C7BBA1119B3EC770DA /* FFmpeg-macOS-dummy.m */,
-				8E70F073997EB383C99D12D78A77D9FC /* FFmpeg-macOS-Info.plist */,
-				5EF0615272BDEF15A82904CE0B325AB2 /* FFmpeg-macOS-prefix.pch */,
-				34DC180C045746CD60AE1A589975974E /* FFmpeg-macOS-umbrella.h */,
-				24B24313EE3FF67B563BE06CFBEED59E /* FFmpeg-macOS.debug.xcconfig */,
-				BC5CEC1EB7FA0943BADC020DA8206816 /* FFmpeg-macOS.release.xcconfig */,
-				CCA244A62D783173170155F693D2D227 /* FFmpeg-tvOS.modulemap */,
-				5001F9CA5337742788DAA7368F2D78B6 /* FFmpeg-tvOS-dummy.m */,
-				172C0E5AE1CC8ACE451F42DD102069C2 /* FFmpeg-tvOS-Info.plist */,
-				E95FA1C88748D6B43A0C8D0B20E98ACE /* FFmpeg-tvOS-prefix.pch */,
-				B483CA168841897392346C0F9B424112 /* FFmpeg-tvOS-umbrella.h */,
-				394EA7B4A6AA478F3E9B0D9E0D790E12 /* FFmpeg-tvOS.debug.xcconfig */,
-				03895E0BC8E6308624DEB1DAF7470FCD /* FFmpeg-tvOS.release.xcconfig */,
+				ECC7584657F567DE7537559167C6B431 /* Libavcodec.xcframework */,
+				94A24C8C400CC9036938B828168C8DDF /* Libavformat.xcframework */,
+				F39BE016F958594093BAF2B4B51947F5 /* Libavutil.xcframework */,
+				95CB7A242BE7615F35E89357D7B9A7A4 /* Libswresample.xcframework */,
+				8C0005AFE1EFB4902366C27DCD27A036 /* Libswscale.xcframework */,
 			);
-			name = "Support Files";
-			path = "Demo/Pods/Target Support Files/FFmpeg-iOS";
-			sourceTree = "<group>";
-		};
-		C6BC6AFA6E41F5BBCD02EF540BC7F7A0 /* FFmpeg */ = {
-			isa = PBXGroup;
-			children = (
-				7A9E8FC9D6B9066F3826B55407A76CE3 /* Frameworks */,
-			);
-			name = FFmpeg;
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 		DE3ACCC59638D396E7E47A348966835A = {
 			isa = PBXGroup;
 			children = (
 				AEC46DBDDAE1365810E3B597C46312CF /* Dependencies */,
-				6CEB0B67D2F8D3669B54F9A18430E217 /* FFmpeg */,
+				5E951AD4071D4DCF4345982595D0479A /* FFmpeg */,
 				7E13D7139385F17A8830730F702D11A8 /* Frameworks */,
 				B2B266A3CAA28B539CF744F7C0CAFC22 /* Products */,
 			);
+			sourceTree = "<group>";
+		};
+		EA35ED8C8305C2D58C6743D51879A144 /* Pod */ = {
+			isa = PBXGroup;
+			children = (
+				F59372639D02CDC011C4B94949DD5070 /* FFmpeg.podspec */,
+			);
+			name = Pod;
+			sourceTree = "<group>";
+		};
+		F572F102B5B23E0D50A8C47B02EE2C49 /* include */ = {
+			isa = PBXGroup;
+			children = (
+				16B3AC81B1317DFAD6CB6F81DCF7F205 /* FFmpeg.h */,
+			);
+			name = include;
+			path = Sources/FFmpeg/include;
 			sourceTree = "<group>";
 		};
 		F74B877F38B9A0D88518775FBE58A94F /* tvOS */ = {
@@ -259,30 +265,30 @@
 /* End PBXGroup section */
 
 /* Begin PBXHeadersBuildPhase section */
-		5F23D005E27E8578CD5350EF7F3FB38D /* Headers */ = {
+		74EA5F341AAAA15943A73554EE885234 /* Headers */ = {
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				6C7361310394B28D4FAAFA998C5EBDF1 /* FFmpeg-tvOS-umbrella.h in Headers */,
-				60D50A343C9A5A9F71222A06DEB76564 /* FFmpeg.h in Headers */,
+				4ADB1BDDF3C0E8B525DF33FB2EA7BC15 /* FFmpeg-tvOS-umbrella.h in Headers */,
+				F8E0B9688874A24EEAD4792538595037 /* FFmpeg.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		606A1F2610AF142DEA7C57B0E4820C9D /* Headers */ = {
+		C86B9B88EA4DC94462018CB8ED8469BA /* Headers */ = {
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				06164196D02246B3070453C831E0BCDB /* FFmpeg-macOS-umbrella.h in Headers */,
-				8738C81D21D64006BF8BC43B1083C93C /* FFmpeg.h in Headers */,
+				2DB24107FE7D178621F2EB8452A6E1CE /* FFmpeg-macOS-umbrella.h in Headers */,
+				C39AA913CB84F0193A60A7DE54D80E65 /* FFmpeg.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		67CF39F07099C37D4EB6621C04FE0AF7 /* Headers */ = {
+		EBF5D3DDC0DA3A5DF5134672B98D1683 /* Headers */ = {
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				297640ABB28987088FAAF9EE487479CB /* FFmpeg-iOS-umbrella.h in Headers */,
-				9DB2483A3BE9764D0BD68390961FB628 /* FFmpeg.h in Headers */,
+				91ED169365A37D948F2786BB59340C86 /* FFmpeg-iOS-umbrella.h in Headers */,
+				90B35CFDEF4B02D798AC5B0E23CBEAEB /* FFmpeg.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -291,17 +297,18 @@
 /* Begin PBXNativeTarget section */
 		0286B5291AB3CEA9A65CCD409651A7EB /* FFmpeg-tvOS */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = F4950AAFA2DAEE162842FF9541D73D7C /* Build configuration list for PBXNativeTarget "FFmpeg-tvOS" */;
+			buildConfigurationList = DF721193C671A001C866D994DBD3D29A /* Build configuration list for PBXNativeTarget "FFmpeg-tvOS" */;
 			buildPhases = (
-				5F23D005E27E8578CD5350EF7F3FB38D /* Headers */,
-				F9C90EAFF61DE052E3939ACB44841401 /* Sources */,
-				3FFFAB1F5B744CBF59B15627E67F8E2F /* Frameworks */,
-				676B1A360F99B981FC4CA5A41A86B3ED /* Resources */,
+				74EA5F341AAAA15943A73554EE885234 /* Headers */,
+				5DB11CEA97258A5F1FCEB72E5F48E3BA /* [CP] Copy XCFrameworks */,
+				51EC62B8C4E46C0B466CB4EC73501378 /* Sources */,
+				4F339D0C8AFCA2612DE6348A24CB19F8 /* Frameworks */,
+				F23D2B691622E0BB8A7D465D7D17666C /* Resources */,
 			);
 			buildRules = (
 			);
 			dependencies = (
-				DA0B721A236DD72732516BCFDBCDEAD4 /* PBXTargetDependency */,
+				FF4F5C0AAD98DCCFF4BFFB5962C398BB /* PBXTargetDependency */,
 			);
 			name = "FFmpeg-tvOS";
 			productName = "FFmpeg-tvOS";
@@ -310,17 +317,18 @@
 		};
 		8E0872FEBF613E156B07D2FE690ABE1C /* FFmpeg-macOS */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 1F47D6158318394F30299B53E5BC9624 /* Build configuration list for PBXNativeTarget "FFmpeg-macOS" */;
+			buildConfigurationList = 5532229C020993588472E55027E0B9E2 /* Build configuration list for PBXNativeTarget "FFmpeg-macOS" */;
 			buildPhases = (
-				606A1F2610AF142DEA7C57B0E4820C9D /* Headers */,
-				850E0823FB246B5A66CD2FCAA552CE90 /* Sources */,
-				0998D033885E1BE6D235159801C4BBBC /* Frameworks */,
-				EFC57C8C2AB77D11C5DFEB7C4CF53701 /* Resources */,
+				C86B9B88EA4DC94462018CB8ED8469BA /* Headers */,
+				7F68C94EF2A0456217E4A538BFE66686 /* [CP] Copy XCFrameworks */,
+				720A309A612BA0BFCAD35A0E9ACA2710 /* Sources */,
+				EF6D12B57178F27B081804E14227D444 /* Frameworks */,
+				B9BD22BC07A49396F2546A837366EE01 /* Resources */,
 			);
 			buildRules = (
 			);
 			dependencies = (
-				927E024B669CF441C16E4BFECD23C911 /* PBXTargetDependency */,
+				6EDD4FB4D7160D8C6E8A28EC599D4896 /* PBXTargetDependency */,
 			);
 			name = "FFmpeg-macOS";
 			productName = "FFmpeg-macOS";
@@ -329,17 +337,18 @@
 		};
 		DC97163E5903ECB91BAF372D83D4575F /* FFmpeg-iOS */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 366BC9F7DD9E50F74B21B5CF2FA323B9 /* Build configuration list for PBXNativeTarget "FFmpeg-iOS" */;
+			buildConfigurationList = CC043EC4C949502C0BF81FB5BA2C60D8 /* Build configuration list for PBXNativeTarget "FFmpeg-iOS" */;
 			buildPhases = (
-				67CF39F07099C37D4EB6621C04FE0AF7 /* Headers */,
-				1A3863E553689D351695925043DB130A /* Sources */,
-				19643808B4B7ECC662B0C46266FA26AB /* Frameworks */,
-				08D95D78D94B17142B5C7CC19FFCCEC1 /* Resources */,
+				EBF5D3DDC0DA3A5DF5134672B98D1683 /* Headers */,
+				A6BD09BD495EC2E249EB52A0E25FD922 /* [CP] Copy XCFrameworks */,
+				0C16615B6A9966E97CA525A3D11320B7 /* Sources */,
+				2E3F4F522D7782FE01A792822271FAEB /* Frameworks */,
+				0CCD8F66AEF2AE8A6997CA02416D0A57 /* Resources */,
 			);
 			buildRules = (
 			);
 			dependencies = (
-				FD214D9E151479E7A51E53DAA0D933AD /* PBXTargetDependency */,
+				5E8AFC9A96C6417F36E2A6F361933F65 /* PBXTargetDependency */,
 			);
 			name = "FFmpeg-iOS";
 			productName = "FFmpeg-iOS";
@@ -381,21 +390,21 @@
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
-		08D95D78D94B17142B5C7CC19FFCCEC1 /* Resources */ = {
+		0CCD8F66AEF2AE8A6997CA02416D0A57 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		676B1A360F99B981FC4CA5A41A86B3ED /* Resources */ = {
+		B9BD22BC07A49396F2546A837366EE01 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		EFC57C8C2AB77D11C5DFEB7C4CF53701 /* Resources */ = {
+		F23D2B691622E0BB8A7D465D7D17666C /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -404,58 +413,247 @@
 		};
 /* End PBXResourcesBuildPhase section */
 
+/* Begin PBXShellScriptBuildPhase section */
+		5DB11CEA97258A5F1FCEB72E5F48E3BA /* [CP] Copy XCFrameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/FFmpeg-tvOS/FFmpeg-tvOS-xcframeworks-input-files.xcfilelist",
+			);
+			name = "[CP] Copy XCFrameworks";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/FFmpeg-tvOS/FFmpeg-tvOS-xcframeworks-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/FFmpeg-tvOS/FFmpeg-tvOS-xcframeworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		7F68C94EF2A0456217E4A538BFE66686 /* [CP] Copy XCFrameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/FFmpeg-macOS/FFmpeg-macOS-xcframeworks-input-files.xcfilelist",
+			);
+			name = "[CP] Copy XCFrameworks";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/FFmpeg-macOS/FFmpeg-macOS-xcframeworks-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/FFmpeg-macOS/FFmpeg-macOS-xcframeworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		A6BD09BD495EC2E249EB52A0E25FD922 /* [CP] Copy XCFrameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/FFmpeg-iOS/FFmpeg-iOS-xcframeworks-input-files.xcfilelist",
+			);
+			name = "[CP] Copy XCFrameworks";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/FFmpeg-iOS/FFmpeg-iOS-xcframeworks-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/FFmpeg-iOS/FFmpeg-iOS-xcframeworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
+
 /* Begin PBXSourcesBuildPhase section */
-		1A3863E553689D351695925043DB130A /* Sources */ = {
+		0C16615B6A9966E97CA525A3D11320B7 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				02A32872566B4ABAEFD2FE48324128B5 /* FFmpeg-iOS-dummy.m in Sources */,
-				3EEAA502CD1DAA05E5491B3E3E9E5DE2 /* FFmpeg.c in Sources */,
+				DF52C2C7E9F220D0B33A8FDC0DB409AF /* FFmpeg-iOS-dummy.m in Sources */,
+				3B86E6109C6A1ACBD0F69EF6EF76C81C /* FFmpeg.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		850E0823FB246B5A66CD2FCAA552CE90 /* Sources */ = {
+		51EC62B8C4E46C0B466CB4EC73501378 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				E57649E5086F5353D005571B559D1528 /* FFmpeg-macOS-dummy.m in Sources */,
-				9F6DEE5A3A4B794E73CA84A6E976C76D /* FFmpeg.c in Sources */,
+				C94CB4D5954DD5F169FDB06165CBDA13 /* FFmpeg-tvOS-dummy.m in Sources */,
+				09A1291CD0E05B48B27B5F6567485783 /* FFmpeg.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		F9C90EAFF61DE052E3939ACB44841401 /* Sources */ = {
+		720A309A612BA0BFCAD35A0E9ACA2710 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				25066D76A6C57D6A868C93989AA1E410 /* FFmpeg-tvOS-dummy.m in Sources */,
-				1F120FF76058DF7BB710F530AABAA0B0 /* FFmpeg.c in Sources */,
+				2C0997A1FE8080B28D95AF0DCEBF6A1E /* FFmpeg-macOS-dummy.m in Sources */,
+				A945EF5CCEA5296E973A4F6A74449AA0 /* FFmpeg.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
-		927E024B669CF441C16E4BFECD23C911 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			name = "OpenSSL-macOS";
-			targetProxy = 04C32C2DCCFCB8541101408A067DE762 /* PBXContainerItemProxy */;
-		};
-		DA0B721A236DD72732516BCFDBCDEAD4 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			name = "OpenSSL-tvOS";
-			targetProxy = AD9B0959F23E6A9B87CE224DF8C93BD7 /* PBXContainerItemProxy */;
-		};
-		FD214D9E151479E7A51E53DAA0D933AD /* PBXTargetDependency */ = {
+		5E8AFC9A96C6417F36E2A6F361933F65 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			name = "OpenSSL-iOS";
-			targetProxy = 2ECB267DF7B9D9D5E83E60048FA7943A /* PBXContainerItemProxy */;
+			targetProxy = 3FBD3464C422DD9ADE1BB3B1FC1852D8 /* PBXContainerItemProxy */;
+		};
+		6EDD4FB4D7160D8C6E8A28EC599D4896 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = "OpenSSL-macOS";
+			targetProxy = 62D3BEC3E4EBC5A426C59D94430067C2 /* PBXContainerItemProxy */;
+		};
+		FF4F5C0AAD98DCCFF4BFFB5962C398BB /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = "OpenSSL-tvOS";
+			targetProxy = 2A94B7833BBFD4B51FA062D7D37FD5BB /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
-		0801381CA08074BD15FCD1F2A618EA25 /* Release */ = {
+		250841A73E7365C7CDFF2A47395EFD18 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 78530B3DC03BB12E59CEE10075FB6B13 /* FFmpeg-iOS.release.xcconfig */;
+			baseConfigurationReference = D1B4A1C2E7DAE522354D17C11FD1D3D1 /* FFmpeg-iOS.debug.xcconfig */;
+			buildSettings = {
+				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
+				CURRENT_PROJECT_VERSION = 1;
+				DEFINES_MODULE = YES;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				GCC_PREFIX_HEADER = "Target Support Files/FFmpeg-iOS/FFmpeg-iOS-prefix.pch";
+				INFOPLIST_FILE = "Target Support Files/FFmpeg-iOS/FFmpeg-iOS-Info.plist";
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MACH_O_TYPE = staticlib;
+				MODULEMAP_FILE = "Target Support Files/FFmpeg-iOS/FFmpeg-iOS.modulemap";
+				PRODUCT_MODULE_NAME = FFmpeg;
+				PRODUCT_NAME = FFmpeg;
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) ";
+				SWIFT_VERSION = 5.1;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Debug;
+		};
+		3D6D764E7F2CB407100D179C12BA97C8 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"POD_CONFIGURATION_RELEASE=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
+				MACOSX_DEPLOYMENT_TARGET = 10.11;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRIP_INSTALLED_PRODUCT = NO;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+				SYMROOT = "${SRCROOT}/../build";
+				TVOS_DEPLOYMENT_TARGET = 10.2;
+			};
+			name = Release;
+		};
+		4E8413BB7574EAA5B09A960041EA0003 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 3BBA2868DA9D9A756D5E9500247F8DD3 /* FFmpeg-tvOS.release.xcconfig */;
+			buildSettings = {
+				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
+				CURRENT_PROJECT_VERSION = 1;
+				DEFINES_MODULE = YES;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				GCC_PREFIX_HEADER = "Target Support Files/FFmpeg-tvOS/FFmpeg-tvOS-prefix.pch";
+				INFOPLIST_FILE = "Target Support Files/FFmpeg-tvOS/FFmpeg-tvOS-Info.plist";
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MACH_O_TYPE = staticlib;
+				MODULEMAP_FILE = "Target Support Files/FFmpeg-tvOS/FFmpeg-tvOS.modulemap";
+				PRODUCT_MODULE_NAME = FFmpeg;
+				PRODUCT_NAME = FFmpeg;
+				SDKROOT = appletvos;
+				SKIP_INSTALL = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) ";
+				SWIFT_VERSION = 5.1;
+				TARGETED_DEVICE_FAMILY = 3;
+				TVOS_DEPLOYMENT_TARGET = 10.2;
+				VALIDATE_PRODUCT = YES;
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Release;
+		};
+		813984B3B69D2E97B22EA1ABB7254EB4 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 1EA46E32037DD951B0B75387DBA2033F /* FFmpeg-iOS.release.xcconfig */;
 			buildSettings = {
 				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
@@ -489,10 +687,83 @@
 			};
 			name = Release;
 		};
-		161D707C9638C756E207DB462ABCB95B /* Debug */ = {
+		C25F8698DC0348D6B20BE698ABE3E0CC /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = C652178B90E0AA3C28FC1F898967EBB8 /* FFmpeg-macOS.debug.xcconfig */;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DEFINES_MODULE = YES;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				GCC_PREFIX_HEADER = "Target Support Files/FFmpeg-macOS/FFmpeg-macOS-prefix.pch";
+				INFOPLIST_FILE = "Target Support Files/FFmpeg-macOS/FFmpeg-macOS-Info.plist";
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MACH_O_TYPE = staticlib;
+				MACOSX_DEPLOYMENT_TARGET = 10.11;
+				MODULEMAP_FILE = "Target Support Files/FFmpeg-macOS/FFmpeg-macOS.modulemap";
+				PRODUCT_MODULE_NAME = FFmpeg;
+				PRODUCT_NAME = FFmpeg;
+				SDKROOT = macosx;
+				SKIP_INSTALL = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) ";
+				SWIFT_VERSION = 5.1;
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Debug;
+		};
+		C31F3E66009E361D76C441C8FD553EC6 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = B5DAFE187A0509F932820F2DEC6F0F0A /* FFmpeg-tvOS.debug.xcconfig */;
+			buildSettings = {
+				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
+				CURRENT_PROJECT_VERSION = 1;
+				DEFINES_MODULE = YES;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				GCC_PREFIX_HEADER = "Target Support Files/FFmpeg-tvOS/FFmpeg-tvOS-prefix.pch";
+				INFOPLIST_FILE = "Target Support Files/FFmpeg-tvOS/FFmpeg-tvOS-Info.plist";
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MACH_O_TYPE = staticlib;
+				MODULEMAP_FILE = "Target Support Files/FFmpeg-tvOS/FFmpeg-tvOS.modulemap";
+				PRODUCT_MODULE_NAME = FFmpeg;
+				PRODUCT_NAME = FFmpeg;
+				SDKROOT = appletvos;
+				SKIP_INSTALL = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) ";
+				SWIFT_VERSION = 5.1;
+				TARGETED_DEVICE_FAMILY = 3;
+				TVOS_DEPLOYMENT_TARGET = 10.2;
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Debug;
+		};
+		E4F0F6E1A8F30A91D62B2785522DF1EA /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
@@ -556,107 +827,9 @@
 			};
 			name = Debug;
 		};
-		1A3A4620BFE46DEBD93D391CC1484228 /* Release */ = {
+		F8785D33237DD17DA38550E34A807F3D /* Release */ = {
 			isa = XCBuildConfiguration;
-			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				CLANG_ANALYZER_NONNULL = YES;
-				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
-				CLANG_CXX_LIBRARY = "libc++";
-				CLANG_ENABLE_MODULES = YES;
-				CLANG_ENABLE_OBJC_ARC = YES;
-				CLANG_ENABLE_OBJC_WEAK = YES;
-				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
-				CLANG_WARN_BOOL_CONVERSION = YES;
-				CLANG_WARN_COMMA = YES;
-				CLANG_WARN_CONSTANT_CONVERSION = YES;
-				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
-				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
-				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
-				CLANG_WARN_EMPTY_BODY = YES;
-				CLANG_WARN_ENUM_CONVERSION = YES;
-				CLANG_WARN_INFINITE_RECURSION = YES;
-				CLANG_WARN_INT_CONVERSION = YES;
-				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
-				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
-				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
-				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
-				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
-				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
-				CLANG_WARN_STRICT_PROTOTYPES = YES;
-				CLANG_WARN_SUSPICIOUS_MOVE = YES;
-				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
-				CLANG_WARN_UNREACHABLE_CODE = YES;
-				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				COPY_PHASE_STRIP = NO;
-				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				ENABLE_NS_ASSERTIONS = NO;
-				ENABLE_STRICT_OBJC_MSGSEND = YES;
-				GCC_C_LANGUAGE_STANDARD = gnu11;
-				GCC_NO_COMMON_BLOCKS = YES;
-				GCC_PREPROCESSOR_DEFINITIONS = (
-					"POD_CONFIGURATION_RELEASE=1",
-					"$(inherited)",
-				);
-				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
-				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
-				GCC_WARN_UNDECLARED_SELECTOR = YES;
-				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
-				GCC_WARN_UNUSED_FUNCTION = YES;
-				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
-				MACOSX_DEPLOYMENT_TARGET = 10.11;
-				MTL_ENABLE_DEBUG_INFO = NO;
-				MTL_FAST_MATH = YES;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				STRIP_INSTALLED_PRODUCT = NO;
-				SWIFT_COMPILATION_MODE = wholemodule;
-				SWIFT_OPTIMIZATION_LEVEL = "-O";
-				SWIFT_VERSION = 5.0;
-				SYMROOT = "${SRCROOT}/../build";
-				TVOS_DEPLOYMENT_TARGET = 10.2;
-			};
-			name = Release;
-		};
-		21CC4EF3B01A22287374D318C30FDEE7 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			baseConfigurationReference = C85988DD5232B50A3F9A104113F42FF2 /* FFmpeg-iOS.debug.xcconfig */;
-			buildSettings = {
-				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
-				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
-				CURRENT_PROJECT_VERSION = 1;
-				DEFINES_MODULE = YES;
-				DYLIB_COMPATIBILITY_VERSION = 1;
-				DYLIB_CURRENT_VERSION = 1;
-				DYLIB_INSTALL_NAME_BASE = "@rpath";
-				GCC_PREFIX_HEADER = "Target Support Files/FFmpeg-iOS/FFmpeg-iOS-prefix.pch";
-				INFOPLIST_FILE = "Target Support Files/FFmpeg-iOS/FFmpeg-iOS-Info.plist";
-				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@loader_path/Frameworks",
-				);
-				MACH_O_TYPE = staticlib;
-				MODULEMAP_FILE = "Target Support Files/FFmpeg-iOS/FFmpeg-iOS.modulemap";
-				PRODUCT_MODULE_NAME = FFmpeg;
-				PRODUCT_NAME = FFmpeg;
-				SDKROOT = iphoneos;
-				SKIP_INSTALL = YES;
-				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) ";
-				SWIFT_VERSION = 5.1;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				VERSIONING_SYSTEM = "apple-generic";
-				VERSION_INFO_PREFIX = "";
-			};
-			name = Debug;
-		};
-		26A2780150C91E1FC64926B0C8F72863 /* Release */ = {
-			isa = XCBuildConfiguration;
-			baseConfigurationReference = BC5CEC1EB7FA0943BADC020DA8206816 /* FFmpeg-macOS.release.xcconfig */;
+			baseConfigurationReference = 208BB72DF13B554BDB404222368D0666 /* FFmpeg-macOS.release.xcconfig */;
 			buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
 				CLANG_ENABLE_OBJC_WEAK = NO;
@@ -690,150 +863,42 @@
 				VERSION_INFO_PREFIX = "";
 			};
 			name = Release;
-		};
-		442528D6A24DF7D8C085774CFCAB9B02 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			baseConfigurationReference = 24B24313EE3FF67B563BE06CFBEED59E /* FFmpeg-macOS.debug.xcconfig */;
-			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
-				CLANG_ENABLE_OBJC_WEAK = NO;
-				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
-				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
-				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 1;
-				DEFINES_MODULE = YES;
-				DYLIB_COMPATIBILITY_VERSION = 1;
-				DYLIB_CURRENT_VERSION = 1;
-				DYLIB_INSTALL_NAME_BASE = "@rpath";
-				GCC_PREFIX_HEADER = "Target Support Files/FFmpeg-macOS/FFmpeg-macOS-prefix.pch";
-				INFOPLIST_FILE = "Target Support Files/FFmpeg-macOS/FFmpeg-macOS-Info.plist";
-				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/../Frameworks",
-					"@loader_path/Frameworks",
-				);
-				MACH_O_TYPE = staticlib;
-				MACOSX_DEPLOYMENT_TARGET = 10.11;
-				MODULEMAP_FILE = "Target Support Files/FFmpeg-macOS/FFmpeg-macOS.modulemap";
-				PRODUCT_MODULE_NAME = FFmpeg;
-				PRODUCT_NAME = FFmpeg;
-				SDKROOT = macosx;
-				SKIP_INSTALL = YES;
-				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) ";
-				SWIFT_VERSION = 5.1;
-				VERSIONING_SYSTEM = "apple-generic";
-				VERSION_INFO_PREFIX = "";
-			};
-			name = Debug;
-		};
-		4CFE1FA74189E53240A6C3EB39A1B21B /* Release */ = {
-			isa = XCBuildConfiguration;
-			baseConfigurationReference = 03895E0BC8E6308624DEB1DAF7470FCD /* FFmpeg-tvOS.release.xcconfig */;
-			buildSettings = {
-				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
-				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
-				CURRENT_PROJECT_VERSION = 1;
-				DEFINES_MODULE = YES;
-				DYLIB_COMPATIBILITY_VERSION = 1;
-				DYLIB_CURRENT_VERSION = 1;
-				DYLIB_INSTALL_NAME_BASE = "@rpath";
-				GCC_PREFIX_HEADER = "Target Support Files/FFmpeg-tvOS/FFmpeg-tvOS-prefix.pch";
-				INFOPLIST_FILE = "Target Support Files/FFmpeg-tvOS/FFmpeg-tvOS-Info.plist";
-				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@loader_path/Frameworks",
-				);
-				MACH_O_TYPE = staticlib;
-				MODULEMAP_FILE = "Target Support Files/FFmpeg-tvOS/FFmpeg-tvOS.modulemap";
-				PRODUCT_MODULE_NAME = FFmpeg;
-				PRODUCT_NAME = FFmpeg;
-				SDKROOT = appletvos;
-				SKIP_INSTALL = YES;
-				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) ";
-				SWIFT_VERSION = 5.1;
-				TARGETED_DEVICE_FAMILY = 3;
-				TVOS_DEPLOYMENT_TARGET = 10.2;
-				VALIDATE_PRODUCT = YES;
-				VERSIONING_SYSTEM = "apple-generic";
-				VERSION_INFO_PREFIX = "";
-			};
-			name = Release;
-		};
-		7D8F251549A8750C033ED3930FA470C4 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			baseConfigurationReference = 394EA7B4A6AA478F3E9B0D9E0D790E12 /* FFmpeg-tvOS.debug.xcconfig */;
-			buildSettings = {
-				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
-				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
-				CURRENT_PROJECT_VERSION = 1;
-				DEFINES_MODULE = YES;
-				DYLIB_COMPATIBILITY_VERSION = 1;
-				DYLIB_CURRENT_VERSION = 1;
-				DYLIB_INSTALL_NAME_BASE = "@rpath";
-				GCC_PREFIX_HEADER = "Target Support Files/FFmpeg-tvOS/FFmpeg-tvOS-prefix.pch";
-				INFOPLIST_FILE = "Target Support Files/FFmpeg-tvOS/FFmpeg-tvOS-Info.plist";
-				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@loader_path/Frameworks",
-				);
-				MACH_O_TYPE = staticlib;
-				MODULEMAP_FILE = "Target Support Files/FFmpeg-tvOS/FFmpeg-tvOS.modulemap";
-				PRODUCT_MODULE_NAME = FFmpeg;
-				PRODUCT_NAME = FFmpeg;
-				SDKROOT = appletvos;
-				SKIP_INSTALL = YES;
-				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) ";
-				SWIFT_VERSION = 5.1;
-				TARGETED_DEVICE_FAMILY = 3;
-				TVOS_DEPLOYMENT_TARGET = 10.2;
-				VERSIONING_SYSTEM = "apple-generic";
-				VERSION_INFO_PREFIX = "";
-			};
-			name = Debug;
 		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		1F47D6158318394F30299B53E5BC9624 /* Build configuration list for PBXNativeTarget "FFmpeg-macOS" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				442528D6A24DF7D8C085774CFCAB9B02 /* Debug */,
-				26A2780150C91E1FC64926B0C8F72863 /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
 		20E2142F98118C068482E8EC6D031B77 /* Build configuration list for PBXProject "FFmpeg" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				161D707C9638C756E207DB462ABCB95B /* Debug */,
-				1A3A4620BFE46DEBD93D391CC1484228 /* Release */,
+				E4F0F6E1A8F30A91D62B2785522DF1EA /* Debug */,
+				3D6D764E7F2CB407100D179C12BA97C8 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		366BC9F7DD9E50F74B21B5CF2FA323B9 /* Build configuration list for PBXNativeTarget "FFmpeg-iOS" */ = {
+		5532229C020993588472E55027E0B9E2 /* Build configuration list for PBXNativeTarget "FFmpeg-macOS" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				21CC4EF3B01A22287374D318C30FDEE7 /* Debug */,
-				0801381CA08074BD15FCD1F2A618EA25 /* Release */,
+				C25F8698DC0348D6B20BE698ABE3E0CC /* Debug */,
+				F8785D33237DD17DA38550E34A807F3D /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		F4950AAFA2DAEE162842FF9541D73D7C /* Build configuration list for PBXNativeTarget "FFmpeg-tvOS" */ = {
+		CC043EC4C949502C0BF81FB5BA2C60D8 /* Build configuration list for PBXNativeTarget "FFmpeg-iOS" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				7D8F251549A8750C033ED3930FA470C4 /* Debug */,
-				4CFE1FA74189E53240A6C3EB39A1B21B /* Release */,
+				250841A73E7365C7CDFF2A47395EFD18 /* Debug */,
+				813984B3B69D2E97B22EA1ABB7254EB4 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		DF721193C671A001C866D994DBD3D29A /* Build configuration list for PBXNativeTarget "FFmpeg-tvOS" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C31F3E66009E361D76C441C8FD553EC6 /* Debug */,
+				4E8413BB7574EAA5B09A960041EA0003 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

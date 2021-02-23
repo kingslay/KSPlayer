@@ -10,15 +10,14 @@ import Metal
 import QuartzCore
 import simd
 import VideoToolbox
+import Accelerate
 class MetalRender {
     static let share = MetalRender()
     let device: MTLDevice
     private let commandQueue: MTLCommandQueue?
     private let library: MTLLibrary
     private lazy var yuv = YUVMetalRenderPipeline(device: device, library: library)
-    private lazy var yuvp010LE = YUVMetalRenderPipeline(device: device, library: library, bitDepth: 10)
     private lazy var nv12 = NV12MetalRenderPipeline(device: device, library: library)
-    private lazy var p010LE = NV12MetalRenderPipeline(device: device, library: library, bitDepth: 10)
     private lazy var bgra = BGRAMetalRenderPipeline(device: device, library: library)
     private lazy var samplerState: MTLSamplerState? = {
         let samplerDescriptor = MTLSamplerDescriptor()
@@ -31,50 +30,38 @@ class MetalRender {
         return device.makeSamplerState(descriptor: samplerDescriptor)
     }()
 
-    private lazy var colorConversion601VideoRangeMatrixBuffer: MTLBuffer? = {
-        var matrix = simd_float3x3([1.164, 1.164, 1.164], [0, -0.392, 2.017], [1.596, -0.813, 0])
+    private lazy var colorConversion601MatrixBuffer: MTLBuffer? = {
+        let itu = kvImage_YpCbCrToARGBMatrix_ITU_R_601_4.pointee
+        var matrix = simd_float3x3([itu.Yp, itu.Yp, itu.Yp], [0.0, itu.Cb_G, itu.Cb_B], [itu.Cr_R, itu.Cr_G, 0.0])
         let buffer = device.makeBuffer(bytes: &matrix, length: MemoryLayout<simd_float3x3>.size, options: .storageModeShared)
         buffer?.label = "colorConversionMatrix"
         return buffer
     }()
 
-    private lazy var colorConversion601FullRangeMatrixBuffer: MTLBuffer? = {
-        var matrix = simd_float3x3([1.0, 1.0, 1.0], [0.0, -0.343, 1.765], [1.4, -0.711, 0.0])
-        let buffer = device.makeBuffer(bytes: &matrix, length: MemoryLayout<simd_float3x3>.size, options: .storageModeShared)
-        buffer?.label = "colorConversionMatrix"
-        return buffer
-    }()
-
-    private lazy var colorConversion709VideoRangeMatrixBuffer: MTLBuffer? = {
-        var matrix = simd_float3x3([1.164, 1.164, 1.164], [0.0, -0.213, 2.112], [1.793, -0.533, 0.0])
-        let buffer = device.makeBuffer(bytes: &matrix, length: MemoryLayout<simd_float3x3>.size, options: .storageModeShared)
-        buffer?.label = "colorConversionMatrix"
-        return buffer
-    }()
-
-    private lazy var colorConversion709FullRangeMatrixBuffer: MTLBuffer? = {
-        var matrix = simd_float3x3([1, 1, 1], [0.0, -0.187, 1.856], [1.570, -0.467, 0.0])
+    private lazy var colorConversion709MatrixBuffer: MTLBuffer? = {
+        let itu = kvImage_YpCbCrToARGBMatrix_ITU_R_709_2.pointee
+        var matrix = simd_float3x3([itu.Yp, itu.Yp, itu.Yp], [0.0, itu.Cb_G, itu.Cb_B], [itu.Cr_R, itu.Cr_G, 0.0])
         let buffer = device.makeBuffer(bytes: &matrix, length: MemoryLayout<simd_float3x3>.size, options: .storageModeShared)
         buffer?.label = "colorConversionMatrix"
         return buffer
     }()
 
     private lazy var colorConversion2020MatrixBuffer: MTLBuffer? = {
-        var matrix = simd_float3x3([1.168, 1.168, 1.168], [0, -0.188, 2.148], [1.683, -0.652, 0])
+        var matrix = simd_float3x3([1, 1, 1], [0, -0.16455, 1.8814], [1.4746, -0.57135, 0])
         let buffer = device.makeBuffer(bytes: &matrix, length: MemoryLayout<simd_float3x3>.size, options: .storageModeShared)
         buffer?.label = "colorConversionMatrix"
         return buffer
     }()
 
     private lazy var colorOffsetVideoRangeMatrixBuffer: MTLBuffer? = {
-        var firstColumn = SIMD3<Float>(-(16.0 / 255.0), -0.5, -0.5)
+        var firstColumn = SIMD3<Float>(-16.0 / 255.0, -128.0/255.0, -128.0/255.0)
         let buffer = device.makeBuffer(bytes: &firstColumn, length: MemoryLayout<SIMD3<Float>>.size, options: .storageModeShared)
         buffer?.label = "colorOffset"
         return buffer
     }()
 
     private lazy var colorOffsetFullRangeMatrixBuffer: MTLBuffer? = {
-        var firstColumn = SIMD3<Float>(0, -0.5, -0.5)
+        var firstColumn = SIMD3<Float>(0, -128.0/255.0, -128.0/255.0)
         let buffer = device.makeBuffer(bytes: &firstColumn, length: MemoryLayout<SIMD3<Float>>.size, options: .storageModeShared)
         buffer?.label = "colorOffset"
         return buffer
@@ -128,17 +115,9 @@ class MetalRender {
     private func pipeline(pixelBuffer: BufferProtocol) -> MetalRenderPipeline {
         switch pixelBuffer.planeCount {
         case 3:
-            if pixelBuffer.bitDepth == 10 {
-                return yuvp010LE
-            } else {
-                return yuv
-            }
+            return yuv
         case 2:
-            if pixelBuffer.bitDepth == 10 {
-                return p010LE
-            } else {
-                return nv12
-            }
+            return nv12
         case 1:
             return bgra
         default:
@@ -148,18 +127,19 @@ class MetalRender {
 
     private func setFragmentBuffer(pixelBuffer: BufferProtocol, encoder: MTLRenderCommandEncoder) {
         if pixelBuffer.planeCount > 1 {
-            var buffer = colorConversion601FullRangeMatrixBuffer
-            let isFullRangeVideo = pixelBuffer.isFullRangeVideo
+            let buffer: MTLBuffer?
             let yCbCrMatrix = pixelBuffer.yCbCrMatrix
             if yCbCrMatrix == kCVImageBufferYCbCrMatrix_ITU_R_601_4 {
-                buffer = isFullRangeVideo ? colorConversion601FullRangeMatrixBuffer : colorConversion601VideoRangeMatrixBuffer
+                buffer = colorConversion601MatrixBuffer
             } else if yCbCrMatrix == kCVImageBufferYCbCrMatrix_ITU_R_709_2 {
-                buffer = isFullRangeVideo ? colorConversion709FullRangeMatrixBuffer : colorConversion709VideoRangeMatrixBuffer
+                buffer = colorConversion709MatrixBuffer
             } else if yCbCrMatrix == kCVImageBufferYCbCrMatrix_ITU_R_2020 {
                 buffer = colorConversion2020MatrixBuffer
+            } else {
+                buffer = colorConversion601MatrixBuffer
             }
             encoder.setFragmentBuffer(buffer, offset: 0, index: 0)
-            let colorOffset = isFullRangeVideo ? colorOffsetFullRangeMatrixBuffer : colorOffsetVideoRangeMatrixBuffer
+            let colorOffset = pixelBuffer.isFullRangeVideo ? colorOffsetFullRangeMatrixBuffer : colorOffsetVideoRangeMatrixBuffer
             encoder.setFragmentBuffer(colorOffset, offset: 0, index: 1)
         }
     }

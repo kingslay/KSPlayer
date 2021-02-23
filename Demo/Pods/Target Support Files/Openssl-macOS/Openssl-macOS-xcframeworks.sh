@@ -149,6 +149,6 @@ install_xcframework() {
   echo "Copied $source to $destination"
 }
 
-install_xcframework "${PODS_ROOT}/../../Sources/libssl.xcframework" "libssl" "framework" "macos-arm64_x86_64"
-install_xcframework "${PODS_ROOT}/../../Sources/libcrypto.xcframework" "libcrypto" "framework" "macos-arm64_x86_64"
+install_xcframework "${PODS_ROOT}/../../Sources/Libssl.xcframework" "Libssl" "framework" "macos-arm64_x86_64"
+install_xcframework "${PODS_ROOT}/../../Sources/Libcrypto.xcframework" "Libcrypto" "framework" "macos-arm64_x86_64"
 

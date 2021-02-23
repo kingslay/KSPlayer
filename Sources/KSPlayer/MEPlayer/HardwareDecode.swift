@@ -11,7 +11,7 @@ import VideoToolbox
 protocol DecodeProtocol {
     init(assetTrack: TrackProtocol, options: KSOptions)
     func decode()
-    func doDecode(packet: UnsafeMutablePointer<AVPacket>) throws -> [Frame]
+    func doDecode(packet: UnsafeMutablePointer<AVPacket>) throws -> [MEFrame]
     func seek(time: TimeInterval)
     func doFlushCodec()
     func shutdown()
@@ -20,7 +20,9 @@ protocol DecodeProtocol {
 extension TrackProtocol {
     func makeDecode(options: KSOptions) -> DecodeProtocol {
         autoreleasepool {
-            if let session = DecompressionSession(codecpar: stream.pointee.codecpar.pointee, options: options) {
+            if mediaType == .subtitle {
+                return SubtitleDecode(assetTrack: self, options: options)
+            } else if let session = DecompressionSession(codecpar: stream.pointee.codecpar.pointee, options: options) {
                 return HardwareDecode(assetTrack: self, options: options, session: session)
             } else {
                 return SoftwareDecode(assetTrack: self, options: options)
@@ -61,7 +63,7 @@ class HardwareDecode: DecodeProtocol {
         self.session = session
     }
 
-    func doDecode(packet: UnsafeMutablePointer<AVPacket>) throws -> [Frame] {
+    func doDecode(packet: UnsafeMutablePointer<AVPacket>) throws -> [MEFrame] {
         guard let data = packet.pointee.data, let session = session else {
             return []
         }
@@ -88,8 +90,7 @@ class HardwareDecode: DecodeProtocol {
             self.lastPosition += frame.duration
             result.append(frame)
         }
-        if vtStatus != noErr {
-//            status == kVTInvalidSessionErr || status == kVTVideoDecoderMalfunctionErr || status == kVTVideoDecoderBadDataErr
+        if vtStatus != noErr || status == kVTInvalidSessionErr || status == kVTVideoDecoderMalfunctionErr || status == kVTVideoDecoderBadDataErr {
             if packet.pointee.flags & AV_PKT_FLAG_KEY == 1 {
                 throw NSError(errorCode: .codecVideoReceiveFrame, ffmpegErrnum: vtStatus)
             } else {
@@ -148,7 +149,7 @@ class DecompressionSession {
             kCVImageBufferChromaLocationTopFieldKey: kCVImageBufferChromaLocation_Left,
             kCMFormatDescriptionExtension_FullRangeVideo: isFullRangeVideo,
             kCMFormatDescriptionExtension_SampleDescriptionExtensionAtoms: [
-                codecpar.codec_id.rawValue == AV_CODEC_ID_HEVC.rawValue ? "hvcC" : "avcC": NSData(bytes: extradata, length: Int(extradataSize))
+                codecpar.codec_id == AV_CODEC_ID_HEVC ? "hvcC" : "avcC": NSData(bytes: extradata, length: Int(extradataSize))
             ]
         ]
         if let aspectRatio = codecpar.aspectRatio {
@@ -157,7 +158,7 @@ class DecompressionSession {
         dic[kCVImageBufferColorPrimariesKey] = codecpar.color_primaries.colorPrimaries
         dic[kCVImageBufferTransferFunctionKey] = codecpar.color_trc.transferFunction
         dic[kCVImageBufferYCbCrMatrixKey] = codecpar.color_space.ycbcrMatrix
-        let type = codecpar.codec_id.rawValue == AV_CODEC_ID_HEVC.rawValue ? kCMVideoCodecType_HEVC : kCMVideoCodecType_H264
+        let type = codecpar.codec_id == AV_CODEC_ID_HEVC ? kCMVideoCodecType_HEVC : kCMVideoCodecType_H264
         // swiftlint:disable line_length
         var description: CMFormatDescription?
         var status = CMVideoFormatDescriptionCreate(allocator: kCFAllocatorDefault, codecType: type, width: codecpar.width, height: codecpar.height, extensions: dic, formatDescriptionOut: &description)
@@ -168,7 +169,8 @@ class DecompressionSession {
         self.formatDescription = formatDescription
 
         let attributes: NSMutableDictionary = [
-            kCVPixelBufferPixelFormatTypeKey: options.bestPixelFormatType(bitDepth: format.bitDepth(), isFullRangeVideo: isFullRangeVideo, planeCount: format.planeCount())
+            kCVPixelBufferPixelFormatTypeKey: options.bestPixelFormatType(bitDepth: format.bitDepth(), isFullRangeVideo: isFullRangeVideo, planeCount: format.planeCount()),
+            kCVPixelBufferMetalCompatibilityKey: true
         ]
         var session: VTDecompressionSession?
         // swiftlint:disable line_length
@@ -287,6 +289,19 @@ extension AVColorSpace {
             return kCVImageBufferYCbCrMatrix_ITU_R_2020
         default:
             return nil
+        }
+    }
+
+    var colorSpace: CGColorSpace? {
+        switch self {
+            case AVCOL_SPC_BT709:
+                return CGColorSpace(name: CGColorSpace.itur_709)
+            case AVCOL_SPC_BT470BG, AVCOL_SPC_SMPTE170M:
+                return CGColorSpace(name: CGColorSpace.sRGB)
+            case AVCOL_SPC_BT2020_NCL:
+                return CGColorSpace(name: CGColorSpace.itur_2020)
+            default:
+                return nil
         }
     }
 }
