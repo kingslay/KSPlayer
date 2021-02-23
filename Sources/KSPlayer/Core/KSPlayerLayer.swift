@@ -217,6 +217,7 @@ open class KSPlayerLayer: UIView {
         shouldSeekTo = 0
         player?.playbackRate = 1
         player?.playbackVolume = 1
+        set(metadata:nil)
         UIApplication.shared.isIdleTimerDisabled = false
     }
 
