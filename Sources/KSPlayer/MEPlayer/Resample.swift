@@ -27,7 +27,7 @@ class VideoSwresample: Swresample {
     private var forceTransfer: Bool
     var dstFrame: UnsafeMutablePointer<AVFrame>?
     init(dstFormat: AVPixelFormat = AV_PIX_FMT_NV12, forceTransfer: Bool = false) {
-        self.dstFormat = AV_PIX_FMT_NV12
+        self.dstFormat = dstFormat
         self.forceTransfer = forceTransfer
     }
 
@@ -221,13 +221,14 @@ class PixelBuffer: BufferProtocol {
     }
 
     func image() -> CGImage? {
-        var image: CGImage?
+        let image: CGImage?
         if format == AV_PIX_FMT_RGB24 {
             image =  CGImage.make(rgbData: dataWrap.data[0]!.contents().assumingMemoryBound(to: UInt8.self), linesize: Int(lineSize[0]), width: width, height: height)
+        } else {
+            let scale = VideoSwresample(dstFormat: AV_PIX_FMT_RGB24, forceTransfer: true)
+            image = scale.transfer(format: format, width: Int32(width), height: Int32(height), data: dataWrap.data.map({ $0?.contents().assumingMemoryBound(to: UInt8.self) }), linesize: lineSize)
+            scale.shutdown()
         }
-        let scale = VideoSwresample(dstFormat: AV_PIX_FMT_RGB24, forceTransfer: true)
-        image = scale.transfer(format: format, width: Int32(width), height: Int32(height), data: dataWrap.data.map({ $0?.contents().assumingMemoryBound(to: UInt8.self) }), linesize: lineSize)
-        scale.shutdown()
         return image
     }
 }
@@ -296,7 +297,7 @@ extension CVPixelBufferPool {
 extension CGImage {
     static func make(rgbData: UnsafePointer<UInt8>, linesize: Int, width: Int, height: Int, isAlpha: Bool = false) -> CGImage? {
         let colorSpace = CGColorSpaceCreateDeviceRGB()
-        let bitmapInfo: CGBitmapInfo = isAlpha ? CGBitmapInfo(rawValue: CGImageAlphaInfo.last.rawValue) : []
+        let bitmapInfo: CGBitmapInfo = isAlpha ? CGBitmapInfo(rawValue: CGImageAlphaInfo.last.rawValue) : CGBitmapInfo.byteOrderMask
         guard let data = CFDataCreate(kCFAllocatorDefault, rgbData, linesize * height), let provider = CGDataProvider(data: data) else {
             return nil
         }
