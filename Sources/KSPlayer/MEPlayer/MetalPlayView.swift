@@ -21,6 +21,7 @@ final class MetalPlayView: MTKView, FrameOutput {
                     if drawableSize != size {
                         drawableSize = size
                     }
+                    colorPixelFormat = KSOptions.colorPixelFormat(bitDepth: pixelBuffer.bitDepth)
                     #if targetEnvironment(simulator)
                     if #available(iOS 13.0, tvOS 13.0, *) {
                         (layer as? CAMetalLayer)?.colorspace = pixelBuffer.colorspace
