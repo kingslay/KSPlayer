@@ -181,10 +181,7 @@ open class KSPlayerLayer: UIView {
 
     open func pause() {
         if let player = player {
-            MPNowPlayingInfoCenter.default().nowPlayingInfo = [
-                MPNowPlayingInfoPropertyElapsedPlaybackTime: player.currentPlaybackTime,
-                MPMediaItemPropertyPlaybackDuration: player.duration
-            ]
+            MPNowPlayingInfoCenter.default().nowPlayingInfo?[MPNowPlayingInfoPropertyElapsedPlaybackTime] = player.currentPlaybackTime
         }
         isAutoPlay = false
         player?.pause()
