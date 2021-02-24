@@ -35,7 +35,7 @@ extension KSOptions {
     func canHardwareDecode(codecpar: AVCodecParameters) -> Bool {
         if codecpar.codec_id == AV_CODEC_ID_H264, hardwareDecodeH264 {
             return true
-        } else if codecpar.codec_id == AV_CODEC_ID_HEVC, #available(iOS 11.0, tvOS 11.0, OSX 10.13, *), VTIsHardwareDecodeSupported(kCMVideoCodecType_HEVC), hardwareDecodeH265 {
+        } else if codecpar.codec_id == AV_CODEC_ID_HEVC, #available(iOS 11.0, tvOS 11.0, *), VTIsHardwareDecodeSupported(kCMVideoCodecType_HEVC), hardwareDecodeH265 {
             return true
         }
         return false
@@ -255,7 +255,7 @@ extension AVColorTransferCharacteristic {
         case AVCOL_TRC_SMPTE240M:
             return kCVImageBufferTransferFunction_SMPTE_240M_1995
         case AVCOL_TRC_SMPTE2084:
-            if #available(iOS 11.0, tvOS 11.0, OSX 10.13, *) {
+            if #available(iOS 11.0, tvOS 11.0, *) {
                 return kCVImageBufferTransferFunction_SMPTE_ST_2084_PQ
             }
         case AVCOL_TRC_LINEAR:
@@ -263,7 +263,7 @@ extension AVColorTransferCharacteristic {
                 return kCVImageBufferTransferFunction_Linear
             }
         case AVCOL_TRC_ARIB_STD_B67:
-            if #available(iOS 11.0, tvOS 11.0, OSX 10.13, *) {
+            if #available(iOS 11.0, tvOS 11.0, *) {
                 return kCVImageBufferTransferFunction_ITU_R_2100_HLG
             }
         case AVCOL_TRC_GAMMA22, AVCOL_TRC_GAMMA28:

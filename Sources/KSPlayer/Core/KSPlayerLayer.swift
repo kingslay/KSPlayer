@@ -180,13 +180,11 @@ open class KSPlayerLayer: UIView {
     }
 
     open func pause() {
-        if #available(OSX 10.12.2, *) {
-            if let player = player {
-                MPNowPlayingInfoCenter.default().nowPlayingInfo = [
-                    MPNowPlayingInfoPropertyElapsedPlaybackTime: player.currentPlaybackTime,
-                    MPMediaItemPropertyPlaybackDuration: player.duration
-                ]
-            }
+        if let player = player {
+            MPNowPlayingInfoCenter.default().nowPlayingInfo = [
+                MPNowPlayingInfoPropertyElapsedPlaybackTime: player.currentPlaybackTime,
+                MPMediaItemPropertyPlaybackDuration: player.duration
+            ]
         }
         isAutoPlay = false
         player?.pause()
@@ -245,11 +243,9 @@ open class KSPlayerLayer: UIView {
 
 extension KSPlayerLayer: MediaPlayerDelegate {
     public func preparedToPlay(player: MediaPlayerProtocol) {
-        if #available(OSX 10.12.2, *) {
-            MPNowPlayingInfoCenter.default().nowPlayingInfo = [
-                MPMediaItemPropertyPlaybackDuration: player.duration
-            ]
-        }
+        MPNowPlayingInfoCenter.default().nowPlayingInfo = [
+            MPMediaItemPropertyPlaybackDuration: player.duration
+        ]
         state = .readyToPlay
         if isAutoPlay {
             if shouldSeekTo > 0 {
@@ -350,30 +346,25 @@ extension KSPlayerLayer {
     }
 
     private func registerRemoteControllEvent() {
-        if #available(OSX 10.12.2, *) {
-            MPRemoteCommandCenter.shared().playCommand.addTarget(self, action: #selector(remoteCommandAction(event:)))
-            MPRemoteCommandCenter.shared().pauseCommand.addTarget(self, action: #selector(remoteCommandAction(event:)))
-            MPRemoteCommandCenter.shared().togglePlayPauseCommand.addTarget(self, action: #selector(remoteCommandAction(event:)))
-            MPRemoteCommandCenter.shared().seekForwardCommand.addTarget(self, action: #selector(remoteCommandAction(event:)))
-            MPRemoteCommandCenter.shared().seekBackwardCommand.addTarget(self, action: #selector(remoteCommandAction(event:)))
-            MPRemoteCommandCenter.shared().changePlaybackRateCommand.addTarget(self, action: #selector(remoteCommandAction(event:)))
-            MPRemoteCommandCenter.shared().changePlaybackPositionCommand.addTarget(self, action: #selector(remoteCommandAction(event:)))
-        }
+        MPRemoteCommandCenter.shared().playCommand.addTarget(self, action: #selector(remoteCommandAction(event:)))
+        MPRemoteCommandCenter.shared().pauseCommand.addTarget(self, action: #selector(remoteCommandAction(event:)))
+        MPRemoteCommandCenter.shared().togglePlayPauseCommand.addTarget(self, action: #selector(remoteCommandAction(event:)))
+        MPRemoteCommandCenter.shared().seekForwardCommand.addTarget(self, action: #selector(remoteCommandAction(event:)))
+        MPRemoteCommandCenter.shared().seekBackwardCommand.addTarget(self, action: #selector(remoteCommandAction(event:)))
+        MPRemoteCommandCenter.shared().changePlaybackRateCommand.addTarget(self, action: #selector(remoteCommandAction(event:)))
+        MPRemoteCommandCenter.shared().changePlaybackPositionCommand.addTarget(self, action: #selector(remoteCommandAction(event:)))
     }
 
     private func unregisterRemoteControllEvent() {
-        if #available(OSX 10.12.2, *) {
-            MPRemoteCommandCenter.shared().playCommand.removeTarget(self)
-            MPRemoteCommandCenter.shared().pauseCommand.removeTarget(self)
-            MPRemoteCommandCenter.shared().togglePlayPauseCommand.removeTarget(self)
-            MPRemoteCommandCenter.shared().seekForwardCommand.removeTarget(self)
-            MPRemoteCommandCenter.shared().seekBackwardCommand.removeTarget(self)
-            MPRemoteCommandCenter.shared().changePlaybackRateCommand.removeTarget(self)
-            MPRemoteCommandCenter.shared().changePlaybackPositionCommand.removeTarget(self)
-        }
+        MPRemoteCommandCenter.shared().playCommand.removeTarget(self)
+        MPRemoteCommandCenter.shared().pauseCommand.removeTarget(self)
+        MPRemoteCommandCenter.shared().togglePlayPauseCommand.removeTarget(self)
+        MPRemoteCommandCenter.shared().seekForwardCommand.removeTarget(self)
+        MPRemoteCommandCenter.shared().seekBackwardCommand.removeTarget(self)
+        MPRemoteCommandCenter.shared().changePlaybackRateCommand.removeTarget(self)
+        MPRemoteCommandCenter.shared().changePlaybackPositionCommand.removeTarget(self)
     }
 
-    @available(OSX 10.12.2, *)
     @objc private func remoteCommandAction(event: MPRemoteCommandEvent) -> MPRemoteCommandHandlerStatus {
         guard let player = player else {
             return .noSuchContent

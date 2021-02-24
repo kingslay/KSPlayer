@@ -188,7 +188,7 @@ final class AudioGraphPlayer: AudioPlayer {
 import Accelerate
 import AVFoundation
 
-@available(OSX 10.13, tvOS 11.0, iOS 11.0, *)
+@available(tvOS 11.0, iOS 11.0, *)
 final class AudioEnginePlayer: AudioPlayer {
     var isPaused: Bool {
         get {

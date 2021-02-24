@@ -248,16 +248,10 @@ extension NSResponder {
 extension NSSlider {
     open var minimumTrackTintColor: UIColor? {
         get {
-            if #available(OSX 10.12.2, *) {
-                return trackFillColor
-            } else {
-                return nil
-            }
+            return trackFillColor
         }
         set {
-            if #available(OSX 10.12.2, *) {
-                trackFillColor = newValue
-            }
+            trackFillColor = newValue
         }
     }
 

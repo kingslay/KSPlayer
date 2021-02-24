@@ -32,6 +32,7 @@ public protocol MediaPlayerProtocol: MediaPlayback {
     var loadState: MediaLoadState { get }
     var isPlaying: Bool { get }
     //    var numberOfBytesTransferred: Int64 { get }
+    var seekable: Bool { get }
     var isMuted: Bool { get set }
     var allowsExternalPlayback: Bool { get set }
     var usesExternalPlaybackWhileExternalScreenIsActive: Bool { get set }
