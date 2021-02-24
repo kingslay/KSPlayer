@@ -11,13 +11,18 @@ import QuartzCore
 import simd
 import VideoToolbox
 import Accelerate
+// swiftlint:disable identifier_name
+private let kvImage_YpCbCrToARGBMatrix_ITU_R_2020 = vImage_YpCbCrToARGBMatrix(Yp: 1, Cr_R: 1.4746, Cr_G: -0.57135, Cb_G: -0.16455, Cb_B: 1.8814)
+// swiftlint:enable identifier_name
 class MetalRender {
     static let share = MetalRender()
     let device: MTLDevice
     private let commandQueue: MTLCommandQueue?
     private let library: MTLLibrary
     private lazy var yuv = YUVMetalRenderPipeline(device: device, library: library)
+    private lazy var yuvp010LE = YUVMetalRenderPipeline(device: device, library: library, bitDepth: 10)
     private lazy var nv12 = NV12MetalRenderPipeline(device: device, library: library)
+    private lazy var p010LE = NV12MetalRenderPipeline(device: device, library: library, bitDepth: 10)
     private lazy var bgra = BGRAMetalRenderPipeline(device: device, library: library)
     private lazy var samplerState: MTLSamplerState? = {
         let samplerDescriptor = MTLSamplerDescriptor()
@@ -30,27 +35,28 @@ class MetalRender {
         return device.makeSamplerState(descriptor: samplerDescriptor)
     }()
 
-    private lazy var colorConversion601MatrixBuffer: MTLBuffer? = {
-        let itu = kvImage_YpCbCrToARGBMatrix_ITU_R_601_4.pointee
-        var matrix = simd_float3x3([itu.Yp, itu.Yp, itu.Yp], [0.0, itu.Cb_G, itu.Cb_B], [itu.Cr_R, itu.Cr_G, 0.0])
-        let buffer = device.makeBuffer(bytes: &matrix, length: MemoryLayout<simd_float3x3>.size, options: .storageModeShared)
-        buffer?.label = "colorConversionMatrix"
-        return buffer
+    private lazy var colorConversion601VideoRangeMatrixBuffer: MTLBuffer? = {
+        kvImage_YpCbCrToARGBMatrix_ITU_R_601_4.pointee.videoRange.buffer(device: device)
     }()
 
-    private lazy var colorConversion709MatrixBuffer: MTLBuffer? = {
-        let itu = kvImage_YpCbCrToARGBMatrix_ITU_R_709_2.pointee
-        var matrix = simd_float3x3([itu.Yp, itu.Yp, itu.Yp], [0.0, itu.Cb_G, itu.Cb_B], [itu.Cr_R, itu.Cr_G, 0.0])
-        let buffer = device.makeBuffer(bytes: &matrix, length: MemoryLayout<simd_float3x3>.size, options: .storageModeShared)
-        buffer?.label = "colorConversionMatrix"
-        return buffer
+    private lazy var colorConversion601FullRangeMatrixBuffer: MTLBuffer? = {
+        kvImage_YpCbCrToARGBMatrix_ITU_R_601_4.pointee.buffer(device: device)
+    }()
+
+    private lazy var colorConversion709VideoRangeMatrixBuffer: MTLBuffer? = {
+        kvImage_YpCbCrToARGBMatrix_ITU_R_709_2.pointee.videoRange.buffer(device: device)
+    }()
+
+    private lazy var colorConversion709FullRangeMatrixBuffer: MTLBuffer? = {
+        kvImage_YpCbCrToARGBMatrix_ITU_R_709_2.pointee.buffer(device: device)
     }()
 
     private lazy var colorConversion2020MatrixBuffer: MTLBuffer? = {
-        var matrix = simd_float3x3([1, 1, 1], [0, -0.16455, 1.8814], [1.4746, -0.57135, 0])
-        let buffer = device.makeBuffer(bytes: &matrix, length: MemoryLayout<simd_float3x3>.size, options: .storageModeShared)
-        buffer?.label = "colorConversionMatrix"
-        return buffer
+        kvImage_YpCbCrToARGBMatrix_ITU_R_2020.videoRange.buffer(device: device)
+    }()
+
+    private lazy var colorConversion2020FullRangeMatrixBuffer: MTLBuffer? = {
+        kvImage_YpCbCrToARGBMatrix_ITU_R_2020.buffer(device: device)
     }()
 
     private lazy var colorOffsetVideoRangeMatrixBuffer: MTLBuffer? = {
@@ -115,9 +121,17 @@ class MetalRender {
     private func pipeline(pixelBuffer: BufferProtocol) -> MetalRenderPipeline {
         switch pixelBuffer.planeCount {
         case 3:
-            return yuv
+            if pixelBuffer.bitDepth == 10 {
+                return yuvp010LE
+            } else {
+                return yuv
+            }
         case 2:
-            return nv12
+            if pixelBuffer.bitDepth == 10 {
+                return p010LE
+            } else {
+                return nv12
+            }
         case 1:
             return bgra
         default:
@@ -129,18 +143,29 @@ class MetalRender {
         if pixelBuffer.planeCount > 1 {
             let buffer: MTLBuffer?
             let yCbCrMatrix = pixelBuffer.yCbCrMatrix
-            if yCbCrMatrix == kCVImageBufferYCbCrMatrix_ITU_R_601_4 {
-                buffer = colorConversion601MatrixBuffer
-            } else if yCbCrMatrix == kCVImageBufferYCbCrMatrix_ITU_R_709_2 {
-                buffer = colorConversion709MatrixBuffer
+            let isFullRangeVideo = pixelBuffer.isFullRangeVideo
+            if yCbCrMatrix == kCVImageBufferYCbCrMatrix_ITU_R_709_2 {
+                buffer = isFullRangeVideo ? colorConversion709FullRangeMatrixBuffer : colorConversion709VideoRangeMatrixBuffer
             } else if yCbCrMatrix == kCVImageBufferYCbCrMatrix_ITU_R_2020 {
-                buffer = colorConversion2020MatrixBuffer
+                buffer = isFullRangeVideo ? colorConversion2020FullRangeMatrixBuffer : colorConversion2020MatrixBuffer
             } else {
-                buffer = colorConversion601MatrixBuffer
+                buffer = isFullRangeVideo ? colorConversion601FullRangeMatrixBuffer : colorConversion601VideoRangeMatrixBuffer
             }
             encoder.setFragmentBuffer(buffer, offset: 0, index: 0)
-            let colorOffset = pixelBuffer.isFullRangeVideo ? colorOffsetFullRangeMatrixBuffer : colorOffsetVideoRangeMatrixBuffer
+            let colorOffset = isFullRangeVideo ? colorOffsetFullRangeMatrixBuffer : colorOffsetVideoRangeMatrixBuffer
             encoder.setFragmentBuffer(colorOffset, offset: 0, index: 1)
         }
+    }
+}
+extension vImage_YpCbCrToARGBMatrix {
+    var videoRange: vImage_YpCbCrToARGBMatrix {
+        vImage_YpCbCrToARGBMatrix(Yp: 255/219*Yp, Cr_R: 255/224*Cr_R, Cr_G: 255/224*Cr_G, Cb_G: 255/224*Cb_G, Cb_B: 255/224*Cb_B)
+    }
+
+    func buffer(device: MTLDevice) -> MTLBuffer? {
+        var matrix = simd_float3x3([Yp, Yp, Yp], [0.0, Cb_G, Cb_B], [Cr_R, Cr_G, 0.0])
+        let buffer = device.makeBuffer(bytes: &matrix, length: MemoryLayout<simd_float3x3>.size, options: .storageModeShared)
+        buffer?.label = "colorConversionMatrix"
+        return buffer
     }
 }
