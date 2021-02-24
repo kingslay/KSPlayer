@@ -304,7 +304,6 @@ extension KSAVPlayer {
 
 extension KSAVPlayer: MediaPlayerProtocol {
     public var subtitleDataSouce: SubtitleDataSouce? { nil }
-
     public var isPlaying: Bool { player.rate > 0 ? true : playbackState == .playing }
 
     public var view: UIView { playerView }
@@ -442,6 +441,10 @@ extension KSAVPlayer: MediaPlayerProtocol {
 
     public func enterForeground() {
         playerView.playerLayer.player = playerView.player
+    }
+
+    public var seekable: Bool {
+        !(player.currentItem?.seekableTimeRanges.isEmpty ?? true)
     }
 
     public var isMuted: Bool {
