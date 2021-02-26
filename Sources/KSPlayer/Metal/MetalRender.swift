@@ -125,16 +125,27 @@ class MetalRender {
         }
     }
 
-    static func makePipelineState(vertexFunction: String = "mapTexture", fragmentFunction: String, bitDepth: Int32 = 8) -> MTLRenderPipelineState {
+    static func makePipelineState(fragmentFunction: String, isSphere: Bool = false, bitDepth: Int32 = 8) -> MTLRenderPipelineState {
         let descriptor = MTLRenderPipelineDescriptor()
         descriptor.colorAttachments[0].pixelFormat = KSOptions.colorPixelFormat(bitDepth: bitDepth)
-        descriptor.vertexFunction = library.makeFunction(name: vertexFunction)
+        descriptor.vertexFunction = library.makeFunction(name: isSphere ? "mapSphereTexture" : "mapTexture")
         descriptor.fragmentFunction = library.makeFunction(name: fragmentFunction)
+        let vertexDescriptor = MTLVertexDescriptor()
+        vertexDescriptor.attributes[0].format = .float4
+        vertexDescriptor.attributes[0].bufferIndex = 0
+        vertexDescriptor.attributes[0].offset = 0
+        vertexDescriptor.attributes[1].format = .float2
+        vertexDescriptor.attributes[1].bufferIndex = 1
+        vertexDescriptor.attributes[1].offset = 0
+        vertexDescriptor.layouts[0].stride = MemoryLayout<SIMD4<Float>>.stride
+        vertexDescriptor.layouts[1].stride = MemoryLayout<SIMD2<Float>>.stride
+        descriptor.vertexDescriptor = vertexDescriptor
         // swiftlint:disable force_try
         return try! library.device.makeRenderPipelineState(descriptor: descriptor)
         // swftlint:enable force_try
     }
 }
+
 extension vImage_YpCbCrToARGBMatrix {
     var videoRange: vImage_YpCbCrToARGBMatrix {
         vImage_YpCbCrToARGBMatrix(Yp: 255/219*Yp, Cr_R: 255/224*Cr_R, Cr_G: 255/224*Cr_G, Cb_G: 255/224*Cb_G, Cb_B: 255/224*Cb_B)

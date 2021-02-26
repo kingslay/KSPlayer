@@ -3,29 +3,39 @@
 #include <metal_stdlib>
 using namespace metal;
 
-typedef struct {
+struct VertexIn
+{
+    float4 pos [[attribute(0)]];
+    float2 uv [[attribute(1)]];
+};
+
+struct VertexOut {
     float4 renderedCoordinate [[position]];
     float2 textureCoordinate;
-} TextureMappingVertex;
+};
 
-vertex TextureMappingVertex mapTexture(unsigned int vertex_id [[ vertex_id ]],
-                                       constant float4 * pos [[ buffer(0) ]],
-                                       constant float2 * uv [[ buffer(1) ]],
-                                       constant float4x4& uniforms [[ buffer(2) ]]) {
-    TextureMappingVertex outVertex;
-    outVertex.renderedCoordinate = uniforms * pos[vertex_id];
-    outVertex.textureCoordinate = uv[vertex_id];
-
+vertex VertexOut mapTexture(VertexIn input [[stage_in]]) {
+    VertexOut outVertex;
+    outVertex.renderedCoordinate = input.pos;
+    outVertex.textureCoordinate = input.uv;
     return outVertex;
 }
-fragment half4 displayTexture(TextureMappingVertex mappingVertex [[ stage_in ]],
+
+vertex VertexOut mapSphereTexture(VertexIn input [[stage_in]], constant float4x4& uniforms [[ buffer(2) ]]) {
+    VertexOut outVertex;
+    outVertex.renderedCoordinate = uniforms * input.pos;
+    outVertex.textureCoordinate = input.uv;
+    return outVertex;
+}
+
+fragment half4 displayTexture(VertexOut mappingVertex [[ stage_in ]],
                               texture2d<half, access::sample> texture [[ texture(0) ]]) {
     constexpr sampler s(address::clamp_to_edge, filter::linear);
 
     return half4(texture.sample(s, mappingVertex.textureCoordinate));
 }
 
-fragment half4 displayYUVTexture(TextureMappingVertex in [[ stage_in ]],
+fragment half4 displayYUVTexture(VertexOut in [[ stage_in ]],
                                   texture2d<half> yTexture [[ texture(0) ]],
                                   texture2d<half> uTexture [[ texture(1) ]],
                                   texture2d<half> vTexture [[ texture(2) ]],
@@ -41,7 +51,7 @@ fragment half4 displayYUVTexture(TextureMappingVertex in [[ stage_in ]],
 }
 
 
-fragment half4 displayNV12Texture(TextureMappingVertex in [[ stage_in ]],
+fragment half4 displayNV12Texture(VertexOut in [[ stage_in ]],
                                   texture2d<half> lumaTexture [[ texture(0) ]],
                                   texture2d<half> chromaTexture [[ texture(1) ]],
                                   sampler textureSampler [[ sampler(0) ]],
