@@ -175,7 +175,7 @@ class PixelBuffer: BufferProtocol {
         var size = [Int]()
         for i in 0 ..< planeCount {
             if #available(iOS 11.0, tvOS 11.0, *) {
-                let alignment = MetalRender.share.device.minimumLinearTextureAlignment(for: formats[i])
+                let alignment = MetalRender.device.minimumLinearTextureAlignment(for: formats[i])
                 let remainder = bytesPerRow[i] % alignment
                 lineSize.append(remainder == 0 ? bytesPerRow[i] : bytesPerRow[i] + alignment - remainder)
             } else {

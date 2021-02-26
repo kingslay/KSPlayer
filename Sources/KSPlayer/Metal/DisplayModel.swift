@@ -28,6 +28,17 @@ extension DisplayEnum {
         }
     }
 
+    func pipeline(planeCount: Int, bitDepth: Int32) -> MTLRenderPipelineState {
+        switch self {
+        case .plane:
+            return DisplayEnum.planeDisplay.pipeline(planeCount: planeCount, bitDepth: bitDepth)
+        case .vr:
+            return DisplayEnum.vrDiaplay.pipeline(planeCount: planeCount, bitDepth: bitDepth)
+        case .vrBox:
+            return DisplayEnum.vrBoxDiaplay.pipeline(planeCount: planeCount, bitDepth: bitDepth)
+        }
+    }
+
     #if targetEnvironment(simulator) || targetEnvironment(macCatalyst)
     func touchesMoved(touch: UITouch) {
         switch self {
@@ -43,6 +54,11 @@ extension DisplayEnum {
 }
 
 private class PlaneDisplayModel {
+    private lazy var yuv = MetalRender.makePipelineState(fragmentFunction: "displayYUVTexture")
+    private lazy var yuvp010LE = MetalRender.makePipelineState(fragmentFunction: "displayYUVTexture", bitDepth: 10)
+    private lazy var nv12 = MetalRender.makePipelineState(fragmentFunction: "displayNV12Texture")
+    private lazy var p010LE = MetalRender.makePipelineState(fragmentFunction: "displayNV12Texture", bitDepth: 10)
+    private lazy var bgra = MetalRender.makePipelineState(fragmentFunction: "displayTexture")
     let indexCount: Int
     let indexType = MTLIndexType.uint16
     let primitiveType = MTLPrimitiveType.triangleStrip
@@ -53,7 +69,7 @@ private class PlaneDisplayModel {
 
     fileprivate init() {
         let (indices, positions, uvs) = PlaneDisplayModel.genSphere()
-        let device = MetalRender.share.device
+        let device = MetalRender.device
         indexCount = indices.count
         indexBuffer = device.makeBuffer(bytes: indices, length: MemoryLayout<UInt16>.size * indexCount, options: .storageModeShared)!
         posBuffer = device.makeBuffer(bytes: positions, length: MemoryLayout<simd_float4>.size * positions.count, options: .storageModeShared)
@@ -86,9 +102,35 @@ private class PlaneDisplayModel {
         encoder.setVertexBuffer(matrixBuffer, offset: 0, index: 2)
         encoder.drawIndexedPrimitives(type: primitiveType, indexCount: indexCount, indexType: indexType, indexBuffer: indexBuffer, indexBufferOffset: 0)
     }
+
+    func pipeline(planeCount: Int, bitDepth: Int32) -> MTLRenderPipelineState {
+        switch planeCount {
+            case 3:
+                if bitDepth == 10 {
+                    return yuvp010LE
+                } else {
+                    return yuv
+                }
+            case 2:
+                if bitDepth == 10 {
+                    return p010LE
+                } else {
+                    return nv12
+                }
+            case 1:
+                return bgra
+            default:
+                return bgra
+        }
+    }
 }
 
 private class SphereDisplayModel {
+    private lazy var yuv = MetalRender.makePipelineState(fragmentFunction: "displayYUVTexture")
+    private lazy var yuvp010LE = MetalRender.makePipelineState(fragmentFunction: "displayYUVTexture", bitDepth: 10)
+    private lazy var nv12 = MetalRender.makePipelineState(fragmentFunction: "displayNV12Texture")
+    private lazy var p010LE = MetalRender.makePipelineState(fragmentFunction: "displayNV12Texture", bitDepth: 10)
+    private lazy var bgra = MetalRender.makePipelineState(fragmentFunction: "displayTexture")
     private var fingerRotationX = Float(0)
     private var fingerRotationY = Float(0)
     fileprivate var modelViewMatrix = matrix_identity_float4x4
@@ -101,7 +143,7 @@ private class SphereDisplayModel {
 
     fileprivate init() {
         let (indices, positions, uvs) = SphereDisplayModel.genSphere()
-        let device = MetalRender.share.device
+        let device = MetalRender.device
         indexCount = indices.count
         indexBuffer = device.makeBuffer(bytes: indices, length: MemoryLayout<UInt16>.size * indexCount, options: .storageModeShared)!
         posBuffer = device.makeBuffer(bytes: positions, length: MemoryLayout<simd_float4>.size * positions.count, options: .storageModeShared)
@@ -112,7 +154,16 @@ private class SphereDisplayModel {
         }
         #endif
     }
-
+    func set(encoder: MTLRenderCommandEncoder) {
+        encoder.setFrontFacing(.clockwise)
+        encoder.setVertexBuffer(posBuffer, offset: 0, index: 0)
+        encoder.setVertexBuffer(uvBuffer, offset: 0, index: 1)
+        #if os(iOS)
+        if KSPlayerManager.enableSensor, let matrix = MotionSensor.shared.matrix() {
+            modelViewMatrix = matrix
+        }
+        #endif
+    }
     #if targetEnvironment(simulator) || targetEnvironment(macCatalyst)
     func touchesMoved(touch: UITouch) {
         var distX = Float(touch.location(in: touch.view).x - touch.previousLocation(in: touch.view).x)
@@ -168,6 +219,27 @@ private class SphereDisplayModel {
         }
         return (indices, positions, uvs)
     }
+
+    func pipeline(planeCount: Int, bitDepth: Int32) -> MTLRenderPipelineState {
+        switch planeCount {
+            case 3:
+                if bitDepth == 10 {
+                    return yuvp010LE
+                } else {
+                    return yuv
+                }
+            case 2:
+                if bitDepth == 10 {
+                    return p010LE
+                } else {
+                    return nv12
+                }
+            case 1:
+                return bgra
+            default:
+                return bgra
+        }
+    }
 }
 
 private class VRDisplayModel: SphereDisplayModel {
@@ -181,17 +253,10 @@ private class VRDisplayModel: SphereDisplayModel {
         super.init()
     }
 
-    func set(encoder: MTLRenderCommandEncoder) {
-        encoder.setFrontFacing(.clockwise)
-        encoder.setVertexBuffer(posBuffer, offset: 0, index: 0)
-        encoder.setVertexBuffer(uvBuffer, offset: 0, index: 1)
-        #if os(iOS)
-        if KSPlayerManager.enableSensor, let matrix = MotionSensor.shared.matrix() {
-            modelViewMatrix = matrix
-        }
-        #endif
+    override func set(encoder: MTLRenderCommandEncoder) {
+        super.set(encoder: encoder)
         var matrix = modelViewProjectionMatrix * modelViewMatrix
-        let matrixBuffer = MetalRender.share.device.makeBuffer(bytes: &matrix, length: MemoryLayout<simd_float4x4>.size, options: .storageModeShared)
+        let matrixBuffer = MetalRender.device.makeBuffer(bytes: &matrix, length: MemoryLayout<simd_float4x4>.size, options: .storageModeShared)
         encoder.setVertexBuffer(matrixBuffer, offset: 0, index: 2)
         encoder.drawIndexedPrimitives(type: primitiveType, indexCount: indexCount, indexType: indexType, indexBuffer: indexBuffer, indexBufferOffset: 0)
     }
@@ -211,22 +276,15 @@ private class VRBoxDisplayModel: SphereDisplayModel {
         super.init()
     }
 
-    func set(encoder: MTLRenderCommandEncoder) {
-        encoder.setFrontFacing(.clockwise)
-        encoder.setVertexBuffer(posBuffer, offset: 0, index: 0)
-        encoder.setVertexBuffer(uvBuffer, offset: 0, index: 1)
-        #if os(iOS)
-        if KSPlayerManager.enableSensor, let matrix = MotionSensor.shared.matrix() {
-            modelViewMatrix = matrix
-        }
-        #endif
+    override func set(encoder: MTLRenderCommandEncoder) {
+        super.set(encoder: encoder)
         let layerSize = UIScreen.size
         let width = Double(layerSize.width / 2)
         [(modelViewProjectionMatrixLeft, MTLViewport(originX: 0, originY: 0, width: width, height: Double(layerSize.height), znear: 0, zfar: 0)),
          (modelViewProjectionMatrixRight, MTLViewport(originX: width, originY: 0, width: width, height: Double(layerSize.height), znear: 0, zfar: 0))].forEach { modelViewProjectionMatrix, viewport in
             encoder.setViewport(viewport)
             var matrix = modelViewProjectionMatrix * modelViewMatrix
-            let matrixBuffer = MetalRender.share.device.makeBuffer(bytes: &matrix, length: MemoryLayout<simd_float4x4>.size, options: .storageModeShared)
+            let matrixBuffer = MetalRender.device.makeBuffer(bytes: &matrix, length: MemoryLayout<simd_float4x4>.size, options: .storageModeShared)
             encoder.setVertexBuffer(matrixBuffer, offset: 0, index: 2)
             encoder.drawIndexedPrimitives(type: primitiveType, indexCount: indexCount, indexType: indexType, indexBuffer: indexBuffer, indexBufferOffset: 0)
         }

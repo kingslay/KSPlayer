@@ -51,7 +51,7 @@
 		354AAF56863C555363E1CDD8642627A7 /* KSAVPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAB0B89F9B6453F3204F5B8D69EBB46C /* KSAVPlayer.swift */; };
 		35D3A9E4B0BF633D6DED901E2F31426A /* KSMEPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = D996DD55B080BE47F951BCB49689A65E /* KSMEPlayer.swift */; };
 		38FA908361AA29943963F8A7E645F90B /* ObjectPool.swift in Sources */ = {isa = PBXBuildFile; fileRef = B29FFA1CA3A006BF929B576ED904C1CB /* ObjectPool.swift */; };
-		3987EB967E970C42E2FF3344436D996B /* MetalRenderPipeline.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1B035D14C5311357876E72C29E8C43B6 /* MetalRenderPipeline.swift */; };
+		3987EB967E970C42E2FF3344436D996B /* BufferProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1B035D14C5311357876E72C29E8C43B6 /* BufferProtocol.swift */; };
 		3BAD6172533E77F11DAA47CF82C78103 /* PlayerControllerTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4708E6121B0C213802F3816738A75791 /* PlayerControllerTest.swift */; };
 		3CB26FA7B06BBFC86AD801B751F62441 /* Shaders.metal in Sources */ = {isa = PBXBuildFile; fileRef = 5B223A411B3AA8AC489BCCD7E53C03C8 /* Shaders.metal */; };
 		3EEE02D229835AB89F715F91078203B1 /* SeekView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CD8C10617496C7DCD75A92731CA2F87F /* SeekView.swift */; };
@@ -94,7 +94,7 @@
 		7482CAFF53BB3F1C33C65A94F5A976FD /* KSPlayer-iOS-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = A361370274D69642BF4DF23856A452C1 /* KSPlayer-iOS-dummy.m */; };
 		759966098CB313E4D5FA9A8C8AC318F5 /* SubtitleDecode.swift in Sources */ = {isa = PBXBuildFile; fileRef = B70107F6D7BB89C126489AE829A4638E /* SubtitleDecode.swift */; };
 		75B70A54637517B045C06410C93C82B8 /* Polonaise.flac in Resources */ = {isa = PBXBuildFile; fileRef = 5FD7527D1DDB9E45D37B97226B75F6A1 /* Polonaise.flac */; };
-		762F17887E84F998789889EF85B236C0 /* MetalRenderPipeline.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1B035D14C5311357876E72C29E8C43B6 /* MetalRenderPipeline.swift */; };
+		762F17887E84F998789889EF85B236C0 /* BufferProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1B035D14C5311357876E72C29E8C43B6 /* BufferProtocol.swift */; };
 		77756E49D5CB11DEE93B24A35F35C8CF /* KSSubtitleController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05FDB716725C4D70913B48909760A61D /* KSSubtitleController.swift */; };
 		789E4F6040AD6F756F5ED267856EE6AF /* Utility.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21A391B28E721902D5013410B99DF493 /* Utility.swift */; };
 		7BADE58516143D80BA51680E08B7BFA1 /* VideoPlayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7D754F0E7B174D1189A0098DAFC5EA2 /* VideoPlayerView.swift */; };
@@ -149,7 +149,7 @@
 		C943195F5AACCD13FE8157E484DEFD59 /* KSSubtitleController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05FDB716725C4D70913B48909760A61D /* KSSubtitleController.swift */; };
 		C94F3756A87C1DF390B9DF69AEBC19DD /* 567082ac3ae39699f68de4fd2b7444b1e045515a.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = 293C7A46C42B21F0384E42258792431C /* 567082ac3ae39699f68de4fd2b7444b1e045515a.mp4 */; };
 		CBCD8FA75A3FA259B8B38AD058926A6A /* IOSVideoPlayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 061B960693E779F2082A44D5979F2B7C /* IOSVideoPlayerView.swift */; };
-		CC68AA5C7093092CD9007D8FF5D40387 /* MetalRenderPipeline.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1B035D14C5311357876E72C29E8C43B6 /* MetalRenderPipeline.swift */; };
+		CC68AA5C7093092CD9007D8FF5D40387 /* BufferProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1B035D14C5311357876E72C29E8C43B6 /* BufferProtocol.swift */; };
 		CC6FE924065F650243CB10D3ECDC71A0 /* SeekView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CD8C10617496C7DCD75A92731CA2F87F /* SeekView.swift */; };
 		CCE66B32DFC85F8FE9300CB1814E9648 /* AudioPlayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A3B3C3284DF75E88EA43F566F22A1AA /* AudioPlayerView.swift */; };
 		CE54ACAED3211D34E69C567C110E5EF4 /* KSAVPlayerTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5DE8C105FC54A86D91A77B0DCF6AE17 /* KSAVPlayerTest.swift */; };
@@ -312,7 +312,7 @@
 		1498320DA328E7C1273B79109A67B592 /* KSPlayer-tvOS-Unit-Tests-frameworks.sh */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.script.sh; name = "KSPlayer-tvOS-Unit-Tests-frameworks.sh"; path = "../KSPlayer-tvOS/KSPlayer-tvOS-Unit-Tests-frameworks.sh"; sourceTree = "<group>"; };
 		14DBA11DEEACA557EDE16F921B9EE852 /* MEPlayerItem.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = MEPlayerItem.swift; path = Sources/KSPlayer/MEPlayer/MEPlayerItem.swift; sourceTree = "<group>"; };
 		16E1299ADF80D8E2782D89CCF88B8601 /* KSPlayer-tvOS.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "KSPlayer-tvOS.debug.xcconfig"; path = "../KSPlayer-tvOS/KSPlayer-tvOS.debug.xcconfig"; sourceTree = "<group>"; };
-		1B035D14C5311357876E72C29E8C43B6 /* MetalRenderPipeline.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = MetalRenderPipeline.swift; path = Sources/KSPlayer/Metal/MetalRenderPipeline.swift; sourceTree = "<group>"; };
+		1B035D14C5311357876E72C29E8C43B6 /* BufferProtocol.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = BufferProtocol.swift; path = Sources/KSPlayer/Metal/BufferProtocol.swift; sourceTree = "<group>"; };
 		1C90A82585816E289D5C73355B38D6FF /* KSPlayer-tvOS-Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; name = "KSPlayer-tvOS-Info.plist"; path = "../KSPlayer-tvOS/KSPlayer-tvOS-Info.plist"; sourceTree = "<group>"; };
 		1DED43A42451C7E4FA92FD809F62ECA4 /* ATBPlayerItemTrack.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ATBPlayerItemTrack.swift; path = Sources/KSPlayer/MEPlayer/ATBPlayerItemTrack.swift; sourceTree = "<group>"; };
 		1DF2F3CF29321CEE8F62F760EAAC79AF /* AppKitExtend.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = AppKitExtend.swift; path = Sources/KSPlayer/UXKit/AppKitExtend.swift; sourceTree = "<group>"; };
@@ -546,7 +546,7 @@
 			children = (
 				5AA8A70F578F80E1E8DFA71183F0FDCA /* DisplayModel.swift */,
 				58AD61A05542B6B8814C522C82E3FF0B /* MetalRender.swift */,
-				1B035D14C5311357876E72C29E8C43B6 /* MetalRenderPipeline.swift */,
+				1B035D14C5311357876E72C29E8C43B6 /* BufferProtocol.swift */,
 				E07906BE6C23E09269B83BA62A90DD65 /* MetalTexture.swift */,
 				273DC6A762D076E7AF57C4412E1FF5DC /* MotionSensor.swift */,
 				B29FFA1CA3A006BF929B576ED904C1CB /* ObjectPool.swift */,
@@ -1341,7 +1341,7 @@
 				69DD4DF1ED06952A53E42DC37D0B7057 /* MEPlayerItemTrack.swift in Sources */,
 				C5AA1F1E5CB62CDFA96F24F8F6B936CD /* MetalPlayView.swift in Sources */,
 				EFA6AA9D0FC3CE50D85DBCD3BEE96826 /* MetalRender.swift in Sources */,
-				3987EB967E970C42E2FF3344436D996B /* MetalRenderPipeline.swift in Sources */,
+				3987EB967E970C42E2FF3344436D996B /* BufferProtocol.swift in Sources */,
 				11FE5E38505AB8278B17BF3004F2662B /* MetalTexture.swift in Sources */,
 				EF45963AF0288FA5FB300A0D5DFC1FE7 /* Model.swift in Sources */,
 				EA4202EC7CB89A2D8A2AD6344A326DDD /* MotionSensor.swift in Sources */,
@@ -1443,7 +1443,7 @@
 				C0F2D22AC88C45884636F12EA61FAC44 /* MEPlayerItemTrack.swift in Sources */,
 				0FD1E9599BE19144F0BDEB6E206D91F5 /* MetalPlayView.swift in Sources */,
 				D01464664ED817D1E42E20C343AF6228 /* MetalRender.swift in Sources */,
-				CC68AA5C7093092CD9007D8FF5D40387 /* MetalRenderPipeline.swift in Sources */,
+				CC68AA5C7093092CD9007D8FF5D40387 /* BufferProtocol.swift in Sources */,
 				F9FF9E725888EA72EB24E17882BAD404 /* MetalTexture.swift in Sources */,
 				4EE8D23F1A2312D93F2EF9D9FD6993D7 /* Model.swift in Sources */,
 				15B8EAEA7EF1BFB92981DCF242B61041 /* MotionSensor.swift in Sources */,
@@ -1494,7 +1494,7 @@
 				53F3FD90A2E05CBC717AD6635480910C /* MEPlayerItemTrack.swift in Sources */,
 				FDBB16DC6E5EF161EC50F967E1C02AA7 /* MetalPlayView.swift in Sources */,
 				8F5EA7F975E6CA825AF82FAE87CEE35A /* MetalRender.swift in Sources */,
-				762F17887E84F998789889EF85B236C0 /* MetalRenderPipeline.swift in Sources */,
+				762F17887E84F998789889EF85B236C0 /* BufferProtocol.swift in Sources */,
 				F54785B163802B241053B87BD7D9591E /* MetalTexture.swift in Sources */,
 				0D8F6469DE8BFAE5A42D9E7B598FB4B7 /* Model.swift in Sources */,
 				664509792CD6512463BBFDD3C88E3F32 /* MotionSensor.swift in Sources */,

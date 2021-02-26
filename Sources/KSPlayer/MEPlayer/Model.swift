@@ -103,9 +103,12 @@ extension KSPlayerManager {
     public static var audioPlayerMaximumChannels = AVAudioChannelCount(2)
     #else
     public static var audioPlayerSampleRate = Int32(AVAudioSession.sharedInstance().sampleRate)
-    public static var audioPlayerMaximumChannels = AVAudioChannelCount(AVAudioSession.sharedInstance().outputNumberOfChannels)
+    public static var audioPlayerMaximumChannels = AVAudioChannelCount(AVAudioSession.sharedInstance().maximumOutputNumberOfChannels)
     #endif
     static func outputFormat() -> AudioStreamBasicDescription {
+        #if !os(macOS)
+        try? AVAudioSession.sharedInstance().setPreferredOutputNumberOfChannels(Int(audioPlayerMaximumChannels))
+        #endif
         var audioStreamBasicDescription = AudioStreamBasicDescription()
         let floatByteSize = UInt32(MemoryLayout<Float>.size)
         audioStreamBasicDescription.mBitsPerChannel = 8 * floatByteSize
@@ -221,13 +224,13 @@ final class MTLBufferWrap {
     var size: [Int] {
         didSet {
             if size.description != oldValue.description {
-                data = size.map { MetalRender.share.device.makeBuffer(length: $0, options: .storageModeShared) }
+                data = size.map { MetalRender.device.makeBuffer(length: $0, options: .storageModeShared) }
             }
         }
     }
     public init(size: [Int]) {
         self.size = size
-        data = size.map { MetalRender.share.device.makeBuffer(length: $0, options: .storageModeShared) }
+        data = size.map { MetalRender.device.makeBuffer(length: $0, options: .storageModeShared) }
     }
 
     deinit {
