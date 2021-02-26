@@ -5,6 +5,7 @@
 //  Created by kintan on 2018/3/11.
 //
 
+import CoreGraphics
 import Libavformat
 import Foundation
 class SubtitleDecode: DecodeProtocol {
