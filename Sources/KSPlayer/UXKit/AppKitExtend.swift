@@ -165,7 +165,7 @@ extension NSImage {
 }
 
 extension NSButton {
-    open var titleFont: UIFont? {
+    var titleFont: UIFont? {
         get {
             font
         }
