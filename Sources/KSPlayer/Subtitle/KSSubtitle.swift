@@ -7,6 +7,7 @@
 //
 
 import CoreFoundation
+import CoreGraphics
 import Foundation
 public class SubtitlePart: CustomStringConvertible {
     public let start: TimeInterval
