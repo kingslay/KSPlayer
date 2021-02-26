@@ -89,18 +89,18 @@ class SubtitleDecode: DecodeProtocol {
         let attributedString = NSMutableAttributedString()
         var image: CGImage?
         for i in 0 ..< Int(subtitle.num_rects) {
-            guard let rect = subtitle.rects[i] else {
+            guard let rect = subtitle.rects[i]?.pointee else {
                 continue
             }
-            if let text = rect.pointee.text {
+            if let text = rect.text {
                 attributedString.append(NSAttributedString(string: String(cString: text)))
-            } else if let ass = rect.pointee.ass {
+            } else if let ass = rect.ass {
                 let scanner = Scanner(string: String(cString: ass))
                 if let group = AssParse.parse(scanner: scanner, reg: reg) {
                     attributedString.append(group.text)
                 }
-            } else if rect.pointee.type == SUBTITLE_BITMAP {
-                image = scale.transfer(format: AV_PIX_FMT_PAL8, width: Int32(rect.pointee.w), height: Int32(rect.pointee.h), data: Array(tuple: rect.pointee.data), linesize: Array(tuple: rect.pointee.linesize).map {Int($0)})
+            } else if rect.type == SUBTITLE_BITMAP {
+                image = scale.transfer(format: AV_PIX_FMT_PAL8, width: rect.w, height: rect.h, data: Array(tuple: rect.data), linesize: Array(tuple: rect.linesize).map {Int($0)})
             }
         }
         return (attributedString, image)

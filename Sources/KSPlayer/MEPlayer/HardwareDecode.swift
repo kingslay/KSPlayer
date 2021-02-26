@@ -294,14 +294,14 @@ extension AVColorSpace {
 
     var colorSpace: CGColorSpace? {
         switch self {
-            case AVCOL_SPC_BT709:
-                return CGColorSpace(name: CGColorSpace.itur_709)
-            case AVCOL_SPC_BT470BG, AVCOL_SPC_SMPTE170M:
-                return CGColorSpace(name: CGColorSpace.sRGB)
-            case AVCOL_SPC_BT2020_NCL:
-                return CGColorSpace(name: CGColorSpace.itur_2020)
-            default:
-                return nil
+        case AVCOL_SPC_BT709:
+            return CGColorSpace(name: CGColorSpace.itur_709)
+        case AVCOL_SPC_BT470BG, AVCOL_SPC_SMPTE170M:
+            return CGColorSpace(name: CGColorSpace.sRGB)
+        case AVCOL_SPC_BT2020_NCL:
+            return CGColorSpace(name: CGColorSpace.itur_2020)
+        default:
+            return nil
         }
     }
 }
