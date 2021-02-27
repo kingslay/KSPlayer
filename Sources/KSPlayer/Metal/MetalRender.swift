@@ -19,8 +19,8 @@ class MetalRender {
     static let library: MTLLibrary = {
         var library: MTLLibrary!
         library = device.makeDefaultLibrary()
-        if library == nil, let path = Bundle(for: MetalRender.self).path(forResource: "Metal", ofType: "bundle"), let bundle = Bundle(path: path) {
-            library = try? device.makeDefaultLibrary(bundle: bundle)
+        if library == nil {
+            library = try? device.makeDefaultLibrary(bundle: KSPlayerManager.bundle)
         }
         return library
     }()
