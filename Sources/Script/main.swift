@@ -64,6 +64,7 @@ open class BaseBuild {
         try? FileManager.default.createDirectory(at: frameworkDir + "Modules", withIntermediateDirectories: true, attributes: nil)
         let modulemap = "framework module \(framework) [system] {\n   \(frameworkHeader(framework))\n    export *\n}"
         FileManager.default.createFile(atPath: frameworkDir.path + "/Modules/module.modulemap", contents: modulemap.data(using: .utf8), attributes: nil)
+        createPlist(path: frameworkDir.path+"/Info.plist", name: framework, minVersion: platform.minVersion, platform: platform.sdk())
         return frameworkDir.path
     }
     func thinDir(platform: PlatformType, arch: ArchType) -> URL {
@@ -75,6 +76,49 @@ open class BaseBuild {
 
     func frameworkHeader(_ framework: String) -> String {
         return "header \"\(framework.replacingOccurrences(of: "Lib", with: "")).h\""
+    }
+
+    func createPlist(path: String, name: String, minVersion: String, platform: String) {
+        let identifier = "com.kintan.ksplayer." + name
+        var content = """
+        <?xml version="1.0" encoding="UTF-8"?>
+        <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+        <plist version="1.0">
+        <dict>
+        <key>CFBundleDevelopmentRegion</key>
+        <string>en</string>
+        <key>CFBundleExecutable</key>
+        <string>${FRAMEWORK_NAME}</string>
+        <key>CFBundleIdentifier</key>
+        <string>${FRAMEWORK_ID}</string>
+        <key>CFBundleInfoDictionaryVersion</key>
+        <string>6.0</string>
+        <key>CFBundleName</key>
+        <string>${FRAMEWORK_NAME}</string>
+        <key>CFBundlePackageType</key>
+        <string>FMWK</string>
+        <key>CFBundleShortVersionString</key>
+        <string>87.88.520</string>
+        <key>CFBundleVersion</key>
+        <string>87.88.520</string>
+        <key>CFBundleSignature</key>
+        <string>????</string>
+        <key>MinimumOSVersion</key>
+        <string>${MinimumOSVersion}</string>
+        <key>CFBundleSupportedPlatforms</key>
+        <array>
+        <string>${CFBundleSupportedPlatforms}</string>
+        </array>
+        <key>NSPrincipalClass</key>
+        <string></string>
+        </dict>
+        </plist>
+        """
+        content = content.replacingOccurrences(of: "${FRAMEWORK_NAME}", with: name)
+        content = content.replacingOccurrences(of: "${FRAMEWORK_ID}", with: identifier)
+        content = content.replacingOccurrences(of: "${MinimumOSVersion}", with: minVersion)
+        content = content.replacingOccurrences(of: "${CFBundleSupportedPlatforms}", with: platform)
+        FileManager.default.createFile(atPath: path, contents: content.data(using: .utf8), attributes: nil)
     }
 }
 
@@ -305,6 +349,18 @@ class BuildBoringSSL: BaseBuild {
 }
 enum PlatformType: String, CaseIterable {
     case ios, isimulator, tvos, tvsimulator, macos, maccatalyst
+    var minVersion: String {
+        switch self {
+        case .ios, .isimulator:
+            return "10.0"
+        case .tvos, .tvsimulator:
+            return "10.2"
+        case .macos:
+            return "10.13"
+        case .maccatalyst:
+            return "13.0"
+        }
+    }
     func architectures() -> [ArchType] {
         switch self {
         case .ios:
@@ -332,15 +388,15 @@ enum PlatformType: String, CaseIterable {
     func deploymentTarget() -> String {
         switch self {
         case .ios:
-            return "-mios-version-min=10.0"
+            return "-mios-version-min=\(minVersion)"
         case .isimulator:
-            return "-mios-simulator-version-min=10.0"
+            return "-mios-simulator-version-min=\(minVersion)"
         case .tvos:
-            return "-mtvos-version-min=10.2"
+            return "-mtvos-version-min=\(minVersion)"
         case .tvsimulator:
-            return "-mtvos-simulator-version-min=10.2"
+            return "-mtvos-simulator-version-min=\(minVersion)"
         case .macos:
-            return "-mmacosx-version-min=10.13"
+            return "-mmacosx-version-min=\(minVersion)"
         case .maccatalyst:
             return "-target x86_64-apple-ios13.0-macabi"
         }
