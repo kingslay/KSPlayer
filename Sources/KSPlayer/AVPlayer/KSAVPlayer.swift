@@ -444,16 +444,6 @@ extension KSAVPlayer: MediaPlayerProtocol {
     }
     
     public var seekable: Bool {
-        get {
-            if let items = player.currentItem?.seekableTimeRanges,
-               !items.isEmpty {
-                return true
-            }
-            return false
-        }
-    }
-
-    public var seekable: Bool {
         !(player.currentItem?.seekableTimeRanges.isEmpty ?? true)
     }
 
