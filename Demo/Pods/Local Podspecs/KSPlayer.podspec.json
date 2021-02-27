@@ -50,11 +50,6 @@
     {
       "name": "Metal",
       "source_files": "Sources/KSPlayer/Metal/*.{swift,metal}",
-      "resource_bundles": {
-        "Metal": [
-          "Sources/KSPlayer/Metal/*.metal"
-        ]
-      },
       "weak_frameworks": "MetalKit"
     },
     {
@@ -107,8 +102,9 @@
         ]
       },
       "resource_bundles": {
-        "KSResources": [
-          "Sources/KSPlayer/Core/Resources/*"
+        "KSPlayer_KSPlayer": [
+          "Sources/KSPlayer/Core/Resources/*",
+          "Sources/KSPlayer/Metal/*.metal"
         ]
       }
     },

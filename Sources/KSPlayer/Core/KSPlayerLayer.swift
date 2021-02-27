@@ -446,7 +446,7 @@ extension KSPlayerLayer {
 extension KSPlayerManager {
     public static var firstPlayerType: MediaPlayerProtocol.Type = KSAVPlayer.self
     public static var secondPlayerType: MediaPlayerProtocol.Type?
-    static let bundle: Bundle = Bundle(for: KSPlayerLayer.self).path(forResource: "KSResources", ofType: "bundle").map { Bundle(path: $0) ?? Bundle.main } ?? Bundle.main
+    static let bundle: Bundle = Bundle(for: KSPlayerLayer.self).path(forResource: "KSPlayer_KSPlayer", ofType: "bundle").map { Bundle(path: $0) ?? Bundle.main } ?? Bundle.main
 }
 
 extension KSPlayerManager {
