@@ -8,10 +8,8 @@
 import MetalKit
 public final class MetalTextureCache {
     private var textureCache: CVMetalTextureCache?
-    private let device: MTLDevice
     public init() {
-        device = MetalRender.share.device
-        CVMetalTextureCacheCreate(kCFAllocatorDefault, nil, device, nil, &textureCache)
+        CVMetalTextureCacheCreate(kCFAllocatorDefault, nil, MetalRender.device, nil, &textureCache)
     }
 
     public func texture(pixelBuffer: CVPixelBuffer) -> [MTLTexture] {

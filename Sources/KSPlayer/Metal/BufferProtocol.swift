@@ -12,67 +12,6 @@ import Metal
 import simd
 import VideoToolbox
 
-protocol MetalRenderPipeline {
-    var device: MTLDevice { get }
-    var library: MTLLibrary { get }
-    var state: MTLRenderPipelineState { get }
-    var descriptor: MTLRenderPipelineDescriptor { get }
-}
-
-struct NV12MetalRenderPipeline: MetalRenderPipeline {
-    let device: MTLDevice
-    let library: MTLLibrary
-    let state: MTLRenderPipelineState
-    let descriptor: MTLRenderPipelineDescriptor
-    init(device: MTLDevice, library: MTLLibrary, bitDepth: Int32 = 8) {
-        self.device = device
-        self.library = library
-        descriptor = MTLRenderPipelineDescriptor()
-        descriptor.vertexFunction = library.makeFunction(name: "mapTexture")
-        descriptor.colorAttachments[0].pixelFormat = .bgra8Unorm
-        descriptor.fragmentFunction = library.makeFunction(name: "displayNV12Texture")
-        // swiftlint:disable force_try
-        try! state = device.makeRenderPipelineState(descriptor: descriptor)
-        // swftlint:enable force_try
-    }
-}
-
-struct BGRAMetalRenderPipeline: MetalRenderPipeline {
-    let device: MTLDevice
-    let library: MTLLibrary
-    let state: MTLRenderPipelineState
-    let descriptor: MTLRenderPipelineDescriptor
-    init(device: MTLDevice, library: MTLLibrary) {
-        self.device = device
-        self.library = library
-        descriptor = MTLRenderPipelineDescriptor()
-        descriptor.vertexFunction = library.makeFunction(name: "mapTexture")
-        descriptor.colorAttachments[0].pixelFormat = .bgra8Unorm
-        descriptor.fragmentFunction = library.makeFunction(name: "displayTexture")
-        // swiftlint:disable force_try
-        try! state = device.makeRenderPipelineState(descriptor: descriptor)
-        // swftlint:enable force_try
-    }
-}
-
-struct YUVMetalRenderPipeline: MetalRenderPipeline {
-    let device: MTLDevice
-    let library: MTLLibrary
-    let state: MTLRenderPipelineState
-    let descriptor: MTLRenderPipelineDescriptor
-    init(device: MTLDevice, library: MTLLibrary, bitDepth: Int32 = 8) {
-        self.device = device
-        self.library = library
-        descriptor = MTLRenderPipelineDescriptor()
-        descriptor.vertexFunction = library.makeFunction(name: "mapTexture")
-        descriptor.colorAttachments[0].pixelFormat = .bgra8Unorm
-        descriptor.fragmentFunction = library.makeFunction(name: "displayYUVTexture")
-        // swiftlint:disable force_try
-        try! state = device.makeRenderPipelineState(descriptor: descriptor)
-        // swftlint:enable force_try
-    }
-}
-
 public protocol BufferProtocol: AnyObject {
     var drawableSize: CGSize { get }
     var planeCount: Int { get }

@@ -12,10 +12,7 @@ let package = Package(
         .library(
             name: "KSPlayer",
             targets: ["KSPlayer"]
-        ),
-        .library(
-            name: "Script",
-            targets: ["Script"])
+        )
     ],
     dependencies: [
         // Dependencies declare other packages that this package depends on.
@@ -29,12 +26,8 @@ let package = Package(
         ),
         .target(
             name: "FFmpeg",
-            dependencies: ["Libavcodec", "Libavformat", "Libavutil", "Libswresample", "Libswscale", "OpenSSL"],
+            dependencies: ["Libavcodec", "Libavformat", "Libavutil", "Libswresample", "Libswscale", "Libssl", "Libcrypto"],
             linkerSettings: [.linkedLibrary("bz2"), .linkedLibrary("iconv"), .linkedLibrary("xml2"), .linkedLibrary("z")]
-        ),
-        .target(
-            name: "OpenSSL",
-            dependencies: ["Libssl", "Libcrypto"]
         ),
         .target(
             name: "Script",
