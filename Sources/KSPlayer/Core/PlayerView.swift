@@ -113,7 +113,7 @@ open class PlayerView: UIView, KSPlayerLayerDelegate, KSSliderDelegate {
         totalTime = 0
         playerLayer.set(url: url, options: options)
     }
-
+    
     deinit {
         resetPlayer()
     }
@@ -165,6 +165,10 @@ extension PlayerView {
         set {
             toolBar.totalTime = newValue
         }
+    }
+    
+    public func set(nowPlaying metadata:KSNowPlayableMetadata?) {
+        self.playerLayer.setNowPlaingInfo(metadata: metadata)
     }
 
     #if os(macOS)

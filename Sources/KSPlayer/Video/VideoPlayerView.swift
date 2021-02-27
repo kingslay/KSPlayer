@@ -75,6 +75,7 @@ open class VideoPlayerView: PlayerView {
                 toolBar.definitionButton.isHidden = resource.definitions.count < 2
                 autoFadeOutViewWithAnimation()
                 isMaskShow = true
+                self.set(nowPlaying: resource.nowPlayingInfo)
             }
         }
     }

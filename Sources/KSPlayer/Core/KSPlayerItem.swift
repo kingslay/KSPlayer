@@ -18,6 +18,7 @@ public class KSPlayerResource: Hashable {
     public let cover: URL?
     public let definitions: [KSPlayerResourceDefinition]
     public var subtitle: KSSubtitleProtocol?
+    public var nowPlayingInfo: KSNowPlayableMetadata?
     /**
      Player recource item with url, used to play single difinition video
 
@@ -48,6 +49,7 @@ public class KSPlayerResource: Hashable {
         self.cover = cover
         self.subtitle = subtitle
         self.definitions = definitions
+        self.nowPlayingInfo = KSNowPlayableMetadata(mediaType: nil, isLiveStream: nil, title: name, artist: nil, artwork: nil, albumArtist: nil, albumTitle: nil)
     }
 
     public func hash(into hasher: inout Hasher) {
