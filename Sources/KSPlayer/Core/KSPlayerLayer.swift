@@ -194,13 +194,8 @@ open class KSPlayerLayer: UIView {
     }
 
     open func pause() {
-        if #available(OSX 10.12.2, *) {
-            if let player = player {
-                MPNowPlayingInfoCenter.default().nowPlayingInfo = [
-                    MPNowPlayingInfoPropertyElapsedPlaybackTime: player.currentPlaybackTime,
-                    MPMediaItemPropertyPlaybackDuration: player.duration
-                ]
-            }
+        if let player = player {
+            MPNowPlayingInfoCenter.default().nowPlayingInfo?[MPNowPlayingInfoPropertyElapsedPlaybackTime] = player.currentPlaybackTime
         }
         isAutoPlay = false
         player?.pause()
@@ -260,11 +255,9 @@ open class KSPlayerLayer: UIView {
 
 extension KSPlayerLayer: MediaPlayerDelegate {
     public func preparedToPlay(player: MediaPlayerProtocol) {
-        if #available(OSX 10.12.2, *) {
-            MPNowPlayingInfoCenter.default().nowPlayingInfo = [
-                MPMediaItemPropertyPlaybackDuration: player.duration
-            ]
-        }
+        MPNowPlayingInfoCenter.default().nowPlayingInfo = [
+            MPMediaItemPropertyPlaybackDuration: player.duration
+        ]
         state = .readyToPlay
         if isAutoPlay {
             if shouldSeekTo > 0 {

@@ -10,7 +10,7 @@ import UIKit
 import AppKit
 #endif
 
-public extension UIView {
+extension UIView {
     var backingLayer: CALayer? {
         #if os(macOS)
         wantsLayer = true

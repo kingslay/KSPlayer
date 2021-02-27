@@ -9,8 +9,7 @@ import CoreMedia
 import MetalKit
 
 final class MetalPlayView: MTKView, FrameOutput {
-    private let textureCache = MetalTextureCache()
-    private let renderPassDescriptor = MTLRenderPassDescriptor()
+    private let render = MetalRender()
     var display: DisplayEnum = .plane
     weak var renderSource: OutputRenderSourceDelegate?
     private var pixelBuffer: BufferProtocol? {
@@ -21,6 +20,7 @@ final class MetalPlayView: MTKView, FrameOutput {
                     if drawableSize != size {
                         drawableSize = size
                     }
+                    colorPixelFormat = KSOptions.colorPixelFormat(bitDepth: pixelBuffer.bitDepth)
                     #if targetEnvironment(simulator)
                     if #available(iOS 13.0, tvOS 13.0, *) {
                         (layer as? CAMetalLayer)?.colorspace = pixelBuffer.colorspace
@@ -31,18 +31,17 @@ final class MetalPlayView: MTKView, FrameOutput {
                     #if os(macOS) || targetEnvironment(macCatalyst)
                     (layer as? CAMetalLayer)?.wantsExtendedDynamicRangeContent = true
                     #endif
-                    let textures = pixelBuffer.textures(frome: textureCache)
                     guard let drawable = currentDrawable else {
                         return
                     }
-                    MetalRender.share.draw(pixelBuffer: pixelBuffer, display: display, inputTextures: textures, drawable: drawable, renderPassDescriptor: renderPassDescriptor)
+                    render.draw(pixelBuffer: pixelBuffer, display: display, drawable: drawable)
                 }
             }
         }
     }
 
     init() {
-        super.init(frame: .zero, device: MetalRender.share.device)
+        super.init(frame: .zero, device: MetalRender.device)
         framebufferOnly = true
         preferredFramesPerSecond = KSPlayerManager.preferredFramesPerSecond
         isPaused = true
