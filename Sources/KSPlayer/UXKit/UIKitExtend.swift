@@ -178,7 +178,6 @@ internal extension UIButton {
         }
     }
 
-
     var title: String? {
         get {
             titleLabel?.text

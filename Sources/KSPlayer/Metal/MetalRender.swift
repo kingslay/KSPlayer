@@ -137,8 +137,8 @@ class MetalRender {
         vertexDescriptor.attributes[1].format = .float2
         vertexDescriptor.attributes[1].bufferIndex = 1
         vertexDescriptor.attributes[1].offset = 0
-        vertexDescriptor.layouts[0].stride = MemoryLayout<SIMD4<Float>>.stride
-        vertexDescriptor.layouts[1].stride = MemoryLayout<SIMD2<Float>>.stride
+        vertexDescriptor.layouts[0].stride = MemoryLayout<simd_float4>.stride
+        vertexDescriptor.layouts[1].stride = MemoryLayout<simd_float2>.stride
         descriptor.vertexDescriptor = vertexDescriptor
         // swiftlint:disable force_try
         return try! library.device.makeRenderPipelineState(descriptor: descriptor)
