@@ -442,7 +442,7 @@ extension KSAVPlayer: MediaPlayerProtocol {
     public func enterForeground() {
         playerView.playerLayer.player = playerView.player
     }
-
+    
     public var seekable: Bool {
         !(player.currentItem?.seekableTimeRanges.isEmpty ?? true)
     }
