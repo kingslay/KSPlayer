@@ -11,6 +11,7 @@ import UIKit
 #else
 import AppKit
 #endif
+import MediaPlayer
 
 /// internal enum to check the pan direction
 public enum KSPanDirection {
@@ -75,7 +76,7 @@ open class VideoPlayerView: PlayerView {
                 toolBar.definitionButton.isHidden = resource.definitions.count < 2
                 autoFadeOutViewWithAnimation()
                 isMaskShow = true
-                self.set(nowPlaying: resource.nowPlayingInfo)
+                MPNowPlayingInfoCenter.default().nowPlayingInfo = resource.nowPlayingInfo?.nowPlayingInfo
             }
         }
     }
