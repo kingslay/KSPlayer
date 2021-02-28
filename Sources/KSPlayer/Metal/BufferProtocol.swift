@@ -13,7 +13,7 @@ import simd
 import VideoToolbox
 
 public protocol BufferProtocol: AnyObject {
-    var drawableSize: CGSize { get }
+    var sar: CGSize { get }
     var planeCount: Int { get }
     var width: Int { get }
     var height: Int { get }
@@ -29,29 +29,29 @@ public protocol BufferProtocol: AnyObject {
     func textures(frome cache: MetalTextureCache) -> [MTLTexture]
     func image() -> CGImage?
 }
+extension BufferProtocol {
+    var size: CGSize { CGSize(width: width, height: height) }
+}
 
 extension CVPixelBuffer: BufferProtocol {
     public var width: Int { CVPixelBufferGetWidth(self) }
 
     public var height: Int { CVPixelBufferGetHeight(self) }
 
-    public var size: CGSize { CGSize(width: width, height: height) }
+    public var sar: CGSize {
+        if let ratio = CVBufferGetAttachment(self, kCVImageBufferPixelAspectRatioKey, nil)?.takeUnretainedValue() as? NSDictionary,
+           let horizontal = (ratio[kCVImageBufferPixelAspectRatioHorizontalSpacingKey] as? NSNumber)?.intValue,
+           let vertical = (ratio[kCVImageBufferPixelAspectRatioVerticalSpacingKey] as? NSNumber)?.intValue,
+           horizontal > 0, vertical > 0 {
+            return CGSize(width: horizontal, height: vertical)
+        } else {
+            return CGSize(width: 1, height: 1)
+        }
+    }
 
     public var isPlanar: Bool { CVPixelBufferIsPlanar(self) }
 
     public var planeCount: Int { isPlanar ? CVPixelBufferGetPlaneCount(self) : 1 }
-
-    public var drawableSize: CGSize {
-        // Check if the pixel buffer exists
-        if let ratio = CVBufferGetAttachment(self, kCVImageBufferPixelAspectRatioKey, nil)?.takeUnretainedValue() as? NSDictionary,
-            let horizontal = (ratio[kCVImageBufferPixelAspectRatioHorizontalSpacingKey] as? NSNumber)?.intValue,
-            let vertical = (ratio[kCVImageBufferPixelAspectRatioVerticalSpacingKey] as? NSNumber)?.intValue,
-            horizontal > 0, vertical > 0, horizontal != vertical {
-            return CGSize(width: width, height: height * vertical / horizontal)
-        } else {
-            return size
-        }
-    }
 
     public var isFullRangeVideo: Bool {
         CVBufferGetAttachment(self, kCMFormatDescriptionExtension_FullRangeVideo, nil)?.takeUnretainedValue() as? Bool ?? true

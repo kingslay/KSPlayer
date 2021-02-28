@@ -152,9 +152,7 @@ class DecompressionSession {
                 codecpar.codec_id == AV_CODEC_ID_HEVC ? "hvcC" : "avcC": NSData(bytes: extradata, length: Int(extradataSize))
             ]
         ]
-        if let aspectRatio = codecpar.aspectRatio {
-            dic[kCVImageBufferPixelAspectRatioKey] = aspectRatio
-        }
+        dic[kCVImageBufferPixelAspectRatioKey] = codecpar.sar
         dic[kCVImageBufferColorPrimariesKey] = codecpar.color_primaries.colorPrimaries
         dic[kCVImageBufferTransferFunctionKey] = codecpar.color_trc.transferFunction
         dic[kCVImageBufferYCbCrMatrixKey] = codecpar.color_space.ycbcrMatrix

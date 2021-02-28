@@ -132,7 +132,7 @@ public struct VideoAdaptationState {
     public internal(set) var loadedCount: Int = 0
 }
 
-public class KSOptions {
+open class KSOptions {
     public static var hardwareDecodeH264 = true
     public static var hardwareDecodeH265 = true
     /// 最低缓存视频时间
@@ -320,6 +320,10 @@ public class KSOptions {
 
     open func audioFrameMaxCount(fps: Float) -> Int {
         return 16
+    }
+
+    open func drawableSize(par: CGSize, sar: CGSize) -> CGSize {
+        display == .plane ? CGSize(width: par.width, height: par.height*sar.width/sar.height) : UIScreen.size
     }
 
     private class func deviceCpuCount() -> Int {
