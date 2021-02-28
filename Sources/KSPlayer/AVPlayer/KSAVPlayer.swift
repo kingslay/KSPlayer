@@ -305,12 +305,7 @@ extension KSAVPlayer {
 extension KSAVPlayer: MediaPlayerProtocol {
     public var subtitleDataSouce: SubtitleDataSouce? { nil }
     public var isPlaying: Bool { player.rate > 0 ? true : playbackState == .playing }
-
     public var view: UIView { playerView }
-    public var nominalFrameRate: Float {
-        urlAsset.tracks(withMediaType: .video).first { $0.isEnabled }?.nominalFrameRate ?? 0.0
-    }
-
     public var allowsExternalPlayback: Bool {
         get {
             player.allowsExternalPlayback
@@ -462,7 +457,7 @@ extension KSAVPlayer: MediaPlayerProtocol {
 
     public func select(track: MediaPlayerTrack) {
         if var track = track as? AVMediaPlayerTrack {
-            player.currentItem?.tracks.filter { $0.assetTrack?.mediaType == track.mediaType }.dropFirst().forEach { $0.isEnabled = false }
+            player.currentItem?.tracks.filter { $0.assetTrack?.mediaType == track.mediaType }.forEach { $0.isEnabled = false }
             track.isEnabled = true
         }
     }
@@ -485,7 +480,7 @@ extension AVMediaType {
 
 struct AVMediaPlayerTrack: MediaPlayerTrack {
     private let track: AVPlayerItemTrack
-    let fps: Float
+    let nominalFrameRate: Float
     let codecType: FourCharCode
     let rotation: Double = 0
     let bitRate: Int64 = 0
@@ -511,7 +506,7 @@ struct AVMediaPlayerTrack: MediaPlayerTrack {
         mediaType = track.assetTrack?.mediaType ?? .video
         name = track.assetTrack?.languageCode ?? ""
         language = track.assetTrack?.extendedLanguageTag
-        fps = track.assetTrack?.nominalFrameRate ?? 24.0
+        nominalFrameRate = track.assetTrack?.nominalFrameRate ?? 24.0
         naturalSize = track.assetTrack?.naturalSize ?? .zero
         if let formatDescription = track.assetTrack?.formatDescriptions.first {
             // swiftlint:disable force_cast

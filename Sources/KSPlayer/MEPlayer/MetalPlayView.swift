@@ -61,10 +61,10 @@ final class MetalPlayView: MTKView, FrameOutput {
 
     #if targetEnvironment(simulator) || targetEnvironment(macCatalyst)
     override func touchesMoved(_ touches: Set<UITouch>, with: UIEvent?) {
-        if display == .plane {
+        if options.display == .plane {
             super.touchesMoved(touches, with: with)
         } else {
-            display.touchesMoved(touch: touches.first!)
+            options.display.touchesMoved(touch: touches.first!)
         }
     }
     #endif
