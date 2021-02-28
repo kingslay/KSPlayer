@@ -176,10 +176,6 @@ extension KSMEPlayer: MediaPlayerProtocol {
         playerItem.rotation == 90 || playerItem.rotation == 270 ? playerItem.naturalSize.reverse : playerItem.naturalSize
     }
 
-    public var nominalFrameRate: Float {
-        Float(playerItem.assetTracks.first { $0.mediaType == .video && $0.isEnabled }?.fps ?? 0)
-    }
-
     public var isExternalPlaybackActive: Bool { false }
 
     public var view: UIView { videoOutput }
