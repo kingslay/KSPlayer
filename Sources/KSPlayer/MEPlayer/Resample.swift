@@ -125,7 +125,7 @@ class PixelBuffer: BufferProtocol {
     let transferFunction: CFString?
     let yCbCrMatrix: CFString?
 
-    let drawableSize: CGSize
+    let sar: CGSize
     private let formats: [MTLPixelFormat]
     private let widths: [Int]
     private let heights: [Int]
@@ -150,13 +150,7 @@ class PixelBuffer: BufferProtocol {
         isFullRangeVideo = frame.pointee.color_range == AVCOL_RANGE_JPEG
         let bytesPerRow = Array(tuple: frame.pointee.linesize).compactMap { Int($0) }
         bitDepth = format.bitDepth()
-        let vertical = Int(frame.pointee.sample_aspect_ratio.den)
-        let horizontal = Int(frame.pointee.sample_aspect_ratio.num)
-        if vertical > 0, horizontal > 0, vertical != horizontal {
-            drawableSize = CGSize(width: width, height: height * vertical / horizontal)
-        } else {
-            drawableSize = CGSize(width: width, height: height)
-        }
+        sar = frame.pointee.sample_aspect_ratio.size
         planeCount = Int(format.planeCount())
         switch planeCount {
         case 3:
@@ -234,12 +228,12 @@ class PixelBuffer: BufferProtocol {
 }
 
 extension AVCodecParameters {
-    var aspectRatio: NSDictionary? {
-        let den = sample_aspect_ratio.den
-        let num = sample_aspect_ratio.num
-        if den > 0, num > 0, den != num {
-            return [kCVImageBufferPixelAspectRatioHorizontalSpacingKey: num,
-                    kCVImageBufferPixelAspectRatioVerticalSpacingKey: den] as NSDictionary
+
+    var sar: NSDictionary? {
+        let sar = sample_aspect_ratio.size
+        if sar.width != sar.height {
+            return [kCVImageBufferPixelAspectRatioHorizontalSpacingKey: sar.width,
+                    kCVImageBufferPixelAspectRatioVerticalSpacingKey: sar.height] as NSDictionary
         } else {
             return nil
         }

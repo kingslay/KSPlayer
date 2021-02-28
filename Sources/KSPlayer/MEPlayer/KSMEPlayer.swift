@@ -16,7 +16,7 @@ public class KSMEPlayer {
     private var loopCount = 1
     private let audioOutput = AudioOutput()
     private var playerItem: MEPlayerItem
-    private let videoOutput = MetalPlayView()
+    private let videoOutput: MetalPlayView
     private var options: KSOptions
     public private(set) var bufferingProgress = 0 {
         didSet {
@@ -58,11 +58,11 @@ public class KSMEPlayer {
 
     public required init(url: URL, options: KSOptions) {
         playerItem = MEPlayerItem(url: url, options: options)
+        self.videoOutput = MetalPlayView(options: options)
         self.options = options
         playerItem.delegate = self
         audioOutput.renderSource = playerItem
         videoOutput.renderSource = playerItem
-        videoOutput.display = options.display
         setAudioSession()
     }
 
@@ -193,7 +193,7 @@ extension KSMEPlayer: MediaPlayerProtocol {
         playerItem.delegate = self
         audioOutput.renderSource = playerItem
         videoOutput.renderSource = playerItem
-        videoOutput.display = options.display
+        videoOutput.options = options
     }
 
     public var currentPlaybackTime: TimeInterval {
