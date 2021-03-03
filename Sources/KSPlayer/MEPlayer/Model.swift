@@ -152,6 +152,11 @@ extension Timebase {
     }
 }
 
+extension AVRational {
+    var size: CGSize {
+        num > 0 && den > 0 ? CGSize(width: Int(den), height: Int(num)) : CGSize(width: 1, height: 1)
+    }
+}
 final class Packet: ObjectQueueItem {
     final class AVPacketWrap {
         fileprivate var corePacket = av_packet_alloc()

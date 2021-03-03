@@ -51,42 +51,6 @@ public enum KSPlayerState: CustomStringConvertible {
     public var isPlaying: Bool { self == .buffering || self == .bufferFinished }
 }
 
-public struct KSNowPlayableMetadata {
-    let mediaType: MPNowPlayingInfoMediaType?
-    let isLiveStream: Bool?
-    let title: String?
-    let artist: String?
-    let artwork: MPMediaItemArtwork?
-    let albumArtist: String?
-    let albumTitle: String?
-    
-    init(mediaType: MPNowPlayingInfoMediaType? = nil, isLiveStream: Bool? = nil, title: String , artist: String? = nil, artwork: MPMediaItemArtwork? = nil, albumArtist: String? = nil, albumTitle: String? = nil) {
-        self.mediaType = mediaType
-        self.isLiveStream = isLiveStream
-        self.title = title
-        self.artist = artist
-        self.artwork = artwork
-        self.albumArtist = albumArtist
-        self.albumTitle = albumTitle
-    }
-    
-    init(mediaType: MPNowPlayingInfoMediaType? = nil, isLiveStream: Bool? = nil, title: String , artist: String? = nil, image: UIImage? = nil, albumArtist: String? = nil, albumTitle: String? = nil) {
-        self.mediaType = mediaType
-        self.isLiveStream = isLiveStream
-        self.title = title
-        self.artist = artist
-        self.albumArtist = albumArtist
-        self.albumTitle = albumTitle
-        if let image = image {
-            self.artwork = MPMediaItemArtwork(boundsSize: image.size, requestHandler: { _ in
-                return image
-            })
-        } else {
-            self.artwork = nil
-        }
-    }
-}
-
 public protocol KSPlayerLayerDelegate: AnyObject {
     func player(layer: KSPlayerLayer, state: KSPlayerState)
     func player(layer: KSPlayerLayer, currentTime: TimeInterval, totalTime: TimeInterval)
@@ -105,7 +69,6 @@ open class KSPlayerLayer: UIView {
     private var bufferedCount = 0
     private var shouldSeekTo: TimeInterval = 0
     private var startTime: TimeInterval = 0
-    private var nowPlayingInfo = [String: Any]()
     private var url: URL? {
         didSet {
             guard let url = url, let options = options else {
@@ -197,10 +160,6 @@ open class KSPlayerLayer: UIView {
         self.urls.append(contentsOf: urls)
         url = urls.first
     }
-    
-    public func set(metadata:KSNowPlayableMetadata?) {
-        self.setNowPlaingInfo(metadata: metadata)
-    }
 
     open func play() {
         UIApplication.shared.isIdleTimerDisabled = true
@@ -237,7 +196,7 @@ open class KSPlayerLayer: UIView {
         player?.playbackRate = 1
         player?.playbackVolume = 1
         UIApplication.shared.isIdleTimerDisabled = false
-        self.setNowPlaingInfo(metadata: nil)
+        MPNowPlayingInfoCenter.default().nowPlayingInfo = nil
     }
 
     open func seek(time: TimeInterval, autoPlay: Bool, completion handler: ((Bool) -> Void)? = nil) {
@@ -279,8 +238,7 @@ open class KSPlayerLayer: UIView {
 
 extension KSPlayerLayer: MediaPlayerDelegate {
     public func preparedToPlay(player: MediaPlayerProtocol) {
-        self.updateNowPlayingTime()
-        self.updateNowPlayingAudioTracks()
+        updateNowPlayingInfo()
         state = .readyToPlay
         if isAutoPlay {
             if shouldSeekTo > 0 {
@@ -357,20 +315,40 @@ extension KSPlayerLayer: MediaPlayerDelegate {
     }
 }
 
-// MARK: - Now Playing
+// MARK: - private functions
 extension KSPlayerLayer {
-    private func updateNowPlayingTime() {
-        // NowPlaying events - during a pause may not update time
-        guard let player = self.player, player.isPlaying else { return }
-        self.nowPlayingInfo[MPMediaItemPropertyPlaybackDuration] = player.duration
-        self.nowPlayingInfo[MPNowPlayingInfoPropertyElapsedPlaybackTime] = player.currentPlaybackTime
-        MPNowPlayingInfoCenter.default().nowPlayingInfo = self.nowPlayingInfo
+    private func prepareToPlay() {
+        startTime = CACurrentMediaTime()
+        bufferedCount = 0
+        player?.prepareToPlay()
+        if isAutoPlay {
+            state = .buffering
+        } else {
+            state = .notSetURL
+        }
     }
-    
-    private func updateNowPlayingAudioTracks() {
+
+    @objc private func playerTimerAction() {
+        guard let player = player, player.isPreparedToPlay else { return }
+        delegate?.player(layer: self, currentTime: player.currentPlaybackTime, totalTime: player.duration)
+        if player.playbackState == .playing, player.loadState == .playable, state == .buffering {
+            // 一个兜底保护，正常不能走到这里
+            state = .bufferFinished
+        }
+        if player.isPlaying {
+            MPNowPlayingInfoCenter.default().nowPlayingInfo?[MPNowPlayingInfoPropertyElapsedPlaybackTime] = player.currentPlaybackTime
+        }
+    }
+
+    private func updateNowPlayingInfo() {
         guard let player = self.player else { return }
-        var current:[MPNowPlayingInfoLanguageOption] = []
-        var langs:[MPNowPlayingInfoLanguageOptionGroup] = []
+        if MPNowPlayingInfoCenter.default().nowPlayingInfo == nil {
+            MPNowPlayingInfoCenter.default().nowPlayingInfo = [MPMediaItemPropertyPlaybackDuration: player.duration]
+        } else {
+            MPNowPlayingInfoCenter.default().nowPlayingInfo?[MPMediaItemPropertyPlaybackDuration] = player.duration
+        }
+        var current: [MPNowPlayingInfoLanguageOption] = []
+        var langs: [MPNowPlayingInfoLanguageOptionGroup] = []
         for track in player.tracks(mediaType: .audio) {
             if let lang = track.language {
                 let audioLang = MPNowPlayingInfoLanguageOption(type: .audible, languageTag: lang, characteristics: nil, displayName: track.name, identifier: track.name)
@@ -384,52 +362,8 @@ extension KSPlayerLayer {
         if langs.count > 0 {
             MPRemoteCommandCenter.shared().enableLanguageOptionCommand.isEnabled = true
         }
-        self.nowPlayingInfo[MPNowPlayingInfoPropertyAvailableLanguageOptions] = langs
-        self.nowPlayingInfo[MPNowPlayingInfoPropertyCurrentLanguageOptions] = current
-        MPNowPlayingInfoCenter.default().nowPlayingInfo = self.nowPlayingInfo
-    }
-    
-    func setNowPlaingInfo(metadata: KSNowPlayableMetadata?) {
-        let nowPlayingInfoCenter = MPNowPlayingInfoCenter.default()
-        guard let metadata = metadata else {
-            nowPlayingInfoCenter.nowPlayingInfo = nil
-            self.nowPlayingInfo.removeAll()
-            return
-        }
-        self.nowPlayingInfo[MPNowPlayingInfoPropertyMediaType] = metadata.mediaType?.rawValue
-        self.nowPlayingInfo[MPNowPlayingInfoPropertyIsLiveStream] = metadata.isLiveStream
-        self.nowPlayingInfo[MPMediaItemPropertyTitle] = metadata.title
-        self.nowPlayingInfo[MPMediaItemPropertyArtist] = metadata.artist
-        if #available(OSX 10.13.2, *) {
-            self.nowPlayingInfo[MPMediaItemPropertyArtwork] = metadata.artwork
-        }
-        self.nowPlayingInfo[MPMediaItemPropertyAlbumArtist] = metadata.albumArtist
-        self.nowPlayingInfo[MPMediaItemPropertyAlbumTitle] = metadata.albumTitle
-        nowPlayingInfoCenter.nowPlayingInfo = self.nowPlayingInfo
-    }
-}
-
-// MARK: - private functions
-extension KSPlayerLayer {
-    private func prepareToPlay() {
-        startTime = CACurrentMediaTime()
-        bufferedCount = 0
-        player?.prepareToPlay()
-        if isAutoPlay {
-            state = .buffering
-        } else {
-            state = .notSetURL
-        }
-    }
-    
-    @objc private func playerTimerAction() {
-        guard let player = player, player.isPreparedToPlay else { return }
-        delegate?.player(layer: self, currentTime: player.currentPlaybackTime, totalTime: player.duration)
-        if player.playbackState == .playing, player.loadState == .playable, state == .buffering {
-            // 一个兜底保护，正常不能走到这里
-            state = .bufferFinished
-        }
-        self.updateNowPlayingTime()
+        MPNowPlayingInfoCenter.default().nowPlayingInfo?[MPNowPlayingInfoPropertyAvailableLanguageOptions] = langs
+        MPNowPlayingInfoCenter.default().nowPlayingInfo?[MPNowPlayingInfoPropertyCurrentLanguageOptions] = current
     }
 
     private func registerRemoteControllEvent() {
@@ -457,21 +391,7 @@ extension KSPlayerLayer {
         guard let player = player else {
             return .noSuchContent
         }
-        if event.command == MPRemoteCommandCenter.shared().playCommand {
-            play()
-        } else if event.command == MPRemoteCommandCenter.shared().pauseCommand {
-            pause()
-        } else if event.command == MPRemoteCommandCenter.shared().togglePlayPauseCommand {
-            if state.isPlaying {
-                pause()
-            } else {
-                play()
-            }
-        } else if event.command == MPRemoteCommandCenter.shared().seekForwardCommand {
-            seek(time: player.currentPlaybackTime + player.duration * 0.01, autoPlay: options?.isSeekedAutoPlay ?? false)
-        } else if event.command == MPRemoteCommandCenter.shared().seekBackwardCommand {
-            seek(time: player.currentPlaybackTime - player.duration * 0.01, autoPlay: options?.isSeekedAutoPlay ?? false)
-        } else if let event = event as? MPChangePlaybackPositionCommandEvent {
+        if let event = event as? MPChangePlaybackPositionCommandEvent {
             seek(time: event.positionTime, autoPlay: options?.isSeekedAutoPlay ?? false)
         } else if let event = event as? MPChangePlaybackRateCommandEvent {
             player.playbackRate = event.playbackRate
@@ -480,6 +400,25 @@ extension KSPlayerLayer {
             if selectLang.languageOptionType == .audible,
                let trackToSelect = player.tracks(mediaType: .audio).first(where: { $0.name == selectLang.displayName }) {
                 player.select(track: trackToSelect)
+            }
+        } else {
+            switch event.command {
+            case MPRemoteCommandCenter.shared().playCommand:
+                play()
+            case MPRemoteCommandCenter.shared().pauseCommand:
+                pause()
+            case MPRemoteCommandCenter.shared().togglePlayPauseCommand:
+                if state.isPlaying {
+                    pause()
+                } else {
+                    play()
+                }
+            case MPRemoteCommandCenter.shared().seekForwardCommand:
+                seek(time: player.currentPlaybackTime + player.duration * 0.01, autoPlay: options?.isSeekedAutoPlay ?? false)
+            case MPRemoteCommandCenter.shared().seekBackwardCommand:
+                seek(time: player.currentPlaybackTime - player.duration * 0.01, autoPlay: options?.isSeekedAutoPlay ?? false)
+            default:
+                return .success
             }
         }
         return .success
@@ -507,7 +446,7 @@ extension KSPlayerLayer {
 extension KSPlayerManager {
     public static var firstPlayerType: MediaPlayerProtocol.Type = KSAVPlayer.self
     public static var secondPlayerType: MediaPlayerProtocol.Type?
-    static let bundle: Bundle = Bundle(for: KSPlayerLayer.self).path(forResource: "KSResources", ofType: "bundle").map { Bundle(path: $0) ?? Bundle.main } ?? Bundle.main
+    static let bundle: Bundle = Bundle(for: KSPlayerLayer.self).path(forResource: "KSPlayer_KSPlayer", ofType: "bundle").map { Bundle(path: $0) ?? Bundle.main } ?? Bundle.main
 }
 
 extension KSPlayerManager {

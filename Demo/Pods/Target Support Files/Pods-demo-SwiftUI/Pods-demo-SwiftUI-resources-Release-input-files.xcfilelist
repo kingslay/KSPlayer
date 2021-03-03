@@ -1,3 +1,2 @@
 ${PODS_ROOT}/Target Support Files/Pods-demo-SwiftUI/Pods-demo-SwiftUI-resources.sh
-${PODS_CONFIGURATION_BUILD_DIR}/KSPlayer-iOS/KSResources.bundle
-${PODS_CONFIGURATION_BUILD_DIR}/KSPlayer-iOS/Metal.bundle
+${PODS_CONFIGURATION_BUILD_DIR}/KSPlayer-iOS/KSPlayer_KSPlayer.bundle

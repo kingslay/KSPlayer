@@ -25,7 +25,6 @@ public protocol MediaPlayback: AnyObject {
 public protocol MediaPlayerProtocol: MediaPlayback {
     var delegate: MediaPlayerDelegate? { get set }
     var view: UIView { get }
-    var nominalFrameRate: Float { get }
     var playableTime: TimeInterval { get }
     var isPreparedToPlay: Bool { get }
     var playbackState: MediaPlaybackState { get }
@@ -51,6 +50,11 @@ public protocol MediaPlayerProtocol: MediaPlayback {
     func tracks(mediaType: AVFoundation.AVMediaType) -> [MediaPlayerTrack]
     func select(track: MediaPlayerTrack)
 }
+extension MediaPlayerProtocol {
+    public var nominalFrameRate: Float {
+        tracks(mediaType: .video).first { $0.isEnabled }?.nominalFrameRate ?? 0
+    }
+}
 
 public protocol MediaPlayerDelegate: AnyObject {
     func preparedToPlay(player: MediaPlayerProtocol)
@@ -66,7 +70,7 @@ public protocol MediaPlayerTrack {
     var language: String? { get }
     var mediaType: AVFoundation.AVMediaType { get }
     var codecType: FourCharCode { get }
-    var fps: Float { get }
+    var nominalFrameRate: Float { get }
     var rotation: Double { get }
     var bitRate: Int64 { get }
     var naturalSize: CGSize { get }
@@ -132,7 +136,7 @@ public struct VideoAdaptationState {
     public internal(set) var loadedCount: Int = 0
 }
 
-public class KSOptions {
+open class KSOptions {
     public static var hardwareDecodeH264 = true
     public static var hardwareDecodeH265 = true
     /// 最低缓存视频时间
@@ -320,6 +324,10 @@ public class KSOptions {
 
     open func audioFrameMaxCount(fps: Float) -> Int {
         return 16
+    }
+
+    open func drawableSize(par: CGSize, sar: CGSize) -> CGSize {
+        display == .plane ? CGSize(width: par.width, height: par.height*sar.width/sar.height) : UIScreen.size
     }
 
     private class func deviceCpuCount() -> Int {

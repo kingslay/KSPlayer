@@ -35,7 +35,7 @@ struct AssetTrack: TrackProtocol {
     let stream: UnsafeMutablePointer<AVStream>
     let mediaType: AVFoundation.AVMediaType
     let timebase: Timebase
-    let fps: Float
+    let nominalFrameRate: Float
     let bitRate: Int64
     let rotation: Double
     let naturalSize: CGSize
@@ -73,14 +73,15 @@ struct AssetTrack: TrackProtocol {
         }
         self.timebase = timebase
         rotation = stream.rotation
-        naturalSize = CGSize(width: Int(stream.pointee.codecpar.pointee.width), height: Int(stream.pointee.codecpar.pointee.height))
+        let sar = stream.pointee.codecpar.pointee.sample_aspect_ratio.size
+        naturalSize = CGSize(width: Int(stream.pointee.codecpar.pointee.width), height: Int(CGFloat(stream.pointee.codecpar.pointee.height)*sar.height/sar.width))
         let frameRate = av_guess_frame_rate(nil, stream, nil)
         if stream.pointee.duration > 0, stream.pointee.nb_frames > 0, stream.pointee.nb_frames != stream.pointee.duration {
-            fps = Float(stream.pointee.nb_frames) * Float(timebase.den) / Float(stream.pointee.duration) * Float(timebase.num)
+            nominalFrameRate = Float(stream.pointee.nb_frames) * Float(timebase.den) / Float(stream.pointee.duration) * Float(timebase.num)
         } else if frameRate.den > 0, frameRate.num > 0 {
-            fps = Float(frameRate.num) / Float(frameRate.den)
+            nominalFrameRate = Float(frameRate.num) / Float(frameRate.den)
         } else {
-            fps = mediaType == .audio ? 44 : 24
+            nominalFrameRate = mediaType == .audio ? 44 : 24
         }
         if let entry = av_dict_get(stream.pointee.metadata, "language", nil, 0), let title = entry.pointee.value {
             language = NSLocalizedString(String(cString: title), comment: "")
@@ -139,7 +140,7 @@ class FFPlayerItemTrack<Frame: MEFrame>: PlayerItemTrackProtocol, CustomStringCo
         decoderMap[assetTrack.streamIndex] = assetTrack.makeDecode(options: options)
         mediaType = assetTrack.mediaType
         description = mediaType.rawValue
-        fps = assetTrack.fps
+        fps = assetTrack.nominalFrameRate
         self.options = options
         // 默认缓存队列大小跟帧率挂钩,经测试除以4，最优
         if mediaType == .audio {

@@ -10,13 +10,13 @@ import MetalKit
 
 final class MetalPlayView: MTKView, FrameOutput {
     private let render = MetalRender()
-    var display: DisplayEnum = .plane
+    var options: KSOptions
     weak var renderSource: OutputRenderSourceDelegate?
     private var pixelBuffer: BufferProtocol? {
         didSet {
             if let pixelBuffer = pixelBuffer {
                 autoreleasepool {
-                    let size = display == .plane ? pixelBuffer.drawableSize : UIScreen.size
+                    let size = options.drawableSize(par: pixelBuffer.size, sar: pixelBuffer.sar)
                     if drawableSize != size {
                         drawableSize = size
                     }
@@ -34,13 +34,14 @@ final class MetalPlayView: MTKView, FrameOutput {
                     guard let drawable = currentDrawable else {
                         return
                     }
-                    render.draw(pixelBuffer: pixelBuffer, display: display, drawable: drawable)
+                    render.draw(pixelBuffer: pixelBuffer, display: options.display, drawable: drawable)
                 }
             }
         }
     }
 
-    init() {
+    init(options: KSOptions) {
+        self.options = options
         super.init(frame: .zero, device: MetalRender.device)
         framebufferOnly = true
         preferredFramesPerSecond = KSPlayerManager.preferredFramesPerSecond
@@ -60,10 +61,10 @@ final class MetalPlayView: MTKView, FrameOutput {
 
     #if targetEnvironment(simulator) || targetEnvironment(macCatalyst)
     override func touchesMoved(_ touches: Set<UITouch>, with: UIEvent?) {
-        if display == .plane {
+        if options.display == .plane {
             super.touchesMoved(touches, with: with)
         } else {
-            display.touchesMoved(touch: touches.first!)
+            options.display.touchesMoved(touch: touches.first!)
         }
     }
     #endif
