@@ -137,8 +137,8 @@ class BuildFFMPEG: BaseBuild {
             ffmpegcflags.append("--enable-encoder=aac")
             ffmpegcflags.append("--enable-muxer=m4v")
             ffmpegcflags.append("--enable-muxer=dash")
-            ffmpegcflags.append("--disable-debug")
         } else {
+            ffmpegcflags.append("--disable-debug")
             ffmpegcflags.append("--disable-programs")
             ffmpegcflags.append("--disable-ffmpeg")
             ffmpegcflags.append("--disable-ffplay")
