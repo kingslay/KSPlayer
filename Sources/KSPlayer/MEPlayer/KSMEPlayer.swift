@@ -170,6 +170,50 @@ extension KSMEPlayer: MediaPlayerProtocol {
         }
     }
 
+    public var attackTime: Float {
+        get {
+            audioOutput.audioPlayer.attackTime
+        }
+        set {
+            audioOutput.audioPlayer.attackTime = newValue
+        }
+    }
+
+    public var releaseTime: Float {
+        get {
+            audioOutput.audioPlayer.releaseTime
+        }
+        set {
+            audioOutput.audioPlayer.releaseTime = newValue
+        }
+    }
+
+    public var threshold: Float {
+        get {
+            audioOutput.audioPlayer.threshold
+        }
+        set {
+            audioOutput.audioPlayer.threshold = newValue
+        }
+    }
+
+    public var expansionRatio: Float {
+        get {
+            audioOutput.audioPlayer.expansionRatio
+        }
+        set {
+            audioOutput.audioPlayer.expansionRatio = newValue
+        }
+    }
+    
+    public var masterGain: Float {
+        get {
+            audioOutput.audioPlayer.masterGain
+        }
+        set {
+            audioOutput.audioPlayer.masterGain = newValue
+        }
+    }
     public var isPlaying: Bool { playbackState == .playing }
 
     public var naturalSize: CGSize {
