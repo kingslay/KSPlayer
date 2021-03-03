@@ -54,7 +54,7 @@ final class AudioGraphPlayer: AudioPlayer {
     var playbackRate: Float {
         get {
             var playbackRate = AudioUnitParameterValue(0.0)
-            AudioUnitGetParameter(audioUnitForMixer, kNewTimePitchParam_Rate, kAudioUnitScope_Global, 0, &playbackRate)
+            AudioUnitGetParameter(audioUnitForTimePitch, kNewTimePitchParam_Rate, kAudioUnitScope_Global, 0, &playbackRate)
             return playbackRate
         }
         set {
