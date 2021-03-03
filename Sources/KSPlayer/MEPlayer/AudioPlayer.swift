@@ -140,11 +140,13 @@ final class AudioGraphPlayer: AudioPlayer {
                                  kAudioUnitScope_Input, 0,
                                  &audioStreamBasicDescription,
                                  audioStreamBasicDescriptionSize)
-            AudioUnitSetProperty(unit,
-                                 kAudioUnitProperty_StreamFormat,
-                                 kAudioUnitScope_Output, 0,
-                                 &audioStreamBasicDescription,
-                                 audioStreamBasicDescriptionSize)
+            if unit != audioUnitForOutput {
+                AudioUnitSetProperty(unit,
+                                     kAudioUnitProperty_StreamFormat,
+                                     kAudioUnitScope_Output, 0,
+                                     &audioStreamBasicDescription,
+                                     audioStreamBasicDescriptionSize)
+            }
         }
         AUGraphInitialize(graph)
     }
