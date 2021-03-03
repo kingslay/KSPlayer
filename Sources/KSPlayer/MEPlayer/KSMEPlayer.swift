@@ -205,7 +205,7 @@ extension KSMEPlayer: MediaPlayerProtocol {
             audioOutput.audioPlayer.expansionRatio = newValue
         }
     }
-    
+
     public var masterGain: Float {
         get {
             audioOutput.audioPlayer.masterGain

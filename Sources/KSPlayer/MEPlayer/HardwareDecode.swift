@@ -22,8 +22,8 @@ extension TrackProtocol {
         autoreleasepool {
             if mediaType == .subtitle {
                 return SubtitleDecode(assetTrack: self, options: options)
-            } else if let session = DecompressionSession(codecpar: stream.pointee.codecpar.pointee, options: options) {
-                return HardwareDecode(assetTrack: self, options: options, session: session)
+            } else if mediaType == .video, let session = DecompressionSession(codecpar: stream.pointee.codecpar.pointee, options: options) {
+                return VideoHardwareDecode(assetTrack: self, options: options, session: session)
             } else {
                 return SoftwareDecode(assetTrack: self, options: options)
             }
@@ -42,7 +42,7 @@ extension KSOptions {
     }
 }
 
-class HardwareDecode: DecodeProtocol {
+class VideoHardwareDecode: DecodeProtocol {
     private var session: DecompressionSession?
     private let codecpar: AVCodecParameters
     private let timebase: Timebase

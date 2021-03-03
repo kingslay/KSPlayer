@@ -240,7 +240,7 @@ class FFPlayerItemTrack<Frame: MEFrame>: PlayerItemTrackProtocol, CustomStringCo
             }
         } catch {
             KSLog("Decoder did Failed : \(error)")
-            if decoder is HardwareDecode {
+            if decoder is VideoHardwareDecode {
                 decoderMap[packet.assetTrack.streamIndex] = SoftwareDecode(assetTrack: packet.assetTrack, options: options)
                 KSLog("VideoCodec switch to software decompression")
                 doDecode(packet: packet)
