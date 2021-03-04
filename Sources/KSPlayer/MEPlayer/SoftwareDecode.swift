@@ -82,6 +82,7 @@ class SoftwareDecode: DecodeProtocol {
     func shutdown() {
         av_frame_free(&coreFrame)
         avcodec_free_context(&codecContext)
+        swresample.shutdown()
     }
 
     func seek(time _: TimeInterval) {
@@ -93,10 +94,6 @@ class SoftwareDecode: DecodeProtocol {
         if codecContext != nil {
             avcodec_flush_buffers(codecContext)
         }
-    }
-
-    deinit {
-        swresample.shutdown()
     }
 }
 
