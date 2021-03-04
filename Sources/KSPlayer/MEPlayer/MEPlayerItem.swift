@@ -515,14 +515,14 @@ extension MEPlayerItem: OutputRenderSourceDelegate {
         if type == .video {
             predicate = { [weak self] (frame) -> Bool in
                 guard let self = self else { return true }
-                var desire = self.positionTime
+                var desire = self.positionTime + self.options.audioDelay
                 if self.isAudioStalled {
                     desire += max(CACurrentMediaTime() - self.videoMediaTime, 0)
                 }
                 return frame.cmtime.seconds <= desire
             }
             let frame = videoTrack?.getOutputRender(where: predicate)
-            if let frame = frame, frame.seconds + 0.4 < positionTime {
+            if let frame = frame, frame.seconds + 0.4 < positionTime + self.options.audioDelay {
                 _ = videoTrack?.getOutputRender(where: nil)
             }
             return frame
