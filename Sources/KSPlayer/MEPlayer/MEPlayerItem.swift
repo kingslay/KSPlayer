@@ -92,13 +92,6 @@ final class MEPlayerItem {
         operationQueue.qualityOfService = .userInteractive
     }
 
-    deinit {
-        if !operationQueue.operations.isEmpty {
-            shutdown()
-            operationQueue.waitUntilAllOperationsAreFinished()
-        }
-    }
-
     func select(track: MediaPlayerTrack) {
         if let track = track as? TrackProtocol {
             assetTracks.filter { $0.mediaType == track.mediaType }.forEach { $0.stream.pointee.discard = AVDISCARD_ALL }
