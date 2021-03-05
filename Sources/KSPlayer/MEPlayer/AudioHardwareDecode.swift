@@ -76,9 +76,6 @@ import Libavcodec
         }
         return []
     }
-    func seek(time: TimeInterval) {
-
-    }
     func doFlushCodec() {
 
     }

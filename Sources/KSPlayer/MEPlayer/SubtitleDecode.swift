@@ -70,9 +70,6 @@ class SubtitleDecode: DecodeProtocol {
         return array
     }
 
-    func seek(time: TimeInterval) {
-    }
-
     func doFlushCodec() {
     }
 
