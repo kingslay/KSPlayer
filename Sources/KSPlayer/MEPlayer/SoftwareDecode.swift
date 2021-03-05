@@ -70,6 +70,7 @@ class SoftwareDecode: DecodeProtocol {
     }
 
     func doFlushCodec() {
+        bestEffortTimestamp = Int64(0)
         if firstSeek {
             firstSeek = false
         } else {
@@ -85,15 +86,8 @@ class SoftwareDecode: DecodeProtocol {
         swresample.shutdown()
     }
 
-    func seek(time _: TimeInterval) {
-        bestEffortTimestamp = Int64(0)
-    }
-
     func decode() {
         bestEffortTimestamp = Int64(0)
-        if codecContext != nil {
-            avcodec_flush_buffers(codecContext)
-        }
     }
 }
 

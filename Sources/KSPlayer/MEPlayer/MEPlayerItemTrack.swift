@@ -165,7 +165,6 @@ class FFPlayerItemTrack<Frame: MEFrame>: PlayerItemTrackProtocol, CustomStringCo
         outputRenderQueue.flush()
         isLoopModel = false
         delegate?.codecDidChangeCapacity(track: self)
-        decoderMap.values.forEach { $0.seek(time: time) }
     }
 
     func putPacket(packet: Packet) {

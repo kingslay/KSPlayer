@@ -12,7 +12,6 @@ protocol DecodeProtocol {
     init(assetTrack: TrackProtocol, options: KSOptions)
     func decode()
     func doDecode(packet: UnsafeMutablePointer<AVPacket>) throws -> [MEFrame]
-    func seek(time: TimeInterval)
     func doFlushCodec()
     func shutdown()
 }
@@ -103,15 +102,12 @@ class VideoHardwareDecode: DecodeProtocol {
 
     func doFlushCodec() {
         session = DecompressionSession(codecpar: codecpar, options: options)
+        lastPosition = 0
+        startTime = 0
     }
 
     func shutdown() {
         session = nil
-    }
-
-    func seek(time _: TimeInterval) {
-        lastPosition = 0
-        startTime = 0
     }
 
     func decode() {
