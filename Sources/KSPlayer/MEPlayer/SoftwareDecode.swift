@@ -37,47 +37,40 @@ class SoftwareDecode: DecodeProtocol {
         }
     }
 
-    func doDecode(packet: UnsafeMutablePointer<AVPacket>) throws -> [Frame] {
-        guard let codecContext = codecContext else {
+    func doDecode(packet: UnsafeMutablePointer<AVPacket>) throws -> [MEFrame] {
+        guard let codecContext = codecContext, avcodec_send_packet(codecContext, packet) == 0 else {
             return []
         }
-        let result = avcodec_send_packet(codecContext, packet)
-        guard result == 0 else {
-            return []
-        }
-        var array = [Frame]()
+        var array = [MEFrame]()
         while true {
-            do {
-                let result = avcodec_receive_frame(codecContext, coreFrame)
-                if result == 0, let avframe = coreFrame {
-                    let timestamp = max(avframe.pointee.best_effort_timestamp, avframe.pointee.pts, avframe.pointee.pkt_dts)
-                    if timestamp >= bestEffortTimestamp {
-                        bestEffortTimestamp = timestamp
-                    }
-                    let frame = swresample.transfer(avframe: avframe, timebase: timebase)
-                    frame.position = bestEffortTimestamp
-                    bestEffortTimestamp += frame.duration
-                    array.append(frame)
-                } else {
-                    throw result
+            let result = avcodec_receive_frame(codecContext, coreFrame)
+            if result == 0, let avframe = coreFrame {
+                let timestamp = max(avframe.pointee.best_effort_timestamp, avframe.pointee.pts, avframe.pointee.pkt_dts)
+                if timestamp >= bestEffortTimestamp {
+                    bestEffortTimestamp = timestamp
                 }
-            } catch let code as Int32 {
-                if code == 0 || AVFILTER_EOF(code) {
-                    if IS_AVERROR_EOF(code) {
+                var frame = swresample.transfer(avframe: avframe, timebase: timebase)
+                frame.position = bestEffortTimestamp
+                bestEffortTimestamp += frame.duration
+                array.append(frame)
+            } else {
+                if AVFILTER_EOF(result) {
+                    if IS_AVERROR_EOF(result) {
                         avcodec_flush_buffers(codecContext)
                     }
                     break
                 } else {
-                    let error = NSError(errorCode: mediaType == .audio ? .codecAudioReceiveFrame : .codecVideoReceiveFrame, ffmpegErrnum: code)
+                    let error = NSError(errorCode: mediaType == .audio ? .codecAudioReceiveFrame : .codecVideoReceiveFrame, ffmpegErrnum: result)
                     KSLog(error)
                     throw error
                 }
-            } catch {}
+            }
         }
         return array
     }
 
     func doFlushCodec() {
+        bestEffortTimestamp = Int64(0)
         if firstSeek {
             firstSeek = false
         } else {
@@ -90,21 +83,11 @@ class SoftwareDecode: DecodeProtocol {
     func shutdown() {
         av_frame_free(&coreFrame)
         avcodec_free_context(&codecContext)
-    }
-
-    func seek(time _: TimeInterval) {
-        bestEffortTimestamp = Int64(0)
+        swresample.shutdown()
     }
 
     func decode() {
         bestEffortTimestamp = Int64(0)
-        if codecContext != nil {
-            avcodec_flush_buffers(codecContext)
-        }
-    }
-
-    deinit {
-        swresample.shutdown()
     }
 }
 
@@ -119,48 +102,15 @@ extension UnsafeMutablePointer where Pointee == AVCodecParameters {
             avcodec_free_context(&codecContextOption)
             throw NSError(errorCode: .codecContextSetParam, ffmpegErrnum: result)
         }
-        if options.canHardwareDecode(codecpar: pointee) {
-            codecContext.pointee.opaque = Unmanaged.passUnretained(options).toOpaque()
-            codecContext.pointee.get_format = { ctx, fmt -> AVPixelFormat in
-                guard let fmt = fmt, let ctx = ctx else {
-                    return AV_PIX_FMT_NONE
-                }
-//                let options = Unmanaged<KSOptions>.fromOpaque(ctx.pointee.opaque).takeUnretainedValue()
-                var i = 0
-                while fmt[i] != AV_PIX_FMT_NONE {
-                    if fmt[i] == AV_PIX_FMT_VIDEOTOOLBOX {
-                        var deviceCtx = av_hwdevice_ctx_alloc(AV_HWDEVICE_TYPE_VIDEOTOOLBOX)
-                        if deviceCtx == nil {
-                            break
-                        }
-                        av_buffer_unref(&deviceCtx)
-                        var framesCtx = av_hwframe_ctx_alloc(deviceCtx)
-                        if let framesCtx = framesCtx {
-                            let framesCtxData = UnsafeMutableRawPointer(framesCtx.pointee.data)
-                                .bindMemory(to: AVHWFramesContext.self, capacity: 1)
-                            framesCtxData.pointee.format = AV_PIX_FMT_VIDEOTOOLBOX
-//                            framesCtxData.pointee.sw_format = AVPixelFormat(rawValue: pointee.format).bestPixelFormat()
-                            framesCtxData.pointee.width = ctx.pointee.width
-                            framesCtxData.pointee.height = ctx.pointee.height
-                        }
-                        if av_hwframe_ctx_init(framesCtx) != 0 {
-                            av_buffer_unref(&framesCtx)
-                            break
-                        }
-                        ctx.pointee.hw_frames_ctx = framesCtx
-                        return fmt[i]
-                    }
-                    i += 1
-                }
-                return fmt[0]
-            }
-        }
+//        if options.canHardwareDecode(codecpar: pointee) {
+//            codecContext.getFormat()
+//        }
         guard let codec = avcodec_find_decoder(codecContext.pointee.codec_id) else {
             avcodec_free_context(&codecContextOption)
             throw NSError(errorCode: .codecContextFindDecoder, ffmpegErrnum: result)
         }
         codecContext.pointee.codec_id = codec.pointee.id
-        codecContext.pointee.flags |= AV_CODEC_FLAG2_FAST
+        codecContext.pointee.flags2 |= AV_CODEC_FLAG2_FAST
         var lowres = options.lowres
         if lowres > codec.pointee.max_lowres {
             lowres = codec.pointee.max_lowres
@@ -176,5 +126,42 @@ extension UnsafeMutablePointer where Pointee == AVCodecParameters {
             throw NSError(errorCode: .codesContextOpen, ffmpegErrnum: result)
         }
         return codecContext
+    }
+}
+
+extension UnsafeMutablePointer where Pointee == AVCodecContext {
+    func getFormat() {
+        pointee.get_format = { ctx, fmt -> AVPixelFormat in
+            guard let fmt = fmt, let ctx = ctx else {
+                return AV_PIX_FMT_NONE
+            }
+            var i = 0
+            while fmt[i] != AV_PIX_FMT_NONE {
+                if fmt[i] == AV_PIX_FMT_VIDEOTOOLBOX {
+                    var deviceCtx = av_hwdevice_ctx_alloc(AV_HWDEVICE_TYPE_VIDEOTOOLBOX)
+                    if deviceCtx == nil {
+                        break
+                    }
+                    av_buffer_unref(&deviceCtx)
+                    var framesCtx = av_hwframe_ctx_alloc(deviceCtx)
+                    if let framesCtx = framesCtx {
+                        let framesCtxData = UnsafeMutableRawPointer(framesCtx.pointee.data)
+                            .bindMemory(to: AVHWFramesContext.self, capacity: 1)
+                        framesCtxData.pointee.format = AV_PIX_FMT_VIDEOTOOLBOX
+                        framesCtxData.pointee.sw_format = ctx.pointee.pix_fmt.bestPixelFormat()
+                        framesCtxData.pointee.width = ctx.pointee.width
+                        framesCtxData.pointee.height = ctx.pointee.height
+                    }
+                    if av_hwframe_ctx_init(framesCtx) != 0 {
+                        av_buffer_unref(&framesCtx)
+                        break
+                    }
+                    ctx.pointee.hw_frames_ctx = framesCtx
+                    return fmt[i]
+                }
+                i += 1
+            }
+            return fmt[0]
+        }
     }
 }

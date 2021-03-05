@@ -6,16 +6,13 @@ import PackageDescription
 let package = Package(
     name: "KSPlayer",
     defaultLocalization: "en",
-    platforms: [.macOS(.v10_12), .iOS(.v10), .tvOS("10.2")],
+    platforms: [.macOS(.v10_13), .iOS(.v10), .tvOS("10.2")],
     products: [
         // Products define the executables and libraries produced by a package, and make them visible to other packages.
         .library(
             name: "KSPlayer",
             targets: ["KSPlayer"]
-        ),
-        .library(
-            name: "Script",
-            targets: ["Script"])
+        )
     ],
     dependencies: [
         // Dependencies declare other packages that this package depends on.
@@ -29,7 +26,7 @@ let package = Package(
         ),
         .target(
             name: "FFmpeg",
-            dependencies: ["Libavcodec", "Libavformat", "Libavutil", "Libswresample", "Libswscale"],
+            dependencies: ["Libavcodec", "Libavformat", "Libavutil", "Libswresample", "Libswscale", "Libssl", "Libcrypto"],
             linkerSettings: [.linkedLibrary("bz2"), .linkedLibrary("iconv"), .linkedLibrary("xml2"), .linkedLibrary("z")]
         ),
         .target(

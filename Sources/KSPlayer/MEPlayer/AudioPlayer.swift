@@ -20,12 +20,18 @@ protocol AudioPlayer: AnyObject {
     var volume: Float { get set }
     var isMuted: Bool { get set }
     var isPaused: Bool { get set }
+    var attackTime: Float { get set }
+    var releaseTime: Float { get set }
+    var threshold: Float { get set }
+    var expansionRatio: Float { get set }
+    var masterGain: Float { get set }
 }
 
 final class AudioGraphPlayer: AudioPlayer {
     private let graph: AUGraph
     private var audioUnitForMixer: AudioUnit!
     private var audioUnitForTimePitch: AudioUnit!
+    private var audioUnitForDynamicsProcessor: AudioUnit!
     private var audioStreamBasicDescription = KSPlayerManager.outputFormat()
     var isPaused: Bool {
         get {
@@ -46,42 +52,93 @@ final class AudioGraphPlayer: AudioPlayer {
         }
     }
 
-    private var sampleRate: Float64 { audioStreamBasicDescription.mSampleRate }
-
-    private var numberOfChannels: UInt32 { audioStreamBasicDescription.mChannelsPerFrame }
-
     weak var delegate: AudioPlayerDelegate?
     var playbackRate: Float {
-        set {
-            AudioUnitSetParameter(audioUnitForTimePitch, kNewTimePitchParam_Rate, kAudioUnitScope_Global, 0, newValue, 0)
-        }
         get {
             var playbackRate = AudioUnitParameterValue(0.0)
-            AudioUnitGetParameter(audioUnitForMixer, kNewTimePitchParam_Rate, kAudioUnitScope_Global, 0, &playbackRate)
+            AudioUnitGetParameter(audioUnitForTimePitch, kNewTimePitchParam_Rate, kAudioUnitScope_Global, 0, &playbackRate)
             return playbackRate
+        }
+        set {
+            AudioUnitSetParameter(audioUnitForTimePitch, kNewTimePitchParam_Rate, kAudioUnitScope_Global, 0, newValue, 0)
         }
     }
 
     var volume: Float {
-        set {
-            AudioUnitSetParameter(audioUnitForMixer, kMultiChannelMixerParam_Volume, kAudioUnitScope_Input, 0, newValue, 0)
-        }
         get {
             var volume = AudioUnitParameterValue(0.0)
             AudioUnitGetParameter(audioUnitForMixer, kMultiChannelMixerParam_Volume, kAudioUnitScope_Input, 0, &volume)
             return volume
         }
+        set {
+            AudioUnitSetParameter(audioUnitForMixer, kMultiChannelMixerParam_Volume, kAudioUnitScope_Input, 0, newValue, 0)
+        }
     }
 
     public var isMuted: Bool {
-        set {
-            let value = newValue ? 0 : 1
-            AudioUnitSetParameter(audioUnitForMixer, kMultiChannelMixerParam_Enable, kAudioUnitScope_Input, 0, AudioUnitParameterValue(value), 0)
-        }
         get {
             var value = AudioUnitParameterValue(1.0)
             AudioUnitGetParameter(audioUnitForMixer, kMultiChannelMixerParam_Enable, kAudioUnitScope_Input, 0, &value)
             return value == 0
+        }
+        set {
+            let value = newValue ? 0 : 1
+            AudioUnitSetParameter(audioUnitForMixer, kMultiChannelMixerParam_Enable, kAudioUnitScope_Input, 0, AudioUnitParameterValue(value), 0)
+        }
+    }
+
+    public var attackTime: Float {
+        get {
+            var value = AudioUnitParameterValue(1.0)
+            AudioUnitGetParameter(audioUnitForDynamicsProcessor, kDynamicsProcessorParam_AttackTime, kAudioUnitScope_Global, 0, &value)
+            return value
+        }
+        set {
+            AudioUnitSetParameter(audioUnitForDynamicsProcessor, kDynamicsProcessorParam_AttackTime, kAudioUnitScope_Global, 0, AudioUnitParameterValue(newValue), 0)
+        }
+    }
+
+    public var releaseTime: Float {
+        get {
+            var value = AudioUnitParameterValue(1.0)
+            AudioUnitGetParameter(audioUnitForDynamicsProcessor, kDynamicsProcessorParam_ReleaseTime, kAudioUnitScope_Global, 0, &value)
+            return value
+        }
+        set {
+            AudioUnitSetParameter(audioUnitForDynamicsProcessor, kDynamicsProcessorParam_ReleaseTime, kAudioUnitScope_Global, 0, AudioUnitParameterValue(newValue), 0)
+        }
+    }
+
+    public var threshold: Float {
+        get {
+            var value = AudioUnitParameterValue(1.0)
+            AudioUnitGetParameter(audioUnitForDynamicsProcessor, kDynamicsProcessorParam_Threshold, kAudioUnitScope_Global, 0, &value)
+            return value
+        }
+        set {
+            AudioUnitSetParameter(audioUnitForDynamicsProcessor, kDynamicsProcessorParam_Threshold, kAudioUnitScope_Global, 0, AudioUnitParameterValue(newValue), 0)
+        }
+    }
+
+    public var expansionRatio: Float {
+        get {
+            var value = AudioUnitParameterValue(1.0)
+            AudioUnitGetParameter(audioUnitForDynamicsProcessor, kDynamicsProcessorParam_ExpansionRatio, kAudioUnitScope_Global, 0, &value)
+            return value
+        }
+        set {
+            AudioUnitSetParameter(audioUnitForDynamicsProcessor, kDynamicsProcessorParam_ExpansionRatio, kAudioUnitScope_Global, 0, AudioUnitParameterValue(newValue), 0)
+        }
+    }
+
+    public var masterGain: Float {
+        get {
+            var value = AudioUnitParameterValue(1.0)
+            AudioUnitGetParameter(audioUnitForDynamicsProcessor, kDynamicsProcessorParam_MasterGain, kAudioUnitScope_Global, 0, &value)
+            return value
+        }
+        set {
+            AudioUnitSetParameter(audioUnitForDynamicsProcessor, kDynamicsProcessorParam_MasterGain, kAudioUnitScope_Global, 0, AudioUnitParameterValue(newValue), 0)
         }
     }
 
@@ -93,7 +150,10 @@ final class AudioGraphPlayer: AudioPlayer {
         descriptionForTimePitch.componentType = kAudioUnitType_FormatConverter
         descriptionForTimePitch.componentSubType = kAudioUnitSubType_NewTimePitch
         descriptionForTimePitch.componentManufacturer = kAudioUnitManufacturer_Apple
-
+        var descriptionForDynamicsProcessor = AudioComponentDescription()
+        descriptionForDynamicsProcessor.componentType = kAudioUnitType_Effect
+        descriptionForDynamicsProcessor.componentManufacturer = kAudioUnitManufacturer_Apple
+        descriptionForDynamicsProcessor.componentSubType = kAudioUnitSubType_DynamicsProcessor
         var descriptionForMixer = AudioComponentDescription()
         descriptionForMixer.componentType = kAudioUnitType_Mixer
         descriptionForMixer.componentManufacturer = kAudioUnitManufacturer_Apple
@@ -111,16 +171,20 @@ final class AudioGraphPlayer: AudioPlayer {
         descriptionForOutput.componentSubType = kAudioUnitSubType_RemoteIO
         #endif
         var nodeForTimePitch = AUNode()
+        var nodeForDynamicsProcessor = AUNode()
         var nodeForMixer = AUNode()
         var nodeForOutput = AUNode()
         var audioUnitForOutput: AudioUnit!
         AUGraphAddNode(graph, &descriptionForTimePitch, &nodeForTimePitch)
         AUGraphAddNode(graph, &descriptionForMixer, &nodeForMixer)
+        AUGraphAddNode(graph, &descriptionForDynamicsProcessor, &nodeForDynamicsProcessor)
         AUGraphAddNode(graph, &descriptionForOutput, &nodeForOutput)
         AUGraphOpen(graph)
-        AUGraphConnectNodeInput(graph, nodeForTimePitch, 0, nodeForMixer, 0)
+        AUGraphConnectNodeInput(graph, nodeForTimePitch, 0, nodeForDynamicsProcessor, 0)
+        AUGraphConnectNodeInput(graph, nodeForDynamicsProcessor, 0, nodeForMixer, 0)
         AUGraphConnectNodeInput(graph, nodeForMixer, 0, nodeForOutput, 0)
         AUGraphNodeInfo(graph, nodeForTimePitch, &descriptionForTimePitch, &audioUnitForTimePitch)
+        AUGraphNodeInfo(graph, nodeForDynamicsProcessor, &descriptionForDynamicsProcessor, &audioUnitForDynamicsProcessor)
         AUGraphNodeInfo(graph, nodeForMixer, &descriptionForMixer, &audioUnitForMixer)
         AUGraphNodeInfo(graph, nodeForOutput, &descriptionForOutput, &audioUnitForOutput)
         var inputCallbackStruct = renderCallbackStruct()
@@ -128,7 +192,7 @@ final class AudioGraphPlayer: AudioPlayer {
         addRenderNotify(audioUnit: audioUnitForOutput)
         let audioStreamBasicDescriptionSize = UInt32(MemoryLayout<AudioStreamBasicDescription>.size)
         let inDataSize = UInt32(MemoryLayout.size(ofValue: KSPlayerManager.audioPlayerMaximumFramesPerSlice))
-        [audioUnitForTimePitch, audioUnitForMixer, audioUnitForOutput].forEach { unit in
+        [audioUnitForTimePitch, audioUnitForDynamicsProcessor, audioUnitForMixer, audioUnitForOutput].forEach { unit in
             guard let unit = unit else { return }
             AudioUnitSetProperty(unit,
                                  kAudioUnitProperty_MaximumFramesPerSlice,
@@ -140,11 +204,13 @@ final class AudioGraphPlayer: AudioPlayer {
                                  kAudioUnitScope_Input, 0,
                                  &audioStreamBasicDescription,
                                  audioStreamBasicDescriptionSize)
-            AudioUnitSetProperty(unit,
-                                 kAudioUnitProperty_StreamFormat,
-                                 kAudioUnitScope_Output, 0,
-                                 &audioStreamBasicDescription,
-                                 audioStreamBasicDescriptionSize)
+            if unit != audioUnitForOutput {
+                AudioUnitSetProperty(unit,
+                                     kAudioUnitProperty_StreamFormat,
+                                     kAudioUnitScope_Output, 0,
+                                     &audioStreamBasicDescription,
+                                     audioStreamBasicDescriptionSize)
+            }
         }
         AUGraphInitialize(graph)
     }
@@ -157,7 +223,7 @@ final class AudioGraphPlayer: AudioPlayer {
                 return noErr
             }
             let `self` = Unmanaged<AudioGraphPlayer>.fromOpaque(refCon).takeUnretainedValue()
-            self.delegate?.audioPlayerShouldInputData(ioData: UnsafeMutableAudioBufferListPointer(ioData), numberOfFrames: inNumberFrames, numberOfChannels: self.numberOfChannels)
+            self.delegate?.audioPlayerShouldInputData(ioData: UnsafeMutableAudioBufferListPointer(ioData), numberOfFrames: inNumberFrames, numberOfChannels: self.audioStreamBasicDescription.mChannelsPerFrame )
             return noErr
         }
         return inputCallbackStruct
@@ -188,8 +254,8 @@ final class AudioGraphPlayer: AudioPlayer {
 import Accelerate
 import AVFoundation
 
-@available(OSX 10.13, tvOS 11.0, iOS 11.0, *)
-final class AudioEnginePlayer: AudioPlayer {
+@available(tvOS 11.0, iOS 11.0, *)
+final class AudioEnginePlayer {
     var isPaused: Bool {
         get {
             engine.isRunning
@@ -228,13 +294,6 @@ final class AudioEnginePlayer: AudioPlayer {
         set {
             player.volume = newValue
         }
-    }
-
-    var isMuted: Bool {
-        get {
-            volume == 0
-        }
-        set {}
     }
 
     init() {

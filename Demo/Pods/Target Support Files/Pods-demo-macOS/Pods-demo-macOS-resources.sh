@@ -97,12 +97,10 @@ EOM
   esac
 }
 if [[ "$CONFIGURATION" == "Debug" ]]; then
-  install_resource "${PODS_CONFIGURATION_BUILD_DIR}/KSPlayer-macOS/KSResources.bundle"
-  install_resource "${PODS_CONFIGURATION_BUILD_DIR}/KSPlayer-macOS/Metal.bundle"
+  install_resource "${PODS_CONFIGURATION_BUILD_DIR}/KSPlayer-macOS/KSPlayer_KSPlayer.bundle"
 fi
 if [[ "$CONFIGURATION" == "Release" ]]; then
-  install_resource "${PODS_CONFIGURATION_BUILD_DIR}/KSPlayer-macOS/KSResources.bundle"
-  install_resource "${PODS_CONFIGURATION_BUILD_DIR}/KSPlayer-macOS/Metal.bundle"
+  install_resource "${PODS_CONFIGURATION_BUILD_DIR}/KSPlayer-macOS/KSPlayer_KSPlayer.bundle"
 fi
 
 mkdir -p "${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}"

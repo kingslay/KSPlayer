@@ -7,11 +7,13 @@
 //
 
 import CoreFoundation
+import CoreGraphics
 import Foundation
 public class SubtitlePart: CustomStringConvertible {
     public let start: TimeInterval
     public let end: TimeInterval
-    public var text: NSMutableAttributedString
+    public let text: NSMutableAttributedString
+    public var image: CGImage?
     public convenience init(_ start: TimeInterval, _ end: TimeInterval, _ string: String) {
         var text = string
         text = text.trimmingCharacters(in: .whitespaces)

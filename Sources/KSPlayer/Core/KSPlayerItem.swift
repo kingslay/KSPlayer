@@ -8,6 +8,7 @@
 
 import AVFoundation
 import Foundation
+import MediaPlayer
 
 public class KSPlayerResource: Hashable {
     public static func == (lhs: KSPlayerResource, rhs: KSPlayerResource) -> Bool {
@@ -18,6 +19,7 @@ public class KSPlayerResource: Hashable {
     public let cover: URL?
     public let definitions: [KSPlayerResourceDefinition]
     public var subtitle: KSSubtitleProtocol?
+    public var nowPlayingInfo: KSNowPlayableMetadata?
     /**
      Player recource item with url, used to play single difinition video
 
@@ -48,6 +50,7 @@ public class KSPlayerResource: Hashable {
         self.cover = cover
         self.subtitle = subtitle
         self.definitions = definitions
+        self.nowPlayingInfo = KSNowPlayableMetadata(title: name)
     }
 
     public func hash(into hasher: inout Hasher) {
@@ -88,5 +91,48 @@ public class KSPlayerResourceDefinition: Hashable {
 
     public func hash(into hasher: inout Hasher) {
         hasher.combine(url)
+    }
+}
+
+public struct KSNowPlayableMetadata {
+    private let mediaType: MPNowPlayingInfoMediaType?
+    private let isLiveStream: Bool?
+    private let title: String
+    private let artist: String?
+    private let artwork: MPMediaItemArtwork?
+    private let albumArtist: String?
+    private let albumTitle: String?
+    var nowPlayingInfo: [String: Any] {
+        var nowPlayingInfo = [String: Any]()
+        nowPlayingInfo[MPNowPlayingInfoPropertyMediaType] = mediaType?.rawValue
+        nowPlayingInfo[MPNowPlayingInfoPropertyIsLiveStream] = isLiveStream
+        nowPlayingInfo[MPMediaItemPropertyTitle] = title
+        nowPlayingInfo[MPMediaItemPropertyArtist] = artist
+        if #available(OSX 10.13.2, *) {
+            nowPlayingInfo[MPMediaItemPropertyArtwork] = artwork
+        }
+        nowPlayingInfo[MPMediaItemPropertyAlbumArtist] = albumArtist
+        nowPlayingInfo[MPMediaItemPropertyAlbumTitle] = albumTitle
+        return nowPlayingInfo
+    }
+
+    init(mediaType: MPNowPlayingInfoMediaType? = nil, isLiveStream: Bool? = nil, title: String, artist: String? = nil, artwork: MPMediaItemArtwork? = nil, albumArtist: String? = nil, albumTitle: String? = nil) {
+        self.mediaType = mediaType
+        self.isLiveStream = isLiveStream
+        self.title = title
+        self.artist = artist
+        self.artwork = artwork
+        self.albumArtist = albumArtist
+        self.albumTitle = albumTitle
+    }
+
+    init(mediaType: MPNowPlayingInfoMediaType? = nil, isLiveStream: Bool? = nil, title: String, artist: String? = nil, image: UIImage, albumArtist: String? = nil, albumTitle: String? = nil) {
+        self.mediaType = mediaType
+        self.isLiveStream = isLiveStream
+        self.title = title
+        self.artist = artist
+        self.albumArtist = albumArtist
+        self.albumTitle = albumTitle
+        self.artwork = MPMediaItemArtwork(boundsSize: image.size) { _ in image }
     }
 }

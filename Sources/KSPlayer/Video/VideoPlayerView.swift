@@ -11,6 +11,7 @@ import UIKit
 #else
 import AppKit
 #endif
+import MediaPlayer
 
 /// internal enum to check the pan direction
 public enum KSPanDirection {
@@ -75,6 +76,7 @@ open class VideoPlayerView: PlayerView {
                 toolBar.definitionButton.isHidden = resource.definitions.count < 2
                 autoFadeOutViewWithAnimation()
                 isMaskShow = true
+                MPNowPlayingInfoCenter.default().nowPlayingInfo = resource.nowPlayingInfo?.nowPlayingInfo
             }
         }
     }
@@ -475,7 +477,7 @@ extension VideoPlayerView {
     }
 
     open func showSubtile(from subtitle: KSSubtitleProtocol, at time: TimeInterval) {
-        if let text = subtitle.search(for: time) {
+        if let text = subtitle.search(for: time + (resource?.definitions[currentDefinition].options.subtitleDelay ?? 0.0)) {
             subtitleBackView.isHidden = false
             subtitleLabel.attributedText = text
         } else {

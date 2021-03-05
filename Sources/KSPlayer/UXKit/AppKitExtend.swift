@@ -165,7 +165,7 @@ extension NSImage {
 }
 
 extension NSButton {
-    open var titleFont: UIFont? {
+    var titleFont: UIFont? {
         get {
             font
         }
@@ -248,16 +248,10 @@ extension NSResponder {
 extension NSSlider {
     open var minimumTrackTintColor: UIColor? {
         get {
-            if #available(OSX 10.12.2, *) {
-                return trackFillColor
-            } else {
-                return nil
-            }
+            return trackFillColor
         }
         set {
-            if #available(OSX 10.12.2, *) {
-                trackFillColor = newValue
-            }
+            trackFillColor = newValue
         }
     }
 
@@ -395,7 +389,7 @@ public struct State: OptionSet {
 
 extension State: Hashable {}
 public class UILabel: NSTextField {
-    override init(frame frameRect: NSRect) {
+    override init(frame frameRect: CGRect) {
         super.init(frame: frameRect)
         alignment = .left
         isBordered = false
@@ -418,7 +412,7 @@ public class UIButton: NSButton {
     private var titleColors = [State: UIColor]()
     private var targetActions = [ControlEvents: (AnyObject?, Selector)]()
 
-    override public init(frame frameRect: NSRect) {
+    override public init(frame frameRect: CGRect) {
         super.init(frame: frameRect)
         isBordered = false
     }
@@ -521,7 +515,7 @@ public class KSSlider: NSSlider {
         self.init(frame: .zero)
     }
 
-    override public init(frame frameRect: NSRect) {
+    override public init(frame frameRect: CGRect) {
         super.init(frame: frameRect)
         target = self
         action = #selector(progressSliderTouchEnded(_:))

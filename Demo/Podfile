@@ -15,7 +15,7 @@ end
 
 target 'demo-macOS' do
   project 'demo-macOS/demo-macOS.xcodeproj'
-  platform :osx, 10.12
+  platform :osx, 10.13
   common
 end
 
