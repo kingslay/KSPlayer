@@ -47,10 +47,12 @@ target 'ProjectName' do
 end
 ```
 
-#### Carthage
+### Swift Package Manager
 
-```
-git "https://github.com/kingslay/KSPlayer.git" "master"
+```swift
+dependencies: [
+    .package(url: "https://github.com/kingslay/KSPlayer.git", .branch("develop"))
+]
 ```
 
 
@@ -244,7 +246,7 @@ mkdir -p Script && cd Script && swift ../Sources/Script/main.swift debug
 dwarfdump -F --debug-info ../Sources/libavformat.xcframework/ios-x86_64-maccatalyst/FFmpeg.framework/FFmpeg | head -n 20
 ```
 
-run demo-iOS use Mac Catalyst
+run demo-macOS
 
 ![6](https://github.com/kingslay/KSPlayer/blob/develop/Documents/6.png?raw=true)
 
