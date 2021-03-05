@@ -14,7 +14,6 @@ final class MEPlayerItem {
     private let url: URL
     private let options: KSOptions
     private let operationQueue = OperationQueue()
-    private let semaphore = DispatchSemaphore(value: 1)
     private let condition = NSCondition()
     private var formatCtx: UnsafeMutablePointer<AVFormatContext>?
     private var openOperation: BlockOperation?
@@ -37,7 +36,7 @@ final class MEPlayerItem {
 
     private(set) var assetTracks = [TrackProtocol]()
     private var videoAdaptation: VideoAdaptationState?
-    private(set) var subtitleTracks = [SubtitlePlayerItemTrack]()
+    private(set) var subtitleTracks = [FFPlayerItemTrack<SubtitleFrame>]()
     var isBackground = false
     var currentPlaybackTime: TimeInterval {
         max(positionTime - startTime, 0)
@@ -91,13 +90,6 @@ final class MEPlayerItem {
         operationQueue.name = "KSPlayer_" + String(describing: self).components(separatedBy: ".").last!
         operationQueue.maxConcurrentOperationCount = 1
         operationQueue.qualityOfService = .userInteractive
-    }
-
-    deinit {
-        if !operationQueue.operations.isEmpty {
-            shutdown()
-            operationQueue.waitUntilAllOperationsAreFinished()
-        }
     }
 
     func select(track: MediaPlayerTrack) {
@@ -162,6 +154,8 @@ extension MEPlayerItem {
             avformat_close_input(&self.formatCtx)
             return
         }
+        formatCtx.pointee.flags |= AVFMT_FLAG_GENPTS
+        av_format_inject_global_side_data(formatCtx)
         options.openTime = CACurrentMediaTime()
         result = avformat_find_stream_info(formatCtx, nil)
         guard result == 0 else {
@@ -214,13 +208,13 @@ extension MEPlayerItem {
                 first.stream.pointee.discard = AVDISCARD_DEFAULT
                 rotation = first.rotation
                 naturalSize = first.naturalSize
-                let track = AsyncPlayerItemTrack(assetTrack: first, options: options)
-                videoAudioTracks.append(track)
+                let track = options.syncDecodeVideo ? FFPlayerItemTrack<VideoVTBFrame>(assetTrack: first, options: options) : AsyncPlayerItemTrack<VideoVTBFrame>(assetTrack: first, options: options)
                 track.delegate = self
+                videoAudioTracks.append(track)
                 videoTrack = track
                 if videos.count > 1, options.videoAdaptable {
                     let bitRateState = VideoAdaptationState.BitRateState(bitRate: first.bitRate, time: CACurrentMediaTime())
-                    videoAdaptation = VideoAdaptationState(bitRates: bitRates.sorted(by: <), duration: duration, fps: first.fps, bitRateStates: [bitRateState])
+                    videoAdaptation = VideoAdaptationState(bitRates: bitRates.sorted(by: <), duration: duration, fps: first.nominalFrameRate, bitRateStates: [bitRateState])
                 }
             }
         }
@@ -235,7 +229,7 @@ extension MEPlayerItem {
             let index = av_find_best_stream(formatCtx, AVMEDIA_TYPE_AUDIO, wantedStreamNb, videoIndex, nil, 0)
             if let first = assetTracks.first(where: { $0.mediaType == .audio && $0.streamIndex == index }) {
                 first.stream.pointee.discard = AVDISCARD_DEFAULT
-                let track = AsyncPlayerItemTrack(assetTrack: first, options: options)
+                let track = options.syncDecodeAudio ? FFPlayerItemTrack<AudioFrame>(assetTrack: first, options: options) : AsyncPlayerItemTrack<AudioFrame>(assetTrack: first, options: options)
                 track.delegate = self
                 videoAudioTracks.append(track)
                 audioTrack = track
@@ -245,7 +239,8 @@ extension MEPlayerItem {
         if !options.subtitleDisable {
             subtitleTracks = assetTracks.filter { $0.mediaType == .subtitle }.map {
                 $0.stream.pointee.discard = AVDISCARD_DEFAULT
-                return SubtitlePlayerItemTrack(assetTrack: $0, options: options)
+                return FFPlayerItemTrack<
+                    SubtitleFrame>(assetTrack: $0, options: options)
             }
             allTracks.append(contentsOf: subtitleTracks)
         }
@@ -418,6 +413,7 @@ extension MEPlayerItem: MediaPlayback {
             seekingCompletionHandler = handler
             state = .seeking
             condition.broadcast()
+            allTracks.forEach { $0.seek(time: positionTime) }
         } else if state == .finished {
             positionTime = time + startTime
             seekingCompletionHandler = handler
@@ -430,13 +426,6 @@ extension MEPlayerItem: MediaPlayback {
 
 extension MEPlayerItem: CodecCapacityDelegate {
     func codecDidChangeCapacity(track: PlayerItemTrackProtocol) {
-        semaphore.wait()
-        defer {
-            semaphore.signal()
-            if isBackground, let videoTrack = videoTrack, videoTrack.frameCount > videoTrack.frameMaxCount >> 1 {
-                _ = getOutputRender(type: .video)
-            }
-        }
         guard let loadingState = options.playable(capacitys: videoAudioTracks, isFirst: isFirst, isSeek: isSeek) else {
             return
         }
@@ -495,7 +484,7 @@ extension MEPlayerItem: CodecCapacityDelegate {
             }
         }
         let bitRateState = VideoAdaptationState.BitRateState(bitRate: newBitrate, time: CACurrentMediaTime())
-        self.videoAdaptation?.bitRateStates.append(bitRateState)
+        videoAdaptation.bitRateStates.append(bitRateState)
         delegate?.sourceDidChange(oldBitRate: oldBitRate, newBitrate: newBitrate)
     }
 }
@@ -519,18 +508,21 @@ extension MEPlayerItem: OutputRenderSourceDelegate {
         if type == .video {
             predicate = { [weak self] (frame) -> Bool in
                 guard let self = self else { return true }
-                var desire = self.positionTime
+                var desire = self.positionTime + self.options.audioDelay
                 if self.isAudioStalled {
                     desire += max(CACurrentMediaTime() - self.videoMediaTime, 0)
                 }
                 return frame.cmtime.seconds <= desire
             }
             let frame = videoTrack?.getOutputRender(where: predicate)
-            if let frame = frame, frame.seconds + 0.1 < positionTime {
+            if let frame = frame, frame.seconds + 0.4 < positionTime + self.options.audioDelay {
                 _ = videoTrack?.getOutputRender(where: nil)
             }
             return frame
         } else {
+            if isBackground, videoTrack != nil {
+                _ = getOutputRender(type: .video)
+            }
             return audioTrack?.getOutputRender(where: nil)
         }
     }

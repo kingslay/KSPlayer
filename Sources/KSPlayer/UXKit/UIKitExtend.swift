@@ -168,8 +168,8 @@ public class UXSlider: UIProgressView {
 }
 #endif
 public typealias UIViewContentMode = UIView.ContentMode
-extension UIButton {
-    open var titleFont: UIFont? {
+internal extension UIButton {
+    var titleFont: UIFont? {
         get {
             titleLabel?.font
         }
@@ -178,7 +178,7 @@ extension UIButton {
         }
     }
 
-    open var title: String? {
+    var title: String? {
         get {
             titleLabel?.text
         }

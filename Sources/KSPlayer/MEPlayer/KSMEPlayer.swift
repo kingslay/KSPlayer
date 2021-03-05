@@ -16,7 +16,7 @@ public class KSMEPlayer {
     private var loopCount = 1
     private let audioOutput = AudioOutput()
     private var playerItem: MEPlayerItem
-    private let videoOutput = MetalPlayView()
+    private let videoOutput: MetalPlayView
     private var options: KSOptions
     public private(set) var bufferingProgress = 0 {
         didSet {
@@ -58,11 +58,11 @@ public class KSMEPlayer {
 
     public required init(url: URL, options: KSOptions) {
         playerItem = MEPlayerItem(url: url, options: options)
+        self.videoOutput = MetalPlayView(options: options)
         self.options = options
         playerItem.delegate = self
         audioOutput.renderSource = playerItem
         videoOutput.renderSource = playerItem
-        videoOutput.display = options.display
         setAudioSession()
     }
 
@@ -91,9 +91,6 @@ extension KSMEPlayer: MEPlayerDelegate {
             self.videoOutput.drawableSize = self.options.display == .plane ? self.naturalSize : UIScreen.size
             self.view.centerRotate(byDegrees: self.playerItem.rotation)
             self.videoOutput.isPaused = false
-            if self.options.isAutoPlay {
-                self.play()
-            }
             self.delegate?.preparedToPlay(player: self)
         }
     }
@@ -173,14 +170,54 @@ extension KSMEPlayer: MediaPlayerProtocol {
         }
     }
 
+    public var attackTime: Float {
+        get {
+            audioOutput.audioPlayer.attackTime
+        }
+        set {
+            audioOutput.audioPlayer.attackTime = newValue
+        }
+    }
+
+    public var releaseTime: Float {
+        get {
+            audioOutput.audioPlayer.releaseTime
+        }
+        set {
+            audioOutput.audioPlayer.releaseTime = newValue
+        }
+    }
+
+    public var threshold: Float {
+        get {
+            audioOutput.audioPlayer.threshold
+        }
+        set {
+            audioOutput.audioPlayer.threshold = newValue
+        }
+    }
+
+    public var expansionRatio: Float {
+        get {
+            audioOutput.audioPlayer.expansionRatio
+        }
+        set {
+            audioOutput.audioPlayer.expansionRatio = newValue
+        }
+    }
+
+    public var masterGain: Float {
+        get {
+            audioOutput.audioPlayer.masterGain
+        }
+        set {
+            audioOutput.audioPlayer.masterGain = newValue
+        }
+    }
     public var isPlaying: Bool { playbackState == .playing }
 
     public var naturalSize: CGSize {
         playerItem.rotation == 90 || playerItem.rotation == 270 ? playerItem.naturalSize.reverse : playerItem.naturalSize
-    }
-
-    public var nominalFrameRate: Float {
-        Float(playerItem.assetTracks.first { $0.mediaType == .video && $0.isEnabled }?.fps ?? 0)
     }
 
     public var isExternalPlaybackActive: Bool { false }
@@ -190,15 +227,13 @@ extension KSMEPlayer: MediaPlayerProtocol {
     public func replace(url: URL, options: KSOptions) {
         KSLog("replaceUrl \(self)")
         shutdown()
-        audioOutput.clear()
-        videoOutput.clear()
         playerItem.delegate = nil
         playerItem = MEPlayerItem(url: url, options: options)
         self.options = options
         playerItem.delegate = self
         audioOutput.renderSource = playerItem
         videoOutput.renderSource = playerItem
-        videoOutput.display = options.display
+        videoOutput.options = options
     }
 
     public var currentPlaybackTime: TimeInterval {
@@ -223,7 +258,6 @@ extension KSMEPlayer: MediaPlayerProtocol {
         runInMainqueue { [weak self] in
             self?.bufferingProgress = 0
         }
-        audioOutput.clear()
         let seekTime: TimeInterval
         if time >= duration, options.isLoopPlay {
             seekTime = 0
@@ -232,7 +266,6 @@ extension KSMEPlayer: MediaPlayerProtocol {
         }
         playerItem.seek(time: seekTime) { [weak self] result in
             guard let self = self else { return }
-            self.audioOutput.clear()
             runInMainqueue { [weak self] in
                 guard let self = self else { return }
                 self.playbackState = oldPlaybackState
@@ -274,11 +307,11 @@ extension KSMEPlayer: MediaPlayerProtocol {
     }
 
     public var contentMode: UIViewContentMode {
-        set {
-            view.contentMode = newValue
-        }
         get {
             view.contentMode
+        }
+        set {
+            view.contentMode = newValue
         }
     }
 
@@ -296,11 +329,11 @@ extension KSMEPlayer: MediaPlayerProtocol {
     }
 
     public var isMuted: Bool {
-        set {
-            audioOutput.audioPlayer.isMuted = newValue
-        }
         get {
             audioOutput.audioPlayer.isMuted
+        }
+        set {
+            audioOutput.audioPlayer.isMuted = newValue
         }
     }
 

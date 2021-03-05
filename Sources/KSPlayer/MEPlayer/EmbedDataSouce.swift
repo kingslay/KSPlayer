@@ -7,13 +7,13 @@
 import Libavutil
 import Foundation
 public class EmbedSubtitleInfo: SubtitleInfo {
-    private let subtitle: SubtitlePlayerItemTrack
+    private let subtitle: FFPlayerItemTrack<SubtitleFrame>
     public var userInfo: NSMutableDictionary?
     public weak var subtitleDataSouce: SubtitleDataSouce?
     public let name: String
     public let subtitleID: String
     public var comment: String?
-    init(subtitleID: String, name: String, subtitle: SubtitlePlayerItemTrack) {
+    init(subtitleID: String, name: String, subtitle: FFPlayerItemTrack<SubtitleFrame>) {
         self.subtitleID = subtitleID
         self.name = name
         self.subtitle = subtitle
@@ -24,16 +24,16 @@ public class EmbedSubtitleInfo: SubtitleInfo {
     }
 }
 
-extension SubtitlePlayerItemTrack: KSSubtitleProtocol {
+extension FFPlayerItemTrack: KSSubtitleProtocol {
     func search(for time: TimeInterval) -> NSAttributedString? {
         let frame = getOutputRender { item -> Bool in
-            if let subtitle = item as? SubtitleFrame, let part = subtitle.part {
-                return part == time
+            if let subtitle = item as? SubtitleFrame {
+                return subtitle.part == time
             }
             return false
         }
         if let frame = frame as? SubtitleFrame {
-            return frame.part?.text
+            return frame.part.text
         }
         return nil
     }

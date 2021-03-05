@@ -111,7 +111,7 @@ public class CircularBuffer<Item: ObjectQueueItem> {
         condition.lock()
         defer { condition.unlock() }
         for i in headIndex ..< tailIndex {
-            if i < _buffer.count, let item = _buffer[Int(i)] {
+            if let item = _buffer[Int(i & mask)] {
                 if predicate(item) {
                     headIndex = i
                     return item

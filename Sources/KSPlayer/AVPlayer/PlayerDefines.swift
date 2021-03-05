@@ -25,12 +25,12 @@ public protocol MediaPlayback: AnyObject {
 public protocol MediaPlayerProtocol: MediaPlayback {
     var delegate: MediaPlayerDelegate? { get set }
     var view: UIView { get }
-    var nominalFrameRate: Float { get }
     var playableTime: TimeInterval { get }
     var isPreparedToPlay: Bool { get }
     var playbackState: MediaPlaybackState { get }
     var loadState: MediaLoadState { get }
     var isPlaying: Bool { get }
+    var seekable: Bool { get }
     //    var numberOfBytesTransferred: Int64 { get }
     var isMuted: Bool { get set }
     var allowsExternalPlayback: Bool { get set }
@@ -50,6 +50,11 @@ public protocol MediaPlayerProtocol: MediaPlayback {
     func tracks(mediaType: AVFoundation.AVMediaType) -> [MediaPlayerTrack]
     func select(track: MediaPlayerTrack)
 }
+extension MediaPlayerProtocol {
+    public var nominalFrameRate: Float {
+        tracks(mediaType: .video).first { $0.isEnabled }?.nominalFrameRate ?? 0
+    }
+}
 
 public protocol MediaPlayerDelegate: AnyObject {
     func preparedToPlay(player: MediaPlayerProtocol)
@@ -65,7 +70,7 @@ public protocol MediaPlayerTrack {
     var language: String? { get }
     var mediaType: AVFoundation.AVMediaType { get }
     var codecType: FourCharCode { get }
-    var fps: Float { get }
+    var nominalFrameRate: Float { get }
     var rotation: Double { get }
     var bitRate: Int64 { get }
     var naturalSize: CGSize { get }
@@ -131,7 +136,7 @@ public struct VideoAdaptationState {
     public internal(set) var loadedCount: Int = 0
 }
 
-public class KSOptions {
+open class KSOptions {
     public static var hardwareDecodeH264 = true
     public static var hardwareDecodeH265 = true
     /// 最低缓存视频时间
@@ -170,11 +175,15 @@ public class KSOptions {
 //    ffmpeg only cache http
     public var cache = false
     public var display = DisplayEnum.plane
+    public var audioDelay = 0.0 // s
+    public var subtitleDelay = 0.0 // s
     public var videoDisable = false
     public var audioDisable = false
     public var subtitleDisable = false
     public var asynchronousDecompression = false
     public var videoAdaptable = true
+    public var syncDecodeAudio = false
+    public var syncDecodeVideo = false
     public var avOptions = [String: Any]()
     public var formatContextOptions = [String: Any]()
     public var decoderOptions = [String: Any]()
@@ -190,6 +199,7 @@ public class KSOptions {
 
     // 加个节流器，防止频繁的更新加载状态
     private var throttle = mach_absolute_time()
+    private let concurrentQueue = DispatchQueue(label: "throttle", attributes: .concurrent)
     private let throttleDiff: UInt64
     public init() {
         formatContextOptions["auto_convert"] = 0
@@ -223,8 +233,11 @@ public class KSOptions {
 
     // 缓冲算法函数
     open func playable(capacitys: [CapacityProtocol], isFirst: Bool, isSeek: Bool) -> LoadingState? {
-        guard isFirst || isSeek || mach_absolute_time() - throttle > throttleDiff else {
+        guard isFirst || isSeek || !isThrottle() else {
             return nil
+        }
+        concurrentQueue.sync(flags: .barrier) {
+            self.throttle = mach_absolute_time()
         }
         let packetCount = capacitys.map { $0.packetCount }.min() ?? 0
         let frameCount = capacitys.map { $0.frameCount }.min() ?? 0
@@ -236,7 +249,10 @@ public class KSOptions {
                 return true
             }
             guard capacity.frameCount >= capacity.frameMaxCount >> 1 else {
-                return false;
+                return false
+            }
+            if (syncDecodeVideo && capacity.mediaType == .video) || (syncDecodeAudio && capacity.mediaType == .audio) {
+                return true
             }
             if isFirst || isSeek {
                 // 让音频能更快的打开
@@ -250,10 +266,17 @@ public class KSOptions {
             }
             return capacity.packetCount + capacity.frameCount >= Int(capacity.fps * Float(preferredForwardBufferDuration))
         }
-        throttle = mach_absolute_time()
         return LoadingState(loadedTime: loadedTime, progress: progress, packetCount: packetCount,
                             frameCount: frameCount, isEndOfFile: isEndOfFile, isPlayable: isPlayable,
                             isFirst: isFirst, isSeek: isSeek)
+    }
+
+    private func isThrottle() -> Bool {
+        var isThrottle = false
+        concurrentQueue.sync {
+            isThrottle = mach_absolute_time() - self.throttle < throttleDiff
+        }
+        return isThrottle
     }
 
     open func adaptable(state: VideoAdaptationState) -> (Int64, Int64)? {
@@ -303,6 +326,17 @@ public class KSOptions {
 
     open func audioFrameMaxCount(fps: Float) -> Int {
         return 16
+    }
+
+    open func drawableSize(par: CGSize, sar: CGSize) -> CGSize {
+        display == .plane ? CGSize(width: par.width, height: par.height*sar.width/sar.height) : UIScreen.size
+    }
+
+    private class func deviceCpuCount() -> Int {
+        var ncpu: UInt = UInt(0)
+        var len: size_t = MemoryLayout.size(ofValue: ncpu)
+        sysctlbyname("hw.ncpu", &ncpu, &len, nil, 0)
+        return Int(ncpu)
     }
 }
 

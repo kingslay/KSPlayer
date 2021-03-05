@@ -11,8 +11,7 @@ import VideoToolbox
 protocol DecodeProtocol {
     init(assetTrack: TrackProtocol, options: KSOptions)
     func decode()
-    func doDecode(packet: UnsafeMutablePointer<AVPacket>) throws -> [Frame]
-    func seek(time: TimeInterval)
+    func doDecode(packet: UnsafeMutablePointer<AVPacket>) throws -> [MEFrame]
     func doFlushCodec()
     func shutdown()
 }
@@ -20,8 +19,10 @@ protocol DecodeProtocol {
 extension TrackProtocol {
     func makeDecode(options: KSOptions) -> DecodeProtocol {
         autoreleasepool {
-            if let session = DecompressionSession(codecpar: stream.pointee.codecpar.pointee, options: options) {
-                return HardwareDecode(assetTrack: self, options: options, session: session)
+            if mediaType == .subtitle {
+                return SubtitleDecode(assetTrack: self, options: options)
+            } else if mediaType == .video, let session = DecompressionSession(codecpar: stream.pointee.codecpar.pointee, options: options) {
+                return VideoHardwareDecode(assetTrack: self, options: options, session: session)
             } else {
                 return SoftwareDecode(assetTrack: self, options: options)
             }
@@ -33,14 +34,14 @@ extension KSOptions {
     func canHardwareDecode(codecpar: AVCodecParameters) -> Bool {
         if codecpar.codec_id == AV_CODEC_ID_H264, hardwareDecodeH264 {
             return true
-        } else if codecpar.codec_id == AV_CODEC_ID_HEVC, #available(iOS 11.0, tvOS 11.0, OSX 10.13, *), VTIsHardwareDecodeSupported(kCMVideoCodecType_HEVC), hardwareDecodeH265 {
+        } else if codecpar.codec_id == AV_CODEC_ID_HEVC, #available(iOS 11.0, tvOS 11.0, *), VTIsHardwareDecodeSupported(kCMVideoCodecType_HEVC), hardwareDecodeH265 {
             return true
         }
         return false
     }
 }
 
-class HardwareDecode: DecodeProtocol {
+class VideoHardwareDecode: DecodeProtocol {
     private var session: DecompressionSession?
     private let codecpar: AVCodecParameters
     private let timebase: Timebase
@@ -61,7 +62,7 @@ class HardwareDecode: DecodeProtocol {
         self.session = session
     }
 
-    func doDecode(packet: UnsafeMutablePointer<AVPacket>) throws -> [Frame] {
+    func doDecode(packet: UnsafeMutablePointer<AVPacket>) throws -> [MEFrame] {
         guard let data = packet.pointee.data, let session = session else {
             return []
         }
@@ -88,8 +89,7 @@ class HardwareDecode: DecodeProtocol {
             self.lastPosition += frame.duration
             result.append(frame)
         }
-        if vtStatus != noErr {
-//            status == kVTInvalidSessionErr || status == kVTVideoDecoderMalfunctionErr || status == kVTVideoDecoderBadDataErr
+        if vtStatus != noErr || status == kVTInvalidSessionErr || status == kVTVideoDecoderMalfunctionErr || status == kVTVideoDecoderBadDataErr {
             if packet.pointee.flags & AV_PKT_FLAG_KEY == 1 {
                 throw NSError(errorCode: .codecVideoReceiveFrame, ffmpegErrnum: vtStatus)
             } else {
@@ -102,15 +102,12 @@ class HardwareDecode: DecodeProtocol {
 
     func doFlushCodec() {
         session = DecompressionSession(codecpar: codecpar, options: options)
+        lastPosition = 0
+        startTime = 0
     }
 
     func shutdown() {
         session = nil
-    }
-
-    func seek(time _: TimeInterval) {
-        lastPosition = 0
-        startTime = 0
     }
 
     func decode() {
@@ -148,16 +145,14 @@ class DecompressionSession {
             kCVImageBufferChromaLocationTopFieldKey: kCVImageBufferChromaLocation_Left,
             kCMFormatDescriptionExtension_FullRangeVideo: isFullRangeVideo,
             kCMFormatDescriptionExtension_SampleDescriptionExtensionAtoms: [
-                codecpar.codec_id.rawValue == AV_CODEC_ID_HEVC.rawValue ? "hvcC" : "avcC": NSData(bytes: extradata, length: Int(extradataSize))
+                codecpar.codec_id == AV_CODEC_ID_HEVC ? "hvcC" : "avcC": NSData(bytes: extradata, length: Int(extradataSize))
             ]
         ]
-        if let aspectRatio = codecpar.aspectRatio {
-            dic[kCVImageBufferPixelAspectRatioKey] = aspectRatio
-        }
+        dic[kCVImageBufferPixelAspectRatioKey] = codecpar.sar
         dic[kCVImageBufferColorPrimariesKey] = codecpar.color_primaries.colorPrimaries
         dic[kCVImageBufferTransferFunctionKey] = codecpar.color_trc.transferFunction
         dic[kCVImageBufferYCbCrMatrixKey] = codecpar.color_space.ycbcrMatrix
-        let type = codecpar.codec_id.rawValue == AV_CODEC_ID_HEVC.rawValue ? kCMVideoCodecType_HEVC : kCMVideoCodecType_H264
+        let type = codecpar.codec_id == AV_CODEC_ID_HEVC ? kCMVideoCodecType_HEVC : kCMVideoCodecType_H264
         // swiftlint:disable line_length
         var description: CMFormatDescription?
         var status = CMVideoFormatDescriptionCreate(allocator: kCFAllocatorDefault, codecType: type, width: codecpar.width, height: codecpar.height, extensions: dic, formatDescriptionOut: &description)
@@ -168,7 +163,8 @@ class DecompressionSession {
         self.formatDescription = formatDescription
 
         let attributes: NSMutableDictionary = [
-            kCVPixelBufferPixelFormatTypeKey: options.bestPixelFormatType(bitDepth: format.bitDepth(), isFullRangeVideo: isFullRangeVideo, planeCount: format.planeCount())
+            kCVPixelBufferPixelFormatTypeKey: options.bestPixelFormatType(bitDepth: format.bitDepth(), isFullRangeVideo: isFullRangeVideo, planeCount: format.planeCount()),
+            kCVPixelBufferMetalCompatibilityKey: true
         ]
         var session: VTDecompressionSession?
         // swiftlint:disable line_length
@@ -253,7 +249,7 @@ extension AVColorTransferCharacteristic {
         case AVCOL_TRC_SMPTE240M:
             return kCVImageBufferTransferFunction_SMPTE_240M_1995
         case AVCOL_TRC_SMPTE2084:
-            if #available(iOS 11.0, tvOS 11.0, OSX 10.13, *) {
+            if #available(iOS 11.0, tvOS 11.0, *) {
                 return kCVImageBufferTransferFunction_SMPTE_ST_2084_PQ
             }
         case AVCOL_TRC_LINEAR:
@@ -261,7 +257,7 @@ extension AVColorTransferCharacteristic {
                 return kCVImageBufferTransferFunction_Linear
             }
         case AVCOL_TRC_ARIB_STD_B67:
-            if #available(iOS 11.0, tvOS 11.0, OSX 10.13, *) {
+            if #available(iOS 11.0, tvOS 11.0, *) {
                 return kCVImageBufferTransferFunction_ITU_R_2100_HLG
             }
         case AVCOL_TRC_GAMMA22, AVCOL_TRC_GAMMA28:
@@ -285,6 +281,19 @@ extension AVColorSpace {
             return kCVImageBufferYCbCrMatrix_SMPTE_240M_1995
         case AVCOL_SPC_BT2020_NCL:
             return kCVImageBufferYCbCrMatrix_ITU_R_2020
+        default:
+            return nil
+        }
+    }
+
+    var colorSpace: CGColorSpace? {
+        switch self {
+        case AVCOL_SPC_BT709:
+            return CGColorSpace(name: CGColorSpace.itur_709)
+        case AVCOL_SPC_BT470BG, AVCOL_SPC_SMPTE170M:
+            return CGColorSpace(name: CGColorSpace.sRGB)
+        case AVCOL_SPC_BT2020_NCL:
+            return CGColorSpace(name: CGColorSpace.itur_2020)
         default:
             return nil
         }

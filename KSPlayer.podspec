@@ -13,7 +13,7 @@ Pod::Spec.new do |s|
     s.source           = { :git => 'https://github.com/kingslay/KSPlayer.git', :tag => s.version.to_s }
 
     s.ios.deployment_target = '10.0'
-    s.osx.deployment_target = '10.12'
+    s.osx.deployment_target = '10.13'
     # s.watchos.deployment_target = '2.0'
     s.tvos.deployment_target = '10.2'
     s.swift_version = '5.2'
@@ -32,9 +32,6 @@ Pod::Spec.new do |s|
     end
     s.subspec 'Metal' do |ss|
         ss.source_files = 'Sources/KSPlayer/Metal/*.{swift,metal}'
-        ss.resource_bundles = {
-            'Metal' => ['Sources/KSPlayer/Metal/*.metal']
-        }
         ss.weak_framework = 'MetalKit'
     end
     #AVPlayer播放内核
@@ -60,7 +57,7 @@ Pod::Spec.new do |s|
         ss.source_files = 'Sources/KSPlayer/Core/*'
         ss.dependency 'KSPlayer/AVPlayer'
         ss.resource_bundles = {
-            'KSResources' => ['Sources/KSPlayer/Core/Resources/*']
+            'KSPlayer_KSPlayer' => ['Sources/KSPlayer/Core/Resources/*', 'Sources/KSPlayer/Metal/*.metal']
         } 
     end
     s.subspec 'Audio'do |ss|

@@ -157,9 +157,6 @@ public class KSAVPlayer {
         didSet {
             if isPreparedToPlay != oldValue {
                 if isPreparedToPlay {
-                    if options.isAutoPlay {
-                        play()
-                    }
                     delegate?.preparedToPlay(player: self)
                 }
             }
@@ -307,14 +304,8 @@ extension KSAVPlayer {
 
 extension KSAVPlayer: MediaPlayerProtocol {
     public var subtitleDataSouce: SubtitleDataSouce? { nil }
-
     public var isPlaying: Bool { player.rate > 0 ? true : playbackState == .playing }
-
     public var view: UIView { playerView }
-    public var nominalFrameRate: Float {
-        urlAsset.tracks(withMediaType: .video).first { $0.isEnabled }?.nominalFrameRate ?? 0.0
-    }
-
     public var allowsExternalPlayback: Bool {
         get {
             player.allowsExternalPlayback
@@ -431,11 +422,11 @@ extension KSAVPlayer: MediaPlayerProtocol {
     }
 
     public var contentMode: UIViewContentMode {
-        set {
-            view.contentMode = newValue
-        }
         get {
             view.contentMode
+        }
+        set {
+            view.contentMode = newValue
         }
     }
 
@@ -447,12 +438,16 @@ extension KSAVPlayer: MediaPlayerProtocol {
         playerView.playerLayer.player = playerView.player
     }
 
+    public var seekable: Bool {
+        !(player.currentItem?.seekableTimeRanges.isEmpty ?? true)
+    }
+
     public var isMuted: Bool {
-        set {
-            player.isMuted = newValue
-        }
         get {
             player.isMuted
+        }
+        set {
+            player.isMuted = newValue
         }
     }
 
@@ -461,9 +456,9 @@ extension KSAVPlayer: MediaPlayerProtocol {
     }
 
     public func select(track: MediaPlayerTrack) {
-        if let track = track as? AVMediaPlayerTrack {
-            player.currentItem?.tracks.filter { $0.assetTrack?.mediaType.rawValue == AVMediaType.audio.rawValue }.dropFirst().forEach { $0.isEnabled = false }
-            track.track.isEnabled = true
+        if var track = track as? AVMediaPlayerTrack {
+            player.currentItem?.tracks.filter { $0.assetTrack?.mediaType == track.mediaType }.forEach { $0.isEnabled = false }
+            track.isEnabled = true
         }
     }
 }
@@ -484,8 +479,8 @@ extension AVMediaType {
 }
 
 struct AVMediaPlayerTrack: MediaPlayerTrack {
-    fileprivate let track: AVPlayerItemTrack
-    let fps: Float
+    private let track: AVPlayerItemTrack
+    let nominalFrameRate: Float
     let codecType: FourCharCode
     let rotation: Double = 0
     let bitRate: Int64 = 0
@@ -499,14 +494,19 @@ struct AVMediaPlayerTrack: MediaPlayerTrack {
     let yCbCrMatrix: String?
 
     var isEnabled: Bool {
-        track.isEnabled
+        get {
+            track.isEnabled
+        }
+        set {
+            track.isEnabled = newValue
+        }
     }
     init(track: AVPlayerItemTrack) {
         self.track = track
         mediaType = track.assetTrack?.mediaType ?? .video
         name = track.assetTrack?.languageCode ?? ""
         language = track.assetTrack?.extendedLanguageTag
-        fps = track.assetTrack?.nominalFrameRate ?? 24.0
+        nominalFrameRate = track.assetTrack?.nominalFrameRate ?? 24.0
         naturalSize = track.assetTrack?.naturalSize ?? .zero
         if let formatDescription = track.assetTrack?.formatDescriptions.first {
             // swiftlint:disable force_cast

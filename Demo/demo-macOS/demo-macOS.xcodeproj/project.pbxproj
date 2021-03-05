@@ -56,7 +56,6 @@
 		AC62AEEF20C9812F00A75F85 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/MainMenu.xib; sourceTree = "<group>"; };
 		AC62AEF120C9830300A75F85 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
 		AC62AEF220C9830300A75F85 /* ViewController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = ViewController.xib; sourceTree = "<group>"; };
-		AC7ADAF4218988E1008C07EF /* MyPlayground.playground */ = {isa = PBXFileReference; lastKnownFileType = file.playground; path = MyPlayground.playground; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
 		ACB5A24F226579E0004C4EEF /* OpenURLWindowController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OpenURLWindowController.swift; sourceTree = "<group>"; };
 		ACB5A250226579E1004C4EEF /* OpenURLWindowController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = OpenURLWindowController.xib; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -107,7 +106,6 @@
 		AC0860D320B699E100D801FC = {
 			isa = PBXGroup;
 			children = (
-				AC7ADAF4218988E1008C07EF /* MyPlayground.playground */,
 				AC0860DE20B699E100D801FC /* demo-macOS */,
 				AC0860F120B699E200D801FC /* demo-macOSTests */,
 				AC0860FC20B699E200D801FC /* demo-macOSUITests */,
@@ -170,12 +168,10 @@
 			buildConfigurationList = AC08610220B699E200D801FC /* Build configuration list for PBXNativeTarget "demo-macOS" */;
 			buildPhases = (
 				66D566658ED1703BA9764C71 /* [CP] Check Pods Manifest.lock */,
-				5CD50E302B52435F284858D4 /* [CP] Prepare Artifacts */,
 				AC0860D820B699E100D801FC /* Sources */,
 				AC0860D920B699E100D801FC /* Frameworks */,
 				AC0860DA20B699E100D801FC /* Resources */,
 				49ED335F58FD65DB63E85D30 /* [CP] Copy Pods Resources */,
-				063B90284FC16F0D9F3F0BFF /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -297,23 +293,6 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
-		063B90284FC16F0D9F3F0BFF /* [CP] Embed Pods Frameworks */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-demo-macOS/Pods-demo-macOS-frameworks-${CONFIGURATION}-input-files.xcfilelist",
-			);
-			name = "[CP] Embed Pods Frameworks";
-			outputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-demo-macOS/Pods-demo-macOS-frameworks-${CONFIGURATION}-output-files.xcfilelist",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-demo-macOS/Pods-demo-macOS-frameworks.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
 		49ED335F58FD65DB63E85D30 /* [CP] Copy Pods Resources */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
@@ -329,23 +308,6 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-demo-macOS/Pods-demo-macOS-resources.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
-		5CD50E302B52435F284858D4 /* [CP] Prepare Artifacts */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-demo-macOS/Pods-demo-macOS-artifacts-${CONFIGURATION}-input-files.xcfilelist",
-			);
-			name = "[CP] Prepare Artifacts";
-			outputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-demo-macOS/Pods-demo-macOS-artifacts-${CONFIGURATION}-output-files.xcfilelist",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-demo-macOS/Pods-demo-macOS-artifacts.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
 		66D566658ED1703BA9764C71 /* [CP] Check Pods Manifest.lock */ = {
@@ -474,7 +436,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				MACOSX_DEPLOYMENT_TARGET = 10.12;
+				MACOSX_DEPLOYMENT_TARGET = 10.13;
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = macosx;
@@ -529,7 +491,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				MACOSX_DEPLOYMENT_TARGET = 10.12;
+				MACOSX_DEPLOYMENT_TARGET = 10.13;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				SDKROOT = macosx;
 				SWIFT_COMPILATION_MODE = wholemodule;
