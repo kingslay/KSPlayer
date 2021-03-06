@@ -21,6 +21,7 @@
 - Multiple audio/video tracks.
 - H.264/H.265 hardware accelerator.
 - HDR
+- dvb_subtitle
 
 ## Requirements
 
