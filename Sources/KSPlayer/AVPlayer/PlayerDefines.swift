@@ -175,6 +175,8 @@ open class KSOptions {
 //    ffmpeg only cache http
     public var cache = false
     public var display = DisplayEnum.plane
+    public var audioDelay = 0.0 // s
+    public var subtitleDelay = 0.0 // s
     public var videoDisable = false
     public var audioDisable = false
     public var subtitleDisable = false

@@ -12,7 +12,6 @@ protocol DecodeProtocol {
     init(assetTrack: TrackProtocol, options: KSOptions)
     func decode()
     func doDecode(packet: UnsafeMutablePointer<AVPacket>) throws -> [MEFrame]
-    func seek(time: TimeInterval)
     func doFlushCodec()
     func shutdown()
 }
@@ -22,8 +21,8 @@ extension TrackProtocol {
         autoreleasepool {
             if mediaType == .subtitle {
                 return SubtitleDecode(assetTrack: self, options: options)
-            } else if let session = DecompressionSession(codecpar: stream.pointee.codecpar.pointee, options: options) {
-                return HardwareDecode(assetTrack: self, options: options, session: session)
+            } else if mediaType == .video, let session = DecompressionSession(codecpar: stream.pointee.codecpar.pointee, options: options) {
+                return VideoHardwareDecode(assetTrack: self, options: options, session: session)
             } else {
                 return SoftwareDecode(assetTrack: self, options: options)
             }
@@ -42,7 +41,7 @@ extension KSOptions {
     }
 }
 
-class HardwareDecode: DecodeProtocol {
+class VideoHardwareDecode: DecodeProtocol {
     private var session: DecompressionSession?
     private let codecpar: AVCodecParameters
     private let timebase: Timebase
@@ -103,15 +102,12 @@ class HardwareDecode: DecodeProtocol {
 
     func doFlushCodec() {
         session = DecompressionSession(codecpar: codecpar, options: options)
+        lastPosition = 0
+        startTime = 0
     }
 
     func shutdown() {
         session = nil
-    }
-
-    func seek(time _: TimeInterval) {
-        lastPosition = 0
-        startTime = 0
     }
 
     func decode() {

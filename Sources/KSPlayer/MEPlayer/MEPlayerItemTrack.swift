@@ -165,7 +165,6 @@ class FFPlayerItemTrack<Frame: MEFrame>: PlayerItemTrackProtocol, CustomStringCo
         outputRenderQueue.flush()
         isLoopModel = false
         delegate?.codecDidChangeCapacity(track: self)
-        decoderMap.values.forEach { $0.seek(time: time) }
     }
 
     func putPacket(packet: Packet) {
@@ -207,8 +206,6 @@ class FFPlayerItemTrack<Frame: MEFrame>: PlayerItemTrackProtocol, CustomStringCo
         }
         state = .closed
         outputRenderQueue.shutdown()
-        decoderMap.values.forEach { $0.shutdown() }
-        decoderMap.removeAll()
     }
 
     fileprivate func doDecode(packet: Packet) {
@@ -240,7 +237,7 @@ class FFPlayerItemTrack<Frame: MEFrame>: PlayerItemTrackProtocol, CustomStringCo
             }
         } catch {
             KSLog("Decoder did Failed : \(error)")
-            if decoder is HardwareDecode {
+            if decoder is VideoHardwareDecode {
                 decoderMap[packet.assetTrack.streamIndex] = SoftwareDecode(assetTrack: packet.assetTrack, options: options)
                 KSLog("VideoCodec switch to software decompression")
                 doDecode(packet: packet)
@@ -248,10 +245,6 @@ class FFPlayerItemTrack<Frame: MEFrame>: PlayerItemTrackProtocol, CustomStringCo
                 state = .failed
             }
         }
-    }
-
-    deinit {
-        shutdown()
     }
 }
 
@@ -320,6 +313,10 @@ final class AsyncPlayerItemTrack<Frame: MEFrame>: FFPlayerItemTrack<Frame> {
         isEndOfFile = false
         decoderMap.values.forEach { $0.decode() }
         while !decodeOperation.isCancelled {
+            if state == .closed {
+                decoderMap.values.forEach { $0.shutdown() }
+                break
+            }
             if state == .flush {
                 decoderMap.values.forEach { $0.doFlushCodec() }
                 state = .decoding
@@ -352,10 +349,6 @@ final class AsyncPlayerItemTrack<Frame: MEFrame>: FFPlayerItemTrack<Frame> {
         }
         super.shutdown()
         packetQueue.shutdown()
-        operationQueue.cancelAllOperations()
-        if Thread.current.name != operationQueue.name {
-            operationQueue.waitUntilAllOperationsAreFinished()
-        }
     }
 }
 

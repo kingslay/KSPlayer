@@ -155,6 +155,9 @@ class BuildFFMPEG: BaseBuild {
                 ffmpegcflags.append("--enable-small")
             }
         }
+        if platform == .maccatalyst {
+            ffmpegcflags.append("--disable-asm")
+        }
         var cflags = cflags
         var ldflags = "-arch \(arch.rawValue)"
         if platform == .maccatalyst {

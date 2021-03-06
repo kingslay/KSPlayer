@@ -38,15 +38,18 @@ KSPlayer是一款基于 AVPlayer, FFmpeg  纯Swift的音视频播放器，支持
 ```ruby
 target 'ProjectName' do
     use_frameworks!
-    pod 'KSPlayer',:git => 'https://github.com/kingslay/KSPlayer.git', :branch => 'master'
-    pod 'Openssl',:git => 'https://github.com/kingslay/KSPlayer.git', :branch => 'master'
+    pod 'KSPlayer',:git => 'https://github.com/kingslay/KSPlayer.git', :branch => 'develop'
+    pod 'FFmpeg',:git => 'https://github.com/kingslay/KSPlayer.git', :branch => 'develop'
+    pod 'Openssl',:git => 'https://github.com/kingslay/KSPlayer.git', :branch => 'develop'
 end
 ```
 
-#### Carthage
+#### Swift Package Manager
 
-```
-git "https://github.com/kingslay/KSPlayer.git" "master"
+```swift
+dependencies: [
+    .package(url: "https://github.com/kingslay/KSPlayer.git", .branch("develop"))
+]
 ```
 
 ### Demo
