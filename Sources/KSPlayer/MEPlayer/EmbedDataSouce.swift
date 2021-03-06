@@ -5,6 +5,7 @@
 //  Created by kintan on 2018/8/7.
 //
 import Libavutil
+import Libavcodec
 import Foundation
 public class EmbedSubtitleInfo: SubtitleInfo {
     private let subtitle: FFPlayerItemTrack<SubtitleFrame>
@@ -20,12 +21,13 @@ public class EmbedSubtitleInfo: SubtitleInfo {
     }
 
     public func makeSubtitle(completion: @escaping (Result<KSSubtitleProtocol?, NSError>) -> Void) {
+        subtitle.assetTrack.stream.pointee.discard = AVDISCARD_DEFAULT
         completion(.success(subtitle))
     }
 }
 
 extension FFPlayerItemTrack: KSSubtitleProtocol {
-    func search(for time: TimeInterval) -> NSAttributedString? {
+    func search(for time: TimeInterval) -> AnyObject? {
         let frame = getOutputRender { item -> Bool in
             if let subtitle = item as? SubtitleFrame {
                 return subtitle.part == time
@@ -33,7 +35,7 @@ extension FFPlayerItemTrack: KSSubtitleProtocol {
             return false
         }
         if let frame = frame as? SubtitleFrame {
-            return frame.part.text
+            return frame.part.image ?? frame.part.text
         }
         return nil
     }

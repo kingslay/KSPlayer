@@ -70,7 +70,7 @@ extension SubtitlePart: NumericComparable {
 }
 
 public protocol KSSubtitleProtocol: AnyObject {
-    func search(for time: TimeInterval) -> NSAttributedString?
+    func search(for time: TimeInterval) -> AnyObject?
 }
 
 public func == (lhs: KSSubtitleProtocol, rhs: KSSubtitleProtocol) -> Bool {
@@ -158,7 +158,7 @@ public class KSURLSubtitle: KSSubtitle {
 
 extension KSSubtitle: KSSubtitleProtocol {
     /// Search for target group for time
-    public func search(for time: TimeInterval) -> NSAttributedString? {
+    public func search(for time: TimeInterval) -> AnyObject? {
         var index = currentIndex
         if searchIndex(for: time) != nil {
             if currentIndex == index {
