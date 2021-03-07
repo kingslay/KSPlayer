@@ -186,16 +186,15 @@ class FFPlayerItemTrack<Frame: MEFrame>: PlayerItemTrackProtocol, CustomStringCo
     }
 
     func getOutputRender(where predicate: ((MEFrame) -> Bool)?) -> MEFrame? {
-        if mediaType == .subtitle {
-            return outputRenderQueue.search(where: predicate ?? { _ in true })
-        }
         let outputFecthRender = outputRenderQueue.pop(where: predicate)
-        if outputFecthRender == nil {
-            if state == .finished, frameCount == 0 {
-                delegate?.codecDidFinished(track: self)
+        if mediaType != .subtitle {
+            if outputFecthRender == nil {
+                if state == .finished, frameCount == 0 {
+                    delegate?.codecDidFinished(track: self)
+                }
+            } else {
+                delegate?.codecDidChangeCapacity(track: self)
             }
-        } else {
-            delegate?.codecDidChangeCapacity(track: self)
         }
         return outputFecthRender
     }

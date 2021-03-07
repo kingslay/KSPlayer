@@ -8,6 +8,11 @@
 import CoreGraphics
 import Libavformat
 import Foundation
+#if canImport(UIKit)
+import UIKit
+#else
+import AppKit
+#endif
 class SubtitleDecode: DecodeProtocol {
     private let reg = AssParse.patternReg()
     private var codecContext: UnsafeMutablePointer<AVCodecContext>?
@@ -82,7 +87,7 @@ class SubtitleDecode: DecodeProtocol {
         }
     }
 
-    private func text(subtitle: AVSubtitle) -> (NSMutableAttributedString, CGImage?) {
+    private func text(subtitle: AVSubtitle) -> (NSMutableAttributedString, UIImage?) {
         let attributedString = NSMutableAttributedString()
         var image: CGImage?
         for i in 0 ..< Int(subtitle.num_rects) {
@@ -100,7 +105,7 @@ class SubtitleDecode: DecodeProtocol {
                 image = scale.transfer(format: AV_PIX_FMT_PAL8, width: rect.w, height: rect.h, data: Array(tuple: rect.data), linesize: Array(tuple: rect.linesize).map {Int($0)})
             }
         }
-        return (attributedString, image)
+        return (attributedString, image.map { UIImage(cgImage: $0) })
     }
 }
 

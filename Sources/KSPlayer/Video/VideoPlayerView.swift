@@ -85,6 +85,7 @@ open class VideoPlayerView: PlayerView {
     public var titleLabel = UILabel()
     public var subtitleLabel = UILabel()
     public var subtitleBackView = UIImageView()
+    private var subtitleEndTime = TimeInterval(0)
     /// Activty Indector for loading
     public var loadingIndector: UIView & LoadingIndector = UIActivityIndicatorView(frame: CGRect(x: 0, y: 0, width: 30, height: 30))
     public var seekToView: UIView & SeekViewProtocol = SeekView()
@@ -220,8 +221,6 @@ open class VideoPlayerView: PlayerView {
         super.player(layer: layer, currentTime: currentTime, totalTime: totalTime)
         if let subtitle = resource?.subtitle {
             showSubtile(from: subtitle, at: currentTime)
-        } else {
-            subtitleBackView.isHidden = true
         }
     }
 
@@ -447,7 +446,12 @@ extension VideoPlayerView {
         srtControl.view.isHidden = true
         srtControl.selectWithFilePath = { [weak self] result in
             guard let self = self else { return }
-            self.resource?.subtitle = try? result.get()
+            if let subtitle = try? result.get() {
+                self.subtitleBackView.isHidden = false
+                self.resource?.subtitle = subtitle
+            } else {
+                self.subtitleBackView.isHidden = true
+            }
         }
     }
 
@@ -476,17 +480,23 @@ extension VideoPlayerView {
     }
 
     open func showSubtile(from subtitle: KSSubtitleProtocol, at time: TimeInterval) {
-        if let object = subtitle.search(for: time + (resource?.definitions[currentDefinition].options.subtitleDelay ?? 0.0)) {
-            subtitleBackView.isHidden = false
-            if let text = object as? NSAttributedString {
-                subtitleLabel.attributedText = text
+        let time = time + (resource?.definitions[currentDefinition].options.subtitleDelay ?? 0.0)
+        if let part = subtitle.search(for: time) {
+            subtitleEndTime = part.end
+            if let image = part.image {
+                subtitleBackView.image = image
             } else {
-                // swiftlint:disable force_cast
-                subtitleBackView.image = UIImage(cgImage: object as! CGImage)
-                // swiftlint:enable force_cast
+                subtitleLabel.attributedText = part.text
             }
         } else {
-            subtitleBackView.isHidden = true
+            if time > subtitleEndTime {
+                subtitleBackView.image = nil
+                #if os(macOS)
+                subtitleLabel.attributedText = NSMutableAttributedString()
+                #else
+                subtitleLabel.attributedText = nil
+                #endif
+            }
         }
     }
 
