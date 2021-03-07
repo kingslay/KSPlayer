@@ -27,7 +27,7 @@ public class EmbedSubtitleInfo: SubtitleInfo {
 }
 
 extension FFPlayerItemTrack: KSSubtitleProtocol {
-    func search(for time: TimeInterval) -> AnyObject? {
+    func search(for time: TimeInterval) -> SubtitlePart? {
         let frame = getOutputRender { item -> Bool in
             if let subtitle = item as? SubtitleFrame {
                 return subtitle.part == time
@@ -35,7 +35,7 @@ extension FFPlayerItemTrack: KSSubtitleProtocol {
             return false
         }
         if let frame = frame as? SubtitleFrame {
-            return frame.part.image ?? frame.part.text
+            return frame.part
         }
         return nil
     }
