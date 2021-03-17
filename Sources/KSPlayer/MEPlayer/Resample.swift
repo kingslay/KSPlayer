@@ -124,7 +124,6 @@ class PixelBuffer: BufferProtocol {
     let colorPrimaries: CFString?
     let transferFunction: CFString?
     let yCbCrMatrix: CFString?
-
     let sar: CGSize
     private let formats: [MTLPixelFormat]
     private let widths: [Int]
