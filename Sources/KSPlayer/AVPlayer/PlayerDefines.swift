@@ -338,6 +338,9 @@ open class KSOptions {
         sysctlbyname("hw.ncpu", &ncpu, &len, nil, 0)
         return Int(ncpu)
     }
+    open func isUseDisplayLayer() -> Bool {
+        display == .plane
+    }
 }
 
 // 缓冲情况
