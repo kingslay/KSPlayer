@@ -123,7 +123,7 @@ open class BaseBuild {
 }
 
 class BuildFFMPEG: BaseBuild {
-    private let ffmpegFile = "ffmpeg-4.3.1"
+    private let ffmpegFile = "ffmpeg-4.3.2"
     init() {
         super.init(library: "FFmpeg")
     }
@@ -147,13 +147,9 @@ class BuildFFMPEG: BaseBuild {
             ffmpegcflags.append("--disable-filters")
         }
         if platform == .isimulator || platform == .tvsimulator {
-            ffmpegcflags.append("--assert-level=2")
-        } else {
-            ffmpegcflags.append("--enable-pic")
-            ffmpegcflags.append("--enable-neon")
-            if platform == .ios {
-                ffmpegcflags.append("--enable-small")
-            }
+            ffmpegcflags.append("--assert-level=1")
+        } else if platform == .ios {
+            ffmpegcflags.append("--enable-small")
         }
         if platform == .maccatalyst {
             ffmpegcflags.append("--disable-asm")
