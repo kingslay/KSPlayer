@@ -372,7 +372,7 @@
 		C07DCC583F7A757F491630B362A3B164 /* KSPlayer-iOS-prefix.pch */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "KSPlayer-iOS-prefix.pch"; sourceTree = "<group>"; };
 		C1A7BBB2DF4FF979EDE25971BBA6E14B /* AudioOutput.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = AudioOutput.swift; path = Sources/KSPlayer/MEPlayer/AudioOutput.swift; sourceTree = "<group>"; };
 		C34D383BC679CBEE89BDB5801DD2F28B /* Polonaise.flac */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = file; name = Polonaise.flac; path = Tests/KSPlayerTests/Resources/Polonaise.flac; sourceTree = "<group>"; };
-		C472C97B903FFE1D7C131A47557F2B35 /* KSPlayer-iOS-Unit-Tests */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; name = "KSPlayer-iOS-Unit-Tests"; path = "KSPlayer-iOS-Unit-Tests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		C472C97B903FFE1D7C131A47557F2B35 /* KSPlayer-iOS-Unit-Tests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "KSPlayer-iOS-Unit-Tests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		CAD04F2C86060EA4E7DCF03CE58B19C3 /* CircularBuffer.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = CircularBuffer.swift; path = Sources/KSPlayer/MEPlayer/CircularBuffer.swift; sourceTree = "<group>"; };
 		CC0401F08EEC9B2F84B4522D497FBCBB /* KSPlayer_KSPlayer.bundle */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = KSPlayer_KSPlayer.bundle; sourceTree = BUILT_PRODUCTS_DIR; };
 		CE895BEB17ABECAB218E1957F0449992 /* EmbedDataSouce.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = EmbedDataSouce.swift; path = Sources/KSPlayer/MEPlayer/EmbedDataSouce.swift; sourceTree = "<group>"; };
@@ -645,7 +645,7 @@
 				92C970804A17DE949D66F13575EA5367 /* KSPlayer.framework */,
 				60C43558171822E74AADF86FBF5AABF3 /* KSPlayer.framework */,
 				880389D99D1EF36F926AA4C3DFAA257C /* KSPlayer.framework */,
-				C472C97B903FFE1D7C131A47557F2B35 /* KSPlayer-iOS-Unit-Tests */,
+				C472C97B903FFE1D7C131A47557F2B35 /* KSPlayer-iOS-Unit-Tests.xctest */,
 				F2451797988C9C4538E4FA8A4BD599B9 /* KSPlayer-macOS-Unit-Tests */,
 				0E1FABDC66E96D401CA063825EEACF5A /* KSPlayer-tvOS-Unit-Tests */,
 				CC0401F08EEC9B2F84B4522D497FBCBB /* KSPlayer_KSPlayer.bundle */,
@@ -829,7 +829,7 @@
 			);
 			name = "KSPlayer-iOS-Unit-Tests";
 			productName = "KSPlayer-iOS-Unit-Tests";
-			productReference = C472C97B903FFE1D7C131A47557F2B35 /* KSPlayer-iOS-Unit-Tests */;
+			productReference = C472C97B903FFE1D7C131A47557F2B35 /* KSPlayer-iOS-Unit-Tests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
 		54550AC0B2C25CEBE493F5622B9733EF /* KSPlayer-iOS-KSPlayer_KSPlayer */ = {
@@ -1546,6 +1546,7 @@
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "-";
 				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
 				GCC_PREFIX_HEADER = "Target Support Files/KSPlayer-iOS/KSPlayer-iOS-Unit-Tests-prefix.pch";
 				INFOPLIST_FILE = "Target Support Files/KSPlayer-iOS/KSPlayer-iOS-Unit-Tests-Info.plist";
@@ -1665,6 +1666,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 13AB25B78C254A33D6FB37AB0EFF303C /* KSPlayer-iOS.release.xcconfig */;
 			buildSettings = {
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "-";
 				CONFIGURATION_BUILD_DIR = "$(BUILD_DIR)/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)/KSPlayer-iOS";
 				IBSC_MODULE = KSPlayer;
 				INFOPLIST_FILE = "Target Support Files/KSPlayer-iOS/ResourceBundle-KSPlayer_KSPlayer-KSPlayer-iOS-Info.plist";
@@ -1701,6 +1703,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = F124998203424BD3A2726E5056D50338 /* KSPlayer-iOS.debug.xcconfig */;
 			buildSettings = {
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "-";
 				CONFIGURATION_BUILD_DIR = "$(BUILD_DIR)/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)/KSPlayer-iOS";
 				IBSC_MODULE = KSPlayer;
 				INFOPLIST_FILE = "Target Support Files/KSPlayer-iOS/ResourceBundle-KSPlayer_KSPlayer-KSPlayer-iOS-Info.plist";
@@ -1961,6 +1964,7 @@
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "-";
 				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
 				GCC_PREFIX_HEADER = "Target Support Files/KSPlayer-iOS/KSPlayer-iOS-Unit-Tests-prefix.pch";
 				INFOPLIST_FILE = "Target Support Files/KSPlayer-iOS/KSPlayer-iOS-Unit-Tests-Info.plist";

@@ -84,7 +84,8 @@ open class VideoPlayerView: PlayerView {
     public var navigationBar = UIStackView()
     public var titleLabel = UILabel()
     public var subtitleLabel = UILabel()
-    public var subtitleBackView = UIView()
+    public var subtitleBackView = UIImageView()
+    private var subtitleEndTime = TimeInterval(0)
     /// Activty Indector for loading
     public var loadingIndector: UIView & LoadingIndector = UIActivityIndicatorView(frame: CGRect(x: 0, y: 0, width: 30, height: 30))
     public var seekToView: UIView & SeekViewProtocol = SeekView()
@@ -220,8 +221,6 @@ open class VideoPlayerView: PlayerView {
         super.player(layer: layer, currentTime: currentTime, totalTime: totalTime)
         if let subtitle = resource?.subtitle {
             showSubtile(from: subtitle, at: currentTime)
-        } else {
-            subtitleBackView.isHidden = true
         }
     }
 
@@ -440,7 +439,6 @@ extension VideoPlayerView {
         subtitleLabel.textColor = .white
         subtitleLabel.font = .systemFont(ofSize: 16)
         subtitleBackView.cornerRadius = 2
-        subtitleBackView.backgroundColor = UIColor.black.withAlphaComponent(0.4)
         subtitleBackView.addSubview(subtitleLabel)
         subtitleBackView.isHidden = true
         addSubview(subtitleBackView)
@@ -448,7 +446,12 @@ extension VideoPlayerView {
         srtControl.view.isHidden = true
         srtControl.selectWithFilePath = { [weak self] result in
             guard let self = self else { return }
-            self.resource?.subtitle = try? result.get()
+            if let subtitle = try? result.get() {
+                self.subtitleBackView.isHidden = false
+                self.resource?.subtitle = subtitle
+            } else {
+                self.subtitleBackView.isHidden = true
+            }
         }
     }
 
@@ -477,11 +480,23 @@ extension VideoPlayerView {
     }
 
     open func showSubtile(from subtitle: KSSubtitleProtocol, at time: TimeInterval) {
-        if let text = subtitle.search(for: time + (resource?.definitions[currentDefinition].options.subtitleDelay ?? 0.0)) {
-            subtitleBackView.isHidden = false
-            subtitleLabel.attributedText = text
+        let time = time + (resource?.definitions[currentDefinition].options.subtitleDelay ?? 0.0)
+        if let part = subtitle.search(for: time) {
+            subtitleEndTime = part.end
+            if let image = part.image {
+                subtitleBackView.image = image
+            } else {
+                subtitleLabel.attributedText = part.text
+            }
         } else {
-            subtitleBackView.isHidden = true
+            if time > subtitleEndTime {
+                subtitleBackView.image = nil
+                #if os(macOS)
+                subtitleLabel.attributedText = NSMutableAttributedString()
+                #else
+                subtitleLabel.attributedText = nil
+                #endif
+            }
         }
     }
 
