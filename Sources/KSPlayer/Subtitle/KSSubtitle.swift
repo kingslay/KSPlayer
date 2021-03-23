@@ -5,31 +5,42 @@
 //  Created by kintan on 2017/4/2.
 //
 //
-
+#if canImport(UIKit)
+import UIKit
+#else
+import AppKit
+#endif
 import CoreFoundation
 import CoreGraphics
 import Foundation
-public class SubtitlePart: CustomStringConvertible {
+public class SubtitlePart: CustomStringConvertible, NSMutableCopying {
     public let start: TimeInterval
     public let end: TimeInterval
     public let text: NSMutableAttributedString
-    public var image: CGImage?
+    public var image: UIImage?
+    public var description: String {
+        "Subtile Group ==========\nstart: \(start)\nend:\(end)\ntext:\(text)"
+    }
+
     public convenience init(_ start: TimeInterval, _ end: TimeInterval, _ string: String) {
         var text = string
         text = text.trimmingCharacters(in: .whitespaces)
         text = text.replacingOccurrences(of: "\r", with: "")
-        self.init(start, end, NSMutableAttributedString(string: text))
+        self.init(start, end, attributedString: NSMutableAttributedString(string: text))
     }
 
-    public init(_ start: TimeInterval, _ end: TimeInterval, _ attributedString: NSMutableAttributedString) {
+    public init(_ start: TimeInterval, _ end: TimeInterval, attributedString: NSMutableAttributedString) {
         self.start = start
         self.end = end
         text = attributedString
     }
 
-    public var description: String {
-        "Subtile Group ==========\nstart: \(start)\nend:\(end)\ntext:\(text)"
+    public func mutableCopy(with zone: NSZone? = nil) -> Any {
+        // swiftlint:disable force_cast
+        return SubtitlePart(start, end, attributedString: text.mutableCopy() as! NSMutableAttributedString)
+        // swiftlint:enable force_cast
     }
+
 }
 
 extension SubtitlePart: Comparable {
@@ -53,24 +64,16 @@ extension SubtitlePart: Comparable {
 extension SubtitlePart: NumericComparable {
     public typealias Compare = TimeInterval
     public static func == (left: SubtitlePart, right: TimeInterval) -> Bool {
-        if left.start <= right, left.end >= right {
-            return true
-        } else {
-            return false
-        }
+        left.start <= right && left.end >= right
     }
 
     public static func < (left: SubtitlePart, right: TimeInterval) -> Bool {
-        if left.end < right {
-            return true
-        } else {
-            return false
-        }
+        left.end < right
     }
 }
 
 public protocol KSSubtitleProtocol: AnyObject {
-    func search(for time: TimeInterval) -> NSAttributedString?
+    func search(for time: TimeInterval) -> SubtitlePart?
 }
 
 public func == (lhs: KSSubtitleProtocol, rhs: KSSubtitleProtocol) -> Bool {
@@ -158,22 +161,23 @@ public class KSURLSubtitle: KSSubtitle {
 
 extension KSSubtitle: KSSubtitleProtocol {
     /// Search for target group for time
-    public func search(for time: TimeInterval) -> NSAttributedString? {
+    public func search(for time: TimeInterval) -> SubtitlePart? {
         var index = currentIndex
         if searchIndex(for: time) != nil {
             if currentIndex == index {
-                let text = NSMutableAttributedString(attributedString: parts[currentIndex].text)
+                // swiftlint:disable force_cast
+                let copy = parts[currentIndex].mutableCopy() as! SubtitlePart
+                // swiftlint:enable force_cast
+                let text = copy.text
                 index = currentIndex + 1
-                while index < parts.count, parts[index].start < time {
-                    if parts[index] == time {
-                        text.append(NSAttributedString(string: "\n"))
-                        text.append(parts[index].text)
-                    }
+                while index < parts.count, parts[index] == time {
+                    text.append(NSAttributedString(string: "\n"))
+                    text.append(parts[index].text)
                     index += 1
                 }
-                return text
+                return copy
             } else {
-                return parts[currentIndex].text
+                return parts[currentIndex]
             }
         } else {
             return nil
