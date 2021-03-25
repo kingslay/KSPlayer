@@ -243,8 +243,8 @@ public protocol PlayerControllerDelegate: class {
 
 ```bash
 brew install sdl2
-mkdir -p Script && cd Script && swift ../Sources/Script/main.swift debug
-dwarfdump -F --debug-info ../Sources/libavformat.xcframework/ios-x86_64-maccatalyst/FFmpeg.framework/FFmpeg | head -n 20
+swift run Script debug
+dwarfdump -F --debug-info ../Sources/libavformat.xcframework/macos-arm64_x86_64/Libavformat.framework/Libavformat | head -n 20
 ```
 
 run demo-macOS

@@ -1,5 +1,9 @@
 import Foundation
-
+let path = URL.currentDirectory + "Script"
+if !FileManager.default.fileExists(atPath: path.path) {
+    try FileManager.default.createDirectory(at: path, withIntermediateDirectories: false, attributes: nil)
+}
+FileManager.default.changeCurrentDirectoryPath(path.path)
 let array = Array(CommandLine.arguments.dropFirst())
 let isDebug = array.firstIndex(of: "debug") != nil
 let xcodePath = Utility.shell("xcode-select -p", isOutput: true) ?? ""
@@ -23,7 +27,7 @@ open class BaseBuild {
     }
 
     func build(platform: PlatformType, arch: ArchType) {
-        let url = Utility.splice(paths: [library, platform.rawValue, "scratch", arch.rawValue])
+        let url = URL.currentDirectory + [library, platform.rawValue, "scratch", arch.rawValue]
         try? FileManager.default.createDirectory(at: url, withIntermediateDirectories: true, attributes: nil)
         var cflags = "-arch \(arch.rawValue) \(platform.deploymentTarget())"
         cflags += " -fembed-bitcode"
@@ -35,7 +39,7 @@ open class BaseBuild {
     func createXCFramework() {
         for framework in frameworks() {
             var arguments = ""
-            let XCFrameworkFile = Utility.splice(paths: ["../Sources", framework + ".xcframework"])
+            let XCFrameworkFile = URL.currentDirectory + ["../Sources", framework + ".xcframework"]
             try? FileManager.default.removeItem(at: XCFrameworkFile)
             for platform in platforms {
                 arguments += " -framework \(createFramework(framework: framework, platform: platform, archs: platform.architectures()))"
@@ -44,14 +48,14 @@ open class BaseBuild {
         }
     }
     private func createFramework(framework: String, platform: PlatformType, archs: [ArchType]) -> String {
-        let frameworkDir = Utility.splice(paths: [library, platform.rawValue, "\(framework).framework"])
+        let frameworkDir = URL.currentDirectory + [library, platform.rawValue, "\(framework).framework"]
         try? FileManager.default.removeItem(at: frameworkDir)
         try? FileManager.default.createDirectory(at: frameworkDir, withIntermediateDirectories: true, attributes: nil)
         var command = "lipo -create"
         for arch in archs {
             let prefix = thinDir(platform: platform, arch: arch)
             command += " "
-            command += (prefix + "lib/\(framework).a").path
+            command += (prefix + ["lib", "\(framework).a"]).path
             var headerURL = prefix + "include" + framework
             if !FileManager.default.fileExists(atPath: headerURL.path) {
                 headerURL = prefix + "include"
@@ -68,7 +72,7 @@ open class BaseBuild {
         return frameworkDir.path
     }
     func thinDir(platform: PlatformType, arch: ArchType) -> URL {
-        return Utility.splice(paths: [library, platform.rawValue, "thin", arch.rawValue])
+        return URL.currentDirectory + [library, platform.rawValue, "thin", arch.rawValue]
     }
     func frameworks() -> [String] {
         return []
@@ -161,14 +165,14 @@ class BuildFFMPEG: BaseBuild {
             cflags += " -isysroot \(syslibroot) -iframework \(syslibroot)/System/iOSSupport/System/Library/Frameworks"
             ldflags = cflags
         }
-        let opensslPath = Utility.splice(paths: ["SSL", platform.rawValue, "thin", arch.rawValue])
+        let opensslPath = URL.currentDirectory + ["SSL", platform.rawValue, "thin", arch.rawValue]
         if FileManager.default.fileExists(atPath: opensslPath.path) {
             cflags += " -I\(opensslPath.path)/include"
             ldflags += " -L\(opensslPath.path)/lib"
             ffmpegcflags.append("--enable-openssl")
         }
         let prefix = thinDir(platform: platform, arch: arch)
-        var args = ["set -o noglob &&", Utility.splice(paths: [ffmpegFile, "configure"]).path, "--target-os=darwin",
+        var args = ["set -o noglob &&", (URL.currentDirectory + [ffmpegFile, "configure"]).path, "--target-os=darwin",
                     "--arch=\(arch)", "--cc='xcrun -sdk \(platform.sdk().lowercased()) clang'",
                     "--extra-cflags='\(cflags)'", "--extra-ldflags='\(ldflags)'", "--prefix=\(prefix.path)"]
         args.append(contentsOf: ffmpegcflags)
@@ -179,9 +183,9 @@ class BuildFFMPEG: BaseBuild {
             try? FileManager.default.removeItem(at: URL(fileURLWithPath: "/usr/local/bin/ffmpeg"))
             try? FileManager.default.removeItem(at: URL(fileURLWithPath: "/usr/local/bin/ffplay"))
             try? FileManager.default.removeItem(at: URL(fileURLWithPath: "/usr/local/bin/ffprobe"))
-            try? FileManager.default.copyItem(at: Utility.splice(paths: ["bin", "ffmpeg"], current: prefix), to: URL(fileURLWithPath: "/usr/local/bin/ffmpeg"))
-            try? FileManager.default.copyItem(at: Utility.splice(paths: ["bin", "ffplay"], current: prefix), to: URL(fileURLWithPath: "/usr/local/bin/ffplay"))
-            try? FileManager.default.copyItem(at: Utility.splice(paths: ["bin", "ffprobe"], current: prefix), to: URL(fileURLWithPath: "/usr/local/bin/ffprobe"))
+            try? FileManager.default.copyItem(at: prefix + ["bin", "ffmpeg"], to: URL(fileURLWithPath: "/usr/local/bin/ffmpeg"))
+            try? FileManager.default.copyItem(at: prefix + ["bin", "ffplay"], to: URL(fileURLWithPath: "/usr/local/bin/ffplay"))
+            try? FileManager.default.copyItem(at: prefix + ["bin", "ffprobe"], to: URL(fileURLWithPath: "/usr/local/bin/ffprobe"))
         }
     }
     override func frameworks() -> [String] {
@@ -189,7 +193,7 @@ class BuildFFMPEG: BaseBuild {
     }
     override func buildALL() {
         prepareYasm()
-        if !FileManager.default.fileExists(atPath: Utility.splice(paths: [ffmpegFile]).path) {
+        if !FileManager.default.fileExists(atPath: (URL.currentDirectory + ffmpegFile).path) {
             Utility.shell("curl http://www.ffmpeg.org/releases/\(ffmpegFile).tar.bz2 | tar xj")
         }
         super.buildALL()
@@ -285,13 +289,13 @@ class BuildOpenSSL: BaseBuild {
         super.init(library: "SSL")
     }
     override func buildALL() {
-        if !FileManager.default.fileExists(atPath: Utility.splice(paths: [sslFile]).path) {
+        if !FileManager.default.fileExists(atPath: (URL.currentDirectory + sslFile).path) {
             Utility.shell("curl https://www.openssl.org/source/\(sslFile).tar.gz | tar xj")
         }
         super.buildALL()
     }
     override func innerBuid(platform: PlatformType, arch: ArchType, cflags: String, buildDir: URL) {
-        let directoryURL = Utility.splice(paths: [sslFile])
+        let directoryURL = URL.currentDirectory + sslFile
         var ccFlags = "/usr/bin/clang " + cflags
         if platform == .macos || platform == .maccatalyst {
             ccFlags += " -fno-common"
@@ -320,7 +324,7 @@ class BuildBoringSSL: BaseBuild {
         super.init(library: "SSL")
     }
     override func buildALL() {
-        if !FileManager.default.fileExists(atPath: Utility.splice(paths: [sslFile]).path) {
+        if !FileManager.default.fileExists(atPath: (URL.currentDirectory + sslFile).path) {
             Utility.shell("git clone https://github.com/google/boringssl.git")
         }
         super.buildALL()
@@ -335,9 +339,9 @@ class BuildBoringSSL: BaseBuild {
         Utility.shell("ninja >>\(buildDir.path).log", currentDirectoryURL: buildDir)
         let thin = thinDir(platform: platform, arch: arch)
         try? FileManager.default.createDirectory(at: thin + "lib", withIntermediateDirectories: true, attributes: nil)
-        try? FileManager.default.copyItem(at: Utility.splice(paths: [sslFile, "include"]), to: thin + "include")
-        try? FileManager.default.copyItem(at: buildDir + "ssl/libssl.a", to: thin + "lib/libssl.a")
-        try? FileManager.default.copyItem(at: buildDir + "crypto/libcrypto.a", to: thin + "lib/libcrypto.a")
+        try? FileManager.default.copyItem(at: URL.currentDirectory + [sslFile, "include"], to: thin + "include")
+        try? FileManager.default.copyItem(at: buildDir + ["ssl", "libssl.a"], to: thin + ["lib", "libssl.a"])
+        try? FileManager.default.copyItem(at: buildDir + ["crypto", "libcrypto.a"], to: thin + ["lib", "libcrypto.a"])
     }
     override func frameworks() -> [String] {
         return ["Libcrypto", "Libssl"]
@@ -532,18 +536,21 @@ struct Utility {
 //            return nil
 //        }
 //    }
-    static func splice(paths: [String], current: URL = URL(fileURLWithPath: FileManager.default.currentDirectoryPath)) -> URL {
-        var url = current
-        paths.forEach {
-            url.appendPathComponent($0)
-        }
-        return url
-    }
 }
 extension URL {
+    static var currentDirectory: URL {
+        URL(fileURLWithPath: FileManager.default.currentDirectoryPath)
+    }
     static func + (left: URL, right: String) -> URL {
         var url = left
         url.appendPathComponent(right)
+        return url
+    }
+    static func + (left: URL, right: [String]) -> URL {
+        var url = left
+        right.forEach {
+            url.appendPathComponent($0)
+        }
         return url
     }
 }
