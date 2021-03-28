@@ -229,13 +229,13 @@ final class MTLBufferWrap {
     var size: [Int] {
         didSet {
             if size.description != oldValue.description {
-                data = size.map { MetalRender.device.makeBuffer(length: $0, options: .storageModeShared) }
+                data = size.map { MetalRender.device.makeBuffer(length: $0) }
             }
         }
     }
     public init(size: [Int]) {
         self.size = size
-        data = size.map { MetalRender.device.makeBuffer(length: $0, options: .storageModeShared) }
+        data = size.map { MetalRender.device.makeBuffer(length: $0) }
     }
 
     deinit {

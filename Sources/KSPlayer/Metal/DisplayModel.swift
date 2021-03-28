@@ -70,9 +70,9 @@ private class PlaneDisplayModel {
         let (indices, positions, uvs) = PlaneDisplayModel.genSphere()
         let device = MetalRender.device
         indexCount = indices.count
-        indexBuffer = device.makeBuffer(bytes: indices, length: MemoryLayout<UInt16>.size * indexCount, options: .storageModeShared)!
-        posBuffer = device.makeBuffer(bytes: positions, length: MemoryLayout<simd_float4>.size * positions.count, options: .storageModeShared)
-        uvBuffer = device.makeBuffer(bytes: uvs, length: MemoryLayout<simd_float2>.size * uvs.count, options: .storageModeShared)
+        indexBuffer = device.makeBuffer(bytes: indices, length: MemoryLayout<UInt16>.size * indexCount)!
+        posBuffer = device.makeBuffer(bytes: positions, length: MemoryLayout<simd_float4>.size * positions.count)
+        uvBuffer = device.makeBuffer(bytes: uvs, length: MemoryLayout<simd_float2>.size * uvs.count)
     }
 
     private static func genSphere() -> ([UInt16], [simd_float4], [simd_float2]) {
@@ -141,9 +141,9 @@ private class SphereDisplayModel {
         let (indices, positions, uvs) = SphereDisplayModel.genSphere()
         let device = MetalRender.device
         indexCount = indices.count
-        indexBuffer = device.makeBuffer(bytes: indices, length: MemoryLayout<UInt16>.size * indexCount, options: .storageModeShared)!
-        posBuffer = device.makeBuffer(bytes: positions, length: MemoryLayout<simd_float4>.size * positions.count, options: .storageModeShared)
-        uvBuffer = device.makeBuffer(bytes: uvs, length: MemoryLayout<simd_float2>.size * uvs.count, options: .storageModeShared)
+        indexBuffer = device.makeBuffer(bytes: indices, length: MemoryLayout<UInt16>.size * indexCount)!
+        posBuffer = device.makeBuffer(bytes: positions, length: MemoryLayout<simd_float4>.size * positions.count)
+        uvBuffer = device.makeBuffer(bytes: uvs, length: MemoryLayout<simd_float2>.size * uvs.count)
         #if os(iOS)
         if KSPlayerManager.enableSensor {
             MotionSensor.shared.start()
@@ -252,7 +252,7 @@ private class VRDisplayModel: SphereDisplayModel {
     override func set(encoder: MTLRenderCommandEncoder) {
         super.set(encoder: encoder)
         var matrix = modelViewProjectionMatrix * modelViewMatrix
-        let matrixBuffer = MetalRender.device.makeBuffer(bytes: &matrix, length: MemoryLayout<simd_float4x4>.size, options: .storageModeShared)
+        let matrixBuffer = MetalRender.device.makeBuffer(bytes: &matrix, length: MemoryLayout<simd_float4x4>.size)
         encoder.setVertexBuffer(matrixBuffer, offset: 0, index: 2)
         encoder.drawIndexedPrimitives(type: primitiveType, indexCount: indexCount, indexType: indexType, indexBuffer: indexBuffer, indexBufferOffset: 0)
     }
@@ -280,7 +280,7 @@ private class VRBoxDisplayModel: SphereDisplayModel {
          (modelViewProjectionMatrixRight, MTLViewport(originX: width, originY: 0, width: width, height: Double(layerSize.height), znear: 0, zfar: 0))].forEach { modelViewProjectionMatrix, viewport in
             encoder.setViewport(viewport)
             var matrix = modelViewProjectionMatrix * modelViewMatrix
-            let matrixBuffer = MetalRender.device.makeBuffer(bytes: &matrix, length: MemoryLayout<simd_float4x4>.size, options: .storageModeShared)
+            let matrixBuffer = MetalRender.device.makeBuffer(bytes: &matrix, length: MemoryLayout<simd_float4x4>.size)
             encoder.setVertexBuffer(matrixBuffer, offset: 0, index: 2)
             encoder.drawIndexedPrimitives(type: primitiveType, indexCount: indexCount, indexType: indexType, indexBuffer: indexBuffer, indexBufferOffset: 0)
         }

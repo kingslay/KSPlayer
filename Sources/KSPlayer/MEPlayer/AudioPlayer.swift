@@ -256,6 +256,13 @@ import AVFoundation
 
 @available(tvOS 11.0, iOS 11.0, *)
 final class AudioEnginePlayer {
+    private let engine = AVAudioEngine()
+    private let player = AVAudioPlayerNode()
+    private let pitch = AVAudioUnitTimePitch()
+    private let mixer = AVAudioMixerNode()
+
+    weak var delegate: AudioPlayerDelegate?
+
     var isPaused: Bool {
         get {
             engine.isRunning
@@ -273,44 +280,51 @@ final class AudioEnginePlayer {
         }
     }
 
-    private let engine = AVAudioEngine()
-    private let player = AVAudioPlayerNode()
-    private let picth = AVAudioUnitTimePitch()
-    weak var delegate: AudioPlayerDelegate?
-
     var playbackRate: Float {
         get {
-            picth.rate
+            pitch.rate
         }
         set {
-            picth.rate = min(32, max(1.0 / 32.0, newValue))
+            pitch.rate = min(32, max(1.0 / 32.0, newValue))
         }
     }
 
     var volume: Float {
         get {
-            player.volume
+            mixer.volume
         }
         set {
-            player.volume = newValue
+            mixer.volume = newValue
+        }
+    }
+
+    public var isMuted: Bool {
+        get {
+            mixer.outputVolume == 0.0
+        }
+        set {
+            mixer.outputVolume = newValue ? 0.0 : 1.0
         }
     }
 
     init() {
         engine.attach(player)
-        engine.attach(picth)
+        engine.attach(pitch)
+        engine.attach(mixer)
         let format = KSPlayerManager.audioDefaultFormat
-        engine.connect(player, to: picth, format: format)
-        engine.connect(picth, to: engine.mainMixerNode, format: format)
+        engine.connect(player, to: pitch, format: format)
+        engine.connect(pitch, to: mixer, format: format)
+        engine.connect(mixer, to: engine.mainMixerNode, format: format)
         engine.prepare()
-        try? engine.enableManualRenderingMode(.realtime, format: format, maximumFrameCount: KSPlayerManager.audioPlayerMaximumFramesPerSlice)
+        try? engine.start()
+//        try? engine.enableManualRenderingMode(.realtime, format: format, maximumFrameCount: KSPlayerManager.audioPlayerMaximumFramesPerSlice)
 //        engine.inputNode.setManualRenderingInputPCMFormat(format) { count -> UnsafePointer<AudioBufferList>? in
 //            self.delegate?.audioPlayerShouldInputData(ioData: <#T##UnsafeMutableAudioBufferListPointer#>, numberOfSamples: <#T##UInt32#>, numberOfChannels: <#T##UInt32#>)
 //        }
     }
 
-    func audioPlay(buffer: AVAudioPCMBuffer) {
-        player.scheduleBuffer(buffer, completionHandler: nil)
+    func scheduleBuffer(_ buffer: AVAudioPCMBuffer, completionHandler: AVAudioNodeCompletionHandler? = nil) {
+        player.scheduleBuffer(buffer, completionHandler: completionHandler)
     }
 }
 
