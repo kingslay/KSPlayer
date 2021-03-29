@@ -50,13 +50,13 @@ public class KSSubtitleView: UIControl, SubtitleViewProtocol {
         super.init(frame: frame)
         tableView.rowHeight = 52
         tableView.backgroundColor = UIColor(white: 0, alpha: 0.7)
-        #if os(iOS)
-        tableView.separatorColor = UIColor(white: 1, alpha: 0.15)
-        #endif
         addSubview(tableView)
         tableView.translatesAutoresizingMaskIntoConstraints = false
         tableViewRightConstraint = tableView.rightAnchor.constraint(equalTo: rightAnchor)
         #if canImport(UIKit)
+        #if !os(tvOS)
+        tableView.separatorColor = UIColor(white: 1, alpha: 0.15)
+        #endif
         tableView.dataSource = self
         tableView.delegate = self
         tableView.register(SrtListCell.self, forCellReuseIdentifier: "SrtListCell")

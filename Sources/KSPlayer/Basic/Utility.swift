@@ -160,53 +160,35 @@ public extension UIView {
     }
 
     var safeTopAnchor: NSLayoutYAxisAnchor {
-        #if os(macOS)
-        return topAnchor
-        #else
-        if #available(iOS 11.0, tvOS 11.0, *) {
+        if #available(iOS 11.0, tvOS 11.0, macOS 11.0, *) {
             return self.safeAreaLayoutGuide.topAnchor
         } else {
             return topAnchor
         }
-        #endif
     }
 
     var safeLeftAnchor: NSLayoutXAxisAnchor {
-        #if os(macOS)
-        return leftAnchor
-
-        #else
-        if #available(iOS 11.0, tvOS 11.0, *) {
+        if #available(iOS 11.0, tvOS 11.0, macOS 11.0, *) {
             return self.safeAreaLayoutGuide.leftAnchor
         } else {
             return leftAnchor
         }
-        #endif
     }
 
     var safeRightAnchor: NSLayoutXAxisAnchor {
-        #if os(macOS)
-        return rightAnchor
-
-        #else
-        if #available(iOS 11.0, tvOS 11.0, *) {
+        if #available(iOS 11.0, tvOS 11.0, macOS 11.0, *) {
             return self.safeAreaLayoutGuide.rightAnchor
         } else {
             return rightAnchor
         }
-        #endif
     }
 
     var safeBottomAnchor: NSLayoutYAxisAnchor {
-        #if os(macOS)
-        return bottomAnchor
-        #else
-        if #available(iOS 11.0, tvOS 11.0, *) {
+        if #available(iOS 11.0, tvOS 11.0, macOS 11.0, *) {
             return self.safeAreaLayoutGuide.bottomAnchor
         } else {
             return bottomAnchor
         }
-        #endif
     }
 }
 

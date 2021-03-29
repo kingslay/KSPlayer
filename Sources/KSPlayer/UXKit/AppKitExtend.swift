@@ -4,7 +4,7 @@
 //
 //  Created by kintan on 2018/3/9.
 //
-#if os(macOS)
+#if canImport(AppKit)
 import AppKit
 import CoreMedia
 import IOKit.pwr_mgt
@@ -209,12 +209,12 @@ extension NSControl {
         }
     }
 
-    public var attributedText: NSAttributedString {
+    public var attributedText: NSAttributedString? {
         get {
             attributedStringValue
         }
         set {
-            attributedStringValue = newValue
+            attributedStringValue = newValue ?? NSAttributedString()
         }
     }
 

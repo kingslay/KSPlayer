@@ -12,7 +12,7 @@ import AppKit
 
 extension UIView {
     var backingLayer: CALayer? {
-        #if os(macOS)
+        #if canImport(APPKit)
         wantsLayer = true
         #endif
         return layer
