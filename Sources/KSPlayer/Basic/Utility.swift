@@ -16,7 +16,11 @@ import AppKit
 import MobileCoreServices.UTType
 #endif
 open class LayerContainerView: UIView {
-    #if os(macOS)
+    #if canImport(UIKit)
+    override open class var layerClass: AnyClass {
+        CAGradientLayer.self
+    }
+    #else
     override public init(frame: CGRect) {
         super.init(frame: frame)
         layer = CAGradientLayer()
@@ -24,11 +28,6 @@ open class LayerContainerView: UIView {
 
     public required init?(coder _: NSCoder) {
         fatalError("init(coder:) has not been implemented")
-    }
-
-    #else
-    override open class var layerClass: AnyClass {
-        CAGradientLayer.self
     }
     #endif
     public var gradientLayer: CAGradientLayer {
