@@ -10,7 +10,7 @@ jobs:
     name: Create Release
     runs-on: macos-latest
     steps:
-      - uses: actions/checkout
+      - uses: actions/checkout@main
       - name: Build
         run: swift build -v -c release
       - name: Test
