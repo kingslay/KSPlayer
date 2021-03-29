@@ -450,10 +450,10 @@ extension KSPlayerManager {
 
 extension KSPlayerManager {
     static func image(named: String) -> UIImage? {
-        #if os(macOS)
-        return KSPlayerManager.bundle.image(forResource: named)
-        #else
+        #if canImport(UIKit)
         return UIImage(named: named, in: KSPlayerManager.bundle, compatibleWith: nil)
+        #else
+        return KSPlayerManager.bundle.image(forResource: named)
         #endif
     }
 }
