@@ -140,7 +140,7 @@ final class MetalPlayView: MTKView, MTKViewDelegate, FrameOutput {
         }
     }
 
-    #if targetEnvironment(simulator) || targetEnvironment(macCatalyst)
+    #if canImport(UIKit)
     override func touchesMoved(_ touches: Set<UITouch>, with: UIEvent?) {
         if options.display == .plane {
             super.touchesMoved(touches, with: with)

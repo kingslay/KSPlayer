@@ -105,13 +105,7 @@ extension UIColor {
     }
 
     public func createImage(size: CGSize = CGSize(width: 1, height: 1)) -> UIImage {
-        #if os(macOS)
-        let image = NSImage(size: size)
-        image.lockFocus()
-        drawSwatch(in: CGRect(origin: .zero, size: size))
-        image.unlockFocus()
-        return image
-        #else
+        #if canImport(UIKit)
         let rect = CGRect(origin: .zero, size: size)
         UIGraphicsBeginImageContext(rect.size)
         let context = UIGraphicsGetCurrentContext()
@@ -120,6 +114,12 @@ extension UIColor {
         let image = UIGraphicsGetImageFromCurrentImageContext()
         UIGraphicsEndImageContext()
         return image!
+        #else
+        let image = NSImage(size: size)
+        image.lockFocus()
+        drawSwatch(in: CGRect(origin: .zero, size: size))
+        image.unlockFocus()
+        return image
         #endif
     }
 }

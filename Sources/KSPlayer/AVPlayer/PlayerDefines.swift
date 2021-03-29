@@ -219,9 +219,9 @@ open class KSOptions {
     }
 
     public func setCookie(_ cookies: [HTTPCookie]) {
-        #if !os(macOS)
-        avOptions[AVURLAssetHTTPCookiesKey] = cookies
-        #endif
+        if #available(OSX 10.15, *) {
+            avOptions[AVURLAssetHTTPCookiesKey] = cookies
+        }
         var cookieStr = "Cookie: "
         for cookie in cookies {
             cookieStr.append("\(cookie.name)=\(cookie.value); ")

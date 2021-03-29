@@ -39,7 +39,7 @@ extension DisplayEnum {
         }
     }
 
-    #if targetEnvironment(simulator) || targetEnvironment(macCatalyst)
+    #if canImport(UIKit)
     func touchesMoved(touch: UITouch) {
         switch self {
         case .vr:
@@ -160,7 +160,7 @@ private class SphereDisplayModel {
         }
         #endif
     }
-    #if targetEnvironment(simulator) || targetEnvironment(macCatalyst)
+    #if canImport(UIKit)
     func touchesMoved(touch: UITouch) {
         var distX = Float(touch.location(in: touch.view).x - touch.previousLocation(in: touch.view).x)
         var distY = Float(touch.location(in: touch.view).y - touch.previousLocation(in: touch.view).y)

@@ -118,12 +118,10 @@ extension KSOptions {
         if bitDepth == 10 {
             #if os(macOS) || targetEnvironment(macCatalyst)
             return .bgr10a2Unorm
-            #else
-            #if targetEnvironment(simulator)
+            #elseif targetEnvironment(simulator)
             return .bgra8Unorm
             #else
             return .bgr10_xr_srgb
-            #endif
             #endif
         } else {
             return .bgra8Unorm

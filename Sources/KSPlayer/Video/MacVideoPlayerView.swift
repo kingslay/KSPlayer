@@ -4,7 +4,7 @@
 //
 //  Created by kintan on 2018/10/31.
 //
-#if canImport(AppKit)
+#if !canImport(UIKit)
 
 import AppKit
 import AVFoundation

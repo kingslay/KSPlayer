@@ -4,7 +4,7 @@
 //
 //  Created by kintan on 2018/3/9.
 //
-#if canImport(AppKit)
+#if !canImport(UIKit)
 import AppKit
 import CoreMedia
 import IOKit.pwr_mgt
