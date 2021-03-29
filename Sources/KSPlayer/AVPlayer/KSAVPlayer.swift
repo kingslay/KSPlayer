@@ -49,7 +49,6 @@ public final class KSAVPlayerView: UIView {
             }
         }
     }
-
     #else
     override public class var layerClass: AnyClass { AVPlayerLayer.self }
 

@@ -491,11 +491,7 @@ extension VideoPlayerView {
         } else {
             if time > subtitleEndTime {
                 subtitleBackView.image = nil
-                #if os(macOS)
-                subtitleLabel.attributedText = NSMutableAttributedString()
-                #else
                 subtitleLabel.attributedText = nil
-                #endif
             }
         }
     }

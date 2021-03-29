@@ -5,7 +5,7 @@
 //  Created by wangjinbian on 2020/1/13.
 //
 
-#if os(iOS)
+#if canImport(UIKit) && canImport(CoreMotion)
 import CoreMotion
 import Foundation
 import simd
