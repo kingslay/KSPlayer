@@ -157,7 +157,7 @@ final class AudioGraphPlayer: AudioPlayer {
         var descriptionForMixer = AudioComponentDescription()
         descriptionForMixer.componentType = kAudioUnitType_Mixer
         descriptionForMixer.componentManufacturer = kAudioUnitManufacturer_Apple
-        #if os(macOS) || targetEnvironment(macCatalyst)
+        #if os(macOS)
         descriptionForMixer.componentSubType = kAudioUnitSubType_SpatialMixer
         #else
         descriptionForMixer.componentSubType = kAudioUnitSubType_MultiChannelMixer

@@ -220,15 +220,14 @@ open class KSPlayerLayer: UIView {
         }
     }
 
-    #if os(macOS)
-    override open func resizeSubviews(withOldSize oldSize: NSSize) {
-        super.resizeSubviews(withOldSize: oldSize)
-        player?.view.frame = bounds
-    }
-
-    #else
+    #if canImport(UIKit)
     override open func layoutSubviews() {
         super.layoutSubviews()
+        player?.view.frame = bounds
+    }
+    #else
+    override open func resizeSubviews(withOldSize oldSize: NSSize) {
+        super.resizeSubviews(withOldSize: oldSize)
         player?.view.frame = bounds
     }
     #endif

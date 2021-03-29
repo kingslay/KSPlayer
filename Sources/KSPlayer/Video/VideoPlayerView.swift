@@ -368,7 +368,7 @@ open class VideoPlayerView: PlayerView {
         }
     }
 
-    #if !os(macOS) && !targetEnvironment(macCatalyst)
+    #if canImport(UIKit)
     override open func pressesBegan(_ presses: Set<UIPress>, with event: UIPressesEvent?) {
         guard let presse = presses.first else {
             return
