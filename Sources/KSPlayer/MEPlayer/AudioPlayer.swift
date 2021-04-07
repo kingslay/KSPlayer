@@ -8,14 +8,7 @@
 import AudioToolbox
 import CoreAudio
 
-protocol AudioPlayerDelegate: AnyObject {
-    func audioPlayerShouldInputData(ioData: UnsafeMutableAudioBufferListPointer, numberOfFrames: UInt32, numberOfChannels: UInt32)
-    func audioPlayerWillRenderSample(sampleTimestamp: AudioTimeStamp)
-    func audioPlayerDidRenderSample(sampleTimestamp: AudioTimeStamp)
-}
-
 protocol AudioPlayer: AnyObject {
-    var delegate: AudioPlayerDelegate? { get set }
     var playbackRate: Float { get set }
     var volume: Float { get set }
     var isMuted: Bool { get set }
@@ -27,12 +20,22 @@ protocol AudioPlayer: AnyObject {
     var masterGain: Float { get set }
 }
 
-final class AudioGraphPlayer: AudioPlayer {
+final class AudioGraphPlayer: AudioPlayer, FrameOutput {
     private let graph: AUGraph
     private var audioUnitForMixer: AudioUnit!
     private var audioUnitForTimePitch: AudioUnit!
     private var audioUnitForDynamicsProcessor: AudioUnit!
     private var audioStreamBasicDescription = KSPlayerManager.outputFormat()
+    private var currentRenderReadOffset = 0
+    weak var renderSource: OutputRenderSourceDelegate?
+    private var currentRender: AudioFrame? {
+        didSet {
+            if currentRender == nil {
+                currentRenderReadOffset = 0
+            }
+        }
+    }
+
     var isPaused: Bool {
         get {
             var running = DarwinBoolean(false)
@@ -52,7 +55,6 @@ final class AudioGraphPlayer: AudioPlayer {
         }
     }
 
-    weak var delegate: AudioPlayerDelegate?
     var playbackRate: Float {
         get {
             var playbackRate = AudioUnitParameterValue(0.0)
@@ -215,6 +217,15 @@ final class AudioGraphPlayer: AudioPlayer {
         AUGraphInitialize(graph)
     }
 
+    deinit {
+        AUGraphStop(graph)
+        AUGraphUninitialize(graph)
+        AUGraphClose(graph)
+        DisposeAUGraph(graph)
+    }
+}
+
+extension AudioGraphPlayer {
     private func renderCallbackStruct() -> AURenderCallbackStruct {
         var inputCallbackStruct = AURenderCallbackStruct()
         inputCallbackStruct.inputProcRefCon = Unmanaged.passUnretained(self).toOpaque()
@@ -223,7 +234,7 @@ final class AudioGraphPlayer: AudioPlayer {
                 return noErr
             }
             let `self` = Unmanaged<AudioGraphPlayer>.fromOpaque(refCon).takeUnretainedValue()
-            self.delegate?.audioPlayerShouldInputData(ioData: UnsafeMutableAudioBufferListPointer(ioData), numberOfFrames: inNumberFrames, numberOfChannels: self.audioStreamBasicDescription.mChannelsPerFrame )
+            self.audioPlayerShouldInputData(ioData: UnsafeMutableAudioBufferListPointer(ioData), numberOfFrames: inNumberFrames, numberOfChannels: self.audioStreamBasicDescription.mChannelsPerFrame )
             return noErr
         }
         return inputCallbackStruct
@@ -233,109 +244,54 @@ final class AudioGraphPlayer: AudioPlayer {
         AudioUnitAddRenderNotify(audioUnit, { refCon, ioActionFlags, inTimeStamp, _, _, _ in
             let `self` = Unmanaged<AudioGraphPlayer>.fromOpaque(refCon).takeUnretainedValue()
             autoreleasepool {
-                if ioActionFlags.pointee.contains(.unitRenderAction_PreRender) {
-                    self.delegate?.audioPlayerWillRenderSample(sampleTimestamp: inTimeStamp.pointee)
-                } else if ioActionFlags.pointee.contains(.unitRenderAction_PostRender) {
-                    self.delegate?.audioPlayerDidRenderSample(sampleTimestamp: inTimeStamp.pointee)
+                if ioActionFlags.pointee.contains(.unitRenderAction_PostRender) {
+                    self.audioPlayerDidRenderSample(sampleTimestamp: inTimeStamp.pointee)
                 }
             }
             return noErr
         }, Unmanaged.passUnretained(self).toOpaque())
     }
 
-    deinit {
-        AUGraphStop(graph)
-        AUGraphUninitialize(graph)
-        AUGraphClose(graph)
-        DisposeAUGraph(graph)
-    }
-}
-
-import Accelerate
-import AVFoundation
-
-@available(tvOS 11.0, iOS 11.0, *)
-final class AudioEnginePlayer {
-    private let engine = AVAudioEngine()
-    private let player = AVAudioPlayerNode()
-    private let pitch = AVAudioUnitTimePitch()
-    private let mixer = AVAudioMixerNode()
-
-    weak var delegate: AudioPlayerDelegate?
-
-    var isPaused: Bool {
-        get {
-            engine.isRunning
+    private func audioPlayerShouldInputData(ioData: UnsafeMutableAudioBufferListPointer, numberOfFrames: UInt32, numberOfChannels _: UInt32) {
+        var ioDataWriteOffset = 0
+        var numberOfSamples = Int(numberOfFrames)
+        while numberOfSamples > 0 {
+            if currentRender == nil {
+                currentRender = renderSource?.getOutputRender(type: .audio) as? AudioFrame
+            }
+            guard let currentRender = currentRender else {
+                break
+            }
+            let residueLinesize = currentRender.numberOfSamples - currentRenderReadOffset
+            guard residueLinesize > 0 else {
+                self.currentRender = nil
+                continue
+            }
+            let framesToCopy = min(numberOfSamples, residueLinesize)
+            let bytesToCopy = framesToCopy * MemoryLayout<Float>.size
+            let offset = currentRenderReadOffset * MemoryLayout<Float>.size
+            for i in 0 ..< min(ioData.count, currentRender.dataWrap.data.count) {
+                (ioData[i].mData! + ioDataWriteOffset).copyMemory(from: currentRender.dataWrap.data[i]! + offset, byteCount: bytesToCopy)
+            }
+            numberOfSamples -= framesToCopy
+            ioDataWriteOffset += bytesToCopy
+            currentRenderReadOffset += framesToCopy
         }
-        set {
-            if newValue {
-                if !engine.isRunning {
-                    try? engine.start()
-                }
-                player.play()
-            } else {
-                player.pause()
-                engine.pause()
+        let sizeCopied = (Int(numberOfFrames) - numberOfSamples) * MemoryLayout<Float>.size
+        for i in 0 ..< ioData.count {
+            let sizeLeft = Int(ioData[i].mDataByteSize) - sizeCopied
+            if sizeLeft > 0 {
+                memset(ioData[i].mData! + sizeCopied, 0, sizeLeft)
             }
         }
     }
 
-    var playbackRate: Float {
-        get {
-            pitch.rate
+    private func audioPlayerDidRenderSample(sampleTimestamp _: AudioTimeStamp) {
+        if let currentRender = currentRender {
+            let currentPreparePosition = currentRender.position + currentRender.duration * Int64(currentRenderReadOffset) / Int64(currentRender.numberOfSamples)
+            if currentPreparePosition > 0 {
+                renderSource?.setAudio(time: currentRender.timebase.cmtime(for: currentPreparePosition))
+            }
         }
-        set {
-            pitch.rate = min(32, max(1.0 / 32.0, newValue))
-        }
-    }
-
-    var volume: Float {
-        get {
-            mixer.volume
-        }
-        set {
-            mixer.volume = newValue
-        }
-    }
-
-    public var isMuted: Bool {
-        get {
-            mixer.outputVolume == 0.0
-        }
-        set {
-            mixer.outputVolume = newValue ? 0.0 : 1.0
-        }
-    }
-
-    init() {
-        engine.attach(player)
-        engine.attach(pitch)
-        engine.attach(mixer)
-        let format = KSPlayerManager.audioDefaultFormat
-        engine.connect(player, to: pitch, format: format)
-        engine.connect(pitch, to: mixer, format: format)
-        engine.connect(mixer, to: engine.mainMixerNode, format: format)
-        engine.prepare()
-        try? engine.start()
-//        try? engine.enableManualRenderingMode(.realtime, format: format, maximumFrameCount: KSPlayerManager.audioPlayerMaximumFramesPerSlice)
-//        engine.inputNode.setManualRenderingInputPCMFormat(format) { count -> UnsafePointer<AudioBufferList>? in
-//            self.delegate?.audioPlayerShouldInputData(ioData: <#T##UnsafeMutableAudioBufferListPointer#>, numberOfSamples: <#T##UInt32#>, numberOfChannels: <#T##UInt32#>)
-//        }
-    }
-
-    func scheduleBuffer(_ buffer: AVAudioPCMBuffer, completionHandler: AVAudioNodeCompletionHandler? = nil) {
-        player.scheduleBuffer(buffer, completionHandler: completionHandler)
-    }
-}
-
-extension AVAudioFormat {
-    func toPCMBuffer(data: NSData) -> AVAudioPCMBuffer? {
-        guard let pcmBuffer = AVAudioPCMBuffer(pcmFormat: self, frameCapacity: UInt32(data.length) / streamDescription.pointee.mBytesPerFrame) else {
-            return nil
-        }
-        pcmBuffer.frameLength = pcmBuffer.frameCapacity
-        let channels = UnsafeBufferPointer(start: pcmBuffer.floatChannelData, count: Int(pcmBuffer.format.channelCount))
-        data.getBytes(UnsafeMutableRawPointer(channels[0]), length: data.length)
-        return pcmBuffer
     }
 }
