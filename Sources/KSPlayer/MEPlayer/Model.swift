@@ -62,7 +62,7 @@ public protocol ObjectQueueItem {
     var position: Int64 { get }
 }
 
-protocol FrameOutput {
+protocol FrameOutput: AnyObject {
     var renderSource: OutputRenderSourceDelegate? { get set }
     var isPaused: Bool { get set }
 }
