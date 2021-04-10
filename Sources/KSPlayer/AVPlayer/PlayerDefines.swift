@@ -444,6 +444,8 @@ extension KSPlayerErrorCode: CustomStringConvertible {
             return "Subtitle parsing error"
         case .subtitleFormatUnSupport:
             return "Current subtitle format is not supported"
+        case .auidoSwrInit:
+            return "swr_init swrContext fail"
         default:
             return "unknown"
         }

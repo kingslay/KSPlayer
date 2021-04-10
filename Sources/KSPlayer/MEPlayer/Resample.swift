@@ -14,7 +14,7 @@ import Libswresample
 import VideoToolbox
 
 protocol Swresample {
-    func transfer(avframe: UnsafeMutablePointer<AVFrame>, timebase: Timebase) -> MEFrame
+    func transfer(avframe: UnsafeMutablePointer<AVFrame>, timebase: Timebase) throws -> MEFrame
     func shutdown()
 }
 
@@ -67,7 +67,7 @@ class VideoSwresample: Swresample {
         return true
     }
 
-    func transfer(avframe: UnsafeMutablePointer<AVFrame>, timebase: Timebase) -> MEFrame {
+    func transfer(avframe: UnsafeMutablePointer<AVFrame>, timebase: Timebase) throws -> MEFrame {
         let frame = VideoVTBFrame()
         frame.timebase = timebase
         if avframe.pointee.format == AV_PIX_FMT_VIDEOTOOLBOX.rawValue {
@@ -304,27 +304,34 @@ typealias SwrContext = OpaquePointer
 
 class AudioSwresample: Swresample {
     private var swrContext: SwrContext?
-    private var descriptor: AudioDescriptor?
-    private func setup(frame: UnsafeMutablePointer<AVFrame>) -> Bool {
-        let newDescriptor = AudioDescriptor(frame: frame)
-        if let descriptor = descriptor, descriptor == newDescriptor {
-            return true
-        }
+    private var descriptor: AudioDescriptor
+    init(codecpar: UnsafeMutablePointer<AVCodecParameters>) {
+        descriptor = AudioDescriptor(codecpar: codecpar)
+        _ = setup(descriptor: descriptor)
+    }
+
+    private func setup(descriptor: AudioDescriptor) -> Bool {
         let outChannel = av_get_default_channel_layout(Int32(KSPlayerManager.audioPlayerMaximumChannels))
-        let inChannel = av_get_default_channel_layout(Int32(newDescriptor.inputNumberOfChannels))
-        swrContext = swr_alloc_set_opts(nil, outChannel, AV_SAMPLE_FMT_FLTP, KSPlayerManager.audioPlayerSampleRate, inChannel, newDescriptor.inputFormat, newDescriptor.inputSampleRate, 0, nil)
+        let inChannel = av_get_default_channel_layout(Int32(descriptor.inputNumberOfChannels))
+        swrContext = swr_alloc_set_opts(nil, outChannel, AV_SAMPLE_FMT_FLTP, KSPlayerManager.audioPlayerSampleRate, inChannel, descriptor.inputFormat, descriptor.inputSampleRate, 0, nil)
         let result = swr_init(swrContext)
         if result < 0 {
             shutdown()
             return false
         } else {
-            descriptor = newDescriptor
             return true
         }
     }
 
-    func transfer(avframe: UnsafeMutablePointer<AVFrame>, timebase: Timebase) -> MEFrame {
-        _ = setup(frame: avframe)
+    func transfer(avframe: UnsafeMutablePointer<AVFrame>, timebase: Timebase) throws -> MEFrame {
+        if !(descriptor == avframe.pointee) {
+            let descriptor = AudioDescriptor(frame: avframe)
+            if setup(descriptor: descriptor) {
+                self.descriptor = descriptor
+            } else {
+                throw NSError(errorCode: .auidoSwrInit, userInfo: ["outChannel": KSPlayerManager.audioPlayerMaximumChannels, "inChannel": descriptor.inputNumberOfChannels])
+            }
+        }
         var numberOfSamples = avframe.pointee.nb_samples
         let nbSamples = swr_get_out_samples(swrContext, numberOfSamples)
         var frameBuffer = Array(tuple: avframe.pointee.data).map { UnsafePointer<UInt8>($0) }
