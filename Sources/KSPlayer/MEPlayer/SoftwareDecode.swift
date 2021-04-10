@@ -33,7 +33,7 @@ class SoftwareDecode: DecodeProtocol {
         if mediaType == .video {
             swresample = VideoSwresample()
         } else {
-            swresample = AudioSwresample()
+            swresample = AudioSwresample(codecpar: assetTrack.stream.pointee.codecpar)
         }
     }
 
@@ -49,7 +49,7 @@ class SoftwareDecode: DecodeProtocol {
                 if timestamp >= bestEffortTimestamp {
                     bestEffortTimestamp = timestamp
                 }
-                var frame = swresample.transfer(avframe: avframe, timebase: timebase)
+                var frame = try swresample.transfer(avframe: avframe, timebase: timebase)
                 frame.position = bestEffortTimestamp
                 bestEffortTimestamp += frame.duration
                 array.append(frame)
