@@ -49,12 +49,19 @@ final class MetalPlayView: MTKView, MTKViewDelegate, FrameOutput {
         }
         let cmtime = frame.cmtime
         renderSource?.setVideo(time: cmtime)
+        let sar = pixelBuffer.size
+        let par = pixelBuffer.aspectRatio
         if pixelBuffer is PixelBuffer || !options.isUseDisplayLayer() {
             displayLayer.isHidden = true
             autoreleasepool {
-                let size = options.drawableSize(par: pixelBuffer.size, sar: pixelBuffer.sar)
-                if drawableSize != size {
-                    drawableSize = size
+                if options.display == .plane {
+                    if let dar = options.customizeDar(sar: sar, par: par) {
+                        drawableSize = CGSize(width: sar.width, height: sar.width*dar.height/dar.width)
+                    } else {
+                        drawableSize = CGSize(width: sar.width, height: sar.height*par.height/par.width)
+                    }
+                } else {
+                    drawableSize = UIScreen.size
                 }
                 colorPixelFormat = KSOptions.colorPixelFormat(bitDepth: pixelBuffer.bitDepth)
                 #if targetEnvironment(simulator)
@@ -81,6 +88,9 @@ final class MetalPlayView: MTKView, MTKViewDelegate, FrameOutput {
                 }
             }
             // swiftlint:disable force_cast
+            if let dar = options.customizeDar(sar: sar, par: par) {
+                (pixelBuffer as! CVPixelBuffer).aspectRatio = CGSize(width: dar.width, height: dar.height * sar.width/sar.height)
+            }
             set(pixelBuffer: pixelBuffer as! CVPixelBuffer, time: cmtime)
             // swiftlint:enable force_cast
         }
@@ -90,7 +100,7 @@ final class MetalPlayView: MTKView, MTKViewDelegate, FrameOutput {
         displayLayer.frame = bounds
     }
 
-    public func set(pixelBuffer: CVPixelBuffer, time: CMTime) {
+    private func set(pixelBuffer: CVPixelBuffer, time: CMTime) {
         if videoInfo == nil || !CMVideoFormatDescriptionMatchesImageBuffer(videoInfo!, imageBuffer: pixelBuffer) {
             let err = CMVideoFormatDescriptionCreateForImageBuffer(allocator: nil, imageBuffer: pixelBuffer, formatDescriptionOut: &videoInfo)
             if err != noErr {

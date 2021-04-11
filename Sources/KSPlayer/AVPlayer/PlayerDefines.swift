@@ -328,8 +328,8 @@ open class KSOptions {
         return 16
     }
 
-    open func drawableSize(par: CGSize, sar: CGSize) -> CGSize {
-        display == .plane ? CGSize(width: par.width, height: par.height*sar.width/sar.height) : UIScreen.size
+    open func customizeDar(sar: CGSize, par: CGSize) -> CGSize? {
+        return nil
     }
 
     private class func deviceCpuCount() -> Int {

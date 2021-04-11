@@ -13,7 +13,7 @@ import simd
 import VideoToolbox
 
 public protocol BufferProtocol: AnyObject {
-    var sar: CGSize { get }
+    var aspectRatio: CGSize { get }
     var planeCount: Int { get }
     var width: Int { get }
     var height: Int { get }
@@ -38,14 +38,21 @@ extension CVPixelBuffer: BufferProtocol {
 
     public var height: Int { CVPixelBufferGetHeight(self) }
 
-    public var sar: CGSize {
-        if let ratio = CVBufferGetAttachment(self, kCVImageBufferPixelAspectRatioKey, nil)?.takeUnretainedValue() as? NSDictionary,
-           let horizontal = (ratio[kCVImageBufferPixelAspectRatioHorizontalSpacingKey] as? NSNumber)?.intValue,
-           let vertical = (ratio[kCVImageBufferPixelAspectRatioVerticalSpacingKey] as? NSNumber)?.intValue,
-           horizontal > 0, vertical > 0 {
-            return CGSize(width: horizontal, height: vertical)
-        } else {
-            return CGSize(width: 1, height: 1)
+    public var aspectRatio: CGSize {
+        get {
+            if let ratio = CVBufferGetAttachment(self, kCVImageBufferPixelAspectRatioKey, nil)?.takeUnretainedValue() as? NSDictionary,
+               let horizontal = (ratio[kCVImageBufferPixelAspectRatioHorizontalSpacingKey] as? NSNumber)?.intValue,
+               let vertical = (ratio[kCVImageBufferPixelAspectRatioVerticalSpacingKey] as? NSNumber)?.intValue,
+               horizontal > 0, vertical > 0 {
+                return CGSize(width: horizontal, height: vertical)
+            } else {
+                return CGSize(width: 1, height: 1)
+            }
+        }
+        set {
+            if let aspectRatio = newValue.aspectRatio {
+                CVBufferSetAttachment(self, kCVImageBufferPixelAspectRatioKey, aspectRatio, .shouldPropagate)
+            }
         }
     }
 
