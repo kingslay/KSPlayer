@@ -10,17 +10,19 @@ import AppKit
 import KSPlayer
 
 class MeOptions: KSOptions {
-    override func drawableSize(par: CGSize, sar: CGSize) -> CGSize {
-        let size = super.drawableSize(par: par, sar: sar)
-        let rate = size.width/size.height
+    override func customizeDar(sar: CGSize, par: CGSize) -> CGSize? {
+        let rate = sar.width*par.height/(sar.height*par.height)
         if rate < 5/4 {
-            return CGSize(width: par.width, height: par.width*4/5)
+            return CGSize(width: 5, height: 4)
         } else if rate < 4/3 {
-            return CGSize(width: par.width, height: par.width*3/4)
+            return CGSize(width: 4, height: 3)
         } else if rate < 16/9 {
-            return CGSize(width: par.width, height: par.width*9/16)
+            return CGSize(width: 16, height: 9)
         }
-        return size
+        return nil
+    }
+    override func isUseDisplayLayer() -> Bool {
+        return super.isUseDisplayLayer()
     }
 }
 

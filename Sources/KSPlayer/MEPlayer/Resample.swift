@@ -124,7 +124,7 @@ class PixelBuffer: BufferProtocol {
     let colorPrimaries: CFString?
     let transferFunction: CFString?
     let yCbCrMatrix: CFString?
-    let sar: CGSize
+    let aspectRatio: CGSize
     private let formats: [MTLPixelFormat]
     private let widths: [Int]
     private let heights: [Int]
@@ -149,7 +149,7 @@ class PixelBuffer: BufferProtocol {
         isFullRangeVideo = frame.pointee.color_range == AVCOL_RANGE_JPEG
         let bytesPerRow = Array(tuple: frame.pointee.linesize).compactMap { Int($0) }
         bitDepth = format.bitDepth()
-        sar = frame.pointee.sample_aspect_ratio.size
+        aspectRatio = frame.pointee.sample_aspect_ratio.size
         planeCount = Int(format.planeCount())
         switch planeCount {
         case 3:
@@ -223,19 +223,6 @@ class PixelBuffer: BufferProtocol {
             scale.shutdown()
         }
         return image
-    }
-}
-
-extension AVCodecParameters {
-
-    var sar: NSDictionary? {
-        let sar = sample_aspect_ratio.size
-        if sar.width != sar.height {
-            return [kCVImageBufferPixelAspectRatioHorizontalSpacingKey: sar.width,
-                    kCVImageBufferPixelAspectRatioVerticalSpacingKey: sar.height] as NSDictionary
-        } else {
-            return nil
-        }
     }
 }
 
