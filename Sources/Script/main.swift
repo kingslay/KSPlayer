@@ -127,7 +127,7 @@ open class BaseBuild {
 }
 
 class BuildFFMPEG: BaseBuild {
-    private let ffmpegFile = "ffmpeg-4.3.2"
+    private let ffmpegFile = "ffmpeg-4.4"
     init() {
         super.init(library: "FFmpeg")
     }
@@ -284,7 +284,7 @@ class BuildFFMPEG: BaseBuild {
 }
 
 class BuildOpenSSL: BaseBuild {
-    private let sslFile = "openssl-1.1.1i"
+    private let sslFile = "openssl-1.1.1k"
     init() {
         super.init(library: "SSL")
     }
