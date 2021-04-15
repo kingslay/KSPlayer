@@ -12,10 +12,11 @@ BuildOpenSSL().buildALL()
 BuildFFMPEG().buildALL()
 open class BaseBuild {
     private let platforms = PlatformType.allCases
-//    private let platforms = [PlatformType.maccatalyst, PlatformType.macos]
+    // private let platforms = [PlatformType.tvos]
     private let library: String
     init(library: String) {
         self.library = library
+        try? FileManager.default.removeItem(at: URL.currentDirectory + library)
     }
     func buildALL() {
         for platform in platforms {
@@ -302,13 +303,15 @@ class BuildOpenSSL: BaseBuild {
         } else {
             ccFlags += " -isysroot \(platform.isysroot())"
         }
+        let options = "no-async no-shared no-tests"
+        if platform == .tvos || platform == .tvsimulator {
+            ccFlags += " -DNO_FORK -DHAVE_FORK=0"
+        }
         let target = platform.target(arch: arch)
         let environment = ["LC_CTYPE": "C", "CROSS_TOP": platform.crossTop(), "CROSS_SDK": platform.crossSDK(), "CC": ccFlags]
-        let args = ["./Configure", target, "--prefix=\(thinDir(platform: platform, arch: arch).path)", "no-asm no-async no-shared", "--openssldir=\(buildDir.path)", ">>\(buildDir.path).log"]
+        let args = ["./Configure", target, "--prefix=\(thinDir(platform: platform, arch: arch).path)", options, "--openssldir=\(buildDir.path)", ">>\(buildDir.path).log"]
         Utility.shell(args.joined(separator: " "), currentDirectoryURL: directoryURL, environment: environment)
-        Utility.shell("make >>\(buildDir.path).log", currentDirectoryURL: directoryURL, environment: environment)
-        Utility.shell("make install_sw >>\(buildDir.path).log", currentDirectoryURL: directoryURL, environment: environment)
-        Utility.shell("make clean >>\(buildDir.path).log", currentDirectoryURL: directoryURL, environment: environment)
+        Utility.shell("make clean >>\(buildDir.path).log && make >>\(buildDir.path).log && make install_sw >>\(buildDir.path).log ", currentDirectoryURL: directoryURL, environment: environment)
     }
     override func frameworks() -> [String] {
         return ["Libcrypto", "Libssl"]
