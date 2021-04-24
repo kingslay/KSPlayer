@@ -81,8 +81,6 @@ final class AudioEnginePlayer: FrameOutput {
                 return
             }
             let audioFrame = self.renderSource?.getOutputRender(type: .audio) as? AudioFrame
-            
-
         }
     }
 }
