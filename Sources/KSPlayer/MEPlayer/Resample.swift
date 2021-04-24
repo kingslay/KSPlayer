@@ -292,13 +292,15 @@ typealias SwrContext = OpaquePointer
 class AudioSwresample: Swresample {
     private var swrContext: SwrContext?
     private var descriptor: AudioDescriptor
+    private let channels: Int32
     init(codecpar: UnsafeMutablePointer<AVCodecParameters>) {
         descriptor = AudioDescriptor(codecpar: codecpar)
+        channels = Int32(min(KSPlayerManager.audioPlayerMaximumChannels, descriptor.inputNumberOfChannels))
         _ = setup(descriptor: descriptor)
     }
 
     private func setup(descriptor: AudioDescriptor) -> Bool {
-        let outChannel = av_get_default_channel_layout(Int32(KSPlayerManager.audioPlayerMaximumChannels))
+        let outChannel = av_get_default_channel_layout(channels)
         let inChannel = av_get_default_channel_layout(Int32(descriptor.inputNumberOfChannels))
         swrContext = swr_alloc_set_opts(nil, outChannel, AV_SAMPLE_FMT_FLTP, KSPlayerManager.audioPlayerSampleRate, inChannel, descriptor.inputFormat, descriptor.inputSampleRate, 0, nil)
         let result = swr_init(swrContext)
@@ -316,15 +318,15 @@ class AudioSwresample: Swresample {
             if setup(descriptor: descriptor) {
                 self.descriptor = descriptor
             } else {
-                throw NSError(errorCode: .auidoSwrInit, userInfo: ["outChannel": KSPlayerManager.audioPlayerMaximumChannels, "inChannel": descriptor.inputNumberOfChannels])
+                throw NSError(errorCode: .auidoSwrInit, userInfo: ["outChannel": channels, "inChannel": descriptor.inputNumberOfChannels])
             }
         }
         var numberOfSamples = avframe.pointee.nb_samples
         let nbSamples = swr_get_out_samples(swrContext, numberOfSamples)
         var frameBuffer = Array(tuple: avframe.pointee.data).map { UnsafePointer<UInt8>($0) }
         var bufferSize = Int32(0)
-        _ = av_samples_get_buffer_size(&bufferSize, Int32(KSPlayerManager.audioPlayerMaximumChannels), nbSamples, AV_SAMPLE_FMT_FLTP, 1)
-        let frame = AudioFrame(bufferSize: bufferSize)
+        _ = av_samples_get_buffer_size(&bufferSize, channels, nbSamples, AV_SAMPLE_FMT_FLTP, 1)
+        let frame = AudioFrame(bufferSize: bufferSize, channels: channels)
         numberOfSamples = swr_convert(swrContext, &frame.dataWrap.data, nbSamples, &frameBuffer, numberOfSamples)
         frame.timebase = timebase
         frame.numberOfSamples = Int(numberOfSamples)
@@ -347,7 +349,7 @@ class AudioDescriptor: Equatable {
     fileprivate let inputFormat: AVSampleFormat
     init(codecpar: UnsafeMutablePointer<AVCodecParameters>) {
         let channels = UInt32(codecpar.pointee.channels)
-        inputNumberOfChannels = channels == 0 ? KSPlayerManager.audioPlayerMaximumChannels : channels
+        inputNumberOfChannels = channels == 0 ? 2 : channels
         let sampleRate = codecpar.pointee.sample_rate
         inputSampleRate = sampleRate == 0 ? KSPlayerManager.audioPlayerSampleRate : sampleRate
         inputFormat = AVSampleFormat(rawValue: codecpar.pointee.format)
@@ -355,7 +357,7 @@ class AudioDescriptor: Equatable {
 
     init(frame: UnsafeMutablePointer<AVFrame>) {
         let channels = UInt32(frame.pointee.channels)
-        inputNumberOfChannels = channels == 0 ? KSPlayerManager.audioPlayerMaximumChannels : channels
+        inputNumberOfChannels = channels == 0 ? 2 : channels
         let sampleRate = frame.pointee.sample_rate
         inputSampleRate = sampleRate == 0 ? KSPlayerManager.audioPlayerSampleRate : sampleRate
         inputFormat = AVSampleFormat(rawValue: frame.pointee.format)

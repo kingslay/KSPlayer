@@ -253,15 +253,16 @@ final class AudioFrame: MEFrame {
     public var position: Int64 = 0
     public var numberOfSamples = 0
     let dataWrap: ByteDataWrap
-    public init(bufferSize: Int32) {
-        dataWrap = ObjectPool.share.object(class: ByteDataWrap.self, key: "AudioData") { ByteDataWrap() }
+
+    public init(bufferSize: Int32, channels: Int32) {
+        dataWrap = ObjectPool.share.object(class: ByteDataWrap.self, key: "AudioData_\(channels)") { ByteDataWrap() }
         if dataWrap.size[0] < bufferSize {
-            dataWrap.size = Array(repeating: Int(bufferSize), count: Int(KSPlayerManager.audioPlayerMaximumChannels))
+            dataWrap.size = Array(repeating: Int(bufferSize), count: Int(channels))
         }
     }
 
     deinit {
-        ObjectPool.share.comeback(item: dataWrap, key: "AudioData")
+        ObjectPool.share.comeback(item: dataWrap, key: "AudioData_\(dataWrap.data.count)")
     }
 }
 
