@@ -150,8 +150,8 @@ install_xcframework() {
 }
 
 install_xcframework "${PODS_ROOT}/../../Sources/Libavcodec.xcframework" "Libavcodec" "framework" "tvos-arm64_x86_64-simulator" "tvos-arm64"
-install_xcframework "${PODS_ROOT}/../../Sources/Libavformat.xcframework" "Libavformat" "framework" "tvos-arm64_x86_64-simulator" "tvos-arm64"
+install_xcframework "${PODS_ROOT}/../../Sources/Libavformat.xcframework" "Libavformat" "framework" "tvos-arm64" "tvos-arm64_x86_64-simulator"
 install_xcframework "${PODS_ROOT}/../../Sources/Libavutil.xcframework" "Libavutil" "framework" "tvos-arm64" "tvos-arm64_x86_64-simulator"
-install_xcframework "${PODS_ROOT}/../../Sources/Libswresample.xcframework" "Libswresample" "framework" "tvos-arm64" "tvos-arm64_x86_64-simulator"
+install_xcframework "${PODS_ROOT}/../../Sources/Libswresample.xcframework" "Libswresample" "framework" "tvos-arm64_x86_64-simulator" "tvos-arm64"
 install_xcframework "${PODS_ROOT}/../../Sources/Libswscale.xcframework" "Libswscale" "framework" "tvos-arm64_x86_64-simulator" "tvos-arm64"
 

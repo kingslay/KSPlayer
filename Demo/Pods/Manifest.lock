@@ -59,7 +59,7 @@ EXTERNAL SOURCES:
     :path: "../"
 
 SPEC CHECKSUMS:
-  FFmpeg: 4e79fa1edbe19fe720d8c5feb6eeac5629b0d117
+  FFmpeg: 7e46f1cb623b95bc3956b1c04134e39cb21e8877
   KSPlayer: ed0857c61f11bb0fbd9e97176d99a13fdce95840
   OpenSSL: 14d697b174fe7d4b3e7bf0b4c74bb4b23cc2b2bf
   SwiftLint: 22ccbbe3b8008684be5955693bab135e0ed6a447
