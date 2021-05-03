@@ -7,19 +7,8 @@
 #import <libavutil/display.h>
 #import <stdbool.h>
 
-static __inline__ int AVERROR_CONVERT(int err) {
-    return AVERROR(err);
+static inline int swift_AVERROR(int errnum) {
+    return AVERROR(errnum);
 }
-
-static __inline__ bool IS_AVERROR_EOF(int err) {
-    return err == AVERROR_EOF;
-}
-
-static __inline__ bool IS_AVERROR_INVALIDDATA(int err) {
-    return err == AVERROR_INVALIDDATA;
-}
-
-static __inline__ bool AVFILTER_EOF(int ret) {
-    return ret == AVERROR(EAGAIN) || IS_AVERROR_EOF(ret);
-}
-
+static const int swift_AVERROR_EOF                = AVERROR_EOF; ///< End of file
+static const int swift_AVERROR_INVALIDDATA        = AVERROR_INVALIDDATA; ///< Invalid data found when processing input

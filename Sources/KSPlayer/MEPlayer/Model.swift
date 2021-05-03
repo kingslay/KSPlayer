@@ -7,6 +7,7 @@
 
 import AVFoundation
 import CoreMedia
+import FFmpeg
 import Libavcodec
 
 // MARK: enum
@@ -289,3 +290,41 @@ extension Dictionary where Key == String {
         return avOptions
     }
 }
+public struct AVError: Error, Equatable {
+    public var code: Int32
+    public var message: String
+
+    init(code: Int32) {
+        self.code = code
+        self.message = String(avErrorCode: code)
+    }
+}
+extension String {
+
+    init(avErrorCode code: Int32) {
+        let buf = UnsafeMutablePointer<Int8>.allocate(capacity: Int(AV_ERROR_MAX_STRING_SIZE))
+        buf.initialize(repeating: 0, count: Int(AV_ERROR_MAX_STRING_SIZE))
+        defer { buf.deallocate() }
+        self = String(cString: av_make_error_string(buf, Int(AV_ERROR_MAX_STRING_SIZE), code))
+    }
+}
+
+extension AVError {
+    public static let tryAgain = AVError(code: swift_AVERROR(EAGAIN))
+    public static let eof = AVError(code: swift_AVERROR_EOF)
+}
+
+//// swiftlint:disable identifier_name
+// extension Character {
+//    @inlinable public var asciiValueInt32: Int32 {
+//        Int32(asciiValue ?? 0)
+//    }
+// }
+// private func swift_AVERROR(_ err: Int32) -> Int32 {
+//    return -err
+// }
+// private func MKTAG(a: Character, b: Character, c: Character, d: Character) -> Int32 {
+//    return a.asciiValueInt32 | b.asciiValueInt32 << 8 | c.asciiValueInt32 << 16 | d.asciiValueInt32 << 24
+// }
+// private let swift_AVERROR_EOF = swift_AVERROR(MKTAG(a: "E", b: "O", c: "F", d: " "))
+//// swiftlint:enable identifier_name

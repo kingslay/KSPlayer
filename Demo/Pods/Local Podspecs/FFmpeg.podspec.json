@@ -20,7 +20,7 @@
   "default_subspecs": "FFmpeg",
   "swift_versions": "5.1",
   "static_framework": true,
-  "source_files": "Sources/FFmpeg/**/*.{h,c}",
+  "source_files": "Sources/FFmpeg/**/*.{h,c,m}",
   "subspecs": [
     {
       "name": "FFmpeg",

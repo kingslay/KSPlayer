@@ -19,7 +19,7 @@ Pod::Spec.new do |s|
     s.default_subspec = 'FFmpeg'
     s.swift_version = '5.1'
     s.static_framework = true
-    s.source_files = 'Sources/FFmpeg/**/*.{h,c}'
+    s.source_files = 'Sources/FFmpeg/**/*.{h,c,m}'
     s.subspec 'FFmpeg' do |ffmpeg|
         ffmpeg.libraries   = 'bz2', 'z', 'iconv', 'xml2'
         ffmpeg.vendored_frameworks = 'Sources/libavcodec.xcframework','Sources/libavformat.xcframework','Sources/libavutil.xcframework','Sources/libswresample.xcframework','Sources/libswscale.xcframework'
