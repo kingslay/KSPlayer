@@ -1,0 +1,16 @@
+{
+  "object": {
+    "pins": [
+      {
+        "package": "KSPlayer",
+        "repositoryURL": "/Users/kintan/Documents/GitLab/KSPlayer",
+        "state": {
+          "branch": "develop",
+          "revision": "dbc50f437639992e5ab358d7de6ac56b75ec7ff4",
+          "version": null
+        }
+      }
+    ]
+  },
+  "version": 1
+}
