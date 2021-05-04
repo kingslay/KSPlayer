@@ -124,7 +124,7 @@ struct MasterView: View {
     }
 }
 
-struct ContentView_Prreviews: PreviewProvider {
+struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
         ContentView()
     }
