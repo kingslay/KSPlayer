@@ -9,7 +9,7 @@ def common
 end
 target 'demo-iOS' do
   project 'demo-iOS/demo-iOS.xcodeproj'
-  platform :ios, 10.0
+  platform :ios, 11.0
   common
 end
 
@@ -21,12 +21,12 @@ end
 
 target 'demo-SwiftUI' do
   project 'demo-SwiftUI/demo-SwiftUI.xcodeproj'
-  platform :ios, 10.0
+  platform :ios, 11.0
   common
 end
 
 target 'demo-tvOS' do
   project 'demo-tvOS/demo-tvOS.xcodeproj'
-  platform :tvos, 10.2
+  platform :tvos, 11.0
   common
 end
