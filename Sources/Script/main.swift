@@ -67,7 +67,11 @@ open class BaseBuild {
         command += (frameworkDir + framework).path
         Utility.shell(command)
         try? FileManager.default.createDirectory(at: frameworkDir + "Modules", withIntermediateDirectories: true, attributes: nil)
-        let modulemap = "framework module \(framework) [system] {\n   \(frameworkHeader(framework))\n    export *\n}"
+        var modulemap = "framework module \(framework) [system] {\n"
+        frameworkHeaders(framework).forEach { header in
+            modulemap += "    header \"\(header).h\"\n"
+        }
+        modulemap += "    export *\n}"
         FileManager.default.createFile(atPath: frameworkDir.path + "/Modules/module.modulemap", contents: modulemap.data(using: .utf8), attributes: nil)
         createPlist(path: frameworkDir.path+"/Info.plist", name: framework, minVersion: platform.minVersion, platform: platform.sdk())
         return frameworkDir.path
@@ -79,8 +83,8 @@ open class BaseBuild {
         return []
     }
 
-    func frameworkHeader(_ framework: String) -> String {
-        return "header \"\(framework.replacingOccurrences(of: "Lib", with: "")).h\""
+    func frameworkHeaders(_ framework: String) -> [String] {
+        return [framework.replacingOccurrences(of: "Lib", with: "")]
     }
 
     func createPlist(path: String, name: String, minVersion: String, platform: String) {
@@ -210,11 +214,13 @@ class BuildFFMPEG: BaseBuild {
             Utility.shell("brew install pkg-config")
         }
     }
-    override func frameworkHeader(_ framework: String) -> String {
+    override func frameworkHeaders(_ framework: String) -> [String] {
         if framework == "Libavutil" {
-            return super.frameworkHeader(framework) + "\n    header \"display.h\"\n    header \"imgutils.h\""
+            return super.frameworkHeaders(framework) + ["display", "imgutils", "channel_layout"]
+        } else if framework == "Libavformat" {
+            return super.frameworkHeaders(framework) + ["avio"]
         } else {
-            return super.frameworkHeader(framework)
+            return super.frameworkHeaders(framework)
         }
     }
     private let ffmpegConfiguers = [
@@ -315,8 +321,8 @@ class BuildOpenSSL: BaseBuild {
     override func frameworks() -> [String] {
         return ["Libcrypto", "Libssl"]
     }
-    override func frameworkHeader(_ framework: String) -> String {
-        return "header \"openssl/\(framework.replacingOccurrences(of: "Lib", with: "")).h\""
+    override func frameworkHeaders(_ framework: String) -> [String] {
+        return ["openssl/\(framework.replacingOccurrences(of: "Lib", with: ""))"]
     }
 }
 
@@ -348,8 +354,8 @@ class BuildBoringSSL: BaseBuild {
     override func frameworks() -> [String] {
         return ["Libcrypto", "Libssl"]
     }
-    override func frameworkHeader(_ framework: String) -> String {
-        return "header \"openssl/\(framework.replacingOccurrences(of: "Lib", with: "")).h\""
+    override func frameworkHeaders(_ framework: String) -> [String] {
+        return ["openssl/\(framework.replacingOccurrences(of: "Lib", with: ""))"]
     }
 }
 enum PlatformType: String, CaseIterable {
