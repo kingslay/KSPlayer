@@ -219,9 +219,9 @@ open class KSOptions {
     }
 
     public func setCookie(_ cookies: [HTTPCookie]) {
-        #if !os(macOS)
-        avOptions[AVURLAssetHTTPCookiesKey] = cookies
-        #endif
+        if #available(OSX 10.15, *) {
+            avOptions[AVURLAssetHTTPCookiesKey] = cookies
+        }
         var cookieStr = "Cookie: "
         for cookie in cookies {
             cookieStr.append("\(cookie.name)=\(cookie.value); ")
@@ -328,8 +328,8 @@ open class KSOptions {
         return 16
     }
 
-    open func drawableSize(par: CGSize, sar: CGSize) -> CGSize {
-        display == .plane ? CGSize(width: par.width, height: par.height*sar.width/sar.height) : UIScreen.size
+    open func customizeDar(sar: CGSize, par: CGSize) -> CGSize? {
+        return nil
     }
 
     private class func deviceCpuCount() -> Int {
@@ -444,6 +444,8 @@ extension KSPlayerErrorCode: CustomStringConvertible {
             return "Subtitle parsing error"
         case .subtitleFormatUnSupport:
             return "Current subtitle format is not supported"
+        case .auidoSwrInit:
+            return "swr_init swrContext fail"
         default:
             return "unknown"
         }

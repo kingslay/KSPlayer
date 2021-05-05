@@ -7,7 +7,6 @@
 
 import AVFoundation
 import Libavcodec
-import FFmpeg
 import Foundation
 
 class SoftwareDecode: DecodeProtocol {
@@ -33,7 +32,7 @@ class SoftwareDecode: DecodeProtocol {
         if mediaType == .video {
             swresample = VideoSwresample()
         } else {
-            swresample = AudioSwresample()
+            swresample = AudioSwresample(codecpar: assetTrack.stream.pointee.codecpar)
         }
     }
 
@@ -49,15 +48,15 @@ class SoftwareDecode: DecodeProtocol {
                 if timestamp >= bestEffortTimestamp {
                     bestEffortTimestamp = timestamp
                 }
-                var frame = swresample.transfer(avframe: avframe, timebase: timebase)
+                var frame = try swresample.transfer(avframe: avframe, timebase: timebase)
                 frame.position = bestEffortTimestamp
                 bestEffortTimestamp += frame.duration
                 array.append(frame)
             } else {
-                if AVFILTER_EOF(result) {
-                    if IS_AVERROR_EOF(result) {
-                        avcodec_flush_buffers(codecContext)
-                    }
+                if result == AVError.eof.code {
+                    avcodec_flush_buffers(codecContext)
+                    break
+                } else if result == AVError.tryAgain.code {
                     break
                 } else {
                     let error = NSError(errorCode: mediaType == .audio ? .codecAudioReceiveFrame : .codecVideoReceiveFrame, ffmpegErrnum: result)

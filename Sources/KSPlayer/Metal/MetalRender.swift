@@ -60,14 +60,14 @@ class MetalRender {
 
     private lazy var colorOffsetVideoRangeMatrixBuffer: MTLBuffer? = {
         var firstColumn = SIMD3<Float>(-16.0 / 255.0, -128.0/255.0, -128.0/255.0)
-        let buffer = MetalRender.device.makeBuffer(bytes: &firstColumn, length: MemoryLayout<SIMD3<Float>>.size, options: .storageModeShared)
+        let buffer = MetalRender.device.makeBuffer(bytes: &firstColumn, length: MemoryLayout<SIMD3<Float>>.size)
         buffer?.label = "colorOffset"
         return buffer
     }()
 
     private lazy var colorOffsetFullRangeMatrixBuffer: MTLBuffer? = {
         var firstColumn = SIMD3<Float>(0, -128.0/255.0, -128.0/255.0)
-        let buffer = MetalRender.device.makeBuffer(bytes: &firstColumn, length: MemoryLayout<SIMD3<Float>>.size, options: .storageModeShared)
+        let buffer = MetalRender.device.makeBuffer(bytes: &firstColumn, length: MemoryLayout<SIMD3<Float>>.size)
         buffer?.label = "colorOffset"
         return buffer
     }()
@@ -154,7 +154,7 @@ extension vImage_YpCbCrToARGBMatrix {
 
     var buffer: MTLBuffer? {
         var matrix = simd_float3x3([Yp, Yp, Yp], [0.0, Cb_G, Cb_B], [Cr_R, Cr_G, 0.0])
-        let buffer = MetalRender.device.makeBuffer(bytes: &matrix, length: MemoryLayout<simd_float3x3>.size, options: .storageModeShared)
+        let buffer = MetalRender.device.makeBuffer(bytes: &matrix, length: MemoryLayout<simd_float3x3>.size)
         buffer?.label = "colorConversionMatrix"
         return buffer
     }

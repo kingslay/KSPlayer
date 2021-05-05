@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
     s.name             = 'FFmpeg'
-    s.version          = '4.3.1'
+    s.version          = '4.4'
     s.summary          = 'FFmpeg'
 
     s.description      = <<-DESC
@@ -12,14 +12,15 @@ Pod::Spec.new do |s|
     s.license          = 'MIT'
     s.source           = { :git => 'https://github.com/kingslay/KSPlayer.git', :tag => s.version.to_s }
 
-    s.ios.deployment_target = '10.0'
+    s.ios.deployment_target = '11.0'
     s.osx.deployment_target = '10.13'
     # s.watchos.deployment_target = '2.0'
-    s.tvos.deployment_target = '10.2'
+    s.tvos.deployment_target = '11.0'
     s.default_subspec = 'FFmpeg'
-    s.swift_version = '5.1'
+    s.swift_version = '5.4'
     s.static_framework = true
-    s.source_files = 'Sources/FFmpeg/**/*.{h,c}'
+#    s.module_map = 'Sources/FFmpeg/module.modulemap'
+    s.source_files = 'Sources/FFmpeg/**/*.{h,c,m}'
     s.subspec 'FFmpeg' do |ffmpeg|
         ffmpeg.libraries   = 'bz2', 'z', 'iconv', 'xml2'
         ffmpeg.vendored_frameworks = 'Sources/libavcodec.xcframework','Sources/libavformat.xcframework','Sources/libavutil.xcframework','Sources/libswresample.xcframework','Sources/libswscale.xcframework'

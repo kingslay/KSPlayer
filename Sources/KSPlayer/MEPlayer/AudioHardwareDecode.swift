@@ -64,7 +64,7 @@ import Libavcodec
         var ioOutputDataPacketSize = UInt32(0)
         let status = AudioConverterFillComplexBuffer(converter, inputDataProc, packet, &ioOutputDataPacketSize, &outAudioBufferList, nil)
         if status == noErr {
-            let frame = AudioFrame(bufferSize: Int32(outAudioBufferList.mNumberBuffers))
+            let frame = AudioFrame(bufferSize: Int32(outAudioBufferList.mNumberBuffers), channels: Int32(outAudioBufferList.mBuffers.mNumberChannels))
             frame.timebase = timebase
             frame.position = packet.pointee.pts
             if frame.position == Int64.min || frame.position < 0 {

@@ -215,22 +215,6 @@
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin XCBuildConfiguration section */
-		47441F011CD6AC908104893725E6F106 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			baseConfigurationReference = 79A02B7034CBD86DACEEB19FB05F3293 /* OpenSSL-tvOS.debug.xcconfig */;
-			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = "App Icon & Top Shelf Image";
-				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-				);
-				SDKROOT = appletvos;
-				TARGETED_DEVICE_FAMILY = 3;
-				TVOS_DEPLOYMENT_TARGET = 10.2;
-			};
-			name = Debug;
-		};
 		6C596B86E223D261A7152F8321B38B97 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = AE0062EBE4601146B90EDE767C42CF8C /* OpenSSL-macOS.debug.xcconfig */;
@@ -249,14 +233,14 @@
 			};
 			name = Debug;
 		};
-		6D747F9FF03F1B02DC0C6BCB07E08732 /* Debug */ = {
+		6E201E46A578D76032935592F013CB9C /* Debug */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 590B3CA86E22DD6E355EB9B8948E66E3 /* OpenSSL-iOS.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CLANG_ENABLE_OBJC_WEAK = NO;
-				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -265,6 +249,41 @@
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
+		};
+		769A97E06570B3DAB549E641581FF921 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 2454C238BF05CD2498F40E8B229BB64A /* OpenSSL-iOS.release.xcconfig */;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		830A4A58809B5FF43A0793D024744E95 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = D4B5DC5BBB7267900692148B89C16402 /* OpenSSL-tvOS.release.xcconfig */;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = "App Icon & Top Shelf Image";
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				SDKROOT = appletvos;
+				TARGETED_DEVICE_FAMILY = 3;
+				TVOS_DEPLOYMENT_TARGET = 11.0;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
 		};
 		9A69F17E320380FF54510A6803E75790 /* Release */ = {
 			isa = XCBuildConfiguration;
@@ -284,42 +303,7 @@
 			};
 			name = Release;
 		};
-		9F8F4504D9D12E0C5488A8B4C8EF663F /* Release */ = {
-			isa = XCBuildConfiguration;
-			baseConfigurationReference = D4B5DC5BBB7267900692148B89C16402 /* OpenSSL-tvOS.release.xcconfig */;
-			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = "App Icon & Top Shelf Image";
-				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-				);
-				SDKROOT = appletvos;
-				TARGETED_DEVICE_FAMILY = 3;
-				TVOS_DEPLOYMENT_TARGET = 10.2;
-				VALIDATE_PRODUCT = YES;
-			};
-			name = Release;
-		};
-		A850E216A29A6896D8E4355077573C22 /* Release */ = {
-			isa = XCBuildConfiguration;
-			baseConfigurationReference = 2454C238BF05CD2498F40E8B229BB64A /* OpenSSL-iOS.release.xcconfig */;
-			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CLANG_ENABLE_OBJC_WEAK = NO;
-				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-				);
-				SDKROOT = iphoneos;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				VALIDATE_PRODUCT = YES;
-			};
-			name = Release;
-		};
-		B4D912105C0840591411794696F77C48 /* Debug */ = {
+		B621168C58D8D1BB2D521189F7ABE106 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -372,7 +356,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
 				MACOSX_DEPLOYMENT_TARGET = 10.13;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
@@ -383,11 +367,27 @@
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 				SYMROOT = "${SRCROOT}/../build";
-				TVOS_DEPLOYMENT_TARGET = 10.2;
+				TVOS_DEPLOYMENT_TARGET = 11.0;
 			};
 			name = Debug;
 		};
-		F68D8F58FE092613C2A3364B6F7C4462 /* Release */ = {
+		B94B773BF692FC4343F72E8A8EBE62D0 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 79A02B7034CBD86DACEEB19FB05F3293 /* OpenSSL-tvOS.debug.xcconfig */;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = "App Icon & Top Shelf Image";
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				SDKROOT = appletvos;
+				TARGETED_DEVICE_FAMILY = 3;
+				TVOS_DEPLOYMENT_TARGET = 11.0;
+			};
+			name = Debug;
+		};
+		E1043E02697C2F1C79626ED510EB7893 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -437,7 +437,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
 				MACOSX_DEPLOYMENT_TARGET = 10.13;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
@@ -447,7 +447,7 @@
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
 				SWIFT_VERSION = 5.0;
 				SYMROOT = "${SRCROOT}/../build";
-				TVOS_DEPLOYMENT_TARGET = 10.2;
+				TVOS_DEPLOYMENT_TARGET = 11.0;
 			};
 			name = Release;
 		};
@@ -457,8 +457,8 @@
 		47D271A2DBF2F6DC8C40CB2B70A40C82 /* Build configuration list for PBXAggregateTarget "OpenSSL-iOS" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				6D747F9FF03F1B02DC0C6BCB07E08732 /* Debug */,
-				A850E216A29A6896D8E4355077573C22 /* Release */,
+				6E201E46A578D76032935592F013CB9C /* Debug */,
+				769A97E06570B3DAB549E641581FF921 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
@@ -475,8 +475,8 @@
 		A10DE46079F9958CEE8F0A4D11E68090 /* Build configuration list for PBXAggregateTarget "OpenSSL-tvOS" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				47441F011CD6AC908104893725E6F106 /* Debug */,
-				9F8F4504D9D12E0C5488A8B4C8EF663F /* Release */,
+				B94B773BF692FC4343F72E8A8EBE62D0 /* Debug */,
+				830A4A58809B5FF43A0793D024744E95 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
@@ -484,8 +484,8 @@
 		F01EC34373F596EB89807C4ECFC3ABDE /* Build configuration list for PBXProject "OpenSSL" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				B4D912105C0840591411794696F77C48 /* Debug */,
-				F68D8F58FE092613C2A3364B6F7C4462 /* Release */,
+				B621168C58D8D1BB2D521189F7ABE106 /* Debug */,
+				E1043E02697C2F1C79626ED510EB7893 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

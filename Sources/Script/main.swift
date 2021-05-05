@@ -1,5 +1,9 @@
 import Foundation
-
+let path = URL.currentDirectory + "Script"
+if !FileManager.default.fileExists(atPath: path.path) {
+    try FileManager.default.createDirectory(at: path, withIntermediateDirectories: false, attributes: nil)
+}
+FileManager.default.changeCurrentDirectoryPath(path.path)
 let array = Array(CommandLine.arguments.dropFirst())
 let isDebug = array.firstIndex(of: "debug") != nil
 let xcodePath = Utility.shell("xcode-select -p", isOutput: true) ?? ""
@@ -8,10 +12,11 @@ BuildOpenSSL().buildALL()
 BuildFFMPEG().buildALL()
 open class BaseBuild {
     private let platforms = PlatformType.allCases
-//    private let platforms = [PlatformType.maccatalyst, PlatformType.macos]
+    // private let platforms = [PlatformType.tvos]
     private let library: String
     init(library: String) {
         self.library = library
+        try? FileManager.default.removeItem(at: URL.currentDirectory + library)
     }
     func buildALL() {
         for platform in platforms {
@@ -23,7 +28,7 @@ open class BaseBuild {
     }
 
     func build(platform: PlatformType, arch: ArchType) {
-        let url = Utility.splice(paths: [library, platform.rawValue, "scratch", arch.rawValue])
+        let url = URL.currentDirectory + [library, platform.rawValue, "scratch", arch.rawValue]
         try? FileManager.default.createDirectory(at: url, withIntermediateDirectories: true, attributes: nil)
         var cflags = "-arch \(arch.rawValue) \(platform.deploymentTarget())"
         cflags += " -fembed-bitcode"
@@ -35,7 +40,7 @@ open class BaseBuild {
     func createXCFramework() {
         for framework in frameworks() {
             var arguments = ""
-            let XCFrameworkFile = Utility.splice(paths: ["../Sources", framework + ".xcframework"])
+            let XCFrameworkFile = URL.currentDirectory + ["../Sources", framework + ".xcframework"]
             try? FileManager.default.removeItem(at: XCFrameworkFile)
             for platform in platforms {
                 arguments += " -framework \(createFramework(framework: framework, platform: platform, archs: platform.architectures()))"
@@ -44,14 +49,14 @@ open class BaseBuild {
         }
     }
     private func createFramework(framework: String, platform: PlatformType, archs: [ArchType]) -> String {
-        let frameworkDir = Utility.splice(paths: [library, platform.rawValue, "\(framework).framework"])
+        let frameworkDir = URL.currentDirectory + [library, platform.rawValue, "\(framework).framework"]
         try? FileManager.default.removeItem(at: frameworkDir)
         try? FileManager.default.createDirectory(at: frameworkDir, withIntermediateDirectories: true, attributes: nil)
         var command = "lipo -create"
         for arch in archs {
             let prefix = thinDir(platform: platform, arch: arch)
             command += " "
-            command += (prefix + "lib/\(framework).a").path
+            command += (prefix + ["lib", "\(framework).a"]).path
             var headerURL = prefix + "include" + framework
             if !FileManager.default.fileExists(atPath: headerURL.path) {
                 headerURL = prefix + "include"
@@ -62,20 +67,24 @@ open class BaseBuild {
         command += (frameworkDir + framework).path
         Utility.shell(command)
         try? FileManager.default.createDirectory(at: frameworkDir + "Modules", withIntermediateDirectories: true, attributes: nil)
-        let modulemap = "framework module \(framework) [system] {\n   \(frameworkHeader(framework))\n    export *\n}"
+        var modulemap = "framework module \(framework) [system] {\n"
+        frameworkHeaders(framework).forEach { header in
+            modulemap += "    header \"\(header).h\"\n"
+        }
+        modulemap += "    export *\n}"
         FileManager.default.createFile(atPath: frameworkDir.path + "/Modules/module.modulemap", contents: modulemap.data(using: .utf8), attributes: nil)
         createPlist(path: frameworkDir.path+"/Info.plist", name: framework, minVersion: platform.minVersion, platform: platform.sdk())
         return frameworkDir.path
     }
     func thinDir(platform: PlatformType, arch: ArchType) -> URL {
-        return Utility.splice(paths: [library, platform.rawValue, "thin", arch.rawValue])
+        return URL.currentDirectory + [library, platform.rawValue, "thin", arch.rawValue]
     }
     func frameworks() -> [String] {
         return []
     }
 
-    func frameworkHeader(_ framework: String) -> String {
-        return "header \"\(framework.replacingOccurrences(of: "Lib", with: "")).h\""
+    func frameworkHeaders(_ framework: String) -> [String] {
+        return [framework.replacingOccurrences(of: "Lib", with: "")]
     }
 
     func createPlist(path: String, name: String, minVersion: String, platform: String) {
@@ -123,7 +132,7 @@ open class BaseBuild {
 }
 
 class BuildFFMPEG: BaseBuild {
-    private let ffmpegFile = "ffmpeg-4.3.2"
+    private let ffmpegFile = "ffmpeg-4.4"
     init() {
         super.init(library: "FFmpeg")
     }
@@ -161,14 +170,14 @@ class BuildFFMPEG: BaseBuild {
             cflags += " -isysroot \(syslibroot) -iframework \(syslibroot)/System/iOSSupport/System/Library/Frameworks"
             ldflags = cflags
         }
-        let opensslPath = Utility.splice(paths: ["SSL", platform.rawValue, "thin", arch.rawValue])
+        let opensslPath = URL.currentDirectory + ["SSL", platform.rawValue, "thin", arch.rawValue]
         if FileManager.default.fileExists(atPath: opensslPath.path) {
             cflags += " -I\(opensslPath.path)/include"
             ldflags += " -L\(opensslPath.path)/lib"
             ffmpegcflags.append("--enable-openssl")
         }
         let prefix = thinDir(platform: platform, arch: arch)
-        var args = ["set -o noglob &&", Utility.splice(paths: [ffmpegFile, "configure"]).path, "--target-os=darwin",
+        var args = ["set -o noglob &&", (URL.currentDirectory + [ffmpegFile, "configure"]).path, "--target-os=darwin",
                     "--arch=\(arch)", "--cc='xcrun -sdk \(platform.sdk().lowercased()) clang'",
                     "--extra-cflags='\(cflags)'", "--extra-ldflags='\(ldflags)'", "--prefix=\(prefix.path)"]
         args.append(contentsOf: ffmpegcflags)
@@ -179,9 +188,9 @@ class BuildFFMPEG: BaseBuild {
             try? FileManager.default.removeItem(at: URL(fileURLWithPath: "/usr/local/bin/ffmpeg"))
             try? FileManager.default.removeItem(at: URL(fileURLWithPath: "/usr/local/bin/ffplay"))
             try? FileManager.default.removeItem(at: URL(fileURLWithPath: "/usr/local/bin/ffprobe"))
-            try? FileManager.default.copyItem(at: Utility.splice(paths: ["bin", "ffmpeg"], current: prefix), to: URL(fileURLWithPath: "/usr/local/bin/ffmpeg"))
-            try? FileManager.default.copyItem(at: Utility.splice(paths: ["bin", "ffplay"], current: prefix), to: URL(fileURLWithPath: "/usr/local/bin/ffplay"))
-            try? FileManager.default.copyItem(at: Utility.splice(paths: ["bin", "ffprobe"], current: prefix), to: URL(fileURLWithPath: "/usr/local/bin/ffprobe"))
+            try? FileManager.default.copyItem(at: prefix + ["bin", "ffmpeg"], to: URL(fileURLWithPath: "/usr/local/bin/ffmpeg"))
+            try? FileManager.default.copyItem(at: prefix + ["bin", "ffplay"], to: URL(fileURLWithPath: "/usr/local/bin/ffplay"))
+            try? FileManager.default.copyItem(at: prefix + ["bin", "ffprobe"], to: URL(fileURLWithPath: "/usr/local/bin/ffprobe"))
         }
     }
     override func frameworks() -> [String] {
@@ -189,7 +198,7 @@ class BuildFFMPEG: BaseBuild {
     }
     override func buildALL() {
         prepareYasm()
-        if !FileManager.default.fileExists(atPath: Utility.splice(paths: [ffmpegFile]).path) {
+        if !FileManager.default.fileExists(atPath: (URL.currentDirectory + ffmpegFile).path) {
             Utility.shell("curl http://www.ffmpeg.org/releases/\(ffmpegFile).tar.bz2 | tar xj")
         }
         super.buildALL()
@@ -205,11 +214,13 @@ class BuildFFMPEG: BaseBuild {
             Utility.shell("brew install pkg-config")
         }
     }
-    override func frameworkHeader(_ framework: String) -> String {
+    override func frameworkHeaders(_ framework: String) -> [String] {
         if framework == "Libavutil" {
-            return super.frameworkHeader(framework) + "\n    header \"display.h\"\n    header \"imgutils.h\""
+            return super.frameworkHeaders(framework) + ["display", "imgutils", "channel_layout"]
+        } else if framework == "Libavformat" {
+            return super.frameworkHeaders(framework) + ["avio"]
         } else {
-            return super.frameworkHeader(framework)
+            return super.frameworkHeaders(framework)
         }
     }
     private let ffmpegConfiguers = [
@@ -280,37 +291,38 @@ class BuildFFMPEG: BaseBuild {
 }
 
 class BuildOpenSSL: BaseBuild {
-    private let sslFile = "openssl-1.1.1i"
+    private let sslFile = "openssl-1.1.1k"
     init() {
         super.init(library: "SSL")
     }
     override func buildALL() {
-        if !FileManager.default.fileExists(atPath: Utility.splice(paths: [sslFile]).path) {
+        if !FileManager.default.fileExists(atPath: (URL.currentDirectory + sslFile).path) {
             Utility.shell("curl https://www.openssl.org/source/\(sslFile).tar.gz | tar xj")
         }
         super.buildALL()
     }
     override func innerBuid(platform: PlatformType, arch: ArchType, cflags: String, buildDir: URL) {
-        let directoryURL = Utility.splice(paths: [sslFile])
+        let directoryURL = URL.currentDirectory + sslFile
         var ccFlags = "/usr/bin/clang " + cflags
         if platform == .macos || platform == .maccatalyst {
             ccFlags += " -fno-common"
         } else {
             ccFlags += " -isysroot \(platform.isysroot())"
         }
+        if platform == .tvos || platform == .tvsimulator {
+            ccFlags += " -DHAVE_FORK=0"
+        }
         let target = platform.target(arch: arch)
         let environment = ["LC_CTYPE": "C", "CROSS_TOP": platform.crossTop(), "CROSS_SDK": platform.crossSDK(), "CC": ccFlags]
-        let args = ["./Configure", target, "--prefix=\(thinDir(platform: platform, arch: arch).path)", "no-asm no-async no-shared", "--openssldir=\(buildDir.path)", ">>\(buildDir.path).log"]
-        Utility.shell(args.joined(separator: " "), currentDirectoryURL: directoryURL, environment: environment)
-        Utility.shell("make >>\(buildDir.path).log", currentDirectoryURL: directoryURL, environment: environment)
-        Utility.shell("make install_sw >>\(buildDir.path).log", currentDirectoryURL: directoryURL, environment: environment)
-        Utility.shell("make clean >>\(buildDir.path).log", currentDirectoryURL: directoryURL, environment: environment)
+        let command = "./Configure " + target + " no-async no-shared no-tests --prefix=\(thinDir(platform: platform, arch: arch).path) --openssldir=\(buildDir.path) >>\(buildDir.path).log"
+        Utility.shell(command, currentDirectoryURL: directoryURL, environment: environment)
+        Utility.shell("make clean >>\(buildDir.path).log && make >>\(buildDir.path).log && make install_sw >>\(buildDir.path).log ", currentDirectoryURL: directoryURL, environment: environment)
     }
     override func frameworks() -> [String] {
         return ["Libcrypto", "Libssl"]
     }
-    override func frameworkHeader(_ framework: String) -> String {
-        return "header \"openssl/\(framework.replacingOccurrences(of: "Lib", with: "")).h\""
+    override func frameworkHeaders(_ framework: String) -> [String] {
+        return ["openssl/\(framework.replacingOccurrences(of: "Lib", with: ""))"]
     }
 }
 
@@ -320,7 +332,7 @@ class BuildBoringSSL: BaseBuild {
         super.init(library: "SSL")
     }
     override func buildALL() {
-        if !FileManager.default.fileExists(atPath: Utility.splice(paths: [sslFile]).path) {
+        if !FileManager.default.fileExists(atPath: (URL.currentDirectory + sslFile).path) {
             Utility.shell("git clone https://github.com/google/boringssl.git")
         }
         super.buildALL()
@@ -335,15 +347,15 @@ class BuildBoringSSL: BaseBuild {
         Utility.shell("ninja >>\(buildDir.path).log", currentDirectoryURL: buildDir)
         let thin = thinDir(platform: platform, arch: arch)
         try? FileManager.default.createDirectory(at: thin + "lib", withIntermediateDirectories: true, attributes: nil)
-        try? FileManager.default.copyItem(at: Utility.splice(paths: [sslFile, "include"]), to: thin + "include")
-        try? FileManager.default.copyItem(at: buildDir + "ssl/libssl.a", to: thin + "lib/libssl.a")
-        try? FileManager.default.copyItem(at: buildDir + "crypto/libcrypto.a", to: thin + "lib/libcrypto.a")
+        try? FileManager.default.copyItem(at: URL.currentDirectory + [sslFile, "include"], to: thin + "include")
+        try? FileManager.default.copyItem(at: buildDir + ["ssl", "libssl.a"], to: thin + ["lib", "libssl.a"])
+        try? FileManager.default.copyItem(at: buildDir + ["crypto", "libcrypto.a"], to: thin + ["lib", "libcrypto.a"])
     }
     override func frameworks() -> [String] {
         return ["Libcrypto", "Libssl"]
     }
-    override func frameworkHeader(_ framework: String) -> String {
-        return "header \"openssl/\(framework.replacingOccurrences(of: "Lib", with: "")).h\""
+    override func frameworkHeaders(_ framework: String) -> [String] {
+        return ["openssl/\(framework.replacingOccurrences(of: "Lib", with: ""))"]
     }
 }
 enum PlatformType: String, CaseIterable {
@@ -532,18 +544,21 @@ struct Utility {
 //            return nil
 //        }
 //    }
-    static func splice(paths: [String], current: URL = URL(fileURLWithPath: FileManager.default.currentDirectoryPath)) -> URL {
-        var url = current
-        paths.forEach {
-            url.appendPathComponent($0)
-        }
-        return url
-    }
 }
 extension URL {
+    static var currentDirectory: URL {
+        URL(fileURLWithPath: FileManager.default.currentDirectoryPath)
+    }
     static func + (left: URL, right: String) -> URL {
         var url = left
         url.appendPathComponent(right)
+        return url
+    }
+    static func + (left: URL, right: [String]) -> URL {
+        var url = left
+        right.forEach {
+            url.appendPathComponent($0)
+        }
         return url
     }
 }

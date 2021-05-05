@@ -1,6 +1,6 @@
 {
   "name": "FFmpeg",
-  "version": "4.3.1",
+  "version": "4.4",
   "summary": "FFmpeg",
   "description": "OpenSSL",
   "homepage": "https://github.com/kingslay/KSPlayer",
@@ -10,17 +10,17 @@
   "license": "MIT",
   "source": {
     "git": "https://github.com/kingslay/KSPlayer.git",
-    "tag": "4.3.1"
+    "tag": "4.4"
   },
   "platforms": {
-    "ios": "10.0",
+    "ios": "11.0",
     "osx": "10.13",
-    "tvos": "10.2"
+    "tvos": "11.0"
   },
   "default_subspecs": "FFmpeg",
-  "swift_versions": "5.1",
+  "swift_versions": "5.4",
   "static_framework": true,
-  "source_files": "Sources/FFmpeg/**/*.{h,c}",
+  "source_files": "Sources/FFmpeg/**/*.{h,c,m}",
   "subspecs": [
     {
       "name": "FFmpeg",
@@ -44,5 +44,5 @@
       }
     }
   ],
-  "swift_version": "5.1"
+  "swift_version": "5.4"
 }

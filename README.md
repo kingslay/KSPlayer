@@ -25,9 +25,9 @@
 
 ## Requirements
 
-- iOS 10 +,  macOS 10.12 +, tvOS 10.2 +
+- iOS 11 +,  macOS 10.12 +, tvOS 11 +
 - Xcode 12
-- Swift 5.3
+- Swift 5.4
 
 ## Demo
 
@@ -37,7 +37,7 @@
 
 #### CocoaPods
 
-Make sure to use the latest version **cocoapods 1.9.3**, which can be installed using the command `brew install cocoapods`
+Make sure to use the latest version **cocoapods 1.10.1**, which can be installed using the command `brew install cocoapods`
 
 ```ruby
 target 'ProjectName' do
@@ -243,8 +243,8 @@ public protocol PlayerControllerDelegate: class {
 
 ```bash
 brew install sdl2
-mkdir -p Script && cd Script && swift ../Sources/Script/main.swift debug
-dwarfdump -F --debug-info ../Sources/libavformat.xcframework/ios-x86_64-maccatalyst/FFmpeg.framework/FFmpeg | head -n 20
+swift run Script debug
+dwarfdump -F --debug-info ../Sources/libavformat.xcframework/macos-arm64_x86_64/Libavformat.framework/Libavformat | head -n 20
 ```
 
 run demo-macOS

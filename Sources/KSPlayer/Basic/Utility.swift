@@ -16,7 +16,11 @@ import AppKit
 import MobileCoreServices.UTType
 #endif
 open class LayerContainerView: UIView {
-    #if os(macOS)
+    #if canImport(UIKit)
+    override open class var layerClass: AnyClass {
+        CAGradientLayer.self
+    }
+    #else
     override public init(frame: CGRect) {
         super.init(frame: frame)
         layer = CAGradientLayer()
@@ -24,11 +28,6 @@ open class LayerContainerView: UIView {
 
     public required init?(coder _: NSCoder) {
         fatalError("init(coder:) has not been implemented")
-    }
-
-    #else
-    override open class var layerClass: AnyClass {
-        CAGradientLayer.self
     }
     #endif
     public var gradientLayer: CAGradientLayer {
@@ -105,13 +104,7 @@ extension UIColor {
     }
 
     public func createImage(size: CGSize = CGSize(width: 1, height: 1)) -> UIImage {
-        #if os(macOS)
-        let image = NSImage(size: size)
-        image.lockFocus()
-        drawSwatch(in: CGRect(origin: .zero, size: size))
-        image.unlockFocus()
-        return image
-        #else
+        #if canImport(UIKit)
         let rect = CGRect(origin: .zero, size: size)
         UIGraphicsBeginImageContext(rect.size)
         let context = UIGraphicsGetCurrentContext()
@@ -120,6 +113,12 @@ extension UIColor {
         let image = UIGraphicsGetImageFromCurrentImageContext()
         UIGraphicsEndImageContext()
         return image!
+        #else
+        let image = NSImage(size: size)
+        image.lockFocus()
+        drawSwatch(in: CGRect(origin: .zero, size: size))
+        image.unlockFocus()
+        return image
         #endif
     }
 }
@@ -160,53 +159,35 @@ public extension UIView {
     }
 
     var safeTopAnchor: NSLayoutYAxisAnchor {
-        #if os(macOS)
-        return topAnchor
-        #else
-        if #available(iOS 11.0, tvOS 11.0, *) {
+        if #available(iOS 11.0, tvOS 11.0, macOS 11.0, *) {
             return self.safeAreaLayoutGuide.topAnchor
         } else {
             return topAnchor
         }
-        #endif
     }
 
     var safeLeftAnchor: NSLayoutXAxisAnchor {
-        #if os(macOS)
-        return leftAnchor
-
-        #else
-        if #available(iOS 11.0, tvOS 11.0, *) {
+        if #available(iOS 11.0, tvOS 11.0, macOS 11.0, *) {
             return self.safeAreaLayoutGuide.leftAnchor
         } else {
             return leftAnchor
         }
-        #endif
     }
 
     var safeRightAnchor: NSLayoutXAxisAnchor {
-        #if os(macOS)
-        return rightAnchor
-
-        #else
-        if #available(iOS 11.0, tvOS 11.0, *) {
+        if #available(iOS 11.0, tvOS 11.0, macOS 11.0, *) {
             return self.safeAreaLayoutGuide.rightAnchor
         } else {
             return rightAnchor
         }
-        #endif
     }
 
     var safeBottomAnchor: NSLayoutYAxisAnchor {
-        #if os(macOS)
-        return bottomAnchor
-        #else
-        if #available(iOS 11.0, tvOS 11.0, *) {
+        if #available(iOS 11.0, tvOS 11.0, macOS 11.0, *) {
             return self.safeAreaLayoutGuide.bottomAnchor
         } else {
             return bottomAnchor
         }
-        #endif
     }
 }
 

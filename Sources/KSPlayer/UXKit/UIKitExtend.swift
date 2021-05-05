@@ -95,7 +95,7 @@ public class KSSlider: UXSlider {
     }
 }
 
-#if os(iOS)
+#if !os(tvOS)
 public typealias UXSlider = UISlider
 #else
 public class UXSlider: UIProgressView {

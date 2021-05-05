@@ -368,7 +368,7 @@ open class VideoPlayerView: PlayerView {
         }
     }
 
-    #if !os(macOS) && !targetEnvironment(macCatalyst)
+    #if canImport(UIKit)
     override open func pressesBegan(_ presses: Set<UIPress>, with event: UIPressesEvent?) {
         guard let presse = presses.first else {
             return
@@ -491,11 +491,7 @@ extension VideoPlayerView {
         } else {
             if time > subtitleEndTime {
                 subtitleBackView.image = nil
-                #if os(macOS)
-                subtitleLabel.attributedText = NSMutableAttributedString()
-                #else
                 subtitleLabel.attributedText = nil
-                #endif
             }
         }
     }

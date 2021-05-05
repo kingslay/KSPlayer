@@ -1,0 +1,22 @@
+name: Create Release
+
+# Create XCFramework when a version is tagged
+on:
+  push:
+    tags:
+
+jobs:
+  create_release:
+    name: Create Release
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@main
+      - name: Build
+        run: swift build -v -c release
+      - name: Test
+        run: swift test -v
+      # - name: Create XCFramework
+      #   uses: unsignedapps/swift-create-xcframework@v1.3
+
+      # Create a release
+      # Upload those artifacts to the release

@@ -220,15 +220,14 @@ open class KSPlayerLayer: UIView {
         }
     }
 
-    #if os(macOS)
-    override open func resizeSubviews(withOldSize oldSize: NSSize) {
-        super.resizeSubviews(withOldSize: oldSize)
-        player?.view.frame = bounds
-    }
-
-    #else
+    #if canImport(UIKit)
     override open func layoutSubviews() {
         super.layoutSubviews()
+        player?.view.frame = bounds
+    }
+    #else
+    override open func resizeSubviews(withOldSize oldSize: NSSize) {
+        super.resizeSubviews(withOldSize: oldSize)
         player?.view.frame = bounds
     }
     #endif
@@ -451,10 +450,10 @@ extension KSPlayerManager {
 
 extension KSPlayerManager {
     static func image(named: String) -> UIImage? {
-        #if os(macOS)
-        return KSPlayerManager.bundle.image(forResource: named)
-        #else
+        #if canImport(UIKit)
         return UIImage(named: named, in: KSPlayerManager.bundle, compatibleWith: nil)
+        #else
+        return KSPlayerManager.bundle.image(forResource: named)
         #endif
     }
 }
