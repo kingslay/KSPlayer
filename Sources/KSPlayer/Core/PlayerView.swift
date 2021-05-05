@@ -167,8 +167,6 @@ extension PlayerView {
         }
     }
 
-    #if os(macOS)
-    #else
     @objc private func audioInterrupted(notification: Notification) {
         if let callBegin = notification.userInfo?[AVAudioSessionInterruptionTypeKey] as? Bool {
             if callBegin {
@@ -176,7 +174,6 @@ extension PlayerView {
             }
         }
     }
-    #endif
 }
 
 extension UIView {

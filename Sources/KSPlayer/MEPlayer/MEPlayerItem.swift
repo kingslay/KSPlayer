@@ -7,7 +7,6 @@
 
 import AVFoundation
 import Libavformat
-import FFmpeg
 import VideoToolbox
 
 final class MEPlayerItem {
@@ -139,7 +138,7 @@ extension MEPlayerItem {
         }
         var result = avformat_open_input(&self.formatCtx, urlString, nil, &avOptions)
         av_dict_free(&avOptions)
-        if IS_AVERROR_EOF(result) {
+        if result == AVError.eof.code {
             state = .finished
             return
         }
@@ -313,7 +312,7 @@ extension MEPlayerItem {
                 }
             }
         } else {
-            if IS_AVERROR_EOF(readResult) || avio_feof(formatCtx?.pointee.pb) != 0 {
+            if readResult == AVError.eof.code || avio_feof(formatCtx?.pointee.pb) != 0 {
                 if options.isLoopPlay, allTracks.allSatisfy({ !$0.isLoopModel }) {
                     allTracks.forEach { $0.isLoopModel = true }
                     _ = av_seek_frame(formatCtx, -1, 0, AVSEEK_FLAG_BACKWARD)

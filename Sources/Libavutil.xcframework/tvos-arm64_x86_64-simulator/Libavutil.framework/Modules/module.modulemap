@@ -1,6 +1,7 @@
 framework module Libavutil [system] {
-   header "avutil.h"
+    header "avutil.h"
     header "display.h"
     header "imgutils.h"
+    header "channel_layout.h"
     export *
 }

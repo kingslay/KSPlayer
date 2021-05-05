@@ -148,7 +148,7 @@ class DecompressionSession {
                 codecpar.codec_id == AV_CODEC_ID_HEVC ? "hvcC" : "avcC": NSData(bytes: extradata, length: Int(extradataSize))
             ]
         ]
-        dic[kCVImageBufferPixelAspectRatioKey] = codecpar.sar
+        dic[kCVImageBufferPixelAspectRatioKey] = codecpar.sample_aspect_ratio.size.aspectRatio
         dic[kCVImageBufferColorPrimariesKey] = codecpar.color_primaries.colorPrimaries
         dic[kCVImageBufferTransferFunctionKey] = codecpar.color_trc.transferFunction
         dic[kCVImageBufferYCbCrMatrixKey] = codecpar.color_space.ycbcrMatrix
@@ -179,6 +179,17 @@ class DecompressionSession {
     deinit {
         VTDecompressionSessionWaitForAsynchronousFrames(decompressionSession)
         VTDecompressionSessionInvalidate(decompressionSession)
+    }
+}
+
+extension CGSize {
+    var aspectRatio: NSDictionary? {
+        if width != 0 && height != 0 {
+            return [kCVImageBufferPixelAspectRatioHorizontalSpacingKey: width,
+                    kCVImageBufferPixelAspectRatioVerticalSpacingKey: height]
+        } else {
+            return nil
+        }
     }
 }
 

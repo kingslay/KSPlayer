@@ -7,6 +7,7 @@
 
 import AVFoundation
 import CoreMedia
+import FFmpeg
 import Libavcodec
 
 // MARK: enum
@@ -62,7 +63,7 @@ public protocol ObjectQueueItem {
     var position: Int64 { get }
 }
 
-protocol FrameOutput {
+protocol FrameOutput: AnyObject {
     var renderSource: OutputRenderSourceDelegate? { get set }
     var isPaused: Bool { get set }
 }
@@ -229,13 +230,13 @@ final class MTLBufferWrap {
     var size: [Int] {
         didSet {
             if size.description != oldValue.description {
-                data = size.map { MetalRender.device.makeBuffer(length: $0, options: .storageModeShared) }
+                data = size.map { MetalRender.device.makeBuffer(length: $0) }
             }
         }
     }
     public init(size: [Int]) {
         self.size = size
-        data = size.map { MetalRender.device.makeBuffer(length: $0, options: .storageModeShared) }
+        data = size.map { MetalRender.device.makeBuffer(length: $0) }
     }
 
     deinit {
@@ -253,15 +254,16 @@ final class AudioFrame: MEFrame {
     public var position: Int64 = 0
     public var numberOfSamples = 0
     let dataWrap: ByteDataWrap
-    public init(bufferSize: Int32) {
-        dataWrap = ObjectPool.share.object(class: ByteDataWrap.self, key: "AudioData") { ByteDataWrap() }
+
+    public init(bufferSize: Int32, channels: Int32) {
+        dataWrap = ObjectPool.share.object(class: ByteDataWrap.self, key: "AudioData_\(channels)") { ByteDataWrap() }
         if dataWrap.size[0] < bufferSize {
-            dataWrap.size = Array(repeating: Int(bufferSize), count: Int(KSPlayerManager.audioPlayerMaximumChannels))
+            dataWrap.size = Array(repeating: Int(bufferSize), count: Int(channels))
         }
     }
 
     deinit {
-        ObjectPool.share.comeback(item: dataWrap, key: "AudioData")
+        ObjectPool.share.comeback(item: dataWrap, key: "AudioData_\(dataWrap.data.count)")
     }
 }
 
@@ -288,3 +290,41 @@ extension Dictionary where Key == String {
         return avOptions
     }
 }
+public struct AVError: Error, Equatable {
+    public var code: Int32
+    public var message: String
+
+    init(code: Int32) {
+        self.code = code
+        self.message = String(avErrorCode: code)
+    }
+}
+extension String {
+
+    init(avErrorCode code: Int32) {
+        let buf = UnsafeMutablePointer<Int8>.allocate(capacity: Int(AV_ERROR_MAX_STRING_SIZE))
+        buf.initialize(repeating: 0, count: Int(AV_ERROR_MAX_STRING_SIZE))
+        defer { buf.deallocate() }
+        self = String(cString: av_make_error_string(buf, Int(AV_ERROR_MAX_STRING_SIZE), code))
+    }
+}
+
+extension AVError {
+    public static let tryAgain = AVError(code: swift_AVERROR(EAGAIN))
+    public static let eof = AVError(code: swift_AVERROR_EOF)
+}
+
+//// swiftlint:disable identifier_name
+// extension Character {
+//    @inlinable public var asciiValueInt32: Int32 {
+//        Int32(asciiValue ?? 0)
+//    }
+// }
+// private func swift_AVERROR(_ err: Int32) -> Int32 {
+//    return -err
+// }
+// private func MKTAG(a: Character, b: Character, c: Character, d: Character) -> Int32 {
+//    return a.asciiValueInt32 | b.asciiValueInt32 << 8 | c.asciiValueInt32 << 16 | d.asciiValueInt32 << 24
+// }
+// private let swift_AVERROR_EOF = swift_AVERROR(MKTAG(a: "E", b: "O", c: "F", d: " "))
+//// swiftlint:enable identifier_name
