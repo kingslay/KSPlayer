@@ -19,7 +19,6 @@ Pod::Spec.new do |s|
     s.default_subspec = 'FFmpeg'
     s.swift_version = '5.4'
     s.static_framework = true
-#    s.module_map = 'Sources/FFmpeg/module.modulemap'
     s.source_files = 'Sources/FFmpeg/**/*.{h,c,m}'
     s.subspec 'FFmpeg' do |ffmpeg|
         ffmpeg.libraries   = 'bz2', 'z', 'iconv', 'xml2'
