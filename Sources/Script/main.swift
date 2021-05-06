@@ -213,6 +213,9 @@ class BuildFFMPEG: BaseBuild {
         if Utility.shell("which pkg-config") == nil {
             Utility.shell("brew install pkg-config")
         }
+        if isDebug && Utility.shell("which sdl2-config") == nil {
+            Utility.shell("brew install sdl2")
+        }
     }
     override func frameworkHeaders(_ framework: String) -> [String] {
         if framework == "Libavutil" {
