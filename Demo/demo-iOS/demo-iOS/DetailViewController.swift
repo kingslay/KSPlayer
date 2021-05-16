@@ -97,7 +97,7 @@ class DetailViewController: UIViewController, DetailProtocol {
     /// User chose "Open" from the File menu.
     @objc public func openAction(_: AnyObject) {
         #if os(iOS)
-        let documentPicker = UIDocumentPickerViewController(documentTypes: [kUTTypeMPEG4 as String], in: .open)
+        let documentPicker = UIDocumentPickerViewController(documentTypes: [kUTTypeMovie as String], in: .open)
         documentPicker.delegate = self
         present(documentPicker, animated: true, completion: nil)
         #endif
