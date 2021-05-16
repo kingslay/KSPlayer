@@ -484,7 +484,7 @@ extension MEPlayerItem: CodecCapacityDelegate {
 extension MEPlayerItem: OutputRenderSourceDelegate {
     func setVideo(time: CMTime) {
         if isAudioStalled {
-            currentPlaybackTime = time.seconds
+            currentPlaybackTime = time.seconds - options.audioDelay
             videoMediaTime = CACurrentMediaTime()
         }
     }
