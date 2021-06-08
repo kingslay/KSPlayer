@@ -6,6 +6,7 @@
 //
 #if canImport(UIKit) && canImport(CallKit)
 import CallKit
+import CoreServices
 import MediaPlayer
 import UIKit
 
@@ -329,4 +330,108 @@ extension UIApplication {
         }
     }
 }
+// MARK: - menu
+extension IOSVideoPlayerView {
+    override open var canBecomeFirstResponder: Bool {
+        true
+    }
+    override open func canPerformAction(_ action: Selector, withSender _: Any?) -> Bool {
+        if action == #selector(IOSVideoPlayerView.openFileAction) {
+            return true
+        }
+        return true
+    }
+    @objc fileprivate func openFileAction(_: AnyObject) {
+        let documentPicker = UIDocumentPickerViewController(documentTypes: [kUTTypeAudio, kUTTypeMovie, kUTTypePlainText] as [String], in: .open)
+        documentPicker.delegate = self
+        self.viewController?.present(documentPicker, animated: true, completion: nil)
+    }
+
+}
+
+extension IOSVideoPlayerView: UIDocumentPickerDelegate {
+    public func documentPicker(_: UIDocumentPickerViewController, didPickDocumentsAt urls: [URL]) {
+        if let url = urls.first {
+            if url.isMovie || url.isAudio {
+                set(url: url, options: KSOptions())
+            } else {
+                resource?.subtitle = KSURLSubtitle(url: url)
+            }
+        }
+    }
+}
+
 #endif
+
+@available(iOS 13.0, tvOS 13.0, *)
+public class MenuController {
+    public init(with builder: UIMenuBuilder) {
+        builder.remove(menu: .format)
+        #if os(iOS)
+        builder.insertChild(MenuController.openFileMenu(), atStartOfMenu: .file)
+//        builder.insertChild(MenuController.openURLMenu(), atStartOfMenu: .file)
+//        builder.insertChild(MenuController.navigationMenu(), atStartOfMenu: .file)
+        #endif
+    }
+
+    #if os(iOS)
+    class func openFileMenu() -> UIMenu {
+        let openCommand = UIKeyCommand(input: "O", modifierFlags: .command, action: #selector(IOSVideoPlayerView.openFileAction(_:)))
+        openCommand.title = NSLocalizedString("Open File", comment: "")
+        let openMenu = UIMenu(title: "",
+                              image: nil,
+                              identifier: UIMenu.Identifier("com.example.apple-samplecode.menus.openFileMenu"),
+                              options: .displayInline,
+                              children: [openCommand])
+        return openMenu
+    }
+
+//    class func openURLMenu() -> UIMenu {
+//        let openCommand = UIKeyCommand(input: "O", modifierFlags: [.command, .shift], action: #selector(IOSVideoPlayerView.openURLAction(_:)))
+//        openCommand.title = NSLocalizedString("Open URL", comment: "")
+//        let openMenu = UIMenu(title: "",
+//                              image: nil,
+//                              identifier: UIMenu.Identifier("com.example.apple-samplecode.menus.openURLMenu"),
+//                              options: .displayInline,
+//                              children: [openCommand])
+//        return openMenu
+//    }
+//    class func navigationMenu() -> UIMenu {
+//        let arrowKeyChildrenCommands = Arrows.allCases.map { arrow in
+//            UIKeyCommand(title: arrow.localizedString(),
+//                         image: nil,
+//                         action: #selector(IOSVideoPlayerView.navigationMenuAction(_:)),
+//                         input: arrow.command,
+//                         modifierFlags: .command)
+//        }
+//        return UIMenu(title: NSLocalizedString("NavigationTitle", comment: ""),
+//                      image: nil,
+//                      identifier: UIMenu.Identifier("com.example.apple-samplecode.menus.navigationMenu"),
+//                      options: [],
+//                      children: arrowKeyChildrenCommands)
+//    }
+
+    enum Arrows: String, CaseIterable {
+        case rightArrow
+        case leftArrow
+        case upArrow
+        case downArrow
+        func localizedString() -> String {
+            return NSLocalizedString("\(self.rawValue)", comment: "")
+        }
+
+        var command: String {
+            switch self {
+            case .rightArrow:
+                return UIKeyCommand.inputRightArrow
+            case .leftArrow:
+                return UIKeyCommand.inputLeftArrow
+            case .upArrow:
+                return UIKeyCommand.inputUpArrow
+            case .downArrow:
+                return UIKeyCommand.inputDownArrow
+            }
+        }
+    }
+    #endif
+}

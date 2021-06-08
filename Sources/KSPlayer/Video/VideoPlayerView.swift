@@ -221,6 +221,7 @@ open class VideoPlayerView: PlayerView {
         super.player(layer: layer, currentTime: currentTime, totalTime: totalTime)
         if let subtitle = resource?.subtitle {
             showSubtile(from: subtitle, at: currentTime)
+            subtitleBackView.isHidden = false
         }
     }
 
