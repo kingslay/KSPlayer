@@ -383,3 +383,19 @@ extension UIImageView {
         }
     }
 }
+
+extension URL {
+    public var isMovie: Bool {
+        if let typeID = try? resourceValues(forKeys: [.typeIdentifierKey]).typeIdentifier as CFString? {
+            return UTTypeConformsTo(typeID, kUTTypeMovie)
+        }
+        return false
+    }
+
+    public var isAudio: Bool {
+        if let typeID = try? resourceValues(forKeys: [.typeIdentifierKey]).typeIdentifier as CFString? {
+            return UTTypeConformsTo(typeID, kUTTypeAudio)
+        }
+        return false
+    }
+}

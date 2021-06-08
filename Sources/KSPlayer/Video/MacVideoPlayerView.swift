@@ -27,14 +27,6 @@ extension NSDraggingInfo {
 }
 
 open class MacVideoPlayerView: VideoPlayerView {
-    static let supportedFileExt: [AVMediaType: [String]] = [
-        .video: ["mkv", "mp4", "avi", "m4v", "mov", "3gp", "ts", "mts", "m2ts", "wmv", "flv", "f4v", "asf", "webm", "rm", "rmvb", "qt", "dv", "mpg", "mpeg", "mxf", "vob", "gif"],
-        .audio: ["mp3", "aac", "mka", "dts", "flac", "ogg", "oga", "mogg", "m4a", "ac3", "opus", "wav", "wv", "aiff", "ape", "tta", "tak"],
-        .subtitle: ["utf", "utf8", "utf-8", "idx", "sub", "srt", "smi", "rt", "ssa", "aqt", "jss", "js", "ass", "mks", "vtt", "sup", "scc"]
-    ]
-
-    static let playableFileExt = supportedFileExt[.video]! + supportedFileExt[.audio]!
-
     override open func customizeUIComponents() {
         super.customizeUIComponents()
         registerForDraggedTypes([.nsFilenames, .nsURL, .string])
@@ -127,12 +119,11 @@ extension MacVideoPlayerView {
 
     override open func performDragOperation(_ sender: NSDraggingInfo) -> Bool {
         if let url = sender.getUrl() {
-            if let set = MacVideoPlayerView.supportedFileExt[.subtitle],
-                set.contains(url.pathExtension.lowercased()) {
-                resource?.subtitle = KSURLSubtitle(url: url)
-                return true
-            } else if MacVideoPlayerView.playableFileExt.contains(url.pathExtension.lowercased()) {
+            if url.isMovie || url.isAudio {
                 set(resource: KSPlayerResource(url: url, options: KSOptions()))
+                return true
+            } else {
+                resource?.subtitle = KSURLSubtitle(url: url)
                 return true
             }
         }
