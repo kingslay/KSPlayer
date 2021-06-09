@@ -363,18 +363,16 @@ extension IOSVideoPlayerView: UIDocumentPickerDelegate {
 
 #endif
 
-@available(iOS 13.0, tvOS 13.0, *)
+#if os(iOS)
+@available(iOS 13.0, *)
 public class MenuController {
     public init(with builder: UIMenuBuilder) {
         builder.remove(menu: .format)
-        #if os(iOS)
         builder.insertChild(MenuController.openFileMenu(), atStartOfMenu: .file)
 //        builder.insertChild(MenuController.openURLMenu(), atStartOfMenu: .file)
 //        builder.insertChild(MenuController.navigationMenu(), atStartOfMenu: .file)
-        #endif
     }
 
-    #if os(iOS)
     class func openFileMenu() -> UIMenu {
         let openCommand = UIKeyCommand(input: "O", modifierFlags: .command, action: #selector(IOSVideoPlayerView.openFileAction(_:)))
         openCommand.title = NSLocalizedString("Open File", comment: "")
@@ -433,5 +431,5 @@ public class MenuController {
             }
         }
     }
-    #endif
 }
+#endif

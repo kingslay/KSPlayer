@@ -12,7 +12,6 @@ import UIKit
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate, UISplitViewControllerDelegate {
     var window: UIWindow?
-    private var menuController: MenuController!
     func application(_: UIApplication, didFinishLaunchingWithOptions _: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         let window = UIWindow()
         KSPlayerManager.canBackgroundPlay = true
@@ -49,11 +48,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UISplitViewControllerDele
     func application(_ application: UIApplication, supportedInterfaceOrientationsFor window: UIWindow?) -> UIInterfaceOrientationMask {
         return KSPlayerManager.supportedInterfaceOrientations
     }
-    #endif
-
+    
+    private var menuController: MenuController!
     override func buildMenu(with builder: UIMenuBuilder) {
         if builder.system == .main {
             menuController = MenuController(with: builder)
         }
     }
+    #endif
 }
