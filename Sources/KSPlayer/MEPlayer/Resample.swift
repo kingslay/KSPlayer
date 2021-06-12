@@ -295,7 +295,7 @@ class AudioSwresample: Swresample {
     private let channels: Int32
     init(codecpar: UnsafeMutablePointer<AVCodecParameters>) {
         descriptor = AudioDescriptor(codecpar: codecpar)
-        channels = Int32(min(KSPlayerManager.audioPlayerMaximumChannels, descriptor.inputNumberOfChannels))
+        channels = Int32(max(min(KSPlayerManager.audioPlayerMaximumChannels, descriptor.inputNumberOfChannels), 2))
         _ = setup(descriptor: descriptor)
     }
 
@@ -348,16 +348,14 @@ class AudioDescriptor: Equatable {
     fileprivate let inputSampleRate: Int32
     fileprivate let inputFormat: AVSampleFormat
     init(codecpar: UnsafeMutablePointer<AVCodecParameters>) {
-        let channels = UInt32(codecpar.pointee.channels)
-        inputNumberOfChannels = channels == 0 ? 2 : channels
+        inputNumberOfChannels = max(UInt32(codecpar.pointee.channels), 1)
         let sampleRate = codecpar.pointee.sample_rate
         inputSampleRate = sampleRate == 0 ? KSPlayerManager.audioPlayerSampleRate : sampleRate
         inputFormat = AVSampleFormat(rawValue: codecpar.pointee.format)
     }
 
     init(frame: UnsafeMutablePointer<AVFrame>) {
-        let channels = UInt32(frame.pointee.channels)
-        inputNumberOfChannels = channels == 0 ? 2 : channels
+        inputNumberOfChannels = max(UInt32(frame.pointee.channels), 1)
         let sampleRate = frame.pointee.sample_rate
         inputSampleRate = sampleRate == 0 ? KSPlayerManager.audioPlayerSampleRate : sampleRate
         inputFormat = AVSampleFormat(rawValue: frame.pointee.format)
