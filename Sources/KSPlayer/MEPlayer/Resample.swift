@@ -25,6 +25,7 @@ class VideoSwresample: Swresample {
     private var height: Int32 = 0
     private var width: Int32 = 0
     private var forceTransfer: Bool
+    private var pool: CVPixelBufferPool?
     var dstFrame: UnsafeMutablePointer<AVFrame>?
     init(dstFormat: AVPixelFormat = AV_PIX_FMT_NV12, forceTransfer: Bool = false) {
         self.dstFormat = dstFormat
@@ -32,13 +33,20 @@ class VideoSwresample: Swresample {
     }
 
     private func setup(frame: UnsafeMutablePointer<AVFrame>) -> Bool {
-        setup(format: AVPixelFormat(rawValue: frame.pointee.format), width: frame.pointee.width, height: frame.pointee.height)
-    }
-
-    func setup(format: AVPixelFormat, width: Int32, height: Int32) -> Bool {
+        let format = AVPixelFormat(rawValue: frame.pointee.format)
+        let width = frame.pointee.width
+        let height = frame.pointee.height
         if self.format == format, self.width == width, self.height == height {
             return true
         }
+        let result = setup(format: format, width: width, height: height)
+        if let pixelFormatType = format.osType() {
+            pool = CVPixelBufferPool.ceate(width: width, height: height, bytesPerRowAlignment: frame.pointee.linesize.0, pixelFormatType: pixelFormatType)
+        }
+        return result
+    }
+
+    private func setup(format: AVPixelFormat, width: Int32, height: Int32) -> Bool {
         shutdown()
         self.format = format
         self.height = height
@@ -75,12 +83,17 @@ class VideoSwresample: Swresample {
             frame.corePixelBuffer = avframe.pointee.data.3 as! CVPixelBuffer
             // swiftlint:enable force_cast
         } else {
-            if setup(frame: avframe), let dstFrame = dstFrame, swsConvert(data: Array(tuple: avframe.pointee.data), linesize: Array(tuple: avframe.pointee.linesize)) {
-                avframe.pointee.format = dstFrame.pointee.format
-                avframe.pointee.data = dstFrame.pointee.data
-                avframe.pointee.linesize = dstFrame.pointee.linesize
+            _ = setup(frame: avframe)
+            if let pool = pool {
+                frame.corePixelBuffer = pool.getPixelBuffer(fromFrame: avframe.pointee)
+            } else {
+                if let dstFrame = dstFrame, swsConvert(data: Array(tuple: avframe.pointee.data), linesize: Array(tuple: avframe.pointee.linesize)) {
+                    avframe.pointee.format = dstFrame.pointee.format
+                    avframe.pointee.data = dstFrame.pointee.data
+                    avframe.pointee.linesize = dstFrame.pointee.linesize
+                }
+                frame.corePixelBuffer = PixelBuffer(frame: avframe)
             }
-            frame.corePixelBuffer = PixelBuffer(frame: avframe)
         }
         frame.duration = avframe.pointee.pkt_duration
         frame.size = Int64(avframe.pointee.pkt_size)
@@ -168,9 +181,7 @@ class PixelBuffer: BufferProtocol {
         var size = [Int]()
         for i in 0 ..< planeCount {
             if #available(iOS 11.0, tvOS 11.0, *) {
-                let alignment = MetalRender.device.minimumLinearTextureAlignment(for: formats[i])
-                let remainder = bytesPerRow[i] % alignment
-                lineSize.append(remainder == 0 ? bytesPerRow[i] : bytesPerRow[i] + alignment - remainder)
+                lineSize.append(bytesPerRow[i].alignment(value: MetalRender.device.minimumLinearTextureAlignment(for: formats[i])))
             } else {
                 lineSize.append(bytesPerRow[i])
             }
@@ -226,6 +237,12 @@ class PixelBuffer: BufferProtocol {
     }
 }
 
+extension BinaryInteger {
+    func alignment(value: Self) -> Self {
+        let remainder = self % value
+        return remainder == 0 ? self : self + value - remainder
+    }
+}
 extension AVPixelFormat {
     func bitDepth() -> Int32 {
         let descriptor = av_pix_fmt_desc_get(self)
@@ -250,25 +267,83 @@ extension AVPixelFormat {
     func bestPixelFormat() -> AVPixelFormat {
         return bitDepth() > 8 ? AV_PIX_FMT_P010LE : AV_PIX_FMT_NV12
     }
+
+    // swiftlint:disable cyclomatic_complexity
+    func osType() -> OSType? {
+        switch self {
+        case AV_PIX_FMT_ABGR:       return kCVPixelFormatType_32ABGR
+        case AV_PIX_FMT_ARGB:       return kCVPixelFormatType_32ARGB
+        case AV_PIX_FMT_BGR24:      return kCVPixelFormatType_24BGR
+        case AV_PIX_FMT_BGR48BE:    return kCVPixelFormatType_48RGB
+        case AV_PIX_FMT_BGRA:       return kCVPixelFormatType_32BGRA
+        case AV_PIX_FMT_MONOBLACK:  return kCVPixelFormatType_1Monochrome
+        case AV_PIX_FMT_NV12:       return kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange
+        case AV_PIX_FMT_RGB24:      return kCVPixelFormatType_24RGB
+        case AV_PIX_FMT_RGB555BE:   return kCVPixelFormatType_16BE555
+        case AV_PIX_FMT_RGB555LE:   return kCVPixelFormatType_16LE555
+        case AV_PIX_FMT_RGB565BE:   return kCVPixelFormatType_16BE565
+        case AV_PIX_FMT_RGB565LE:   return kCVPixelFormatType_16LE565
+        case AV_PIX_FMT_RGBA:       return kCVPixelFormatType_32RGBA
+        case AV_PIX_FMT_UYVY422:    return kCVPixelFormatType_422YpCbCr8
+        case AV_PIX_FMT_YUV420P:    return kCVPixelFormatType_420YpCbCr8Planar
+        case AV_PIX_FMT_P010LE:     return kCVPixelFormatType_420YpCbCr10BiPlanarVideoRange
+        case AV_PIX_FMT_YUV422P10LE:return kCVPixelFormatType_422YpCbCr10
+        case AV_PIX_FMT_YUV422P16LE:return kCVPixelFormatType_422YpCbCr16
+        case AV_PIX_FMT_YUV444P:    return kCVPixelFormatType_444YpCbCr8
+        case AV_PIX_FMT_YUV444P10LE:return kCVPixelFormatType_444YpCbCr10
+        case AV_PIX_FMT_YUVA444P:   return kCVPixelFormatType_4444YpCbCrA8R
+        case AV_PIX_FMT_YUVA444P16LE:return kCVPixelFormatType_4444AYpCbCr16
+        case AV_PIX_FMT_YUYV422:    return kCVPixelFormatType_422YpCbCr8_yuvs
+        case AV_PIX_FMT_GRAY8:      return kCVPixelFormatType_OneComponent8
+        default:
+            return nil
+        }
+    }
+    // swiftlint:enable cyclomatic_complexity
+
 }
 
 extension CVPixelBufferPool {
+    static func ceate(width: Int32, height: Int32, bytesPerRowAlignment: Int32, pixelFormatType: OSType, bufferCount: Int = 24) -> CVPixelBufferPool? {
+        let sourcePixelBufferOptions: NSMutableDictionary = [
+            kCVPixelBufferPixelFormatTypeKey: pixelFormatType,
+            kCVPixelBufferWidthKey: width,
+            kCVPixelBufferHeightKey: height,
+            kCVPixelBufferBytesPerRowAlignmentKey: bytesPerRowAlignment.alignment(value: 64),
+            kCVPixelBufferMetalCompatibilityKey: true,
+//            kCVPixelBufferIOSurfacePropertiesKey: NSDictionary()
+        ]
+        var outputPool: CVPixelBufferPool?
+        let pixelBufferPoolOptions: NSDictionary = [kCVPixelBufferPoolMinimumBufferCountKey: bufferCount]
+        CVPixelBufferPoolCreate(kCFAllocatorDefault, pixelBufferPoolOptions, sourcePixelBufferOptions, &outputPool)
+        return outputPool
+    }
+
     func getPixelBuffer(fromFrame frame: AVFrame) -> CVPixelBuffer? {
         var pbuf: CVPixelBuffer?
         let ret = CVPixelBufferPoolCreatePixelBuffer(kCFAllocatorDefault, self, &pbuf)
-        //        let dic = [kCVPixelBufferIOSurfacePropertiesKey: NSDictionary(),
-        //                       kCVPixelBufferBytesPerRowAlignmentKey: frame.linesize.0] as NSDictionary
-        //        let ret = CVPixelBufferCreate(kCFAllocatorDefault, Int(frame.width), Int(frame.height), AVPixelFormat(rawValue: frame.format).format, dic, &pbuf)
         if let pbuf = pbuf, ret == kCVReturnSuccess {
             CVPixelBufferLockBaseAddress(pbuf, CVPixelBufferLockFlags(rawValue: 0))
             let data = Array(tuple: frame.data)
             let linesize = Array(tuple: frame.linesize)
-            let heights = [frame.height, frame.height / 2, frame.height / 2]
             for i in 0 ..< pbuf.planeCount {
-                let perRow = Int(linesize[i])
-                pbuf.baseAddressOfPlane(at: i)?.copyMemory(from: data[i]!, byteCount: Int(heights[i]) * perRow)
+                let height = pbuf.heightOfPlane(at: i)
+                let size = Int(linesize[i])
+                let bytesPerRow = CVPixelBufferGetBytesPerRowOfPlane(pbuf, i)
+                if bytesPerRow == size {
+                    pbuf.baseAddressOfPlane(at: i)?.copyMemory(from: data[i]!, byteCount: height * size)
+                } else {
+                    let contents = pbuf.baseAddressOfPlane(at: i)
+                    let source = data[i]!
+                    for j in 0 ..< height {
+                        contents?.advanced(by: j*bytesPerRow).copyMemory(from: source.advanced(by: j*size), byteCount: size)
+                    }
+                }
             }
             CVPixelBufferUnlockBaseAddress(pbuf, CVPixelBufferLockFlags(rawValue: 0))
+            if let aspectRatio = frame.sample_aspect_ratio.size.aspectRatio {
+                CVBufferSetAttachment(pbuf, kCVImageBufferPixelAspectRatioKey, aspectRatio, .shouldPropagate)
+            }
         }
         return pbuf
     }
