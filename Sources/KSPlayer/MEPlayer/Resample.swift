@@ -40,7 +40,7 @@ class VideoSwresample: Swresample {
             return true
         }
         let result = setup(format: format, width: width, height: height)
-        if let pixelFormatType = format.osType() {
+        if result, let pixelFormatType = format.osType() ?? dstFormat.osType() {
             pool = CVPixelBufferPool.ceate(width: width, height: height, bytesPerRowAlignment: frame.pointee.linesize.0, pixelFormatType: pixelFormatType)
         }
         return result
@@ -52,7 +52,7 @@ class VideoSwresample: Swresample {
         self.height = height
         self.width = width
         if !forceTransfer {
-            if PixelBuffer.isSupported(format: self.format) {
+            if self.format.osType() != nil {
                 return true
             } else {
                 dstFormat = self.format.bestPixelFormat()
@@ -218,10 +218,6 @@ class PixelBuffer: BufferProtocol {
 
     func heightOfPlane(at planeIndex: Int) -> Int {
         heights[planeIndex]
-    }
-
-    public static func isSupported(format: AVPixelFormat) -> Bool {
-        [AV_PIX_FMT_BGRA, AV_PIX_FMT_NV12, AV_PIX_FMT_P010BE, AV_PIX_FMT_YUV420P].contains(format)
     }
 
     func image() -> CGImage? {
