@@ -44,7 +44,7 @@ let package = Package(
                 .linkedLibrary("z")
             ]
         ),
-        .target(
+        .executableTarget(
             name: "Script",
             dependencies: [],
             sources: ["main.swift"]
