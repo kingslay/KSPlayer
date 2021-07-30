@@ -58,7 +58,7 @@ public class KSMEPlayer {
 
     public required init(url: URL, options: KSOptions) {
         playerItem = MEPlayerItem(url: url, options: options)
-        self.videoOutput = MetalPlayView(options: options)
+        videoOutput = MetalPlayView(options: options)
         self.options = options
         playerItem.delegate = self
         audioOutput.renderSource = playerItem
