@@ -60,7 +60,7 @@ final class MotionSensor {
     }
 
     func matrix() -> simd_float4x4? {
-        if var matrix = manager.matrix() {
+        if var matrix = manager.deviceMotion.flatMap(simd_float4x4.init(motion:)) {
             matrix = matrix.transpose
             matrix *= worldToInertialReferenceFrame
             orientation = UIApplication.shared.statusBarOrientation
@@ -69,15 +69,6 @@ final class MotionSensor {
             return matrix
         }
         return nil
-    }
-}
-
-extension CMMotionManager {
-    public func matrix() -> simd_float4x4? {
-        guard let motion = deviceMotion else {
-            return nil
-        }
-        return simd_float4x4(motion: motion)
     }
 }
 

@@ -17,7 +17,6 @@ Pod::Spec.new do |s|
     # s.watchos.deployment_target = '2.0'
     s.tvos.deployment_target = '11.0'
     s.default_subspec = 'FFmpeg'
-    s.swift_version = '5.4'
     s.static_framework = true
     s.source_files = 'Sources/FFmpeg/**/*.{h,c,m}'
     s.subspec 'FFmpeg' do |ffmpeg|
