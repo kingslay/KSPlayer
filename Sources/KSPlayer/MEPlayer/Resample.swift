@@ -40,7 +40,7 @@ class VideoSwresample: Swresample {
             return true
         }
         let result = setup(format: format, width: width, height: height)
-        if result, let pixelFormatType = format.osType() ?? dstFormat.osType() {
+        if result, let pixelFormatType = dstFormat.osType() {
             pool = CVPixelBufferPool.ceate(width: width, height: height, bytesPerRowAlignment: frame.pointee.linesize.0, pixelFormatType: pixelFormatType)
         }
         return result
@@ -53,6 +53,7 @@ class VideoSwresample: Swresample {
         self.width = width
         if !forceTransfer {
             if self.format.osType() != nil {
+                dstFormat = self.format
                 return true
             } else {
                 dstFormat = self.format.bestPixelFormat()
@@ -84,14 +85,14 @@ class VideoSwresample: Swresample {
             // swiftlint:enable force_cast
         } else {
             _ = setup(frame: avframe)
+            if let dstFrame = dstFrame, swsConvert(data: Array(tuple: avframe.pointee.data), linesize: Array(tuple: avframe.pointee.linesize)) {
+                avframe.pointee.format = dstFrame.pointee.format
+                avframe.pointee.data = dstFrame.pointee.data
+                avframe.pointee.linesize = dstFrame.pointee.linesize
+            }
             if let pool = pool {
                 frame.corePixelBuffer = pool.getPixelBuffer(fromFrame: avframe.pointee)
             } else {
-                if let dstFrame = dstFrame, swsConvert(data: Array(tuple: avframe.pointee.data), linesize: Array(tuple: avframe.pointee.linesize)) {
-                    avframe.pointee.format = dstFrame.pointee.format
-                    avframe.pointee.data = dstFrame.pointee.data
-                    avframe.pointee.linesize = dstFrame.pointee.linesize
-                }
                 frame.corePixelBuffer = PixelBuffer(frame: avframe)
             }
         }
@@ -282,6 +283,7 @@ extension AVPixelFormat {
         case AV_PIX_FMT_RGBA:       return kCVPixelFormatType_32RGBA
         case AV_PIX_FMT_UYVY422:    return kCVPixelFormatType_422YpCbCr8
         case AV_PIX_FMT_YUV420P:    return kCVPixelFormatType_420YpCbCr8Planar
+//        case AV_PIX_FMT_YUVJ420P:   return kCVPixelFormatType_420YpCbCr8PlanarFullRange
         case AV_PIX_FMT_P010LE:     return kCVPixelFormatType_420YpCbCr10BiPlanarVideoRange
         case AV_PIX_FMT_YUV422P10LE:return kCVPixelFormatType_422YpCbCr10
         case AV_PIX_FMT_YUV422P16LE:return kCVPixelFormatType_422YpCbCr16
