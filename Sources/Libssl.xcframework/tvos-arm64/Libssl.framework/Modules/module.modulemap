@@ -1,4 +1,4 @@
-framework module Libssl [system] {
-   header "openssl/ssl.h"
+module Libssl {
+    umbrella "."
     export *
 }

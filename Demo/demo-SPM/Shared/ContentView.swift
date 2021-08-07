@@ -5,8 +5,8 @@
 //  Created by kintan on 2021/5/3.
 //
 
-import SwiftUI
 import KSPlayer
+import SwiftUI
 struct ContentView: View {
     var body: some View {
         Text("Hello, world!")

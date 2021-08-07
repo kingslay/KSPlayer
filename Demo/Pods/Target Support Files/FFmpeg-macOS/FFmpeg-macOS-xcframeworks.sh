@@ -150,6 +150,7 @@ install_xcframework() {
 }
 
 install_xcframework "${PODS_ROOT}/../../Sources/Libavcodec.xcframework" "Libavcodec" "framework" "macos-arm64_x86_64"
+install_xcframework "${PODS_ROOT}/../../Sources/Libavfilter.xcframework" "Libavfilter" "framework" "macos-arm64_x86_64"
 install_xcframework "${PODS_ROOT}/../../Sources/Libavformat.xcframework" "Libavformat" "framework" "macos-arm64_x86_64"
 install_xcframework "${PODS_ROOT}/../../Sources/Libavutil.xcframework" "Libavutil" "framework" "macos-arm64_x86_64"
 install_xcframework "${PODS_ROOT}/../../Sources/Libswresample.xcframework" "Libswresample" "framework" "macos-arm64_x86_64"

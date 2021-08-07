@@ -6,8 +6,8 @@
 //
 
 import AVFoundation
-import Libavcodec
 import Foundation
+import Libavcodec
 
 class SoftwareDecode: DecodeProtocol {
     private let mediaType: AVFoundation.AVMediaType
@@ -19,20 +19,34 @@ class SoftwareDecode: DecodeProtocol {
     private var codecContext: UnsafeMutablePointer<AVCodecContext>?
     private var bestEffortTimestamp = Int64(0)
     private let swresample: Swresample
+    private let filter: MEFilter?
     required init(assetTrack: TrackProtocol, options: KSOptions) {
         timebase = assetTrack.timebase
         mediaType = assetTrack.mediaType
         self.options = options
+        var codecpar = assetTrack.stream.pointee.codecpar.pointee
         do {
-            codecContext = try assetTrack.stream.pointee.codecpar.ceateContext(options: options)
+            codecContext = try codecpar.ceateContext(options: options)
         } catch {
             KSLog(error as CustomStringConvertible)
         }
         codecContext?.pointee.time_base = timebase.rational
         if mediaType == .video {
+            filter = options.videoFilters.flatMap { str -> MEFilter? in
+                let ratio = codecpar.sample_aspect_ratio
+                let timebase = assetTrack.timebase
+                let args = "video_size=\(codecpar.width)x\(codecpar.height):pix_fmt=\(codecpar.format):time_base=\(timebase.num)/\(timebase.den):pixel_aspect=\(ratio.num)/\(ratio.den)"
+                return MEFilter(filters: str, args: args, isAudio: false)
+            }
             swresample = VideoSwresample()
         } else {
-            swresample = AudioSwresample(codecpar: assetTrack.stream.pointee.codecpar)
+            filter = options.videoFilters.flatMap { str -> MEFilter? in
+                let fmt = String(describing: av_get_sample_fmt_name(AVSampleFormat(rawValue: codecpar.format)))
+                let timebase = assetTrack.timebase
+                let args = "sample_rate=\(codecpar.sample_rate):sample_fmt=\(fmt):time_base=\(timebase.num)/\(timebase.den):channels=\(codecpar.channels):channel_layout=\(codecpar.channel_layout)"
+                return MEFilter(filters: str, args: args, isAudio: true)
+            }
+            swresample = AudioSwresample(codecpar: codecpar)
         }
     }
 
@@ -48,7 +62,7 @@ class SoftwareDecode: DecodeProtocol {
                 if timestamp >= bestEffortTimestamp {
                     bestEffortTimestamp = timestamp
                 }
-                var frame = try swresample.transfer(avframe: avframe, timebase: timebase)
+                var frame = try swresample.transfer(avframe: filter?.filter(inputFrame: avframe) ?? avframe, timebase: timebase)
                 frame.position = bestEffortTimestamp
                 bestEffortTimestamp += frame.duration
                 array.append(frame)
@@ -90,13 +104,13 @@ class SoftwareDecode: DecodeProtocol {
     }
 }
 
-extension UnsafeMutablePointer where Pointee == AVCodecParameters {
-    func ceateContext(options: KSOptions) throws -> UnsafeMutablePointer<AVCodecContext> {
+extension AVCodecParameters {
+    mutating func ceateContext(options: KSOptions) throws -> UnsafeMutablePointer<AVCodecContext> {
         var codecContextOption = avcodec_alloc_context3(nil)
         guard let codecContext = codecContextOption else {
             throw NSError(errorCode: .codecContextCreate)
         }
-        var result = avcodec_parameters_to_context(codecContext, self)
+        var result = avcodec_parameters_to_context(codecContext, &self)
         guard result == 0 else {
             avcodec_free_context(&codecContextOption)
             throw NSError(errorCode: .codecContextSetParam, ffmpegErrnum: result)

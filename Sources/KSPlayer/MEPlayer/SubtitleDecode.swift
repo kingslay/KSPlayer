@@ -6,8 +6,8 @@
 //
 
 import CoreGraphics
-import Libavformat
 import Foundation
+import Libavformat
 #if canImport(UIKit)
 import UIKit
 #else
@@ -23,15 +23,13 @@ class SubtitleDecode: DecodeProtocol {
     required init(assetTrack: TrackProtocol, options: KSOptions) {
         timebase = assetTrack.timebase
         do {
-            codecContext = try assetTrack.stream.pointee.codecpar.ceateContext(options: options)
+            codecContext = try assetTrack.stream.pointee.codecpar.pointee.ceateContext(options: options)
         } catch {
             KSLog(error as CustomStringConvertible)
         }
     }
 
-    func decode() {
-
-    }
+    func decode() {}
 
     func doDecode(packet: UnsafeMutablePointer<AVPacket>) throws -> [MEFrame] {
         guard let codecContext = codecContext else { return [] }
@@ -75,8 +73,7 @@ class SubtitleDecode: DecodeProtocol {
         return array
     }
 
-    func doFlushCodec() {
-    }
+    func doFlushCodec() {}
 
     func shutdown() {
         scale.shutdown()
@@ -102,7 +99,7 @@ class SubtitleDecode: DecodeProtocol {
                     attributedString.append(group.text)
                 }
             } else if rect.type == SUBTITLE_BITMAP {
-                image = scale.transfer(format: AV_PIX_FMT_PAL8, width: rect.w, height: rect.h, data: Array(tuple: rect.data), linesize: Array(tuple: rect.linesize).map {Int($0)})
+                image = scale.transfer(format: AV_PIX_FMT_PAL8, width: rect.w, height: rect.h, data: Array(tuple: rect.data), linesize: Array(tuple: rect.linesize).map { Int($0) })
             }
         }
         return (attributedString, image.map { UIImage(cgImage: $0) })

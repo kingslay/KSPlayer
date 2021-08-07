@@ -26,6 +26,7 @@ open class LayerContainerView: UIView {
         layer = CAGradientLayer()
     }
 
+    @available(*, unavailable)
     public required init?(coder _: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
@@ -95,15 +96,15 @@ extension String {
     }
 }
 
-extension UIColor {
-    public convenience init(hex: Int, alpha: CGFloat = 1) {
+public extension UIColor {
+    convenience init(hex: Int, alpha: CGFloat = 1) {
         let red = CGFloat((hex >> 16) & 0xFF)
         let green = CGFloat((hex >> 8) & 0xFF)
         let blue = CGFloat(hex & 0xFF)
         self.init(red: red / 255.0, green: green / 255.0, blue: blue / 255.0, alpha: alpha)
     }
 
-    public func createImage(size: CGSize = CGSize(width: 1, height: 1)) -> UIImage {
+    func createImage(size: CGSize = CGSize(width: 1, height: 1)) -> UIImage {
         #if canImport(UIKit)
         let rect = CGRect(origin: .zero, size: size)
         UIGraphicsBeginImageContext(rect.size)
@@ -384,15 +385,15 @@ extension UIImageView {
     }
 }
 
-extension URL {
-    public var isMovie: Bool {
+public extension URL {
+    var isMovie: Bool {
         if let typeID = try? resourceValues(forKeys: [.typeIdentifierKey]).typeIdentifier as CFString? {
             return UTTypeConformsTo(typeID, kUTTypeMovie)
         }
         return false
     }
 
-    public var isAudio: Bool {
+    var isAudio: Bool {
         if let typeID = try? resourceValues(forKeys: [.typeIdentifierKey]).typeIdentifier as CFString? {
             return UTTypeConformsTo(typeID, kUTTypeAudio)
         }

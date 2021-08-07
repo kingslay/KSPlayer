@@ -212,9 +212,9 @@ class KeychainAccess {
 
         // get data
         guard let existingItem = item as? [String: Any],
-            let passwordData = existingItem[kSecValueData as String] as? Data,
-            let password = String(data: passwordData, encoding: String.Encoding.utf8),
-            let account = existingItem[kSecAttrAccount as String] as? String
+              let passwordData = existingItem[kSecValueData as String] as? Data,
+              let password = String(data: passwordData, encoding: String.Encoding.utf8),
+              let account = existingItem[kSecAttrAccount as String] as? String
         else {
             throw KeychainError.unexpectedData
         }
@@ -222,7 +222,7 @@ class KeychainAccess {
     }
 }
 
-class Utility {
+enum Utility {
     static func showAlert(_ key: String, comment: String? = nil, arguments: [CVarArg]? = nil, style: NSAlert.Style = .critical, sheetWindow: NSWindow? = nil) {
         let alert = NSAlert()
         switch style {

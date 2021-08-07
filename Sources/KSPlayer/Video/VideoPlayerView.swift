@@ -115,11 +115,6 @@ open class VideoPlayerView: PlayerView {
         setupUIComponents()
     }
 
-    public required init?(coder aDecoder: NSCoder) {
-        super.init(coder: aDecoder)
-        setupUIComponents()
-    }
-
     // MARK: - Action Response
 
     override open func onButtonPressed(type: PlayerButtonType, button: UIButton) {
@@ -389,21 +384,21 @@ open class VideoPlayerView: PlayerView {
 
 // MARK: - seekToView
 
-extension VideoPlayerView {
+public extension VideoPlayerView {
     /**
      Call when User use the slide to seek function
 
      - parameter second:     target time
      - parameter isAdd:         isAdd
      */
-    public func showSeekToView(second: TimeInterval, isAdd: Bool) {
+    func showSeekToView(second: TimeInterval, isAdd: Bool) {
         isMaskShow = true
         seekToView.isHidden = false
         toolBar.currentTime = second
         seekToView.set(text: second.toString(for: toolBar.timeType), isAdd: isAdd)
     }
 
-    public func hideSeekToView() {
+    func hideSeekToView() {
         seekToView.isHidden = true
     }
 }
@@ -569,7 +564,7 @@ extension VideoPlayerView {
             srtControl.view.topAnchor.constraint(equalTo: topAnchor),
             srtControl.view.leftAnchor.constraint(equalTo: leftAnchor),
             srtControl.view.bottomAnchor.constraint(equalTo: bottomAnchor),
-            srtControl.view.rightAnchor.constraint(equalTo: rightAnchor)
+            srtControl.view.rightAnchor.constraint(equalTo: rightAnchor),
         ])
     }
 
@@ -591,22 +586,22 @@ public enum KSPlayerTopBarShowCase {
     case none
 }
 
-extension KSPlayerManager {
+public extension KSPlayerManager {
     /// 顶部返回、标题、AirPlay按钮 显示选项，默认.Always，可选.HorizantalOnly、.None
-    public static var topBarShowInCase = KSPlayerTopBarShowCase.always
+    static var topBarShowInCase = KSPlayerTopBarShowCase.always
     /// 自动隐藏操作栏的时间间隔 默认5秒
-    public static var animateDelayTimeInterval = TimeInterval(5)
+    static var animateDelayTimeInterval = TimeInterval(5)
     /// 开启亮度手势 默认true
-    public static var enableBrightnessGestures = true
+    static var enableBrightnessGestures = true
     /// 开启音量手势 默认true
-    public static var enableVolumeGestures = true
+    static var enableVolumeGestures = true
     /// 开启进度滑动手势 默认true
-    public static var enablePlaytimeGestures = true
+    static var enablePlaytimeGestures = true
     /// 竖屏是否开启手势控制 默认false
-    public static var enablePortraitGestures = false
+    static var enablePortraitGestures = false
     /// 播放内核选择策略 先使用firstPlayer，失败了自动切换到secondPlayer，播放内核有KSAVPlayer、KSMEPlayer两个选项
     /// 是否能后台播放视频
-    public static var canBackgroundPlay = false
+    static var canBackgroundPlay = false
 
-    public static var autoSelectEmbedSubtitle = true
+    static var autoSelectEmbedSubtitle = true
 }

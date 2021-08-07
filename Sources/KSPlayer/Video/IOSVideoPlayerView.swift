@@ -96,7 +96,7 @@ open class IOSVideoPlayerView: VideoPlayerView {
             routeButton.widthAnchor.constraint(equalToConstant: 25),
             landscapeButton.widthAnchor.constraint(equalToConstant: 30),
             airplayStatusView.centerXAnchor.constraint(equalTo: centerXAnchor),
-            airplayStatusView.centerYAnchor.constraint(equalTo: centerYAnchor)
+            airplayStatusView.centerYAnchor.constraint(equalTo: centerYAnchor),
         ])
         addNotification()
     }
@@ -151,7 +151,7 @@ open class IOSVideoPlayerView: VideoPlayerView {
             UIDevice.current.setValue(UIInterfaceOrientation.unknown.rawValue, forKey: "orientation")
             UIDevice.current.setValue((isLandscape ? UIInterfaceOrientation.landscapeRight : .portrait).rawValue, forKey: "orientation")
             if KSPlayerManager.supportedInterfaceOrientations != .all {
-                KSPlayerManager.supportedInterfaceOrientations = isLandscape ?  UIInterfaceOrientationMask.landscapeRight : .portrait
+                KSPlayerManager.supportedInterfaceOrientations = isLandscape ? UIInterfaceOrientationMask.landscapeRight : .portrait
                 UIViewController.attemptRotationToDeviceOrientation()
             }
         }
@@ -306,19 +306,20 @@ public class AirplayStatusView: UIView {
             airplaymessage.bottomAnchor.constraint(equalTo: bottomAnchor),
             airplaymessage.leftAnchor.constraint(equalTo: leftAnchor),
             airplaymessage.rightAnchor.constraint(equalTo: rightAnchor),
-            airplaymessage.heightAnchor.constraint(equalToConstant: 15)
+            airplaymessage.heightAnchor.constraint(equalToConstant: 15),
         ])
         isHidden = true
     }
 
+    @available(*, unavailable)
     required init?(coder _: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
 }
-extension KSPlayerManager {
-    /// func application(_ application: UIApplication, supportedInterfaceOrientationsFor window: UIWindow?) -> UIInterfaceOrientationMask
-    public static var supportedInterfaceOrientations = UIInterfaceOrientationMask.portrait
 
+public extension KSPlayerManager {
+    /// func application(_ application: UIApplication, supportedInterfaceOrientationsFor window: UIWindow?) -> UIInterfaceOrientationMask
+    static var supportedInterfaceOrientations = UIInterfaceOrientationMask.portrait
 }
 
 extension UIApplication {
@@ -330,23 +331,26 @@ extension UIApplication {
         }
     }
 }
+
 // MARK: - menu
+
 extension IOSVideoPlayerView {
     override open var canBecomeFirstResponder: Bool {
         true
     }
+
     override open func canPerformAction(_ action: Selector, withSender _: Any?) -> Bool {
         if action == #selector(IOSVideoPlayerView.openFileAction) {
             return true
         }
         return true
     }
+
     @objc fileprivate func openFileAction(_: AnyObject) {
         let documentPicker = UIDocumentPickerViewController(documentTypes: [kUTTypeAudio, kUTTypeMovie, kUTTypePlainText] as [String], in: .open)
         documentPicker.delegate = self
-        self.viewController?.present(documentPicker, animated: true, completion: nil)
+        viewController?.present(documentPicker, animated: true, completion: nil)
     }
-
 }
 
 extension IOSVideoPlayerView: UIDocumentPickerDelegate {
@@ -415,7 +419,7 @@ public class MenuController {
         case upArrow
         case downArrow
         func localizedString() -> String {
-            return NSLocalizedString("\(self.rawValue)", comment: "")
+            NSLocalizedString("\(rawValue)", comment: "")
         }
 
         var command: String {

@@ -23,6 +23,7 @@ class TableViewCell: UITableViewCell {
         ])
     }
 
+    @available(*, unavailable)
     required init?(coder _: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
@@ -44,7 +45,10 @@ class MasterViewController: UIViewController, UITableViewDelegate, UITableViewDa
         tableView.delegate = self
         tableView.dataSource = self
         if let path = Bundle.main.path(forResource: "567082ac3ae39699f68de4fd2b7444b1e045515a", ofType: "mp4") {
-            objects.append(KSPlayerResource(url: URL(fileURLWithPath: path), name: "本地视频"))
+            let options = KSOptions()
+            options.videoFilters = "hflip,vflip"
+            options.hardwareDecodeH264 = false
+            objects.append(KSPlayerResource(url: URL(fileURLWithPath: path), options: options, name: "本地视频"))
         }
         if let path = Bundle.main.path(forResource: "google-help-vr", ofType: "mp4") {
             let options = KSOptions()

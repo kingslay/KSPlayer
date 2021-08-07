@@ -60,6 +60,7 @@ open class PlayerView: UIView, KSPlayerLayerDelegate, KSSliderDelegate {
         toolBar.addTarget(self, action: #selector(onButtonPressed(_:)))
     }
 
+    @available(*, unavailable)
     public required init?(coder _: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }

@@ -8,13 +8,13 @@
 
 import AppKit
 import AVFoundation
-extension NSPasteboard.PasteboardType {
-    public static let nsURL = NSPasteboard.PasteboardType("NSURL")
-    public static let nsFilenames = NSPasteboard.PasteboardType("NSFilenamesPboardType")
+public extension NSPasteboard.PasteboardType {
+    static let nsURL = NSPasteboard.PasteboardType("NSURL")
+    static let nsFilenames = NSPasteboard.PasteboardType("NSFilenamesPboardType")
 }
 
-extension NSDraggingInfo {
-    public func getUrl() -> URL? {
+public extension NSDraggingInfo {
+    func getUrl() -> URL? {
         guard let types = draggingPasteboard.types else { return nil }
 
         if types.contains(.nsFilenames) {
@@ -148,6 +148,7 @@ class UIActivityIndicatorView: UIView {
         setupLoadingView()
     }
 
+    @available(*, unavailable)
     required init?(coder _: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
@@ -172,7 +173,7 @@ class UIActivityIndicatorView: UIView {
             imageView.bottomAnchor.constraint(equalTo: loadingView.bottomAnchor),
             imageView.leftAnchor.constraint(equalTo: loadingView.leftAnchor),
             imageView.heightAnchor.constraint(equalTo: widthAnchor),
-            imageView.widthAnchor.constraint(equalTo: heightAnchor)
+            imageView.widthAnchor.constraint(equalTo: heightAnchor),
         ])
         progressLabel.alignment = .center
         progressLabel.font = NSFont.systemFont(ofSize: 18, weight: .medium)
@@ -182,7 +183,7 @@ class UIActivityIndicatorView: UIView {
             progressLabel.centerXAnchor.constraint(equalTo: centerXAnchor),
             progressLabel.topAnchor.constraint(equalTo: loadingView.bottomAnchor, constant: 20),
             progressLabel.widthAnchor.constraint(equalToConstant: 100),
-            progressLabel.heightAnchor.constraint(equalToConstant: 22)
+            progressLabel.heightAnchor.constraint(equalToConstant: 22),
         ])
         startAnimating()
     }

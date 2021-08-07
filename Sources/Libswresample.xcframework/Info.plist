@@ -6,6 +6,35 @@
 	<array>
 		<dict>
 			<key>LibraryIdentifier</key>
+			<string>tvos-arm64_x86_64-simulator</string>
+			<key>LibraryPath</key>
+			<string>Libswresample.framework</string>
+			<key>SupportedArchitectures</key>
+			<array>
+				<string>arm64</string>
+				<string>x86_64</string>
+			</array>
+			<key>SupportedPlatform</key>
+			<string>tvos</string>
+			<key>SupportedPlatformVariant</key>
+			<string>simulator</string>
+		</dict>
+		<dict>
+			<key>LibraryIdentifier</key>
+			<string>ios-x86_64-maccatalyst</string>
+			<key>LibraryPath</key>
+			<string>Libswresample.framework</string>
+			<key>SupportedArchitectures</key>
+			<array>
+				<string>x86_64</string>
+			</array>
+			<key>SupportedPlatform</key>
+			<string>ios</string>
+			<key>SupportedPlatformVariant</key>
+			<string>maccatalyst</string>
+		</dict>
+		<dict>
+			<key>LibraryIdentifier</key>
 			<string>ios-arm64_x86_64-simulator</string>
 			<key>LibraryPath</key>
 			<string>Libswresample.framework</string>
@@ -33,21 +62,6 @@
 		</dict>
 		<dict>
 			<key>LibraryIdentifier</key>
-			<string>tvos-arm64_x86_64-simulator</string>
-			<key>LibraryPath</key>
-			<string>Libswresample.framework</string>
-			<key>SupportedArchitectures</key>
-			<array>
-				<string>arm64</string>
-				<string>x86_64</string>
-			</array>
-			<key>SupportedPlatform</key>
-			<string>tvos</string>
-			<key>SupportedPlatformVariant</key>
-			<string>simulator</string>
-		</dict>
-		<dict>
-			<key>LibraryIdentifier</key>
 			<string>macos-arm64_x86_64</string>
 			<key>LibraryPath</key>
 			<string>Libswresample.framework</string>
@@ -58,20 +72,6 @@
 			</array>
 			<key>SupportedPlatform</key>
 			<string>macos</string>
-		</dict>
-		<dict>
-			<key>LibraryIdentifier</key>
-			<string>ios-x86_64-maccatalyst</string>
-			<key>LibraryPath</key>
-			<string>Libswresample.framework</string>
-			<key>SupportedArchitectures</key>
-			<array>
-				<string>x86_64</string>
-			</array>
-			<key>SupportedPlatform</key>
-			<string>ios</string>
-			<key>SupportedPlatformVariant</key>
-			<string>maccatalyst</string>
 		</dict>
 		<dict>
 			<key>LibraryIdentifier</key>

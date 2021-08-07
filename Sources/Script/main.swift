@@ -3,6 +3,7 @@ let path = URL.currentDirectory + "Script"
 if !FileManager.default.fileExists(atPath: path.path) {
     try FileManager.default.createDirectory(at: path, withIntermediateDirectories: false, attributes: nil)
 }
+
 FileManager.default.changeCurrentDirectoryPath(path.path)
 let array = Array(CommandLine.arguments.dropFirst())
 let isDebug = array.firstIndex(of: "debug") != nil
@@ -16,9 +17,10 @@ open class BaseBuild {
     private let library: String
     init(library: String) {
         self.library = library
-        try? FileManager.default.removeItem(at: URL.currentDirectory + library)
     }
+
     func buildALL() {
+        try? FileManager.default.removeItem(at: URL.currentDirectory + library)
         for platform in platforms {
             for arch in platform.architectures() {
                 build(platform: platform, arch: arch)
@@ -34,9 +36,9 @@ open class BaseBuild {
         cflags += " -fembed-bitcode"
         innerBuid(platform: platform, arch: arch, cflags: cflags, buildDir: url)
     }
-    func innerBuid(platform: PlatformType, arch: ArchType, cflags: String, buildDir: URL) {
 
-    }
+    func innerBuid(platform _: PlatformType, arch _: ArchType, cflags _: String, buildDir _: URL) {}
+
     func createXCFramework() {
         for framework in frameworks() {
             var arguments = ""
@@ -48,6 +50,7 @@ open class BaseBuild {
             Utility.shell("xcodebuild -create-xcframework\(arguments) -output \(XCFrameworkFile.path)")
         }
     }
+
     private func createFramework(framework: String, platform: PlatformType, archs: [ArchType]) -> String {
         let frameworkDir = URL.currentDirectory + [library, platform.rawValue, "\(framework).framework"]
         try? FileManager.default.removeItem(at: frameworkDir)
@@ -67,24 +70,36 @@ open class BaseBuild {
         command += (frameworkDir + framework).path
         Utility.shell(command)
         try? FileManager.default.createDirectory(at: frameworkDir + "Modules", withIntermediateDirectories: true, attributes: nil)
-        var modulemap = "framework module \(framework) [system] {\n"
-        frameworkHeaders(framework).forEach { header in
-            modulemap += "    header \"\(header).h\"\n"
+        var modulemap = """
+        framework module \(framework) [system] {
+            umbrella "."
+
+        """
+        frameworkExcludeHeaders(framework).forEach { header in
+            modulemap += """
+                exclude header "\(header).h"
+
+            """
         }
-        modulemap += "    export *\n}"
+        modulemap += """
+            export *
+        }
+        """
         FileManager.default.createFile(atPath: frameworkDir.path + "/Modules/module.modulemap", contents: modulemap.data(using: .utf8), attributes: nil)
-        createPlist(path: frameworkDir.path+"/Info.plist", name: framework, minVersion: platform.minVersion, platform: platform.sdk())
+        createPlist(path: frameworkDir.path + "/Info.plist", name: framework, minVersion: platform.minVersion, platform: platform.sdk())
         return frameworkDir.path
     }
+
     func thinDir(platform: PlatformType, arch: ArchType) -> URL {
-        return URL.currentDirectory + [library, platform.rawValue, "thin", arch.rawValue]
-    }
-    func frameworks() -> [String] {
-        return []
+        URL.currentDirectory + [library, platform.rawValue, "thin", arch.rawValue]
     }
 
-    func frameworkHeaders(_ framework: String) -> [String] {
-        return [framework.replacingOccurrences(of: "Lib", with: "")]
+    func frameworks() -> [String] {
+        []
+    }
+
+    func frameworkExcludeHeaders(_: String) -> [String] {
+        []
     }
 
     func createPlist(path: String, name: String, minVersion: String, platform: String) {
@@ -136,6 +151,7 @@ class BuildFFMPEG: BaseBuild {
     init() {
         super.init(library: "FFmpeg")
     }
+
     override func innerBuid(platform: PlatformType, arch: ArchType, cflags: String, buildDir: URL) {
         var ffmpegcflags = ffmpegConfiguers
         if isDebug && platform == .macos {
@@ -152,8 +168,6 @@ class BuildFFMPEG: BaseBuild {
             ffmpegcflags.append("--disable-ffmpeg")
             ffmpegcflags.append("--disable-ffplay")
             ffmpegcflags.append("--disable-ffprobe")
-            ffmpegcflags.append("--disable-avfilter")
-            ffmpegcflags.append("--disable-filters")
         }
         if platform == .isimulator || platform == .tvsimulator {
             ffmpegcflags.append("--assert-level=1")
@@ -184,7 +198,7 @@ class BuildFFMPEG: BaseBuild {
         print(args.joined(separator: " "))
         Utility.shell(args.joined(separator: " "), currentDirectoryURL: buildDir)
         Utility.shell("make -j8 install\(arch == .x86_64 ? "" : " GASPP_FIX_XCODE5=1") >>\(buildDir.path).log", currentDirectoryURL: buildDir)
-        if isDebug && platform == .macos && arch.executable() {
+        if isDebug, platform == .macos, arch.executable() {
             try? FileManager.default.removeItem(at: URL(fileURLWithPath: "/usr/local/bin/ffmpeg"))
             try? FileManager.default.removeItem(at: URL(fileURLWithPath: "/usr/local/bin/ffplay"))
             try? FileManager.default.removeItem(at: URL(fileURLWithPath: "/usr/local/bin/ffprobe"))
@@ -193,9 +207,11 @@ class BuildFFMPEG: BaseBuild {
             try? FileManager.default.copyItem(at: prefix + ["bin", "ffprobe"], to: URL(fileURLWithPath: "/usr/local/bin/ffprobe"))
         }
     }
+
     override func frameworks() -> [String] {
-        return ["Libavcodec", "Libavformat", "Libavutil", "Libswresample", "Libswscale"]
+        ["Libavcodec", "Libavformat", "Libavutil", "Libswresample", "Libswscale", "Libavfilter"]
     }
+
     override func buildALL() {
         prepareYasm()
         if !FileManager.default.fileExists(atPath: (URL.currentDirectory + ffmpegFile).path) {
@@ -203,6 +219,7 @@ class BuildFFMPEG: BaseBuild {
         }
         super.buildALL()
     }
+
     private func prepareYasm() {
         if Utility.shell("which brew") == nil {
             Utility.shell("ruby -e \"$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)\"")
@@ -213,19 +230,21 @@ class BuildFFMPEG: BaseBuild {
         if Utility.shell("which pkg-config") == nil {
             Utility.shell("brew install pkg-config")
         }
-        if isDebug && Utility.shell("which sdl2-config") == nil {
+        if isDebug, Utility.shell("which sdl2-config") == nil {
             Utility.shell("brew install sdl2")
         }
     }
-    override func frameworkHeaders(_ framework: String) -> [String] {
-        if framework == "Libavutil" {
-            return super.frameworkHeaders(framework) + ["display", "imgutils", "channel_layout"]
-        } else if framework == "Libavformat" {
-            return super.frameworkHeaders(framework) + ["avio"]
+
+    override func frameworkExcludeHeaders(_ framework: String) -> [String] {
+        if framework == "Libavcodec" {
+            return ["xvmc", "vdpau", "qsv", "dxva2", "d3d11va"]
+        } else if framework == "Libavutil" {
+            return ["hwcontext_vulkan", "hwcontext_vdpau", "hwcontext_vaapi", "hwcontext_qsv", "hwcontext_opencl", "hwcontext_dxva2", "hwcontext_d3d11va", "hwcontext_cuda"]
         } else {
-            return super.frameworkHeaders(framework)
+            return super.frameworkExcludeHeaders(framework)
         }
     }
+
     private let ffmpegConfiguers = [
         "--enable-optimizations", "--enable-gpl", "--enable-version3", "--enable-nonfree",
         // Configuration options:
@@ -271,26 +290,34 @@ class BuildFFMPEG: BaseBuild {
         "--enable-decoder=subrip", "--enable-decoder=dvdsub", "--enable-decoder=dvbsub", "--enable-decoder=webvtt", "--disable-hwaccels",
         // ./configure --list-muxers
         "--disable-muxers",
-        // ,"--enable-muxer=mpegts"
-        // ,"--enable-muxer=mp4"
+        // "--enable-muxer=mpegts", "--enable-muxer=mp4",
         // ./configure --list-demuxers
         "--disable-demuxers", "--enable-demuxer=aac", "--enable-demuxer=concat", "--enable-demuxer=data", "--enable-demuxer=flv", "--enable-demuxer=hls",
-        // "--enable-demuxer=latm",
         "--enable-demuxer=live_flv", "--enable-demuxer=loas", "--enable-demuxer=m4v", "--enable-demuxer=mov",
         "--enable-demuxer=mp3", "--enable-demuxer=mpegps", "--enable-demuxer=mpegts", "--enable-demuxer=mpegvideo",
         "--enable-demuxer=hevc", "--enable-demuxer=dash", "--enable-demuxer=wav", "--enable-demuxer=ogg",
         "--enable-demuxer=ape", "--enable-demuxer=aiff", "--enable-demuxer=flac", "--enable-demuxer=amr",
         "--enable-demuxer=rtsp", "--enable-demuxer=asf", "--enable-demuxer=avi", "--enable-demuxer=matroska",
         "--enable-demuxer=rm", "--enable-demuxer=vc1",
+        // "--enable-demuxer=latm",
         // "--enable-demuxer=webm_dash_manifest",
-
         // ./configure --list-protocols
         "--enable-protocols", "--disable-protocol=bluray", "--disable-protocol=ffrtmpcrypt", "--disable-protocol=gopher",
         "--disable-protocol=icecast", "--disable-protocol=librtmp*", "--disable-protocol=libssh",
         "--disable-protocol=md5", "--disable-protocol=mmsh", "--disable-protocol=mmst", "--disable-protocol=sctp",
         "--disable-protocol=srtp", "--disable-protocol=subfile", "--disable-protocol=unix",
+
         "--disable-devices", "--disable-indevs", "--disable-outdevs", "--disable-iconv", "--disable-bsfs",
-        "--disable-audiotoolbox", "--disable-videotoolbox", "--disable-linux-perf", "--disable-bzlib"]
+        "--disable-audiotoolbox", "--disable-videotoolbox", "--disable-linux-perf", "--disable-bzlib",
+        // filters
+        "--disable-filters", "--enable-filter=amix", "--enable-filter=aforma", "--enable-filter=scale",
+        "--enable-filter=format", "--enable-filter=aformat", "--enable-filter=fps", "--enable-filter=trim",
+        "--enable-filter=atrim", "--enable-filter=vflip", "--enable-filter=hflip", "--enable-filter=transpose",
+        "--enable-filter=rotate", "--enable-filter=yadif", "--enable-filter=pan", "--enable-filter=volume",
+        "--enable-filter=aresample", "--enable-filter=atempo", "--enable-filter=asetrate", "--enable-filter=setpts",
+        "--enable-filter=overlay", "--enable-filter=paletteuse", "--enable-filter=areverse", "--enable-filter=anull",
+        "--enable-filter=palettegen", "--enable-filter=null",
+    ]
 }
 
 class BuildOpenSSL: BaseBuild {
@@ -298,12 +325,14 @@ class BuildOpenSSL: BaseBuild {
     init() {
         super.init(library: "SSL")
     }
+
     override func buildALL() {
         if !FileManager.default.fileExists(atPath: (URL.currentDirectory + sslFile).path) {
             Utility.shell("curl https://www.openssl.org/source/\(sslFile).tar.gz | tar xj")
         }
         super.buildALL()
     }
+
     override func innerBuid(platform: PlatformType, arch: ArchType, cflags: String, buildDir: URL) {
         let directoryURL = URL.currentDirectory + sslFile
         var ccFlags = "/usr/bin/clang " + cflags
@@ -321,11 +350,9 @@ class BuildOpenSSL: BaseBuild {
         Utility.shell(command, currentDirectoryURL: directoryURL, environment: environment)
         Utility.shell("make clean >>\(buildDir.path).log && make >>\(buildDir.path).log && make install_sw >>\(buildDir.path).log ", currentDirectoryURL: directoryURL, environment: environment)
     }
+
     override func frameworks() -> [String] {
-        return ["Libcrypto", "Libssl"]
-    }
-    override func frameworkHeaders(_ framework: String) -> [String] {
-        return ["openssl/\(framework.replacingOccurrences(of: "Lib", with: ""))"]
+        ["Libcrypto", "Libssl"]
     }
 }
 
@@ -334,12 +361,14 @@ class BuildBoringSSL: BaseBuild {
     init() {
         super.init(library: "SSL")
     }
+
     override func buildALL() {
         if !FileManager.default.fileExists(atPath: (URL.currentDirectory + sslFile).path) {
             Utility.shell("git clone https://github.com/google/boringssl.git")
         }
         super.buildALL()
     }
+
     override func innerBuid(platform: PlatformType, arch: ArchType, cflags: String, buildDir: URL) {
         var command = "cmake -DCMAKE_OSX_SYSROOT=\(platform.sdk().lowercased()) -DCMAKE_OSX_ARCHITECTURES=\(arch.rawValue)"
         if platform == .maccatalyst {
@@ -354,13 +383,12 @@ class BuildBoringSSL: BaseBuild {
         try? FileManager.default.copyItem(at: buildDir + ["ssl", "libssl.a"], to: thin + ["lib", "libssl.a"])
         try? FileManager.default.copyItem(at: buildDir + ["crypto", "libcrypto.a"], to: thin + ["lib", "libcrypto.a"])
     }
+
     override func frameworks() -> [String] {
-        return ["Libcrypto", "Libssl"]
-    }
-    override func frameworkHeaders(_ framework: String) -> [String] {
-        return ["openssl/\(framework.replacingOccurrences(of: "Lib", with: ""))"]
+        ["Libcrypto", "Libssl"]
     }
 }
+
 enum PlatformType: String, CaseIterable {
     case ios, isimulator, tvos, tvsimulator, macos, maccatalyst
     var minVersion: String {
@@ -375,6 +403,7 @@ enum PlatformType: String, CaseIterable {
             return "13.0"
         }
     }
+
     func architectures() -> [ArchType] {
         switch self {
         case .ios:
@@ -389,6 +418,7 @@ enum PlatformType: String, CaseIterable {
             return [.x86_64]
         }
     }
+
     func os() -> String {
         switch self {
         case .isimulator:
@@ -396,9 +426,10 @@ enum PlatformType: String, CaseIterable {
         case .tvsimulator:
             return "tvos"
         default:
-        return self.rawValue
+            return rawValue
         }
     }
+
     func deploymentTarget() -> String {
         switch self {
         case .ios:
@@ -415,6 +446,7 @@ enum PlatformType: String, CaseIterable {
             return "-target x86_64-apple-ios13.0-macabi"
         }
     }
+
     func sdk() -> String {
         switch self {
         case .ios:
@@ -436,9 +468,10 @@ enum PlatformType: String, CaseIterable {
         if self == .maccatalyst {
             return PlatformType.macos.crossSDK()
         } else {
-            return sdk()+".sdk"
+            return sdk() + ".sdk"
         }
     }
+
     func crossTop() -> String {
         if self == .maccatalyst {
             return PlatformType.macos.crossTop()
@@ -446,11 +479,13 @@ enum PlatformType: String, CaseIterable {
             return "\(xcodePath)/Platforms/\(sdk()).platform/Developer"
         }
     }
+
     func isysroot() -> String {
-        return crossTop() + "/SDKs/" + crossSDK()
+        crossTop() + "/SDKs/" + crossSDK()
     }
+
     func target(arch: ArchType) -> String {
-        if arch == .arm64 && (self == .macos || self == .tvsimulator || self == .isimulator) {
+        if arch == .arm64, self == .macos || self == .tvsimulator || self == .isimulator {
             return "darwin64-arm64-cc"
         } else {
             if arch == .x86_64 {
@@ -475,6 +510,7 @@ enum PlatformType: String, CaseIterable {
         // }
     }
 }
+
 enum ArchType: String, CaseIterable {
     // swiftlint:disable identifier_name
     case arm64, x86_64, arm64e
@@ -484,19 +520,18 @@ enum ArchType: String, CaseIterable {
             return false
         }
         if #available(OSX 11.0, *) {
-            if architecture == NSBundleExecutableArchitectureARM64 && self == .arm64 {
+            if architecture == NSBundleExecutableArchitectureARM64, self == .arm64 {
                 return true
             }
         }
-        if architecture == NSBundleExecutableArchitectureX86_64 && self == .x86_64 {
+        if architecture == NSBundleExecutableArchitectureX86_64, self == .x86_64 {
             return true
         }
         return false
     }
 }
 
-struct Utility {
-
+enum Utility {
     @discardableResult
     static func shell(_ command: String, isOutput: Bool = false, currentDirectoryURL: URL? = nil, environment: [String: String] = [:]) -> String? {
         let task = Process()
@@ -548,15 +583,18 @@ struct Utility {
 //        }
 //    }
 }
+
 extension URL {
     static var currentDirectory: URL {
         URL(fileURLWithPath: FileManager.default.currentDirectoryPath)
     }
+
     static func + (left: URL, right: String) -> URL {
         var url = left
         url.appendPathComponent(right)
         return url
     }
+
     static func + (left: URL, right: [String]) -> URL {
         var url = left
         right.forEach {
