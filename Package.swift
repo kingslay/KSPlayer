@@ -12,7 +12,7 @@ let package = Package(
         .library(
             name: "KSPlayer",
             targets: ["KSPlayer"]
-        )
+        ),
     ],
     dependencies: [
         // Dependencies declare other packages that this package depends on.
@@ -31,17 +31,17 @@ let package = Package(
                 .linkedFramework("CoreVideo"),
                 .linkedFramework("MetalKit"),
                 .linkedFramework("Security"),
-                .linkedFramework("VideoToolbox")
+                .linkedFramework("VideoToolbox"),
             ]
         ),
         .target(
             name: "FFmpeg",
-            dependencies: ["Libavcodec", "Libavformat", "Libavutil", "Libswresample", "Libswscale", "Libssl", "Libcrypto"],
+            dependencies: ["Libavcodec", "Libavfilter", "Libavformat", "Libavutil", "Libswresample", "Libswscale", "Libssl", "Libcrypto"],
             linkerSettings: [
                 .linkedLibrary("bz2"),
                 .linkedLibrary("iconv"),
                 .linkedLibrary("xml2"),
-                .linkedLibrary("z")
+                .linkedLibrary("z"),
             ]
         ),
         .executableTarget(
@@ -57,6 +57,10 @@ let package = Package(
         .binaryTarget(
             name: "Libavcodec",
             path: "Sources/Libavcodec.xcframework"
+        ),
+        .binaryTarget(
+            name: "Libavfilter",
+            path: "Sources/Libavfilter.xcframework"
         ),
         .binaryTarget(
             name: "Libavformat",
@@ -81,6 +85,6 @@ let package = Package(
         .binaryTarget(
             name: "Libcrypto",
             path: "Sources/Libcrypto.xcframework"
-        )
+        ),
     ]
 )

@@ -70,7 +70,7 @@ protocol FrameOutput: AnyObject {
 
 protocol MEFrame: ObjectQueueItem {
     var timebase: Timebase { get set }
-    var position: Int64 { get set}
+    var position: Int64 { get set }
 }
 
 extension MEFrame {
@@ -91,22 +91,22 @@ public enum LogLevel: Int32 {
     case trace = 56
 }
 
-extension KSPlayerManager {
+public extension KSPlayerManager {
     /// 开启VR模式的陀飞轮
-    public static var enableSensor = true
+    static var enableSensor = true
     /// 日志级别
-    public static var logLevel = LogLevel.warning
-    public static var stackSize = 32768
-    public static var audioPlayerMaximumFramesPerSlice = AVAudioFrameCount(4096)
-    public static var preferredFramesPerSecond = 60
+    static var logLevel = LogLevel.warning
+    static var stackSize = 32768
+    static var audioPlayerMaximumFramesPerSlice = AVAudioFrameCount(4096)
+    static var preferredFramesPerSecond = 60
     #if os(macOS)
-    public static var audioPlayerSampleRate = Int32(44100)
-    public static var audioPlayerMaximumChannels = AVAudioChannelCount(2)
+    static var audioPlayerSampleRate = Int32(44100)
+    static var audioPlayerMaximumChannels = AVAudioChannelCount(2)
     #else
-    public static var audioPlayerSampleRate = Int32(AVAudioSession.sharedInstance().sampleRate)
-    public static var audioPlayerMaximumChannels = AVAudioChannelCount(AVAudioSession.sharedInstance().maximumOutputNumberOfChannels)
+    static var audioPlayerSampleRate = Int32(AVAudioSession.sharedInstance().sampleRate)
+    static var audioPlayerMaximumChannels = AVAudioChannelCount(AVAudioSession.sharedInstance().maximumOutputNumberOfChannels)
     #endif
-    static func outputFormat() -> AudioStreamBasicDescription {
+    internal static func outputFormat() -> AudioStreamBasicDescription {
         #if !os(macOS)
         try? AVAudioSession.sharedInstance().setPreferredOutputNumberOfChannels(Int(audioPlayerMaximumChannels))
         #endif
@@ -123,7 +123,7 @@ extension KSPlayerManager {
         return audioStreamBasicDescription
     }
 
-    static let audioDefaultFormat = AVAudioFormat(commonFormat: .pcmFormatFloat32, sampleRate: Double(audioPlayerSampleRate), channels: audioPlayerMaximumChannels, interleaved: false)!
+    internal static let audioDefaultFormat = AVAudioFormat(commonFormat: .pcmFormatFloat32, sampleRate: Double(audioPlayerSampleRate), channels: audioPlayerMaximumChannels, interleaved: false)!
 }
 
 enum MECodecState {
@@ -158,6 +158,7 @@ extension AVRational {
         num > 0 && den > 0 ? CGSize(width: Int(den), height: Int(num)) : CGSize(width: 1, height: 1)
     }
 }
+
 final class Packet: ObjectQueueItem {
     final class AVPacketWrap {
         fileprivate var corePacket = av_packet_alloc()
@@ -200,12 +201,12 @@ final class ByteDataWrap {
     var size: [Int] = [0] {
         didSet {
             if size.description != oldValue.description {
-                for i in (0 ..< data.count) where oldValue[i] > 0 {
+                for i in 0 ..< data.count where oldValue[i] > 0 {
                     data[i]?.deinitialize(count: oldValue[i])
                     data[i]?.deallocate()
                 }
                 data.removeAll()
-                for i in (0 ..< size.count) {
+                for i in 0 ..< size.count {
                     data.append(UnsafeMutablePointer<UInt8>.allocate(capacity: Int(size[i])))
                 }
             }
@@ -217,7 +218,7 @@ final class ByteDataWrap {
     }
 
     deinit {
-        for i in (0 ..< data.count) {
+        for i in 0 ..< data.count {
             data[i]?.deinitialize(count: size[i])
             data[i]?.deallocate()
         }
@@ -234,6 +235,7 @@ final class MTLBufferWrap {
             }
         }
     }
+
     public init(size: [Int]) {
         self.size = size
         data = size.map { MetalRender.device.makeBuffer(length: $0) }
@@ -290,17 +292,18 @@ extension Dictionary where Key == String {
         return avOptions
     }
 }
+
 public struct AVError: Error, Equatable {
     public var code: Int32
     public var message: String
 
     init(code: Int32) {
         self.code = code
-        self.message = String(avErrorCode: code)
+        message = String(avErrorCode: code)
     }
 }
-extension String {
 
+extension String {
     init(avErrorCode code: Int32) {
         let buf = UnsafeMutablePointer<Int8>.allocate(capacity: Int(AV_ERROR_MAX_STRING_SIZE))
         buf.initialize(repeating: 0, count: Int(AV_ERROR_MAX_STRING_SIZE))
@@ -309,9 +312,9 @@ extension String {
     }
 }
 
-extension AVError {
-    public static let tryAgain = AVError(code: swift_AVERROR(EAGAIN))
-    public static let eof = AVError(code: swift_AVERROR_EOF)
+public extension AVError {
+    static let tryAgain = AVError(code: swift_AVERROR(EAGAIN))
+    static let eof = AVError(code: swift_AVERROR_EOF)
 }
 
 //// swiftlint:disable identifier_name

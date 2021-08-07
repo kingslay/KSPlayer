@@ -142,8 +142,8 @@ class DecompressionSession {
             kCVImageBufferChromaLocationTopFieldKey: kCVImageBufferChromaLocation_Left,
             kCMFormatDescriptionExtension_FullRangeVideo: isFullRangeVideo,
             kCMFormatDescriptionExtension_SampleDescriptionExtensionAtoms: [
-                codecpar.codec_id == AV_CODEC_ID_HEVC ? "hvcC" : "avcC": NSData(bytes: extradata, length: Int(extradataSize))
-            ]
+                codecpar.codec_id == AV_CODEC_ID_HEVC ? "hvcC" : "avcC": NSData(bytes: extradata, length: Int(extradataSize)),
+            ],
         ]
         dic[kCVImageBufferPixelAspectRatioKey] = codecpar.sample_aspect_ratio.size.aspectRatio
         dic[kCVImageBufferColorPrimariesKey] = codecpar.color_primaries.colorPrimaries
@@ -161,7 +161,7 @@ class DecompressionSession {
 
         let attributes: NSMutableDictionary = [
             kCVPixelBufferPixelFormatTypeKey: pixelFormatType,
-            kCVPixelBufferMetalCompatibilityKey: true
+            kCVPixelBufferMetalCompatibilityKey: true,
         ]
         var session: VTDecompressionSession?
         // swiftlint:disable line_length
@@ -181,7 +181,7 @@ class DecompressionSession {
 
 extension CGSize {
     var aspectRatio: NSDictionary? {
-        if width != 0 && height != 0 {
+        if width != 0, height != 0 {
             return [kCVImageBufferPixelAspectRatioHorizontalSpacingKey: width,
                     kCVImageBufferPixelAspectRatioVerticalSpacingKey: height]
         } else {
@@ -249,6 +249,7 @@ extension AVColorPrimaries {
         }
     }
 }
+
 extension AVColorTransferCharacteristic {
     var transferFunction: CFString? {
         switch self {
@@ -278,6 +279,7 @@ extension AVColorTransferCharacteristic {
         return nil
     }
 }
+
 extension AVColorSpace {
     var ycbcrMatrix: CFString? {
         switch self {

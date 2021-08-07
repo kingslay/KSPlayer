@@ -234,7 +234,7 @@ extension AudioGraphPlayer {
                 return noErr
             }
             let `self` = Unmanaged<AudioGraphPlayer>.fromOpaque(refCon).takeUnretainedValue()
-            self.audioPlayerShouldInputData(ioData: UnsafeMutableAudioBufferListPointer(ioData), numberOfFrames: inNumberFrames, numberOfChannels: self.audioStreamBasicDescription.mChannelsPerFrame )
+            self.audioPlayerShouldInputData(ioData: UnsafeMutableAudioBufferListPointer(ioData), numberOfFrames: inNumberFrames, numberOfChannels: self.audioStreamBasicDescription.mChannelsPerFrame)
             return noErr
         }
         return inputCallbackStruct

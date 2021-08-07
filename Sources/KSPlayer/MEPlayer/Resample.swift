@@ -9,8 +9,8 @@ import AVFoundation
 import CoreGraphics
 import CoreMedia
 import Libavcodec
-import Libswscale
 import Libswresample
+import Libswscale
 import VideoToolbox
 
 protocol Swresample {
@@ -102,7 +102,7 @@ class VideoSwresample: Swresample {
     }
 
     func transfer(format: AVPixelFormat, width: Int32, height: Int32, data: [UnsafeMutablePointer<UInt8>?], linesize: [Int]) -> CGImage? {
-        if setup(format: format, width: width, height: height), swsConvert(data: data, linesize: linesize.compactMap({Int32($0)})), let frame = dstFrame?.pointee {
+        if setup(format: format, width: width, height: height), swsConvert(data: data, linesize: linesize.compactMap { Int32($0) }), let frame = dstFrame?.pointee {
             return CGImage.make(rgbData: frame.data.0!, linesize: Int(frame.linesize.0), width: Int(width), height: Int(height), isAlpha: dstFormat == AV_PIX_FMT_RGBA)
         }
         return nil
@@ -145,7 +145,7 @@ class PixelBuffer: BufferProtocol {
     private let dataWrap: MTLBufferWrap
     private var lineSize = [Int]()
     public var colorspace: CGColorSpace? {
-       attachmentsDic.flatMap { CVImageBufferCreateColorSpaceFromAttachments($0)?.takeUnretainedValue() }
+        attachmentsDic.flatMap { CVImageBufferCreateColorSpaceFromAttachments($0)?.takeUnretainedValue() }
     }
 
     init(frame: UnsafeMutablePointer<AVFrame>) {
@@ -171,7 +171,7 @@ class PixelBuffer: BufferProtocol {
             widths = [width, width / 2, width / 2]
             heights = [height, height / 2, height / 2]
         case 2:
-            formats =  bitDepth > 8 ? [.r16Unorm, .rg16Unorm] : [.r8Unorm, .rg8Unorm]
+            formats = bitDepth > 8 ? [.r16Unorm, .rg16Unorm] : [.r8Unorm, .rg8Unorm]
             widths = [width, width / 2]
             heights = [height, height / 2]
         default:
@@ -187,19 +187,18 @@ class PixelBuffer: BufferProtocol {
                 lineSize.append(bytesPerRow[i])
             }
             size.append(lineSize[i] * heights[i])
-
         }
         dataWrap = ObjectPool.share.object(class: MTLBufferWrap.self, key: "VideoData") { MTLBufferWrap(size: size) }
         dataWrap.size = size
         let bytes = Array(tuple: frame.pointee.data)
         for i in 0 ..< planeCount {
             if bytesPerRow[i] == lineSize[i] {
-                dataWrap.data[i]?.contents().copyMemory(from: bytes[i]!, byteCount: heights[i]*lineSize[i])
+                dataWrap.data[i]?.contents().copyMemory(from: bytes[i]!, byteCount: heights[i] * lineSize[i])
             } else {
                 let contents = dataWrap.data[i]?.contents()
                 let source = bytes[i]!
                 for j in 0 ..< heights[i] {
-                    contents?.advanced(by: j*lineSize[i]).copyMemory(from: source.advanced(by: j*bytesPerRow[i]), byteCount: bytesPerRow[i])
+                    contents?.advanced(by: j * lineSize[i]).copyMemory(from: source.advanced(by: j * bytesPerRow[i]), byteCount: bytesPerRow[i])
                 }
             }
         }
@@ -224,10 +223,10 @@ class PixelBuffer: BufferProtocol {
     func image() -> CGImage? {
         let image: CGImage?
         if format == AV_PIX_FMT_RGB24 {
-            image =  CGImage.make(rgbData: dataWrap.data[0]!.contents().assumingMemoryBound(to: UInt8.self), linesize: Int(lineSize[0]), width: width, height: height)
+            image = CGImage.make(rgbData: dataWrap.data[0]!.contents().assumingMemoryBound(to: UInt8.self), linesize: Int(lineSize[0]), width: width, height: height)
         } else {
             let scale = VideoSwresample(dstFormat: AV_PIX_FMT_RGB24, forceTransfer: true)
-            image = scale.transfer(format: format, width: Int32(width), height: Int32(height), data: dataWrap.data.map({ $0?.contents().assumingMemoryBound(to: UInt8.self) }), linesize: lineSize)
+            image = scale.transfer(format: format, width: Int32(width), height: Int32(height), data: dataWrap.data.map { $0?.contents().assumingMemoryBound(to: UInt8.self) }, linesize: lineSize)
             scale.shutdown()
         }
         return image
@@ -240,6 +239,7 @@ extension BinaryInteger {
         return remainder == 0 ? self : self + value - remainder
     }
 }
+
 extension AVPixelFormat {
     func bitDepth() -> Int32 {
         let descriptor = av_pix_fmt_desc_get(self)
@@ -262,43 +262,42 @@ extension AVPixelFormat {
     }
 
     func bestPixelFormat() -> AVPixelFormat {
-        return bitDepth() > 8 ? AV_PIX_FMT_P010LE : AV_PIX_FMT_NV12
+        bitDepth() > 8 ? AV_PIX_FMT_P010LE : AV_PIX_FMT_NV12
     }
 
     // swiftlint:disable cyclomatic_complexity
     func osType() -> OSType? {
         switch self {
-        case AV_PIX_FMT_ABGR:       return kCVPixelFormatType_32ABGR
-        case AV_PIX_FMT_ARGB:       return kCVPixelFormatType_32ARGB
-        case AV_PIX_FMT_BGR24:      return kCVPixelFormatType_24BGR
-        case AV_PIX_FMT_BGR48BE:    return kCVPixelFormatType_48RGB
-        case AV_PIX_FMT_BGRA:       return kCVPixelFormatType_32BGRA
-        case AV_PIX_FMT_MONOBLACK:  return kCVPixelFormatType_1Monochrome
-        case AV_PIX_FMT_NV12:       return kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange
-        case AV_PIX_FMT_RGB24:      return kCVPixelFormatType_24RGB
-        case AV_PIX_FMT_RGB555BE:   return kCVPixelFormatType_16BE555
-        case AV_PIX_FMT_RGB555LE:   return kCVPixelFormatType_16LE555
-        case AV_PIX_FMT_RGB565BE:   return kCVPixelFormatType_16BE565
-        case AV_PIX_FMT_RGB565LE:   return kCVPixelFormatType_16LE565
-        case AV_PIX_FMT_RGBA:       return kCVPixelFormatType_32RGBA
-        case AV_PIX_FMT_UYVY422:    return kCVPixelFormatType_422YpCbCr8
-        case AV_PIX_FMT_YUV420P:    return kCVPixelFormatType_420YpCbCr8Planar
+        case AV_PIX_FMT_ABGR: return kCVPixelFormatType_32ABGR
+        case AV_PIX_FMT_ARGB: return kCVPixelFormatType_32ARGB
+        case AV_PIX_FMT_BGR24: return kCVPixelFormatType_24BGR
+        case AV_PIX_FMT_BGR48BE: return kCVPixelFormatType_48RGB
+        case AV_PIX_FMT_BGRA: return kCVPixelFormatType_32BGRA
+        case AV_PIX_FMT_MONOBLACK: return kCVPixelFormatType_1Monochrome
+        case AV_PIX_FMT_NV12: return kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange
+        case AV_PIX_FMT_RGB24: return kCVPixelFormatType_24RGB
+        case AV_PIX_FMT_RGB555BE: return kCVPixelFormatType_16BE555
+        case AV_PIX_FMT_RGB555LE: return kCVPixelFormatType_16LE555
+        case AV_PIX_FMT_RGB565BE: return kCVPixelFormatType_16BE565
+        case AV_PIX_FMT_RGB565LE: return kCVPixelFormatType_16LE565
+        case AV_PIX_FMT_RGBA: return kCVPixelFormatType_32RGBA
+        case AV_PIX_FMT_UYVY422: return kCVPixelFormatType_422YpCbCr8
+        case AV_PIX_FMT_YUV420P: return kCVPixelFormatType_420YpCbCr8Planar
 //        case AV_PIX_FMT_YUVJ420P:   return kCVPixelFormatType_420YpCbCr8PlanarFullRange
-        case AV_PIX_FMT_P010LE:     return kCVPixelFormatType_420YpCbCr10BiPlanarVideoRange
-        case AV_PIX_FMT_YUV422P10LE:return kCVPixelFormatType_422YpCbCr10
-        case AV_PIX_FMT_YUV422P16LE:return kCVPixelFormatType_422YpCbCr16
-        case AV_PIX_FMT_YUV444P:    return kCVPixelFormatType_444YpCbCr8
-        case AV_PIX_FMT_YUV444P10LE:return kCVPixelFormatType_444YpCbCr10
-        case AV_PIX_FMT_YUVA444P:   return kCVPixelFormatType_4444YpCbCrA8R
-        case AV_PIX_FMT_YUVA444P16LE:return kCVPixelFormatType_4444AYpCbCr16
-        case AV_PIX_FMT_YUYV422:    return kCVPixelFormatType_422YpCbCr8_yuvs
-        case AV_PIX_FMT_GRAY8:      return kCVPixelFormatType_OneComponent8
+        case AV_PIX_FMT_P010LE: return kCVPixelFormatType_420YpCbCr10BiPlanarVideoRange
+        case AV_PIX_FMT_YUV422P10LE: return kCVPixelFormatType_422YpCbCr10
+        case AV_PIX_FMT_YUV422P16LE: return kCVPixelFormatType_422YpCbCr16
+        case AV_PIX_FMT_YUV444P: return kCVPixelFormatType_444YpCbCr8
+        case AV_PIX_FMT_YUV444P10LE: return kCVPixelFormatType_444YpCbCr10
+        case AV_PIX_FMT_YUVA444P: return kCVPixelFormatType_4444YpCbCrA8R
+        case AV_PIX_FMT_YUVA444P16LE: return kCVPixelFormatType_4444AYpCbCr16
+        case AV_PIX_FMT_YUYV422: return kCVPixelFormatType_422YpCbCr8_yuvs
+        case AV_PIX_FMT_GRAY8: return kCVPixelFormatType_OneComponent8
         default:
             return nil
         }
     }
     // swiftlint:enable cyclomatic_complexity
-
 }
 
 extension CVPixelBufferPool {
@@ -334,7 +333,7 @@ extension CVPixelBufferPool {
                     let contents = pbuf.baseAddressOfPlane(at: i)
                     let source = data[i]!
                     for j in 0 ..< height {
-                        contents?.advanced(by: j*bytesPerRow).copyMemory(from: source.advanced(by: j*size), byteCount: size)
+                        contents?.advanced(by: j * bytesPerRow).copyMemory(from: source.advanced(by: j * size), byteCount: size)
                     }
                 }
             }
@@ -366,7 +365,7 @@ class AudioSwresample: Swresample {
     private var swrContext: SwrContext?
     private var descriptor: AudioDescriptor
     private let channels: Int32
-    init(codecpar: UnsafeMutablePointer<AVCodecParameters>) {
+    init(codecpar: AVCodecParameters) {
         descriptor = AudioDescriptor(codecpar: codecpar)
         channels = Int32(max(min(KSPlayerManager.audioPlayerMaximumChannels, descriptor.inputNumberOfChannels), 2))
         _ = setup(descriptor: descriptor)
@@ -420,11 +419,11 @@ class AudioDescriptor: Equatable {
     fileprivate let inputNumberOfChannels: AVAudioChannelCount
     fileprivate let inputSampleRate: Int32
     fileprivate let inputFormat: AVSampleFormat
-    init(codecpar: UnsafeMutablePointer<AVCodecParameters>) {
-        inputNumberOfChannels = max(UInt32(codecpar.pointee.channels), 1)
-        let sampleRate = codecpar.pointee.sample_rate
+    init(codecpar: AVCodecParameters) {
+        inputNumberOfChannels = max(UInt32(codecpar.channels), 1)
+        let sampleRate = codecpar.sample_rate
         inputSampleRate = sampleRate == 0 ? KSPlayerManager.audioPlayerSampleRate : sampleRate
-        inputFormat = AVSampleFormat(rawValue: codecpar.pointee.format)
+        inputFormat = AVSampleFormat(rawValue: codecpar.format)
     }
 
     init(frame: UnsafeMutablePointer<AVFrame>) {

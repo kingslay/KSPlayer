@@ -22,6 +22,7 @@ class DetailViewController: UIViewController, DetailProtocol {
     override var prefersStatusBarHidden: Bool {
         !playerView.isMaskShow
     }
+
     private let playerView = IOSVideoPlayerView()
     #else
     private let playerView = CustomVideoPlayerView()
@@ -83,32 +84,21 @@ class DetailViewController: UIViewController, DetailProtocol {
 }
 
 extension DetailViewController: PlayerControllerDelegate {
-    func playerController(state: KSPlayerState) {
+    func playerController(state _: KSPlayerState) {}
 
-    }
+    func playerController(currentTime _: TimeInterval, totalTime _: TimeInterval) {}
 
-    func playerController(currentTime: TimeInterval, totalTime: TimeInterval) {
+    func playerController(finish _: Error?) {}
 
-    }
-
-    func playerController(finish error: Error?) {
-
-    }
-
-    func playerController(maskShow: Bool) {
+    func playerController(maskShow _: Bool) {
         #if os(iOS)
         setNeedsStatusBarAppearanceUpdate()
         #endif
     }
 
-    func playerController(action: PlayerButtonType) {
+    func playerController(action _: PlayerButtonType) {}
 
-    }
-
-    func playerController(bufferedCount: Int, consumeTime: TimeInterval) {
-
-    }
-
+    func playerController(bufferedCount _: Int, consumeTime _: TimeInterval) {}
 }
 
 class CustomVideoPlayerView: VideoPlayerView {
@@ -134,7 +124,7 @@ class CustomVideoPlayerView: VideoPlayerView {
                 print("audio name: \(track.name) language: \(track.language ?? "")")
             }
             for track in player.tracks(mediaType: .video) {
-                print("video name: \(track.name) bitRate: \(track.bitRate) fps: \(track.nominalFrameRate) bitDepth: \(track.bitDepth) colorPrimaries: \(track.colorPrimaries ?? "") colorPrimaries: \(track.transferFunction  ?? "") yCbCrMatrix: \(track.yCbCrMatrix ?? "") codecType:  \(track.codecType.string)")
+                print("video name: \(track.name) bitRate: \(track.bitRate) fps: \(track.nominalFrameRate) bitDepth: \(track.bitDepth) colorPrimaries: \(track.colorPrimaries ?? "") colorPrimaries: \(track.transferFunction ?? "") yCbCrMatrix: \(track.yCbCrMatrix ?? "") codecType:  \(track.codecType.string)")
             }
         }
     }

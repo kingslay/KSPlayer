@@ -158,8 +158,8 @@ extension NSView {
     }
 }
 
-extension NSImage {
-    public convenience init(cgImage: CGImage) {
+public extension NSImage {
+    convenience init(cgImage: CGImage) {
         self.init(cgImage: cgImage, size: NSSize.zero)
     }
 }
@@ -190,8 +190,8 @@ extension NSButton {
     }
 }
 
-extension NSControl {
-    public var textAlignment: NSTextAlignment {
+public extension NSControl {
+    var textAlignment: NSTextAlignment {
         get {
             alignment
         }
@@ -200,7 +200,7 @@ extension NSControl {
         }
     }
 
-    public var text: String {
+    var text: String {
         get {
             stringValue
         }
@@ -209,7 +209,7 @@ extension NSControl {
         }
     }
 
-    public var attributedText: NSAttributedString? {
+    var attributedText: NSAttributedString? {
         get {
             attributedStringValue
         }
@@ -218,7 +218,7 @@ extension NSControl {
         }
     }
 
-    public var numberOfLines: Int {
+    var numberOfLines: Int {
         get {
             usesSingleLineMode ? 1 : 0
         }
@@ -228,8 +228,8 @@ extension NSControl {
     }
 }
 
-extension NSTextContainer {
-    public var numberOfLines: Int {
+public extension NSTextContainer {
+    var numberOfLines: Int {
         get {
             maximumNumberOfLines
         }
@@ -239,8 +239,8 @@ extension NSTextContainer {
     }
 }
 
-extension NSResponder {
-    public var next: NSResponder? {
+public extension NSResponder {
+    var next: NSResponder? {
         nextResponder
     }
 }
@@ -248,7 +248,7 @@ extension NSResponder {
 extension NSSlider {
     open var minimumTrackTintColor: UIColor? {
         get {
-            return trackFillColor
+            trackFillColor
         }
         set {
             trackFillColor = newValue
@@ -319,9 +319,9 @@ extension NSGestureRecognizer {
     }
 }
 
-extension UIApplication {
+public extension UIApplication {
     private static var assertionID = IOPMAssertionID()
-    public static var isIdleTimerDisabled = false {
+    static var isIdleTimerDisabled = false {
         didSet {
             if isIdleTimerDisabled != oldValue {
                 if isIdleTimerDisabled {
@@ -336,7 +336,7 @@ extension UIApplication {
         }
     }
 
-    public var isIdleTimerDisabled: Bool {
+    var isIdleTimerDisabled: Bool {
         get {
             UIApplication.isIdleTimerDisabled
         }
@@ -401,6 +401,7 @@ public class UILabel: NSTextField {
         textColor = NSColor.white
     }
 
+    @available(*, unavailable)
     required init?(coder _: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
@@ -417,6 +418,7 @@ public class UIButton: NSButton {
         isBordered = false
     }
 
+    @available(*, unavailable)
     required init?(coder _: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
@@ -521,6 +523,7 @@ public class KSSlider: NSSlider {
         action = #selector(progressSliderTouchEnded(_:))
     }
 
+    @available(*, unavailable)
     required init?(coder _: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }

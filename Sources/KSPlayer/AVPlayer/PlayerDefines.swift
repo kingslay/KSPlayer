@@ -50,8 +50,9 @@ public protocol MediaPlayerProtocol: MediaPlayback {
     func tracks(mediaType: AVFoundation.AVMediaType) -> [MediaPlayerTrack]
     func select(track: MediaPlayerTrack)
 }
-extension MediaPlayerProtocol {
-    public var nominalFrameRate: Float {
+
+public extension MediaPlayerProtocol {
+    var nominalFrameRate: Float {
         tracks(mediaType: .video).first { $0.isEnabled }?.nominalFrameRate ?? 0
     }
 }
@@ -81,14 +82,14 @@ public protocol MediaPlayerTrack {
     var yCbCrMatrix: String? { get }
 }
 
-extension FourCharCode {
-    public var string: String {
+public extension FourCharCode {
+    var string: String {
         let cString: [CChar] = [
             CChar(self >> 24 & 0xFF),
             CChar(self >> 16 & 0xFF),
             CChar(self >> 8 & 0xFF),
             CChar(self & 0xFF),
-            0
+            0,
         ]
         return String(cString: cString)
     }
@@ -179,6 +180,8 @@ open class KSOptions {
     public var subtitleDelay = 0.0 // s
     public var videoDisable = false
     public var audioDisable = false
+    public var audioFilters: String?
+    public var videoFilters: String?
     public var subtitleDisable = false
     public var asynchronousDecompression = false
     public var videoAdaptable = true
@@ -239,9 +242,9 @@ open class KSOptions {
         concurrentQueue.sync(flags: .barrier) {
             self.throttle = mach_absolute_time()
         }
-        let packetCount = capacitys.map { $0.packetCount }.min() ?? 0
-        let frameCount = capacitys.map { $0.frameCount }.min() ?? 0
-        let isEndOfFile = capacitys.allSatisfy { $0.isEndOfFile }
+        let packetCount = capacitys.map(\.packetCount).min() ?? 0
+        let frameCount = capacitys.map(\.frameCount).min() ?? 0
+        let isEndOfFile = capacitys.allSatisfy(\.isEndOfFile)
         let loadedTime = capacitys.map { TimeInterval($0.packetCount + $0.frameCount) / TimeInterval($0.fps) }.min() ?? 0
         let progress = loadedTime * 100.0 / preferredForwardBufferDuration
         let isPlayable = capacitys.allSatisfy { capacity in
@@ -313,24 +316,25 @@ open class KSOptions {
         nil
     }
 
-    open func videoFrameMaxCount(fps: Float) -> Int {
-        return 8
+    open func videoFrameMaxCount(fps _: Float) -> Int {
+        8
     }
 
-    open func audioFrameMaxCount(fps: Float) -> Int {
-        return 16
+    open func audioFrameMaxCount(fps _: Float) -> Int {
+        16
     }
 
-    open func customizeDar(sar: CGSize, par: CGSize) -> CGSize? {
-        return nil
+    open func customizeDar(sar _: CGSize, par _: CGSize) -> CGSize? {
+        nil
     }
 
     private class func deviceCpuCount() -> Int {
-        var ncpu: UInt = UInt(0)
+        var ncpu = UInt(0)
         var len: size_t = MemoryLayout.size(ofValue: ncpu)
         sysctlbyname("hw.ncpu", &ncpu, &len, nil, 0)
         return Int(ncpu)
     }
+
     open func isUseDisplayLayer() -> Bool {
         display == .plane
     }
@@ -357,7 +361,7 @@ public struct LoadingState {
     public let isSeek: Bool
 }
 
-public struct KSPlayerManager {
+public enum KSPlayerManager {
     /// 日志输出方式
     public static var logFunctionPoint: (String) -> Void = {
         print($0)

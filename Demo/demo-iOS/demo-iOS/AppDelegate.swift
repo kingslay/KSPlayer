@@ -44,11 +44,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UISplitViewControllerDele
         self.window = window
         return true
     }
+
     #if os(iOS)
-    func application(_ application: UIApplication, supportedInterfaceOrientationsFor window: UIWindow?) -> UIInterfaceOrientationMask {
-        return KSPlayerManager.supportedInterfaceOrientations
+    func application(_: UIApplication, supportedInterfaceOrientationsFor _: UIWindow?) -> UIInterfaceOrientationMask {
+        KSPlayerManager.supportedInterfaceOrientations
     }
-    
+
     private var menuController: MenuController!
     override func buildMenu(with builder: UIMenuBuilder) {
         if builder.system == .main {

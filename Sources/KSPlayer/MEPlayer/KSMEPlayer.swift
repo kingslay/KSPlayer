@@ -214,6 +214,7 @@ extension KSMEPlayer: MediaPlayerProtocol {
             audioOutput.masterGain = newValue
         }
     }
+
     public var isPlaying: Bool { playbackState == .playing }
 
     public var naturalSize: CGSize {
@@ -346,8 +347,8 @@ extension KSMEPlayer: MediaPlayerProtocol {
     }
 }
 
-extension KSMEPlayer {
-    public var subtitleDataSouce: SubtitleDataSouce? { playerItem }
+public extension KSMEPlayer {
+    var subtitleDataSouce: SubtitleDataSouce? { playerItem }
 
-    public var subtitles: [KSSubtitleProtocol] { playerItem.subtitleTracks }
+    var subtitles: [KSSubtitleProtocol] { playerItem.subtitleTracks }
 }

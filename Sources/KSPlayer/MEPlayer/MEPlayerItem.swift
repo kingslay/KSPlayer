@@ -189,7 +189,7 @@ extension MEPlayerItem {
         var videoIndex: Int32 = -1
         if !options.videoDisable {
             let videos = assetTracks.filter { $0.mediaType == .video }
-            let bitRates = videos.map { $0.bitRate }
+            let bitRates = videos.map(\.bitRate)
             let wantedStreamNb: Int32
             if videos.count > 0, let index = options.wantedVideo(bitRates: bitRates) {
                 wantedStreamNb = videos[index].streamIndex
@@ -231,8 +231,9 @@ extension MEPlayerItem {
         }
         if !options.subtitleDisable {
             subtitleTracks = assetTracks.filter { $0.mediaType == .subtitle }.map {
-                return FFPlayerItemTrack<
-                    SubtitleFrame>(assetTrack: $0, options: options)
+                FFPlayerItemTrack<
+                    SubtitleFrame
+                >(assetTrack: $0, options: options)
             }
             allTracks.append(contentsOf: subtitleTracks)
         }
@@ -498,7 +499,7 @@ extension MEPlayerItem: OutputRenderSourceDelegate {
     func getOutputRender(type: AVFoundation.AVMediaType) -> MEFrame? {
         var predicate: ((MEFrame) -> Bool)?
         if type == .video {
-            predicate = { [weak self] (frame) -> Bool in
+            predicate = { [weak self] frame -> Bool in
                 guard let self = self else { return true }
                 var desire = self.currentPlaybackTime + self.options.audioDelay
                 if self.isAudioStalled {

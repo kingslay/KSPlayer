@@ -15,7 +15,6 @@ PODS:
     - KSPlayer/Video (= 1.0)
   - KSPlayer/Audio (1.0):
     - KSPlayer/Core
-    - KSPlayer/Subtitle
   - KSPlayer/AVPlayer (1.0):
     - KSPlayer/Basic
   - KSPlayer/Basic (1.0):
@@ -59,9 +58,9 @@ EXTERNAL SOURCES:
     :path: "../"
 
 SPEC CHECKSUMS:
-  FFmpeg: 411e46c4d9257a7bca2e26be633751bba9bd17dd
-  KSPlayer: 367b81f162f443f66a3000c4e8f343393e49cd2d
-  OpenSSL: d016bd5616b251ceabf8d8f1630f763c0fb0d15b
+  FFmpeg: b9554306bf619b593bd7077cea2bc552b259997f
+  KSPlayer: 00e5acede9598c4685314ba7bc344d92ef8664b0
+  OpenSSL: a3f74f425dd6d0dc2a5ccd9b299ca46af73c7f16
   SwiftLint: 22ccbbe3b8008684be5955693bab135e0ed6a447
 
 PODFILE CHECKSUM: 6a7350b0c0629dbfc8fb3b0920d69c23f927024c

@@ -10,12 +10,12 @@ public protocol KSParseProtocol {
     func parse(subtitle: String) -> [SubtitlePart]
 }
 
-extension KSParseProtocol {
-    public static func patternReg() -> NSRegularExpression? {
+public extension KSParseProtocol {
+    static func patternReg() -> NSRegularExpression? {
         try? NSRegularExpression(pattern: "\\{[^}]+\\}", options: .caseInsensitive)
     }
 
-    public static func parseDuration(_ fromStr: String) -> TimeInterval {
+    static func parseDuration(_ fromStr: String) -> TimeInterval {
         var hour: TimeInterval = 0.0, min: TimeInterval = 0.0, sec: TimeInterval = 0.0, millisecond: TimeInterval = 0.0
         let scanner = Scanner(string: fromStr)
         scanner.scanDouble(&hour)
@@ -143,8 +143,8 @@ public class SrtParse: KSParseProtocol {
     }
 }
 
-extension Array {
-    fileprivate func mergeSortBottomUp(isOrderedBefore: (Element, Element) -> Bool) -> [Element] {
+private extension Array {
+    func mergeSortBottomUp(isOrderedBefore: (Element, Element) -> Bool) -> [Element] {
         let n = count
         var z = [self, self] // the two working arrays
         var d = 0 // z[d] is used for reading, z[1 - d] for writing

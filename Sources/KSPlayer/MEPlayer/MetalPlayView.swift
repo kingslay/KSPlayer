@@ -35,11 +35,12 @@ final class MetalPlayView: MTKView, MTKViewDelegate, FrameOutput {
         }
     }
 
+    @available(*, unavailable)
     required init(coder _: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
 
-    func draw(in view: MTKView) {
+    func draw(in _: MTKView) {
         guard let frame = renderSource?.getOutputRender(type: .video) as? VideoVTBFrame else {
             return
         }
@@ -56,9 +57,9 @@ final class MetalPlayView: MTKView, MTKViewDelegate, FrameOutput {
             autoreleasepool {
                 if options.display == .plane {
                     if let dar = options.customizeDar(sar: sar, par: par) {
-                        drawableSize = CGSize(width: sar.width, height: sar.width*dar.height/dar.width)
+                        drawableSize = CGSize(width: sar.width, height: sar.width * dar.height / dar.width)
                     } else {
-                        drawableSize = CGSize(width: sar.width, height: sar.height*par.height/par.width)
+                        drawableSize = CGSize(width: sar.width, height: sar.height * par.height / par.width)
                     }
                 } else {
                     drawableSize = UIScreen.size
@@ -89,14 +90,14 @@ final class MetalPlayView: MTKView, MTKViewDelegate, FrameOutput {
             }
             // swiftlint:disable force_cast
             if let dar = options.customizeDar(sar: sar, par: par) {
-                (pixelBuffer as! CVPixelBuffer).aspectRatio = CGSize(width: dar.width, height: dar.height * sar.width/sar.height)
+                (pixelBuffer as! CVPixelBuffer).aspectRatio = CGSize(width: dar.width, height: dar.height * sar.width / sar.height)
             }
             set(pixelBuffer: pixelBuffer as! CVPixelBuffer, time: cmtime)
             // swiftlint:enable force_cast
         }
     }
 
-    func mtkView(_ view: MTKView, drawableSizeWillChange size: CGSize) {
+    func mtkView(_: MTKView, drawableSizeWillChange _: CGSize) {
         displayLayer.frame = bounds
     }
 

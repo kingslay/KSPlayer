@@ -86,7 +86,7 @@ final class AudioEnginePlayer: AudioPlayer, FrameOutput {
     }
 
     func schedule() {
-        guard let audioFrame = self.renderSource?.getOutputRender(type: .audio) as? AudioFrame else {
+        guard let audioFrame = renderSource?.getOutputRender(type: .audio) as? AudioFrame else {
             Timer.scheduledTimer(withTimeInterval: 0.1, repeats: false) { [weak self] _ in
                 self?.schedule()
             }
@@ -110,7 +110,7 @@ extension AVAudioFormat {
             return nil
         }
         pcmBuffer.frameLength = pcmBuffer.frameCapacity
-        for i in 0..<min(Int(pcmBuffer.format.channelCount), frame.dataWrap.size.count) {
+        for i in 0 ..< min(Int(pcmBuffer.format.channelCount), frame.dataWrap.size.count) {
             frame.dataWrap.data[i]?.withMemoryRebound(to: Float.self, capacity: Int(pcmBuffer.frameCapacity)) { srcFloatsForChannel in
                 pcmBuffer.floatChannelData?[i].assign(from: srcFloatsForChannel, count: Int(pcmBuffer.frameCapacity))
             }
