@@ -58,9 +58,9 @@ protocol MEPlayerDelegate: AnyObject {
 // MARK: protocol
 
 public protocol ObjectQueueItem {
-    var duration: Int64 { get }
-    var size: Int64 { get }
-    var position: Int64 { get }
+    var duration: Int64 { get set }
+    var size: Int64 { get set }
+    var position: Int64 { get set }
 }
 
 protocol FrameOutput: AnyObject {
@@ -70,7 +70,6 @@ protocol FrameOutput: AnyObject {
 
 protocol MEFrame: ObjectQueueItem {
     var timebase: Timebase { get set }
-    var position: Int64 { get set }
 }
 
 extension MEFrame {
@@ -167,9 +166,9 @@ final class Packet: ObjectQueueItem {
         }
     }
 
-    public var duration: Int64 = 0
-    public var size: Int64 = 0
-    public var position: Int64 = 0
+    var duration: Int64 = 0
+    var size: Int64 = 0
+    var position: Int64 = 0
     var assetTrack: TrackProtocol!
     var corePacket: UnsafeMutablePointer<AVPacket> { packetWrap.corePacket! }
     private let packetWrap = ObjectPool.share.object(class: AVPacketWrap.self, key: "AVPacketWrap") { AVPacketWrap() }
@@ -186,11 +185,11 @@ final class Packet: ObjectQueueItem {
 }
 
 final class SubtitleFrame: MEFrame {
-    public var timebase = Timebase.defaultValue
-    public var duration: Int64 = 0
-    public var size: Int64 = 0
-    public var position: Int64 = 0
-    public let part: SubtitlePart
+    var timebase = Timebase.defaultValue
+    var duration: Int64 = 0
+    var size: Int64 = 0
+    var position: Int64 = 0
+    let part: SubtitlePart
     init(part: SubtitlePart) {
         self.part = part
     }
@@ -250,11 +249,11 @@ final class MTLBufferWrap {
 }
 
 final class AudioFrame: MEFrame {
-    public var timebase = Timebase.defaultValue
-    public var duration: Int64 = 0
-    public var size: Int64 = 0
-    public var position: Int64 = 0
-    public var numberOfSamples = 0
+    var timebase = Timebase.defaultValue
+    var duration: Int64 = 0
+    var size: Int64 = 0
+    var position: Int64 = 0
+    var numberOfSamples = 0
     let dataWrap: ByteDataWrap
 
     public init(bufferSize: Int32, channels: Int32) {
@@ -270,11 +269,11 @@ final class AudioFrame: MEFrame {
 }
 
 final class VideoVTBFrame: MEFrame {
-    public var timebase = Timebase.defaultValue
-    public var duration: Int64 = 0
-    public var size: Int64 = 0
-    public var position: Int64 = 0
-    public var corePixelBuffer: BufferProtocol?
+    var timebase = Timebase.defaultValue
+    var duration: Int64 = 0
+    var size: Int64 = 0
+    var position: Int64 = 0
+    var corePixelBuffer: BufferProtocol?
 }
 
 extension Dictionary where Key == String {

@@ -62,7 +62,13 @@ class SoftwareDecode: DecodeProtocol {
                 if timestamp >= bestEffortTimestamp {
                     bestEffortTimestamp = timestamp
                 }
-                var frame = try swresample.transfer(avframe: filter?.filter(inputFrame: avframe) ?? avframe, timebase: timebase)
+                var frame = try swresample.transfer(avframe: filter?.filter(inputFrame: avframe) ?? avframe)
+                frame.timebase = timebase
+                frame.duration = avframe.pointee.pkt_duration
+                frame.size = Int64(avframe.pointee.pkt_size)
+                if mediaType == .audio, frame.duration == 0 {
+                    frame.duration = Int64(avframe.pointee.nb_samples) * Int64(frame.timebase.den) / (Int64(avframe.pointee.sample_rate) * Int64(frame.timebase.num))
+                }
                 frame.position = bestEffortTimestamp
                 bestEffortTimestamp += frame.duration
                 array.append(frame)
