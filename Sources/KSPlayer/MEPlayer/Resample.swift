@@ -14,7 +14,7 @@ import Libswscale
 import VideoToolbox
 
 protocol Swresample {
-    func transfer(avframe: UnsafeMutablePointer<AVFrame>, timebase: Timebase) throws -> MEFrame
+    func transfer(avframe: UnsafeMutablePointer<AVFrame>) throws -> MEFrame
     func shutdown()
 }
 
@@ -76,9 +76,8 @@ class VideoSwresample: Swresample {
         return true
     }
 
-    func transfer(avframe: UnsafeMutablePointer<AVFrame>, timebase: Timebase) throws -> MEFrame {
+    func transfer(avframe: UnsafeMutablePointer<AVFrame>) throws -> MEFrame {
         let frame = VideoVTBFrame()
-        frame.timebase = timebase
         if avframe.pointee.format == AV_PIX_FMT_VIDEOTOOLBOX.rawValue {
             // swiftlint:disable force_cast
             frame.corePixelBuffer = avframe.pointee.data.3 as! CVPixelBuffer
@@ -96,8 +95,6 @@ class VideoSwresample: Swresample {
                 frame.corePixelBuffer = PixelBuffer(frame: avframe)
             }
         }
-        frame.duration = avframe.pointee.pkt_duration
-        frame.size = Int64(avframe.pointee.pkt_size)
         return frame
     }
 
@@ -384,7 +381,7 @@ class AudioSwresample: Swresample {
         }
     }
 
-    func transfer(avframe: UnsafeMutablePointer<AVFrame>, timebase: Timebase) throws -> MEFrame {
+    func transfer(avframe: UnsafeMutablePointer<AVFrame>) throws -> MEFrame {
         if !(descriptor == avframe.pointee) {
             let descriptor = AudioDescriptor(frame: avframe)
             if setup(descriptor: descriptor) {
@@ -400,13 +397,7 @@ class AudioSwresample: Swresample {
         _ = av_samples_get_buffer_size(&bufferSize, channels, nbSamples, AV_SAMPLE_FMT_FLTP, 1)
         let frame = AudioFrame(bufferSize: bufferSize, channels: channels)
         numberOfSamples = swr_convert(swrContext, &frame.dataWrap.data, nbSamples, &frameBuffer, numberOfSamples)
-        frame.timebase = timebase
         frame.numberOfSamples = Int(numberOfSamples)
-        frame.duration = avframe.pointee.pkt_duration
-        frame.size = Int64(avframe.pointee.pkt_size)
-        if frame.duration == 0 {
-            frame.duration = Int64(avframe.pointee.nb_samples) * Int64(frame.timebase.den) / (Int64(avframe.pointee.sample_rate) * Int64(frame.timebase.num))
-        }
         return frame
     }
 
