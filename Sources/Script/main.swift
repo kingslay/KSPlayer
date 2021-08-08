@@ -242,9 +242,12 @@ class BuildFFMPEG: BaseBuild {
     }
 
     private let ffmpegConfiguers = [
-        "--enable-optimizations", "--enable-gpl", "--enable-version3", "--enable-nonfree",
+        "--enable-optimizations", "--enable-gpl", "--enable-version3", "--enable-nonfree","--disable-zlib",
+        "--disable-xlib", "--disable-devices", "--disable-indevs", "--disable-outdevs", "--disable-iconv",
+        "--disable-bsfs", "--disable-symver", "--disable-armv5te", "--disable-armv6", " --disable-armv6t2",
+        "--disable-audiotoolbox", "--disable-videotoolbox", "--disable-linux-perf", "--disable-bzlib",
         // Configuration options:
-        "--enable-cross-compile", "--enable-stripping", "--enable-libxml2", "--enable-thumb",
+        "--enable-cross-compile", "--enable-stripping", "--enable-libxml2", "--enable-thumb", "--enable-asm",
         "--enable-static", "--disable-shared", "--enable-runtime-cpudetect", "--disable-gray", "--disable-swscale-alpha",
         // Documentation options:
         "--disable-doc", "--disable-htmlpages", "--disable-manpages", "--disable-podpages", "--disable-txtpages",
@@ -303,8 +306,6 @@ class BuildFFMPEG: BaseBuild {
         "--disable-protocol=md5", "--disable-protocol=mmsh", "--disable-protocol=mmst", "--disable-protocol=sctp",
         "--disable-protocol=srtp", "--disable-protocol=subfile", "--disable-protocol=unix",
 
-        "--disable-devices", "--disable-indevs", "--disable-outdevs", "--disable-iconv", "--disable-bsfs",
-        "--disable-audiotoolbox", "--disable-videotoolbox", "--disable-linux-perf", "--disable-bzlib",
         // filters
         "--disable-filters", "--enable-filter=amix", "--enable-filter=aforma", "--enable-filter=scale",
         "--enable-filter=format", "--enable-filter=aformat", "--enable-filter=fps", "--enable-filter=trim",
