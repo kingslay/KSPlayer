@@ -104,7 +104,7 @@ open class BaseBuild {
 
     func createPlist(path: String, name: String, minVersion: String, platform: String) {
         let identifier = "com.kintan.ksplayer." + name
-        var content = """
+        let content = """
         <?xml version="1.0" encoding="UTF-8"?>
         <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
         <plist version="1.0">
@@ -112,13 +112,13 @@ open class BaseBuild {
         <key>CFBundleDevelopmentRegion</key>
         <string>en</string>
         <key>CFBundleExecutable</key>
-        <string>${FRAMEWORK_NAME}</string>
+        <string>\(name)</string>
         <key>CFBundleIdentifier</key>
-        <string>${FRAMEWORK_ID}</string>
+        <string>\(identifier)</string>
         <key>CFBundleInfoDictionaryVersion</key>
         <string>6.0</string>
         <key>CFBundleName</key>
-        <string>${FRAMEWORK_NAME}</string>
+        <string>\(name)</string>
         <key>CFBundlePackageType</key>
         <string>FMWK</string>
         <key>CFBundleShortVersionString</key>
@@ -128,20 +128,16 @@ open class BaseBuild {
         <key>CFBundleSignature</key>
         <string>????</string>
         <key>MinimumOSVersion</key>
-        <string>${MinimumOSVersion}</string>
+        <string>\(minVersion)</string>
         <key>CFBundleSupportedPlatforms</key>
         <array>
-        <string>${CFBundleSupportedPlatforms}</string>
+        <string>\(platform)</string>
         </array>
         <key>NSPrincipalClass</key>
         <string></string>
         </dict>
         </plist>
         """
-        content = content.replacingOccurrences(of: "${FRAMEWORK_NAME}", with: name)
-        content = content.replacingOccurrences(of: "${FRAMEWORK_ID}", with: identifier)
-        content = content.replacingOccurrences(of: "${MinimumOSVersion}", with: minVersion)
-        content = content.replacingOccurrences(of: "${CFBundleSupportedPlatforms}", with: platform)
         FileManager.default.createFile(atPath: path, contents: content.data(using: .utf8), attributes: nil)
     }
 }
