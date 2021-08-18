@@ -178,11 +178,7 @@ class PixelBuffer: BufferProtocol {
         }
         var size = [Int]()
         for i in 0 ..< planeCount {
-            if #available(iOS 11.0, tvOS 11.0, *) {
-                lineSize.append(bytesPerRow[i].alignment(value: MetalRender.device.minimumLinearTextureAlignment(for: formats[i])))
-            } else {
-                lineSize.append(bytesPerRow[i])
-            }
+            lineSize.append(bytesPerRow[i].alignment(value: MetalRender.device.minimumLinearTextureAlignment(for: formats[i])))
             size.append(lineSize[i] * heights[i])
         }
         dataWrap = ObjectPool.share.object(class: MTLBufferWrap.self, key: "VideoData") { MTLBufferWrap(size: size) }

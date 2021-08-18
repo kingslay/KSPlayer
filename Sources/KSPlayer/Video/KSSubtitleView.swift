@@ -52,7 +52,7 @@ public class KSSubtitleView: UIControl, SubtitleViewProtocol {
         tableView.backgroundColor = UIColor(white: 0, alpha: 0.7)
         addSubview(tableView)
         tableView.translatesAutoresizingMaskIntoConstraints = false
-        tableViewRightConstraint = tableView.rightAnchor.constraint(equalTo: rightAnchor)
+        tableViewRightConstraint = tableView.trailingAnchor.constraint(equalTo: trailingAnchor)
         #if canImport(UIKit)
         #if !os(tvOS)
         tableView.separatorColor = UIColor(white: 1, alpha: 0.15)
@@ -158,18 +158,18 @@ public class SrtListCell: UITableViewCell {
         checkView.translatesAutoresizingMaskIntoConstraints = false
 
         NSLayoutConstraint.activate([
-            titleLabel.leftAnchor.constraint(equalTo: contentView.leftAnchor, constant: 20),
+            titleLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
             titleLabel.topAnchor.constraint(equalTo: contentView.topAnchor),
             titleLabel.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
-            titleLabel.rightAnchor.constraint(equalTo: localIconView.leftAnchor, constant: -12),
+            titleLabel.trailingAnchor.constraint(equalTo: localIconView.leadingAnchor, constant: -12),
             localIconViewWidth,
             localIconView.heightAnchor.constraint(equalToConstant: 20),
             localIconView.centerYAnchor.constraint(equalTo: contentView.centerYAnchor),
-            localIconView.rightAnchor.constraint(equalTo: checkView.leftAnchor),
+            localIconView.trailingAnchor.constraint(equalTo: checkView.leadingAnchor),
             checkView.widthAnchor.constraint(equalToConstant: 20),
             checkView.heightAnchor.constraint(equalToConstant: 20),
             checkView.centerYAnchor.constraint(equalTo: contentView.centerYAnchor),
-            checkView.rightAnchor.constraint(equalTo: contentView.rightAnchor, constant: -15),
+            checkView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -15),
         ])
     }
 

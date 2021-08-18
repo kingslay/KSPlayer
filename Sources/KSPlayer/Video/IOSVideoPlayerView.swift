@@ -87,11 +87,11 @@ open class IOSVideoPlayerView: VideoPlayerView {
         maskImageView.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
             maskImageView.topAnchor.constraint(equalTo: topAnchor),
-            maskImageView.leftAnchor.constraint(equalTo: leftAnchor),
+            maskImageView.leadingAnchor.constraint(equalTo: leadingAnchor),
             maskImageView.bottomAnchor.constraint(equalTo: bottomAnchor),
-            maskImageView.rightAnchor.constraint(equalTo: rightAnchor),
+            maskImageView.trailingAnchor.constraint(equalTo: trailingAnchor),
             backButton.widthAnchor.constraint(equalToConstant: 25),
-            lockButton.leftAnchor.constraint(equalTo: safeLeftAnchor, constant: 22),
+            lockButton.leadingAnchor.constraint(equalTo: safeLeadingAnchor, constant: 22),
             lockButton.centerYAnchor.constraint(equalTo: centerYAnchor),
             routeButton.widthAnchor.constraint(equalToConstant: 25),
             landscapeButton.widthAnchor.constraint(equalToConstant: 30),
@@ -304,8 +304,8 @@ public class AirplayStatusView: UIView {
             airplayicon.widthAnchor.constraint(equalToConstant: 100),
             airplayicon.heightAnchor.constraint(equalToConstant: 100),
             airplaymessage.bottomAnchor.constraint(equalTo: bottomAnchor),
-            airplaymessage.leftAnchor.constraint(equalTo: leftAnchor),
-            airplaymessage.rightAnchor.constraint(equalTo: rightAnchor),
+            airplaymessage.leadingAnchor.constraint(equalTo: leadingAnchor),
+            airplaymessage.trailingAnchor.constraint(equalTo: trailingAnchor),
             airplaymessage.heightAnchor.constraint(equalToConstant: 15),
         ])
         isHidden = true

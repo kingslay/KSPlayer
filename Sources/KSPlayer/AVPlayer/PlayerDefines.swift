@@ -104,11 +104,7 @@ extension MediaPlayerProtocol {
         if category == .playback || category == .playAndRecord {
             return
         }
-        if #available(iOS 11.0, tvOS 11.0, *) {
-            try? AVAudioSession.sharedInstance().setCategory(.playback, mode: .default, policy: .longFormAudio)
-        } else {
-            try? AVAudioSession.sharedInstance().setCategory(.playback, mode: .default)
-        }
+        try? AVAudioSession.sharedInstance().setCategory(.playback, mode: .default, policy: .longFormAudio)
         try? AVAudioSession.sharedInstance().setActive(true)
         #endif
     }

@@ -27,8 +27,8 @@ open class AudioPlayerView: PlayerView {
         addSubview(toolBar)
         toolBar.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
-            toolBar.leftAnchor.constraint(equalTo: leftAnchor, constant: 7),
-            toolBar.rightAnchor.constraint(equalTo: rightAnchor, constant: -12),
+            toolBar.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 7),
+            toolBar.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -12),
             toolBar.topAnchor.constraint(equalTo: topAnchor),
             toolBar.bottomAnchor.constraint(equalTo: bottomAnchor),
         ])

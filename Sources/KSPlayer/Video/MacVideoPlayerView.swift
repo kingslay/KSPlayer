@@ -171,7 +171,7 @@ class UIActivityIndicatorView: UIView {
             loadingView.widthAnchor.constraint(equalTo: widthAnchor),
             loadingView.heightAnchor.constraint(equalTo: heightAnchor),
             imageView.bottomAnchor.constraint(equalTo: loadingView.bottomAnchor),
-            imageView.leftAnchor.constraint(equalTo: loadingView.leftAnchor),
+            imageView.leadingAnchor.constraint(equalTo: loadingView.leadingAnchor),
             imageView.heightAnchor.constraint(equalTo: widthAnchor),
             imageView.widthAnchor.constraint(equalTo: heightAnchor),
         ])
