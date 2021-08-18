@@ -115,12 +115,12 @@ private final class SystemView: UIVisualEffectView {
             titleLabel.widthAnchor.constraint(equalTo: widthAnchor),
             titleLabel.centerXAnchor.constraint(equalTo: centerXAnchor),
             titleLabel.heightAnchor.constraint(equalToConstant: 30),
-            longView.leftAnchor.constraint(equalTo: leftAnchor, constant: 13),
-            longView.rightAnchor.constraint(equalTo: rightAnchor, constant: -13),
+            longView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 13),
+            longView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -13),
             longView.heightAnchor.constraint(equalToConstant: 7),
             longView.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -16),
-            stackView.leftAnchor.constraint(equalTo: longView.leftAnchor, constant: 1),
-            stackView.rightAnchor.constraint(equalTo: longView.rightAnchor, constant: -1),
+            stackView.leadingAnchor.constraint(equalTo: longView.leadingAnchor, constant: 1),
+            stackView.trailingAnchor.constraint(equalTo: longView.trailingAnchor, constant: -1),
             stackView.topAnchor.constraint(equalTo: longView.topAnchor, constant: 1),
             stackView.bottomAnchor.constraint(equalTo: longView.bottomAnchor, constant: -1),
         ])
@@ -184,8 +184,8 @@ private final class ProgressView: UIView {
             progressView.heightAnchor.constraint(equalToConstant: 2),
             progressView.centerXAnchor.constraint(equalTo: centerXAnchor),
             progressView.topAnchor.constraint(equalTo: topAnchor, constant: 57),
-            imageView.leftAnchor.constraint(equalTo: leftAnchor),
-            imageView.rightAnchor.constraint(equalTo: rightAnchor),
+            imageView.leadingAnchor.constraint(equalTo: leadingAnchor),
+            imageView.trailingAnchor.constraint(equalTo: trailingAnchor),
             imageView.bottomAnchor.constraint(equalTo: bottomAnchor),
         ])
     }
@@ -212,7 +212,7 @@ extension ProgressView: BrightnessVolumeViewProtocol {
             view.addSubview(self)
             translatesAutoresizingMaskIntoConstraints = false
             NSLayoutConstraint.activate([
-                rightAnchor.constraint(equalTo: view.safeRightAnchor, constant: -10),
+                trailingAnchor.constraint(equalTo: view.safeTrailingAnchor, constant: -10),
                 centerYAnchor.constraint(equalTo: view.centerYAnchor),
                 heightAnchor.constraint(equalToConstant: 150),
                 widthAnchor.constraint(equalToConstant: 24),
