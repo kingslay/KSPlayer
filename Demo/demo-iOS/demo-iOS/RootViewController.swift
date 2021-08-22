@@ -35,7 +35,7 @@ private class TableViewCell: UITableViewCell {
     }
 }
 
-class RootViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
+class RootViewController: UIViewController {
     var tableView = UITableView()
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -72,7 +72,28 @@ class RootViewController: UIViewController, UITableViewDelegate, UITableViewData
     #else
     private let playerView = CustomVideoPlayerView()
     #endif
+}
 
+extension RootViewController: UITableViewDataSource {
+    func numberOfSections(in _: UITableView) -> Int {
+        1
+    }
+
+    func tableView(_: UITableView, numberOfRowsInSection _: Int) -> Int {
+        objects.count
+    }
+
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath)
+        if let cell = cell as? TableViewCell {
+            let resource = objects[indexPath.row]
+            cell.nameLabel.text = resource.name
+        }
+        return cell
+    }
+}
+
+extension RootViewController: UITableViewDelegate {
     func scrollViewDidEndDecelerating(_: UIScrollView) {
         beginVideoAction()
     }
@@ -89,24 +110,5 @@ class RootViewController: UIViewController, UITableViewDelegate, UITableViewData
         }
         playerView.set(resource: objects[index.row])
         cell.videoView.addSubview(playerView)
-    }
-
-    // MARK: - Table View
-
-    func numberOfSections(in _: UITableView) -> Int {
-        1
-    }
-
-    func tableView(_: UITableView, numberOfRowsInSection _: Int) -> Int {
-        objects.count
-    }
-
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath)
-        if let cell = cell as? TableViewCell {
-            let resource = objects[indexPath.row]
-            cell.nameLabel.text = resource.name
-        }
-        return cell
     }
 }
