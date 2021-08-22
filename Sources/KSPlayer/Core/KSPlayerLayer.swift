@@ -112,9 +112,7 @@ open class KSPlayerLayer: UIView {
                     player.playbackRate = oldValue.playbackRate
                     player.playbackVolume = oldValue.playbackVolume
                 }
-                addSubview(player.view)
                 prepareToPlay()
-                player.view.frame = bounds
             }
         }
     }
@@ -222,23 +220,19 @@ open class KSPlayerLayer: UIView {
         }
     }
 
-    #if canImport(UIKit)
-    override open func layoutSubviews() {
-        super.layoutSubviews()
-        player?.view.frame = bounds
+    override open func didAddSubview(_ subview: UIView) {
+        super.didAddSubview(subview)
+        if subview == player?.view {
+            player?.updateConstraint()
+        }
     }
-    #else
-    override open func resizeSubviews(withOldSize oldSize: NSSize) {
-        super.resizeSubviews(withOldSize: oldSize)
-        player?.view.frame = bounds
-    }
-    #endif
 }
 
 // MARK: - MediaPlayerDelegate
 
 extension KSPlayerLayer: MediaPlayerDelegate {
-    public func preparedToPlay(player _: MediaPlayerProtocol) {
+    public func preparedToPlay(player: MediaPlayerProtocol) {
+        addSubview(player.view)
         updateNowPlayingInfo()
         state = .readyToPlay
         if isAutoPlay {

@@ -137,8 +137,8 @@
 		DA80A3B4FBF9081F7FCF6EED11230D37 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastSwiftUpdateCheck = 1100;
-				LastUpgradeCheck = 1100;
+				LastSwiftUpdateCheck = 1240;
+				LastUpgradeCheck = 1240;
 			};
 			buildConfigurationList = F01EC34373F596EB89807C4ECFC3ABDE /* Build configuration list for PBXProject "OpenSSL" */;
 			compatibilityVersion = "Xcode 11.0";

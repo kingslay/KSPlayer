@@ -55,6 +55,28 @@ public extension MediaPlayerProtocol {
     var nominalFrameRate: Float {
         tracks(mediaType: .video).first { $0.isEnabled }?.nominalFrameRate ?? 0
     }
+
+    func updateConstraint() {
+        guard let superview = view.superview, naturalSize != .zero else {
+            return
+        }
+        view.constraints.forEach { view.removeConstraint($0) }
+        view.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            view.centerXAnchor.constraint(equalTo: superview.centerXAnchor),
+            view.centerYAnchor.constraint(equalTo: superview.centerYAnchor),
+            view.widthAnchor.constraint(equalTo: view.heightAnchor, multiplier: naturalSize.width / naturalSize.height),
+        ])
+        if naturalSize.isHorizonal {
+            NSLayoutConstraint.activate([
+                view.widthAnchor.constraint(equalTo: superview.widthAnchor),
+            ])
+        } else {
+            NSLayoutConstraint.activate([
+                view.heightAnchor.constraint(equalTo: superview.heightAnchor),
+            ])
+        }
+    }
 }
 
 public protocol MediaPlayerDelegate: AnyObject {

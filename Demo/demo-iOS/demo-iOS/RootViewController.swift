@@ -10,16 +10,22 @@ import KSPlayer
 import UIKit
 private class TableViewCell: UITableViewCell {
     var nameLabel: UILabel
+    var videoView = UIView()
     override public init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         nameLabel = UILabel()
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         contentView.addSubview(nameLabel)
+        contentView.addSubview(videoView)
         nameLabel.translatesAutoresizingMaskIntoConstraints = false
+        videoView.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
-            nameLabel.topAnchor.constraint(equalTo: contentView.topAnchor),
+            nameLabel.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 10),
             nameLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 10),
-            nameLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
-            nameLabel.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
+            nameLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -10),
+            videoView.topAnchor.constraint(equalTo: nameLabel.bottomAnchor, constant: 10),
+            videoView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
+            videoView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
+            videoView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
         ])
     }
 
@@ -29,7 +35,7 @@ private class TableViewCell: UITableViewCell {
     }
 }
 
-class MasterViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
+class RootViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
     var tableView = UITableView()
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -43,18 +49,46 @@ class MasterViewController: UIViewController, UITableViewDelegate, UITableViewDa
         ])
         tableView.delegate = self
         tableView.dataSource = self
-        tableView.rowHeight = 50
+        tableView.rowHeight = UIScreen.main.bounds.width * 0.65 + 50
         tableView.register(TableViewCell.self, forCellReuseIdentifier: "Cell")
         tableView.reloadData()
+        beginVideoAction()
     }
 
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
+    #if os(iOS)
+    override var preferredStatusBarStyle: UIStatusBarStyle {
+        .lightContent
     }
 
-    override func didReceiveMemoryWarning() {
-        super.didReceiveMemoryWarning()
-        // Dispose of any resources that can be recreated.
+    override var prefersStatusBarHidden: Bool {
+        !playerView.isMaskShow
+    }
+
+    override var supportedInterfaceOrientations: UIInterfaceOrientationMask {
+        KSPlayerManager.supportedInterfaceOrientations
+    }
+
+    private let playerView = IOSVideoPlayerView()
+    #else
+    private let playerView = CustomVideoPlayerView()
+    #endif
+
+    func scrollViewDidEndDecelerating(_: UIScrollView) {
+        beginVideoAction()
+    }
+
+    func scrollViewDidEndDragging(_: UIScrollView, willDecelerate decelerate: Bool) {
+        if !decelerate {
+            beginVideoAction()
+        }
+    }
+
+    private func beginVideoAction() {
+        guard let index = tableView.indexPathsForVisibleRows?.first, let cell = tableView.cellForRow(at: index) as? TableViewCell else {
+            return
+        }
+        playerView.set(resource: objects[index.row])
+        cell.videoView.addSubview(playerView)
     }
 
     // MARK: - Table View
@@ -70,29 +104,9 @@ class MasterViewController: UIViewController, UITableViewDelegate, UITableViewDa
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath)
         if let cell = cell as? TableViewCell {
-            cell.nameLabel.text = objects[indexPath.row].name
+            let resource = objects[indexPath.row]
+            cell.nameLabel.text = resource.name
         }
         return cell
-    }
-
-    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        tableView.deselectRow(at: indexPath, animated: true)
-        if let split = splitViewController, let nav = split.viewControllers.last as? UINavigationController, let detail = nav.topViewController as? DetailProtocol {
-            detail.resource = objects[indexPath.row]
-            #if os(iOS)
-            detail.navigationItem.leftBarButtonItem = split.displayModeButtonItem
-            detail.navigationItem.leftItemsSupplementBackButton = true
-            #endif
-            split.preferredDisplayMode = .primaryHidden
-            return
-        }
-        let controller: DetailProtocol
-        if indexPath.row == objects.count - 1 {
-            controller = AudioViewController()
-        } else {
-            controller = DetailViewController()
-        }
-        controller.resource = objects[indexPath.row]
-        navigationController?.pushViewController(controller, animated: true)
     }
 }

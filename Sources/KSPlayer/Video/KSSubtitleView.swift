@@ -16,13 +16,13 @@ public class KSSubtitleView: UIControl, SubtitleViewProtocol {
     private var closeInfo = URLSubtitleInfo(subtitleID: "", name: NSLocalizedString("no show subtitle", comment: ""))
     private let tableView = UITableView()
     private let tableWidth = CGFloat(360)
-    private var tableViewRightConstraint: NSLayoutConstraint!
+    private var tableViewTrailingConstraint: NSLayoutConstraint!
     public let selectedInfo: KSObservable<SubtitleInfo>
     override public var isHidden: Bool {
         didSet {
             if isHidden {
                 UIView.animate(withDuration: 0.25) {
-                    self.tableViewRightConstraint.constant = self.tableWidth
+                    self.tableViewTrailingConstraint.constant = self.tableWidth
                     self.layoutIfNeeded()
                 }
                 #if canImport(UIKit)
@@ -31,7 +31,7 @@ public class KSSubtitleView: UIControl, SubtitleViewProtocol {
             } else {
                 tableView.reloadData()
                 UIView.animate(withDuration: 0.25) {
-                    self.tableViewRightConstraint.constant = 0
+                    self.tableViewTrailingConstraint.constant = 0
                     self.layoutIfNeeded()
                 }
                 #if canImport(UIKit)
@@ -52,7 +52,7 @@ public class KSSubtitleView: UIControl, SubtitleViewProtocol {
         tableView.backgroundColor = UIColor(white: 0, alpha: 0.7)
         addSubview(tableView)
         tableView.translatesAutoresizingMaskIntoConstraints = false
-        tableViewRightConstraint = tableView.trailingAnchor.constraint(equalTo: trailingAnchor)
+        tableViewTrailingConstraint = tableView.trailingAnchor.constraint(equalTo: trailingAnchor)
         #if canImport(UIKit)
         #if !os(tvOS)
         tableView.separatorColor = UIColor(white: 1, alpha: 0.15)
@@ -64,14 +64,14 @@ public class KSSubtitleView: UIControl, SubtitleViewProtocol {
             tableView.topAnchor.constraint(equalTo: topAnchor),
             tableView.bottomAnchor.constraint(equalTo: bottomAnchor),
             tableView.widthAnchor.constraint(equalToConstant: tableWidth),
-            tableViewRightConstraint,
+            tableViewTrailingConstraint,
         ])
         #else
         NSLayoutConstraint.activate([
             tableView.topAnchor.constraint(equalTo: topAnchor),
 //          tableView.bottomAnchor.constraint(equalTo: bottomAnchor),
             tableView.widthAnchor.constraint(equalToConstant: tableWidth),
-            tableViewRightConstraint,
+            tableViewTrailingConstraint,
         ])
         #endif
 

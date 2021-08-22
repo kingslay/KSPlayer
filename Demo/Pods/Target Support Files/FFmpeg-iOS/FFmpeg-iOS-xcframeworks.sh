@@ -149,10 +149,10 @@ install_xcframework() {
   echo "Copied $source to $destination"
 }
 
-install_xcframework "${PODS_ROOT}/../../Sources/Libavcodec.xcframework" "Libavcodec" "framework" "ios-arm64" "ios-arm64_x86_64-simulator" "ios-x86_64-maccatalyst"
-install_xcframework "${PODS_ROOT}/../../Sources/Libavfilter.xcframework" "Libavfilter" "framework" "ios-arm64" "ios-arm64_x86_64-simulator" "ios-x86_64-maccatalyst"
-install_xcframework "${PODS_ROOT}/../../Sources/Libavformat.xcframework" "Libavformat" "framework" "ios-arm64" "ios-x86_64-maccatalyst" "ios-arm64_x86_64-simulator"
+install_xcframework "${PODS_ROOT}/../../Sources/Libavcodec.xcframework" "Libavcodec" "framework" "ios-arm64_x86_64-simulator" "ios-arm64" "ios-x86_64-maccatalyst"
+install_xcframework "${PODS_ROOT}/../../Sources/Libavfilter.xcframework" "Libavfilter" "framework" "ios-arm64_x86_64-simulator" "ios-x86_64-maccatalyst" "ios-arm64"
+install_xcframework "${PODS_ROOT}/../../Sources/Libavformat.xcframework" "Libavformat" "framework" "ios-arm64_x86_64-simulator" "ios-x86_64-maccatalyst" "ios-arm64"
 install_xcframework "${PODS_ROOT}/../../Sources/Libavutil.xcframework" "Libavutil" "framework" "ios-x86_64-maccatalyst" "ios-arm64" "ios-arm64_x86_64-simulator"
-install_xcframework "${PODS_ROOT}/../../Sources/Libswresample.xcframework" "Libswresample" "framework" "ios-arm64" "ios-arm64_x86_64-simulator" "ios-x86_64-maccatalyst"
-install_xcframework "${PODS_ROOT}/../../Sources/Libswscale.xcframework" "Libswscale" "framework" "ios-arm64_x86_64-simulator" "ios-x86_64-maccatalyst" "ios-arm64"
+install_xcframework "${PODS_ROOT}/../../Sources/Libswresample.xcframework" "Libswresample" "framework" "ios-x86_64-maccatalyst" "ios-arm64_x86_64-simulator" "ios-arm64"
+install_xcframework "${PODS_ROOT}/../../Sources/Libswscale.xcframework" "Libswscale" "framework" "ios-arm64" "ios-arm64_x86_64-simulator" "ios-x86_64-maccatalyst"
 

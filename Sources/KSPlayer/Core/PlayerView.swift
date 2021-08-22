@@ -89,6 +89,7 @@ open class PlayerView: UIView, KSPlayerLayerDelegate, KSSliderDelegate {
     }
 
     open func play() {
+        becomeFirstResponder()
         if playerLayer.state == .playedToTheEnd {
             seek(time: 0)
         } else {

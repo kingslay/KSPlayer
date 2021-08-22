@@ -114,6 +114,35 @@ open class VideoPlayerView: PlayerView {
         super.init(frame: frame)
         setupUIComponents()
     }
+    #if os(macOS)
+    open override func viewDidMoveToSuperview() {
+        super.viewDidMoveToSuperview()
+        guard let superview = superview else {
+            return
+        }
+        translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            topAnchor.constraint(equalTo: superview.readableTopAnchor),
+            leadingAnchor.constraint(equalTo: superview.leadingAnchor),
+            trailingAnchor.constraint(equalTo: superview.trailingAnchor),
+            bottomAnchor.constraint(equalTo: superview.bottomAnchor),
+        ])
+    }
+    #else
+    override open func didMoveToSuperview() {
+        super.didMoveToSuperview()
+        guard let superview = superview else {
+            return
+        }
+        translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            topAnchor.constraint(equalTo: superview.readableTopAnchor),
+            leadingAnchor.constraint(equalTo: superview.leadingAnchor),
+            trailingAnchor.constraint(equalTo: superview.trailingAnchor),
+            bottomAnchor.constraint(equalTo: superview.bottomAnchor),
+        ])
+    }
+    #endif
 
     // MARK: - Action Response
 
