@@ -98,8 +98,8 @@
 		3E8C44FCFA390D3EA0F1946A37EF7312 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastSwiftUpdateCheck = 1100;
-				LastUpgradeCheck = 1100;
+				LastSwiftUpdateCheck = 1240;
+				LastUpgradeCheck = 1240;
 			};
 			buildConfigurationList = 4FB14426193C9C27F7C8689611A6338E /* Build configuration list for PBXProject "SwiftLint" */;
 			compatibilityVersion = "Xcode 11.0";

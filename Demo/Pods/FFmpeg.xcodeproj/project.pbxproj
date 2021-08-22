@@ -411,8 +411,8 @@
 		D89FC7EDE9471CB41818E901B118730D /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastSwiftUpdateCheck = 1100;
-				LastUpgradeCheck = 1100;
+				LastSwiftUpdateCheck = 1240;
+				LastUpgradeCheck = 1240;
 			};
 			buildConfigurationList = 20E2142F98118C068482E8EC6D031B77 /* Build configuration list for PBXProject "FFmpeg" */;
 			compatibilityVersion = "Xcode 11.0";
@@ -522,8 +522,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				C20B6C06EEC7B1485B4B6DBD51AA18AD /* FFmpeg-macOS-dummy.m in Sources */,
 				B8B8732A415BC00AF8DB1E5A7CB31793 /* FFmpeg.c in Sources */,
+				C20B6C06EEC7B1485B4B6DBD51AA18AD /* FFmpeg-macOS-dummy.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -531,8 +531,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				22F2398E6EF84EF539144E12B8D101B1 /* FFmpeg-iOS-dummy.m in Sources */,
 				351CB4DBA351F2DCD2D7C1526C27E1E9 /* FFmpeg.c in Sources */,
+				22F2398E6EF84EF539144E12B8D101B1 /* FFmpeg-iOS-dummy.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -540,8 +540,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				E2F0DFCED65AD582C42F3A55E41C8281 /* FFmpeg-tvOS-dummy.m in Sources */,
 				70F38618EE1B0EFE8E2D5659DEC3CE92 /* FFmpeg.c in Sources */,
+				E2F0DFCED65AD582C42F3A55E41C8281 /* FFmpeg-tvOS-dummy.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

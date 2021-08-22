@@ -242,7 +242,7 @@ class BuildFFMPEG: BaseBuild {
     }
 
     private let ffmpegConfiguers = [
-        "--enable-optimizations", "--enable-gpl", "--enable-version3", "--enable-nonfree","--disable-zlib",
+        "--enable-optimizations", "--enable-gpl", "--enable-version3", "--enable-nonfree", "--disable-zlib",
         "--disable-xlib", "--disable-devices", "--disable-indevs", "--disable-outdevs", "--disable-iconv",
         "--disable-bsfs", "--disable-symver", "--disable-armv5te", "--disable-armv6", " --disable-armv6t2",
         "--disable-audiotoolbox", "--disable-videotoolbox", "--disable-linux-perf", "--disable-bzlib",

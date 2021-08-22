@@ -135,12 +135,12 @@ public extension UIView {
         constraints.first { $0.isMember(of: NSLayoutConstraint.self) && $0.firstAttribute == .height }
     }
 
-    var rightConstraint: NSLayoutConstraint? {
-        superview?.constraints.first { $0.firstItem === self && $0.firstAttribute == .right }
+    var trailingConstraint: NSLayoutConstraint? {
+        superview?.constraints.first { $0.firstItem === self && $0.firstAttribute == .trailing }
     }
 
-    var leftConstraint: NSLayoutConstraint? {
-        superview?.constraints.first { $0.firstItem === self && $0.firstAttribute == .left }
+    var leadingConstraint: NSLayoutConstraint? {
+        superview?.constraints.first { $0.firstItem === self && $0.firstAttribute == .leading }
     }
 
     var topConstraint: NSLayoutConstraint? {
@@ -166,6 +166,15 @@ public extension UIView {
             return topAnchor
         }
     }
+
+    var readableTopAnchor: NSLayoutYAxisAnchor {
+        #if os(macOS)
+        topAnchor
+        #else
+        readableContentGuide.topAnchor
+        #endif
+    }
+
 
     var safeLeadingAnchor: NSLayoutXAxisAnchor {
         if #available(macOS 11.0, *) {
@@ -211,6 +220,10 @@ extension CGSize {
 
     var toPoint: CGPoint {
         CGPoint(x: width, y: height)
+    }
+
+    var isHorizonal: Bool {
+        width > height
     }
 }
 

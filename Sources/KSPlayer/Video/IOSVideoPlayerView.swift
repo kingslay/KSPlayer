@@ -11,6 +11,9 @@ import MediaPlayer
 import UIKit
 
 open class IOSVideoPlayerView: VideoPlayerView {
+    private weak var originalSuperView: UIView?
+    private var originalOrientations: UIInterfaceOrientationMask?
+    private weak var fullScreenDelegate: PlayerViewFullScreenDelegate?
     private var isPlayingForCall = false
     private let callCenter = CXCallObserver()
     private var isVolume = false
@@ -25,6 +28,7 @@ open class IOSVideoPlayerView: VideoPlayerView {
     public var landscapeButton = UIButton()
     override open var isMaskShow: Bool {
         didSet {
+            fullScreenDelegate?.player(isMaskShow: isMaskShow, isFullScreen: landscapeButton.isSelected)
             UIView.animate(withDuration: 0.3) {
                 self.lockButton.alpha = self.isMaskShow ? 1.0 : 0.0
             }
@@ -111,18 +115,60 @@ open class IOSVideoPlayerView: VideoPlayerView {
     }
 
     override open func onButtonPressed(type: PlayerButtonType, button: UIButton) {
+        if type == .back && viewController is PlayerFullScreenViewController {
+            updateUI(isFullScreen: false)
+            return
+        }
         super.onButtonPressed(type: type, button: button)
         if type == .lock {
             button.isSelected.toggle()
             isMaskShow = !button.isSelected
             button.alpha = 1.0
         } else if type == .landscape {
-            updateUI(isLandscape: !UIApplication.isLandscape)
+            updateUI(isFullScreen: !landscapeButton.isSelected)
         }
     }
 
+    open func updateUI(isFullScreen: Bool) {
+        guard let viewController = viewController else {
+            return
+        }
+        landscapeButton.isSelected = isFullScreen
+        let isHorizonal = playerLayer.player?.naturalSize.isHorizonal ?? true
+        viewController.navigationController?.interactivePopGestureRecognizer?.isEnabled = !isFullScreen
+        if isFullScreen {
+            if viewController is PlayerFullScreenViewController {
+                return
+            }
+            originalSuperView = superview
+            originalOrientations = viewController.supportedInterfaceOrientations
+            let fullVC = PlayerFullScreenViewController(isHorizonal: isHorizonal)
+            fullScreenDelegate = fullVC
+            fullVC.view.addSubview(self)
+            fullVC.modalPresentationStyle = .fullScreen
+            fullVC.modalPresentationCapturesStatusBarAppearance = true
+            fullVC.transitioningDelegate = self
+            viewController.present(fullVC, animated: true) {
+                KSPlayerManager.supportedInterfaceOrientations = fullVC.supportedInterfaceOrientations
+            }
+        } else {
+            guard viewController is PlayerFullScreenViewController else {
+                return
+            }
+            let presentingVC = viewController.presentingViewController ?? viewController
+            KSPlayerManager.supportedInterfaceOrientations = .portrait
+            presentingVC.dismiss(animated: true) {
+                self.originalSuperView?.addSubview(self)
+                if let originalOrientations = self.originalOrientations {
+                    KSPlayerManager.supportedInterfaceOrientations = originalOrientations
+                }
+            }
+        }
+        let isLandscape = isFullScreen && isHorizonal
+        updateUI(isLandscape: isLandscape)
+    }
+
     open func updateUI(isLandscape: Bool) {
-        landscapeButton.isSelected = isLandscape
         if isLandscape {
             topMaskView.isHidden = KSPlayerManager.topBarShowInCase == .none
         } else {
@@ -146,14 +192,6 @@ open class IOSVideoPlayerView: VideoPlayerView {
             toolBar.playbackRateButton.isHidden = !isLandscape
         } else {
             landscapeButton.isHidden = true
-        }
-        if UIApplication.isLandscape != isLandscape {
-            UIDevice.current.setValue(UIInterfaceOrientation.unknown.rawValue, forKey: "orientation")
-            UIDevice.current.setValue((isLandscape ? UIInterfaceOrientation.landscapeRight : .portrait).rawValue, forKey: "orientation")
-            if KSPlayerManager.supportedInterfaceOrientations != .all {
-                KSPlayerManager.supportedInterfaceOrientations = isLandscape ? UIInterfaceOrientationMask.landscapeRight : .portrait
-                UIViewController.attemptRotationToDeviceOrientation()
-            }
         }
         lockButton.isHidden = !isLandscape
         judgePanGesture()
@@ -238,12 +276,28 @@ extension IOSVideoPlayerView: CXCallObserverDelegate {
     }
 }
 
+extension IOSVideoPlayerView: UIViewControllerTransitioningDelegate {
+    public func animationController(forPresented _: UIViewController, presenting _: UIViewController, source _: UIViewController) -> UIViewControllerAnimatedTransitioning? {
+        if let originalSuperView = originalSuperView, let animationView = playerLayer.player?.view {
+            return PlayerTransitionAnimator(containerView: originalSuperView, animationView: animationView)
+        }
+        return nil
+    }
+
+    public func animationController(forDismissed _: UIViewController) -> UIViewControllerAnimatedTransitioning? {
+        if let originalSuperView = originalSuperView, let animationView = playerLayer.player?.view {
+            return PlayerTransitionAnimator(containerView: originalSuperView, animationView: animationView, isDismiss: true)
+        } else {
+            return nil
+        }
+    }
+}
+
 // MARK: - private functions
 
 extension IOSVideoPlayerView {
     private func addNotification() {
         NotificationCenter.default.addObserver(self, selector: #selector(orientationChanged), name: UIApplication.didChangeStatusBarOrientationNotification, object: nil)
-        orientationChanged()
         NotificationCenter.default.addObserver(self, selector: #selector(routesAvailableDidChange), name: .MPVolumeViewWirelessRoutesAvailableDidChange, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(wirelessRouteActiveDidChange(notification:)), name: .MPVolumeViewWirelessRouteActiveDidChange, object: nil)
         callCenter.setDelegate(self, queue: DispatchQueue.main)
@@ -264,8 +318,11 @@ extension IOSVideoPlayerView {
         playerLayer.isWirelessRouteActive = volumeView.isWirelessRouteActive
     }
 
-    @objc private func orientationChanged() {
-        updateUI(isLandscape: UIApplication.isLandscape)
+    @objc private func orientationChanged(notification _: Notification) {
+        guard let isHorizonal = playerLayer.player?.naturalSize.isHorizonal, isHorizonal else {
+            return
+        }
+        updateUI(isFullScreen: UIApplication.isLandscape)
     }
 
     private func judgePanGesture() {
@@ -319,6 +376,7 @@ public class AirplayStatusView: UIView {
 
 public extension KSPlayerManager {
     /// func application(_ application: UIApplication, supportedInterfaceOrientationsFor window: UIWindow?) -> UIInterfaceOrientationMask
+    @KSObservable
     static var supportedInterfaceOrientations = UIInterfaceOrientationMask.portrait
 }
 
