@@ -29,7 +29,7 @@ private class TableViewCell: UITableViewCell {
     }
 }
 
-class MasterViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
+class MasterViewController: UIViewController {
     var tableView = UITableView()
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -56,7 +56,9 @@ class MasterViewController: UIViewController, UITableViewDelegate, UITableViewDa
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
     }
+}
 
+extension MasterViewController: UITableViewDataSource {
     // MARK: - Table View
 
     func numberOfSections(in _: UITableView) -> Int {
@@ -74,7 +76,9 @@ class MasterViewController: UIViewController, UITableViewDelegate, UITableViewDa
         }
         return cell
     }
+}
 
+extension MasterViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
         if let split = splitViewController, let nav = split.viewControllers.last as? UINavigationController, let detail = nav.topViewController as? DetailProtocol {
