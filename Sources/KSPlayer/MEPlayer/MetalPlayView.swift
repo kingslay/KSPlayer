@@ -37,6 +37,13 @@ final class MetalPlayView: UIView {
         view.delegate = self
         addSubview(view)
         view.isHidden = true
+        view.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            topAnchor.constraint(equalTo: view.topAnchor),
+            leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            bottomAnchor.constraint(equalTo: view.bottomAnchor),
+        ])
         var controlTimebase: CMTimebase?
         CMTimebaseCreateWithMasterClock(allocator: kCFAllocatorDefault, masterClock: CMClockGetHostTimeClock(), timebaseOut: &controlTimebase)
         if let controlTimebase = controlTimebase {
@@ -177,9 +184,6 @@ extension MetalPlayView: MTKViewDelegate {
     }
 
     func mtkView(_ view: MTKView, drawableSizeWillChange _: CGSize) {
-        if view.frame != bounds {
-            view.frame = bounds
-        }
     }
 }
 extension MetalPlayView: FrameOutput {
