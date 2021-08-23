@@ -94,6 +94,14 @@ extension RootViewController: UITableViewDataSource {
 }
 
 extension RootViewController: UITableViewDelegate {
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        tableView.deselectRow(at: indexPath, animated: true)
+        guard let cell = tableView.cellForRow(at: indexPath) as? TableViewCell else {
+            return
+        }
+        playerView.set(resource: objects[indexPath.row])
+        cell.videoView.addSubview(playerView)
+    }
     func scrollViewDidEndDecelerating(_: UIScrollView) {
         beginVideoAction()
     }
