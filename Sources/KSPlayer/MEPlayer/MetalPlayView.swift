@@ -11,7 +11,7 @@ import MetalKit
 
 final class MetalPlayView: UIView {
     private let render = MetalRender()
-    private let view =  MTKView(frame: .zero, device: MetalRender.device)
+    private let view = MTKView(frame: .zero, device: MetalRender.device)
     private var videoInfo: CMVideoFormatDescription?
     private var pixelBuffer: BufferProtocol?
     var options: KSOptions
@@ -25,6 +25,7 @@ final class MetalPlayView: UIView {
         layer as! AVSampleBufferDisplayLayer
         // swiftlint:enable force_cast
     }
+
     init(options: KSOptions) {
         self.options = options
         super.init(frame: .zero)
@@ -183,9 +184,9 @@ extension MetalPlayView: MTKViewDelegate {
         }
     }
 
-    func mtkView(_ view: MTKView, drawableSizeWillChange _: CGSize) {
-    }
+    func mtkView(_: MTKView, drawableSizeWillChange _: CGSize) {}
 }
+
 extension MetalPlayView: FrameOutput {
     var isPaused: Bool {
         get {
@@ -195,6 +196,7 @@ extension MetalPlayView: FrameOutput {
             view.isPaused = newValue
         }
     }
+
     var drawableSize: CGSize {
         get {
             view.drawableSize

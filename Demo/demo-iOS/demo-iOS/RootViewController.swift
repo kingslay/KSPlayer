@@ -22,7 +22,7 @@ private class TableViewCell: UITableViewCell {
             nameLabel.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 10),
             nameLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 10),
             nameLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -10),
-            videoView.topAnchor.constraint(equalTo: nameLabel.bottomAnchor, constant: 10),
+            videoView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 50),
             videoView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
             videoView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
             videoView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
@@ -32,6 +32,9 @@ private class TableViewCell: UITableViewCell {
     @available(*, unavailable)
     required init?(coder _: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+    override func prepareForReuse() {
+        _ = videoView.subviews.compactMap{ $0.removeFromSuperview()}
     }
 }
 
@@ -102,13 +105,14 @@ extension RootViewController: UITableViewDelegate {
         playerView.set(resource: objects[indexPath.row])
         cell.videoView.addSubview(playerView)
     }
+
     func scrollViewDidEndDecelerating(_: UIScrollView) {
-        beginVideoAction()
+//        beginVideoAction()
     }
 
     func scrollViewDidEndDragging(_: UIScrollView, willDecelerate decelerate: Bool) {
         if !decelerate {
-            beginVideoAction()
+//            beginVideoAction()
         }
     }
 

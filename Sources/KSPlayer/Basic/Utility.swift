@@ -175,7 +175,6 @@ public extension UIView {
         #endif
     }
 
-
     var safeLeadingAnchor: NSLayoutXAxisAnchor {
         if #available(macOS 11.0, *) {
             return self.safeAreaLayoutGuide.leadingAnchor
@@ -210,6 +209,12 @@ extension CMTime {
 extension CMTimeRange {
     init(start: TimeInterval, end: TimeInterval) {
         self.init(start: CMTime(seconds: start), end: CMTime(seconds: end))
+    }
+}
+
+extension CGPoint {
+    var reverse: CGPoint {
+        CGPoint(x: y, y: x)
     }
 }
 
