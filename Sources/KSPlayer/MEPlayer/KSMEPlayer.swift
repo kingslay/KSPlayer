@@ -88,7 +88,7 @@ extension KSMEPlayer: MEPlayerDelegate {
         isPreparedToPlay = true
         runInMainqueue { [weak self] in
             guard let self = self else { return }
-            self.videoOutput.drawableSize = self.options.display == .plane ? self.naturalSize : UIScreen.size
+            self.videoOutput.drawableSize = self.naturalSize
             self.view.centerRotate(byDegrees: self.playerItem.rotation)
             self.videoOutput.isPaused = false
             self.delegate?.preparedToPlay(player: self)
@@ -218,7 +218,7 @@ extension KSMEPlayer: MediaPlayerProtocol {
     public var isPlaying: Bool { playbackState == .playing }
 
     public var naturalSize: CGSize {
-        playerItem.rotation == 90 || playerItem.rotation == 270 ? playerItem.naturalSize.reverse : playerItem.naturalSize
+        self.options.display == .plane ? (playerItem.rotation == 90 || playerItem.rotation == 270 ? playerItem.naturalSize.reverse : playerItem.naturalSize) : UIScreen.size
     }
 
     public var isExternalPlaybackActive: Bool { false }

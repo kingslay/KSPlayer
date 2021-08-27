@@ -115,7 +115,7 @@ open class IOSVideoPlayerView: VideoPlayerView {
     }
 
     override open func onButtonPressed(type: PlayerButtonType, button: UIButton) {
-        if type == .back && viewController is PlayerFullScreenViewController {
+        if type == .back, viewController is PlayerFullScreenViewController {
             updateUI(isFullScreen: false)
             return
         }

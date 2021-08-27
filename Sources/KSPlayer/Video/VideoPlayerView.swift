@@ -114,8 +114,9 @@ open class VideoPlayerView: PlayerView {
         super.init(frame: frame)
         setupUIComponents()
     }
+
     #if os(macOS)
-    open override func viewDidMoveToSuperview() {
+    override open func viewDidMoveToSuperview() {
         super.viewDidMoveToSuperview()
         guard let superview = superview else {
             return

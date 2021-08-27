@@ -21,7 +21,6 @@ public class EmbedSubtitleInfo: SubtitleInfo {
     }
 
     public func makeSubtitle(completion: @escaping (Result<KSSubtitleProtocol?, NSError>) -> Void) {
-        subtitle.assetTrack.stream.pointee.discard = AVDISCARD_DEFAULT
         completion(.success(subtitle))
     }
 }

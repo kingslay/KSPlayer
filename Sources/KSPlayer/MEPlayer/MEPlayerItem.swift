@@ -231,9 +231,7 @@ extension MEPlayerItem {
         }
         if !options.subtitleDisable {
             subtitleTracks = assetTracks.filter { $0.mediaType == .subtitle }.map {
-                FFPlayerItemTrack<
-                    SubtitleFrame
-                >(assetTrack: $0, options: options)
+                FFPlayerItemTrack<SubtitleFrame>(assetTrack: $0, options: options)
             }
             allTracks.append(contentsOf: subtitleTracks)
         }

@@ -106,7 +106,6 @@ protocol PlayerItemTrackProtocol: CapacityProtocol, AnyObject {
     // 是否无缝循环
     var isLoopModel: Bool { get set }
     var isEndOfFile: Bool { get set }
-    var assetTrack: TrackProtocol { get }
     var delegate: CodecCapacityDelegate? { get set }
     func decode()
     func seek(time: TimeInterval)
