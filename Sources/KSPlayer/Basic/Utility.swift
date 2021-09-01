@@ -124,7 +124,7 @@ public extension UIColor {
     }
 }
 
-public extension UIView {
+extension UIView {
     var widthConstraint: NSLayoutConstraint? {
         // 防止返回NSContentSizeLayoutConstraint
         constraints.first { $0.isMember(of: NSLayoutConstraint.self) && $0.firstAttribute == .width }
