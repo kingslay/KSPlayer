@@ -218,7 +218,7 @@ extension KSMEPlayer: MediaPlayerProtocol {
     public var isPlaying: Bool { playbackState == .playing }
 
     public var naturalSize: CGSize {
-        self.options.display == .plane ? (playerItem.rotation == 90 || playerItem.rotation == 270 ? playerItem.naturalSize.reverse : playerItem.naturalSize) : UIScreen.size
+        options.display == .plane ? (playerItem.rotation == 90 || playerItem.rotation == 270 ? playerItem.naturalSize.reverse : playerItem.naturalSize) : UIScreen.size
     }
 
     public var isExternalPlaybackActive: Bool { false }
