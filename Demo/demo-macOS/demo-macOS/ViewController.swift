@@ -10,17 +10,20 @@ import AppKit
 import KSPlayer
 
 class MeOptions: KSOptions {
-    override func drawableSize(par: CGSize, sar: CGSize) -> CGSize {
-        let size = super.drawableSize(par: par, sar: sar)
-        let rate = size.width/size.height
-        if rate < 5/4 {
-            return CGSize(width: par.width, height: par.width*4/5)
-        } else if rate < 4/3 {
-            return CGSize(width: par.width, height: par.width*3/4)
-        } else if rate < 16/9 {
-            return CGSize(width: par.width, height: par.width*9/16)
+    override func customizeDar(sar: CGSize, par: CGSize) -> CGSize? {
+        let rate = sar.width * par.height / (sar.height * par.height)
+        if rate < 5 / 4 {
+            return CGSize(width: 5, height: 4)
+        } else if rate < 4 / 3 {
+            return CGSize(width: 4, height: 3)
+        } else if rate < 16 / 9 {
+            return CGSize(width: 16, height: 9)
         }
-        return size
+        return nil
+    }
+
+    override func isUseDisplayLayer() -> Bool {
+        super.isUseDisplayLayer()
     }
 }
 
@@ -43,6 +46,7 @@ class ViewController: NSViewController {
 //        self.url = URL(fileURLWithPath: Bundle.main.path(forResource: "567082ac3ae39699f68de4fd2b7444b1e045515a", ofType: "MP4")!)
     }
 
+    @available(*, unavailable)
     required init?(coder _: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
@@ -50,13 +54,6 @@ class ViewController: NSViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         view.addSubview(playerView)
-        playerView.translatesAutoresizingMaskIntoConstraints = false
-        NSLayoutConstraint.activate([
-            playerView.topAnchor.constraint(equalTo: view.topAnchor),
-            playerView.leftAnchor.constraint(equalTo: view.leftAnchor),
-            playerView.rightAnchor.constraint(equalTo: view.rightAnchor),
-            playerView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
-        ])
     }
 
     override var representedObject: Any? {

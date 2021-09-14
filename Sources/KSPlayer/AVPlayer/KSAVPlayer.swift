@@ -9,19 +9,19 @@ public final class KSAVPlayerView: UIView {
     public let player = AVQueuePlayer()
     override public init(frame: CGRect) {
         super.init(frame: frame)
-        #if os(macOS)
+        #if !canImport(UIKit)
         layer = AVPlayerLayer()
         #endif
         playerLayer.player = player
         player.automaticallyWaitsToMinimizeStalling = false
     }
 
+    @available(*, unavailable)
     public required init?(coder _: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
 
-    #if os(macOS)
-    override var contentMode: UIViewContentMode {
+    override public var contentMode: UIViewContentMode {
         get {
             switch playerLayer.videoGravity {
             case .resize:
@@ -50,23 +50,8 @@ public final class KSAVPlayerView: UIView {
         }
     }
 
-    #else
+    #if canImport(UIKit)
     override public class var layerClass: AnyClass { AVPlayerLayer.self }
-
-    override public var contentMode: UIViewContentMode {
-        didSet {
-            switch contentMode {
-            case .scaleToFill:
-                playerLayer.videoGravity = .resize
-            case .scaleAspectFit, .center:
-                playerLayer.videoGravity = .resizeAspect
-            case .scaleAspectFill:
-                playerLayer.videoGravity = .resizeAspectFill
-            default:
-                break
-            }
-        }
-    }
     #endif
     fileprivate var playerLayer: AVPlayerLayer {
         // swiftlint:disable force_cast
@@ -452,7 +437,7 @@ extension KSAVPlayer: MediaPlayerProtocol {
     }
 
     public func tracks(mediaType: AVMediaType) -> [MediaPlayerTrack] {
-        return player.currentItem?.tracks.filter { $0.assetTrack?.mediaType == mediaType }.map { AVMediaPlayerTrack(track: $0) } ?? []
+        player.currentItem?.tracks.filter { $0.assetTrack?.mediaType == mediaType }.map { AVMediaPlayerTrack(track: $0) } ?? []
     }
 
     public func select(track: MediaPlayerTrack) {
@@ -501,6 +486,7 @@ struct AVMediaPlayerTrack: MediaPlayerTrack {
             track.isEnabled = newValue
         }
     }
+
     init(track: AVPlayerItemTrack) {
         self.track = track
         mediaType = track.assetTrack?.mediaType ?? .video

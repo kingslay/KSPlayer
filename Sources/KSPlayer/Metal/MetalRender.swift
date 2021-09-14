@@ -4,13 +4,13 @@
 //
 //  Created by wangjinbian on 2020/1/11.
 //
+import Accelerate
 import CoreVideo
 import Foundation
 import Metal
 import QuartzCore
 import simd
 import VideoToolbox
-import Accelerate
 // swiftlint:disable identifier_name
 private let kvImage_YpCbCrToARGBMatrix_ITU_R_2020 = vImage_YpCbCrToARGBMatrix(Yp: 1, Cr_R: 1.4746, Cr_G: -0.57135, Cb_G: -0.16455, Cb_B: 1.8814)
 // swiftlint:enable identifier_name
@@ -24,6 +24,7 @@ class MetalRender {
         }
         return library
     }()
+
     private let textureCache = MetalTextureCache()
     private let renderPassDescriptor = MTLRenderPassDescriptor()
     private let commandQueue = MetalRender.device.makeCommandQueue()
@@ -59,15 +60,15 @@ class MetalRender {
     }()
 
     private lazy var colorOffsetVideoRangeMatrixBuffer: MTLBuffer? = {
-        var firstColumn = SIMD3<Float>(-16.0 / 255.0, -128.0/255.0, -128.0/255.0)
-        let buffer = MetalRender.device.makeBuffer(bytes: &firstColumn, length: MemoryLayout<SIMD3<Float>>.size, options: .storageModeShared)
+        var firstColumn = SIMD3<Float>(-16.0 / 255.0, -128.0 / 255.0, -128.0 / 255.0)
+        let buffer = MetalRender.device.makeBuffer(bytes: &firstColumn, length: MemoryLayout<SIMD3<Float>>.size)
         buffer?.label = "colorOffset"
         return buffer
     }()
 
     private lazy var colorOffsetFullRangeMatrixBuffer: MTLBuffer? = {
-        var firstColumn = SIMD3<Float>(0, -128.0/255.0, -128.0/255.0)
-        let buffer = MetalRender.device.makeBuffer(bytes: &firstColumn, length: MemoryLayout<SIMD3<Float>>.size, options: .storageModeShared)
+        var firstColumn = SIMD3<Float>(0, -128.0 / 255.0, -128.0 / 255.0)
+        let buffer = MetalRender.device.makeBuffer(bytes: &firstColumn, length: MemoryLayout<SIMD3<Float>>.size)
         buffer?.label = "colorOffset"
         return buffer
     }()
@@ -76,12 +77,14 @@ class MetalRender {
         renderPassDescriptor.colorAttachments[0].clearColor = MTLClearColor(red: 0, green: 0, blue: 0, alpha: 0)
         renderPassDescriptor.colorAttachments[0].loadAction = .clear
         guard let commandBuffer = commandQueue?.makeCommandBuffer(),
-            let encoder = commandBuffer.makeRenderCommandEncoder(descriptor: renderPassDescriptor) else {
+              let encoder = commandBuffer.makeRenderCommandEncoder(descriptor: renderPassDescriptor)
+        else {
             return
         }
         encoder.endEncoding()
         commandBuffer.present(drawable)
         commandBuffer.commit()
+        commandBuffer.waitUntilCompleted()
     }
 
     func draw(pixelBuffer: BufferProtocol, display: DisplayEnum = .plane, drawable: CAMetalDrawable) {
@@ -148,12 +151,12 @@ class MetalRender {
 
 extension vImage_YpCbCrToARGBMatrix {
     var videoRange: vImage_YpCbCrToARGBMatrix {
-        vImage_YpCbCrToARGBMatrix(Yp: 255/219*Yp, Cr_R: 255/224*Cr_R, Cr_G: 255/224*Cr_G, Cb_G: 255/224*Cb_G, Cb_B: 255/224*Cb_B)
+        vImage_YpCbCrToARGBMatrix(Yp: 255 / 219 * Yp, Cr_R: 255 / 224 * Cr_R, Cr_G: 255 / 224 * Cr_G, Cb_G: 255 / 224 * Cb_G, Cb_B: 255 / 224 * Cb_B)
     }
 
     var buffer: MTLBuffer? {
         var matrix = simd_float3x3([Yp, Yp, Yp], [0.0, Cb_G, Cb_B], [Cr_R, Cr_G, 0.0])
-        let buffer = MetalRender.device.makeBuffer(bytes: &matrix, length: MemoryLayout<simd_float3x3>.size, options: .storageModeShared)
+        let buffer = MetalRender.device.makeBuffer(bytes: &matrix, length: MemoryLayout<simd_float3x3>.size)
         buffer?.label = "colorConversionMatrix"
         return buffer
     }

@@ -1,6 +1,12 @@
 framework module Libavutil [system] {
-   header "avutil.h"
-    header "display.h"
-    header "imgutils.h"
+    umbrella "."
+    exclude header "hwcontext_vulkan.h"
+    exclude header "hwcontext_vdpau.h"
+    exclude header "hwcontext_vaapi.h"
+    exclude header "hwcontext_qsv.h"
+    exclude header "hwcontext_opencl.h"
+    exclude header "hwcontext_dxva2.h"
+    exclude header "hwcontext_d3d11va.h"
+    exclude header "hwcontext_cuda.h"
     export *
 }

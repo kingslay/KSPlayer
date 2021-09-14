@@ -85,6 +85,7 @@ open class VideoPlayerView: PlayerView {
     public var titleLabel = UILabel()
     public var subtitleLabel = UILabel()
     public var subtitleBackView = UIImageView()
+    private var subtitleEndTime = TimeInterval(0)
     /// Activty Indector for loading
     public var loadingIndector: UIView & LoadingIndector = UIActivityIndicatorView(frame: CGRect(x: 0, y: 0, width: 30, height: 30))
     public var seekToView: UIView & SeekViewProtocol = SeekView()
@@ -114,10 +115,35 @@ open class VideoPlayerView: PlayerView {
         setupUIComponents()
     }
 
-    public required init?(coder aDecoder: NSCoder) {
-        super.init(coder: aDecoder)
-        setupUIComponents()
+    #if os(macOS)
+    override open func viewDidMoveToSuperview() {
+        super.viewDidMoveToSuperview()
+        guard let superview = superview else {
+            return
+        }
+        translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            topAnchor.constraint(equalTo: superview.readableTopAnchor),
+            leadingAnchor.constraint(equalTo: superview.leadingAnchor),
+            trailingAnchor.constraint(equalTo: superview.trailingAnchor),
+            bottomAnchor.constraint(equalTo: superview.bottomAnchor),
+        ])
     }
+    #else
+    override open func didMoveToSuperview() {
+        super.didMoveToSuperview()
+        guard let superview = superview else {
+            return
+        }
+        translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            topAnchor.constraint(equalTo: superview.readableTopAnchor),
+            leadingAnchor.constraint(equalTo: superview.leadingAnchor),
+            trailingAnchor.constraint(equalTo: superview.trailingAnchor),
+            bottomAnchor.constraint(equalTo: superview.bottomAnchor),
+        ])
+    }
+    #endif
 
     // MARK: - Action Response
 
@@ -220,8 +246,7 @@ open class VideoPlayerView: PlayerView {
         super.player(layer: layer, currentTime: currentTime, totalTime: totalTime)
         if let subtitle = resource?.subtitle {
             showSubtile(from: subtitle, at: currentTime)
-        } else {
-            subtitleBackView.isHidden = true
+            subtitleBackView.isHidden = false
         }
     }
 
@@ -369,7 +394,7 @@ open class VideoPlayerView: PlayerView {
         }
     }
 
-    #if !os(macOS) && !targetEnvironment(macCatalyst)
+    #if canImport(UIKit)
     override open func pressesBegan(_ presses: Set<UIPress>, with event: UIPressesEvent?) {
         guard let presse = presses.first else {
             return
@@ -389,21 +414,21 @@ open class VideoPlayerView: PlayerView {
 
 // MARK: - seekToView
 
-extension VideoPlayerView {
+public extension VideoPlayerView {
     /**
      Call when User use the slide to seek function
 
      - parameter second:     target time
      - parameter isAdd:         isAdd
      */
-    public func showSeekToView(second: TimeInterval, isAdd: Bool) {
+    func showSeekToView(second: TimeInterval, isAdd: Bool) {
         isMaskShow = true
         seekToView.isHidden = false
         toolBar.currentTime = second
         seekToView.set(text: second.toString(for: toolBar.timeType), isAdd: isAdd)
     }
 
-    public func hideSeekToView() {
+    func hideSeekToView() {
         seekToView.isHidden = true
     }
 }
@@ -447,7 +472,12 @@ extension VideoPlayerView {
         srtControl.view.isHidden = true
         srtControl.selectWithFilePath = { [weak self] result in
             guard let self = self else { return }
-            self.resource?.subtitle = try? result.get()
+            if let subtitle = try? result.get() {
+                self.subtitleBackView.isHidden = false
+                self.resource?.subtitle = subtitle
+            } else {
+                self.subtitleBackView.isHidden = true
+            }
         }
     }
 
@@ -476,17 +506,19 @@ extension VideoPlayerView {
     }
 
     open func showSubtile(from subtitle: KSSubtitleProtocol, at time: TimeInterval) {
-        if let object = subtitle.search(for: time + (resource?.definitions[currentDefinition].options.subtitleDelay ?? 0.0)) {
-            subtitleBackView.isHidden = false
-            if let text = object as? NSAttributedString {
-                subtitleLabel.attributedText = text
+        let time = time + (resource?.definitions[currentDefinition].options.subtitleDelay ?? 0.0)
+        if let part = subtitle.search(for: time) {
+            subtitleEndTime = part.end
+            if let image = part.image {
+                subtitleBackView.image = image
             } else {
-                // swiftlint:disable force_cast
-                subtitleBackView.image = UIImage(cgImage: object as! CGImage)
-                // swiftlint:enable force_cast
+                subtitleLabel.attributedText = part.text
             }
         } else {
-            subtitleBackView.isHidden = true
+            if time > subtitleEndTime {
+                subtitleBackView.image = nil
+                subtitleLabel.attributedText = nil
+            }
         }
     }
 
@@ -503,11 +535,9 @@ extension VideoPlayerView {
         toolBar.addArrangedSubview(toolBar.playbackRateButton)
         toolBar.addArrangedSubview(toolBar.definitionButton)
         toolBar.addArrangedSubview(toolBar.srtButton)
-        if #available(iOS 11.0, tvOS 11.0, *) {
-            toolBar.setCustomSpacing(20, after: toolBar.timeLabel)
-            toolBar.setCustomSpacing(20, after: toolBar.playbackRateButton)
-            toolBar.setCustomSpacing(20, after: toolBar.definitionButton)
-        }
+        toolBar.setCustomSpacing(20, after: toolBar.timeLabel)
+        toolBar.setCustomSpacing(20, after: toolBar.playbackRateButton)
+        toolBar.setCustomSpacing(20, after: toolBar.definitionButton)
         toolBar.timeSlider.translatesAutoresizingMaskIntoConstraints = false
         topMaskView.translatesAutoresizingMaskIntoConstraints = false
         bottomMaskView.translatesAutoresizingMaskIntoConstraints = false
@@ -522,27 +552,27 @@ extension VideoPlayerView {
         srtControl.view.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
             playerLayer.topAnchor.constraint(equalTo: topAnchor),
-            playerLayer.leftAnchor.constraint(equalTo: leftAnchor),
+            playerLayer.leadingAnchor.constraint(equalTo: leadingAnchor),
             playerLayer.bottomAnchor.constraint(equalTo: bottomAnchor),
-            playerLayer.rightAnchor.constraint(equalTo: rightAnchor),
+            playerLayer.trailingAnchor.constraint(equalTo: trailingAnchor),
             topMaskView.topAnchor.constraint(equalTo: topAnchor),
-            topMaskView.leftAnchor.constraint(equalTo: leftAnchor),
-            topMaskView.rightAnchor.constraint(equalTo: rightAnchor),
+            topMaskView.leadingAnchor.constraint(equalTo: leadingAnchor),
+            topMaskView.trailingAnchor.constraint(equalTo: trailingAnchor),
             topMaskView.heightAnchor.constraint(equalToConstant: 105),
             navigationBar.topAnchor.constraint(equalTo: topMaskView.topAnchor),
-            navigationBar.leftAnchor.constraint(equalTo: topMaskView.safeLeftAnchor, constant: 15),
-            navigationBar.rightAnchor.constraint(equalTo: topMaskView.safeRightAnchor, constant: -15),
+            navigationBar.leadingAnchor.constraint(equalTo: topMaskView.safeLeadingAnchor, constant: 15),
+            navigationBar.trailingAnchor.constraint(equalTo: topMaskView.safeTrailingAnchor, constant: -15),
             navigationBar.heightAnchor.constraint(equalToConstant: 44),
             bottomMaskView.bottomAnchor.constraint(equalTo: bottomAnchor),
-            bottomMaskView.leftAnchor.constraint(equalTo: leftAnchor),
-            bottomMaskView.rightAnchor.constraint(equalTo: rightAnchor),
+            bottomMaskView.leadingAnchor.constraint(equalTo: leadingAnchor),
+            bottomMaskView.trailingAnchor.constraint(equalTo: trailingAnchor),
             bottomMaskView.heightAnchor.constraint(equalToConstant: 105),
             toolBar.bottomAnchor.constraint(equalTo: bottomMaskView.safeBottomAnchor),
-            toolBar.leftAnchor.constraint(equalTo: bottomMaskView.safeLeftAnchor, constant: 10),
-            toolBar.rightAnchor.constraint(equalTo: bottomMaskView.safeRightAnchor, constant: -15),
+            toolBar.leadingAnchor.constraint(equalTo: bottomMaskView.safeLeadingAnchor, constant: 10),
+            toolBar.trailingAnchor.constraint(equalTo: bottomMaskView.safeTrailingAnchor, constant: -15),
             toolBar.timeSlider.bottomAnchor.constraint(equalTo: toolBar.topAnchor),
-            toolBar.timeSlider.leftAnchor.constraint(equalTo: bottomMaskView.safeLeftAnchor, constant: 15),
-            toolBar.timeSlider.rightAnchor.constraint(equalTo: bottomMaskView.safeRightAnchor, constant: -15),
+            toolBar.timeSlider.leadingAnchor.constraint(equalTo: bottomMaskView.safeLeadingAnchor, constant: 15),
+            toolBar.timeSlider.trailingAnchor.constraint(equalTo: bottomMaskView.safeTrailingAnchor, constant: -15),
             toolBar.timeSlider.heightAnchor.constraint(equalToConstant: 30),
             loadingIndector.centerYAnchor.constraint(equalTo: centerYAnchor),
             loadingIndector.centerXAnchor.constraint(equalTo: centerXAnchor),
@@ -555,14 +585,14 @@ extension VideoPlayerView {
             subtitleBackView.bottomAnchor.constraint(equalTo: safeBottomAnchor, constant: -5),
             subtitleBackView.centerXAnchor.constraint(equalTo: centerXAnchor),
             subtitleBackView.widthAnchor.constraint(lessThanOrEqualTo: widthAnchor, constant: -10),
-            subtitleLabel.leftAnchor.constraint(equalTo: subtitleBackView.leftAnchor, constant: 10),
-            subtitleLabel.rightAnchor.constraint(equalTo: subtitleBackView.rightAnchor, constant: -10),
+            subtitleLabel.leadingAnchor.constraint(equalTo: subtitleBackView.leadingAnchor, constant: 10),
+            subtitleLabel.trailingAnchor.constraint(equalTo: subtitleBackView.trailingAnchor, constant: -10),
             subtitleLabel.topAnchor.constraint(equalTo: subtitleBackView.topAnchor, constant: 2),
             subtitleLabel.bottomAnchor.constraint(equalTo: subtitleBackView.bottomAnchor, constant: -2),
             srtControl.view.topAnchor.constraint(equalTo: topAnchor),
-            srtControl.view.leftAnchor.constraint(equalTo: leftAnchor),
+            srtControl.view.leadingAnchor.constraint(equalTo: leadingAnchor),
             srtControl.view.bottomAnchor.constraint(equalTo: bottomAnchor),
-            srtControl.view.rightAnchor.constraint(equalTo: rightAnchor)
+            srtControl.view.trailingAnchor.constraint(equalTo: trailingAnchor),
         ])
     }
 
@@ -584,22 +614,22 @@ public enum KSPlayerTopBarShowCase {
     case none
 }
 
-extension KSPlayerManager {
+public extension KSPlayerManager {
     /// 顶部返回、标题、AirPlay按钮 显示选项，默认.Always，可选.HorizantalOnly、.None
-    public static var topBarShowInCase = KSPlayerTopBarShowCase.always
+    static var topBarShowInCase = KSPlayerTopBarShowCase.always
     /// 自动隐藏操作栏的时间间隔 默认5秒
-    public static var animateDelayTimeInterval = TimeInterval(5)
+    static var animateDelayTimeInterval = TimeInterval(5)
     /// 开启亮度手势 默认true
-    public static var enableBrightnessGestures = true
+    static var enableBrightnessGestures = true
     /// 开启音量手势 默认true
-    public static var enableVolumeGestures = true
+    static var enableVolumeGestures = true
     /// 开启进度滑动手势 默认true
-    public static var enablePlaytimeGestures = true
+    static var enablePlaytimeGestures = true
     /// 竖屏是否开启手势控制 默认false
-    public static var enablePortraitGestures = false
+    static var enablePortraitGestures = false
     /// 播放内核选择策略 先使用firstPlayer，失败了自动切换到secondPlayer，播放内核有KSAVPlayer、KSMEPlayer两个选项
     /// 是否能后台播放视频
-    public static var canBackgroundPlay = false
+    static var canBackgroundPlay = false
 
-    public static var autoSelectEmbedSubtitle = true
+    static var autoSelectEmbedSubtitle = true
 }

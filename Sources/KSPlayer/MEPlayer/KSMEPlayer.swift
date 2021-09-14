@@ -14,7 +14,7 @@ import AppKit
 
 public class KSMEPlayer {
     private var loopCount = 1
-    private let audioOutput = AudioOutput()
+    private let audioOutput: AudioPlayer & FrameOutput = AudioGraphPlayer()
     private var playerItem: MEPlayerItem
     private let videoOutput: MetalPlayView
     private var options: KSOptions
@@ -32,7 +32,7 @@ public class KSMEPlayer {
 
     public var playbackRate: Float = 1 {
         didSet {
-            audioOutput.audioPlayer.playbackRate = playbackRate
+            audioOutput.playbackRate = playbackRate
         }
     }
 
@@ -58,7 +58,7 @@ public class KSMEPlayer {
 
     public required init(url: URL, options: KSOptions) {
         playerItem = MEPlayerItem(url: url, options: options)
-        self.videoOutput = MetalPlayView(options: options)
+        videoOutput = MetalPlayView(options: options)
         self.options = options
         playerItem.delegate = self
         audioOutput.renderSource = playerItem
@@ -88,7 +88,7 @@ extension KSMEPlayer: MEPlayerDelegate {
         isPreparedToPlay = true
         runInMainqueue { [weak self] in
             guard let self = self else { return }
-            self.videoOutput.drawableSize = self.options.display == .plane ? self.naturalSize : UIScreen.size
+            self.videoOutput.drawableSize = self.naturalSize
             self.view.centerRotate(byDegrees: self.playerItem.rotation)
             self.videoOutput.isPaused = false
             self.delegate?.preparedToPlay(player: self)
@@ -163,61 +163,62 @@ extension KSMEPlayer: MEPlayerDelegate {
 extension KSMEPlayer: MediaPlayerProtocol {
     public var playbackVolume: Float {
         get {
-            audioOutput.audioPlayer.volume
+            audioOutput.volume
         }
         set {
-            audioOutput.audioPlayer.volume = newValue
+            audioOutput.volume = newValue
         }
     }
 
     public var attackTime: Float {
         get {
-            audioOutput.audioPlayer.attackTime
+            audioOutput.attackTime
         }
         set {
-            audioOutput.audioPlayer.attackTime = newValue
+            audioOutput.attackTime = newValue
         }
     }
 
     public var releaseTime: Float {
         get {
-            audioOutput.audioPlayer.releaseTime
+            audioOutput.releaseTime
         }
         set {
-            audioOutput.audioPlayer.releaseTime = newValue
+            audioOutput.releaseTime = newValue
         }
     }
 
     public var threshold: Float {
         get {
-            audioOutput.audioPlayer.threshold
+            audioOutput.threshold
         }
         set {
-            audioOutput.audioPlayer.threshold = newValue
+            audioOutput.threshold = newValue
         }
     }
 
     public var expansionRatio: Float {
         get {
-            audioOutput.audioPlayer.expansionRatio
+            audioOutput.expansionRatio
         }
         set {
-            audioOutput.audioPlayer.expansionRatio = newValue
+            audioOutput.expansionRatio = newValue
         }
     }
 
     public var masterGain: Float {
         get {
-            audioOutput.audioPlayer.masterGain
+            audioOutput.masterGain
         }
         set {
-            audioOutput.audioPlayer.masterGain = newValue
+            audioOutput.masterGain = newValue
         }
     }
+
     public var isPlaying: Bool { playbackState == .playing }
 
     public var naturalSize: CGSize {
-        playerItem.rotation == 90 || playerItem.rotation == 270 ? playerItem.naturalSize.reverse : playerItem.naturalSize
+        options.display == .plane ? (playerItem.rotation == 90 || playerItem.rotation == 270 ? playerItem.naturalSize.reverse : playerItem.naturalSize) : UIScreen.size
     }
 
     public var isExternalPlaybackActive: Bool { false }
@@ -330,10 +331,10 @@ extension KSMEPlayer: MediaPlayerProtocol {
 
     public var isMuted: Bool {
         get {
-            audioOutput.audioPlayer.isMuted
+            audioOutput.isMuted
         }
         set {
-            audioOutput.audioPlayer.isMuted = newValue
+            audioOutput.isMuted = newValue
         }
     }
 
@@ -346,8 +347,8 @@ extension KSMEPlayer: MediaPlayerProtocol {
     }
 }
 
-extension KSMEPlayer {
-    public var subtitleDataSouce: SubtitleDataSouce? { playerItem }
+public extension KSMEPlayer {
+    var subtitleDataSouce: SubtitleDataSouce? { playerItem }
 
-    public var subtitles: [KSSubtitleProtocol] { playerItem.subtitleTracks }
+    var subtitles: [KSSubtitleProtocol] { playerItem.subtitleTracks }
 }

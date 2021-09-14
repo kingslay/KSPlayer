@@ -7,7 +7,6 @@
 
 import AVFoundation
 import Libavformat
-import FFmpeg
 import VideoToolbox
 
 final class MEPlayerItem {
@@ -139,7 +138,7 @@ extension MEPlayerItem {
         }
         var result = avformat_open_input(&self.formatCtx, urlString, nil, &avOptions)
         av_dict_free(&avOptions)
-        if IS_AVERROR_EOF(result) {
+        if result == AVError.eof.code {
             state = .finished
             return
         }
@@ -190,7 +189,7 @@ extension MEPlayerItem {
         var videoIndex: Int32 = -1
         if !options.videoDisable {
             let videos = assetTracks.filter { $0.mediaType == .video }
-            let bitRates = videos.map { $0.bitRate }
+            let bitRates = videos.map(\.bitRate)
             let wantedStreamNb: Int32
             if videos.count > 0, let index = options.wantedVideo(bitRates: bitRates) {
                 wantedStreamNb = videos[index].streamIndex
@@ -232,8 +231,7 @@ extension MEPlayerItem {
         }
         if !options.subtitleDisable {
             subtitleTracks = assetTracks.filter { $0.mediaType == .subtitle }.map {
-                return FFPlayerItemTrack<
-                    SubtitleFrame>(assetTrack: $0, options: options)
+                FFPlayerItemTrack<SubtitleFrame>(assetTrack: $0, options: options)
             }
             allTracks.append(contentsOf: subtitleTracks)
         }
@@ -313,7 +311,7 @@ extension MEPlayerItem {
                 }
             }
         } else {
-            if IS_AVERROR_EOF(readResult) || avio_feof(formatCtx?.pointee.pb) != 0 {
+            if readResult == AVError.eof.code || avio_feof(formatCtx?.pointee.pb) != 0 {
                 if options.isLoopPlay, allTracks.allSatisfy({ !$0.isLoopModel }) {
                     allTracks.forEach { $0.isLoopModel = true }
                     _ = av_seek_frame(formatCtx, -1, 0, AVSEEK_FLAG_BACKWARD)
@@ -485,7 +483,7 @@ extension MEPlayerItem: CodecCapacityDelegate {
 extension MEPlayerItem: OutputRenderSourceDelegate {
     func setVideo(time: CMTime) {
         if isAudioStalled {
-            currentPlaybackTime = time.seconds
+            currentPlaybackTime = time.seconds - options.audioDelay
             videoMediaTime = CACurrentMediaTime()
         }
     }
@@ -499,7 +497,7 @@ extension MEPlayerItem: OutputRenderSourceDelegate {
     func getOutputRender(type: AVFoundation.AVMediaType) -> MEFrame? {
         var predicate: ((MEFrame) -> Bool)?
         if type == .video {
-            predicate = { [weak self] (frame) -> Bool in
+            predicate = { [weak self] frame -> Bool in
                 guard let self = self else { return true }
                 var desire = self.currentPlaybackTime + self.options.audioDelay
                 if self.isAudioStalled {

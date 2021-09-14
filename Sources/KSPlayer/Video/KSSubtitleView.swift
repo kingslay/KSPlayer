@@ -16,13 +16,13 @@ public class KSSubtitleView: UIControl, SubtitleViewProtocol {
     private var closeInfo = URLSubtitleInfo(subtitleID: "", name: NSLocalizedString("no show subtitle", comment: ""))
     private let tableView = UITableView()
     private let tableWidth = CGFloat(360)
-    private var tableViewRightConstraint: NSLayoutConstraint!
+    private var tableViewTrailingConstraint: NSLayoutConstraint!
     public let selectedInfo: KSObservable<SubtitleInfo>
     override public var isHidden: Bool {
         didSet {
             if isHidden {
                 UIView.animate(withDuration: 0.25) {
-                    self.tableViewRightConstraint.constant = self.tableWidth
+                    self.tableViewTrailingConstraint.constant = self.tableWidth
                     self.layoutIfNeeded()
                 }
                 #if canImport(UIKit)
@@ -31,7 +31,7 @@ public class KSSubtitleView: UIControl, SubtitleViewProtocol {
             } else {
                 tableView.reloadData()
                 UIView.animate(withDuration: 0.25) {
-                    self.tableViewRightConstraint.constant = 0
+                    self.tableViewTrailingConstraint.constant = 0
                     self.layoutIfNeeded()
                 }
                 #if canImport(UIKit)
@@ -50,13 +50,13 @@ public class KSSubtitleView: UIControl, SubtitleViewProtocol {
         super.init(frame: frame)
         tableView.rowHeight = 52
         tableView.backgroundColor = UIColor(white: 0, alpha: 0.7)
-        #if os(iOS)
-        tableView.separatorColor = UIColor(white: 1, alpha: 0.15)
-        #endif
         addSubview(tableView)
         tableView.translatesAutoresizingMaskIntoConstraints = false
-        tableViewRightConstraint = tableView.rightAnchor.constraint(equalTo: rightAnchor)
+        tableViewTrailingConstraint = tableView.trailingAnchor.constraint(equalTo: trailingAnchor)
         #if canImport(UIKit)
+        #if !os(tvOS)
+        tableView.separatorColor = UIColor(white: 1, alpha: 0.15)
+        #endif
         tableView.dataSource = self
         tableView.delegate = self
         tableView.register(SrtListCell.self, forCellReuseIdentifier: "SrtListCell")
@@ -64,20 +64,21 @@ public class KSSubtitleView: UIControl, SubtitleViewProtocol {
             tableView.topAnchor.constraint(equalTo: topAnchor),
             tableView.bottomAnchor.constraint(equalTo: bottomAnchor),
             tableView.widthAnchor.constraint(equalToConstant: tableWidth),
-            tableViewRightConstraint
+            tableViewTrailingConstraint,
         ])
         #else
         NSLayoutConstraint.activate([
             tableView.topAnchor.constraint(equalTo: topAnchor),
 //          tableView.bottomAnchor.constraint(equalTo: bottomAnchor),
             tableView.widthAnchor.constraint(equalToConstant: tableWidth),
-            tableViewRightConstraint
+            tableViewTrailingConstraint,
         ])
         #endif
 
         setupDatas(infos: infos)
     }
 
+    @available(*, unavailable)
     public required init?(coder _: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
@@ -157,21 +158,22 @@ public class SrtListCell: UITableViewCell {
         checkView.translatesAutoresizingMaskIntoConstraints = false
 
         NSLayoutConstraint.activate([
-            titleLabel.leftAnchor.constraint(equalTo: contentView.leftAnchor, constant: 20),
+            titleLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
             titleLabel.topAnchor.constraint(equalTo: contentView.topAnchor),
             titleLabel.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
-            titleLabel.rightAnchor.constraint(equalTo: localIconView.leftAnchor, constant: -12),
+            titleLabel.trailingAnchor.constraint(equalTo: localIconView.leadingAnchor, constant: -12),
             localIconViewWidth,
             localIconView.heightAnchor.constraint(equalToConstant: 20),
             localIconView.centerYAnchor.constraint(equalTo: contentView.centerYAnchor),
-            localIconView.rightAnchor.constraint(equalTo: checkView.leftAnchor),
+            localIconView.trailingAnchor.constraint(equalTo: checkView.leadingAnchor),
             checkView.widthAnchor.constraint(equalToConstant: 20),
             checkView.heightAnchor.constraint(equalToConstant: 20),
             checkView.centerYAnchor.constraint(equalTo: contentView.centerYAnchor),
-            checkView.rightAnchor.constraint(equalTo: contentView.rightAnchor, constant: -15)
+            checkView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -15),
         ])
     }
 
+    @available(*, unavailable)
     public required init?(coder _: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }

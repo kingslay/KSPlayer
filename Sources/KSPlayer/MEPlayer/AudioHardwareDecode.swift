@@ -8,11 +8,11 @@
 import AudioToolbox
 import Libavcodec
 
- final class AudioHardwareDecode: DecodeProtocol {
+final class AudioHardwareDecode: DecodeProtocol {
     private let timebase: Timebase
     private var converter: AudioConverterRef?
     private var outAudioBufferList = AudioBufferList()
-    required init(assetTrack: TrackProtocol, options: KSOptions) {
+    required init(assetTrack: TrackProtocol, options _: KSOptions) {
         let codecpar = assetTrack.stream.pointee.codecpar.pointee
         timebase = assetTrack.timebase
         var inputFormat = codecpar.inputFormat
@@ -32,15 +32,13 @@ import Libavcodec
         AudioConverterNew(&inputFormat, &outputFormat, &converter)
     }
 
-    func decode() {
-
-    }
+    func decode() {}
 
     func doDecode(packet: UnsafeMutablePointer<AVPacket>) throws -> [MEFrame] {
         guard let converter = converter else {
             return []
         }
-        let inputDataProc: AudioConverterComplexInputDataProc = { (_, ioPacketCount, audioBufferList, packetDesc, userData) -> OSStatus in
+        let inputDataProc: AudioConverterComplexInputDataProc = { _, ioPacketCount, audioBufferList, packetDesc, userData -> OSStatus in
             guard let packet = UnsafePointer<AVPacket>(OpaquePointer(userData)), let data = packet.pointee.data else {
                 ioPacketCount.pointee = 0
                 return 1
@@ -56,7 +54,7 @@ import Libavcodec
                 description.mVariableFramesInPacket = 0
                 description.mDataByteSize = audioBufferList.pointee.mBuffers.mDataByteSize
                 withUnsafeMutablePointer(to: &description) {
-                     packetDesc.pointee = $0
+                    packetDesc.pointee = $0
                 }
             }
             return noErr
@@ -64,7 +62,7 @@ import Libavcodec
         var ioOutputDataPacketSize = UInt32(0)
         let status = AudioConverterFillComplexBuffer(converter, inputDataProc, packet, &ioOutputDataPacketSize, &outAudioBufferList, nil)
         if status == noErr {
-            let frame = AudioFrame(bufferSize: Int32(outAudioBufferList.mNumberBuffers))
+            let frame = AudioFrame(bufferSize: Int32(outAudioBufferList.mNumberBuffers), channels: Int32(outAudioBufferList.mBuffers.mNumberChannels))
             frame.timebase = timebase
             frame.position = packet.pointee.pts
             if frame.position == Int64.min || frame.position < 0 {
@@ -76,16 +74,16 @@ import Libavcodec
         }
         return []
     }
-    func doFlushCodec() {
 
-    }
+    func doFlushCodec() {}
+
     func shutdown() {
         if let converter = converter {
             AudioConverterDispose(converter)
         }
         converter = nil
     }
- }
+}
 
 extension AVCodecID {
     var mFormatID: UInt32 {

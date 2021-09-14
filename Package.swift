@@ -1,4 +1,4 @@
-// swift-tools-version:5.3
+// swift-tools-version:5.4
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 
 import PackageDescription
@@ -6,13 +6,13 @@ import PackageDescription
 let package = Package(
     name: "KSPlayer",
     defaultLocalization: "en",
-    platforms: [.macOS(.v10_13), .iOS(.v10), .tvOS("10.2")],
+    platforms: [.macOS(.v10_13), .iOS(.v11), .tvOS(.v11)],
     products: [
         // Products define the executables and libraries produced by a package, and make them visible to other packages.
         .library(
             name: "KSPlayer",
             targets: ["KSPlayer"]
-        )
+        ),
     ],
     dependencies: [
         // Dependencies declare other packages that this package depends on.
@@ -22,14 +22,29 @@ let package = Package(
         // Targets are the basic building blocks of a package. A target can define a module or a test suite.
         .target(
             name: "KSPlayer",
-            dependencies: ["FFmpeg", "Libcrypto", "Libssl"]
+            dependencies: ["FFmpeg", "Libcrypto", "Libssl"],
+            linkerSettings: [
+                .linkedFramework("AudioToolbox"),
+                .linkedFramework("AVFoundation"),
+                .linkedFramework("CoreImage"),
+                .linkedFramework("CoreMedia"),
+                .linkedFramework("CoreVideo"),
+                .linkedFramework("MetalKit"),
+                .linkedFramework("Security"),
+                .linkedFramework("VideoToolbox"),
+            ]
         ),
         .target(
             name: "FFmpeg",
-            dependencies: ["Libavcodec", "Libavformat", "Libavutil", "Libswresample", "Libswscale", "Libssl", "Libcrypto"],
-            linkerSettings: [.linkedLibrary("bz2"), .linkedLibrary("iconv"), .linkedLibrary("xml2"), .linkedLibrary("z")]
+            dependencies: ["Libavcodec", "Libavfilter", "Libavformat", "Libavutil", "Libswresample", "Libswscale", "Libssl", "Libcrypto"],
+            linkerSettings: [
+                .linkedLibrary("bz2"),
+                .linkedLibrary("iconv"),
+                .linkedLibrary("xml2"),
+                .linkedLibrary("z"),
+            ]
         ),
-        .target(
+        .executableTarget(
             name: "Script",
             dependencies: [],
             sources: ["main.swift"]
@@ -44,6 +59,10 @@ let package = Package(
             path: "Sources/Libavcodec.xcframework"
         ),
         .binaryTarget(
+            name: "Libavfilter",
+            path: "Sources/Libavfilter.xcframework"
+        ),
+        .binaryTarget(
             name: "Libavformat",
             path: "Sources/Libavformat.xcframework"
         ),
@@ -51,7 +70,7 @@ let package = Package(
             name: "Libavutil",
             path: "Sources/Libavutil.xcframework"
         ),
-          .binaryTarget(
+        .binaryTarget(
             name: "Libswresample",
             path: "Sources/Libswresample.xcframework"
         ),
@@ -66,6 +85,6 @@ let package = Package(
         .binaryTarget(
             name: "Libcrypto",
             path: "Sources/Libcrypto.xcframework"
-        )
+        ),
     ]
 )

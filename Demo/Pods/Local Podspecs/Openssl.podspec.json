@@ -13,12 +13,11 @@
     "tag": "1.1.1"
   },
   "platforms": {
-    "ios": "10.0",
+    "ios": "11.0",
     "osx": "10.13",
-    "tvos": "10.2"
+    "tvos": "11.0"
   },
   "default_subspecs": "OpenSSL",
-  "swift_versions": "5.1",
   "static_framework": true,
   "subspecs": [
     {
@@ -28,6 +27,5 @@
         "Sources/Libcrypto.xcframework"
       ]
     }
-  ],
-  "swift_version": "5.1"
+  ]
 }

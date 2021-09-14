@@ -13,7 +13,7 @@ import simd
 import VideoToolbox
 
 public protocol BufferProtocol: AnyObject {
-    var sar: CGSize { get }
+    var aspectRatio: CGSize { get }
     var planeCount: Int { get }
     var width: Int { get }
     var height: Int { get }
@@ -29,6 +29,7 @@ public protocol BufferProtocol: AnyObject {
     func textures(frome cache: MetalTextureCache) -> [MTLTexture]
     func image() -> CGImage?
 }
+
 extension BufferProtocol {
     var size: CGSize { CGSize(width: width, height: height) }
 }
@@ -38,14 +39,22 @@ extension CVPixelBuffer: BufferProtocol {
 
     public var height: Int { CVPixelBufferGetHeight(self) }
 
-    public var sar: CGSize {
-        if let ratio = CVBufferGetAttachment(self, kCVImageBufferPixelAspectRatioKey, nil)?.takeUnretainedValue() as? NSDictionary,
-           let horizontal = (ratio[kCVImageBufferPixelAspectRatioHorizontalSpacingKey] as? NSNumber)?.intValue,
-           let vertical = (ratio[kCVImageBufferPixelAspectRatioVerticalSpacingKey] as? NSNumber)?.intValue,
-           horizontal > 0, vertical > 0 {
-            return CGSize(width: horizontal, height: vertical)
-        } else {
-            return CGSize(width: 1, height: 1)
+    public var aspectRatio: CGSize {
+        get {
+            if let ratio = CVBufferGetAttachment(self, kCVImageBufferPixelAspectRatioKey, nil)?.takeUnretainedValue() as? NSDictionary,
+               let horizontal = (ratio[kCVImageBufferPixelAspectRatioHorizontalSpacingKey] as? NSNumber)?.intValue,
+               let vertical = (ratio[kCVImageBufferPixelAspectRatioVerticalSpacingKey] as? NSNumber)?.intValue,
+               horizontal > 0, vertical > 0
+            {
+                return CGSize(width: horizontal, height: vertical)
+            } else {
+                return CGSize(width: 1, height: 1)
+            }
+        }
+        set {
+            if let aspectRatio = newValue.aspectRatio {
+                CVBufferSetAttachment(self, kCVImageBufferPixelAspectRatioKey, aspectRatio, .shouldPropagate)
+            }
         }
     }
 
@@ -118,12 +127,10 @@ extension KSOptions {
         if bitDepth == 10 {
             #if os(macOS) || targetEnvironment(macCatalyst)
             return .bgr10a2Unorm
-            #else
-            #if targetEnvironment(simulator)
+            #elseif targetEnvironment(simulator)
             return .bgra8Unorm
             #else
             return .bgr10_xr_srgb
-            #endif
             #endif
         } else {
             return .bgra8Unorm

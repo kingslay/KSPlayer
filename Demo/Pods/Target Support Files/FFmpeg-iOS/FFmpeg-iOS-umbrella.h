@@ -10,7 +10,13 @@
 #endif
 #endif
 
-#import "FFmpeg.h"
+#import "avcodec_shim.h"
+#import "avdevice_shim.h"
+#import "avfilter_shim.h"
+#import "avformat_shim.h"
+#import "avutil_shim.h"
+#import "swresample_shim.h"
+#import "swscale_shim.h"
 
 FOUNDATION_EXPORT double FFmpegVersionNumber;
 FOUNDATION_EXPORT const unsigned char FFmpegVersionString[];

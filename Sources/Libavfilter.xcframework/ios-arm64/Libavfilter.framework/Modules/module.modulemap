@@ -1,0 +1,4 @@
+framework module Libavfilter [system] {
+    umbrella "."
+    export *
+}

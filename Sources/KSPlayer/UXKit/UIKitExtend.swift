@@ -29,6 +29,7 @@ public class KSSlider: UXSlider {
         addTarget(self, action: #selector(progressSliderTouchEnded(_:)), for: [.touchUpInside, .touchCancel, .touchUpOutside])
     }
 
+    @available(*, unavailable)
     public required init?(coder _: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
@@ -95,7 +96,7 @@ public class KSSlider: UXSlider {
     }
 }
 
-#if os(iOS)
+#if !os(tvOS)
 public typealias UXSlider = UISlider
 #else
 public class UXSlider: UIProgressView {

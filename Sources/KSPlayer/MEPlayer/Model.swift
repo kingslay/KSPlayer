@@ -7,6 +7,7 @@
 
 import AVFoundation
 import CoreMedia
+import FFmpeg
 import Libavcodec
 
 // MARK: enum
@@ -57,19 +58,18 @@ protocol MEPlayerDelegate: AnyObject {
 // MARK: protocol
 
 public protocol ObjectQueueItem {
-    var duration: Int64 { get }
-    var size: Int64 { get }
-    var position: Int64 { get }
+    var duration: Int64 { get set }
+    var size: Int64 { get set }
+    var position: Int64 { get set }
 }
 
-protocol FrameOutput {
+protocol FrameOutput: AnyObject {
     var renderSource: OutputRenderSourceDelegate? { get set }
     var isPaused: Bool { get set }
 }
 
 protocol MEFrame: ObjectQueueItem {
     var timebase: Timebase { get set }
-    var position: Int64 { get set}
 }
 
 extension MEFrame {
@@ -90,22 +90,22 @@ public enum LogLevel: Int32 {
     case trace = 56
 }
 
-extension KSPlayerManager {
+public extension KSPlayerManager {
     /// 开启VR模式的陀飞轮
-    public static var enableSensor = true
+    static var enableSensor = true
     /// 日志级别
-    public static var logLevel = LogLevel.warning
-    public static var stackSize = 32768
-    public static var audioPlayerMaximumFramesPerSlice = AVAudioFrameCount(4096)
-    public static var preferredFramesPerSecond = 60
+    static var logLevel = LogLevel.warning
+    static var stackSize = 32768
+    static var audioPlayerMaximumFramesPerSlice = AVAudioFrameCount(4096)
+    static var preferredFramesPerSecond = 60
     #if os(macOS)
-    public static var audioPlayerSampleRate = Int32(44100)
-    public static var audioPlayerMaximumChannels = AVAudioChannelCount(2)
+    static var audioPlayerSampleRate = Int32(44100)
+    static var audioPlayerMaximumChannels = AVAudioChannelCount(2)
     #else
-    public static var audioPlayerSampleRate = Int32(AVAudioSession.sharedInstance().sampleRate)
-    public static var audioPlayerMaximumChannels = AVAudioChannelCount(AVAudioSession.sharedInstance().maximumOutputNumberOfChannels)
+    static var audioPlayerSampleRate = Int32(AVAudioSession.sharedInstance().sampleRate)
+    static var audioPlayerMaximumChannels = AVAudioChannelCount(AVAudioSession.sharedInstance().maximumOutputNumberOfChannels)
     #endif
-    static func outputFormat() -> AudioStreamBasicDescription {
+    internal static func outputFormat() -> AudioStreamBasicDescription {
         #if !os(macOS)
         try? AVAudioSession.sharedInstance().setPreferredOutputNumberOfChannels(Int(audioPlayerMaximumChannels))
         #endif
@@ -122,7 +122,7 @@ extension KSPlayerManager {
         return audioStreamBasicDescription
     }
 
-    static let audioDefaultFormat = AVAudioFormat(commonFormat: .pcmFormatFloat32, sampleRate: Double(audioPlayerSampleRate), channels: audioPlayerMaximumChannels, interleaved: false)!
+    internal static let audioDefaultFormat = AVAudioFormat(commonFormat: .pcmFormatFloat32, sampleRate: Double(audioPlayerSampleRate), channels: audioPlayerMaximumChannels, interleaved: false)!
 }
 
 enum MECodecState {
@@ -157,6 +157,7 @@ extension AVRational {
         num > 0 && den > 0 ? CGSize(width: Int(den), height: Int(num)) : CGSize(width: 1, height: 1)
     }
 }
+
 final class Packet: ObjectQueueItem {
     final class AVPacketWrap {
         fileprivate var corePacket = av_packet_alloc()
@@ -165,9 +166,9 @@ final class Packet: ObjectQueueItem {
         }
     }
 
-    public var duration: Int64 = 0
-    public var size: Int64 = 0
-    public var position: Int64 = 0
+    var duration: Int64 = 0
+    var size: Int64 = 0
+    var position: Int64 = 0
     var assetTrack: TrackProtocol!
     var corePacket: UnsafeMutablePointer<AVPacket> { packetWrap.corePacket! }
     private let packetWrap = ObjectPool.share.object(class: AVPacketWrap.self, key: "AVPacketWrap") { AVPacketWrap() }
@@ -184,11 +185,11 @@ final class Packet: ObjectQueueItem {
 }
 
 final class SubtitleFrame: MEFrame {
-    public var timebase = Timebase.defaultValue
-    public var duration: Int64 = 0
-    public var size: Int64 = 0
-    public var position: Int64 = 0
-    public let part: SubtitlePart
+    var timebase = Timebase.defaultValue
+    var duration: Int64 = 0
+    var size: Int64 = 0
+    var position: Int64 = 0
+    let part: SubtitlePart
     init(part: SubtitlePart) {
         self.part = part
     }
@@ -199,12 +200,12 @@ final class ByteDataWrap {
     var size: [Int] = [0] {
         didSet {
             if size.description != oldValue.description {
-                for i in (0 ..< data.count) where oldValue[i] > 0 {
+                for i in 0 ..< data.count where oldValue[i] > 0 {
                     data[i]?.deinitialize(count: oldValue[i])
                     data[i]?.deallocate()
                 }
                 data.removeAll()
-                for i in (0 ..< size.count) {
+                for i in 0 ..< size.count {
                     data.append(UnsafeMutablePointer<UInt8>.allocate(capacity: Int(size[i])))
                 }
             }
@@ -216,7 +217,7 @@ final class ByteDataWrap {
     }
 
     deinit {
-        for i in (0 ..< data.count) {
+        for i in 0 ..< data.count {
             data[i]?.deinitialize(count: size[i])
             data[i]?.deallocate()
         }
@@ -229,13 +230,14 @@ final class MTLBufferWrap {
     var size: [Int] {
         didSet {
             if size.description != oldValue.description {
-                data = size.map { MetalRender.device.makeBuffer(length: $0, options: .storageModeShared) }
+                data = size.map { MetalRender.device.makeBuffer(length: $0) }
             }
         }
     }
+
     public init(size: [Int]) {
         self.size = size
-        data = size.map { MetalRender.device.makeBuffer(length: $0, options: .storageModeShared) }
+        data = size.map { MetalRender.device.makeBuffer(length: $0) }
     }
 
     deinit {
@@ -247,30 +249,31 @@ final class MTLBufferWrap {
 }
 
 final class AudioFrame: MEFrame {
-    public var timebase = Timebase.defaultValue
-    public var duration: Int64 = 0
-    public var size: Int64 = 0
-    public var position: Int64 = 0
-    public var numberOfSamples = 0
+    var timebase = Timebase.defaultValue
+    var duration: Int64 = 0
+    var size: Int64 = 0
+    var position: Int64 = 0
+    var numberOfSamples = 0
     let dataWrap: ByteDataWrap
-    public init(bufferSize: Int32) {
-        dataWrap = ObjectPool.share.object(class: ByteDataWrap.self, key: "AudioData") { ByteDataWrap() }
+
+    public init(bufferSize: Int32, channels: Int32) {
+        dataWrap = ObjectPool.share.object(class: ByteDataWrap.self, key: "AudioData_\(channels)") { ByteDataWrap() }
         if dataWrap.size[0] < bufferSize {
-            dataWrap.size = Array(repeating: Int(bufferSize), count: Int(KSPlayerManager.audioPlayerMaximumChannels))
+            dataWrap.size = Array(repeating: Int(bufferSize), count: Int(channels))
         }
     }
 
     deinit {
-        ObjectPool.share.comeback(item: dataWrap, key: "AudioData")
+        ObjectPool.share.comeback(item: dataWrap, key: "AudioData_\(dataWrap.data.count)")
     }
 }
 
 final class VideoVTBFrame: MEFrame {
-    public var timebase = Timebase.defaultValue
-    public var duration: Int64 = 0
-    public var size: Int64 = 0
-    public var position: Int64 = 0
-    public var corePixelBuffer: BufferProtocol?
+    var timebase = Timebase.defaultValue
+    var duration: Int64 = 0
+    var size: Int64 = 0
+    var position: Int64 = 0
+    var corePixelBuffer: BufferProtocol?
 }
 
 extension Dictionary where Key == String {
@@ -288,3 +291,42 @@ extension Dictionary where Key == String {
         return avOptions
     }
 }
+
+public struct AVError: Error, Equatable {
+    public var code: Int32
+    public var message: String
+
+    init(code: Int32) {
+        self.code = code
+        message = String(avErrorCode: code)
+    }
+}
+
+extension String {
+    init(avErrorCode code: Int32) {
+        let buf = UnsafeMutablePointer<Int8>.allocate(capacity: Int(AV_ERROR_MAX_STRING_SIZE))
+        buf.initialize(repeating: 0, count: Int(AV_ERROR_MAX_STRING_SIZE))
+        defer { buf.deallocate() }
+        self = String(cString: av_make_error_string(buf, Int(AV_ERROR_MAX_STRING_SIZE), code))
+    }
+}
+
+public extension AVError {
+    static let tryAgain = AVError(code: swift_AVERROR(EAGAIN))
+    static let eof = AVError(code: swift_AVERROR_EOF)
+}
+
+//// swiftlint:disable identifier_name
+// extension Character {
+//    @inlinable public var asciiValueInt32: Int32 {
+//        Int32(asciiValue ?? 0)
+//    }
+// }
+// private func swift_AVERROR(_ err: Int32) -> Int32 {
+//    return -err
+// }
+// private func MKTAG(a: Character, b: Character, c: Character, d: Character) -> Int32 {
+//    return a.asciiValueInt32 | b.asciiValueInt32 << 8 | c.asciiValueInt32 << 16 | d.asciiValueInt32 << 24
+// }
+// private let swift_AVERROR_EOF = swift_AVERROR(MKTAG(a: "E", b: "O", c: "F", d: " "))
+//// swiftlint:enable identifier_name

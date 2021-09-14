@@ -16,19 +16,19 @@ import AppKit
 import MobileCoreServices.UTType
 #endif
 open class LayerContainerView: UIView {
-    #if os(macOS)
+    #if canImport(UIKit)
+    override open class var layerClass: AnyClass {
+        CAGradientLayer.self
+    }
+    #else
     override public init(frame: CGRect) {
         super.init(frame: frame)
         layer = CAGradientLayer()
     }
 
+    @available(*, unavailable)
     public required init?(coder _: NSCoder) {
         fatalError("init(coder:) has not been implemented")
-    }
-
-    #else
-    override open class var layerClass: AnyClass {
-        CAGradientLayer.self
     }
     #endif
     public var gradientLayer: CAGradientLayer {
@@ -96,22 +96,16 @@ extension String {
     }
 }
 
-extension UIColor {
-    public convenience init(hex: Int, alpha: CGFloat = 1) {
+public extension UIColor {
+    convenience init(hex: Int, alpha: CGFloat = 1) {
         let red = CGFloat((hex >> 16) & 0xFF)
         let green = CGFloat((hex >> 8) & 0xFF)
         let blue = CGFloat(hex & 0xFF)
         self.init(red: red / 255.0, green: green / 255.0, blue: blue / 255.0, alpha: alpha)
     }
 
-    public func createImage(size: CGSize = CGSize(width: 1, height: 1)) -> UIImage {
-        #if os(macOS)
-        let image = NSImage(size: size)
-        image.lockFocus()
-        drawSwatch(in: CGRect(origin: .zero, size: size))
-        image.unlockFocus()
-        return image
-        #else
+    func createImage(size: CGSize = CGSize(width: 1, height: 1)) -> UIImage {
+        #if canImport(UIKit)
         let rect = CGRect(origin: .zero, size: size)
         UIGraphicsBeginImageContext(rect.size)
         let context = UIGraphicsGetCurrentContext()
@@ -120,11 +114,17 @@ extension UIColor {
         let image = UIGraphicsGetImageFromCurrentImageContext()
         UIGraphicsEndImageContext()
         return image!
+        #else
+        let image = NSImage(size: size)
+        image.lockFocus()
+        drawSwatch(in: CGRect(origin: .zero, size: size))
+        image.unlockFocus()
+        return image
         #endif
     }
 }
 
-public extension UIView {
+extension UIView {
     var widthConstraint: NSLayoutConstraint? {
         // 防止返回NSContentSizeLayoutConstraint
         constraints.first { $0.isMember(of: NSLayoutConstraint.self) && $0.firstAttribute == .width }
@@ -135,12 +135,12 @@ public extension UIView {
         constraints.first { $0.isMember(of: NSLayoutConstraint.self) && $0.firstAttribute == .height }
     }
 
-    var rightConstraint: NSLayoutConstraint? {
-        superview?.constraints.first { $0.firstItem === self && $0.firstAttribute == .right }
+    var trailingConstraint: NSLayoutConstraint? {
+        superview?.constraints.first { $0.firstItem === self && $0.firstAttribute == .trailing }
     }
 
-    var leftConstraint: NSLayoutConstraint? {
-        superview?.constraints.first { $0.firstItem === self && $0.firstAttribute == .left }
+    var leadingConstraint: NSLayoutConstraint? {
+        superview?.constraints.first { $0.firstItem === self && $0.firstAttribute == .leading }
     }
 
     var topConstraint: NSLayoutConstraint? {
@@ -160,53 +160,43 @@ public extension UIView {
     }
 
     var safeTopAnchor: NSLayoutYAxisAnchor {
-        #if os(macOS)
-        return topAnchor
-        #else
-        if #available(iOS 11.0, tvOS 11.0, *) {
+        if #available(macOS 11.0, *) {
             return self.safeAreaLayoutGuide.topAnchor
         } else {
             return topAnchor
         }
+    }
+
+    var readableTopAnchor: NSLayoutYAxisAnchor {
+        #if os(macOS)
+        topAnchor
+        #else
+        readableContentGuide.topAnchor
         #endif
     }
 
-    var safeLeftAnchor: NSLayoutXAxisAnchor {
-        #if os(macOS)
-        return leftAnchor
-
-        #else
-        if #available(iOS 11.0, tvOS 11.0, *) {
-            return self.safeAreaLayoutGuide.leftAnchor
+    var safeLeadingAnchor: NSLayoutXAxisAnchor {
+        if #available(macOS 11.0, *) {
+            return self.safeAreaLayoutGuide.leadingAnchor
         } else {
-            return leftAnchor
+            return leadingAnchor
         }
-        #endif
     }
 
-    var safeRightAnchor: NSLayoutXAxisAnchor {
-        #if os(macOS)
-        return rightAnchor
-
-        #else
-        if #available(iOS 11.0, tvOS 11.0, *) {
-            return self.safeAreaLayoutGuide.rightAnchor
+    var safeTrailingAnchor: NSLayoutXAxisAnchor {
+        if #available(macOS 11.0, *) {
+            return self.safeAreaLayoutGuide.trailingAnchor
         } else {
-            return rightAnchor
+            return trailingAnchor
         }
-        #endif
     }
 
     var safeBottomAnchor: NSLayoutYAxisAnchor {
-        #if os(macOS)
-        return bottomAnchor
-        #else
-        if #available(iOS 11.0, tvOS 11.0, *) {
+        if #available(macOS 11.0, *) {
             return self.safeAreaLayoutGuide.bottomAnchor
         } else {
             return bottomAnchor
         }
-        #endif
     }
 }
 
@@ -222,6 +212,12 @@ extension CMTimeRange {
     }
 }
 
+extension CGPoint {
+    var reverse: CGPoint {
+        CGPoint(x: y, y: x)
+    }
+}
+
 extension CGSize {
     var reverse: CGSize {
         CGSize(width: height, height: width)
@@ -229,6 +225,10 @@ extension CGSize {
 
     var toPoint: CGPoint {
         CGPoint(x: width, y: height)
+    }
+
+    var isHorizonal: Bool {
+        width > height
     }
 }
 
@@ -400,5 +400,21 @@ extension UIImageView {
                 self.image = image
             }
         }
+    }
+}
+
+public extension URL {
+    var isMovie: Bool {
+        if let typeID = try? resourceValues(forKeys: [.typeIdentifierKey]).typeIdentifier as CFString? {
+            return UTTypeConformsTo(typeID, kUTTypeMovie)
+        }
+        return false
+    }
+
+    var isAudio: Bool {
+        if let typeID = try? resourceValues(forKeys: [.typeIdentifierKey]).typeIdentifier as CFString? {
+            return UTTypeConformsTo(typeID, kUTTypeAudio)
+        }
+        return false
     }
 }

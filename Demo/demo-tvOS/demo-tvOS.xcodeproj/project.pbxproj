@@ -11,6 +11,7 @@
 		AC08611F20B69A1C00D801FC /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AC08611E20B69A1C00D801FC /* Assets.xcassets */; };
 		AC08612A20B69A1D00D801FC /* demo_tvOSTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC08612920B69A1D00D801FC /* demo_tvOSTests.swift */; };
 		AC08613520B69A1D00D801FC /* demo_tvOSUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC08613420B69A1D00D801FC /* demo_tvOSUITests.swift */; };
+		AC21D0E826D250D80007891C /* RootViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC21D0E726D250D80007891C /* RootViewController.swift */; };
 		AC3A420223D32DFE00B666A4 /* MasterViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC3A41FE23D32DFD00B666A4 /* MasterViewController.swift */; };
 		AC3A420323D32DFE00B666A4 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC3A41FF23D32DFE00B666A4 /* AppDelegate.swift */; };
 		AC3A420423D32DFE00B666A4 /* DetailViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC3A420023D32DFE00B666A4 /* DetailViewController.swift */; };
@@ -50,6 +51,7 @@
 		AC08613020B69A1D00D801FC /* demo-tvOSUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "demo-tvOSUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		AC08613420B69A1D00D801FC /* demo_tvOSUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = demo_tvOSUITests.swift; sourceTree = "<group>"; };
 		AC08613620B69A1D00D801FC /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		AC21D0E726D250D80007891C /* RootViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = RootViewController.swift; path = "../../demo-iOS/demo-iOS/RootViewController.swift"; sourceTree = "<group>"; };
 		AC3A41FE23D32DFD00B666A4 /* MasterViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = MasterViewController.swift; path = "../../demo-iOS/demo-iOS/MasterViewController.swift"; sourceTree = "<group>"; };
 		AC3A41FF23D32DFE00B666A4 /* AppDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = AppDelegate.swift; path = "../../demo-iOS/demo-iOS/AppDelegate.swift"; sourceTree = "<group>"; };
 		AC3A420023D32DFE00B666A4 /* DetailViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = DetailViewController.swift; path = "../../demo-iOS/demo-iOS/DetailViewController.swift"; sourceTree = "<group>"; };
@@ -118,6 +120,7 @@
 				AC3A420123D32DFE00B666A4 /* AudioViewController.swift */,
 				AC3A420023D32DFE00B666A4 /* DetailViewController.swift */,
 				AC3A41FE23D32DFD00B666A4 /* MasterViewController.swift */,
+				AC21D0E726D250D80007891C /* RootViewController.swift */,
 				AC08611E20B69A1C00D801FC /* Assets.xcassets */,
 				AC80333124BA1B54002B3D40 /* Main.storyboard */,
 				AC08612020B69A1C00D801FC /* Info.plist */,
@@ -350,6 +353,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				AC21D0E826D250D80007891C /* RootViewController.swift in Sources */,
 				AC3A420423D32DFE00B666A4 /* DetailViewController.swift in Sources */,
 				AC3A420523D32DFE00B666A4 /* AudioViewController.swift in Sources */,
 				AC3A420323D32DFE00B666A4 /* AppDelegate.swift in Sources */,
@@ -444,7 +448,7 @@
 				SDKROOT = appletvos;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
-				TVOS_DEPLOYMENT_TARGET = 11.3;
+				TVOS_DEPLOYMENT_TARGET = 11.0;
 			};
 			name = Debug;
 		};
@@ -496,7 +500,7 @@
 				SDKROOT = appletvos;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
-				TVOS_DEPLOYMENT_TARGET = 11.3;
+				TVOS_DEPLOYMENT_TARGET = 11.0;
 				VALIDATE_PRODUCT = YES;
 			};
 			name = Release;
@@ -525,7 +529,6 @@
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 3;
-				TVOS_DEPLOYMENT_TARGET = 10.2;
 			};
 			name = Debug;
 		};
@@ -550,7 +553,6 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 3;
-				TVOS_DEPLOYMENT_TARGET = 10.2;
 			};
 			name = Release;
 		};

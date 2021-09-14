@@ -42,7 +42,7 @@ public final class MetalTextureCache {
     }
 
     func textures(formats: [MTLPixelFormat], widths: [Int], heights: [Int], buffers: [MTLBuffer?], lineSizes: [Int]) -> [MTLTexture] {
-        return (0 ..< formats.count).compactMap { i in
+        (0 ..< formats.count).compactMap { i in
             guard let buffer = buffers[i] else {
                 return nil
             }

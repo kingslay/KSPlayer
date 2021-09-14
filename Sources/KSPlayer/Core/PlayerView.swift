@@ -60,6 +60,7 @@ open class PlayerView: UIView, KSPlayerLayerDelegate, KSSliderDelegate {
         toolBar.addTarget(self, action: #selector(onButtonPressed(_:)))
     }
 
+    @available(*, unavailable)
     public required init?(coder _: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
@@ -88,6 +89,7 @@ open class PlayerView: UIView, KSPlayerLayerDelegate, KSSliderDelegate {
     }
 
     open func play() {
+        becomeFirstResponder()
         if playerLayer.state == .playedToTheEnd {
             seek(time: 0)
         } else {
@@ -167,8 +169,6 @@ extension PlayerView {
         }
     }
 
-    #if os(macOS)
-    #else
     @objc private func audioInterrupted(notification: Notification) {
         if let callBegin = notification.userInfo?[AVAudioSessionInterruptionTypeKey] as? Bool {
             if callBegin {
@@ -176,7 +176,6 @@ extension PlayerView {
             }
         }
     }
-    #endif
 }
 
 extension UIView {

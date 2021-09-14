@@ -1,7 +1,7 @@
 PODS:
-  - FFmpeg (4.3.1):
-    - FFmpeg/FFmpeg (= 4.3.1)
-  - FFmpeg/FFmpeg (4.3.1):
+  - FFmpeg (4.4):
+    - FFmpeg/FFmpeg (= 4.4)
+  - FFmpeg/FFmpeg (4.4):
     - OpenSSL
   - KSPlayer (1.0):
     - KSPlayer/Audio (= 1.0)
@@ -15,7 +15,6 @@ PODS:
     - KSPlayer/Video (= 1.0)
   - KSPlayer/Audio (1.0):
     - KSPlayer/Core
-    - KSPlayer/Subtitle
   - KSPlayer/AVPlayer (1.0):
     - KSPlayer/Basic
   - KSPlayer/Basic (1.0):
@@ -59,11 +58,11 @@ EXTERNAL SOURCES:
     :path: "../"
 
 SPEC CHECKSUMS:
-  FFmpeg: 4e79fa1edbe19fe720d8c5feb6eeac5629b0d117
-  KSPlayer: ed0857c61f11bb0fbd9e97176d99a13fdce95840
-  OpenSSL: 14d697b174fe7d4b3e7bf0b4c74bb4b23cc2b2bf
+  FFmpeg: b9554306bf619b593bd7077cea2bc552b259997f
+  KSPlayer: 00e5acede9598c4685314ba7bc344d92ef8664b0
+  OpenSSL: a3f74f425dd6d0dc2a5ccd9b299ca46af73c7f16
   SwiftLint: 22ccbbe3b8008684be5955693bab135e0ed6a447
 
-PODFILE CHECKSUM: e90c5364c7ac3a1bab3b0549d08e1c65e8394227
+PODFILE CHECKSUM: 6a7350b0c0629dbfc8fb3b0920d69c23f927024c
 
-COCOAPODS: 1.10.1
+COCOAPODS: 1.10.2

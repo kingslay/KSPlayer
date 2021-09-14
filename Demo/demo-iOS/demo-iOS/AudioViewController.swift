@@ -25,8 +25,8 @@ class AudioViewController: UIViewController, DetailProtocol {
         playerView.backgroundColor = UIColor.white
         playerView.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
-            playerView.leftAnchor.constraint(equalTo: view.leftAnchor),
-            playerView.rightAnchor.constraint(equalTo: view.rightAnchor),
+            playerView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            playerView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             playerView.centerYAnchor.constraint(equalTo: view.centerYAnchor),
         ])
         view.layoutIfNeeded()

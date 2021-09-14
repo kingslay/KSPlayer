@@ -1,4 +1,4 @@
 framework module Libswscale [system] {
-   header "swscale.h"
+    umbrella "."
     export *
 }

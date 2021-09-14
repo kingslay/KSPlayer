@@ -9,12 +9,12 @@ import AVFoundation
 import CoreGraphics
 import CoreMedia
 import Libavcodec
-import Libswscale
 import Libswresample
+import Libswscale
 import VideoToolbox
 
 protocol Swresample {
-    func transfer(avframe: UnsafeMutablePointer<AVFrame>, timebase: Timebase) -> MEFrame
+    func transfer(avframe: UnsafeMutablePointer<AVFrame>) throws -> MEFrame
     func shutdown()
 }
 
@@ -25,6 +25,7 @@ class VideoSwresample: Swresample {
     private var height: Int32 = 0
     private var width: Int32 = 0
     private var forceTransfer: Bool
+    private var pool: CVPixelBufferPool?
     var dstFrame: UnsafeMutablePointer<AVFrame>?
     init(dstFormat: AVPixelFormat = AV_PIX_FMT_NV12, forceTransfer: Bool = false) {
         self.dstFormat = dstFormat
@@ -32,19 +33,27 @@ class VideoSwresample: Swresample {
     }
 
     private func setup(frame: UnsafeMutablePointer<AVFrame>) -> Bool {
-        setup(format: AVPixelFormat(rawValue: frame.pointee.format), width: frame.pointee.width, height: frame.pointee.height)
-    }
-
-    func setup(format: AVPixelFormat, width: Int32, height: Int32) -> Bool {
+        let format = AVPixelFormat(rawValue: frame.pointee.format)
+        let width = frame.pointee.width
+        let height = frame.pointee.height
         if self.format == format, self.width == width, self.height == height {
             return true
         }
+        let result = setup(format: format, width: width, height: height)
+        if result, let pixelFormatType = dstFormat.osType() {
+            pool = CVPixelBufferPool.ceate(width: width, height: height, bytesPerRowAlignment: frame.pointee.linesize.0, pixelFormatType: pixelFormatType)
+        }
+        return result
+    }
+
+    private func setup(format: AVPixelFormat, width: Int32, height: Int32) -> Bool {
         shutdown()
         self.format = format
         self.height = height
         self.width = width
         if !forceTransfer {
-            if PixelBuffer.isSupported(format: self.format) {
+            if self.format.osType() != nil {
+                dstFormat = self.format
                 return true
             } else {
                 dstFormat = self.format.bestPixelFormat()
@@ -67,28 +76,30 @@ class VideoSwresample: Swresample {
         return true
     }
 
-    func transfer(avframe: UnsafeMutablePointer<AVFrame>, timebase: Timebase) -> MEFrame {
+    func transfer(avframe: UnsafeMutablePointer<AVFrame>) throws -> MEFrame {
         let frame = VideoVTBFrame()
-        frame.timebase = timebase
         if avframe.pointee.format == AV_PIX_FMT_VIDEOTOOLBOX.rawValue {
             // swiftlint:disable force_cast
             frame.corePixelBuffer = avframe.pointee.data.3 as! CVPixelBuffer
             // swiftlint:enable force_cast
         } else {
-            if setup(frame: avframe), let dstFrame = dstFrame, swsConvert(data: Array(tuple: avframe.pointee.data), linesize: Array(tuple: avframe.pointee.linesize)) {
+            _ = setup(frame: avframe)
+            if let dstFrame = dstFrame, swsConvert(data: Array(tuple: avframe.pointee.data), linesize: Array(tuple: avframe.pointee.linesize)) {
                 avframe.pointee.format = dstFrame.pointee.format
                 avframe.pointee.data = dstFrame.pointee.data
                 avframe.pointee.linesize = dstFrame.pointee.linesize
             }
-            frame.corePixelBuffer = PixelBuffer(frame: avframe)
+            if let pool = pool {
+                frame.corePixelBuffer = pool.getPixelBuffer(fromFrame: avframe.pointee)
+            } else {
+                frame.corePixelBuffer = PixelBuffer(frame: avframe)
+            }
         }
-        frame.duration = avframe.pointee.pkt_duration
-        frame.size = Int64(avframe.pointee.pkt_size)
         return frame
     }
 
     func transfer(format: AVPixelFormat, width: Int32, height: Int32, data: [UnsafeMutablePointer<UInt8>?], linesize: [Int]) -> CGImage? {
-        if setup(format: format, width: width, height: height), swsConvert(data: data, linesize: linesize.compactMap({Int32($0)})), let frame = dstFrame?.pointee {
+        if setup(format: format, width: width, height: height), swsConvert(data: data, linesize: linesize.compactMap { Int32($0) }), let frame = dstFrame?.pointee {
             return CGImage.make(rgbData: frame.data.0!, linesize: Int(frame.linesize.0), width: Int(width), height: Int(height), isAlpha: dstFormat == AV_PIX_FMT_RGBA)
         }
         return nil
@@ -124,15 +135,14 @@ class PixelBuffer: BufferProtocol {
     let colorPrimaries: CFString?
     let transferFunction: CFString?
     let yCbCrMatrix: CFString?
-
-    let sar: CGSize
+    let aspectRatio: CGSize
     private let formats: [MTLPixelFormat]
     private let widths: [Int]
     private let heights: [Int]
     private let dataWrap: MTLBufferWrap
     private var lineSize = [Int]()
     public var colorspace: CGColorSpace? {
-       attachmentsDic.flatMap { CVImageBufferCreateColorSpaceFromAttachments($0)?.takeUnretainedValue() }
+        attachmentsDic.flatMap { CVImageBufferCreateColorSpaceFromAttachments($0)?.takeUnretainedValue() }
     }
 
     init(frame: UnsafeMutablePointer<AVFrame>) {
@@ -150,7 +160,7 @@ class PixelBuffer: BufferProtocol {
         isFullRangeVideo = frame.pointee.color_range == AVCOL_RANGE_JPEG
         let bytesPerRow = Array(tuple: frame.pointee.linesize).compactMap { Int($0) }
         bitDepth = format.bitDepth()
-        sar = frame.pointee.sample_aspect_ratio.size
+        aspectRatio = frame.pointee.sample_aspect_ratio.size
         planeCount = Int(format.planeCount())
         switch planeCount {
         case 3:
@@ -158,7 +168,7 @@ class PixelBuffer: BufferProtocol {
             widths = [width, width / 2, width / 2]
             heights = [height, height / 2, height / 2]
         case 2:
-            formats =  bitDepth > 8 ? [.r16Unorm, .rg16Unorm] : [.r8Unorm, .rg8Unorm]
+            formats = bitDepth > 8 ? [.r16Unorm, .rg16Unorm] : [.r8Unorm, .rg8Unorm]
             widths = [width, width / 2]
             heights = [height, height / 2]
         default:
@@ -168,27 +178,20 @@ class PixelBuffer: BufferProtocol {
         }
         var size = [Int]()
         for i in 0 ..< planeCount {
-            if #available(iOS 11.0, tvOS 11.0, *) {
-                let alignment = MetalRender.device.minimumLinearTextureAlignment(for: formats[i])
-                let remainder = bytesPerRow[i] % alignment
-                lineSize.append(remainder == 0 ? bytesPerRow[i] : bytesPerRow[i] + alignment - remainder)
-            } else {
-                lineSize.append(bytesPerRow[i])
-            }
+            lineSize.append(bytesPerRow[i].alignment(value: MetalRender.device.minimumLinearTextureAlignment(for: formats[i])))
             size.append(lineSize[i] * heights[i])
-
         }
         dataWrap = ObjectPool.share.object(class: MTLBufferWrap.self, key: "VideoData") { MTLBufferWrap(size: size) }
         dataWrap.size = size
         let bytes = Array(tuple: frame.pointee.data)
         for i in 0 ..< planeCount {
             if bytesPerRow[i] == lineSize[i] {
-                dataWrap.data[i]?.contents().copyMemory(from: bytes[i]!, byteCount: heights[i]*lineSize[i])
+                dataWrap.data[i]?.contents().copyMemory(from: bytes[i]!, byteCount: heights[i] * lineSize[i])
             } else {
                 let contents = dataWrap.data[i]?.contents()
                 let source = bytes[i]!
                 for j in 0 ..< heights[i] {
-                    contents?.advanced(by: j*lineSize[i]).copyMemory(from: source.advanced(by: j*bytesPerRow[i]), byteCount: bytesPerRow[i])
+                    contents?.advanced(by: j * lineSize[i]).copyMemory(from: source.advanced(by: j * bytesPerRow[i]), byteCount: bytesPerRow[i])
                 }
             }
         }
@@ -210,33 +213,23 @@ class PixelBuffer: BufferProtocol {
         heights[planeIndex]
     }
 
-    public static func isSupported(format: AVPixelFormat) -> Bool {
-        [AV_PIX_FMT_BGRA, AV_PIX_FMT_NV12, AV_PIX_FMT_P010BE, AV_PIX_FMT_YUV420P].contains(format)
-    }
-
     func image() -> CGImage? {
         let image: CGImage?
         if format == AV_PIX_FMT_RGB24 {
-            image =  CGImage.make(rgbData: dataWrap.data[0]!.contents().assumingMemoryBound(to: UInt8.self), linesize: Int(lineSize[0]), width: width, height: height)
+            image = CGImage.make(rgbData: dataWrap.data[0]!.contents().assumingMemoryBound(to: UInt8.self), linesize: Int(lineSize[0]), width: width, height: height)
         } else {
             let scale = VideoSwresample(dstFormat: AV_PIX_FMT_RGB24, forceTransfer: true)
-            image = scale.transfer(format: format, width: Int32(width), height: Int32(height), data: dataWrap.data.map({ $0?.contents().assumingMemoryBound(to: UInt8.self) }), linesize: lineSize)
+            image = scale.transfer(format: format, width: Int32(width), height: Int32(height), data: dataWrap.data.map { $0?.contents().assumingMemoryBound(to: UInt8.self) }, linesize: lineSize)
             scale.shutdown()
         }
         return image
     }
 }
 
-extension AVCodecParameters {
-
-    var sar: NSDictionary? {
-        let sar = sample_aspect_ratio.size
-        if sar.width != sar.height {
-            return [kCVImageBufferPixelAspectRatioHorizontalSpacingKey: sar.width,
-                    kCVImageBufferPixelAspectRatioVerticalSpacingKey: sar.height] as NSDictionary
-        } else {
-            return nil
-        }
+extension BinaryInteger {
+    func alignment(value: Self) -> Self {
+        let remainder = self % value
+        return remainder == 0 ? self : self + value - remainder
     }
 }
 
@@ -262,27 +255,85 @@ extension AVPixelFormat {
     }
 
     func bestPixelFormat() -> AVPixelFormat {
-        return bitDepth() > 8 ? AV_PIX_FMT_P010LE : AV_PIX_FMT_NV12
+        bitDepth() > 8 ? AV_PIX_FMT_P010LE : AV_PIX_FMT_NV12
     }
+
+    // swiftlint:disable cyclomatic_complexity
+    func osType() -> OSType? {
+        switch self {
+        case AV_PIX_FMT_ABGR: return kCVPixelFormatType_32ABGR
+        case AV_PIX_FMT_ARGB: return kCVPixelFormatType_32ARGB
+        case AV_PIX_FMT_BGR24: return kCVPixelFormatType_24BGR
+        case AV_PIX_FMT_BGR48BE: return kCVPixelFormatType_48RGB
+        case AV_PIX_FMT_BGRA: return kCVPixelFormatType_32BGRA
+        case AV_PIX_FMT_MONOBLACK: return kCVPixelFormatType_1Monochrome
+        case AV_PIX_FMT_NV12: return kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange
+        case AV_PIX_FMT_RGB24: return kCVPixelFormatType_24RGB
+        case AV_PIX_FMT_RGB555BE: return kCVPixelFormatType_16BE555
+        case AV_PIX_FMT_RGB555LE: return kCVPixelFormatType_16LE555
+        case AV_PIX_FMT_RGB565BE: return kCVPixelFormatType_16BE565
+        case AV_PIX_FMT_RGB565LE: return kCVPixelFormatType_16LE565
+        case AV_PIX_FMT_RGBA: return kCVPixelFormatType_32RGBA
+        case AV_PIX_FMT_UYVY422: return kCVPixelFormatType_422YpCbCr8
+        case AV_PIX_FMT_YUV420P: return kCVPixelFormatType_420YpCbCr8Planar
+//        case AV_PIX_FMT_YUVJ420P:   return kCVPixelFormatType_420YpCbCr8PlanarFullRange
+        case AV_PIX_FMT_P010LE: return kCVPixelFormatType_420YpCbCr10BiPlanarVideoRange
+        case AV_PIX_FMT_YUV422P10LE: return kCVPixelFormatType_422YpCbCr10
+        case AV_PIX_FMT_YUV422P16LE: return kCVPixelFormatType_422YpCbCr16
+        case AV_PIX_FMT_YUV444P: return kCVPixelFormatType_444YpCbCr8
+        case AV_PIX_FMT_YUV444P10LE: return kCVPixelFormatType_444YpCbCr10
+        case AV_PIX_FMT_YUVA444P: return kCVPixelFormatType_4444YpCbCrA8R
+        case AV_PIX_FMT_YUVA444P16LE: return kCVPixelFormatType_4444AYpCbCr16
+        case AV_PIX_FMT_YUYV422: return kCVPixelFormatType_422YpCbCr8_yuvs
+        case AV_PIX_FMT_GRAY8: return kCVPixelFormatType_OneComponent8
+        default:
+            return nil
+        }
+    }
+    // swiftlint:enable cyclomatic_complexity
 }
 
 extension CVPixelBufferPool {
+    static func ceate(width: Int32, height: Int32, bytesPerRowAlignment: Int32, pixelFormatType: OSType, bufferCount: Int = 24) -> CVPixelBufferPool? {
+        let sourcePixelBufferOptions: NSMutableDictionary = [
+            kCVPixelBufferPixelFormatTypeKey: pixelFormatType,
+            kCVPixelBufferWidthKey: width,
+            kCVPixelBufferHeightKey: height,
+            kCVPixelBufferBytesPerRowAlignmentKey: bytesPerRowAlignment.alignment(value: 64),
+            kCVPixelBufferMetalCompatibilityKey: true,
+//            kCVPixelBufferIOSurfacePropertiesKey: NSDictionary()
+        ]
+        var outputPool: CVPixelBufferPool?
+        let pixelBufferPoolOptions: NSDictionary = [kCVPixelBufferPoolMinimumBufferCountKey: bufferCount]
+        CVPixelBufferPoolCreate(kCFAllocatorDefault, pixelBufferPoolOptions, sourcePixelBufferOptions, &outputPool)
+        return outputPool
+    }
+
     func getPixelBuffer(fromFrame frame: AVFrame) -> CVPixelBuffer? {
         var pbuf: CVPixelBuffer?
         let ret = CVPixelBufferPoolCreatePixelBuffer(kCFAllocatorDefault, self, &pbuf)
-        //        let dic = [kCVPixelBufferIOSurfacePropertiesKey: NSDictionary(),
-        //                       kCVPixelBufferBytesPerRowAlignmentKey: frame.linesize.0] as NSDictionary
-        //        let ret = CVPixelBufferCreate(kCFAllocatorDefault, Int(frame.width), Int(frame.height), AVPixelFormat(rawValue: frame.format).format, dic, &pbuf)
         if let pbuf = pbuf, ret == kCVReturnSuccess {
             CVPixelBufferLockBaseAddress(pbuf, CVPixelBufferLockFlags(rawValue: 0))
             let data = Array(tuple: frame.data)
             let linesize = Array(tuple: frame.linesize)
-            let heights = [frame.height, frame.height / 2, frame.height / 2]
             for i in 0 ..< pbuf.planeCount {
-                let perRow = Int(linesize[i])
-                pbuf.baseAddressOfPlane(at: i)?.copyMemory(from: data[i]!, byteCount: Int(heights[i]) * perRow)
+                let height = pbuf.heightOfPlane(at: i)
+                let size = Int(linesize[i])
+                let bytesPerRow = CVPixelBufferGetBytesPerRowOfPlane(pbuf, i)
+                if bytesPerRow == size {
+                    pbuf.baseAddressOfPlane(at: i)?.copyMemory(from: data[i]!, byteCount: height * size)
+                } else {
+                    let contents = pbuf.baseAddressOfPlane(at: i)
+                    let source = data[i]!
+                    for j in 0 ..< height {
+                        contents?.advanced(by: j * bytesPerRow).copyMemory(from: source.advanced(by: j * size), byteCount: size)
+                    }
+                }
             }
             CVPixelBufferUnlockBaseAddress(pbuf, CVPixelBufferLockFlags(rawValue: 0))
+            if let aspectRatio = frame.sample_aspect_ratio.size.aspectRatio {
+                CVBufferSetAttachment(pbuf, kCVImageBufferPixelAspectRatioKey, aspectRatio, .shouldPropagate)
+            }
         }
         return pbuf
     }
@@ -305,41 +356,44 @@ typealias SwrContext = OpaquePointer
 
 class AudioSwresample: Swresample {
     private var swrContext: SwrContext?
-    private var descriptor: AudioDescriptor?
-    private func setup(frame: UnsafeMutablePointer<AVFrame>) -> Bool {
-        let newDescriptor = AudioDescriptor(frame: frame)
-        if let descriptor = descriptor, descriptor == newDescriptor {
-            return true
-        }
-        let outChannel = av_get_default_channel_layout(Int32(KSPlayerManager.audioPlayerMaximumChannels))
-        let inChannel = av_get_default_channel_layout(Int32(newDescriptor.inputNumberOfChannels))
-        swrContext = swr_alloc_set_opts(nil, outChannel, AV_SAMPLE_FMT_FLTP, KSPlayerManager.audioPlayerSampleRate, inChannel, newDescriptor.inputFormat, newDescriptor.inputSampleRate, 0, nil)
+    private var descriptor: AudioDescriptor
+    private let channels: Int32
+    init(codecpar: AVCodecParameters) {
+        descriptor = AudioDescriptor(codecpar: codecpar)
+        channels = Int32(max(min(KSPlayerManager.audioPlayerMaximumChannels, descriptor.inputNumberOfChannels), 2))
+        _ = setup(descriptor: descriptor)
+    }
+
+    private func setup(descriptor: AudioDescriptor) -> Bool {
+        let outChannel = av_get_default_channel_layout(channels)
+        let inChannel = av_get_default_channel_layout(Int32(descriptor.inputNumberOfChannels))
+        swrContext = swr_alloc_set_opts(nil, outChannel, AV_SAMPLE_FMT_FLTP, KSPlayerManager.audioPlayerSampleRate, inChannel, descriptor.inputFormat, descriptor.inputSampleRate, 0, nil)
         let result = swr_init(swrContext)
         if result < 0 {
             shutdown()
             return false
         } else {
-            descriptor = newDescriptor
             return true
         }
     }
 
-    func transfer(avframe: UnsafeMutablePointer<AVFrame>, timebase: Timebase) -> MEFrame {
-        _ = setup(frame: avframe)
+    func transfer(avframe: UnsafeMutablePointer<AVFrame>) throws -> MEFrame {
+        if !(descriptor == avframe.pointee) {
+            let descriptor = AudioDescriptor(frame: avframe)
+            if setup(descriptor: descriptor) {
+                self.descriptor = descriptor
+            } else {
+                throw NSError(errorCode: .auidoSwrInit, userInfo: ["outChannel": channels, "inChannel": descriptor.inputNumberOfChannels])
+            }
+        }
         var numberOfSamples = avframe.pointee.nb_samples
         let nbSamples = swr_get_out_samples(swrContext, numberOfSamples)
         var frameBuffer = Array(tuple: avframe.pointee.data).map { UnsafePointer<UInt8>($0) }
         var bufferSize = Int32(0)
-        _ = av_samples_get_buffer_size(&bufferSize, Int32(KSPlayerManager.audioPlayerMaximumChannels), nbSamples, AV_SAMPLE_FMT_FLTP, 1)
-        let frame = AudioFrame(bufferSize: bufferSize)
+        _ = av_samples_get_buffer_size(&bufferSize, channels, nbSamples, AV_SAMPLE_FMT_FLTP, 1)
+        let frame = AudioFrame(bufferSize: bufferSize, channels: channels)
         numberOfSamples = swr_convert(swrContext, &frame.dataWrap.data, nbSamples, &frameBuffer, numberOfSamples)
-        frame.timebase = timebase
         frame.numberOfSamples = Int(numberOfSamples)
-        frame.duration = avframe.pointee.pkt_duration
-        frame.size = Int64(avframe.pointee.pkt_size)
-        if frame.duration == 0 {
-            frame.duration = Int64(avframe.pointee.nb_samples) * Int64(frame.timebase.den) / (Int64(avframe.pointee.sample_rate) * Int64(frame.timebase.num))
-        }
         return frame
     }
 
@@ -352,17 +406,15 @@ class AudioDescriptor: Equatable {
     fileprivate let inputNumberOfChannels: AVAudioChannelCount
     fileprivate let inputSampleRate: Int32
     fileprivate let inputFormat: AVSampleFormat
-    init(codecpar: UnsafeMutablePointer<AVCodecParameters>) {
-        let channels = UInt32(codecpar.pointee.channels)
-        inputNumberOfChannels = channels == 0 ? KSPlayerManager.audioPlayerMaximumChannels : channels
-        let sampleRate = codecpar.pointee.sample_rate
+    init(codecpar: AVCodecParameters) {
+        inputNumberOfChannels = max(UInt32(codecpar.channels), 1)
+        let sampleRate = codecpar.sample_rate
         inputSampleRate = sampleRate == 0 ? KSPlayerManager.audioPlayerSampleRate : sampleRate
-        inputFormat = AVSampleFormat(rawValue: codecpar.pointee.format)
+        inputFormat = AVSampleFormat(rawValue: codecpar.format)
     }
 
     init(frame: UnsafeMutablePointer<AVFrame>) {
-        let channels = UInt32(frame.pointee.channels)
-        inputNumberOfChannels = channels == 0 ? KSPlayerManager.audioPlayerMaximumChannels : channels
+        inputNumberOfChannels = max(UInt32(frame.pointee.channels), 1)
         let sampleRate = frame.pointee.sample_rate
         inputSampleRate = sampleRate == 0 ? KSPlayerManager.audioPlayerSampleRate : sampleRate
         inputFormat = AVSampleFormat(rawValue: frame.pointee.format)
