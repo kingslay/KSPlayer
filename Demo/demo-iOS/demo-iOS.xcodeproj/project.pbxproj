@@ -18,6 +18,7 @@
 		AC3E54AB24B9E810002B6B1B /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = AC3E498E24B9CB5E002B6B1B /* LaunchScreen.storyboard */; };
 		AC3E54AC24B9E815002B6B1B /* Localized.strings in Resources */ = {isa = PBXBuildFile; fileRef = AC3E491D24B98CEB002B6B1B /* Localized.strings */; };
 		AC458DE621DF830F00BD4CF9 /* AudioViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC458DE521DF830F00BD4CF9 /* AudioViewController.swift */; };
+		AC7D1CB526EF79B6004C5DBA /* tos.mkv in Resources */ = {isa = PBXBuildFile; fileRef = AC7D1CB426EF79B6004C5DBA /* tos.mkv */; };
 		AC80331F24BA1A2F002B3D40 /* Polonaise.flac in Resources */ = {isa = PBXBuildFile; fileRef = AC80331B24BA1A2F002B3D40 /* Polonaise.flac */; };
 		AC80332024BA1A2F002B3D40 /* google-help-vr.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = AC80331C24BA1A2F002B3D40 /* google-help-vr.mp4 */; };
 		AC80332124BA1A2F002B3D40 /* 567082ac3ae39699f68de4fd2b7444b1e045515a.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = AC80331D24BA1A2F002B3D40 /* 567082ac3ae39699f68de4fd2b7444b1e045515a.mp4 */; };
@@ -63,6 +64,7 @@
 		AC3E498C24B9CA67002B6B1B /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "zh-Hans.lproj/Localized.strings"; sourceTree = "<group>"; };
 		AC3E498E24B9CB5E002B6B1B /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = LaunchScreen.storyboard; sourceTree = "<group>"; };
 		AC458DE521DF830F00BD4CF9 /* AudioViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioViewController.swift; sourceTree = "<group>"; };
+		AC7D1CB426EF79B6004C5DBA /* tos.mkv */ = {isa = PBXFileReference; lastKnownFileType = file; path = tos.mkv; sourceTree = "<group>"; };
 		AC7E04DB2414DA5E00B0F540 /* libxml2.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libxml2.tbd; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk/usr/lib/libxml2.tbd; sourceTree = DEVELOPER_DIR; };
 		AC80331B24BA1A2F002B3D40 /* Polonaise.flac */ = {isa = PBXFileReference; lastKnownFileType = file; path = Polonaise.flac; sourceTree = "<group>"; };
 		AC80331C24BA1A2F002B3D40 /* google-help-vr.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = "google-help-vr.mp4"; sourceTree = "<group>"; };
@@ -170,6 +172,7 @@
 				AC80331B24BA1A2F002B3D40 /* Polonaise.flac */,
 				AC80331C24BA1A2F002B3D40 /* google-help-vr.mp4 */,
 				AC80331D24BA1A2F002B3D40 /* 567082ac3ae39699f68de4fd2b7444b1e045515a.mp4 */,
+				AC7D1CB426EF79B6004C5DBA /* tos.mkv */,
 				AC80331E24BA1A2F002B3D40 /* video-h265.mkv */,
 			);
 			name = Resources;
@@ -297,6 +300,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				AC80331F24BA1A2F002B3D40 /* Polonaise.flac in Resources */,
+				AC7D1CB526EF79B6004C5DBA /* tos.mkv in Resources */,
 				AC80332124BA1A2F002B3D40 /* 567082ac3ae39699f68de4fd2b7444b1e045515a.mp4 in Resources */,
 				AC80332224BA1A2F002B3D40 /* video-h265.mkv in Resources */,
 				AC3E54AC24B9E815002B6B1B /* Localized.strings in Resources */,
@@ -553,6 +557,8 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = "demo-iOS/demo-iOS.entitlements";
+				CODE_SIGN_IDENTITY = "Apple Development";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "-";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1.1.1.1;
 				DERIVE_MACCATALYST_PRODUCT_BUNDLE_IDENTIFIER = YES;
@@ -580,6 +586,8 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = "demo-iOS/demo-iOS.entitlements";
+				CODE_SIGN_IDENTITY = "Apple Development";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "-";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1.1.1.1;
 				DERIVE_MACCATALYST_PRODUCT_BUNDLE_IDENTIFIER = YES;

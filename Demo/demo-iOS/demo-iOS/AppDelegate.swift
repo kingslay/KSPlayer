@@ -20,16 +20,15 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UISplitViewControllerDele
         KSPlayerManager.secondPlayerType = KSMEPlayer.self
 //        KSPlayerManager.supportedInterfaceOrientations = .all
         KSOptions.preferredForwardBufferDuration = 10
+        KSOptions.isAutoPlay = true
         KSOptions.isSecondOpen = true
         KSOptions.isAccurateSeek = true
         KSOptions.isLoopPlay = true
         KSOptions.hardwareDecodeH265 = true
         KSOptions.hardwareDecodeH264 = true
         if UIDevice.current.userInterfaceIdiom == .phone {
-            KSOptions.isAutoPlay = false
             window.rootViewController = UINavigationController(rootViewController: RootViewController())
         } else {
-            KSOptions.isAutoPlay = true
             let splitViewController = UISplitViewController()
             splitViewController.preferredDisplayMode = .primaryOverlay
             splitViewController.delegate = self
@@ -68,6 +67,10 @@ var objects: [KSPlayerResource] = {
         options.hardwareDecodeH264 = false
         objects.append(KSPlayerResource(url: URL(fileURLWithPath: path), options: options, name: "本地视频"))
     }
+    if let path = Bundle.main.path(forResource: "tos", ofType: "mkv") {
+        objects.append(KSPlayerResource(url: URL(fileURLWithPath: path), name: "本地mkv"))
+    }
+
     if let path = Bundle.main.path(forResource: "google-help-vr", ofType: "mp4") {
         let options = KSOptions()
         options.display = .vr
