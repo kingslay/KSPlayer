@@ -46,17 +46,20 @@ class RootViewController: UIViewController {
         view.addSubview(tableView)
         tableView.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
-            tableView.topAnchor.constraint(equalTo: view.topAnchor),
+            tableView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
             tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 0),
             tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             tableView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
         ])
+        tableView.contentInsetAdjustmentBehavior = .never
         tableView.delegate = self
         tableView.dataSource = self
         tableView.rowHeight = UIScreen.main.bounds.width * 0.65 + 50
         tableView.register(TableViewCell.self, forCellReuseIdentifier: "Cell")
         tableView.reloadData()
-        beginVideoAction()
+        DispatchQueue.main.async {
+            self._scrollViewDidStopScroll(self.tableView)
+        }
     }
 
     #if os(iOS)
@@ -107,21 +110,44 @@ extension RootViewController: UITableViewDelegate {
         cell.videoView.addSubview(playerView)
     }
 
-    func scrollViewDidEndDecelerating(_: UIScrollView) {
-//        beginVideoAction()
-    }
-
-    func scrollViewDidEndDragging(_: UIScrollView, willDecelerate decelerate: Bool) {
-        if !decelerate {
-//            beginVideoAction()
+    func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
+        if scrollView.isTracking, !scrollView.isDragging, !scrollView.isDecelerating {
+            _scrollViewDidStopScroll(scrollView)
         }
     }
 
-    private func beginVideoAction() {
-        guard let index = tableView.indexPathsForVisibleRows?.first, let cell = tableView.cellForRow(at: index) as? TableViewCell else {
+    func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
+        if !decelerate {
+            if scrollView.isTracking, !scrollView.isDragging, !scrollView.isDecelerating {
+                _scrollViewDidStopScroll(scrollView)
+            }
+        }
+    }
+
+    func scrollViewDidScrollToTop(_ scrollView: UIScrollView) {
+        _scrollViewDidStopScroll(scrollView)
+    }
+
+    private func _scrollViewDidStopScroll(_ scrollView: UIScrollView) {
+        let index = tableView.indexPathsForVisibleRows?.first { index in
+            guard let cell = tableView.cellForRow(at: index) else {
+                return false
+            }
+            let rect = cell.convert(cell.frame, to: scrollView.superview)
+            let topSpacing = rect.minY - scrollView.frame.minY - cell.frame.minY
+            let bottomSpacing = scrollView.frame.maxY - rect.maxY + cell.frame.minY
+            let spacing = -(1 - 0.6) * rect.height
+            if topSpacing > spacing, bottomSpacing > spacing {
+                return true
+            }
+            return false
+        }
+        guard let index = index, let cell = tableView.cellForRow(at: index) as? TableViewCell else {
             return
         }
-        playerView.set(resource: objects[index.row])
-        cell.videoView.addSubview(playerView)
+        if playerView.resource != objects[index.row] {
+            playerView.set(resource: objects[index.row])
+            cell.videoView.addSubview(playerView)
+        }
     }
 }
