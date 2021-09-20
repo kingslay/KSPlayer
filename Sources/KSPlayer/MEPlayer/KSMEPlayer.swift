@@ -235,6 +235,7 @@ extension KSMEPlayer: MediaPlayerProtocol {
         audioOutput.renderSource = playerItem
         videoOutput.renderSource = playerItem
         videoOutput.options = options
+        videoOutput.clear()
     }
 
     public var currentPlaybackTime: TimeInterval {

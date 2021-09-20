@@ -1,4 +1,4 @@
-module Libcrypto {
+framework module Libcrypto [system] {
     umbrella "."
     export *
 }

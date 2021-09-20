@@ -122,6 +122,12 @@ final class MetalPlayView: UIView {
     func toImage() -> UIImage? {
         pixelBuffer?.image().flatMap { UIImage(cgImage: $0) }
     }
+    func clear() {
+        displayLayer.flushAndRemoveImage()
+        if let drawable = view.currentDrawable, let renderPassDescriptor = view.currentRenderPassDescriptor {
+            render.clear(drawable: drawable, renderPassDescriptor: renderPassDescriptor)
+        }
+    }
 }
 
 extension MetalPlayView: MTKViewDelegate {

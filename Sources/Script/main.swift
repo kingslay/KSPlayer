@@ -318,7 +318,7 @@ class BuildFFMPEG: BaseBuild {
 }
 
 class BuildOpenSSL: BaseBuild {
-    private let sslFile = "openssl-1.1.1k"
+    private let sslFile = "openssl-3.0.0"
     init() {
         super.init(library: "SSL")
     }
@@ -343,7 +343,7 @@ class BuildOpenSSL: BaseBuild {
         }
         let target = platform.target(arch: arch)
         let environment = ["LC_CTYPE": "C", "CROSS_TOP": platform.crossTop(), "CROSS_SDK": platform.crossSDK(), "CC": ccFlags]
-        let command = "./Configure " + target + " no-async no-shared no-tests --prefix=\(thinDir(platform: platform, arch: arch).path) --openssldir=\(buildDir.path) >>\(buildDir.path).log"
+        let command = "./Configure " + target + " no-async no-shared no-dso no-engine no-tests --prefix=\(thinDir(platform: platform, arch: arch).path) --openssldir=\(buildDir.path) >>\(buildDir.path).log"
         Utility.shell(command, currentDirectoryURL: directoryURL, environment: environment)
         Utility.shell("make clean >>\(buildDir.path).log && make >>\(buildDir.path).log && make install_sw >>\(buildDir.path).log ", currentDirectoryURL: directoryURL, environment: environment)
     }
@@ -391,9 +391,9 @@ enum PlatformType: String, CaseIterable {
     var minVersion: String {
         switch self {
         case .ios, .isimulator:
-            return "10.0"
+            return "11.0"
         case .tvos, .tvsimulator:
-            return "10.2"
+            return "11.0"
         case .macos:
             return "10.13"
         case .maccatalyst:
@@ -482,11 +482,13 @@ enum PlatformType: String, CaseIterable {
     }
 
     func target(arch: ArchType) -> String {
-        if arch == .arm64, self == .macos || self == .tvsimulator || self == .isimulator {
-            return "darwin64-arm64-cc"
+       if arch == .x86_64 {
+            return "darwin64-x86_64-cc"
         } else {
-            if arch == .x86_64 {
-                return "darwin64-x86_64-cc"
+            if self == .macos || self == .tvsimulator || self == .isimulator {
+                return "darwin64-arm64-cc"
+            } else  if self == .ios {
+                return "ios64-cross"
             } else {
                 return "iphoneos-cross"
             }
