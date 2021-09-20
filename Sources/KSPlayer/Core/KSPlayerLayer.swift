@@ -94,6 +94,7 @@ open class KSPlayerLayer: UIView {
             }
         }
     }
+
     private var urls = [URL]()
     private var isAutoPlay = false
     private lazy var timer: Timer = {
@@ -111,9 +112,7 @@ open class KSPlayerLayer: UIView {
                     player.playbackRate = oldValue.playbackRate
                     player.playbackVolume = oldValue.playbackVolume
                 }
-                addSubview(player.view)
                 prepareToPlay()
-                player.view.frame = bounds
             }
         }
     }
@@ -137,6 +136,7 @@ open class KSPlayerLayer: UIView {
         #endif
     }
 
+    @available(*, unavailable)
     public required init?(coder _: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
@@ -220,23 +220,19 @@ open class KSPlayerLayer: UIView {
         }
     }
 
-    #if canImport(UIKit)
-    override open func layoutSubviews() {
-        super.layoutSubviews()
-        player?.view.frame = bounds
+    override open func didAddSubview(_ subview: UIView) {
+        super.didAddSubview(subview)
+        if subview == player?.view {
+            player?.updateConstraint()
+        }
     }
-    #else
-    override open func resizeSubviews(withOldSize oldSize: NSSize) {
-        super.resizeSubviews(withOldSize: oldSize)
-        player?.view.frame = bounds
-    }
-    #endif
 }
 
 // MARK: - MediaPlayerDelegate
 
 extension KSPlayerLayer: MediaPlayerDelegate {
     public func preparedToPlay(player: MediaPlayerProtocol) {
+        addSubview(player.view)
         updateNowPlayingInfo()
         state = .readyToPlay
         if isAutoPlay {
@@ -307,14 +303,15 @@ extension KSPlayerLayer: MediaPlayerDelegate {
         timer.fireDate = Date.distantFuture
         bufferedCount = 1
         delegate?.player(layer: self, finish: error)
-        if error == nil, urls.count > 1, let url = url, let index = urls.firstIndex(of: url), index < urls.count-1 {
+        if error == nil, urls.count > 1, let url = url, let index = urls.firstIndex(of: url), index < urls.count - 1 {
             isAutoPlay = true
-            self.url = urls[index+1]
+            self.url = urls[index + 1]
         }
     }
 }
 
 // MARK: - private functions
+
 extension KSPlayerLayer {
     private func prepareToPlay() {
         startTime = CACurrentMediaTime()
@@ -397,7 +394,8 @@ extension KSPlayerLayer {
         } else if let event = event as? MPChangeLanguageOptionCommandEvent {
             let selectLang = event.languageOption
             if selectLang.languageOptionType == .audible,
-               let trackToSelect = player.tracks(mediaType: .audio).first(where: { $0.name == selectLang.displayName }) {
+               let trackToSelect = player.tracks(mediaType: .audio).first(where: { $0.name == selectLang.displayName })
+            {
                 player.select(track: trackToSelect)
             }
         } else {
@@ -442,10 +440,10 @@ extension KSPlayerLayer {
     }
 }
 
-extension KSPlayerManager {
-    public static var firstPlayerType: MediaPlayerProtocol.Type = KSAVPlayer.self
-    public static var secondPlayerType: MediaPlayerProtocol.Type?
-    static let bundle: Bundle = Bundle(for: KSPlayerLayer.self).path(forResource: "KSPlayer_KSPlayer", ofType: "bundle").map { Bundle(path: $0) ?? Bundle.main } ?? Bundle.main
+public extension KSPlayerManager {
+    static var firstPlayerType: MediaPlayerProtocol.Type = KSAVPlayer.self
+    static var secondPlayerType: MediaPlayerProtocol.Type?
+    internal static let bundle = Bundle(for: KSPlayerLayer.self).path(forResource: "KSPlayer_KSPlayer", ofType: "bundle").map { Bundle(path: $0) ?? Bundle.main } ?? Bundle.main
 }
 
 extension KSPlayerManager {

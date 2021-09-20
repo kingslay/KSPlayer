@@ -114,9 +114,6 @@
       "dependencies": {
         "KSPlayer/Core": [
 
-        ],
-        "KSPlayer/Subtitle": [
-
         ]
       }
     },

@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
     s.name             = 'OpenSSL'
-    s.version          = '1.1.1'
+    s.version          = '3.0.0'
     s.summary          = 'OpenSSL'
 
     s.description      = <<-DESC
@@ -17,7 +17,6 @@ Pod::Spec.new do |s|
     # s.watchos.deployment_target = '2.0'
     s.tvos.deployment_target = '11.0'
     s.default_subspec = 'OpenSSL'
-    s.swift_version = '5.4'
     s.static_framework = true
     s.subspec 'OpenSSL' do |openssl|
         openssl.vendored_frameworks = 'Sources/Libssl.xcframework', 'Sources/Libcrypto.xcframework'

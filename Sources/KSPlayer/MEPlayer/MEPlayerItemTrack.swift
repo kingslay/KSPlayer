@@ -47,7 +47,8 @@ struct AssetTrack: TrackProtocol {
     init?(stream: UnsafeMutablePointer<AVStream>) {
         self.stream = stream
         if let bitrateEntry = av_dict_get(stream.pointee.metadata, "variant_bitrate", nil, 0) ?? av_dict_get(stream.pointee.metadata, "BPS", nil, 0),
-            let bitRate = Int64(String(cString: bitrateEntry.pointee.value)) {
+           let bitRate = Int64(String(cString: bitrateEntry.pointee.value))
+        {
             self.bitRate = bitRate
         } else {
             bitRate = stream.pointee.codecpar.pointee.bit_rate
@@ -74,7 +75,7 @@ struct AssetTrack: TrackProtocol {
         self.timebase = timebase
         rotation = stream.rotation
         let sar = stream.pointee.codecpar.pointee.sample_aspect_ratio.size
-        naturalSize = CGSize(width: Int(stream.pointee.codecpar.pointee.width), height: Int(CGFloat(stream.pointee.codecpar.pointee.height)*sar.height/sar.width))
+        naturalSize = CGSize(width: Int(stream.pointee.codecpar.pointee.width), height: Int(CGFloat(stream.pointee.codecpar.pointee.height) * sar.height / sar.width))
         let frameRate = av_guess_frame_rate(nil, stream, nil)
         if stream.pointee.duration > 0, stream.pointee.nb_frames > 0, stream.pointee.nb_frames != stream.pointee.duration {
             nominalFrameRate = Float(stream.pointee.nb_frames) * Float(timebase.den) / Float(stream.pointee.duration) * Float(timebase.num)
@@ -105,7 +106,6 @@ protocol PlayerItemTrackProtocol: CapacityProtocol, AnyObject {
     // 是否无缝循环
     var isLoopModel: Bool { get set }
     var isEndOfFile: Bool { get set }
-    var assetTrack: TrackProtocol { get }
     var delegate: CodecCapacityDelegate? { get set }
     func decode()
     func seek(time: TimeInterval)
@@ -124,6 +124,7 @@ class FFPlayerItemTrack<Frame: MEFrame>: PlayerItemTrackProtocol, CustomStringCo
             set(isEndOfFile: isEndOfFile)
         }
     }
+
     var packetCount: Int { 0 }
     var frameCount: Int { outputRenderQueue.count }
     let frameMaxCount: Int
@@ -319,7 +320,7 @@ final class AsyncPlayerItemTrack<Frame: MEFrame>: FFPlayerItemTrack<Frame> {
             if state == .flush {
                 decoderMap.values.forEach { $0.doFlushCodec() }
                 state = .decoding
-            } else if isEndOfFile && packetQueue.count == 0 {
+            } else if isEndOfFile, packetQueue.count == 0 {
                 state = .finished
                 break
             } else if state == .decoding {
@@ -351,8 +352,8 @@ final class AsyncPlayerItemTrack<Frame: MEFrame>: FFPlayerItemTrack<Frame> {
     }
 }
 
-extension Dictionary {
-    public mutating func value(for key: Key, default defaultValue: @autoclosure () -> Value) -> Value {
+public extension Dictionary {
+    mutating func value(for key: Key, default defaultValue: @autoclosure () -> Value) -> Value {
         if let value = self[key] {
             return value
         } else {

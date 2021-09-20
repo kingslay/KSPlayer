@@ -67,6 +67,7 @@ public class PlayerToolBar: UIStackView {
         initUI()
     }
 
+    @available(*, unavailable)
     required init(coder _: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
@@ -103,7 +104,7 @@ public class PlayerToolBar: UIStackView {
         NSLayoutConstraint.activate([
             playButton.widthAnchor.constraint(equalToConstant: 30),
             heightAnchor.constraint(equalToConstant: 49),
-            srtButton.widthAnchor.constraint(equalToConstant: 40)
+            srtButton.widthAnchor.constraint(equalToConstant: 40),
         ])
     }
 
@@ -136,8 +137,8 @@ public enum TimeType {
     case millisecond
 }
 
-extension TimeInterval {
-    public func toString(for type: TimeType) -> String {
+public extension TimeInterval {
+    func toString(for type: TimeType) -> String {
         var second = ceil(self)
         var min = floor(second / 60)
         second -= min * 60

@@ -35,12 +35,11 @@ public class SubtitlePart: CustomStringConvertible, NSMutableCopying {
         text = attributedString
     }
 
-    public func mutableCopy(with zone: NSZone? = nil) -> Any {
+    public func mutableCopy(with _: NSZone? = nil) -> Any {
         // swiftlint:disable force_cast
-        return SubtitlePart(start, end, attributedString: text.mutableCopy() as! NSMutableAttributedString)
+        SubtitlePart(start, end, attributedString: text.mutableCopy() as! NSMutableAttributedString)
         // swiftlint:enable force_cast
     }
-
 }
 
 extension SubtitlePart: Comparable {

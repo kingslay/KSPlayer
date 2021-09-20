@@ -31,15 +31,16 @@ class SeekView: UIView {
         seekToViewImage.translatesAutoresizingMaskIntoConstraints = false
         seekToLabel.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
-            seekToViewImage.leftAnchor.constraint(equalTo: leftAnchor, constant: 15),
+            seekToViewImage.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 15),
             seekToViewImage.centerYAnchor.constraint(equalTo: centerYAnchor),
             seekToViewImage.widthAnchor.constraint(equalToConstant: 25),
             seekToViewImage.heightAnchor.constraint(equalToConstant: 15),
-            seekToLabel.leftAnchor.constraint(equalTo: seekToViewImage.rightAnchor, constant: 10),
-            seekToLabel.centerYAnchor.constraint(equalTo: centerYAnchor)
+            seekToLabel.leadingAnchor.constraint(equalTo: seekToViewImage.trailingAnchor, constant: 10),
+            seekToLabel.centerYAnchor.constraint(equalTo: centerYAnchor),
         ])
     }
 
+    @available(*, unavailable)
     required init?(coder _: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }

@@ -63,7 +63,6 @@ Pod::Spec.new do |s|
     s.subspec 'Audio'do |ss|
         ss.source_files = 'Sources/KSPlayer/Audio/*.swift'
         ss.dependency 'KSPlayer/Core'
-        ss.dependency 'KSPlayer/Subtitle'
     end
     s.subspec 'Video' do |ss|
         ss.source_files = 'Sources/KSPlayer/Video/*.swift'

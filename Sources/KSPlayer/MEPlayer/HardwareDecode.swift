@@ -34,7 +34,7 @@ extension KSOptions {
     func canHardwareDecode(codecpar: AVCodecParameters) -> Bool {
         if codecpar.codec_id == AV_CODEC_ID_H264, hardwareDecodeH264 {
             return true
-        } else if codecpar.codec_id == AV_CODEC_ID_HEVC, #available(iOS 11.0, tvOS 11.0, *), VTIsHardwareDecodeSupported(kCMVideoCodecType_HEVC), hardwareDecodeH265 {
+        } else if codecpar.codec_id == AV_CODEC_ID_HEVC, VTIsHardwareDecodeSupported(kCMVideoCodecType_HEVC), hardwareDecodeH265 {
             return true
         }
         return false
@@ -121,11 +121,8 @@ class DecompressionSession {
     fileprivate let formatDescription: CMFormatDescription
     fileprivate let decompressionSession: VTDecompressionSession
     init?(codecpar: AVCodecParameters, options: KSOptions) {
-        let formats = [AV_PIX_FMT_NV12, AV_PIX_FMT_P010LE, AV_PIX_FMT_P010BE, AV_PIX_FMT_YUV420P, AV_PIX_FMT_YUV420P9BE, AV_PIX_FMT_YUV420P9LE,
-                       AV_PIX_FMT_YUV420P10BE, AV_PIX_FMT_YUV420P10LE, AV_PIX_FMT_YUV420P12BE, AV_PIX_FMT_YUV420P12LE,
-                       AV_PIX_FMT_YUV420P14BE, AV_PIX_FMT_YUV420P14LE, AV_PIX_FMT_YUV420P16BE, AV_PIX_FMT_YUV420P16LE]
         let format = AVPixelFormat(codecpar.format)
-        guard options.canHardwareDecode(codecpar: codecpar), formats.contains(format), let extradata = codecpar.extradata else {
+        guard options.canHardwareDecode(codecpar: codecpar), let pixelFormatType = format.osType(), let extradata = codecpar.extradata else {
             return nil
         }
         let extradataSize = codecpar.extradata_size
@@ -145,8 +142,8 @@ class DecompressionSession {
             kCVImageBufferChromaLocationTopFieldKey: kCVImageBufferChromaLocation_Left,
             kCMFormatDescriptionExtension_FullRangeVideo: isFullRangeVideo,
             kCMFormatDescriptionExtension_SampleDescriptionExtensionAtoms: [
-                codecpar.codec_id == AV_CODEC_ID_HEVC ? "hvcC" : "avcC": NSData(bytes: extradata, length: Int(extradataSize))
-            ]
+                codecpar.codec_id == AV_CODEC_ID_HEVC ? "hvcC" : "avcC": NSData(bytes: extradata, length: Int(extradataSize)),
+            ],
         ]
         dic[kCVImageBufferPixelAspectRatioKey] = codecpar.sample_aspect_ratio.size.aspectRatio
         dic[kCVImageBufferColorPrimariesKey] = codecpar.color_primaries.colorPrimaries
@@ -163,8 +160,8 @@ class DecompressionSession {
         self.formatDescription = formatDescription
 
         let attributes: NSMutableDictionary = [
-            kCVPixelBufferPixelFormatTypeKey: options.bestPixelFormatType(bitDepth: format.bitDepth(), isFullRangeVideo: isFullRangeVideo, planeCount: format.planeCount()),
-            kCVPixelBufferMetalCompatibilityKey: true
+            kCVPixelBufferPixelFormatTypeKey: pixelFormatType,
+            kCVPixelBufferMetalCompatibilityKey: true,
         ]
         var session: VTDecompressionSession?
         // swiftlint:disable line_length
@@ -184,7 +181,7 @@ class DecompressionSession {
 
 extension CGSize {
     var aspectRatio: NSDictionary? {
-        if width != 0 && height != 0 {
+        if width != 0, height != 0 {
             return [kCVImageBufferPixelAspectRatioHorizontalSpacingKey: width,
                     kCVImageBufferPixelAspectRatioVerticalSpacingKey: height]
         } else {
@@ -252,6 +249,7 @@ extension AVColorPrimaries {
         }
     }
 }
+
 extension AVColorTransferCharacteristic {
     var transferFunction: CFString? {
         switch self {
@@ -260,17 +258,13 @@ extension AVColorTransferCharacteristic {
         case AVCOL_TRC_SMPTE240M:
             return kCVImageBufferTransferFunction_SMPTE_240M_1995
         case AVCOL_TRC_SMPTE2084:
-            if #available(iOS 11.0, tvOS 11.0, *) {
-                return kCVImageBufferTransferFunction_SMPTE_ST_2084_PQ
-            }
+            return kCVImageBufferTransferFunction_SMPTE_ST_2084_PQ
         case AVCOL_TRC_LINEAR:
             if #available(iOS 12.0, tvOS 12.0, OSX 10.14, *) {
                 return kCVImageBufferTransferFunction_Linear
             }
         case AVCOL_TRC_ARIB_STD_B67:
-            if #available(iOS 11.0, tvOS 11.0, *) {
-                return kCVImageBufferTransferFunction_ITU_R_2100_HLG
-            }
+            return kCVImageBufferTransferFunction_ITU_R_2100_HLG
         case AVCOL_TRC_GAMMA22, AVCOL_TRC_GAMMA28:
             return kCVImageBufferTransferFunction_UseGamma
         case AVCOL_TRC_BT2020_10, AVCOL_TRC_BT2020_12:
@@ -281,6 +275,7 @@ extension AVColorTransferCharacteristic {
         return nil
     }
 }
+
 extension AVColorSpace {
     var ycbcrMatrix: CFString? {
         switch self {

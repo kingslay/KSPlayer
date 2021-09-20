@@ -18,7 +18,6 @@
     "tvos": "11.0"
   },
   "default_subspecs": "FFmpeg",
-  "swift_versions": "5.4",
   "static_framework": true,
   "source_files": "Sources/FFmpeg/**/*.{h,c,m}",
   "subspecs": [
@@ -31,11 +30,12 @@
         "xml2"
       ],
       "vendored_frameworks": [
-        "Sources/libavcodec.xcframework",
-        "Sources/libavformat.xcframework",
-        "Sources/libavutil.xcframework",
-        "Sources/libswresample.xcframework",
-        "Sources/libswscale.xcframework"
+        "Sources/Libavcodec.xcframework",
+        "Sources/Libavfilter.xcframework",
+        "Sources/Libavformat.xcframework",
+        "Sources/Libavutil.xcframework",
+        "Sources/Libswresample.xcframework",
+        "Sources/Libswscale.xcframework"
       ],
       "dependencies": {
         "OpenSSL": [
@@ -43,6 +43,5 @@
         ]
       }
     }
-  ],
-  "swift_version": "5.4"
+  ]
 }

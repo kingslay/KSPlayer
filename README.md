@@ -25,7 +25,7 @@
 
 ## Requirements
 
-- iOS 11 +,  macOS 10.12 +, tvOS 11 +
+- iOS 11 +,  macOS 10.13 +, tvOS 11 +
 - Xcode 12
 - Swift 5.4
 
@@ -242,7 +242,6 @@ public protocol PlayerControllerDelegate: class {
 ## Debug FFmpeg
 
 ```bash
-brew install sdl2
 swift run Script debug
 dwarfdump -F --debug-info ../Sources/libavformat.xcframework/macos-arm64_x86_64/Libavformat.framework/Libavformat | head -n 20
 ```

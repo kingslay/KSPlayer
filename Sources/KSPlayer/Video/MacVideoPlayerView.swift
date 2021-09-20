@@ -8,13 +8,13 @@
 
 import AppKit
 import AVFoundation
-extension NSPasteboard.PasteboardType {
-    public static let nsURL = NSPasteboard.PasteboardType("NSURL")
-    public static let nsFilenames = NSPasteboard.PasteboardType("NSFilenamesPboardType")
+public extension NSPasteboard.PasteboardType {
+    static let nsURL = NSPasteboard.PasteboardType("NSURL")
+    static let nsFilenames = NSPasteboard.PasteboardType("NSFilenamesPboardType")
 }
 
-extension NSDraggingInfo {
-    public func getUrl() -> URL? {
+public extension NSDraggingInfo {
+    func getUrl() -> URL? {
         guard let types = draggingPasteboard.types else { return nil }
 
         if types.contains(.nsFilenames) {
@@ -27,14 +27,6 @@ extension NSDraggingInfo {
 }
 
 open class MacVideoPlayerView: VideoPlayerView {
-    static let supportedFileExt: [AVMediaType: [String]] = [
-        .video: ["mkv", "mp4", "avi", "m4v", "mov", "3gp", "ts", "mts", "m2ts", "wmv", "flv", "f4v", "asf", "webm", "rm", "rmvb", "qt", "dv", "mpg", "mpeg", "mxf", "vob", "gif"],
-        .audio: ["mp3", "aac", "mka", "dts", "flac", "ogg", "oga", "mogg", "m4a", "ac3", "opus", "wav", "wv", "aiff", "ape", "tta", "tak"],
-        .subtitle: ["utf", "utf8", "utf-8", "idx", "sub", "srt", "smi", "rt", "ssa", "aqt", "jss", "js", "ass", "mks", "vtt", "sup", "scc"]
-    ]
-
-    static let playableFileExt = supportedFileExt[.video]! + supportedFileExt[.audio]!
-
     override open func customizeUIComponents() {
         super.customizeUIComponents()
         registerForDraggedTypes([.nsFilenames, .nsURL, .string])
@@ -127,12 +119,11 @@ extension MacVideoPlayerView {
 
     override open func performDragOperation(_ sender: NSDraggingInfo) -> Bool {
         if let url = sender.getUrl() {
-            if let set = MacVideoPlayerView.supportedFileExt[.subtitle],
-                set.contains(url.pathExtension.lowercased()) {
-                resource?.subtitle = KSURLSubtitle(url: url)
-                return true
-            } else if MacVideoPlayerView.playableFileExt.contains(url.pathExtension.lowercased()) {
+            if url.isMovie || url.isAudio {
                 set(resource: KSPlayerResource(url: url, options: KSOptions()))
+                return true
+            } else {
+                resource?.subtitle = KSURLSubtitle(url: url)
                 return true
             }
         }
@@ -157,6 +148,7 @@ class UIActivityIndicatorView: UIView {
         setupLoadingView()
     }
 
+    @available(*, unavailable)
     required init?(coder _: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
@@ -179,9 +171,9 @@ class UIActivityIndicatorView: UIView {
             loadingView.widthAnchor.constraint(equalTo: widthAnchor),
             loadingView.heightAnchor.constraint(equalTo: heightAnchor),
             imageView.bottomAnchor.constraint(equalTo: loadingView.bottomAnchor),
-            imageView.leftAnchor.constraint(equalTo: loadingView.leftAnchor),
+            imageView.leadingAnchor.constraint(equalTo: loadingView.leadingAnchor),
             imageView.heightAnchor.constraint(equalTo: widthAnchor),
-            imageView.widthAnchor.constraint(equalTo: heightAnchor)
+            imageView.widthAnchor.constraint(equalTo: heightAnchor),
         ])
         progressLabel.alignment = .center
         progressLabel.font = NSFont.systemFont(ofSize: 18, weight: .medium)
@@ -191,7 +183,7 @@ class UIActivityIndicatorView: UIView {
             progressLabel.centerXAnchor.constraint(equalTo: centerXAnchor),
             progressLabel.topAnchor.constraint(equalTo: loadingView.bottomAnchor, constant: 20),
             progressLabel.widthAnchor.constraint(equalToConstant: 100),
-            progressLabel.heightAnchor.constraint(equalToConstant: 22)
+            progressLabel.heightAnchor.constraint(equalToConstant: 22),
         ])
         startAnimating()
     }

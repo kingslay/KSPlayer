@@ -58,7 +58,7 @@ public class KSMEPlayer {
 
     public required init(url: URL, options: KSOptions) {
         playerItem = MEPlayerItem(url: url, options: options)
-        self.videoOutput = MetalPlayView(options: options)
+        videoOutput = MetalPlayView(options: options)
         self.options = options
         playerItem.delegate = self
         audioOutput.renderSource = playerItem
@@ -88,7 +88,7 @@ extension KSMEPlayer: MEPlayerDelegate {
         isPreparedToPlay = true
         runInMainqueue { [weak self] in
             guard let self = self else { return }
-            self.videoOutput.drawableSize = self.options.display == .plane ? self.naturalSize : UIScreen.size
+            self.videoOutput.drawableSize = self.naturalSize
             self.view.centerRotate(byDegrees: self.playerItem.rotation)
             self.videoOutput.isPaused = false
             self.delegate?.preparedToPlay(player: self)
@@ -214,10 +214,11 @@ extension KSMEPlayer: MediaPlayerProtocol {
             audioOutput.masterGain = newValue
         }
     }
+
     public var isPlaying: Bool { playbackState == .playing }
 
     public var naturalSize: CGSize {
-        playerItem.rotation == 90 || playerItem.rotation == 270 ? playerItem.naturalSize.reverse : playerItem.naturalSize
+        options.display == .plane ? (playerItem.rotation == 90 || playerItem.rotation == 270 ? playerItem.naturalSize.reverse : playerItem.naturalSize) : UIScreen.size
     }
 
     public var isExternalPlaybackActive: Bool { false }
@@ -234,6 +235,7 @@ extension KSMEPlayer: MediaPlayerProtocol {
         audioOutput.renderSource = playerItem
         videoOutput.renderSource = playerItem
         videoOutput.options = options
+        videoOutput.clear()
     }
 
     public var currentPlaybackTime: TimeInterval {
@@ -346,8 +348,8 @@ extension KSMEPlayer: MediaPlayerProtocol {
     }
 }
 
-extension KSMEPlayer {
-    public var subtitleDataSouce: SubtitleDataSouce? { playerItem }
+public extension KSMEPlayer {
+    var subtitleDataSouce: SubtitleDataSouce? { playerItem }
 
-    public var subtitles: [KSSubtitleProtocol] { playerItem.subtitleTracks }
+    var subtitles: [KSSubtitleProtocol] { playerItem.subtitleTracks }
 }

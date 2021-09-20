@@ -11,10 +11,12 @@
 		AC08611F20B69A1C00D801FC /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AC08611E20B69A1C00D801FC /* Assets.xcassets */; };
 		AC08612A20B69A1D00D801FC /* demo_tvOSTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC08612920B69A1D00D801FC /* demo_tvOSTests.swift */; };
 		AC08613520B69A1D00D801FC /* demo_tvOSUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC08613420B69A1D00D801FC /* demo_tvOSUITests.swift */; };
+		AC21D0E826D250D80007891C /* RootViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC21D0E726D250D80007891C /* RootViewController.swift */; };
 		AC3A420223D32DFE00B666A4 /* MasterViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC3A41FE23D32DFD00B666A4 /* MasterViewController.swift */; };
 		AC3A420323D32DFE00B666A4 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC3A41FF23D32DFE00B666A4 /* AppDelegate.swift */; };
 		AC3A420423D32DFE00B666A4 /* DetailViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC3A420023D32DFE00B666A4 /* DetailViewController.swift */; };
 		AC3A420523D32DFE00B666A4 /* AudioViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC3A420123D32DFE00B666A4 /* AudioViewController.swift */; };
+		AC7D1CB726EF7BC9004C5DBA /* tos.mkv in Resources */ = {isa = PBXBuildFile; fileRef = AC7D1CB626EF7BC9004C5DBA /* tos.mkv */; };
 		AC80332824BA1AE3002B3D40 /* Polonaise.flac in Resources */ = {isa = PBXBuildFile; fileRef = AC80332424BA1AE3002B3D40 /* Polonaise.flac */; };
 		AC80332924BA1AE3002B3D40 /* google-help-vr.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = AC80332524BA1AE3002B3D40 /* google-help-vr.mp4 */; };
 		AC80332A24BA1AE3002B3D40 /* 567082ac3ae39699f68de4fd2b7444b1e045515a.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = AC80332624BA1AE3002B3D40 /* 567082ac3ae39699f68de4fd2b7444b1e045515a.mp4 */; };
@@ -50,10 +52,12 @@
 		AC08613020B69A1D00D801FC /* demo-tvOSUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "demo-tvOSUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		AC08613420B69A1D00D801FC /* demo_tvOSUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = demo_tvOSUITests.swift; sourceTree = "<group>"; };
 		AC08613620B69A1D00D801FC /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		AC21D0E726D250D80007891C /* RootViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = RootViewController.swift; path = "../../demo-iOS/demo-iOS/RootViewController.swift"; sourceTree = "<group>"; };
 		AC3A41FE23D32DFD00B666A4 /* MasterViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = MasterViewController.swift; path = "../../demo-iOS/demo-iOS/MasterViewController.swift"; sourceTree = "<group>"; };
 		AC3A41FF23D32DFE00B666A4 /* AppDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = AppDelegate.swift; path = "../../demo-iOS/demo-iOS/AppDelegate.swift"; sourceTree = "<group>"; };
 		AC3A420023D32DFE00B666A4 /* DetailViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = DetailViewController.swift; path = "../../demo-iOS/demo-iOS/DetailViewController.swift"; sourceTree = "<group>"; };
 		AC3A420123D32DFE00B666A4 /* AudioViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = AudioViewController.swift; path = "../../demo-iOS/demo-iOS/AudioViewController.swift"; sourceTree = "<group>"; };
+		AC7D1CB626EF7BC9004C5DBA /* tos.mkv */ = {isa = PBXFileReference; lastKnownFileType = file; path = tos.mkv; sourceTree = "<group>"; };
 		AC80332424BA1AE3002B3D40 /* Polonaise.flac */ = {isa = PBXFileReference; lastKnownFileType = file; path = Polonaise.flac; sourceTree = "<group>"; };
 		AC80332524BA1AE3002B3D40 /* google-help-vr.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = "google-help-vr.mp4"; sourceTree = "<group>"; };
 		AC80332624BA1AE3002B3D40 /* 567082ac3ae39699f68de4fd2b7444b1e045515a.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = 567082ac3ae39699f68de4fd2b7444b1e045515a.mp4; sourceTree = "<group>"; };
@@ -118,6 +122,7 @@
 				AC3A420123D32DFE00B666A4 /* AudioViewController.swift */,
 				AC3A420023D32DFE00B666A4 /* DetailViewController.swift */,
 				AC3A41FE23D32DFD00B666A4 /* MasterViewController.swift */,
+				AC21D0E726D250D80007891C /* RootViewController.swift */,
 				AC08611E20B69A1C00D801FC /* Assets.xcassets */,
 				AC80333124BA1B54002B3D40 /* Main.storyboard */,
 				AC08612020B69A1C00D801FC /* Info.plist */,
@@ -148,6 +153,7 @@
 			isa = PBXGroup;
 			children = (
 				AC80332424BA1AE3002B3D40 /* Polonaise.flac */,
+				AC7D1CB626EF7BC9004C5DBA /* tos.mkv */,
 				AC80332524BA1AE3002B3D40 /* google-help-vr.mp4 */,
 				AC80332624BA1AE3002B3D40 /* 567082ac3ae39699f68de4fd2b7444b1e045515a.mp4 */,
 				AC80332724BA1AE3002B3D40 /* video-h265.mkv */,
@@ -282,6 +288,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				AC7D1CB726EF7BC9004C5DBA /* tos.mkv in Resources */,
 				AC80332824BA1AE3002B3D40 /* Polonaise.flac in Resources */,
 				AC80332924BA1AE3002B3D40 /* google-help-vr.mp4 in Resources */,
 				AC80332B24BA1AE3002B3D40 /* video-h265.mkv in Resources */,
@@ -350,6 +357,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				AC21D0E826D250D80007891C /* RootViewController.swift in Sources */,
 				AC3A420423D32DFE00B666A4 /* DetailViewController.swift in Sources */,
 				AC3A420523D32DFE00B666A4 /* AudioViewController.swift in Sources */,
 				AC3A420323D32DFE00B666A4 /* AppDelegate.swift in Sources */,

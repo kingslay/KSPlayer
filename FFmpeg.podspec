@@ -17,13 +17,11 @@ Pod::Spec.new do |s|
     # s.watchos.deployment_target = '2.0'
     s.tvos.deployment_target = '11.0'
     s.default_subspec = 'FFmpeg'
-    s.swift_version = '5.4'
     s.static_framework = true
-#    s.module_map = 'Sources/FFmpeg/module.modulemap'
     s.source_files = 'Sources/FFmpeg/**/*.{h,c,m}'
     s.subspec 'FFmpeg' do |ffmpeg|
         ffmpeg.libraries   = 'bz2', 'z', 'iconv', 'xml2'
-        ffmpeg.vendored_frameworks = 'Sources/libavcodec.xcframework','Sources/libavformat.xcframework','Sources/libavutil.xcframework','Sources/libswresample.xcframework','Sources/libswscale.xcframework'
+        ffmpeg.vendored_frameworks = 'Sources/Libavcodec.xcframework','Sources/Libavfilter.xcframework','Sources/Libavformat.xcframework','Sources/Libavutil.xcframework','Sources/Libswresample.xcframework','Sources/Libswscale.xcframework'
         ffmpeg.dependency 'OpenSSL'
     end
 end
