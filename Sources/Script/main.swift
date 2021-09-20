@@ -482,12 +482,12 @@ enum PlatformType: String, CaseIterable {
     }
 
     func target(arch: ArchType) -> String {
-       if arch == .x86_64 {
+        if arch == .x86_64 {
             return "darwin64-x86_64-cc"
         } else {
             if self == .macos || self == .tvsimulator || self == .isimulator {
                 return "darwin64-arm64-cc"
-            } else  if self == .ios {
+            } else if self == .ios {
                 return "ios64-cross"
             } else {
                 return "iphoneos-cross"
