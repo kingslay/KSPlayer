@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
     s.name             = 'OpenSSL'
-    s.version          = '1.1.1'
+    s.version          = '3.0.0'
     s.summary          = 'OpenSSL'
 
     s.description      = <<-DESC
