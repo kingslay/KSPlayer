@@ -4,6 +4,7 @@
 #import <Libavutil/avutil.h>
 #import <Libavutil/display.h>
 #import <Libavutil/channel_layout.h>
+#import <Libavutil/opt.h>
 
 static const int64_t swift_AV_NOPTS_VALUE = AV_NOPTS_VALUE;
 
@@ -37,6 +38,7 @@ static const uint64_t swift_AV_CH_LAYOUT_7POINT1_WIDE_BACK = AV_CH_LAYOUT_7POINT
 static const uint64_t swift_AV_CH_LAYOUT_OCTAGONAL         = AV_CH_LAYOUT_OCTAGONAL;
 static const uint64_t swift_AV_CH_LAYOUT_HEXADECAGONAL     = AV_CH_LAYOUT_HEXADECAGONAL;
 static const uint64_t swift_AV_CH_LAYOUT_STEREO_DOWNMIX    = AV_CH_LAYOUT_STEREO_DOWNMIX;
+static const uint64_t swift_AV_OPT_SEARCH_CHILDREN         = AV_OPT_SEARCH_CHILDREN;
 
 /* error handling */
 static inline int swift_AVERROR(int errnum) {

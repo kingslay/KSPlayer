@@ -4,9 +4,9 @@
 //
 //  Created by kintan on 2018/8/7.
 //
-import Libavutil
-import Libavcodec
 import Foundation
+import Libavcodec
+import Libavutil
 public class EmbedSubtitleInfo: SubtitleInfo {
     private let subtitle: FFPlayerItemTrack<SubtitleFrame>
     public var userInfo: NSMutableDictionary?
@@ -21,7 +21,6 @@ public class EmbedSubtitleInfo: SubtitleInfo {
     }
 
     public func makeSubtitle(completion: @escaping (Result<KSSubtitleProtocol?, NSError>) -> Void) {
-        subtitle.assetTrack.stream.pointee.discard = AVDISCARD_DEFAULT
         completion(.success(subtitle))
     }
 }

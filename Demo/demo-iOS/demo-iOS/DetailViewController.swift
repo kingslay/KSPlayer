@@ -22,6 +22,7 @@ class DetailViewController: UIViewController, DetailProtocol {
     override var prefersStatusBarHidden: Bool {
         !playerView.isMaskShow
     }
+
     private let playerView = IOSVideoPlayerView()
     #else
     private let playerView = CustomVideoPlayerView()
@@ -42,15 +43,15 @@ class DetailViewController: UIViewController, DetailProtocol {
         #if os(iOS)
         NSLayoutConstraint.activate([
             playerView.topAnchor.constraint(equalTo: view.readableContentGuide.topAnchor),
-            playerView.leftAnchor.constraint(equalTo: view.leftAnchor),
-            playerView.rightAnchor.constraint(equalTo: view.rightAnchor),
+            playerView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            playerView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             playerView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
         ])
         #else
         NSLayoutConstraint.activate([
             playerView.topAnchor.constraint(equalTo: view.topAnchor),
-            playerView.leftAnchor.constraint(equalTo: view.leftAnchor),
-            playerView.rightAnchor.constraint(equalTo: view.rightAnchor),
+            playerView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            playerView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             playerView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
         ])
         #endif
@@ -66,6 +67,7 @@ class DetailViewController: UIViewController, DetailProtocol {
             self.navigationController?.popViewController(animated: true)
             #endif
         }
+        playerView.becomeFirstResponder()
     }
 
     override func viewWillAppear(_ animated: Bool) {
@@ -79,104 +81,22 @@ class DetailViewController: UIViewController, DetailProtocol {
         super.viewWillDisappear(animated)
         navigationController?.setNavigationBarHidden(false, animated: true)
     }
-
-    override open var canBecomeFirstResponder: Bool {
-        true
-    }
-
-    // The responder chain is asking us which commands you support.
-    // Enable/disable certain Edit menu commands.
-    override open func canPerformAction(_ action: Selector, withSender _: Any?) -> Bool {
-        if action == #selector(openAction(_:)) {
-            // User wants to perform a "New" operation.
-            return true
-        }
-        return false
-    }
-
-    /// User chose "Open" from the File menu.
-    @objc public func openAction(_: AnyObject) {
-        #if os(iOS)
-        let documentPicker = UIDocumentPickerViewController(documentTypes: [kUTTypeMPEG4 as String], in: .open)
-        documentPicker.delegate = self
-        present(documentPicker, animated: true, completion: nil)
-        #endif
-    }
 }
 
 extension DetailViewController: PlayerControllerDelegate {
-    func playerController(state: KSPlayerState) {
+    func playerController(state _: KSPlayerState) {}
 
-    }
+    func playerController(currentTime _: TimeInterval, totalTime _: TimeInterval) {}
 
-    func playerController(currentTime: TimeInterval, totalTime: TimeInterval) {
+    func playerController(finish _: Error?) {}
 
-    }
-
-    func playerController(finish error: Error?) {
-
-    }
-
-    func playerController(maskShow: Bool) {
+    func playerController(maskShow _: Bool) {
         #if os(iOS)
         setNeedsStatusBarAppearanceUpdate()
         #endif
     }
 
-    func playerController(action: PlayerButtonType) {
+    func playerController(action _: PlayerButtonType) {}
 
-    }
-
-    func playerController(bufferedCount: Int, consumeTime: TimeInterval) {
-
-    }
-
-}
-
-#if os(iOS)
-
-extension DetailViewController: UIDocumentPickerDelegate {
-    func documentPicker(_: UIDocumentPickerViewController, didPickDocumentsAt urls: [URL]) {
-        if let first = urls.first {
-            resource = KSPlayerResource(url: first)
-        }
-    }
-}
-#endif
-
-class CustomVideoPlayerView: VideoPlayerView {
-    override func customizeUIComponents() {
-        super.customizeUIComponents()
-        toolBar.isHidden = true
-        toolBar.timeSlider.isHidden = true
-    }
-
-    override open func player(layer: KSPlayerLayer, state: KSPlayerState) {
-        super.player(layer: layer, state: state)
-        if state == .readyToPlay, let player = layer.player {
-            print(player.naturalSize)
-            // list the all subtitles
-            let subtitleInfos = srtControl.filterInfos { _ in true }
-            subtitleInfos.forEach {
-                print($0.name)
-            }
-            subtitleInfos.first?.makeSubtitle { result in
-                self.resource?.subtitle = try? result.get()
-            }
-            for track in player.tracks(mediaType: .audio) {
-                print("audio name: \(track.name) language: \(track.language ?? "")")
-            }
-            for track in player.tracks(mediaType: .video) {
-                print("video name: \(track.name) bitRate: \(track.bitRate) fps: \(track.nominalFrameRate) bitDepth: \(track.bitDepth) colorPrimaries: \(track.colorPrimaries ?? "") colorPrimaries: \(track.transferFunction  ?? "") yCbCrMatrix: \(track.yCbCrMatrix ?? "") codecType:  \(track.codecType.string)")
-            }
-        }
-    }
-
-    override func onButtonPressed(type: PlayerButtonType, button: UIButton) {
-        if type == .landscape {
-            // xx
-        } else {
-            super.onButtonPressed(type: type, button: button)
-        }
-    }
+    func playerController(bufferedCount _: Int, consumeTime _: TimeInterval) {}
 }

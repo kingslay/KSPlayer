@@ -6,10 +6,14 @@
 //
 #if canImport(UIKit) && canImport(CallKit)
 import CallKit
+import CoreServices
 import MediaPlayer
 import UIKit
 
 open class IOSVideoPlayerView: VideoPlayerView {
+    private weak var originalSuperView: UIView?
+    private var originalOrientations: UIInterfaceOrientationMask?
+    private weak var fullScreenDelegate: PlayerViewFullScreenDelegate?
     private var isPlayingForCall = false
     private let callCenter = CXCallObserver()
     private var isVolume = false
@@ -24,6 +28,7 @@ open class IOSVideoPlayerView: VideoPlayerView {
     public var landscapeButton = UIButton()
     override open var isMaskShow: Bool {
         didSet {
+            fullScreenDelegate?.player(isMaskShow: isMaskShow, isFullScreen: landscapeButton.isSelected)
             UIView.animate(withDuration: 0.3) {
                 self.lockButton.alpha = self.isMaskShow ? 1.0 : 0.0
             }
@@ -86,16 +91,16 @@ open class IOSVideoPlayerView: VideoPlayerView {
         maskImageView.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
             maskImageView.topAnchor.constraint(equalTo: topAnchor),
-            maskImageView.leftAnchor.constraint(equalTo: leftAnchor),
+            maskImageView.leadingAnchor.constraint(equalTo: leadingAnchor),
             maskImageView.bottomAnchor.constraint(equalTo: bottomAnchor),
-            maskImageView.rightAnchor.constraint(equalTo: rightAnchor),
+            maskImageView.trailingAnchor.constraint(equalTo: trailingAnchor),
             backButton.widthAnchor.constraint(equalToConstant: 25),
-            lockButton.leftAnchor.constraint(equalTo: safeLeftAnchor, constant: 22),
+            lockButton.leadingAnchor.constraint(equalTo: safeLeadingAnchor, constant: 22),
             lockButton.centerYAnchor.constraint(equalTo: centerYAnchor),
             routeButton.widthAnchor.constraint(equalToConstant: 25),
             landscapeButton.widthAnchor.constraint(equalToConstant: 30),
             airplayStatusView.centerXAnchor.constraint(equalTo: centerXAnchor),
-            airplayStatusView.centerYAnchor.constraint(equalTo: centerYAnchor)
+            airplayStatusView.centerYAnchor.constraint(equalTo: centerYAnchor),
         ])
         addNotification()
     }
@@ -110,18 +115,60 @@ open class IOSVideoPlayerView: VideoPlayerView {
     }
 
     override open func onButtonPressed(type: PlayerButtonType, button: UIButton) {
+        if type == .back, viewController is PlayerFullScreenViewController {
+            updateUI(isFullScreen: false)
+            return
+        }
         super.onButtonPressed(type: type, button: button)
         if type == .lock {
             button.isSelected.toggle()
             isMaskShow = !button.isSelected
             button.alpha = 1.0
         } else if type == .landscape {
-            updateUI(isLandscape: !UIApplication.isLandscape)
+            updateUI(isFullScreen: !landscapeButton.isSelected)
         }
     }
 
+    open func updateUI(isFullScreen: Bool) {
+        guard let viewController = viewController else {
+            return
+        }
+        landscapeButton.isSelected = isFullScreen
+        let isHorizonal = playerLayer.player?.naturalSize.isHorizonal ?? true
+        viewController.navigationController?.interactivePopGestureRecognizer?.isEnabled = !isFullScreen
+        if isFullScreen {
+            if viewController is PlayerFullScreenViewController {
+                return
+            }
+            originalSuperView = superview
+            originalOrientations = viewController.supportedInterfaceOrientations
+            let fullVC = PlayerFullScreenViewController(isHorizonal: isHorizonal)
+            fullScreenDelegate = fullVC
+            fullVC.view.addSubview(self)
+            fullVC.modalPresentationStyle = .fullScreen
+            fullVC.modalPresentationCapturesStatusBarAppearance = true
+            fullVC.transitioningDelegate = self
+            viewController.present(fullVC, animated: true) {
+                KSPlayerManager.supportedInterfaceOrientations = fullVC.supportedInterfaceOrientations
+            }
+        } else {
+            guard viewController is PlayerFullScreenViewController else {
+                return
+            }
+            let presentingVC = viewController.presentingViewController ?? viewController
+            KSPlayerManager.supportedInterfaceOrientations = .portrait
+            presentingVC.dismiss(animated: true) {
+                self.originalSuperView?.addSubview(self)
+                if let originalOrientations = self.originalOrientations {
+                    KSPlayerManager.supportedInterfaceOrientations = originalOrientations
+                }
+            }
+        }
+        let isLandscape = isFullScreen && isHorizonal
+        updateUI(isLandscape: isLandscape)
+    }
+
     open func updateUI(isLandscape: Bool) {
-        landscapeButton.isSelected = isLandscape
         if isLandscape {
             topMaskView.isHidden = KSPlayerManager.topBarShowInCase == .none
         } else {
@@ -145,14 +192,6 @@ open class IOSVideoPlayerView: VideoPlayerView {
             toolBar.playbackRateButton.isHidden = !isLandscape
         } else {
             landscapeButton.isHidden = true
-        }
-        if UIApplication.isLandscape != isLandscape {
-            UIDevice.current.setValue(UIInterfaceOrientation.unknown.rawValue, forKey: "orientation")
-            UIDevice.current.setValue((isLandscape ? UIInterfaceOrientation.landscapeRight : .portrait).rawValue, forKey: "orientation")
-            if KSPlayerManager.supportedInterfaceOrientations != .all {
-                KSPlayerManager.supportedInterfaceOrientations = isLandscape ?  UIInterfaceOrientationMask.landscapeRight : .portrait
-                UIViewController.attemptRotationToDeviceOrientation()
-            }
         }
         lockButton.isHidden = !isLandscape
         judgePanGesture()
@@ -237,12 +276,28 @@ extension IOSVideoPlayerView: CXCallObserverDelegate {
     }
 }
 
+extension IOSVideoPlayerView: UIViewControllerTransitioningDelegate {
+    public func animationController(forPresented _: UIViewController, presenting _: UIViewController, source _: UIViewController) -> UIViewControllerAnimatedTransitioning? {
+        if let originalSuperView = originalSuperView, let animationView = playerLayer.player?.view {
+            return PlayerTransitionAnimator(containerView: originalSuperView, animationView: animationView)
+        }
+        return nil
+    }
+
+    public func animationController(forDismissed _: UIViewController) -> UIViewControllerAnimatedTransitioning? {
+        if let originalSuperView = originalSuperView, let animationView = playerLayer.player?.view {
+            return PlayerTransitionAnimator(containerView: originalSuperView, animationView: animationView, isDismiss: true)
+        } else {
+            return nil
+        }
+    }
+}
+
 // MARK: - private functions
 
 extension IOSVideoPlayerView {
     private func addNotification() {
         NotificationCenter.default.addObserver(self, selector: #selector(orientationChanged), name: UIApplication.didChangeStatusBarOrientationNotification, object: nil)
-        orientationChanged()
         NotificationCenter.default.addObserver(self, selector: #selector(routesAvailableDidChange), name: .MPVolumeViewWirelessRoutesAvailableDidChange, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(wirelessRouteActiveDidChange(notification:)), name: .MPVolumeViewWirelessRouteActiveDidChange, object: nil)
         callCenter.setDelegate(self, queue: DispatchQueue.main)
@@ -263,8 +318,11 @@ extension IOSVideoPlayerView {
         playerLayer.isWirelessRouteActive = volumeView.isWirelessRouteActive
     }
 
-    @objc private func orientationChanged() {
-        updateUI(isLandscape: UIApplication.isLandscape)
+    @objc private func orientationChanged(notification _: Notification) {
+        guard let isHorizonal = playerLayer.player?.naturalSize.isHorizonal, isHorizonal else {
+            return
+        }
+        updateUI(isFullScreen: UIApplication.isLandscape)
     }
 
     private func judgePanGesture() {
@@ -303,21 +361,23 @@ public class AirplayStatusView: UIView {
             airplayicon.widthAnchor.constraint(equalToConstant: 100),
             airplayicon.heightAnchor.constraint(equalToConstant: 100),
             airplaymessage.bottomAnchor.constraint(equalTo: bottomAnchor),
-            airplaymessage.leftAnchor.constraint(equalTo: leftAnchor),
-            airplaymessage.rightAnchor.constraint(equalTo: rightAnchor),
-            airplaymessage.heightAnchor.constraint(equalToConstant: 15)
+            airplaymessage.leadingAnchor.constraint(equalTo: leadingAnchor),
+            airplaymessage.trailingAnchor.constraint(equalTo: trailingAnchor),
+            airplaymessage.heightAnchor.constraint(equalToConstant: 15),
         ])
         isHidden = true
     }
 
+    @available(*, unavailable)
     required init?(coder _: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
 }
-extension KSPlayerManager {
-    /// func application(_ application: UIApplication, supportedInterfaceOrientationsFor window: UIWindow?) -> UIInterfaceOrientationMask
-    public static var supportedInterfaceOrientations = UIInterfaceOrientationMask.portrait
 
+public extension KSPlayerManager {
+    /// func application(_ application: UIApplication, supportedInterfaceOrientationsFor window: UIWindow?) -> UIInterfaceOrientationMask
+    @KSObservable
+    static var supportedInterfaceOrientations = UIInterfaceOrientationMask.portrait
 }
 
 extension UIApplication {
@@ -326,6 +386,111 @@ extension UIApplication {
             return UIApplication.shared.windows.first?.windowScene?.interfaceOrientation.isLandscape ?? false
         } else {
             return UIApplication.shared.statusBarOrientation.isLandscape
+        }
+    }
+}
+
+// MARK: - menu
+
+extension IOSVideoPlayerView {
+    override open var canBecomeFirstResponder: Bool {
+        true
+    }
+
+    override open func canPerformAction(_ action: Selector, withSender _: Any?) -> Bool {
+        if action == #selector(IOSVideoPlayerView.openFileAction) {
+            return true
+        }
+        return true
+    }
+
+    @objc fileprivate func openFileAction(_: AnyObject) {
+        let documentPicker = UIDocumentPickerViewController(documentTypes: [kUTTypeAudio, kUTTypeMovie, kUTTypePlainText] as [String], in: .open)
+        documentPicker.delegate = self
+        viewController?.present(documentPicker, animated: true, completion: nil)
+    }
+}
+
+extension IOSVideoPlayerView: UIDocumentPickerDelegate {
+    public func documentPicker(_: UIDocumentPickerViewController, didPickDocumentsAt urls: [URL]) {
+        if let url = urls.first {
+            if url.isMovie || url.isAudio {
+                set(url: url, options: KSOptions())
+            } else {
+                resource?.subtitle = KSURLSubtitle(url: url)
+            }
+        }
+    }
+}
+
+#endif
+
+#if os(iOS)
+@available(iOS 13.0, *)
+public class MenuController {
+    public init(with builder: UIMenuBuilder) {
+        builder.remove(menu: .format)
+        builder.insertChild(MenuController.openFileMenu(), atStartOfMenu: .file)
+//        builder.insertChild(MenuController.openURLMenu(), atStartOfMenu: .file)
+//        builder.insertChild(MenuController.navigationMenu(), atStartOfMenu: .file)
+    }
+
+    class func openFileMenu() -> UIMenu {
+        let openCommand = UIKeyCommand(input: "O", modifierFlags: .command, action: #selector(IOSVideoPlayerView.openFileAction(_:)))
+        openCommand.title = NSLocalizedString("Open File", comment: "")
+        let openMenu = UIMenu(title: "",
+                              image: nil,
+                              identifier: UIMenu.Identifier("com.example.apple-samplecode.menus.openFileMenu"),
+                              options: .displayInline,
+                              children: [openCommand])
+        return openMenu
+    }
+
+//    class func openURLMenu() -> UIMenu {
+//        let openCommand = UIKeyCommand(input: "O", modifierFlags: [.command, .shift], action: #selector(IOSVideoPlayerView.openURLAction(_:)))
+//        openCommand.title = NSLocalizedString("Open URL", comment: "")
+//        let openMenu = UIMenu(title: "",
+//                              image: nil,
+//                              identifier: UIMenu.Identifier("com.example.apple-samplecode.menus.openURLMenu"),
+//                              options: .displayInline,
+//                              children: [openCommand])
+//        return openMenu
+//    }
+//    class func navigationMenu() -> UIMenu {
+//        let arrowKeyChildrenCommands = Arrows.allCases.map { arrow in
+//            UIKeyCommand(title: arrow.localizedString(),
+//                         image: nil,
+//                         action: #selector(IOSVideoPlayerView.navigationMenuAction(_:)),
+//                         input: arrow.command,
+//                         modifierFlags: .command)
+//        }
+//        return UIMenu(title: NSLocalizedString("NavigationTitle", comment: ""),
+//                      image: nil,
+//                      identifier: UIMenu.Identifier("com.example.apple-samplecode.menus.navigationMenu"),
+//                      options: [],
+//                      children: arrowKeyChildrenCommands)
+//    }
+
+    enum Arrows: String, CaseIterable {
+        case rightArrow
+        case leftArrow
+        case upArrow
+        case downArrow
+        func localizedString() -> String {
+            NSLocalizedString("\(rawValue)", comment: "")
+        }
+
+        var command: String {
+            switch self {
+            case .rightArrow:
+                return UIKeyCommand.inputRightArrow
+            case .leftArrow:
+                return UIKeyCommand.inputLeftArrow
+            case .upArrow:
+                return UIKeyCommand.inputUpArrow
+            case .downArrow:
+                return UIKeyCommand.inputDownArrow
+            }
         }
     }
 }

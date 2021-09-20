@@ -81,13 +81,13 @@ private class PlaneDisplayModel {
             [-1.0, -1.0, 0.0, 1.0],
             [-1.0, 1.0, 0.0, 1.0],
             [1.0, -1.0, 0.0, 1.0],
-            [1.0, 1.0, 0.0, 1.0]
+            [1.0, 1.0, 0.0, 1.0],
         ]
         let uvs: [simd_float2] = [
             [0.0, 1.0],
             [0.0, 0.0],
             [1.0, 1.0],
-            [1.0, 0.0]
+            [1.0, 0.0],
         ]
         return (indices, positions, uvs)
     }
@@ -150,6 +150,7 @@ private class SphereDisplayModel {
         }
         #endif
     }
+
     func set(encoder: MTLRenderCommandEncoder) {
         encoder.setFrontFacing(.clockwise)
         encoder.setVertexBuffer(posBuffer, offset: 0, index: 0)
@@ -160,6 +161,7 @@ private class SphereDisplayModel {
         }
         #endif
     }
+
     #if canImport(UIKit)
     func touchesMoved(touch: UITouch) {
         var distX = Float(touch.location(in: touch.view).x - touch.previousLocation(in: touch.view).x)

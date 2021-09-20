@@ -1,5 +1,6 @@
 ${PODS_ROOT}/Target Support Files/FFmpeg-tvOS/FFmpeg-tvOS-xcframeworks.sh
 ${PODS_ROOT}/../../Sources/Libavcodec.xcframework
+${PODS_ROOT}/../../Sources/Libavfilter.xcframework
 ${PODS_ROOT}/../../Sources/Libavformat.xcframework
 ${PODS_ROOT}/../../Sources/Libavutil.xcframework
 ${PODS_ROOT}/../../Sources/Libswresample.xcframework

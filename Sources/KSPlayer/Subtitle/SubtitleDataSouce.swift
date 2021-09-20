@@ -63,8 +63,8 @@ public protocol SubtitletoCache: AnyObject {
     var cache: CacheDataSouce? { get set }
 }
 
-extension SubtitletoCache {
-    public func addCache(subtitleID: String, downloadURL: URL) {
+public extension SubtitletoCache {
+    func addCache(subtitleID: String, downloadURL: URL) {
         cache?.addCache(subtitleID: subtitleID, downloadURL: downloadURL)
     }
 }
