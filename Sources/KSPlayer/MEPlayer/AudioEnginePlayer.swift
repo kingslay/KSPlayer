@@ -20,7 +20,7 @@ final class AudioEnginePlayer: AudioPlayer, FrameOutput {
 
     var expansionRatio: Float = 0
 
-    var masterGain: Float = 0
+    var overallGain: Float = 0
 
     private let engine = AVAudioEngine()
     private let player = AVAudioPlayerNode()
