@@ -46,7 +46,7 @@ final class MetalPlayView: UIView {
             bottomAnchor.constraint(equalTo: view.bottomAnchor),
         ])
         var controlTimebase: CMTimebase?
-        CMTimebaseCreateWithMasterClock(allocator: kCFAllocatorDefault, masterClock: CMClockGetHostTimeClock(), timebaseOut: &controlTimebase)
+        CMTimebaseCreateWithSourceClock(allocator: kCFAllocatorDefault, sourceClock: CMClockGetHostTimeClock(), timebaseOut: &controlTimebase)
         if let controlTimebase = controlTimebase {
             displayLayer.controlTimebase = controlTimebase
             CMTimebaseSetTime(controlTimebase, time: .zero)

@@ -17,7 +17,7 @@ protocol AudioPlayer: AnyObject {
     var releaseTime: Float { get set }
     var threshold: Float { get set }
     var expansionRatio: Float { get set }
-    var masterGain: Float { get set }
+    var overallGain: Float { get set }
 }
 
 final class AudioGraphPlayer: AudioPlayer, FrameOutput {
@@ -133,14 +133,14 @@ final class AudioGraphPlayer: AudioPlayer, FrameOutput {
         }
     }
 
-    public var masterGain: Float {
+    public var overallGain: Float {
         get {
             var value = AudioUnitParameterValue(1.0)
-            AudioUnitGetParameter(audioUnitForDynamicsProcessor, kDynamicsProcessorParam_MasterGain, kAudioUnitScope_Global, 0, &value)
+            AudioUnitGetParameter(audioUnitForDynamicsProcessor, kDynamicsProcessorParam_OverallGain, kAudioUnitScope_Global, 0, &value)
             return value
         }
         set {
-            AudioUnitSetParameter(audioUnitForDynamicsProcessor, kDynamicsProcessorParam_MasterGain, kAudioUnitScope_Global, 0, AudioUnitParameterValue(newValue), 0)
+            AudioUnitSetParameter(audioUnitForDynamicsProcessor, kDynamicsProcessorParam_OverallGain, kAudioUnitScope_Global, 0, AudioUnitParameterValue(newValue), 0)
         }
     }
 

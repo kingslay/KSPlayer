@@ -27,7 +27,7 @@
 
 - iOS 11 +,  macOS 10.13 +, tvOS 11 +
 - Xcode 12
-- Swift 5.4
+- Swift 5.5
 
 ## Demo
 

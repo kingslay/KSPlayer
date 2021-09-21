@@ -206,12 +206,12 @@ extension KSMEPlayer: MediaPlayerProtocol {
         }
     }
 
-    public var masterGain: Float {
+    public var overallGain: Float {
         get {
-            audioOutput.masterGain
+            audioOutput.overallGain
         }
         set {
-            audioOutput.masterGain = newValue
+            audioOutput.overallGain = newValue
         }
     }
 
