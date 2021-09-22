@@ -394,8 +394,7 @@ extension KSPlayerLayer {
         } else if let event = event as? MPChangeLanguageOptionCommandEvent {
             let selectLang = event.languageOption
             if selectLang.languageOptionType == .audible,
-               let trackToSelect = player.tracks(mediaType: .audio).first(where: { $0.name == selectLang.displayName })
-            {
+               let trackToSelect = player.tracks(mediaType: .audio).first(where: { $0.name == selectLang.displayName }) {
                 player.select(track: trackToSelect)
             }
         } else {
@@ -414,8 +413,7 @@ extension KSPlayerLayer {
                 seek(time: player.currentPlaybackTime + player.duration * 0.01, autoPlay: options?.isSeekedAutoPlay ?? false)
             case MPRemoteCommandCenter.shared().seekBackwardCommand:
                 seek(time: player.currentPlaybackTime - player.duration * 0.01, autoPlay: options?.isSeekedAutoPlay ?? false)
-            default:
-                return .success
+            default: break
             }
         }
         return .success

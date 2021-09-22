@@ -1,3 +1,3 @@
 # 格式化规则
---enable trailingClosures
+--disable wrapMultilineStatementBraces
 --ifdef noindent
