@@ -41,7 +41,7 @@ public protocol MediaPlayerProtocol: MediaPlayback {
     var playbackVolume: Float { get set }
     var contentMode: UIViewContentMode { get set }
     var subtitleDataSouce: SubtitleDataSouce? { get }
-    @available(tvOS 14.0, *)
+    @available(tvOS 15.0, macOS 10.15, *)
     var pipController: AVPictureInPictureController? { get }
     init(url: URL, options: KSOptions)
     func replace(url: URL, options: KSOptions)
