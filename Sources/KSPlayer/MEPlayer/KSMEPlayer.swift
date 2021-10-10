@@ -371,7 +371,7 @@ extension KSMEPlayer: AVPictureInPictureSampleBufferPlaybackDelegate {
     }
 
     public func pictureInPictureControllerIsPlaybackPaused(_: AVPictureInPictureController) -> Bool {
-        isPlaying
+        !isPlaying
     }
 
     public func pictureInPictureController(_: AVPictureInPictureController, didTransitionToRenderSize _: CMVideoDimensions) {}
@@ -380,6 +380,9 @@ extension KSMEPlayer: AVPictureInPictureSampleBufferPlaybackDelegate {
         seek(time: currentPlaybackTime + skipInterval.seconds) { _ in
             completionHandler()
         }
+    }
+    public func pictureInPictureControllerShouldProhibitBackgroundAudioPlayback(_ pictureInPictureController: AVPictureInPictureController) -> Bool {
+        false
     }
 }
 
