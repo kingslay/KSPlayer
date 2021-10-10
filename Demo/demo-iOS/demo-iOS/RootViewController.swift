@@ -45,6 +45,7 @@ class RootViewController: UIViewController {
         super.viewDidLoad()
         view.addSubview(tableView)
         tableView.translatesAutoresizingMaskIntoConstraints = false
+        playerView.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
             tableView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
             tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 0),
@@ -106,8 +107,17 @@ extension RootViewController: UITableViewDelegate {
         guard let cell = tableView.cellForRow(at: indexPath) as? TableViewCell else {
             return
         }
-        playerView.set(resource: objects[indexPath.row])
+        if playerView.resource != objects[indexPath.row] {
+            playerView.set(resource: objects[indexPath.row])
+        }
         cell.videoView.addSubview(playerView)
+        playerView.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            playerView.topAnchor.constraint(equalTo: cell.videoView.topAnchor),
+            playerView.leadingAnchor.constraint(equalTo: cell.videoView.leadingAnchor),
+            playerView.trailingAnchor.constraint(equalTo: cell.videoView.trailingAnchor),
+            playerView.bottomAnchor.constraint(equalTo: cell.videoView.bottomAnchor),
+        ])
     }
 
     func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
@@ -147,7 +157,13 @@ extension RootViewController: UITableViewDelegate {
         }
         if playerView.resource != objects[index.row] {
             playerView.set(resource: objects[index.row])
-            cell.videoView.addSubview(playerView)
         }
+        cell.videoView.addSubview(playerView)
+        NSLayoutConstraint.activate([
+            playerView.topAnchor.constraint(equalTo: cell.videoView.topAnchor),
+            playerView.leadingAnchor.constraint(equalTo: cell.videoView.leadingAnchor),
+            playerView.trailingAnchor.constraint(equalTo: cell.videoView.trailingAnchor),
+            playerView.bottomAnchor.constraint(equalTo: cell.videoView.bottomAnchor),
+        ])
     }
 }

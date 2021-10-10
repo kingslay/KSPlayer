@@ -6,6 +6,7 @@
 //
 
 import AVFoundation
+import AVKit
 import CoreMedia
 #if canImport(UIKit)
 import UIKit
@@ -40,6 +41,8 @@ public protocol MediaPlayerProtocol: MediaPlayback {
     var playbackVolume: Float { get set }
     var contentMode: UIViewContentMode { get set }
     var subtitleDataSouce: SubtitleDataSouce? { get }
+    @available(tvOS 14.0, *)
+    var pipController: AVPictureInPictureController? { get }
     init(url: URL, options: KSOptions)
     func replace(url: URL, options: KSOptions)
     func play()

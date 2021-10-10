@@ -337,7 +337,7 @@ extension KSPlayerLayer {
     }
 
     private func updateNowPlayingInfo() {
-        guard let player = self.player else { return }
+        guard let player = player else { return }
         if MPNowPlayingInfoCenter.default().nowPlayingInfo == nil {
             MPNowPlayingInfoCenter.default().nowPlayingInfo = [MPMediaItemPropertyPlaybackDuration: player.duration]
         } else {
@@ -421,6 +421,10 @@ extension KSPlayerLayer {
 
     @objc private func enterBackground() {
         guard let player = player, state.isPlaying, !player.isExternalPlaybackActive else {
+            return
+        }
+
+        if player.pipController?.isPictureInPictureActive ?? false {
             return
         }
 

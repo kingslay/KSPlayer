@@ -12,6 +12,8 @@ import UIKit
 
 open class IOSVideoPlayerView: VideoPlayerView {
     private weak var originalSuperView: UIView?
+    private var originalframeConstraints: [NSLayoutConstraint]?
+    private var originalFrame = CGRect.zero
     private var originalOrientations: UIInterfaceOrientationMask?
     private weak var fullScreenDelegate: PlayerViewFullScreenDelegate?
     private var isPlayingForCall = false
@@ -141,10 +143,19 @@ open class IOSVideoPlayerView: VideoPlayerView {
                 return
             }
             originalSuperView = superview
+            originalframeConstraints = frameConstraints
+            originalFrame = frame
             originalOrientations = viewController.supportedInterfaceOrientations
             let fullVC = PlayerFullScreenViewController(isHorizonal: isHorizonal)
             fullScreenDelegate = fullVC
             fullVC.view.addSubview(self)
+            translatesAutoresizingMaskIntoConstraints = false
+            NSLayoutConstraint.activate([
+                topAnchor.constraint(equalTo: fullVC.view.readableTopAnchor),
+                leadingAnchor.constraint(equalTo: fullVC.view.leadingAnchor),
+                trailingAnchor.constraint(equalTo: fullVC.view.trailingAnchor),
+                bottomAnchor.constraint(equalTo: fullVC.view.bottomAnchor),
+            ])
             fullVC.modalPresentationStyle = .fullScreen
             fullVC.modalPresentationCapturesStatusBarAppearance = true
             fullVC.transitioningDelegate = self
@@ -159,6 +170,12 @@ open class IOSVideoPlayerView: VideoPlayerView {
             KSPlayerManager.supportedInterfaceOrientations = .portrait
             presentingVC.dismiss(animated: true) {
                 self.originalSuperView?.addSubview(self)
+                if let constraints = self.originalframeConstraints, constraints.count > 0 {
+                    NSLayoutConstraint.activate(constraints)
+                } else {
+                    self.translatesAutoresizingMaskIntoConstraints = true
+                    self.frame = self.originalFrame
+                }
                 if let originalOrientations = self.originalOrientations {
                     KSPlayerManager.supportedInterfaceOrientations = originalOrientations
                 }

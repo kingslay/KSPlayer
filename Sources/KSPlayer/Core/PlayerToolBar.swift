@@ -32,6 +32,7 @@ public class PlayerToolBar: UIStackView {
     public var timeSlider = KSSlider()
     public var playbackRateButton = UIButton()
     public var definitionButton = UIButton()
+    public var pipButton = UIButton()
     public var currentTime: TimeInterval = 0 {
         didSet {
             guard !currentTime.isNaN else {
@@ -98,6 +99,9 @@ public class PlayerToolBar: UIStackView {
         srtButton.setTitle(NSLocalizedString("subtitle", comment: ""), for: .normal)
         srtButton.titleFont = .systemFont(ofSize: 14, weight: .medium)
         srtButton.tag = PlayerButtonType.srt.rawValue
+        pipButton.titleFont = .systemFont(ofSize: 14, weight: .medium)
+        pipButton.setTitle(NSLocalizedString("pip", comment: ""), for: .normal)
+        pipButton.tag = PlayerButtonType.pictureInPicture.rawValue
         playButton.translatesAutoresizingMaskIntoConstraints = false
         srtButton.translatesAutoresizingMaskIntoConstraints = false
         translatesAutoresizingMaskIntoConstraints = false
@@ -118,6 +122,7 @@ public class PlayerToolBar: UIStackView {
         playbackRateButton.addTarget(target, action: action, for: .primaryActionTriggered)
         definitionButton.addTarget(target, action: action, for: .primaryActionTriggered)
         srtButton.addTarget(target, action: action, for: .primaryActionTriggered)
+        pipButton.addTarget(target, action: action, for: .primaryActionTriggered)
     }
 
     public func reset() {
