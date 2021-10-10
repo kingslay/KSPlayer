@@ -26,7 +26,7 @@
 ## Requirements
 
 - iOS 11 +,  macOS 10.13 +, tvOS 11 +
-- Xcode 12
+- Xcode 13
 - Swift 5.5
 
 ## Demo
