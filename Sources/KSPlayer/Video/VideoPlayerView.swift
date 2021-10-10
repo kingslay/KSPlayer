@@ -5,7 +5,7 @@
 //  Created by kintan on 16/4/29.
 //
 //
-
+import AVKit
 #if canImport(UIKit)
 import UIKit
 #else
@@ -115,36 +115,6 @@ open class VideoPlayerView: PlayerView {
         setupUIComponents()
     }
 
-    #if os(macOS)
-    override open func viewDidMoveToSuperview() {
-        super.viewDidMoveToSuperview()
-        guard let superview = superview else {
-            return
-        }
-        translatesAutoresizingMaskIntoConstraints = false
-        NSLayoutConstraint.activate([
-            topAnchor.constraint(equalTo: superview.readableTopAnchor),
-            leadingAnchor.constraint(equalTo: superview.leadingAnchor),
-            trailingAnchor.constraint(equalTo: superview.trailingAnchor),
-            bottomAnchor.constraint(equalTo: superview.bottomAnchor),
-        ])
-    }
-    #else
-    override open func didMoveToSuperview() {
-        super.didMoveToSuperview()
-        guard let superview = superview else {
-            return
-        }
-        translatesAutoresizingMaskIntoConstraints = false
-        NSLayoutConstraint.activate([
-            topAnchor.constraint(equalTo: superview.readableTopAnchor),
-            leadingAnchor.constraint(equalTo: superview.leadingAnchor),
-            trailingAnchor.constraint(equalTo: superview.trailingAnchor),
-            bottomAnchor.constraint(equalTo: superview.bottomAnchor),
-        ])
-    }
-    #endif
-
     // MARK: - Action Response
 
     override open func onButtonPressed(type: PlayerButtonType, button: UIButton) {
@@ -168,6 +138,15 @@ open class VideoPlayerView: PlayerView {
             }
             alertController.addAction(UIAlertAction(title: NSLocalizedString("cancel", comment: ""), style: .cancel, handler: nil))
             viewController?.present(alertController, animated: true, completion: nil)
+        } else if type == .pictureInPicture {
+            guard let pipController = playerLayer.player?.pipController else {
+                return
+            }
+            if pipController.isPictureInPictureActive {
+                pipController.stopPictureInPicture()
+            } else {
+                pipController.startPictureInPicture()
+            }
         }
     }
 
@@ -535,9 +514,12 @@ extension VideoPlayerView {
         toolBar.addArrangedSubview(toolBar.playbackRateButton)
         toolBar.addArrangedSubview(toolBar.definitionButton)
         toolBar.addArrangedSubview(toolBar.srtButton)
+        toolBar.addArrangedSubview(toolBar.pipButton)
+        toolBar.pipButton.isHidden = !AVPictureInPictureController.isPictureInPictureSupported()
         toolBar.setCustomSpacing(20, after: toolBar.timeLabel)
         toolBar.setCustomSpacing(20, after: toolBar.playbackRateButton)
         toolBar.setCustomSpacing(20, after: toolBar.definitionButton)
+        toolBar.setCustomSpacing(20, after: toolBar.srtButton)
         toolBar.timeSlider.translatesAutoresizingMaskIntoConstraints = false
         topMaskView.translatesAutoresizingMaskIntoConstraints = false
         bottomMaskView.translatesAutoresizingMaskIntoConstraints = false

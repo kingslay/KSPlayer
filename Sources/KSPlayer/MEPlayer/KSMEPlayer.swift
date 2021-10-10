@@ -6,13 +6,14 @@
 //
 
 import AVFoundation
+import AVKit
 #if canImport(UIKit)
 import UIKit
 #else
 import AppKit
 #endif
 
-public class KSMEPlayer {
+public class KSMEPlayer: NSObject {
     private var loopCount = 1
     private let audioOutput: AudioPlayer & FrameOutput = AudioGraphPlayer()
     private var playerItem: MEPlayerItem
@@ -23,6 +24,16 @@ public class KSMEPlayer {
             delegate?.changeBuffering(player: self, progress: bufferingProgress)
         }
     }
+
+    @available(tvOS 14.0, *)
+    public private(set) lazy var pipController: AVPictureInPictureController? = {
+        if #available(iOS 15.0, tvOS 15.0, macOS 12.0, *) {
+            let contentSource = AVPictureInPictureController.ContentSource(sampleBufferDisplayLayer: videoOutput.displayLayer, playbackDelegate: self)
+            return AVPictureInPictureController(contentSource: contentSource)
+        } else {
+            return nil
+        }
+    }()
 
     public private(set) var playableTime = TimeInterval(0)
     public weak var delegate: MediaPlayerDelegate?
@@ -60,6 +71,7 @@ public class KSMEPlayer {
         playerItem = MEPlayerItem(url: url, options: options)
         videoOutput = MetalPlayView(options: options)
         self.options = options
+        super.init()
         playerItem.delegate = self
         audioOutput.renderSource = playerItem
         videoOutput.renderSource = playerItem
@@ -345,6 +357,28 @@ extension KSMEPlayer: MediaPlayerProtocol {
 
     public func select(track: MediaPlayerTrack) {
         playerItem.select(track: track)
+    }
+}
+
+extension KSMEPlayer: AVPictureInPictureSampleBufferPlaybackDelegate {
+    public func pictureInPictureController(_: AVPictureInPictureController, setPlaying playing: Bool) {
+        playing ? play() : pause()
+    }
+
+    public func pictureInPictureControllerTimeRangeForPlayback(_: AVPictureInPictureController) -> CMTimeRange {
+        CMTimeRange(start: currentPlaybackTime, end: currentPlaybackTime + playableTime)
+    }
+
+    public func pictureInPictureControllerIsPlaybackPaused(_: AVPictureInPictureController) -> Bool {
+        isPlaying
+    }
+
+    public func pictureInPictureController(_: AVPictureInPictureController, didTransitionToRenderSize _: CMVideoDimensions) {}
+
+    public func pictureInPictureController(_: AVPictureInPictureController, skipByInterval skipInterval: CMTime, completion completionHandler: @escaping () -> Void) {
+        seek(time: currentPlaybackTime + skipInterval.seconds) { _ in
+            completionHandler()
+        }
     }
 }
 

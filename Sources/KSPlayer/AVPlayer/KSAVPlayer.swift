@@ -1,5 +1,5 @@
 import AVFoundation
-
+import AVKit
 #if canImport(UIKit)
 import UIKit
 #else
@@ -89,6 +89,11 @@ public class KSAVPlayer {
             }
         }
     }
+
+    @available(tvOS 14.0, *)
+    public private(set) lazy var pipController: AVPictureInPictureController? = {
+        AVPictureInPictureController(playerLayer: playerView.playerLayer)
+    }()
 
     public private(set) var bufferingProgress = 0 {
         didSet {

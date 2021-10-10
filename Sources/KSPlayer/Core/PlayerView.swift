@@ -22,6 +22,7 @@ public enum PlayerButtonType: Int {
     case lock = 107
     case rate = 108
     case definition = 109
+    case pictureInPicture = 110
 }
 
 public protocol PlayerControllerDelegate: AnyObject {
@@ -180,7 +181,7 @@ extension PlayerView {
 
 extension UIView {
     var viewController: UIViewController? {
-        var next = self.next
+        var next = next
         while next != nil {
             if let viewController = next as? UIViewController {
                 return viewController
