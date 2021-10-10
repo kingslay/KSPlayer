@@ -51,7 +51,7 @@ open class IOSVideoPlayerView: VideoPlayerView {
             guard let self = self, count > 0 else {
                 return
             }
-            if UIApplication.isLandscape || UIDevice.current.userInterfaceIdiom == .pad {
+            if self.landscapeButton.isSelected || UIDevice.current.userInterfaceIdiom == .pad {
                 self.toolBar.srtButton.isHidden = false
             }
         }
@@ -343,7 +343,7 @@ extension IOSVideoPlayerView {
     }
 
     private func judgePanGesture() {
-        if UIApplication.isLandscape || UIDevice.current.userInterfaceIdiom == .pad {
+        if landscapeButton.isSelected || UIDevice.current.userInterfaceIdiom == .pad {
             panGesture.isEnabled = isPlayed && !replayButton.isSelected
         } else {
             if KSPlayerManager.enablePortraitGestures {
