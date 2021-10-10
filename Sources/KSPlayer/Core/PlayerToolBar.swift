@@ -105,7 +105,6 @@ public class PlayerToolBar: UIStackView {
             pipButton.setImage(AVPictureInPictureController.pictureInPictureButtonStopImage, for: .selected)
         } else {
             pipButton.setTitle(NSLocalizedString("pip", comment: ""), for: .normal)
-            pipButton.setTitle(NSLocalizedString("pips", comment: ""), for: .selected)
         }
         pipButton.tag = PlayerButtonType.pictureInPicture.rawValue
         playButton.translatesAutoresizingMaskIntoConstraints = false
