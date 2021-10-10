@@ -90,7 +90,7 @@ public class KSAVPlayer {
         }
     }
 
-    @available(tvOS 14.0, *)
+    @available(tvOS 14.0, macOS 10.15, *)
     public private(set) lazy var pipController: AVPictureInPictureController? = {
         AVPictureInPictureController(playerLayer: playerView.playerLayer)
     }()

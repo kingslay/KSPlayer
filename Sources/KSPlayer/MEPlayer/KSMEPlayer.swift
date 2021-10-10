@@ -25,7 +25,7 @@ public class KSMEPlayer: NSObject {
         }
     }
 
-    @available(tvOS 14.0, *)
+    @available(tvOS 15.0, macOS 10.15, *)
     public private(set) lazy var pipController: AVPictureInPictureController? = {
         if #available(iOS 15.0, tvOS 15.0, macOS 12.0, *) {
             let contentSource = AVPictureInPictureController.ContentSource(sampleBufferDisplayLayer: videoOutput.displayLayer, playbackDelegate: self)
@@ -360,6 +360,7 @@ extension KSMEPlayer: MediaPlayerProtocol {
     }
 }
 
+@available(tvOS 15.0, macOS 10.15, *)
 extension KSMEPlayer: AVPictureInPictureSampleBufferPlaybackDelegate {
     public func pictureInPictureController(_: AVPictureInPictureController, setPlaying playing: Bool) {
         playing ? play() : pause()

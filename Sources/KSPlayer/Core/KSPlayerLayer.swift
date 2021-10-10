@@ -424,8 +424,10 @@ extension KSPlayerLayer {
             return
         }
 
-        if player.pipController?.isPictureInPictureActive ?? false {
-            return
+        if #available(tvOS 15.0, macOS 10.15, *) {
+            if player.pipController?.isPictureInPictureActive ?? false {
+                return
+            }
         }
 
         if KSPlayerManager.canBackgroundPlay {
