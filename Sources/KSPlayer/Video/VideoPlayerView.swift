@@ -145,8 +145,10 @@ open class VideoPlayerView: PlayerView {
                 }
                 if pipController.isPictureInPictureActive {
                     pipController.stopPictureInPicture()
+                    button.isSelected = false
                 } else {
                     pipController.startPictureInPicture()
+                    button.isSelected = true
                 }
             }
         }
@@ -519,6 +521,8 @@ extension VideoPlayerView {
         toolBar.addArrangedSubview(toolBar.pipButton)
         if #available(tvOS 14.0, macOS 10.15, *) {
             toolBar.pipButton.isHidden = !AVPictureInPictureController.isPictureInPictureSupported()
+        } else {
+            toolBar.pipButton.isHidden = true
         }
         toolBar.setCustomSpacing(20, after: toolBar.timeLabel)
         toolBar.setCustomSpacing(20, after: toolBar.playbackRateButton)
