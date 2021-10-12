@@ -14,6 +14,10 @@ final class MetalPlayView: UIView {
     private let view = MTKView(frame: .zero, device: MetalRender.device)
     private var videoInfo: CMVideoFormatDescription?
     private var pixelBuffer: BufferProtocol?
+    private lazy var displayLink: CADisplayLink = {
+        CADisplayLink(target: self, selector: #selector(drawView))
+    }()
+
     var options: KSOptions
     weak var renderSource: OutputRenderSourceDelegate?
     #if canImport(UIKit)
@@ -33,9 +37,10 @@ final class MetalPlayView: UIView {
         layer = AVSampleBufferDisplayLayer()
         #endif
         view.framebufferOnly = true
-        view.preferredFramesPerSecond = KSPlayerManager.preferredFramesPerSecond
         view.isPaused = true
-        view.delegate = self
+        displayLink.preferredFramesPerSecond = KSPlayerManager.preferredFramesPerSecond
+        displayLink.add(to: RunLoop.main, forMode: .default)
+        displayLink.isPaused = true
         addSubview(view)
         view.isHidden = true
         view.translatesAutoresizingMaskIntoConstraints = false
@@ -57,41 +62,6 @@ final class MetalPlayView: UIView {
     @available(*, unavailable)
     required init(coder _: NSCoder) {
         fatalError("init(coder:) has not been implemented")
-    }
-
-    private func set(pixelBuffer: CVPixelBuffer, time: CMTime) {
-        if videoInfo == nil || !CMVideoFormatDescriptionMatchesImageBuffer(videoInfo!, imageBuffer: pixelBuffer) {
-            let err = CMVideoFormatDescriptionCreateForImageBuffer(allocator: nil, imageBuffer: pixelBuffer, formatDescriptionOut: &videoInfo)
-            if err != noErr {
-                KSLog("Error at CMVideoFormatDescriptionCreateForImageBuffer \(err)")
-            }
-        }
-        guard let videoInfo = videoInfo else { return }
-        var timing = CMSampleTimingInfo(duration: .invalid, presentationTimeStamp: time, decodeTimeStamp: .invalid)
-        var sampleBuffer: CMSampleBuffer?
-        // swiftlint:disable line_length
-        CMSampleBufferCreateForImageBuffer(allocator: nil, imageBuffer: pixelBuffer, dataReady: true, makeDataReadyCallback: nil, refcon: nil, formatDescription: videoInfo, sampleTiming: &timing, sampleBufferOut: &sampleBuffer)
-        // swiftlint:enable line_length
-
-        if let sampleBuffer = sampleBuffer {
-            if let attachmentsArray = CMSampleBufferGetSampleAttachmentsArray(sampleBuffer, createIfNecessary: true) as? [Any] {
-                if let dic = attachmentsArray.first as? NSMutableDictionary {
-                    dic[kCMSampleAttachmentKey_DisplayImmediately] = true
-                }
-            }
-            if displayLayer.isReadyForMoreMediaData {
-                displayLayer.enqueue(sampleBuffer)
-            }
-            if displayLayer.status == .failed {
-                displayLayer.flush()
-                //                    if let error = displayLayer.error as NSError?, error.code == -11847 {
-                //                        displayLayer.stopRequestingMediaData()
-                //                    }
-            }
-            if let controlTimebase = displayLayer.controlTimebase {
-                CMTimebaseSetTime(controlTimebase, time: time)
-            }
-        }
     }
 
     override var contentMode: UIViewContentMode {
@@ -131,8 +101,43 @@ final class MetalPlayView: UIView {
     }
 }
 
-extension MetalPlayView: MTKViewDelegate {
-    func draw(in view: MTKView) {
+extension MetalPlayView {
+    private func set(pixelBuffer: CVPixelBuffer, time: CMTime) {
+        if videoInfo == nil || !CMVideoFormatDescriptionMatchesImageBuffer(videoInfo!, imageBuffer: pixelBuffer) {
+            let err = CMVideoFormatDescriptionCreateForImageBuffer(allocator: nil, imageBuffer: pixelBuffer, formatDescriptionOut: &videoInfo)
+            if err != noErr {
+                KSLog("Error at CMVideoFormatDescriptionCreateForImageBuffer \(err)")
+            }
+        }
+        guard let videoInfo = videoInfo else { return }
+        var timing = CMSampleTimingInfo(duration: .invalid, presentationTimeStamp: time, decodeTimeStamp: .invalid)
+        var sampleBuffer: CMSampleBuffer?
+        // swiftlint:disable line_length
+        CMSampleBufferCreateForImageBuffer(allocator: nil, imageBuffer: pixelBuffer, dataReady: true, makeDataReadyCallback: nil, refcon: nil, formatDescription: videoInfo, sampleTiming: &timing, sampleBufferOut: &sampleBuffer)
+        // swiftlint:enable line_length
+
+        if let sampleBuffer = sampleBuffer {
+            if let attachmentsArray = CMSampleBufferGetSampleAttachmentsArray(sampleBuffer, createIfNecessary: true) as? [Any] {
+                if let dic = attachmentsArray.first as? NSMutableDictionary {
+                    dic[kCMSampleAttachmentKey_DisplayImmediately] = true
+                }
+            }
+            if displayLayer.isReadyForMoreMediaData {
+                displayLayer.enqueue(sampleBuffer)
+            }
+            if displayLayer.status == .failed {
+                displayLayer.flush()
+                //                    if let error = displayLayer.error as NSError?, error.code == -11847 {
+                //                        displayLayer.stopRequestingMediaData()
+                //                    }
+            }
+            if let controlTimebase = displayLayer.controlTimebase {
+                CMTimebaseSetTime(controlTimebase, time: time)
+            }
+        }
+    }
+
+    @objc private func drawView() {
         guard let frame = renderSource?.getOutputRender(type: .video) as? VideoVTBFrame else {
             return
         }
@@ -190,17 +195,15 @@ extension MetalPlayView: MTKViewDelegate {
             // swiftlint:enable force_cast
         }
     }
-
-    func mtkView(_: MTKView, drawableSizeWillChange _: CGSize) {}
 }
 
 extension MetalPlayView: FrameOutput {
     var isPaused: Bool {
         get {
-            view.isPaused
+            displayLink.isPaused
         }
         set {
-            view.isPaused = newValue
+            displayLink.isPaused = newValue
         }
     }
 
