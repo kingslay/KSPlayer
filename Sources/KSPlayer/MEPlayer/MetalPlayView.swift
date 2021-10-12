@@ -202,6 +202,7 @@ extension MetalPlayView: FrameOutput {
             displayLink.isPaused
         }
         set {
+            view.isPaused = newValue
             displayLink.isPaused = newValue
         }
     }
