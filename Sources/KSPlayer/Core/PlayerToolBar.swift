@@ -33,6 +33,7 @@ public class PlayerToolBar: UIStackView {
             }
         }
     }
+
     public var currentTime: TimeInterval = 0 {
         didSet {
             guard !currentTime.isNaN else {

@@ -335,10 +335,12 @@ extension KSMEPlayer: MediaPlayerProtocol {
     }
 
     public func enterBackground() {
+        videoOutput.isPaused = true
         playerItem.isBackground = true
     }
 
     public func enterForeground() {
+        videoOutput.isPaused = false
         playerItem.isBackground = false
     }
 
@@ -381,7 +383,8 @@ extension KSMEPlayer: AVPictureInPictureSampleBufferPlaybackDelegate {
             completionHandler()
         }
     }
-    public func pictureInPictureControllerShouldProhibitBackgroundAudioPlayback(_ pictureInPictureController: AVPictureInPictureController) -> Bool {
+
+    public func pictureInPictureControllerShouldProhibitBackgroundAudioPlayback(_: AVPictureInPictureController) -> Bool {
         false
     }
 }
