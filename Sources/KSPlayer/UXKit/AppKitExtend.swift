@@ -542,7 +542,6 @@ class CADisplayLink: NSObject {
     private var selector: Selector
     private var runloop: RunLoop?
     private var mode = RunLoop.Mode.default
-    public var frameInterval = 1
     public var timestamp: TimeInterval {
         var timeStamp = CVTimeStamp()
         if CVDisplayLinkGetCurrentTime(displayLink!, &timeStamp) == kCVReturnSuccess, (timeStamp.flags & CVTimeStampFlags.hostTimeValid.rawValue) != 0 {
