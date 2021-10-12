@@ -38,7 +38,6 @@ final class MetalPlayView: UIView {
         #endif
         view.framebufferOnly = true
         view.isPaused = true
-        displayLink.preferredFramesPerSecond = KSPlayerManager.preferredFramesPerSecond
         displayLink.add(to: RunLoop.main, forMode: .default)
         displayLink.isPaused = true
         addSubview(view)

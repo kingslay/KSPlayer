@@ -97,7 +97,6 @@ public extension KSPlayerManager {
     static var logLevel = LogLevel.warning
     static var stackSize = 32768
     static var audioPlayerMaximumFramesPerSlice = AVAudioFrameCount(4096)
-    static var preferredFramesPerSecond = 60
     #if os(macOS)
     static var audioPlayerSampleRate = Int32(44100)
     static var audioPlayerMaximumChannels = AVAudioChannelCount(2)
