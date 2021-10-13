@@ -98,7 +98,19 @@ open class KSPlayerLayer: UIView {
     private var urls = [URL]()
     private var isAutoPlay = false
     private lazy var timer: Timer = {
-        Timer.scheduledTimer(timeInterval: 0.5, target: self, selector: #selector(playerTimerAction), userInfo: nil, repeats: true)
+        Timer.scheduledTimer(withTimeInterval: 0.5, repeats: true) { [weak self] _ in
+            guard let self = self, let player = self.player, player.isPreparedToPlay else {
+                return
+            }
+            self.delegate?.player(layer: self, currentTime: player.currentPlaybackTime, totalTime: player.duration)
+            if player.playbackState == .playing, player.loadState == .playable, self.state == .buffering {
+                // 一个兜底保护，正常不能走到这里
+                self.state = .bufferFinished
+            }
+            if player.isPlaying {
+                MPNowPlayingInfoCenter.default().nowPlayingInfo?[MPNowPlayingInfoPropertyElapsedPlaybackTime] = player.currentPlaybackTime
+            }
+        }
     }()
 
     public var player: MediaPlayerProtocol? {
@@ -144,7 +156,6 @@ open class KSPlayerLayer: UIView {
     deinit {
         NotificationCenter.default.removeObserver(self)
         unregisterRemoteControllEvent()
-        resetPlayer()
     }
 
     public func set(url: URL, options: KSOptions) {
@@ -189,7 +200,6 @@ open class KSPlayerLayer: UIView {
 
     open func resetPlayer() {
         KSLog("resetPlayer")
-        timer.invalidate()
         state = .notSetURL
         bufferedCount = 0
         shouldSeekTo = 0
@@ -321,18 +331,6 @@ extension KSPlayerLayer {
             state = .buffering
         } else {
             state = .notSetURL
-        }
-    }
-
-    @objc private func playerTimerAction() {
-        guard let player = player, player.isPreparedToPlay else { return }
-        delegate?.player(layer: self, currentTime: player.currentPlaybackTime, totalTime: player.duration)
-        if player.playbackState == .playing, player.loadState == .playable, state == .buffering {
-            // 一个兜底保护，正常不能走到这里
-            state = .bufferFinished
-        }
-        if player.isPlaying {
-            MPNowPlayingInfoCenter.default().nowPlayingInfo?[MPNowPlayingInfoPropertyElapsedPlaybackTime] = player.currentPlaybackTime
         }
     }
 
