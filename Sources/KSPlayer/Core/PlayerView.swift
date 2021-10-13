@@ -117,10 +117,6 @@ open class PlayerView: UIView, KSPlayerLayerDelegate, KSSliderDelegate {
         playerLayer.set(url: url, options: options)
     }
 
-    deinit {
-        resetPlayer()
-    }
-
     // MARK: - KSSliderDelegate
 
     open func slider(value: Double, event: ControlEvents) {

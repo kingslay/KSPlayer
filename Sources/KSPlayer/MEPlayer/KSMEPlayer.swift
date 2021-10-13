@@ -79,7 +79,7 @@ public class KSMEPlayer: NSObject {
     }
 
     deinit {
-        shutdown()
+        playerItem.shutdown()
     }
 }
 
