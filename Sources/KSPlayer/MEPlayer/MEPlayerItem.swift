@@ -36,7 +36,6 @@ final class MEPlayerItem {
     private(set) var assetTracks = [TrackProtocol]()
     private var videoAdaptation: VideoAdaptationState?
     private(set) var subtitleTracks = [FFPlayerItemTrack<SubtitleFrame>]()
-    var isBackground = false
     var currentPlaybackTime = TimeInterval(0)
     private var startTime = TimeInterval(0)
     private(set) var rotation = 0.0
@@ -511,9 +510,6 @@ extension MEPlayerItem: OutputRenderSourceDelegate {
             }
             return frame
         } else {
-            if isBackground, videoTrack != nil {
-                _ = getOutputRender(type: .video)
-            }
             return audioTrack?.getOutputRender(where: nil)
         }
     }
