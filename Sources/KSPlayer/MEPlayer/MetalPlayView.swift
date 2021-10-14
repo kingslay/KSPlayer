@@ -19,6 +19,7 @@ final class MetalPlayView: UIView {
     }()
 
     var options: KSOptions
+    var isBackground = false
     weak var renderSource: OutputRenderSourceDelegate?
     #if canImport(UIKit)
     override public class var layerClass: AnyClass { AVSampleBufferDisplayLayer.self }
@@ -137,7 +138,7 @@ extension MetalPlayView {
     }
 
     @objc private func drawView() {
-        guard let frame = renderSource?.getOutputRender(type: .video) as? VideoVTBFrame else {
+        guard let frame = renderSource?.getOutputRender(type: .video) as? VideoVTBFrame, !isBackground else {
             return
         }
         pixelBuffer = frame.corePixelBuffer

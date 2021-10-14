@@ -335,13 +335,11 @@ extension KSMEPlayer: MediaPlayerProtocol {
     }
 
     public func enterBackground() {
-        videoOutput.isPaused = true
-        playerItem.isBackground = true
+        videoOutput.isBackground = true
     }
 
     public func enterForeground() {
-        videoOutput.isPaused = false
-        playerItem.isBackground = false
+        videoOutput.isBackground = false
     }
 
     public var isMuted: Bool {
