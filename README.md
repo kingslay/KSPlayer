@@ -22,6 +22,7 @@
 - H.264/H.265 hardware accelerator.
 - HDR
 - dvb_subtitle
+- Picture in Picture
 
 ## Requirements
 
