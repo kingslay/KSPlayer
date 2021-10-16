@@ -4,7 +4,7 @@
 //
 //  Created by kintan on 2018/3/9.
 //
-#if !canImport(UIKit)
+#if canImport(AppKit)
 import AppKit
 import CoreMedia
 import IOKit.pwr_mgt
@@ -32,6 +32,7 @@ public typealias UITableViewDelegate = NSTableViewDelegate
 public typealias UITableViewDataSource = NSTableViewDataSource
 public typealias UITouch = NSTouch
 public typealias UIEvent = NSEvent
+public typealias UIButton = KSButton
 
 extension NSScreen {
     var scale: CGFloat {
@@ -407,7 +408,7 @@ public class UILabel: NSTextField {
     }
 }
 
-public class UIButton: NSButton {
+public class KSButton: NSButton {
     private var images = [State: UIImage]()
     private var titles = [State: String]()
     private var titleColors = [State: UIColor]()
