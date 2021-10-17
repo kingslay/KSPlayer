@@ -155,7 +155,13 @@ open class KSPlayerLayer: UIView {
 
     deinit {
         NotificationCenter.default.removeObserver(self)
-        unregisterRemoteControllEvent()
+        MPRemoteCommandCenter.shared().playCommand.removeTarget(self)
+        MPRemoteCommandCenter.shared().pauseCommand.removeTarget(self)
+        MPRemoteCommandCenter.shared().togglePlayPauseCommand.removeTarget(self)
+        MPRemoteCommandCenter.shared().seekForwardCommand.removeTarget(self)
+        MPRemoteCommandCenter.shared().seekBackwardCommand.removeTarget(self)
+        MPRemoteCommandCenter.shared().changePlaybackRateCommand.removeTarget(self)
+        MPRemoteCommandCenter.shared().changePlaybackPositionCommand.removeTarget(self)
     }
 
     public func set(url: URL, options: KSOptions) {
@@ -369,16 +375,6 @@ extension KSPlayerLayer {
         MPRemoteCommandCenter.shared().changePlaybackRateCommand.addTarget(self, action: #selector(remoteCommandAction(event:)))
         MPRemoteCommandCenter.shared().changePlaybackPositionCommand.addTarget(self, action: #selector(remoteCommandAction(event:)))
         MPRemoteCommandCenter.shared().enableLanguageOptionCommand.addTarget(self, action: #selector(remoteCommandAction(event:)))
-    }
-
-    private func unregisterRemoteControllEvent() {
-        MPRemoteCommandCenter.shared().playCommand.removeTarget(self)
-        MPRemoteCommandCenter.shared().pauseCommand.removeTarget(self)
-        MPRemoteCommandCenter.shared().togglePlayPauseCommand.removeTarget(self)
-        MPRemoteCommandCenter.shared().seekForwardCommand.removeTarget(self)
-        MPRemoteCommandCenter.shared().seekBackwardCommand.removeTarget(self)
-        MPRemoteCommandCenter.shared().changePlaybackRateCommand.removeTarget(self)
-        MPRemoteCommandCenter.shared().changePlaybackPositionCommand.removeTarget(self)
     }
 
     @objc private func remoteCommandAction(event: MPRemoteCommandEvent) -> MPRemoteCommandHandlerStatus {

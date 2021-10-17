@@ -596,10 +596,6 @@ class CADisplayLink: NSObject {
         isPaused = true
         runloop = nil
     }
-
-    deinit {
-        invalidate()
-    }
 }
 
 extension UIView {
