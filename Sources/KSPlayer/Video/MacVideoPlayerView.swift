@@ -132,8 +132,8 @@ extension MacVideoPlayerView {
 }
 
 class UIActivityIndicatorView: UIView {
-    private var loadingView = NSView()
-    private var progressLabel = UILabel()
+    private let loadingView = NSView()
+    private let progressLabel = UILabel()
     public var progress: Double = 0 {
         didSet {
             print("new progress: \(progress)")

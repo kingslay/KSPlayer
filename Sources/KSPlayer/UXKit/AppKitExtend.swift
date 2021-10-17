@@ -614,7 +614,6 @@ extension UIView {
 open class UIAlertController: UIViewController {
     public enum Style: Int {
         case actionSheet
-
         case alert
     }
 
@@ -628,9 +627,7 @@ open class UIAlertController: UIViewController {
 open class UIAlertAction: NSObject {
     public enum Style: Int {
         case `default`
-
         case cancel
-
         case destructive
     }
 

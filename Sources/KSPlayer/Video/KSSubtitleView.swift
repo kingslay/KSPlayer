@@ -13,7 +13,7 @@ import AppKit
 
 public class KSSubtitleView: UIControl, SubtitleViewProtocol {
     private var infos = [SubtitleInfo]()
-    private var closeInfo = URLSubtitleInfo(subtitleID: "", name: NSLocalizedString("no show subtitle", comment: ""))
+    private let closeInfo = URLSubtitleInfo(subtitleID: "", name: NSLocalizedString("no show subtitle", comment: ""))
     private let tableView = UITableView()
     private let tableWidth = CGFloat(360)
     private var tableViewTrailingConstraint: NSLayoutConstraint!

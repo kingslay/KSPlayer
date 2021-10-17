@@ -5,7 +5,6 @@
 //  Created by kintan on 2017/11/3.
 //
 #if canImport(UIKit)
-
 import UIKit
 
 open class BrightnessVolume {
