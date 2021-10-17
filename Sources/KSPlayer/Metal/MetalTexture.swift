@@ -52,35 +52,9 @@ public final class MetalTextureCache {
         }
     }
 
-//    func textures(formats: [MTLPixelFormat], widths: [Int], heights: [Int], bytes: [UnsafeMutablePointer<UInt8>?], bytesPerRows: [Int32]) -> [MTLTexture] {
-//        let planeCount = formats.count
-//        if textures.count > planeCount {
-//            textures.removeLast(textures.count - planeCount)
-//        }
-//        for i in 0 ..< planeCount {
-//            let key = "MTLTexture" + [Int(formats[i].rawValue), widths[i], heights[i]].description
-//            if textures.count <= i || textures[i].key != key {
-//                let descriptor = MTLTextureDescriptor.texture2DDescriptor(pixelFormat: formats[i], width: widths[i], height: heights[i], mipmapped: false)
-//                let texture = device.makeTexture(descriptor: descriptor)!
-//                if textures.count <= i {
-//                    textures.append(texture)
-//                } else {
-//                    textures[i] = texture
-//                }
-//            }
-//            textures[i].replace(region: MTLRegionMake2D(0, 0, widths[i], heights[i]), mipmapLevel: 0, withBytes: bytes[i]!, bytesPerRow: Int(bytesPerRows[i]))
-//        }
-//        return textures
-//    }
-
     deinit {
-//        textures.removeAll()
         if let textureCache = textureCache {
             CVMetalTextureCacheFlush(textureCache, 0)
         }
     }
-}
-
-extension MTLTexture {
-    var key: String { "MTLTexture" + [Int(pixelFormat.rawValue), width, height].description }
 }
