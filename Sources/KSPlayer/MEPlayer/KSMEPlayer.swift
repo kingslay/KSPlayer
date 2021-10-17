@@ -117,11 +117,6 @@ extension KSMEPlayer: MEPlayerDelegate {
     func sourceDidFinished(type: AVFoundation.AVMediaType, allSatisfy: Bool) {
         runInMainqueue { [weak self] in
             guard let self = self else { return }
-            if type == .audio {
-                self.audioOutput.isPaused = true
-            } else if type == .video {
-                self.videoOutput.isPaused = true
-            }
             if allSatisfy {
                 if self.options.isLoopPlay {
                     self.loopCount += 1
@@ -130,6 +125,11 @@ extension KSMEPlayer: MEPlayerDelegate {
                     self.videoOutput.isPaused = false
                 } else {
                     self.playbackState = .finished
+                    if type == .audio {
+                        self.audioOutput.isPaused = true
+                    } else if type == .video {
+                        self.videoOutput.isPaused = true
+                    }
                 }
             }
         }
