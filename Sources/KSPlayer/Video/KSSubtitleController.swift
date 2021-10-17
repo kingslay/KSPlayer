@@ -18,16 +18,15 @@ public protocol SubtitleViewProtocol {
 }
 
 public class KSSubtitleController {
-    private var cacheDataSouce = CacheDataSouce()
+    private let cacheDataSouce = CacheDataSouce()
     private var subtitleDataSouces: [SubtitleDataSouce] = []
     private var infos = [SubtitleInfo]()
     private var subtitleName: String?
+    public let view: UIView & SubtitleViewProtocol
     public var subtitle: KSSubtitleProtocol?
     public var selectWithFilePath: ((Result<KSSubtitleProtocol?, NSError>) -> Void)?
     @KSObservable
     public var srtListCount: Int = 0
-
-    public var view: UIView & SubtitleViewProtocol
     public init(customControlView: (UIView & SubtitleViewProtocol)? = nil) {
         if let customView = customControlView {
             view = customView

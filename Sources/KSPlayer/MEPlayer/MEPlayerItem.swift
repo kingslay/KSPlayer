@@ -494,9 +494,8 @@ extension MEPlayerItem: OutputRenderSourceDelegate {
     }
 
     func getOutputRender(type: AVFoundation.AVMediaType) -> MEFrame? {
-        var predicate: ((MEFrame) -> Bool)?
         if type == .video {
-            predicate = { [weak self] frame -> Bool in
+            let predicate: (MEFrame) -> Bool = { [weak self] frame -> Bool in
                 guard let self = self else { return true }
                 var desire = self.currentPlaybackTime + self.options.audioDelay
                 if self.isAudioStalled {
