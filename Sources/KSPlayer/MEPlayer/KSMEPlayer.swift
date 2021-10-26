@@ -25,15 +25,20 @@ public class KSMEPlayer: NSObject {
         }
     }
 
-    @available(tvOS 15.0, macOS 10.15, *)
+    @available(tvOS 14.0, macOS 10.15, *)
     public private(set) lazy var pipController: AVPictureInPictureController? = {
+        _pipController()
+    }()
+
+    @available(tvOS 14.0, macOS 10.15, *)
+    private func _pipController() -> AVPictureInPictureController? {
         if #available(iOS 15.0, tvOS 15.0, macOS 12.0, *) {
             let contentSource = AVPictureInPictureController.ContentSource(sampleBufferDisplayLayer: videoOutput.displayLayer, playbackDelegate: self)
             return AVPictureInPictureController(contentSource: contentSource)
         } else {
             return nil
         }
-    }()
+    }
 
     public private(set) var playableTime = TimeInterval(0)
     public weak var delegate: MediaPlayerDelegate?
@@ -360,7 +365,7 @@ extension KSMEPlayer: MediaPlayerProtocol {
     }
 }
 
-@available(tvOS 15.0, macOS 10.15, *)
+@available(tvOS 14.0, macOS 10.15, *)
 extension KSMEPlayer: AVPictureInPictureSampleBufferPlaybackDelegate {
     public func pictureInPictureController(_: AVPictureInPictureController, setPlaying playing: Bool) {
         playing ? play() : pause()

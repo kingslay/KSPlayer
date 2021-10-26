@@ -418,7 +418,7 @@ extension KSPlayerLayer {
             return
         }
 
-        if #available(tvOS 15.0, macOS 10.15, *) {
+        if #available(tvOS 14.0, macOS 10.15, *) {
             if player.pipController?.isPictureInPictureActive ?? false {
                 return
             }

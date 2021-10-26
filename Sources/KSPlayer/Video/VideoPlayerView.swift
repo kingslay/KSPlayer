@@ -139,7 +139,7 @@ open class VideoPlayerView: PlayerView {
             alertController.addAction(UIAlertAction(title: NSLocalizedString("cancel", comment: ""), style: .cancel, handler: nil))
             viewController?.present(alertController, animated: true, completion: nil)
         } else if type == .pictureInPicture {
-            if #available(tvOS 15.0, macOS 10.15, *) {
+            if #available(tvOS 14.0, macOS 10.15, *) {
                 guard let pipController = playerLayer.player?.pipController else {
                     return
                 }
