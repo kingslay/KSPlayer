@@ -181,7 +181,7 @@ class DecompressionSession {
 
 extension CGSize {
     var aspectRatio: NSDictionary? {
-        if width != 0, height != 0 {
+        if width != 0, height != 0, width != height {
             return [kCVImageBufferPixelAspectRatioHorizontalSpacingKey: width,
                     kCVImageBufferPixelAspectRatioVerticalSpacingKey: height]
         } else {
