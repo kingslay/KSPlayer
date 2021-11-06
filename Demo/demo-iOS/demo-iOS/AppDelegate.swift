@@ -64,7 +64,6 @@ var objects: [KSPlayerResource] = {
     if let path = Bundle.main.path(forResource: "567082ac3ae39699f68de4fd2b7444b1e045515a", ofType: "mp4") {
         let options = KSOptions()
         options.videoFilters = "hflip,vflip"
-        options.hardwareDecodeH264 = false
         objects.append(KSPlayerResource(url: URL(fileURLWithPath: path), options: options, name: "本地视频"))
     }
     if let path = Bundle.main.path(forResource: "tos", ofType: "mkv") {

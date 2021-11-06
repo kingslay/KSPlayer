@@ -32,6 +32,9 @@ extension TrackProtocol {
 
 extension KSOptions {
     func canHardwareDecode(codecpar: AVCodecParameters) -> Bool {
+        if videoFilters != nil {
+            return false
+        }
         if codecpar.codec_id == AV_CODEC_ID_H264, hardwareDecodeH264 {
             return true
         } else if codecpar.codec_id == AV_CODEC_ID_HEVC, VTIsHardwareDecodeSupported(kCMVideoCodecType_HEVC), hardwareDecodeH265 {
