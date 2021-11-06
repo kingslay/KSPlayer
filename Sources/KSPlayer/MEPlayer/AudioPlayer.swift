@@ -27,7 +27,9 @@ final class AudioGraphPlayer: AudioPlayer, FrameOutput {
     private var audioUnitForDynamicsProcessor: AudioUnit!
     private var audioStreamBasicDescription = KSPlayerManager.outputFormat()
     private var currentRenderReadOffset = 0
+    #if os(macOS)
     private var volumeBeforeMute: Float = 0.0
+    #endif
     weak var renderSource: OutputRenderSourceDelegate?
     private var currentRender: AudioFrame? {
         didSet {
@@ -71,18 +73,20 @@ final class AudioGraphPlayer: AudioPlayer, FrameOutput {
         get {
             var volume = AudioUnitParameterValue(0.0)
             #if os(macOS)
-            AudioUnitGetParameter(audioUnitForMixer, kStereoMixerParam_Volume, kAudioUnitScope_Input, 0, &volume)
+            let inID = kStereoMixerParam_Volume
             #else
-            AudioUnitGetParameter(audioUnitForMixer, kMultiChannelMixerParam_Volume, kAudioUnitScope_Input, 0, &volume)
+            let inID = kMultiChannelMixerParam_Volume
             #endif
+            AudioUnitGetParameter(audioUnitForMixer, inID, kAudioUnitScope_Input, 0, &volume)
             return volume
         }
         set {
             #if os(macOS)
-            AudioUnitSetParameter(audioUnitForMixer, kStereoMixerParam_Volume, kAudioUnitScope_Input, 0, newValue, 0)
+            let inID = kStereoMixerParam_Volume
             #else
-            AudioUnitSetParameter(audioUnitForMixer, kMultiChannelMixerParam_Volume, kAudioUnitScope_Input, 0, newValue, 0)
+            let inID = kMultiChannelMixerParam_Volume
             #endif
+            AudioUnitSetParameter(audioUnitForMixer, inID, kAudioUnitScope_Input, 0, newValue, 0)
         }
     }
 
