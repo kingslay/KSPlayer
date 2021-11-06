@@ -27,6 +27,7 @@ final class AudioGraphPlayer: AudioPlayer, FrameOutput {
     private var audioUnitForDynamicsProcessor: AudioUnit!
     private var audioStreamBasicDescription = KSPlayerManager.outputFormat()
     private var currentRenderReadOffset = 0
+    private var volumeBeforeMute: Float = 0.0
     weak var renderSource: OutputRenderSourceDelegate?
     private var currentRender: AudioFrame? {
         didSet {
@@ -69,23 +70,42 @@ final class AudioGraphPlayer: AudioPlayer, FrameOutput {
     var volume: Float {
         get {
             var volume = AudioUnitParameterValue(0.0)
+            #if os(macOS)
+            AudioUnitGetParameter(audioUnitForMixer, kStereoMixerParam_Volume, kAudioUnitScope_Input, 0, &volume)
+            #else
             AudioUnitGetParameter(audioUnitForMixer, kMultiChannelMixerParam_Volume, kAudioUnitScope_Input, 0, &volume)
+            #endif
             return volume
         }
         set {
+            #if os(macOS)
+            AudioUnitSetParameter(audioUnitForMixer, kStereoMixerParam_Volume, kAudioUnitScope_Input, 0, newValue, 0)
+            #else
             AudioUnitSetParameter(audioUnitForMixer, kMultiChannelMixerParam_Volume, kAudioUnitScope_Input, 0, newValue, 0)
+            #endif
         }
     }
 
     public var isMuted: Bool {
         get {
             var value = AudioUnitParameterValue(1.0)
+            #if os(macOS)
+            AudioUnitGetParameter(audioUnitForMixer, kStereoMixerParam_Volume, kAudioUnitScope_Input, 0, &value)
+            #else
             AudioUnitGetParameter(audioUnitForMixer, kMultiChannelMixerParam_Enable, kAudioUnitScope_Input, 0, &value)
+            #endif
             return value == 0
         }
         set {
             let value = newValue ? 0 : 1
+            #if os(macOS)
+            if value == 0 {
+                volumeBeforeMute = volume
+            }
+            AudioUnitSetParameter(audioUnitForMixer, kStereoMixerParam_Volume, kAudioUnitScope_Input, 0, min(Float(value), volumeBeforeMute), 0)
+            #else
             AudioUnitSetParameter(audioUnitForMixer, kMultiChannelMixerParam_Enable, kAudioUnitScope_Input, 0, AudioUnitParameterValue(value), 0)
+            #endif
         }
     }
 
@@ -160,7 +180,7 @@ final class AudioGraphPlayer: AudioPlayer, FrameOutput {
         descriptionForMixer.componentType = kAudioUnitType_Mixer
         descriptionForMixer.componentManufacturer = kAudioUnitManufacturer_Apple
         #if os(macOS)
-        descriptionForMixer.componentSubType = kAudioUnitSubType_SpatialMixer
+        descriptionForMixer.componentSubType = kAudioUnitSubType_StereoMixer
         #else
         descriptionForMixer.componentSubType = kAudioUnitSubType_MultiChannelMixer
         #endif
