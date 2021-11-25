@@ -349,6 +349,11 @@ open class KSOptions {
         16
     }
 
+        /// customize dar
+        /// - Parameters:
+        ///   - sar: SAR(Sample Aspect Ratio)
+        ///   - dar: PAR(Pixel Aspect Ratio)
+        /// - Returns: DAR(Display Aspect Ratio)
     open func customizeDar(sar _: CGSize, par _: CGSize) -> CGSize? {
         nil
     }
