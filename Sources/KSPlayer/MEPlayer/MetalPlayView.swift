@@ -147,8 +147,8 @@ extension MetalPlayView {
         }
         let cmtime = frame.cmtime
         renderSource?.setVideo(time: cmtime)
-        let sar = pixelBuffer.size
-        let par = pixelBuffer.aspectRatio
+        let par = pixelBuffer.size
+        let sar = pixelBuffer.aspectRatio
         if pixelBuffer is PixelBuffer || !options.isUseDisplayLayer() {
             if view.isHidden {
                 view.isHidden = false
@@ -157,9 +157,9 @@ extension MetalPlayView {
             autoreleasepool {
                 if options.display == .plane {
                     if let dar = options.customizeDar(sar: sar, par: par) {
-                        view.drawableSize = CGSize(width: sar.width, height: sar.width * dar.height / dar.width)
+                        view.drawableSize = CGSize(width: par.width, height: par.width * dar.height / dar.width)
                     } else {
-                        view.drawableSize = CGSize(width: sar.width, height: sar.height * par.height / par.width)
+                        view.drawableSize = CGSize(width: par.width, height: par.height * sar.height / sar.width)
                     }
                 } else {
                     view.drawableSize = UIScreen.size
@@ -189,7 +189,7 @@ extension MetalPlayView {
             }
             // swiftlint:disable force_cast
             if let dar = options.customizeDar(sar: sar, par: par) {
-                (pixelBuffer as! CVPixelBuffer).aspectRatio = CGSize(width: dar.width, height: dar.height * sar.width / sar.height)
+                (pixelBuffer as! CVPixelBuffer).aspectRatio = CGSize(width: dar.width, height: dar.height * par.width / par.height)
             }
             set(pixelBuffer: pixelBuffer as! CVPixelBuffer, time: cmtime)
             // swiftlint:enable force_cast

@@ -538,9 +538,7 @@ enum Utility {
         var environment = environment
         environment["PATH"] = "/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
         task.environment = environment
-        if #available(OSX 10.13, *) {
-            task.currentDirectoryURL = currentDirectoryURL
-        }
+        task.currentDirectoryURL = currentDirectoryURL
         let pipe = Pipe()
 //        task.standardError = pipe
         if isOutput {
