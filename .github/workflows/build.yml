@@ -1,0 +1,20 @@
+name: build
+
+on:
+  push:
+    branches:
+      - develop
+  pull_request:
+    branches:
+      - develop
+
+jobs:
+  buid:
+    name: build
+    runs-on: macos-11
+    steps:
+      - uses: actions/checkout@main
+      - name: Build
+        run: swift build -v
+      - name: Test
+        run: swift test -v
