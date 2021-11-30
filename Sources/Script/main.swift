@@ -143,7 +143,7 @@ open class BaseBuild {
 }
 
 class BuildFFMPEG: BaseBuild {
-    private let ffmpegFile = "ffmpeg-4.4"
+    private let ffmpegFile = "ffmpeg-4.4.1"
     init() {
         super.init(library: "FFmpeg")
     }
@@ -291,13 +291,14 @@ class BuildFFMPEG: BaseBuild {
         "--disable-muxers",
         // "--enable-muxer=mpegts", "--enable-muxer=mp4",
         // ./configure --list-demuxers
-        "--disable-demuxers", "--enable-demuxer=aac", "--enable-demuxer=concat", "--enable-demuxer=data", "--enable-demuxer=flv", "--enable-demuxer=hls",
+        "--disable-demuxers", "--enable-demuxer=aac", "--enable-demuxer=concat", "--enable-demuxer=data", "--enable-demuxer=flv",
         "--enable-demuxer=live_flv", "--enable-demuxer=loas", "--enable-demuxer=m4v", "--enable-demuxer=mov",
-        "--enable-demuxer=mp3", "--enable-demuxer=mpegps", "--enable-demuxer=mpegts", "--enable-demuxer=mpegvideo",
+        "--enable-demuxer=mp3", "--enable-demuxer=mp4", "--enable-demuxer=hls",
+        "--enable-demuxer=mpegts", "--enable-demuxer=mpegtsraw", "--enable-demuxer=mpegvideo",
         "--enable-demuxer=hevc", "--enable-demuxer=dash", "--enable-demuxer=wav", "--enable-demuxer=ogg",
         "--enable-demuxer=ape", "--enable-demuxer=aiff", "--enable-demuxer=flac", "--enable-demuxer=amr",
         "--enable-demuxer=rtsp", "--enable-demuxer=asf", "--enable-demuxer=avi", "--enable-demuxer=matroska",
-        "--enable-demuxer=rm", "--enable-demuxer=vc1",
+        "--enable-demuxer=rm", "--enable-demuxer=vc1", "--enable-demuxer=h264","--enable-demuxer=mpegtsraw",
         // "--enable-demuxer=latm",
         // "--enable-demuxer=webm_dash_manifest",
         // ./configure --list-protocols
