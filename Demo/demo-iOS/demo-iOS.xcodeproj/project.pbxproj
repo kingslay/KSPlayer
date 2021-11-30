@@ -23,6 +23,7 @@
 		AC80332024BA1A2F002B3D40 /* google-help-vr.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = AC80331C24BA1A2F002B3D40 /* google-help-vr.mp4 */; };
 		AC80332124BA1A2F002B3D40 /* 567082ac3ae39699f68de4fd2b7444b1e045515a.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = AC80331D24BA1A2F002B3D40 /* 567082ac3ae39699f68de4fd2b7444b1e045515a.mp4 */; };
 		AC80332224BA1A2F002B3D40 /* video-h265.mkv in Resources */ = {isa = PBXBuildFile; fileRef = AC80331E24BA1A2F002B3D40 /* video-h265.mkv */; };
+		ACA2123E2756169900F58F75 /* raw.h264 in Resources */ = {isa = PBXBuildFile; fileRef = ACA2123D2756169900F58F75 /* raw.h264 */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -70,6 +71,7 @@
 		AC80331C24BA1A2F002B3D40 /* google-help-vr.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = "google-help-vr.mp4"; sourceTree = "<group>"; };
 		AC80331D24BA1A2F002B3D40 /* 567082ac3ae39699f68de4fd2b7444b1e045515a.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = 567082ac3ae39699f68de4fd2b7444b1e045515a.mp4; sourceTree = "<group>"; };
 		AC80331E24BA1A2F002B3D40 /* video-h265.mkv */ = {isa = PBXFileReference; lastKnownFileType = file; path = "video-h265.mkv"; sourceTree = "<group>"; };
+		ACA2123D2756169900F58F75 /* raw.h264 */ = {isa = PBXFileReference; lastKnownFileType = file; path = raw.h264; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -170,6 +172,7 @@
 			isa = PBXGroup;
 			children = (
 				AC80331B24BA1A2F002B3D40 /* Polonaise.flac */,
+				ACA2123D2756169900F58F75 /* raw.h264 */,
 				AC80331C24BA1A2F002B3D40 /* google-help-vr.mp4 */,
 				AC80331D24BA1A2F002B3D40 /* 567082ac3ae39699f68de4fd2b7444b1e045515a.mp4 */,
 				AC7D1CB426EF79B6004C5DBA /* tos.mkv */,
@@ -299,6 +302,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				ACA2123E2756169900F58F75 /* raw.h264 in Resources */,
 				AC80331F24BA1A2F002B3D40 /* Polonaise.flac in Resources */,
 				AC7D1CB526EF79B6004C5DBA /* tos.mkv in Resources */,
 				AC80332124BA1A2F002B3D40 /* 567082ac3ae39699f68de4fd2b7444b1e045515a.mp4 in Resources */,
