@@ -9,8 +9,10 @@ import KSPlayer
 import SwiftUI
 struct ContentView: View {
     var body: some View {
-        Text("Hello, world!")
-            .padding()
+        if let path = Bundle.main.path(forResource: "567082ac3ae39699f68de4fd2b7444b1e045515a", ofType: "mp4") {
+            let resource = KSPlayerResource(url: URL(fileURLWithPath: path))
+            StructPlayerView(resource: resource)
+        }
     }
 }
 
