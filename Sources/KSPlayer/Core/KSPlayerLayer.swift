@@ -97,21 +97,19 @@ open class KSPlayerLayer: UIView {
 
     private var urls = [URL]()
     private var isAutoPlay = false
-    private lazy var timer: Timer = {
-        Timer.scheduledTimer(withTimeInterval: 0.5, repeats: true) { [weak self] _ in
-            guard let self = self, let player = self.player, player.isPreparedToPlay else {
-                return
-            }
-            self.delegate?.player(layer: self, currentTime: player.currentPlaybackTime, totalTime: player.duration)
-            if player.playbackState == .playing, player.loadState == .playable, self.state == .buffering {
-                // 一个兜底保护，正常不能走到这里
-                self.state = .bufferFinished
-            }
-            if player.isPlaying {
-                MPNowPlayingInfoCenter.default().nowPlayingInfo?[MPNowPlayingInfoPropertyElapsedPlaybackTime] = player.currentPlaybackTime
-            }
+    private lazy var timer: Timer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: true) { [weak self] _ in
+        guard let self = self, let player = self.player, player.isPreparedToPlay else {
+            return
         }
-    }()
+        self.delegate?.player(layer: self, currentTime: player.currentPlaybackTime, totalTime: player.duration)
+        if player.playbackState == .playing, player.loadState == .playable, self.state == .buffering {
+            // 一个兜底保护，正常不能走到这里
+            self.state = .bufferFinished
+        }
+        if player.isPlaying {
+            MPNowPlayingInfoCenter.default().nowPlayingInfo?[MPNowPlayingInfoPropertyElapsedPlaybackTime] = player.currentPlaybackTime
+        }
+    }
 
     public var player: MediaPlayerProtocol? {
         didSet {

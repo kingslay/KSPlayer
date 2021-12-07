@@ -16,4 +16,7 @@
    <FileRef
       location = "group:Pods/Pods.xcodeproj">
    </FileRef>
+   <FileRef
+      location = "group:demo-SPM/demo-SPM.xcodeproj">
+   </FileRef>
 </Workspace>

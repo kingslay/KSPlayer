@@ -14,9 +14,7 @@ final class MetalPlayView: UIView {
     private let view = MTKView(frame: .zero, device: MetalRender.device)
     private var videoInfo: CMVideoFormatDescription?
     private var pixelBuffer: BufferProtocol?
-    private lazy var displayLink: CADisplayLink = {
-        CADisplayLink(target: self, selector: #selector(drawView))
-    }()
+    private lazy var displayLink: CADisplayLink = .init(target: self, selector: #selector(drawView))
 
     var options: KSOptions
     var isBackground = false

@@ -13,10 +13,14 @@
 		AC77DFC626402329001351AE /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC77DFB126402327001351AE /* ContentView.swift */; };
 		AC77DFC726402329001351AE /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AC77DFB226402329001351AE /* Assets.xcassets */; };
 		AC77DFC826402329001351AE /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AC77DFB226402329001351AE /* Assets.xcassets */; };
-		AC77DFDC26402464001351AE /* KSPlayer in Frameworks */ = {isa = PBXBuildFile; productRef = AC77DFDB26402464001351AE /* KSPlayer */; };
+		ACD2F74E275F6EE60006D16F /* KSPlayer in Frameworks */ = {isa = PBXBuildFile; productRef = ACD2F74D275F6EE60006D16F /* KSPlayer */; };
+		ACD2F772275F735C0006D16F /* KSPlayer in Frameworks */ = {isa = PBXBuildFile; productRef = ACD2F771275F735C0006D16F /* KSPlayer */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		338B9D99F584C9F6DF2DE31C /* Pods_demo_SPM__iOS_.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_demo_SPM__iOS_.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		409ED2C986B02A723617F1F1 /* Pods-demo-SPM (iOS).debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-demo-SPM (iOS).debug.xcconfig"; path = "Target Support Files/Pods-demo-SPM (iOS)/Pods-demo-SPM (iOS).debug.xcconfig"; sourceTree = "<group>"; };
+		6DA56DBB7D572623E48AEB27 /* Pods-demo-SPM (iOS).release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-demo-SPM (iOS).release.xcconfig"; path = "Target Support Files/Pods-demo-SPM (iOS)/Pods-demo-SPM (iOS).release.xcconfig"; sourceTree = "<group>"; };
 		AC77DFB026402327001351AE /* demo_SPMApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = demo_SPMApp.swift; sourceTree = "<group>"; };
 		AC77DFB126402327001351AE /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		AC77DFB226402329001351AE /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -25,6 +29,7 @@
 		AC77DFBF26402329001351AE /* demo-SPM.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "demo-SPM.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		AC77DFC126402329001351AE /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		AC77DFC226402329001351AE /* macOS.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = macOS.entitlements; sourceTree = "<group>"; };
+		ACD2F747275F6E860006D16F /* KSPlayer */ = {isa = PBXFileReference; lastKnownFileType = folder; name = KSPlayer; path = ../..; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -32,7 +37,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				AC77DFDC26402464001351AE /* KSPlayer in Frameworks */,
+				ACD2F772275F735C0006D16F /* KSPlayer in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -40,19 +45,33 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				ACD2F74E275F6EE60006D16F /* KSPlayer in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		71BC23521210C059DC43AE54 /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				409ED2C986B02A723617F1F1 /* Pods-demo-SPM (iOS).debug.xcconfig */,
+				6DA56DBB7D572623E48AEB27 /* Pods-demo-SPM (iOS).release.xcconfig */,
+			);
+			name = Pods;
+			path = ../Pods;
+			sourceTree = "<group>";
+		};
 		AC77DFAA26402327001351AE = {
 			isa = PBXGroup;
 			children = (
+				ACD2F743275F6D7A0006D16F /* Packages */,
 				AC77DFAF26402327001351AE /* Shared */,
 				AC77DFB926402329001351AE /* iOS */,
 				AC77DFC026402329001351AE /* macOS */,
 				AC77DFB826402329001351AE /* Products */,
+				ACD2F74C275F6EE60006D16F /* Frameworks */,
+				71BC23521210C059DC43AE54 /* Pods */,
 			);
 			sourceTree = "<group>";
 		};
@@ -92,6 +111,22 @@
 			path = macOS;
 			sourceTree = "<group>";
 		};
+		ACD2F743275F6D7A0006D16F /* Packages */ = {
+			isa = PBXGroup;
+			children = (
+				ACD2F747275F6E860006D16F /* KSPlayer */,
+			);
+			name = Packages;
+			sourceTree = "<group>";
+		};
+		ACD2F74C275F6EE60006D16F /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				338B9D99F584C9F6DF2DE31C /* Pods_demo_SPM__iOS_.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -99,6 +134,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = AC77DFCB26402329001351AE /* Build configuration list for PBXNativeTarget "demo-SPM (iOS)" */;
 			buildPhases = (
+				818BBAC3ABE09C8691BCC788 /* [CP] Check Pods Manifest.lock */,
 				AC77DFB326402329001351AE /* Sources */,
 				AC77DFB426402329001351AE /* Frameworks */,
 				AC77DFB526402329001351AE /* Resources */,
@@ -109,7 +145,7 @@
 			);
 			name = "demo-SPM (iOS)";
 			packageProductDependencies = (
-				AC77DFDB26402464001351AE /* KSPlayer */,
+				ACD2F771275F735C0006D16F /* KSPlayer */,
 			);
 			productName = "demo-SPM (iOS)";
 			productReference = AC77DFB726402329001351AE /* demo-SPM.app */;
@@ -128,6 +164,9 @@
 			dependencies = (
 			);
 			name = "demo-SPM (macOS)";
+			packageProductDependencies = (
+				ACD2F74D275F6EE60006D16F /* KSPlayer */,
+			);
 			productName = "demo-SPM (macOS)";
 			productReference = AC77DFBF26402329001351AE /* demo-SPM.app */;
 			productType = "com.apple.product-type.application";
@@ -139,7 +178,7 @@
 			isa = PBXProject;
 			attributes = {
 				LastSwiftUpdateCheck = 1240;
-				LastUpgradeCheck = 1240;
+				LastUpgradeCheck = 1310;
 				TargetAttributes = {
 					AC77DFB626402329001351AE = {
 						CreatedOnToolsVersion = 12.4;
@@ -158,9 +197,6 @@
 				Base,
 			);
 			mainGroup = AC77DFAA26402327001351AE;
-			packageReferences = (
-				AC77DFDA26402464001351AE /* XCRemoteSwiftPackageReference "." */,
-			);
 			productRefGroup = AC77DFB826402329001351AE /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -189,6 +225,31 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		818BBAC3ABE09C8691BCC788 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-demo-SPM (iOS)-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		AC77DFB326402329001351AE /* Sources */ = {
@@ -325,6 +386,7 @@
 		};
 		AC77DFCC26402329001351AE /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 409ED2C986B02A723617F1F1 /* Pods-demo-SPM (iOS).debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -349,6 +411,7 @@
 		};
 		AC77DFCD26402329001351AE /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 6DA56DBB7D572623E48AEB27 /* Pods-demo-SPM (iOS).release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -378,6 +441,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = macOS/macOS.entitlements;
+				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				ENABLE_PREVIEWS = YES;
@@ -400,6 +464,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = macOS/macOS.entitlements;
+				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				ENABLE_PREVIEWS = YES;
@@ -448,21 +513,13 @@
 		};
 /* End XCConfigurationList section */
 
-/* Begin XCRemoteSwiftPackageReference section */
-		AC77DFDA26402464001351AE /* XCRemoteSwiftPackageReference "." */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = ../..;
-			requirement = {
-				branch = develop;
-				kind = branch;
-			};
-		};
-/* End XCRemoteSwiftPackageReference section */
-
 /* Begin XCSwiftPackageProductDependency section */
-		AC77DFDB26402464001351AE /* KSPlayer */ = {
+		ACD2F74D275F6EE60006D16F /* KSPlayer */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = AC77DFDA26402464001351AE /* XCRemoteSwiftPackageReference "." */;
+			productName = KSPlayer;
+		};
+		ACD2F771275F735C0006D16F /* KSPlayer */ = {
+			isa = XCSwiftPackageProductDependency;
 			productName = KSPlayer;
 		};
 /* End XCSwiftPackageProductDependency section */

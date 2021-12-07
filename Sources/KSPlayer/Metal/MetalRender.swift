@@ -35,29 +35,17 @@ class MetalRender {
         return MetalRender.device.makeSamplerState(descriptor: samplerDescriptor)
     }()
 
-    private lazy var colorConversion601VideoRangeMatrixBuffer: MTLBuffer? = {
-        kvImage_YpCbCrToARGBMatrix_ITU_R_601_4.pointee.videoRange.buffer
-    }()
+    private lazy var colorConversion601VideoRangeMatrixBuffer: MTLBuffer? = kvImage_YpCbCrToARGBMatrix_ITU_R_601_4.pointee.videoRange.buffer
 
-    private lazy var colorConversion601FullRangeMatrixBuffer: MTLBuffer? = {
-        kvImage_YpCbCrToARGBMatrix_ITU_R_601_4.pointee.buffer
-    }()
+    private lazy var colorConversion601FullRangeMatrixBuffer: MTLBuffer? = kvImage_YpCbCrToARGBMatrix_ITU_R_601_4.pointee.buffer
 
-    private lazy var colorConversion709VideoRangeMatrixBuffer: MTLBuffer? = {
-        kvImage_YpCbCrToARGBMatrix_ITU_R_709_2.pointee.videoRange.buffer
-    }()
+    private lazy var colorConversion709VideoRangeMatrixBuffer: MTLBuffer? = kvImage_YpCbCrToARGBMatrix_ITU_R_709_2.pointee.videoRange.buffer
 
-    private lazy var colorConversion709FullRangeMatrixBuffer: MTLBuffer? = {
-        kvImage_YpCbCrToARGBMatrix_ITU_R_709_2.pointee.buffer
-    }()
+    private lazy var colorConversion709FullRangeMatrixBuffer: MTLBuffer? = kvImage_YpCbCrToARGBMatrix_ITU_R_709_2.pointee.buffer
 
-    private lazy var colorConversion2020MatrixBuffer: MTLBuffer? = {
-        kvImage_YpCbCrToARGBMatrix_ITU_R_2020.videoRange.buffer
-    }()
+    private lazy var colorConversion2020MatrixBuffer: MTLBuffer? = kvImage_YpCbCrToARGBMatrix_ITU_R_2020.videoRange.buffer
 
-    private lazy var colorConversion2020FullRangeMatrixBuffer: MTLBuffer? = {
-        kvImage_YpCbCrToARGBMatrix_ITU_R_2020.buffer
-    }()
+    private lazy var colorConversion2020FullRangeMatrixBuffer: MTLBuffer? = kvImage_YpCbCrToARGBMatrix_ITU_R_2020.buffer
 
     private lazy var colorOffsetVideoRangeMatrixBuffer: MTLBuffer? = {
         var firstColumn = SIMD3<Float>(-16.0 / 255.0, -128.0 / 255.0, -128.0 / 255.0)

@@ -1,17 +1,21 @@
 import Foundation
-let path = URL.currentDirectory + "Script"
-if !FileManager.default.fileExists(atPath: path.path) {
-    try FileManager.default.createDirectory(at: path, withIntermediateDirectories: false, attributes: nil)
-}
+@main
+class BaseBuild {
+    fileprivate static let argumentsArray = Array(CommandLine.arguments.dropFirst())
+    static func main() {
+        let path = URL.currentDirectory + "Script"
+        if !FileManager.default.fileExists(atPath: path.path) {
+            try? FileManager.default.createDirectory(at: path, withIntermediateDirectories: false, attributes: nil)
+        }
+        FileManager.default.changeCurrentDirectoryPath(path.path)
+        let onlyFFmpeg = argumentsArray.firstIndex(of: "only-ffmpeg") != nil
+        if !onlyFFmpeg {
+            BuildOpenSSL().buildALL()
+            // BuildBoringSSL().buildALL()
+        }
+        BuildFFMPEG().buildALL()
+    }
 
-FileManager.default.changeCurrentDirectoryPath(path.path)
-let array = Array(CommandLine.arguments.dropFirst())
-let isDebug = array.firstIndex(of: "debug") != nil
-let xcodePath = Utility.shell("xcode-select -p", isOutput: true) ?? ""
-BuildOpenSSL().buildALL()
-// BuildBoringSSL().buildALL()
-BuildFFMPEG().buildALL()
-open class BaseBuild {
     private let platforms = PlatformType.allCases
     // private let platforms = [PlatformType.tvos]
     private let library: String
@@ -144,13 +148,20 @@ open class BaseBuild {
 
 class BuildFFMPEG: BaseBuild {
     private let ffmpegFile = "ffmpeg-4.4.1"
+    private let isDebug: Bool
+    private let isFFplay: Bool
     init() {
+        isDebug = BaseBuild.argumentsArray.firstIndex(of: "debug") != nil
+        isFFplay = BaseBuild.argumentsArray.firstIndex(of: "ffplay") != nil
         super.init(library: "FFmpeg")
     }
 
     override func innerBuid(platform: PlatformType, arch: ArchType, cflags: String, buildDir: URL) {
         var ffmpegcflags = ffmpegConfiguers
-        if isDebug && platform == .macos {
+        if !isDebug {
+            ffmpegcflags.append("--disable-debug")
+        }
+        if isFFplay && platform == .macos && arch == .x86_64 {
             ffmpegcflags.append("--enable-ffmpeg")
             ffmpegcflags.append("--enable-ffplay")
             ffmpegcflags.append("--enable-sdl2")
@@ -159,7 +170,6 @@ class BuildFFMPEG: BaseBuild {
             ffmpegcflags.append("--enable-muxer=m4v")
             ffmpegcflags.append("--enable-muxer=dash")
         } else {
-            ffmpegcflags.append("--disable-debug")
             ffmpegcflags.append("--disable-programs")
             ffmpegcflags.append("--disable-ffmpeg")
             ffmpegcflags.append("--disable-ffplay")
@@ -298,7 +308,7 @@ class BuildFFMPEG: BaseBuild {
         "--enable-demuxer=hevc", "--enable-demuxer=dash", "--enable-demuxer=wav", "--enable-demuxer=ogg",
         "--enable-demuxer=ape", "--enable-demuxer=aiff", "--enable-demuxer=flac", "--enable-demuxer=amr",
         "--enable-demuxer=rtsp", "--enable-demuxer=asf", "--enable-demuxer=avi", "--enable-demuxer=matroska",
-        "--enable-demuxer=rm", "--enable-demuxer=vc1", "--enable-demuxer=h264","--enable-demuxer=mpegtsraw",
+        "--enable-demuxer=rm", "--enable-demuxer=vc1", "--enable-demuxer=h264", "--enable-demuxer=mpegtsraw",
         // "--enable-demuxer=latm",
         // "--enable-demuxer=webm_dash_manifest",
         // ./configure --list-protocols
@@ -389,6 +399,7 @@ class BuildBoringSSL: BaseBuild {
 }
 
 enum PlatformType: String, CaseIterable {
+    private static let xcodePath = Utility.shell("xcode-select -p", isOutput: true) ?? ""
     case ios, isimulator, tvos, tvsimulator, macos, maccatalyst
     var minVersion: String {
         switch self {
@@ -475,7 +486,7 @@ enum PlatformType: String, CaseIterable {
         if self == .maccatalyst {
             return PlatformType.macos.crossTop()
         } else {
-            return "\(xcodePath)/Platforms/\(sdk()).platform/Developer"
+            return "\(PlatformType.xcodePath)/Platforms/\(sdk()).platform/Developer"
         }
     }
 
