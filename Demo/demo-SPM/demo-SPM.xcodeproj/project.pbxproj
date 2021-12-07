@@ -15,6 +15,18 @@
 		AC77DFC826402329001351AE /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AC77DFB226402329001351AE /* Assets.xcassets */; };
 		ACD2F74E275F6EE60006D16F /* KSPlayer in Frameworks */ = {isa = PBXBuildFile; productRef = ACD2F74D275F6EE60006D16F /* KSPlayer */; };
 		ACD2F772275F735C0006D16F /* KSPlayer in Frameworks */ = {isa = PBXBuildFile; productRef = ACD2F771275F735C0006D16F /* KSPlayer */; };
+		ACD2F786275F9BEE0006D16F /* Polonaise.flac in Resources */ = {isa = PBXBuildFile; fileRef = ACD2F780275F9BEE0006D16F /* Polonaise.flac */; };
+		ACD2F787275F9BEE0006D16F /* Polonaise.flac in Resources */ = {isa = PBXBuildFile; fileRef = ACD2F780275F9BEE0006D16F /* Polonaise.flac */; };
+		ACD2F788275F9BEE0006D16F /* tos.mkv in Resources */ = {isa = PBXBuildFile; fileRef = ACD2F781275F9BEE0006D16F /* tos.mkv */; };
+		ACD2F789275F9BEE0006D16F /* tos.mkv in Resources */ = {isa = PBXBuildFile; fileRef = ACD2F781275F9BEE0006D16F /* tos.mkv */; };
+		ACD2F78A275F9BEE0006D16F /* google-help-vr.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = ACD2F782275F9BEE0006D16F /* google-help-vr.mp4 */; };
+		ACD2F78B275F9BEE0006D16F /* google-help-vr.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = ACD2F782275F9BEE0006D16F /* google-help-vr.mp4 */; };
+		ACD2F78C275F9BEE0006D16F /* raw.h264 in Resources */ = {isa = PBXBuildFile; fileRef = ACD2F783275F9BEE0006D16F /* raw.h264 */; };
+		ACD2F78D275F9BEE0006D16F /* raw.h264 in Resources */ = {isa = PBXBuildFile; fileRef = ACD2F783275F9BEE0006D16F /* raw.h264 */; };
+		ACD2F78E275F9BEE0006D16F /* 567082ac3ae39699f68de4fd2b7444b1e045515a.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = ACD2F784275F9BEE0006D16F /* 567082ac3ae39699f68de4fd2b7444b1e045515a.mp4 */; };
+		ACD2F78F275F9BEE0006D16F /* 567082ac3ae39699f68de4fd2b7444b1e045515a.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = ACD2F784275F9BEE0006D16F /* 567082ac3ae39699f68de4fd2b7444b1e045515a.mp4 */; };
+		ACD2F790275F9BEE0006D16F /* video-h265.mkv in Resources */ = {isa = PBXBuildFile; fileRef = ACD2F785275F9BEE0006D16F /* video-h265.mkv */; };
+		ACD2F791275F9BEE0006D16F /* video-h265.mkv in Resources */ = {isa = PBXBuildFile; fileRef = ACD2F785275F9BEE0006D16F /* video-h265.mkv */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -30,6 +42,12 @@
 		AC77DFC126402329001351AE /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		AC77DFC226402329001351AE /* macOS.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = macOS.entitlements; sourceTree = "<group>"; };
 		ACD2F747275F6E860006D16F /* KSPlayer */ = {isa = PBXFileReference; lastKnownFileType = folder; name = KSPlayer; path = ../..; sourceTree = "<group>"; };
+		ACD2F780275F9BEE0006D16F /* Polonaise.flac */ = {isa = PBXFileReference; lastKnownFileType = file; path = Polonaise.flac; sourceTree = "<group>"; };
+		ACD2F781275F9BEE0006D16F /* tos.mkv */ = {isa = PBXFileReference; lastKnownFileType = file; path = tos.mkv; sourceTree = "<group>"; };
+		ACD2F782275F9BEE0006D16F /* google-help-vr.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = "google-help-vr.mp4"; sourceTree = "<group>"; };
+		ACD2F783275F9BEE0006D16F /* raw.h264 */ = {isa = PBXFileReference; lastKnownFileType = file; path = raw.h264; sourceTree = "<group>"; };
+		ACD2F784275F9BEE0006D16F /* 567082ac3ae39699f68de4fd2b7444b1e045515a.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = 567082ac3ae39699f68de4fd2b7444b1e045515a.mp4; sourceTree = "<group>"; };
+		ACD2F785275F9BEE0006D16F /* video-h265.mkv */ = {isa = PBXFileReference; lastKnownFileType = file; path = "video-h265.mkv"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -81,6 +99,7 @@
 				AC77DFB026402327001351AE /* demo_SPMApp.swift */,
 				AC77DFB126402327001351AE /* ContentView.swift */,
 				AC77DFB226402329001351AE /* Assets.xcassets */,
+				ACD2F77F275F9BEE0006D16F /* Resources */,
 			);
 			path = Shared;
 			sourceTree = "<group>";
@@ -125,6 +144,20 @@
 				338B9D99F584C9F6DF2DE31C /* Pods_demo_SPM__iOS_.framework */,
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		ACD2F77F275F9BEE0006D16F /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				ACD2F780275F9BEE0006D16F /* Polonaise.flac */,
+				ACD2F781275F9BEE0006D16F /* tos.mkv */,
+				ACD2F782275F9BEE0006D16F /* google-help-vr.mp4 */,
+				ACD2F783275F9BEE0006D16F /* raw.h264 */,
+				ACD2F784275F9BEE0006D16F /* 567082ac3ae39699f68de4fd2b7444b1e045515a.mp4 */,
+				ACD2F785275F9BEE0006D16F /* video-h265.mkv */,
+			);
+			name = Resources;
+			path = ../../../Tests/KSPlayerTests/Resources;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -212,6 +245,12 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				ACD2F788275F9BEE0006D16F /* tos.mkv in Resources */,
+				ACD2F78E275F9BEE0006D16F /* 567082ac3ae39699f68de4fd2b7444b1e045515a.mp4 in Resources */,
+				ACD2F790275F9BEE0006D16F /* video-h265.mkv in Resources */,
+				ACD2F78A275F9BEE0006D16F /* google-help-vr.mp4 in Resources */,
+				ACD2F78C275F9BEE0006D16F /* raw.h264 in Resources */,
+				ACD2F786275F9BEE0006D16F /* Polonaise.flac in Resources */,
 				AC77DFC726402329001351AE /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -220,6 +259,12 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				ACD2F789275F9BEE0006D16F /* tos.mkv in Resources */,
+				ACD2F78F275F9BEE0006D16F /* 567082ac3ae39699f68de4fd2b7444b1e045515a.mp4 in Resources */,
+				ACD2F791275F9BEE0006D16F /* video-h265.mkv in Resources */,
+				ACD2F78B275F9BEE0006D16F /* google-help-vr.mp4 in Resources */,
+				ACD2F78D275F9BEE0006D16F /* raw.h264 in Resources */,
+				ACD2F787275F9BEE0006D16F /* Polonaise.flac in Resources */,
 				AC77DFC826402329001351AE /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
