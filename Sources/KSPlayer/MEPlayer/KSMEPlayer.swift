@@ -26,9 +26,7 @@ public class KSMEPlayer: NSObject {
     }
 
     @available(tvOS 14.0, macOS 10.15, *)
-    public private(set) lazy var pipController: AVPictureInPictureController? = {
-        _pipController()
-    }()
+    public private(set) lazy var pipController: AVPictureInPictureController? = _pipController()
 
     @available(tvOS 14.0, macOS 10.15, *)
     private func _pipController() -> AVPictureInPictureController? {

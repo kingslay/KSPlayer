@@ -30,3 +30,6 @@ target 'demo-tvOS' do
   platform :tvos, 11.0
   common
 end
+target 'demo-SPM (iOS)' do
+  project 'demo-SPM/demo-SPM.xcodeproj'
+end

@@ -243,7 +243,7 @@ public protocol PlayerControllerDelegate: class {
 ## Debug FFmpeg
 
 ```bash
-swift run Script debug
+swift run BuildFFmpeg debug
 dwarfdump -F --debug-info ../Sources/libavformat.xcframework/macos-arm64_x86_64/Libavformat.framework/Libavformat | head -n 20
 ```
 
