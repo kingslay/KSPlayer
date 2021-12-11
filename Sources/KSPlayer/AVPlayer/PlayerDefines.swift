@@ -43,6 +43,8 @@ public protocol MediaPlayerProtocol: MediaPlayback {
     var subtitleDataSouce: SubtitleDataSouce? { get }
     @available(tvOS 14.0, macOS 10.15, *)
     var pipController: AVPictureInPictureController? { get }
+    @available(macOS 12.0, iOS 15.0, tvOS 15.0, *)
+    var playbackCoordinator: AVPlaybackCoordinator { get }
     init(url: URL, options: KSOptions)
     func replace(url: URL, options: KSOptions)
     func play()

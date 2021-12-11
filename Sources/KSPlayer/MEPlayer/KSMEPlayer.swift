@@ -19,6 +19,7 @@ public class KSMEPlayer: NSObject {
     private var playerItem: MEPlayerItem
     private let videoOutput: MetalPlayView
     private var options: KSOptions
+    private var bufferingCountDownTimer: Timer?
     public private(set) var bufferingProgress = 0 {
         didSet {
             delegate?.changeBuffering(player: self, progress: bufferingProgress)
@@ -37,6 +38,13 @@ public class KSMEPlayer: NSObject {
             return nil
         }
     }
+
+    @available(macOS 12.0, iOS 15.0, tvOS 15.0, *)
+    public private(set) lazy var playbackCoordinator: AVPlaybackCoordinator = {
+        let coordinator = AVDelegatingPlaybackCoordinator(playbackControlDelegate: self)
+        coordinator.suspensionReasonsThatTriggerWaiting = [.stallRecovery]
+        return coordinator
+    }()
 
     public private(set) var playableTime = TimeInterval(0)
     public weak var delegate: MediaPlayerDelegate?
@@ -387,6 +395,82 @@ extension KSMEPlayer: AVPictureInPictureSampleBufferPlaybackDelegate {
 
     public func pictureInPictureControllerShouldProhibitBackgroundAudioPlayback(_: AVPictureInPictureController) -> Bool {
         false
+    }
+}
+
+@available(macOS 12.0, iOS 15.0, tvOS 15.0, *)
+extension KSMEPlayer: AVPlaybackCoordinatorPlaybackControlDelegate {
+    public func playbackCoordinator(_: AVDelegatingPlaybackCoordinator, didIssue playCommand: AVDelegatingPlaybackCoordinatorPlayCommand, completionHandler: @escaping () -> Void) {
+        guard playCommand.expectedCurrentItemIdentifier == (playbackCoordinator as? AVDelegatingPlaybackCoordinator)?.currentItemIdentifier else {
+            completionHandler()
+            return
+        }
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else {
+                return
+            }
+            if self.playbackState != .playing {
+                self.play()
+            }
+            completionHandler()
+        }
+    }
+
+    public func playbackCoordinator(_: AVDelegatingPlaybackCoordinator, didIssue pauseCommand: AVDelegatingPlaybackCoordinatorPauseCommand, completionHandler: @escaping () -> Void) {
+        guard pauseCommand.expectedCurrentItemIdentifier == (playbackCoordinator as? AVDelegatingPlaybackCoordinator)?.currentItemIdentifier else {
+            completionHandler()
+            return
+        }
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else {
+                return
+            }
+            if self.playbackState != .paused {
+                self.pause()
+            }
+            completionHandler()
+        }
+    }
+
+    public func playbackCoordinator(_: AVDelegatingPlaybackCoordinator, didIssue seekCommand: AVDelegatingPlaybackCoordinatorSeekCommand, completionHandler: @escaping () -> Void) {
+        guard seekCommand.expectedCurrentItemIdentifier == (playbackCoordinator as? AVDelegatingPlaybackCoordinator)?.currentItemIdentifier else {
+            completionHandler()
+            return
+        }
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else {
+                return
+            }
+            let seekTime = fmod(seekCommand.itemTime.seconds, self.duration)
+            if abs(self.currentPlaybackTime - seekTime) < CGFLOAT_EPSILON {
+                completionHandler()
+                return
+            }
+            self.seek(time: seekTime) { _ in
+                completionHandler()
+            }
+        }
+    }
+
+    public func playbackCoordinator(_: AVDelegatingPlaybackCoordinator, didIssue bufferingCommand: AVDelegatingPlaybackCoordinatorBufferingCommand, completionHandler: @escaping () -> Void) {
+        guard bufferingCommand.expectedCurrentItemIdentifier == (playbackCoordinator as? AVDelegatingPlaybackCoordinator)?.currentItemIdentifier else {
+            completionHandler()
+            return
+        }
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else {
+                return
+            }
+            guard self.loadState != .playable, let countDown = bufferingCommand.completionDueDate?.timeIntervalSinceNow else {
+                completionHandler()
+                return
+            }
+            self.bufferingCountDownTimer?.invalidate()
+            self.bufferingCountDownTimer = nil
+            self.bufferingCountDownTimer = Timer(timeInterval: countDown, repeats: false) { _ in
+                completionHandler()
+            }
+        }
     }
 }
 
