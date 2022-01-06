@@ -52,7 +52,7 @@ class VideoSwresample: Swresample {
         self.height = height
         self.width = width
         if !forceTransfer {
-            if self.format.osType() != nil {
+            if let osType = self.format.osType(), osType.planeCount() == format.planeCount() {
                 dstFormat = self.format
                 return true
             } else {
@@ -259,38 +259,73 @@ extension AVPixelFormat {
     }
 
     // swiftlint:disable cyclomatic_complexity
+    // avfoundation.m
     func osType() -> OSType? {
         switch self {
-        case AV_PIX_FMT_ABGR: return kCVPixelFormatType_32ABGR
-        case AV_PIX_FMT_ARGB: return kCVPixelFormatType_32ARGB
-        case AV_PIX_FMT_BGR24: return kCVPixelFormatType_24BGR
-        case AV_PIX_FMT_BGR48BE: return kCVPixelFormatType_48RGB
-        case AV_PIX_FMT_BGRA: return kCVPixelFormatType_32BGRA
         case AV_PIX_FMT_MONOBLACK: return kCVPixelFormatType_1Monochrome
-        case AV_PIX_FMT_NV12: return kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange
-        case AV_PIX_FMT_RGB24: return kCVPixelFormatType_24RGB
+        case AV_PIX_FMT_GRAY8: return kCVPixelFormatType_OneComponent8
         case AV_PIX_FMT_RGB555BE: return kCVPixelFormatType_16BE555
         case AV_PIX_FMT_RGB555LE: return kCVPixelFormatType_16LE555
         case AV_PIX_FMT_RGB565BE: return kCVPixelFormatType_16BE565
         case AV_PIX_FMT_RGB565LE: return kCVPixelFormatType_16LE565
-        case AV_PIX_FMT_RGBA: return kCVPixelFormatType_32RGBA
-        case AV_PIX_FMT_UYVY422: return kCVPixelFormatType_422YpCbCr8
+        case AV_PIX_FMT_BGR24: return kCVPixelFormatType_24BGR
+        case AV_PIX_FMT_RGB24: return kCVPixelFormatType_24RGB
+        case AV_PIX_FMT_0RGB: return kCVPixelFormatType_32ARGB
+        case AV_PIX_FMT_BGR0: return kCVPixelFormatType_32BGRA
+        case AV_PIX_FMT_0BGR: return kCVPixelFormatType_32ABGR
+        case AV_PIX_FMT_RGB0: return kCVPixelFormatType_32RGBA
+        case AV_PIX_FMT_BGR48BE: return kCVPixelFormatType_48RGB
+        case AV_PIX_FMT_NV12: return kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange
+        case AV_PIX_FMT_P010LE: return kCVPixelFormatType_420YpCbCr10BiPlanarFullRange
+        case AV_PIX_FMT_YUV420P10LE: return kCVPixelFormatType_420YpCbCr10BiPlanarFullRange
         case AV_PIX_FMT_YUV420P: return kCVPixelFormatType_420YpCbCr8Planar
+        case AV_PIX_FMT_UYVY422: return kCVPixelFormatType_422YpCbCr8
+        case AV_PIX_FMT_YUYV422: return kCVPixelFormatType_422YpCbCr8_yuvs
 //        case AV_PIX_FMT_YUVJ420P:   return kCVPixelFormatType_420YpCbCr8PlanarFullRange
-        case AV_PIX_FMT_P010LE: return kCVPixelFormatType_420YpCbCr10BiPlanarVideoRange
         case AV_PIX_FMT_YUV422P10LE: return kCVPixelFormatType_422YpCbCr10
         case AV_PIX_FMT_YUV422P16LE: return kCVPixelFormatType_422YpCbCr16
         case AV_PIX_FMT_YUV444P: return kCVPixelFormatType_444YpCbCr8
         case AV_PIX_FMT_YUV444P10LE: return kCVPixelFormatType_444YpCbCr10
         case AV_PIX_FMT_YUVA444P: return kCVPixelFormatType_4444YpCbCrA8R
         case AV_PIX_FMT_YUVA444P16LE: return kCVPixelFormatType_4444AYpCbCr16
-        case AV_PIX_FMT_YUYV422: return kCVPixelFormatType_422YpCbCr8_yuvs
-        case AV_PIX_FMT_GRAY8: return kCVPixelFormatType_OneComponent8
         default:
             return nil
         }
     }
     // swiftlint:enable cyclomatic_complexity
+}
+
+extension OSType {
+    func planeCount() -> UInt8 {
+        switch self {
+        case kCVPixelFormatType_48RGB,
+            kCVPixelFormatType_32ABGR,
+            kCVPixelFormatType_32ARGB,
+            kCVPixelFormatType_32BGRA,
+            kCVPixelFormatType_32RGBA,
+            kCVPixelFormatType_24BGR,
+            kCVPixelFormatType_24RGB,
+            kCVPixelFormatType_16BE555,
+            kCVPixelFormatType_16LE555,
+            kCVPixelFormatType_16BE565,
+            kCVPixelFormatType_16LE565,
+            kCVPixelFormatType_16BE555,
+            kCVPixelFormatType_OneComponent8,
+            kCVPixelFormatType_1Monochrome:
+            return 1
+        case kCVPixelFormatType_422YpCbCr8,
+             kCVPixelFormatType_422YpCbCr8_yuvs,
+             kCVPixelFormatType_422YpCbCr10,
+             kCVPixelFormatType_422YpCbCr16,
+             kCVPixelFormatType_444YpCbCr8,
+             kCVPixelFormatType_4444YpCbCrA8R,
+             kCVPixelFormatType_444YpCbCr10,
+             kCVPixelFormatType_4444AYpCbCr16,
+             kCVPixelFormatType_420YpCbCr8PlanarFullRange:
+            return 3
+        default: return 2
+        }
+    }
 }
 
 extension CVPixelBufferPool {
