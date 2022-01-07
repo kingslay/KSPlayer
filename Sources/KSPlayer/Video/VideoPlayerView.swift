@@ -441,6 +441,24 @@ extension VideoPlayerView {
             break
         }
     }
+    
+    public var subtitleTextColor: UIColor {
+        get {
+            return subtitleLabel.textColor
+        }
+        set {
+            subtitleLabel.textColor = newValue
+        }
+    }
+    
+    public var subtitleBackViewColor: UIColor? {
+        get {
+            return subtitleBackView.backgroundColor
+        }
+        set {
+            subtitleBackView.backgroundColor = newValue
+        }
+    }
 
     private func setupSrtControl() {
         subtitleLabel.numberOfLines = 0

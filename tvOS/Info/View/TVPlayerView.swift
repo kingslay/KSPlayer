@@ -35,22 +35,21 @@ final class TVPlayerView: VideoPlayerView {
         }
     }
     
-    public var subtitleColor: UIColor? {
-        return nil
-//        get {
-//            return self.subtitleTextColor
-//        }
-//        set {
-//            self.subtitleTextColor = newValue
-//        }
-    }
-    
-    public var subtitleBacgroundColor: UIColor {
+    public var subtitleColor: UIColor {
         get {
-            return self.subtitleBackView.backgroundColor ?? .white
+            return self.subtitleTextColor
         }
         set {
-            self.subtitleBackView.backgroundColor = newValue
+            self.subtitleTextColor = newValue
+        }
+    }
+    
+    public var subtitleBacgroundColor: UIColor? {
+        get {
+            return subtitleBackViewColor
+        }
+        set {
+            subtitleBackViewColor = newValue
         }
     }
     
@@ -95,7 +94,7 @@ final class TVPlayerView: VideoPlayerView {
         player.releaseTime = 0.2629
         player.threshold = -23.8
         player.expansionRatio = 20
-//        player.masterGain = 7.5
+        player.overallGain = 7.5
     }
     
     private func fullDynamicRange() {
@@ -104,7 +103,7 @@ final class TVPlayerView: VideoPlayerView {
         player.releaseTime = 0.05
         player.threshold = -20
         player.expansionRatio = 2
-//        player.masterGain = 0
+        player.overallGain = 0
     }
 }
 
