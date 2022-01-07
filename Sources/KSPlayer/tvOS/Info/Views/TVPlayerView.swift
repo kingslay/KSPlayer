@@ -7,6 +7,7 @@
 
 import UIKit
 import AVFoundation
+import AVKit
 
 //MARK: - need custom playerView
 final class TVPlayerView: VideoPlayerView {
@@ -15,6 +16,19 @@ final class TVPlayerView: VideoPlayerView {
         super.init(frame: frame)
         self.topMaskView.isHidden = true
         self.bottomMaskView.isHidden = true
+    }
+    
+    deinit {
+        if #available(tvOS 13.0, *) {
+            displayCriteria = nil
+        }
+    }
+    
+    override func removeFromSuperview() {
+        super.removeFromSuperview()
+        if #available(tvOS 13.0, *) {
+            displayCriteria = nil
+        }
     }
     
     public func setSubtitlesBackgorund(color:UIColor) {
@@ -36,25 +50,25 @@ final class TVPlayerView: VideoPlayerView {
         }
     }
     
-    public var subtitleColor: UIColor?
-//    {
-//        get {
-//            return self.subtitleTextColor
-//        }
-//        set {
-//            self.subtitleTextColor = newValue
-//        }
-//    }
+    public var subtitleColor: UIColor
+    {
+        get {
+            return self.subtitleTextColor
+        }
+        set {
+            self.subtitleTextColor = newValue
+        }
+    }
     
     public var subtitleBacgroundColor: UIColor?
-//    {
-//        get {
-//            return subtitleBackViewColor
-//        }
-//        set {
-//            subtitleBackViewColor = newValue
-//        }
-//    }
+    {
+        get {
+            return subtitleBackViewColor
+        }
+        set {
+            subtitleBackViewColor = newValue
+        }
+    }
     
     public var subtitleSize: CGFloat {
         get {
@@ -107,6 +121,68 @@ final class TVPlayerView: VideoPlayerView {
         player.threshold = -20
         player.expansionRatio = 2
         player.overallGain = 0
+    }
+    
+    override public func player(layer: KSPlayerLayer, state: KSPlayerState) {
+        super.player(layer: layer, state: state)
+        guard state == .readyToPlay, let player = layer.player else { return }
+        var fps: Float = 24.0
+        var dynamicRange: DynamicRange = .SDR
+        
+        for track in player.tracks(mediaType: .video) {
+            fps = track.nominalFrameRate
+            
+            if track.codecType.string == "ehvd" /// DolbyVision
+            {
+                dynamicRange = .DV
+            }
+            else if let colorPrimaries = track.colorPrimaries, /// HDR
+                colorPrimaries.contains("2020")  {
+                dynamicRange = .HDR
+            }
+            //video name: eng bitRate: 0 fps: 23.976025 bitDepth: 10 colorPrimaries: ITU_R_2020 colorPrimaries: SMPTE_ST_2084_PQ yCbCrMatrix: ITU_R_2020 codecType:
+            //video name: und bitRate: 17804863 fps: 23.976025 bitDepth: 10 colorPrimaries:  colorPrimaries:  yCbCrMatrix:  codecType:  ehvd
+        }
+        if #available(tvOS 13.0, *) {
+            set(fps: fps, contentMode: dynamicRange)
+        }
+    }
+}
+
+// MARK: - updating display settings
+enum DynamicRange: Int {
+    case SDR = 0
+    case HDR = 2
+    case DV = 4
+}
+@available(tvOS 13.0, *)
+extension TVPlayerView {
+    private var displayManager: AVDisplayManager? {
+        if let avDisplayManager = UIApplication.shared.delegate?.window??.avDisplayManager {
+            return avDisplayManager
+        }
+        return nil
+    }
+    
+    private var displayCriteria: AVDisplayCriteria? {
+        get {
+            guard let displayManager = displayManager else { return nil }
+            return displayManager.preferredDisplayCriteria
+        }
+        set {
+            guard let displayManager = displayManager else { return }
+            if displayManager.isDisplayCriteriaMatchingEnabled,
+                !displayManager.isDisplayModeSwitchInProgress {
+                displayManager.preferredDisplayCriteria = newValue
+            }
+        }
+    }
+
+    
+    private func set(fps:Float, contentMode: DynamicRange) {
+        let criteria =  AVDisplayCriteria(refreshRate: fps,
+                                          videoDynamicRange: Int32(contentMode.rawValue))
+        displayCriteria = criteria
     }
 }
 

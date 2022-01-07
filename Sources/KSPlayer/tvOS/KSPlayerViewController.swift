@@ -289,19 +289,6 @@ extension KSPlayerViewController {
     
 }
 
-// MARK: - updating display settings
-enum ContentMode: Int {
-    case SDR = 0
-    case HDR = 2
-    case DV = 4
-}
-@available(tvOS 13.0, *)
-extension KSPlayerViewController {
-    func set(fps:Int, contentMode:ContentMode) {
-        
-    }
-}
-
 // MARK: - add remove vontroller
 @available(tvOS 13.0, *)
 extension KSPlayerViewController {
