@@ -18,12 +18,6 @@ final class TVPlayerView: VideoPlayerView {
         self.bottomMaskView.isHidden = true
     }
     
-    deinit {
-        if #available(tvOS 13.0, *) {
-            displayCriteria = nil
-        }
-    }
-    
     override func removeFromSuperview() {
         super.removeFromSuperview()
         if #available(tvOS 13.0, *) {
@@ -153,7 +147,7 @@ final class TVPlayerView: VideoPlayerView {
 enum DynamicRange: Int {
     case SDR = 0
     case HDR = 2
-    case DV = 4
+    case DV = 5
 }
 @available(tvOS 13.0, *)
 extension TVPlayerView {
