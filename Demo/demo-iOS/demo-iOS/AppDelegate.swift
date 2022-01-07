@@ -28,6 +28,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UISplitViewControllerDele
         KSOptions.hardwareDecodeH264 = true
         if UIDevice.current.userInterfaceIdiom == .phone {
             window.rootViewController = UINavigationController(rootViewController: RootViewController())
+        } else if UIDevice.current.userInterfaceIdiom == .tv {
+            window.rootViewController = UINavigationController(rootViewController: TvOSViewController(style: .grouped))
         } else {
             let splitViewController = UISplitViewController()
             splitViewController.preferredDisplayMode = .primaryOverlay

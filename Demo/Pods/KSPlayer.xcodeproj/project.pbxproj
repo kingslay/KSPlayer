@@ -27,6 +27,8 @@
 		06B666BF278851960025EAC3 /* PositionViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06B666BD278851960025EAC3 /* PositionViews.swift */; };
 		06B666C0278851960025EAC3 /* ProgressToolBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06B666BE278851960025EAC3 /* ProgressToolBarView.swift */; };
 		06B666C4278853280025EAC3 /* Collection+.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06B666C3278853280025EAC3 /* Collection+.swift */; };
+		06B666C9278860B80025EAC3 /* Collection+.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06B666C3278853280025EAC3 /* Collection+.swift */; };
+		06B666CA278860BD0025EAC3 /* Collection+.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06B666C3278853280025EAC3 /* Collection+.swift */; };
 		07ACB55376633B70ECE734AF0F6BA98F /* KSParseProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA5BC64CC0C4C0992D81DF9B9741F34D /* KSParseProtocol.swift */; };
 		0A968AB3E57FFC610104EC12113CF6A3 /* KSPlayerLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABBCA021B359A3475F72D126CDFB1997 /* KSPlayerLayer.swift */; };
 		0B251D9AAEDCFA999776A49585B0FBF9 /* Filter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17D827F84B388F27970D4CF050D41779 /* Filter.swift */; };
@@ -1437,6 +1439,7 @@
 			files = (
 				21B4C27770DD2303ACD10424B6CEFFA5 /* AudioPlayerViewTest.swift in Sources */,
 				D4C8DA89942F80E870D524C330836E58 /* FormatContextTest.swift in Sources */,
+				06B666CA278860BD0025EAC3 /* Collection+.swift in Sources */,
 				C30AE465350966F1092DA573DD12B54F /* KSAVPlayerTest.swift in Sources */,
 				E706E085D38DF483A571E2F12BF95452 /* KSMEPlayerTest.swift in Sources */,
 				30A5DBE4E7E9FB5F40BDAB6B14C19ABF /* KSPlayerLayerTest.swift in Sources */,
@@ -1504,6 +1507,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				06B666C9278860B80025EAC3 /* Collection+.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

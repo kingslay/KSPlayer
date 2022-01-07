@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import AVFoundation
 
 //MARK: - need custom playerView
 final class TVPlayerView: VideoPlayerView {
