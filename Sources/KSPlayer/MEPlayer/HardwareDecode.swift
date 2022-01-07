@@ -32,6 +32,9 @@ extension TrackProtocol {
 
 extension KSOptions {
     func canHardwareDecode(codecpar: AVCodecParameters) -> Bool {
+        if videoFilters != nil {
+            return false
+        }
         if codecpar.codec_id == AV_CODEC_ID_H264, hardwareDecodeH264 {
             return true
         } else if codecpar.codec_id == AV_CODEC_ID_HEVC, VTIsHardwareDecodeSupported(kCMVideoCodecType_HEVC), hardwareDecodeH265 {
@@ -181,7 +184,7 @@ class DecompressionSession {
 
 extension CGSize {
     var aspectRatio: NSDictionary? {
-        if width != 0, height != 0 {
+        if width != 0, height != 0, width != height {
             return [kCVImageBufferPixelAspectRatioHorizontalSpacingKey: width,
                     kCVImageBufferPixelAspectRatioVerticalSpacingKey: height]
         } else {

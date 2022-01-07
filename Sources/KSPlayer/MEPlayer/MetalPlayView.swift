@@ -14,7 +14,10 @@ final class MetalPlayView: UIView {
     private let view = MTKView(frame: .zero, device: MetalRender.device)
     private var videoInfo: CMVideoFormatDescription?
     private var pixelBuffer: BufferProtocol?
+    private lazy var displayLink: CADisplayLink = .init(target: self, selector: #selector(drawView))
+
     var options: KSOptions
+    var isBackground = false
     weak var renderSource: OutputRenderSourceDelegate?
     #if canImport(UIKit)
     override public class var layerClass: AnyClass { AVSampleBufferDisplayLayer.self }
@@ -33,9 +36,9 @@ final class MetalPlayView: UIView {
         layer = AVSampleBufferDisplayLayer()
         #endif
         view.framebufferOnly = true
-        view.preferredFramesPerSecond = KSPlayerManager.preferredFramesPerSecond
         view.isPaused = true
-        view.delegate = self
+        displayLink.add(to: RunLoop.main, forMode: .default)
+        displayLink.isPaused = true
         addSubview(view)
         view.isHidden = true
         view.translatesAutoresizingMaskIntoConstraints = false
@@ -46,7 +49,7 @@ final class MetalPlayView: UIView {
             bottomAnchor.constraint(equalTo: view.bottomAnchor),
         ])
         var controlTimebase: CMTimebase?
-        CMTimebaseCreateWithMasterClock(allocator: kCFAllocatorDefault, masterClock: CMClockGetHostTimeClock(), timebaseOut: &controlTimebase)
+        CMTimebaseCreateWithSourceClock(allocator: kCFAllocatorDefault, sourceClock: CMClockGetHostTimeClock(), timebaseOut: &controlTimebase)
         if let controlTimebase = controlTimebase {
             displayLayer.controlTimebase = controlTimebase
             CMTimebaseSetTime(controlTimebase, time: .zero)
@@ -59,6 +62,44 @@ final class MetalPlayView: UIView {
         fatalError("init(coder:) has not been implemented")
     }
 
+    override var contentMode: UIViewContentMode {
+        didSet {
+            view.contentMode = contentMode
+            switch contentMode {
+            case .scaleToFill:
+                displayLayer.videoGravity = .resize
+            case .scaleAspectFit, .center:
+                displayLayer.videoGravity = .resizeAspect
+            case .scaleAspectFill:
+                displayLayer.videoGravity = .resizeAspectFill
+            default:
+                break
+            }
+        }
+    }
+
+    #if canImport(UIKit)
+    override func touchesMoved(_ touches: Set<UITouch>, with: UIEvent?) {
+        if options.display == .plane {
+            super.touchesMoved(touches, with: with)
+        } else {
+            options.display.touchesMoved(touch: touches.first!)
+        }
+    }
+    #endif
+    func toImage() -> UIImage? {
+        pixelBuffer?.image().flatMap { UIImage(cgImage: $0) }
+    }
+
+    func clear() {
+        displayLayer.flushAndRemoveImage()
+        if let drawable = view.currentDrawable, let renderPassDescriptor = view.currentRenderPassDescriptor {
+            render.clear(drawable: drawable, renderPassDescriptor: renderPassDescriptor)
+        }
+    }
+}
+
+extension MetalPlayView {
     private func set(pixelBuffer: CVPixelBuffer, time: CMTime) {
         if videoInfo == nil || !CMVideoFormatDescriptionMatchesImageBuffer(videoInfo!, imageBuffer: pixelBuffer) {
             let err = CMVideoFormatDescriptionCreateForImageBuffer(allocator: nil, imageBuffer: pixelBuffer, formatDescriptionOut: &videoInfo)
@@ -94,39 +135,8 @@ final class MetalPlayView: UIView {
         }
     }
 
-    override var contentMode: UIViewContentMode {
-        didSet {
-            view.contentMode = contentMode
-            switch contentMode {
-            case .scaleToFill:
-                displayLayer.videoGravity = .resize
-            case .scaleAspectFit, .center:
-                displayLayer.videoGravity = .resizeAspect
-            case .scaleAspectFill:
-                displayLayer.videoGravity = .resizeAspectFill
-            default:
-                break
-            }
-        }
-    }
-
-    #if canImport(UIKit)
-    override func touchesMoved(_ touches: Set<UITouch>, with: UIEvent?) {
-        if options.display == .plane {
-            super.touchesMoved(touches, with: with)
-        } else {
-            options.display.touchesMoved(touch: touches.first!)
-        }
-    }
-    #endif
-    func toImage() -> UIImage? {
-        pixelBuffer?.image().flatMap { UIImage(cgImage: $0) }
-    }
-}
-
-extension MetalPlayView: MTKViewDelegate {
-    func draw(in view: MTKView) {
-        guard let frame = renderSource?.getOutputRender(type: .video) as? VideoVTBFrame else {
+    @objc private func drawView() {
+        guard let frame = renderSource?.getOutputRender(type: .video) as? VideoVTBFrame, !isBackground else {
             return
         }
         pixelBuffer = frame.corePixelBuffer
@@ -135,8 +145,8 @@ extension MetalPlayView: MTKViewDelegate {
         }
         let cmtime = frame.cmtime
         renderSource?.setVideo(time: cmtime)
-        let sar = pixelBuffer.size
-        let par = pixelBuffer.aspectRatio
+        let par = pixelBuffer.size
+        let sar = pixelBuffer.aspectRatio
         if pixelBuffer is PixelBuffer || !options.isUseDisplayLayer() {
             if view.isHidden {
                 view.isHidden = false
@@ -145,9 +155,9 @@ extension MetalPlayView: MTKViewDelegate {
             autoreleasepool {
                 if options.display == .plane {
                     if let dar = options.customizeDar(sar: sar, par: par) {
-                        view.drawableSize = CGSize(width: sar.width, height: sar.width * dar.height / dar.width)
+                        view.drawableSize = CGSize(width: par.width, height: par.width * dar.height / dar.width)
                     } else {
-                        view.drawableSize = CGSize(width: sar.width, height: sar.height * par.height / par.width)
+                        view.drawableSize = CGSize(width: par.width, height: par.height * sar.height / sar.width)
                     }
                 } else {
                     view.drawableSize = UIScreen.size
@@ -177,23 +187,22 @@ extension MetalPlayView: MTKViewDelegate {
             }
             // swiftlint:disable force_cast
             if let dar = options.customizeDar(sar: sar, par: par) {
-                (pixelBuffer as! CVPixelBuffer).aspectRatio = CGSize(width: dar.width, height: dar.height * sar.width / sar.height)
+                (pixelBuffer as! CVPixelBuffer).aspectRatio = CGSize(width: dar.width, height: dar.height * par.width / par.height)
             }
             set(pixelBuffer: pixelBuffer as! CVPixelBuffer, time: cmtime)
             // swiftlint:enable force_cast
         }
     }
-
-    func mtkView(_: MTKView, drawableSizeWillChange _: CGSize) {}
 }
 
 extension MetalPlayView: FrameOutput {
     var isPaused: Bool {
         get {
-            view.isPaused
+            displayLink.isPaused
         }
         set {
             view.isPaused = newValue
+            displayLink.isPaused = newValue
         }
     }
 

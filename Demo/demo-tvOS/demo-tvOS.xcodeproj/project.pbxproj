@@ -16,6 +16,7 @@
 		AC3A420323D32DFE00B666A4 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC3A41FF23D32DFE00B666A4 /* AppDelegate.swift */; };
 		AC3A420423D32DFE00B666A4 /* DetailViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC3A420023D32DFE00B666A4 /* DetailViewController.swift */; };
 		AC3A420523D32DFE00B666A4 /* AudioViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC3A420123D32DFE00B666A4 /* AudioViewController.swift */; };
+		AC7D1CB726EF7BC9004C5DBA /* tos.mkv in Resources */ = {isa = PBXBuildFile; fileRef = AC7D1CB626EF7BC9004C5DBA /* tos.mkv */; };
 		AC80332824BA1AE3002B3D40 /* Polonaise.flac in Resources */ = {isa = PBXBuildFile; fileRef = AC80332424BA1AE3002B3D40 /* Polonaise.flac */; };
 		AC80332924BA1AE3002B3D40 /* google-help-vr.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = AC80332524BA1AE3002B3D40 /* google-help-vr.mp4 */; };
 		AC80332A24BA1AE3002B3D40 /* 567082ac3ae39699f68de4fd2b7444b1e045515a.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = AC80332624BA1AE3002B3D40 /* 567082ac3ae39699f68de4fd2b7444b1e045515a.mp4 */; };
@@ -56,6 +57,7 @@
 		AC3A41FF23D32DFE00B666A4 /* AppDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = AppDelegate.swift; path = "../../demo-iOS/demo-iOS/AppDelegate.swift"; sourceTree = "<group>"; };
 		AC3A420023D32DFE00B666A4 /* DetailViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = DetailViewController.swift; path = "../../demo-iOS/demo-iOS/DetailViewController.swift"; sourceTree = "<group>"; };
 		AC3A420123D32DFE00B666A4 /* AudioViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = AudioViewController.swift; path = "../../demo-iOS/demo-iOS/AudioViewController.swift"; sourceTree = "<group>"; };
+		AC7D1CB626EF7BC9004C5DBA /* tos.mkv */ = {isa = PBXFileReference; lastKnownFileType = file; path = tos.mkv; sourceTree = "<group>"; };
 		AC80332424BA1AE3002B3D40 /* Polonaise.flac */ = {isa = PBXFileReference; lastKnownFileType = file; path = Polonaise.flac; sourceTree = "<group>"; };
 		AC80332524BA1AE3002B3D40 /* google-help-vr.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = "google-help-vr.mp4"; sourceTree = "<group>"; };
 		AC80332624BA1AE3002B3D40 /* 567082ac3ae39699f68de4fd2b7444b1e045515a.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = 567082ac3ae39699f68de4fd2b7444b1e045515a.mp4; sourceTree = "<group>"; };
@@ -151,6 +153,7 @@
 			isa = PBXGroup;
 			children = (
 				AC80332424BA1AE3002B3D40 /* Polonaise.flac */,
+				AC7D1CB626EF7BC9004C5DBA /* tos.mkv */,
 				AC80332524BA1AE3002B3D40 /* google-help-vr.mp4 */,
 				AC80332624BA1AE3002B3D40 /* 567082ac3ae39699f68de4fd2b7444b1e045515a.mp4 */,
 				AC80332724BA1AE3002B3D40 /* video-h265.mkv */,
@@ -285,6 +288,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				AC7D1CB726EF7BC9004C5DBA /* tos.mkv in Resources */,
 				AC80332824BA1AE3002B3D40 /* Polonaise.flac in Resources */,
 				AC80332924BA1AE3002B3D40 /* google-help-vr.mp4 in Resources */,
 				AC80332B24BA1AE3002B3D40 /* video-h265.mkv in Resources */,

@@ -1,3 +1,4 @@
 # 格式化规则
---enable trailingClosures
+--swiftversion 5.5
+--disable wrapMultilineStatementBraces
 --ifdef noindent

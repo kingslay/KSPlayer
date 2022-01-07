@@ -82,13 +82,13 @@ func pointerFunc(i: UnsafePointer<Int>) -> Int {
 
 var test5 = 1
 pointerFunc(i: &test5)
-[1, 2, 3].withUnsafeBufferPointer { pointer -> Void in
+[1, 2, 3].withUnsafeBufferPointer { pointer in
     print(pointer.baseAddress!) // 得到 UnsafePointer<Int> 对象
     print(pointer.first!) // 得到起始地址指向的 Int 对象
 }
 
 var array = [4, 5, 6]
-array.withUnsafeMutableBufferPointer { pointer -> Void in
+array.withUnsafeMutableBufferPointer { pointer in
     print(pointer.baseAddress!) // 得到 UnsafePointer<Int> 对象
     print(pointer.first!) // 得到起始地址指向的 Int 对象
 }

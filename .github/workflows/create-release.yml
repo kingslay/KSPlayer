@@ -3,20 +3,25 @@ name: Create Release
 # Create XCFramework when a version is tagged
 on:
   push:
-    tags:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
 
 jobs:
   create_release:
     name: Create Release
-    runs-on: macos-latest
+    runs-on: macos-11
     steps:
       - uses: actions/checkout@main
       - name: Build
         run: swift build -v -c release
       - name: Test
         run: swift test -v
-      # - name: Create XCFramework
-      #   uses: unsignedapps/swift-create-xcframework@v1.3
-
-      # Create a release
-      # Upload those artifacts to the release
+      - name: Create XCFramework
+        uses: unsignedapps/swift-create-xcframework@v2
+      - uses: actions/upload-artifact@v2
+        with:
+            name: KSPlayer
+            path: Sources

@@ -6,6 +6,7 @@
 //
 
 import AVFoundation
+import AVKit
 import CoreMedia
 #if canImport(UIKit)
 import UIKit
@@ -40,6 +41,10 @@ public protocol MediaPlayerProtocol: MediaPlayback {
     var playbackVolume: Float { get set }
     var contentMode: UIViewContentMode { get set }
     var subtitleDataSouce: SubtitleDataSouce? { get }
+    @available(tvOS 14.0, macOS 10.15, *)
+    var pipController: AVPictureInPictureController? { get }
+    @available(macOS 12.0, iOS 15.0, tvOS 15.0, *)
+    var playbackCoordinator: AVPlaybackCoordinator { get }
     init(url: URL, options: KSOptions)
     func replace(url: URL, options: KSOptions)
     func play()
@@ -346,6 +351,11 @@ open class KSOptions {
         16
     }
 
+    /// customize dar
+    /// - Parameters:
+    ///   - sar: SAR(Sample Aspect Ratio)
+    ///   - dar: PAR(Pixel Aspect Ratio)
+    /// - Returns: DAR(Display Aspect Ratio)
     open func customizeDar(sar _: CGSize, par _: CGSize) -> CGSize? {
         nil
     }

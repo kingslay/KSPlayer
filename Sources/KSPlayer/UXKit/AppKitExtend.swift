@@ -32,6 +32,7 @@ public typealias UITableViewDelegate = NSTableViewDelegate
 public typealias UITableViewDataSource = NSTableViewDataSource
 public typealias UITouch = NSTouch
 public typealias UIEvent = NSEvent
+public typealias UIButton = KSButton
 
 extension NSScreen {
     var scale: CGFloat {
@@ -407,7 +408,7 @@ public class UILabel: NSTextField {
     }
 }
 
-public class UIButton: NSButton {
+public class KSButton: NSButton {
     private var images = [State: UIImage]()
     private var titles = [State: String]()
     private var titleColors = [State: UIColor]()
@@ -542,7 +543,6 @@ class CADisplayLink: NSObject {
     private var selector: Selector
     private var runloop: RunLoop?
     private var mode = RunLoop.Mode.default
-    public var frameInterval = 1
     public var timestamp: TimeInterval {
         var timeStamp = CVTimeStamp()
         if CVDisplayLinkGetCurrentTime(displayLink!, &timeStamp) == kCVReturnSuccess, (timeStamp.flags & CVTimeStampFlags.hostTimeValid.rawValue) != 0 {
@@ -596,10 +596,6 @@ class CADisplayLink: NSObject {
         isPaused = true
         runloop = nil
     }
-
-    deinit {
-        invalidate()
-    }
 }
 
 extension UIView {
@@ -618,7 +614,6 @@ extension UIView {
 open class UIAlertController: UIViewController {
     public enum Style: Int {
         case actionSheet
-
         case alert
     }
 
@@ -632,9 +627,7 @@ open class UIAlertController: UIViewController {
 open class UIAlertAction: NSObject {
     public enum Style: Int {
         case `default`
-
         case cancel
-
         case destructive
     }
 

@@ -38,7 +38,6 @@ struct ContentView: View {
                 }) {
                     Image(systemName: "plus")
                 })
-            StructPlayerView()
         }.onAppear {
             self.loadCachem3u8()
             if self.resources.count == 0 {
@@ -115,7 +114,7 @@ struct MasterView: View {
             TextField("Search", text: $searchText)
             List {
                 ForEach(resources.filter { $0.name.contains(searchText) || searchText.count == 0 }, id: \.self) { resource in
-                    NavigationLink(resource.name, destination: StructPlayerView(resource: resource))
+                    NavigationLink(resource.name, destination: StructPlayerView(resource: resource)).isDetailLink(false)
                 }.onDelete { indices in
                     indices.forEach { self.resources.remove(at: $0) }
                 }
@@ -132,14 +131,12 @@ struct ContentView_Previews: PreviewProvider {
 
 struct StructPlayerView: UIViewRepresentable {
     typealias UIViewType = VideoPlayerView
-    var resource: KSPlayerResource?
+    var resource: KSPlayerResource
     func makeUIView(context _: UIViewRepresentableContext<StructPlayerView>) -> VideoPlayerView {
         IOSVideoPlayerView()
     }
 
     func updateUIView(_ uiView: VideoPlayerView, context _: UIViewRepresentableContext<StructPlayerView>) {
-        if let resource = resource {
-            uiView.set(resource: resource)
-        }
+        uiView.set(resource: resource)
     }
 }

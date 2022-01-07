@@ -11,7 +11,17 @@ import UIKit
 #else
 import AppKit
 #endif
+import AVKit
 public class PlayerToolBar: UIStackView {
+    public let srtButton = UIButton()
+    public let timeLabel = UILabel()
+    public let currentTimeLabel = UILabel()
+    public let totalTimeLabel = UILabel()
+    public let playButton = UIButton()
+    public let timeSlider = KSSlider()
+    public let playbackRateButton = UIButton()
+    public let definitionButton = UIButton()
+    public let pipButton = UIButton()
     public var timeType = TimeType.minOrHour {
         didSet {
             if timeType != oldValue {
@@ -24,14 +34,6 @@ public class PlayerToolBar: UIStackView {
         }
     }
 
-    public var srtButton = UIButton()
-    public var timeLabel = UILabel()
-    public var currentTimeLabel = UILabel()
-    public var totalTimeLabel = UILabel()
-    public var playButton = UIButton()
-    public var timeSlider = KSSlider()
-    public var playbackRateButton = UIButton()
-    public var definitionButton = UIButton()
     public var currentTime: TimeInterval = 0 {
         didSet {
             guard !currentTime.isNaN else {
@@ -98,6 +100,14 @@ public class PlayerToolBar: UIStackView {
         srtButton.setTitle(NSLocalizedString("subtitle", comment: ""), for: .normal)
         srtButton.titleFont = .systemFont(ofSize: 14, weight: .medium)
         srtButton.tag = PlayerButtonType.srt.rawValue
+        pipButton.titleFont = .systemFont(ofSize: 14, weight: .medium)
+        if #available(iOS 13.0, tvOS 14.0, macOS 10.15, *) {
+            pipButton.setImage(AVPictureInPictureController.pictureInPictureButtonStartImage, for: .normal)
+            pipButton.setImage(AVPictureInPictureController.pictureInPictureButtonStopImage, for: .selected)
+        } else {
+            pipButton.setTitle(NSLocalizedString("pip", comment: ""), for: .normal)
+        }
+        pipButton.tag = PlayerButtonType.pictureInPicture.rawValue
         playButton.translatesAutoresizingMaskIntoConstraints = false
         srtButton.translatesAutoresizingMaskIntoConstraints = false
         translatesAutoresizingMaskIntoConstraints = false
@@ -118,6 +128,7 @@ public class PlayerToolBar: UIStackView {
         playbackRateButton.addTarget(target, action: action, for: .primaryActionTriggered)
         definitionButton.addTarget(target, action: action, for: .primaryActionTriggered)
         srtButton.addTarget(target, action: action, for: .primaryActionTriggered)
+        pipButton.addTarget(target, action: action, for: .primaryActionTriggered)
     }
 
     public func reset() {

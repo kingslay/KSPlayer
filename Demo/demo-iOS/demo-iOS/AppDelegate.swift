@@ -20,16 +20,15 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UISplitViewControllerDele
         KSPlayerManager.secondPlayerType = KSMEPlayer.self
 //        KSPlayerManager.supportedInterfaceOrientations = .all
         KSOptions.preferredForwardBufferDuration = 10
+        KSOptions.isAutoPlay = true
         KSOptions.isSecondOpen = true
         KSOptions.isAccurateSeek = true
         KSOptions.isLoopPlay = true
         KSOptions.hardwareDecodeH265 = true
         KSOptions.hardwareDecodeH264 = true
         if UIDevice.current.userInterfaceIdiom == .phone {
-            KSOptions.isAutoPlay = false
             window.rootViewController = UINavigationController(rootViewController: RootViewController())
         } else {
-            KSOptions.isAutoPlay = true
             let splitViewController = UISplitViewController()
             splitViewController.preferredDisplayMode = .primaryOverlay
             splitViewController.delegate = self
@@ -65,9 +64,12 @@ var objects: [KSPlayerResource] = {
     if let path = Bundle.main.path(forResource: "567082ac3ae39699f68de4fd2b7444b1e045515a", ofType: "mp4") {
         let options = KSOptions()
         options.videoFilters = "hflip,vflip"
-        options.hardwareDecodeH264 = false
         objects.append(KSPlayerResource(url: URL(fileURLWithPath: path), options: options, name: "本地视频"))
     }
+    if let path = Bundle.main.path(forResource: "tos", ofType: "mkv") {
+        objects.append(KSPlayerResource(url: URL(fileURLWithPath: path), name: "本地mkv"))
+    }
+
     if let path = Bundle.main.path(forResource: "google-help-vr", ofType: "mp4") {
         let options = KSOptions()
         options.display = .vr
@@ -111,6 +113,10 @@ var objects: [KSPlayerResource] = {
         let options = KSOptions()
         options.formatContextOptions["timeout"] = 0
         objects.append(KSPlayerResource(url: url, options: options, name: "rtsp video"))
+    }
+
+    if let path = Bundle.main.path(forResource: "raw", ofType: "h264") {
+        objects.append(KSPlayerResource(url: URL(fileURLWithPath: path), name: "raw h264"))
     }
 
     if let path = Bundle.main.path(forResource: "Polonaise", ofType: "flac") {

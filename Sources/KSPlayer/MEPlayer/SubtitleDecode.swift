@@ -78,7 +78,7 @@ class SubtitleDecode: DecodeProtocol {
     func shutdown() {
         scale.shutdown()
         avsubtitle_free(&subtitle)
-        if let codecContext = self.codecContext {
+        if let codecContext = codecContext {
             avcodec_close(codecContext)
             avcodec_free_context(&self.codecContext)
         }

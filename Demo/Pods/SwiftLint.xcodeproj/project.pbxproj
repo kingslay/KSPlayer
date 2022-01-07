@@ -106,8 +106,8 @@
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
-				en,
 				Base,
+				en,
 			);
 			mainGroup = 7919C5072C4B146D14DA5400FB0FE1B9;
 			productRefGroup = 3FF158F36A70A3D4CE703E895A182651 /* Products */;

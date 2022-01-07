@@ -1,4 +1,4 @@
-module Libssl {
+framework module Libssl [system] {
     umbrella "."
     export *
 }

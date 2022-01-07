@@ -44,8 +44,7 @@ extension CVPixelBuffer: BufferProtocol {
             if let ratio = CVBufferGetAttachment(self, kCVImageBufferPixelAspectRatioKey, nil)?.takeUnretainedValue() as? NSDictionary,
                let horizontal = (ratio[kCVImageBufferPixelAspectRatioHorizontalSpacingKey] as? NSNumber)?.intValue,
                let vertical = (ratio[kCVImageBufferPixelAspectRatioVerticalSpacingKey] as? NSNumber)?.intValue,
-               horizontal > 0, vertical > 0
-            {
+               horizontal > 0, vertical > 0 {
                 return CGSize(width: horizontal, height: vertical)
             } else {
                 return CGSize(width: 1, height: 1)

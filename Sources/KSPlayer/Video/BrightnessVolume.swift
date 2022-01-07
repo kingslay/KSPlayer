@@ -5,7 +5,6 @@
 //  Created by kintan on 2017/11/3.
 //
 #if canImport(UIKit)
-
 import UIKit
 
 open class BrightnessVolume {
@@ -42,7 +41,7 @@ open class BrightnessVolume {
     private func appearView() {
         if progressView.alpha == 0.0 {
             progressView.alpha = 1.0
-            DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 3) { [weak self] () -> Void in
+            DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 3) { [weak self] () in
                 self?.disAppearView()
             }
         }
@@ -50,7 +49,7 @@ open class BrightnessVolume {
 
     private func disAppearView() {
         if progressView.alpha == 1.0 {
-            UIView.animate(withDuration: 0.8) { [weak self] () -> Void in
+            UIView.animate(withDuration: 0.8) { [weak self] () in
                 self?.progressView.alpha = 0.0
             }
         }

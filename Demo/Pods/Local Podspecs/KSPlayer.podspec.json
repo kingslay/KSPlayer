@@ -17,7 +17,7 @@
     "osx": "10.13",
     "tvos": "11.0"
   },
-  "swift_versions": "5.4",
+  "swift_versions": "5.5",
   "static_framework": true,
   "testspecs": [
     {
@@ -130,5 +130,5 @@
       }
     }
   ],
-  "swift_version": "5.4"
+  "swift_version": "5.5"
 }

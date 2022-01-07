@@ -22,12 +22,13 @@
 - H.264/H.265 hardware accelerator.
 - HDR
 - dvb_subtitle
+- Picture in Picture
 
 ## Requirements
 
 - iOS 11 +,  macOS 10.13 +, tvOS 11 +
-- Xcode 12
-- Swift 5.4
+- Xcode 13
+- Swift 5.5
 
 ## Demo
 
@@ -242,7 +243,7 @@ public protocol PlayerControllerDelegate: class {
 ## Debug FFmpeg
 
 ```bash
-swift run Script debug
+swift run BuildFFmpeg debug
 dwarfdump -F --debug-info ../Sources/libavformat.xcframework/macos-arm64_x86_64/Libavformat.framework/Libavformat | head -n 20
 ```
 

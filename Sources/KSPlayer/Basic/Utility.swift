@@ -159,6 +159,17 @@ extension UIView {
         superview?.constraints.first { $0.firstItem === self && $0.firstAttribute == .centerY }
     }
 
+    var frameConstraints: [NSLayoutConstraint] {
+        var frameConstraint = superview?.constraints.filter { constraint in
+            constraint.firstItem === self
+        } ?? [NSLayoutConstraint]()
+        for constraint in constraints where
+            constraint.isMember(of: NSLayoutConstraint.self) && constraint.firstItem === self && (constraint.firstAttribute == .width || constraint.firstAttribute == .height) {
+            frameConstraint.append(constraint)
+        }
+        return frameConstraint
+    }
+
     var safeTopAnchor: NSLayoutYAxisAnchor {
         if #available(macOS 11.0, *) {
             return self.safeAreaLayoutGuide.topAnchor

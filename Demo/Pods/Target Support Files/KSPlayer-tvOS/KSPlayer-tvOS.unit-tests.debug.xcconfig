@@ -1,7 +1,8 @@
 CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = NO
-FRAMEWORK_SEARCH_PATHS = $(inherited) "${PODS_CONFIGURATION_BUILD_DIR}/FFmpeg-tvOS" "${PODS_CONFIGURATION_BUILD_DIR}/KSPlayer-tvOS" "${PODS_ROOT}/../../Sources" "${PODS_XCFRAMEWORKS_BUILD_DIR}/Libavcodec" "${PODS_XCFRAMEWORKS_BUILD_DIR}/Libavfilter" "${PODS_XCFRAMEWORKS_BUILD_DIR}/Libavformat" "${PODS_XCFRAMEWORKS_BUILD_DIR}/Libavutil" "${PODS_XCFRAMEWORKS_BUILD_DIR}/Libcrypto" "${PODS_XCFRAMEWORKS_BUILD_DIR}/Libssl" "${PODS_XCFRAMEWORKS_BUILD_DIR}/Libswresample" "${PODS_XCFRAMEWORKS_BUILD_DIR}/Libswscale"
+FRAMEWORK_SEARCH_PATHS = $(inherited) "${PODS_CONFIGURATION_BUILD_DIR}/FFmpeg-tvOS" "${PODS_CONFIGURATION_BUILD_DIR}/KSPlayer-tvOS" "${PODS_ROOT}/../../Sources" "${PODS_XCFRAMEWORKS_BUILD_DIR}/FFmpeg/FFmpeg" "${PODS_XCFRAMEWORKS_BUILD_DIR}/OpenSSL/OpenSSL"
 GCC_PREPROCESSOR_DEFINITIONS = $(inherited) COCOAPODS=1
-LD_RUNPATH_SEARCH_PATHS = $(inherited) '@executable_path/Frameworks' '@loader_path/Frameworks'
+LD_RUNPATH_SEARCH_PATHS = $(inherited) /usr/lib/swift "$(PLATFORM_DIR)/Developer/Library/Frameworks" '@executable_path/Frameworks' '@loader_path/Frameworks'
+LIBRARY_SEARCH_PATHS = $(inherited) "$(PLATFORM_DIR)/Developer/Library/Frameworks" "${DT_TOOLCHAIN_DIR}/usr/lib/swift/${PLATFORM_NAME}" /usr/lib/swift
 OTHER_LDFLAGS = $(inherited) -ObjC -l"bz2" -l"iconv" -l"xml2" -l"z" -framework "AVFoundation" -framework "AudioToolbox" -framework "FFmpeg" -framework "Foundation" -framework "KSPlayer" -framework "Libavcodec" -framework "Libavfilter" -framework "Libavformat" -framework "Libavutil" -framework "Libcrypto" -framework "Libssl" -framework "Libswresample" -framework "Libswscale" -framework "UIKit" -framework "VideoToolbox" -weak_framework "MetalKit"
 OTHER_SWIFT_FLAGS = $(inherited) -D COCOAPODS
 PODS_BUILD_DIR = ${BUILD_DIR}

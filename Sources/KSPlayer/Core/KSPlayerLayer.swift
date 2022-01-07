@@ -97,9 +97,19 @@ open class KSPlayerLayer: UIView {
 
     private var urls = [URL]()
     private var isAutoPlay = false
-    private lazy var timer: Timer = {
-        Timer.scheduledTimer(timeInterval: 0.5, target: self, selector: #selector(playerTimerAction), userInfo: nil, repeats: true)
-    }()
+    private lazy var timer: Timer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: true) { [weak self] _ in
+        guard let self = self, let player = self.player, player.isPreparedToPlay else {
+            return
+        }
+        self.delegate?.player(layer: self, currentTime: player.currentPlaybackTime, totalTime: player.duration)
+        if player.playbackState == .playing, player.loadState == .playable, self.state == .buffering {
+            // 一个兜底保护，正常不能走到这里
+            self.state = .bufferFinished
+        }
+        if player.isPlaying {
+            MPNowPlayingInfoCenter.default().nowPlayingInfo?[MPNowPlayingInfoPropertyElapsedPlaybackTime] = player.currentPlaybackTime
+        }
+    }
 
     public var player: MediaPlayerProtocol? {
         didSet {
@@ -143,8 +153,13 @@ open class KSPlayerLayer: UIView {
 
     deinit {
         NotificationCenter.default.removeObserver(self)
-        unregisterRemoteControllEvent()
-        resetPlayer()
+        MPRemoteCommandCenter.shared().playCommand.removeTarget(self)
+        MPRemoteCommandCenter.shared().pauseCommand.removeTarget(self)
+        MPRemoteCommandCenter.shared().togglePlayPauseCommand.removeTarget(self)
+        MPRemoteCommandCenter.shared().seekForwardCommand.removeTarget(self)
+        MPRemoteCommandCenter.shared().seekBackwardCommand.removeTarget(self)
+        MPRemoteCommandCenter.shared().changePlaybackRateCommand.removeTarget(self)
+        MPRemoteCommandCenter.shared().changePlaybackPositionCommand.removeTarget(self)
     }
 
     public func set(url: URL, options: KSOptions) {
@@ -189,7 +204,6 @@ open class KSPlayerLayer: UIView {
 
     open func resetPlayer() {
         KSLog("resetPlayer")
-        timer.invalidate()
         state = .notSetURL
         bufferedCount = 0
         shouldSeekTo = 0
@@ -324,20 +338,8 @@ extension KSPlayerLayer {
         }
     }
 
-    @objc private func playerTimerAction() {
-        guard let player = player, player.isPreparedToPlay else { return }
-        delegate?.player(layer: self, currentTime: player.currentPlaybackTime, totalTime: player.duration)
-        if player.playbackState == .playing, player.loadState == .playable, state == .buffering {
-            // 一个兜底保护，正常不能走到这里
-            state = .bufferFinished
-        }
-        if player.isPlaying {
-            MPNowPlayingInfoCenter.default().nowPlayingInfo?[MPNowPlayingInfoPropertyElapsedPlaybackTime] = player.currentPlaybackTime
-        }
-    }
-
     private func updateNowPlayingInfo() {
-        guard let player = self.player else { return }
+        guard let player = player else { return }
         if MPNowPlayingInfoCenter.default().nowPlayingInfo == nil {
             MPNowPlayingInfoCenter.default().nowPlayingInfo = [MPMediaItemPropertyPlaybackDuration: player.duration]
         } else {
@@ -373,16 +375,6 @@ extension KSPlayerLayer {
         MPRemoteCommandCenter.shared().enableLanguageOptionCommand.addTarget(self, action: #selector(remoteCommandAction(event:)))
     }
 
-    private func unregisterRemoteControllEvent() {
-        MPRemoteCommandCenter.shared().playCommand.removeTarget(self)
-        MPRemoteCommandCenter.shared().pauseCommand.removeTarget(self)
-        MPRemoteCommandCenter.shared().togglePlayPauseCommand.removeTarget(self)
-        MPRemoteCommandCenter.shared().seekForwardCommand.removeTarget(self)
-        MPRemoteCommandCenter.shared().seekBackwardCommand.removeTarget(self)
-        MPRemoteCommandCenter.shared().changePlaybackRateCommand.removeTarget(self)
-        MPRemoteCommandCenter.shared().changePlaybackPositionCommand.removeTarget(self)
-    }
-
     @objc private func remoteCommandAction(event: MPRemoteCommandEvent) -> MPRemoteCommandHandlerStatus {
         guard let player = player else {
             return .noSuchContent
@@ -394,8 +386,7 @@ extension KSPlayerLayer {
         } else if let event = event as? MPChangeLanguageOptionCommandEvent {
             let selectLang = event.languageOption
             if selectLang.languageOptionType == .audible,
-               let trackToSelect = player.tracks(mediaType: .audio).first(where: { $0.name == selectLang.displayName })
-            {
+               let trackToSelect = player.tracks(mediaType: .audio).first(where: { $0.name == selectLang.displayName }) {
                 player.select(track: trackToSelect)
             }
         } else {
@@ -414,8 +405,7 @@ extension KSPlayerLayer {
                 seek(time: player.currentPlaybackTime + player.duration * 0.01, autoPlay: options?.isSeekedAutoPlay ?? false)
             case MPRemoteCommandCenter.shared().seekBackwardCommand:
                 seek(time: player.currentPlaybackTime - player.duration * 0.01, autoPlay: options?.isSeekedAutoPlay ?? false)
-            default:
-                return .success
+            default: break
             }
         }
         return .success
@@ -424,6 +414,12 @@ extension KSPlayerLayer {
     @objc private func enterBackground() {
         guard let player = player, state.isPlaying, !player.isExternalPlaybackActive else {
             return
+        }
+
+        if #available(tvOS 14.0, macOS 10.15, *) {
+            if player.pipController?.isPictureInPictureActive ?? false {
+                return
+            }
         }
 
         if KSPlayerManager.canBackgroundPlay {
