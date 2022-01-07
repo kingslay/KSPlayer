@@ -36,23 +36,25 @@ final class TVPlayerView: VideoPlayerView {
         }
     }
     
-    public var subtitleColor: UIColor {
-        get {
-            return self.subtitleTextColor
-        }
-        set {
-            self.subtitleTextColor = newValue
-        }
-    }
+    public var subtitleColor: UIColor?
+//    {
+//        get {
+//            return self.subtitleTextColor
+//        }
+//        set {
+//            self.subtitleTextColor = newValue
+//        }
+//    }
     
-    public var subtitleBacgroundColor: UIColor? {
-        get {
-            return subtitleBackViewColor
-        }
-        set {
-            subtitleBackViewColor = newValue
-        }
-    }
+    public var subtitleBacgroundColor: UIColor?
+//    {
+//        get {
+//            return subtitleBackViewColor
+//        }
+//        set {
+//            subtitleBackViewColor = newValue
+//        }
+//    }
     
     public var subtitleSize: CGFloat {
         get {
