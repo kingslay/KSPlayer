@@ -298,7 +298,8 @@ extension AVPixelFormat {
 extension OSType {
     func planeCount() -> UInt8 {
         switch self {
-        case kCVPixelFormatType_48RGB,
+        case
+            kCVPixelFormatType_48RGB,
             kCVPixelFormatType_32ABGR,
             kCVPixelFormatType_32ARGB,
             kCVPixelFormatType_32BGRA,
@@ -313,15 +314,17 @@ extension OSType {
             kCVPixelFormatType_OneComponent8,
             kCVPixelFormatType_1Monochrome:
             return 1
-        case kCVPixelFormatType_422YpCbCr8,
-             kCVPixelFormatType_422YpCbCr8_yuvs,
-             kCVPixelFormatType_422YpCbCr10,
-             kCVPixelFormatType_422YpCbCr16,
-             kCVPixelFormatType_444YpCbCr8,
-             kCVPixelFormatType_4444YpCbCrA8R,
-             kCVPixelFormatType_444YpCbCr10,
-             kCVPixelFormatType_4444AYpCbCr16,
-             kCVPixelFormatType_420YpCbCr8PlanarFullRange:
+        case
+            kCVPixelFormatType_444YpCbCr8,
+            kCVPixelFormatType_4444YpCbCrA8R,
+            kCVPixelFormatType_444YpCbCr10,
+            kCVPixelFormatType_4444AYpCbCr16,
+            kCVPixelFormatType_422YpCbCr8,
+            kCVPixelFormatType_422YpCbCr8_yuvs,
+            kCVPixelFormatType_422YpCbCr10,
+            kCVPixelFormatType_422YpCbCr16,
+            kCVPixelFormatType_420YpCbCr8Planar,
+            kCVPixelFormatType_420YpCbCr8PlanarFullRange:
             return 3
         default: return 2
         }
@@ -351,17 +354,32 @@ extension CVPixelBufferPool {
             CVPixelBufferLockBaseAddress(pbuf, CVPixelBufferLockFlags(rawValue: 0))
             let data = Array(tuple: frame.data)
             let linesize = Array(tuple: frame.linesize)
+            let planeCount = AVPixelFormat(frame.format).planeCount()
             for i in 0 ..< pbuf.planeCount {
                 let height = pbuf.heightOfPlane(at: i)
                 let size = Int(linesize[i])
                 let bytesPerRow = CVPixelBufferGetBytesPerRowOfPlane(pbuf, i)
-                if bytesPerRow == size {
-                    pbuf.baseAddressOfPlane(at: i)?.copyMemory(from: data[i]!, byteCount: height * size)
+                var contents = pbuf.baseAddressOfPlane(at: i)
+                var source = data[i]!
+                if pbuf.planeCount < planeCount, i + 2 == planeCount {
+                    var sourceU = data[i]!
+                    var sourceV = data[i + 1]!
+                    for _ in 0 ..< height {
+                        for k in 0 ..< size {
+                            contents?.storeBytes(of: sourceU[k], toByteOffset: 2 * k, as: UInt8.self)
+                            contents?.storeBytes(of: sourceV[k], toByteOffset: 2 * k + 1, as: UInt8.self)
+                        }
+                        contents = contents?.advanced(by: bytesPerRow)
+                        sourceU = sourceU.advanced(by: size)
+                        sourceV = sourceV.advanced(by: size)
+                    }
+                } else if bytesPerRow == size {
+                    contents?.copyMemory(from: source, byteCount: height * size)
                 } else {
-                    let contents = pbuf.baseAddressOfPlane(at: i)
-                    let source = data[i]!
-                    for j in 0 ..< height {
-                        contents?.advanced(by: j * bytesPerRow).copyMemory(from: source.advanced(by: j * size), byteCount: size)
+                    for _ in 0 ..< height {
+                        contents?.copyMemory(from: source, byteCount: size)
+                        contents = contents?.advanced(by: bytesPerRow)
+                        source = source.advanced(by: size)
                     }
                 }
             }
