@@ -1,0 +1,29 @@
+/* 
+  LocalizabeTvOS.strings
+  KSPlayer
+
+  Created by Alanko5 on 02/03/2021.
+  
+*/
+
+// TabBar titles
+"info" = "Info";
+"audio" = "Audio";
+"srt" = "Subtitiles";
+"video" = "Video";
+
+// info controller
+
+// audio controller
+"language" = "Language";
+"sound" = "Sound";
+"full_dynamic_range" = "Full dynamic range";
+"reduce_loud_sounds" = "Reduce loud sounds";
+"delay" = "Delay";
+"airplay" = "AirPlay";
+
+// subtitles controller
+
+// video controller
+"speed" = "speed";
+
