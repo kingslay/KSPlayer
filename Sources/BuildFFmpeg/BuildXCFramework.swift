@@ -329,7 +329,7 @@ class BuildFFMPEG: BaseBuild {
 }
 
 class BuildOpenSSL: BaseBuild {
-    private let sslFile = "openssl-3.0.0"
+    private let sslFile = "openssl-3.0.1"
     init() {
         super.init(library: "SSL")
     }
