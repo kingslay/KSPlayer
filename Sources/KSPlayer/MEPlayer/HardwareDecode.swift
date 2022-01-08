@@ -265,6 +265,8 @@ extension AVColorTransferCharacteristic {
         case AVCOL_TRC_LINEAR:
             if #available(iOS 12.0, tvOS 12.0, OSX 10.14, *) {
                 return kCVImageBufferTransferFunction_Linear
+            } else {
+                return nil
             }
         case AVCOL_TRC_ARIB_STD_B67:
             return kCVImageBufferTransferFunction_ITU_R_2100_HLG
@@ -275,7 +277,6 @@ extension AVColorTransferCharacteristic {
         default:
             return nil
         }
-        return nil
     }
 }
 
