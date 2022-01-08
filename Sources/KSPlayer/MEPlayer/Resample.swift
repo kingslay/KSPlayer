@@ -365,9 +365,9 @@ extension CVPixelBufferPool {
                     var sourceU = data[i]!
                     var sourceV = data[i + 1]!
                     for _ in 0 ..< height {
-                        for k in 0 ..< size {
-                            contents?.storeBytes(of: sourceU[k], toByteOffset: 2 * k, as: UInt8.self)
-                            contents?.storeBytes(of: sourceV[k], toByteOffset: 2 * k + 1, as: UInt8.self)
+                        for j in 0 ..< size {
+                            contents?.storeBytes(of: sourceU[j], toByteOffset: 2 * j, as: UInt8.self)
+                            contents?.storeBytes(of: sourceV[j], toByteOffset: 2 * j + 1, as: UInt8.self)
                         }
                         contents = contents?.advanced(by: bytesPerRow)
                         sourceU = sourceU.advanced(by: size)
