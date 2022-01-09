@@ -114,7 +114,7 @@ struct MasterView: View {
             TextField("Search", text: $searchText)
             List {
                 ForEach(resources.filter { $0.name.contains(searchText) || searchText.count == 0 }, id: \.self) { resource in
-                    NavigationLink(resource.name, destination: StructPlayerView(resource: resource)).isDetailLink(true)
+                    NavigationLink(resource.name, destination: StructPlayerView(resource: resource))
                 }.onDelete { indices in
                     indices.forEach { self.resources.remove(at: $0) }
                 }

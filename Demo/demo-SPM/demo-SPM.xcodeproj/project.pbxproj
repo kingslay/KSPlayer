@@ -13,6 +13,9 @@
 		AC77DFC626402329001351AE /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC77DFB126402327001351AE /* ContentView.swift */; };
 		AC77DFC726402329001351AE /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AC77DFB226402329001351AE /* Assets.xcassets */; };
 		AC77DFC826402329001351AE /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AC77DFB226402329001351AE /* Assets.xcassets */; };
+		ACB8CA0A278AE433008B6582 /* demo_SPMApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC77DFB026402327001351AE /* demo_SPMApp.swift */; };
+		ACB8CA0B278AE436008B6582 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC77DFB126402327001351AE /* ContentView.swift */; };
+		ACB8CA0D278AE4A0008B6582 /* KSPlayer in Frameworks */ = {isa = PBXBuildFile; productRef = ACB8CA0C278AE4A0008B6582 /* KSPlayer */; };
 		ACD2F74E275F6EE60006D16F /* KSPlayer in Frameworks */ = {isa = PBXBuildFile; productRef = ACD2F74D275F6EE60006D16F /* KSPlayer */; };
 		ACD2F772275F735C0006D16F /* KSPlayer in Frameworks */ = {isa = PBXBuildFile; productRef = ACD2F771275F735C0006D16F /* KSPlayer */; };
 		ACD2F786275F9BEE0006D16F /* Polonaise.flac in Resources */ = {isa = PBXBuildFile; fileRef = ACD2F780275F9BEE0006D16F /* Polonaise.flac */; };
@@ -41,6 +44,7 @@
 		AC77DFBF26402329001351AE /* demo-SPM.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "demo-SPM.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		AC77DFC126402329001351AE /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		AC77DFC226402329001351AE /* macOS.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = macOS.entitlements; sourceTree = "<group>"; };
+		ACB8C9FC278AE3A6008B6582 /* demo-SPM (tvOS).app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "demo-SPM (tvOS).app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		ACD2F747275F6E860006D16F /* KSPlayer */ = {isa = PBXFileReference; lastKnownFileType = folder; name = KSPlayer; path = ../..; sourceTree = "<group>"; };
 		ACD2F780275F9BEE0006D16F /* Polonaise.flac */ = {isa = PBXFileReference; lastKnownFileType = file; path = Polonaise.flac; sourceTree = "<group>"; };
 		ACD2F781275F9BEE0006D16F /* tos.mkv */ = {isa = PBXFileReference; lastKnownFileType = file; path = tos.mkv; sourceTree = "<group>"; };
@@ -67,6 +71,14 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		ACB8C9F9278AE3A6008B6582 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				ACB8CA0D278AE4A0008B6582 /* KSPlayer in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -87,6 +99,7 @@
 				AC77DFAF26402327001351AE /* Shared */,
 				AC77DFB926402329001351AE /* iOS */,
 				AC77DFC026402329001351AE /* macOS */,
+				ACB8C9FD278AE3A6008B6582 /* tvOS */,
 				AC77DFB826402329001351AE /* Products */,
 				ACD2F74C275F6EE60006D16F /* Frameworks */,
 				71BC23521210C059DC43AE54 /* Pods */,
@@ -109,6 +122,7 @@
 			children = (
 				AC77DFB726402329001351AE /* demo-SPM.app */,
 				AC77DFBF26402329001351AE /* demo-SPM.app */,
+				ACB8C9FC278AE3A6008B6582 /* demo-SPM (tvOS).app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -128,6 +142,13 @@
 				AC77DFC226402329001351AE /* macOS.entitlements */,
 			);
 			path = macOS;
+			sourceTree = "<group>";
+		};
+		ACB8C9FD278AE3A6008B6582 /* tvOS */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = tvOS;
 			sourceTree = "<group>";
 		};
 		ACD2F743275F6D7A0006D16F /* Packages */ = {
@@ -204,13 +225,33 @@
 			productReference = AC77DFBF26402329001351AE /* demo-SPM.app */;
 			productType = "com.apple.product-type.application";
 		};
+		ACB8C9FB278AE3A6008B6582 /* demo-SPM (tvOS) */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = ACB8CA07278AE3A8008B6582 /* Build configuration list for PBXNativeTarget "demo-SPM (tvOS)" */;
+			buildPhases = (
+				ACB8C9F8278AE3A6008B6582 /* Sources */,
+				ACB8C9F9278AE3A6008B6582 /* Frameworks */,
+				ACB8C9FA278AE3A6008B6582 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "demo-SPM (tvOS)";
+			packageProductDependencies = (
+				ACB8CA0C278AE4A0008B6582 /* KSPlayer */,
+			);
+			productName = "demo-SPM (tvOS)";
+			productReference = ACB8C9FC278AE3A6008B6582 /* demo-SPM (tvOS).app */;
+			productType = "com.apple.product-type.application";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
 		AC77DFAB26402327001351AE /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastSwiftUpdateCheck = 1240;
+				LastSwiftUpdateCheck = 1310;
 				LastUpgradeCheck = 1310;
 				TargetAttributes = {
 					AC77DFB626402329001351AE = {
@@ -218,6 +259,9 @@
 					};
 					AC77DFBE26402329001351AE = {
 						CreatedOnToolsVersion = 12.4;
+					};
+					ACB8C9FB278AE3A6008B6582 = {
+						CreatedOnToolsVersion = 13.1;
 					};
 				};
 			};
@@ -236,6 +280,7 @@
 			targets = (
 				AC77DFB626402329001351AE /* demo-SPM (iOS) */,
 				AC77DFBE26402329001351AE /* demo-SPM (macOS) */,
+				ACB8C9FB278AE3A6008B6582 /* demo-SPM (tvOS) */,
 			);
 		};
 /* End PBXProject section */
@@ -266,6 +311,13 @@
 				ACD2F78D275F9BEE0006D16F /* raw.h264 in Resources */,
 				ACD2F787275F9BEE0006D16F /* Polonaise.flac in Resources */,
 				AC77DFC826402329001351AE /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		ACB8C9FA278AE3A6008B6582 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -312,6 +364,15 @@
 			files = (
 				AC77DFC626402329001351AE /* ContentView.swift in Sources */,
 				AC77DFC426402329001351AE /* demo_SPMApp.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		ACB8C9F8278AE3A6008B6582 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				ACB8CA0B278AE436008B6582 /* ContentView.swift in Sources */,
+				ACB8CA0A278AE433008B6582 /* demo_SPMApp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -435,6 +496,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = "demo-SPM (iOS).entitlements";
 				CODE_SIGN_IDENTITY = "Apple Development";
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
@@ -463,6 +525,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = "demo-SPM (iOS).entitlements";
 				CODE_SIGN_IDENTITY = "Apple Development";
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
@@ -532,6 +595,61 @@
 			};
 			name = Release;
 		};
+		ACB8CA08278AE3A8008B6582 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = "App Icon & Top Shelf Image";
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UIUserInterfaceStyle = Automatic;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "kintan.demo-SPM--tvOS-";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = appletvos;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 3;
+				TVOS_DEPLOYMENT_TARGET = 15.0;
+			};
+			name = Debug;
+		};
+		ACB8CA09278AE3A8008B6582 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = "App Icon & Top Shelf Image";
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UIUserInterfaceStyle = Automatic;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "kintan.demo-SPM--tvOS-";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = appletvos;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 3;
+				TVOS_DEPLOYMENT_TARGET = 15.0;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -562,9 +680,22 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
+		ACB8CA07278AE3A8008B6582 /* Build configuration list for PBXNativeTarget "demo-SPM (tvOS)" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				ACB8CA08278AE3A8008B6582 /* Debug */,
+				ACB8CA09278AE3A8008B6582 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 /* End XCConfigurationList section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		ACB8CA0C278AE4A0008B6582 /* KSPlayer */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = KSPlayer;
+		};
 		ACD2F74D275F6EE60006D16F /* KSPlayer */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = KSPlayer;
