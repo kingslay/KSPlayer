@@ -376,19 +376,21 @@ public extension UIApplication {
     case bottomRight
 }
 
-public struct State: OptionSet {
-    public var rawValue: UInt
-    public init(rawValue: UInt) { self.rawValue = rawValue }
-    public static var normal = State(rawValue: 1 << 0)
-    public static var highlighted = State(rawValue: 1 << 1)
-    public static var disabled = State(rawValue: 1 << 2)
-    public static var selected = State(rawValue: 1 << 3)
-    public static var focused = State(rawValue: 1 << 4)
-    public static var application = State(rawValue: 1 << 5)
-    public static var reserved = State(rawValue: 1 << 6)
+public extension UIControl {
+    struct State: OptionSet {
+        public var rawValue: UInt
+        public init(rawValue: UInt) { self.rawValue = rawValue }
+        public static var normal = State(rawValue: 1 << 0)
+        public static var highlighted = State(rawValue: 1 << 1)
+        public static var disabled = State(rawValue: 1 << 2)
+        public static var selected = State(rawValue: 1 << 3)
+        public static var focused = State(rawValue: 1 << 4)
+        public static var application = State(rawValue: 1 << 5)
+        public static var reserved = State(rawValue: 1 << 6)
+    }
 }
 
-extension State: Hashable {}
+extension UIControl.State: Hashable {}
 public class UILabel: NSTextField {
     override init(frame frameRect: CGRect) {
         super.init(frame: frameRect)
@@ -409,8 +411,8 @@ public class UILabel: NSTextField {
 }
 
 public class KSButton: NSButton {
-    private var images = [State: UIImage]()
-    private var titles = [State: String]()
+    private var images = [UIControl.State: UIImage]()
+    private var titles = [UIControl.State: String]()
     private var titleColors = [State: UIColor]()
     private var targetActions = [ControlEvents: (AnyObject?, Selector)]()
 
@@ -436,28 +438,28 @@ public class KSButton: NSButton {
         }
     }
 
-    open func setImage(_ image: UIImage?, for state: State) {
+    open func setImage(_ image: UIImage?, for state: UIControl.State) {
         images[state] = image
         if state == .normal, isEnabled, !isSelected {
             self.image = image
         }
     }
 
-    open func setTitle(_ title: String, for state: State) {
+    open func setTitle(_ title: String, for state: UIControl.State) {
         titles[state] = title
         if state == .normal, isEnabled, !isSelected {
             self.title = title
         }
     }
 
-    open func setTitleColor(_ titleColor: UIColor?, for state: State) {
+    open func setTitleColor(_ titleColor: UIColor?, for state: UIControl.State) {
         titleColors[state] = titleColor
         if state == .normal, isEnabled, !isSelected {
 //            self.titleColor = titleColor
         }
     }
 
-    private func update(state: State) {
+    private func update(state: UIControl.State) {
         if let stateImage = images[state] {
             image = stateImage
         }
