@@ -10,6 +10,7 @@ import Foundation
 import Libavcodec
 
 class SoftwareDecode: DecodeProtocol {
+    var decodeResult: (([MEFrame]) -> Void)?
     private let mediaType: AVFoundation.AVMediaType
     private let timebase: Timebase
     private let options: KSOptions
@@ -50,9 +51,10 @@ class SoftwareDecode: DecodeProtocol {
         }
     }
 
-    func doDecode(packet: UnsafeMutablePointer<AVPacket>) throws -> [MEFrame] {
+    func doDecode(packet: UnsafeMutablePointer<AVPacket>) throws {
         guard let codecContext = codecContext, avcodec_send_packet(codecContext, packet) == 0 else {
-            return []
+            decodeResult?([])
+            return
         }
         var array = [MEFrame]()
         while true {
@@ -85,7 +87,7 @@ class SoftwareDecode: DecodeProtocol {
                 }
             }
         }
-        return array
+        decodeResult?(array)
     }
 
     func doFlushCodec() {

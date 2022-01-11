@@ -10,8 +10,9 @@ import VideoToolbox
 
 protocol DecodeProtocol {
     init(assetTrack: TrackProtocol, options: KSOptions)
+    var decodeResult: (([MEFrame]) -> Void)? { get set }
     func decode()
-    func doDecode(packet: UnsafeMutablePointer<AVPacket>) throws -> [MEFrame]
+    func doDecode(packet: UnsafeMutablePointer<AVPacket>) throws
     func doFlushCodec()
     func shutdown()
 }
@@ -45,62 +46,61 @@ extension KSOptions {
 }
 
 class VideoHardwareDecode: DecodeProtocol {
+    var decodeResult: (([MEFrame]) -> Void)?
     private var session: DecompressionSession?
     private let codecpar: AVCodecParameters
     private let timebase: Timebase
     private let options: KSOptions
     private var startTime = Int64(0)
     private var lastPosition = Int64(0)
-    required init(assetTrack: TrackProtocol, options: KSOptions) {
-        timebase = assetTrack.timebase
-        codecpar = assetTrack.stream.pointee.codecpar.pointee
-        self.options = options
-        session = DecompressionSession(codecpar: codecpar, options: options)
+    required convenience init(assetTrack: TrackProtocol, options: KSOptions) {
+        self.init(assetTrack: assetTrack, options: options, session: DecompressionSession(codecpar: assetTrack.stream.pointee.codecpar.pointee, options: options))
     }
 
-    init(assetTrack: TrackProtocol, options: KSOptions, session: DecompressionSession) {
+    init(assetTrack: TrackProtocol, options: KSOptions, session: DecompressionSession?) {
         timebase = assetTrack.timebase
         codecpar = assetTrack.stream.pointee.codecpar.pointee
         self.options = options
         self.session = session
     }
 
-    func doDecode(packet: UnsafeMutablePointer<AVPacket>) throws -> [MEFrame] {
+    func doDecode(packet: UnsafeMutablePointer<AVPacket>) throws {
         guard let data = packet.pointee.data, let session = session else {
-            return []
+            decodeResult?([])
+            return
         }
         let sampleBuffer = try session.formatDescription.getSampleBuffer(isConvertNALSize: session.isConvertNALSize, data: data, size: Int(packet.pointee.size))
-        var result = [VideoVTBFrame]()
-        let flags = options.asynchronousDecompression ? VTDecodeFrameFlags._EnableAsynchronousDecompression : VTDecodeFrameFlags(rawValue: 0)
-        var vtStatus = noErr
-        let status = VTDecompressionSessionDecodeFrame(session.decompressionSession, sampleBuffer: sampleBuffer, flags: flags, infoFlagsOut: nil) { [weak self] status, _, imageBuffer, _, _ in
-            vtStatus = status
-            guard let self = self, status == noErr, let imageBuffer = imageBuffer else {
+        let flags: VTDecodeFrameFlags = [._EnableAsynchronousDecompression]
+        var flagOut = VTDecodeInfoFlags.frameDropped
+        let pts = packet.pointee.pts
+        let packetFlags = packet.pointee.flags
+        let duration = packet.pointee.duration
+        let size = Int64(packet.pointee.size)
+        let status = VTDecompressionSessionDecodeFrame(session.decompressionSession, sampleBuffer: sampleBuffer, flags: flags, infoFlagsOut: &flagOut) { [weak self] status, infoFlags, imageBuffer, _, _ in
+            guard let self = self, status == noErr, !infoFlags.contains(.frameDropped) else {
                 return
             }
             let frame = VideoVTBFrame()
             frame.corePixelBuffer = imageBuffer
             frame.timebase = self.timebase
-            let timestamp = packet.pointee.pts
-            if packet.pointee.flags & AV_PKT_FLAG_KEY == 1, packet.pointee.flags & AV_PKT_FLAG_DISCARD != 0, self.lastPosition > 0 {
-                self.startTime = self.lastPosition - timestamp
+            if packetFlags & AV_PKT_FLAG_KEY == 1, packetFlags & AV_PKT_FLAG_DISCARD != 0, self.lastPosition > 0 {
+                self.startTime = self.lastPosition - pts
             }
-            self.lastPosition = max(self.lastPosition, timestamp)
-            frame.position = self.startTime + timestamp
-            frame.duration = packet.pointee.duration
-            frame.size = Int64(packet.pointee.size)
+            self.lastPosition = max(self.lastPosition, pts)
+            frame.position = self.startTime + pts
+            frame.duration = duration
+            frame.size = size
             self.lastPosition += frame.duration
-            result.append(frame)
+            self.decodeResult?([frame])
         }
-        if vtStatus != noErr || status == kVTInvalidSessionErr || status == kVTVideoDecoderMalfunctionErr || status == kVTVideoDecoderBadDataErr {
+        if status == kVTInvalidSessionErr || status == kVTVideoDecoderMalfunctionErr || status == kVTVideoDecoderBadDataErr {
             if packet.pointee.flags & AV_PKT_FLAG_KEY == 1 {
-                throw NSError(errorCode: .codecVideoReceiveFrame, ffmpegErrnum: vtStatus)
+                throw NSError(errorCode: .codecVideoReceiveFrame, ffmpegErrnum: status)
             } else {
                 // 解决从后台切换到前台，解码失败的问题
                 doFlushCodec()
             }
         }
-        return result
     }
 
     func doFlushCodec() {
@@ -265,6 +265,8 @@ extension AVColorTransferCharacteristic {
         case AVCOL_TRC_LINEAR:
             if #available(iOS 12.0, tvOS 12.0, OSX 10.14, *) {
                 return kCVImageBufferTransferFunction_Linear
+            } else {
+                return nil
             }
         case AVCOL_TRC_ARIB_STD_B67:
             return kCVImageBufferTransferFunction_ITU_R_2100_HLG
@@ -275,7 +277,6 @@ extension AVColorTransferCharacteristic {
         default:
             return nil
         }
-        return nil
     }
 }
 

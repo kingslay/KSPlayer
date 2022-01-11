@@ -14,6 +14,7 @@ import UIKit
 import AppKit
 #endif
 class SubtitleDecode: DecodeProtocol {
+    var decodeResult: (([MEFrame]) -> Void)?
     private let reg = AssParse.patternReg()
     private var codecContext: UnsafeMutablePointer<AVCodecContext>?
     private let scale = VideoSwresample(dstFormat: AV_PIX_FMT_RGBA, forceTransfer: true)
@@ -31,8 +32,11 @@ class SubtitleDecode: DecodeProtocol {
 
     func decode() {}
 
-    func doDecode(packet: UnsafeMutablePointer<AVPacket>) throws -> [MEFrame] {
-        guard let codecContext = codecContext else { return [] }
+    func doDecode(packet: UnsafeMutablePointer<AVPacket>) throws {
+        guard let codecContext = codecContext else {
+            decodeResult?([])
+            return
+        }
         var pktSize = packet.pointee.size
         var error: NSError?
         var array = [MEFrame]()
@@ -70,7 +74,7 @@ class SubtitleDecode: DecodeProtocol {
             }
             pktSize -= len
         }
-        return array
+        decodeResult?(array)
     }
 
     func doFlushCodec() {}
