@@ -210,7 +210,6 @@ open class KSOptions {
     public var audioFilters: String?
     public var videoFilters: String?
     public var subtitleDisable = false
-    public var asynchronousDecompression = false
     public var videoAdaptable = true
     public var syncDecodeAudio = false
     public var syncDecodeVideo = false

@@ -9,6 +9,7 @@ import AudioToolbox
 import Libavcodec
 
 final class AudioHardwareDecode: DecodeProtocol {
+    var decodeResult: (([MEFrame]) -> Void)?
     private let timebase: Timebase
     private var converter: AudioConverterRef?
     private var outAudioBufferList = AudioBufferList()
@@ -34,9 +35,10 @@ final class AudioHardwareDecode: DecodeProtocol {
 
     func decode() {}
 
-    func doDecode(packet: UnsafeMutablePointer<AVPacket>) throws -> [MEFrame] {
+    func doDecode(packet: UnsafeMutablePointer<AVPacket>) throws {
         guard let converter = converter else {
-            return []
+            decodeResult?([])
+            return
         }
         let inputDataProc: AudioConverterComplexInputDataProc = { _, ioPacketCount, audioBufferList, packetDesc, userData -> OSStatus in
             guard let packet = UnsafePointer<AVPacket>(OpaquePointer(userData)), let data = packet.pointee.data else {
@@ -70,9 +72,10 @@ final class AudioHardwareDecode: DecodeProtocol {
             }
             frame.duration = packet.pointee.duration
             frame.size = Int64(packet.pointee.size)
-            return [frame]
+            decodeResult?([frame])
+            return
         }
-        return []
+        decodeResult?([])
     }
 
     func doFlushCodec() {}
