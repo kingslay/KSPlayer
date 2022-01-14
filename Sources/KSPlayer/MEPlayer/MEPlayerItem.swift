@@ -261,6 +261,7 @@ extension MEPlayerItem {
                 condition.wait()
             }
             if state == .seeking {
+                allTracks.forEach { $0.seek(time: currentPlaybackTime) }
                 let timeStamp = Int64(currentPlaybackTime * TimeInterval(AV_TIME_BASE))
                 // can not seek to key frame
 //                let result = avformat_seek_file(formatCtx, -1, timeStamp - 2, timeStamp, timeStamp + 2, AVSEEK_FLAG_BACKWARD)
@@ -268,8 +269,8 @@ extension MEPlayerItem {
                 if state == .closed {
                     break
                 }
-                allTracks.forEach { $0.seek(time: currentPlaybackTime) }
                 isSeek = true
+                allTracks.forEach { $0.seek(time: currentPlaybackTime) }
                 seekingCompletionHandler?(result >= 0)
                 seekingCompletionHandler = nil
                 state = .reading
@@ -403,7 +404,6 @@ extension MEPlayerItem: MediaPlayback {
             seekingCompletionHandler = handler
             state = .seeking
             condition.broadcast()
-            allTracks.forEach { $0.seek(time: currentPlaybackTime) }
         } else if state == .finished {
             currentPlaybackTime = time
             seekingCompletionHandler = handler
@@ -453,7 +453,7 @@ extension MEPlayerItem: CodecCapacityDelegate {
     }
 
     private func adaptable(track: PlayerItemTrackProtocol, loadingState: LoadingState) {
-        guard var videoAdaptation = videoAdaptation, track.mediaType == .video, !loadingState.isEndOfFile else {
+        guard var videoAdaptation = videoAdaptation, track.mediaType == .video, !loadingState.isEndOfFile, !loadingState.isSeek, state != .seeking else {
             return
         }
         videoAdaptation.loadedCount = track.packetCount + track.frameCount
