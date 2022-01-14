@@ -23,10 +23,13 @@ class ObjectPool {
 
     func comeback<P: Any>(item: P, key: String) {
         semaphore.wait()
+        defer { semaphore.signal() }
         var array = pool[key, default: ContiguousArray<Any>()]
+        if array.count > 8 {
+            return
+        }
         array.append(item)
         pool[key] = array
-        semaphore.signal()
     }
 
     func removeAll() {
