@@ -164,7 +164,6 @@ class FFPlayerItemTrack<Frame: MEFrame>: PlayerItemTrackProtocol, CustomStringCo
         state = .flush
         outputRenderQueue.flush()
         isLoopModel = false
-        delegate?.codecDidChangeCapacity(track: self)
     }
 
     func putPacket(packet: Packet) {
@@ -192,8 +191,6 @@ class FFPlayerItemTrack<Frame: MEFrame>: PlayerItemTrackProtocol, CustomStringCo
                 if state == .finished, frameCount == 0 {
                     delegate?.codecDidFinished(track: self)
                 }
-            } else {
-                delegate?.codecDidChangeCapacity(track: self)
             }
         }
         return outputFecthRender
@@ -249,7 +246,6 @@ extension FFPlayerItemTrack: DecodeResultDelegate {
         if let frame = frame as? Frame {
             outputRenderQueue.push(frame)
         }
-        delegate?.codecDidChangeCapacity(track: self)
     }
 }
 
@@ -287,7 +283,6 @@ final class AsyncPlayerItemTrack<Frame: MEFrame>: FFPlayerItemTrack<Frame> {
             if state == .finished, frameCount == 0 {
                 delegate?.codecDidFinished(track: self)
             }
-            delegate?.codecDidChangeCapacity(track: self)
         }
     }
 
@@ -297,7 +292,6 @@ final class AsyncPlayerItemTrack<Frame: MEFrame>: FFPlayerItemTrack<Frame> {
         } else {
             packetQueue.push(packet)
         }
-        delegate?.codecDidChangeCapacity(track: self)
     }
 
     override func decode() {
