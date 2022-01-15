@@ -20,6 +20,8 @@ public class PlayerToolBar: UIStackView {
     public let playButton = UIButton()
     public let timeSlider = KSSlider()
     public let playbackRateButton = UIButton()
+    public let videoSwitchButton = UIButton()
+    public let audioSwitchButton = UIButton()
     public let definitionButton = UIButton()
     public let pipButton = UIButton()
     public var timeType = TimeType.minOrHour {
@@ -76,9 +78,6 @@ public class PlayerToolBar: UIStackView {
 
     private func initUI() {
         distribution = .fill
-        playButton.tag = PlayerButtonType.play.rawValue
-        playButton.setImage(KSPlayerManager.image(named: "toolbar_ic_play"), for: .normal)
-        playButton.setImage(KSPlayerManager.image(named: "toolbar_ic_pause"), for: .selected)
         currentTimeLabel.textColor = UIColor(hex: 0x9B9B9B)
         currentTimeLabel.font = UIFont(name: "HelveticaNeue-Medium", size: 14)
         currentTimeLabel.text = 0.toString(for: timeType)
@@ -92,14 +91,24 @@ public class PlayerToolBar: UIStackView {
         timeSlider.minimumValue = 0
         timeSlider.maximumTrackTintColor = UIColor.white.withAlphaComponent(0.3)
         timeSlider.minimumTrackTintColor = UIColor(red: 0.0, green: 164 / 255.0, blue: 1.0, alpha: 1.0)
+        playButton.tag = PlayerButtonType.play.rawValue
+        playButton.setImage(KSPlayerManager.image(named: "toolbar_ic_play"), for: .normal)
+        playButton.setImage(KSPlayerManager.image(named: "toolbar_ic_pause"), for: .selected)
+        playbackRateButton.tag = PlayerButtonType.rate.rawValue
         playbackRateButton.titleFont = .systemFont(ofSize: 14, weight: .medium)
         playbackRateButton.setTitle(NSLocalizedString("speed", comment: ""), for: .normal)
-        playbackRateButton.tag = PlayerButtonType.rate.rawValue
-        definitionButton.titleFont = .systemFont(ofSize: 14, weight: .medium)
         definitionButton.tag = PlayerButtonType.definition.rawValue
+        definitionButton.titleFont = .systemFont(ofSize: 14, weight: .medium)
+        audioSwitchButton.tag = PlayerButtonType.audioSwitch.rawValue
+        audioSwitchButton.titleFont = .systemFont(ofSize: 14, weight: .medium)
+        audioSwitchButton.setTitle(NSLocalizedString("switch audio", comment: ""), for: .normal)
+        videoSwitchButton.tag = PlayerButtonType.videoSwitch.rawValue
+        videoSwitchButton.titleFont = .systemFont(ofSize: 14, weight: .medium)
+        videoSwitchButton.setTitle(NSLocalizedString("switch video", comment: ""), for: .normal)
+        srtButton.tag = PlayerButtonType.srt.rawValue
         srtButton.setTitle(NSLocalizedString("subtitle", comment: ""), for: .normal)
         srtButton.titleFont = .systemFont(ofSize: 14, weight: .medium)
-        srtButton.tag = PlayerButtonType.srt.rawValue
+        pipButton.tag = PlayerButtonType.pictureInPicture.rawValue
         pipButton.titleFont = .systemFont(ofSize: 14, weight: .medium)
         if #available(iOS 13.0, tvOS 14.0, macOS 10.15, *) {
             pipButton.setImage(AVPictureInPictureController.pictureInPictureButtonStartImage, for: .normal)
@@ -107,7 +116,6 @@ public class PlayerToolBar: UIStackView {
         } else {
             pipButton.setTitle(NSLocalizedString("pip", comment: ""), for: .normal)
         }
-        pipButton.tag = PlayerButtonType.pictureInPicture.rawValue
         playButton.translatesAutoresizingMaskIntoConstraints = false
         srtButton.translatesAutoresizingMaskIntoConstraints = false
         translatesAutoresizingMaskIntoConstraints = false
@@ -127,6 +135,8 @@ public class PlayerToolBar: UIStackView {
         playButton.addTarget(target, action: action, for: .primaryActionTriggered)
         playbackRateButton.addTarget(target, action: action, for: .primaryActionTriggered)
         definitionButton.addTarget(target, action: action, for: .primaryActionTriggered)
+        audioSwitchButton.addTarget(target, action: action, for: .primaryActionTriggered)
+        videoSwitchButton.addTarget(target, action: action, for: .primaryActionTriggered)
         srtButton.addTarget(target, action: action, for: .primaryActionTriggered)
         pipButton.addTarget(target, action: action, for: .primaryActionTriggered)
     }
