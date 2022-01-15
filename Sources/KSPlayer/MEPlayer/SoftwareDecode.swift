@@ -10,7 +10,7 @@ import Foundation
 import Libavcodec
 
 class SoftwareDecode: DecodeProtocol {
-    var decodeResult: (([MEFrame]) -> Void)?
+    private weak var delegate: DecodeResultDelegate?
     private let mediaType: AVFoundation.AVMediaType
     private let timebase: Timebase
     private let options: KSOptions
@@ -21,9 +21,10 @@ class SoftwareDecode: DecodeProtocol {
     private var bestEffortTimestamp = Int64(0)
     private let swresample: Swresample
     private let filter: MEFilter?
-    required init(assetTrack: TrackProtocol, options: KSOptions) {
+    required init(assetTrack: TrackProtocol, options: KSOptions, delegate: DecodeResultDelegate) {
         timebase = assetTrack.timebase
         mediaType = assetTrack.mediaType
+        self.delegate = delegate
         self.options = options
         var codecpar = assetTrack.stream.pointee.codecpar.pointee
         do {
@@ -53,10 +54,9 @@ class SoftwareDecode: DecodeProtocol {
 
     func doDecode(packet: UnsafeMutablePointer<AVPacket>) throws {
         guard let codecContext = codecContext, avcodec_send_packet(codecContext, packet) == 0 else {
-            decodeResult?([])
+            delegate?.decodeResult(frame: nil)
             return
         }
-        var array = [MEFrame]()
         while true {
             let result = avcodec_receive_frame(codecContext, coreFrame)
             if result == 0, let avframe = coreFrame {
@@ -73,7 +73,7 @@ class SoftwareDecode: DecodeProtocol {
                 }
                 frame.position = bestEffortTimestamp
                 bestEffortTimestamp += frame.duration
-                array.append(frame)
+                delegate?.decodeResult(frame: frame)
             } else {
                 if result == AVError.eof.code {
                     avcodec_flush_buffers(codecContext)
@@ -87,7 +87,6 @@ class SoftwareDecode: DecodeProtocol {
                 }
             }
         }
-        decodeResult?(array)
     }
 
     func doFlushCodec() {

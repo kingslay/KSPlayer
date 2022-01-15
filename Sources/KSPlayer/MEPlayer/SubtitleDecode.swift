@@ -14,14 +14,14 @@ import UIKit
 import AppKit
 #endif
 class SubtitleDecode: DecodeProtocol {
-    var decodeResult: (([MEFrame]) -> Void)?
+    private weak var delegate: DecodeResultDelegate?
     private let reg = AssParse.patternReg()
     private var codecContext: UnsafeMutablePointer<AVCodecContext>?
     private let scale = VideoSwresample(dstFormat: AV_PIX_FMT_RGBA, forceTransfer: true)
     private var subtitle = AVSubtitle()
     private var preSubtitleFrame: SubtitleFrame?
     private let timebase: Timebase
-    required init(assetTrack: TrackProtocol, options: KSOptions) {
+    required init(assetTrack: TrackProtocol, options: KSOptions, delegate _: DecodeResultDelegate) {
         timebase = assetTrack.timebase
         do {
             codecContext = try assetTrack.stream.pointee.codecpar.pointee.ceateContext(options: options)
@@ -34,12 +34,11 @@ class SubtitleDecode: DecodeProtocol {
 
     func doDecode(packet: UnsafeMutablePointer<AVPacket>) throws {
         guard let codecContext = codecContext else {
-            decodeResult?([])
+            delegate?.decodeResult(frame: nil)
             return
         }
         var pktSize = packet.pointee.size
         var error: NSError?
-        var array = [MEFrame]()
         while pktSize > 0 {
             var gotsubtitle = Int32(0)
             let len = avcodec_decode_subtitle2(codecContext, &subtitle, &gotsubtitle, packet)
@@ -67,14 +66,13 @@ class SubtitleDecode: DecodeProtocol {
                 preSubtitleFrame.part.text.append(attributedString)
             } else {
                 preSubtitleFrame = frame
-                array.append(frame)
+                delegate?.decodeResult(frame: frame)
             }
             if len == 0 {
                 break
             }
             pktSize -= len
         }
-        decodeResult?(array)
     }
 
     func doFlushCodec() {}

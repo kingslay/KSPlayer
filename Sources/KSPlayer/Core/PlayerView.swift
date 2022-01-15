@@ -14,15 +14,17 @@ import AVFoundation
 
 public enum PlayerButtonType: Int {
     case play = 101
-    case pause = 102
-    case back = 103
-    case srt = 104
-    case landscape = 105
-    case replay = 106
-    case lock = 107
-    case rate = 108
-    case definition = 109
-    case pictureInPicture = 110
+    case pause
+    case back
+    case srt
+    case landscape
+    case replay
+    case lock
+    case rate
+    case definition
+    case pictureInPicture
+    case audioSwitch
+    case videoSwitch
 }
 
 public protocol PlayerControllerDelegate: AnyObject {

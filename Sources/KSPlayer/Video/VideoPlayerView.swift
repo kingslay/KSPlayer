@@ -151,6 +151,26 @@ open class VideoPlayerView: PlayerView {
                     button.isSelected = true
                 }
             }
+        } else if type == .audioSwitch || type == .videoSwitch {
+            guard let tracks = playerLayer.player?.tracks(mediaType: type == .audioSwitch ? .audio : .video) else {
+                return
+            }
+            let alertController = UIAlertController(title: NSLocalizedString(type == .audioSwitch ? "switch audio" : "switch video", comment: ""), message: nil, preferredStyle: preferredStyle())
+            for track in tracks {
+                let isEnabled = track.isEnabled
+                var title = track.name
+                if type == .videoSwitch {
+                    title += " \(track.naturalSize.width)x\(track.naturalSize.height)"
+                }
+                let action = UIAlertAction(title: title, style: .default) { [weak self] _ in
+                    guard let self = self, !isEnabled else { return }
+                    self.playerLayer.player?.select(track: track)
+                }
+                action.setValue(isEnabled, forKey: "checked")
+                alertController.addAction(action)
+            }
+            alertController.addAction(UIAlertAction(title: NSLocalizedString("cancel", comment: ""), style: .cancel, handler: nil))
+            viewController?.present(alertController, animated: true, completion: nil)
         }
     }
 
@@ -239,6 +259,8 @@ open class VideoPlayerView: PlayerView {
         case .readyToPlay:
             toolBar.timeSlider.isPlayable = true
             embedSubtitleDataSouce = layer.player?.subtitleDataSouce
+            toolBar.videoSwitchButton.isHidden = layer.player?.tracks(mediaType: .video).count ?? 1 < 2
+            toolBar.audioSwitchButton.isHidden = layer.player?.tracks(mediaType: .audio).count ?? 1 < 2
         case .buffering:
             isPlayed = true
             replayButton.isHidden = true
@@ -517,8 +539,12 @@ extension VideoPlayerView {
         toolBar.addArrangedSubview(toolBar.timeLabel)
         toolBar.addArrangedSubview(toolBar.playbackRateButton)
         toolBar.addArrangedSubview(toolBar.definitionButton)
+        toolBar.addArrangedSubview(toolBar.audioSwitchButton)
+        toolBar.addArrangedSubview(toolBar.videoSwitchButton)
         toolBar.addArrangedSubview(toolBar.srtButton)
         toolBar.addArrangedSubview(toolBar.pipButton)
+        toolBar.audioSwitchButton.isHidden = true
+        toolBar.videoSwitchButton.isHidden = true
         if #available(tvOS 14.0, macOS 10.15, *) {
             toolBar.pipButton.isHidden = !AVPictureInPictureController.isPictureInPictureSupported()
         } else {

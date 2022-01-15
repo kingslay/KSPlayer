@@ -9,23 +9,26 @@ import Libavformat
 import VideoToolbox
 
 protocol DecodeProtocol {
-    init(assetTrack: TrackProtocol, options: KSOptions)
-    var decodeResult: (([MEFrame]) -> Void)? { get set }
+    init(assetTrack: TrackProtocol, options: KSOptions, delegate: DecodeResultDelegate)
     func decode()
     func doDecode(packet: UnsafeMutablePointer<AVPacket>) throws
     func doFlushCodec()
     func shutdown()
 }
 
+protocol DecodeResultDelegate: AnyObject {
+    func decodeResult(frame: MEFrame?)
+}
+
 extension TrackProtocol {
-    func makeDecode(options: KSOptions) -> DecodeProtocol {
+    func makeDecode(options: KSOptions, delegate: DecodeResultDelegate) -> DecodeProtocol {
         autoreleasepool {
             if mediaType == .subtitle {
-                return SubtitleDecode(assetTrack: self, options: options)
+                return SubtitleDecode(assetTrack: self, options: options, delegate: delegate)
             } else if mediaType == .video, let session = DecompressionSession(codecpar: stream.pointee.codecpar.pointee, options: options) {
-                return VideoHardwareDecode(assetTrack: self, options: options, session: session)
+                return VideoHardwareDecode(assetTrack: self, options: options, session: session, delegate: delegate)
             } else {
-                return SoftwareDecode(assetTrack: self, options: options)
+                return SoftwareDecode(assetTrack: self, options: options, delegate: delegate)
             }
         }
     }
@@ -46,27 +49,28 @@ extension KSOptions {
 }
 
 class VideoHardwareDecode: DecodeProtocol {
-    var decodeResult: (([MEFrame]) -> Void)?
+    private weak var delegate: DecodeResultDelegate?
     private var session: DecompressionSession?
     private let codecpar: AVCodecParameters
     private let timebase: Timebase
     private let options: KSOptions
     private var startTime = Int64(0)
     private var lastPosition = Int64(0)
-    required convenience init(assetTrack: TrackProtocol, options: KSOptions) {
-        self.init(assetTrack: assetTrack, options: options, session: DecompressionSession(codecpar: assetTrack.stream.pointee.codecpar.pointee, options: options))
+    required convenience init(assetTrack: TrackProtocol, options: KSOptions, delegate: DecodeResultDelegate) {
+        self.init(assetTrack: assetTrack, options: options, session: DecompressionSession(codecpar: assetTrack.stream.pointee.codecpar.pointee, options: options), delegate: delegate)
     }
 
-    init(assetTrack: TrackProtocol, options: KSOptions, session: DecompressionSession?) {
+    init(assetTrack: TrackProtocol, options: KSOptions, session: DecompressionSession?, delegate: DecodeResultDelegate) {
         timebase = assetTrack.timebase
         codecpar = assetTrack.stream.pointee.codecpar.pointee
         self.options = options
         self.session = session
+        self.delegate = delegate
     }
 
     func doDecode(packet: UnsafeMutablePointer<AVPacket>) throws {
         guard let data = packet.pointee.data, let session = session else {
-            decodeResult?([])
+            delegate?.decodeResult(frame: nil)
             return
         }
         let sampleBuffer = try session.formatDescription.getSampleBuffer(isConvertNALSize: session.isConvertNALSize, data: data, size: Int(packet.pointee.size))
@@ -91,7 +95,7 @@ class VideoHardwareDecode: DecodeProtocol {
             frame.duration = duration
             frame.size = size
             self.lastPosition += frame.duration
-            self.decodeResult?([frame])
+            self.delegate?.decodeResult(frame: frame)
         }
         if status == kVTInvalidSessionErr || status == kVTVideoDecoderMalfunctionErr || status == kVTVideoDecoderBadDataErr {
             if packet.pointee.flags & AV_PKT_FLAG_KEY == 1 {

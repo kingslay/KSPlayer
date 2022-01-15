@@ -138,8 +138,6 @@ class FFPlayerItemTrack<Frame: MEFrame>: PlayerItemTrackProtocol, CustomStringCo
     required init(assetTrack: TrackProtocol, options: KSOptions) {
         self.assetTrack = assetTrack
         self.options = options
-        var decodeProtocol = assetTrack.makeDecode(options: options)
-        decoderMap[assetTrack.streamIndex] = decodeProtocol
         mediaType = assetTrack.mediaType
         description = mediaType.rawValue
         fps = assetTrack.nominalFrameRate
@@ -152,26 +150,7 @@ class FFPlayerItemTrack<Frame: MEFrame>: PlayerItemTrackProtocol, CustomStringCo
             outputRenderQueue = CircularBuffer()
         }
         frameMaxCount = outputRenderQueue.maxCount
-        decodeProtocol.decodeResult = { [weak self] array in
-            guard let self = self else { return }
-            array.forEach { frame in
-                if self.state == .flush || self.state == .closed {
-                    return
-                }
-                if self.seekTime > 0, options.isAccurateSeek {
-                    let timestamp = frame.position + frame.duration
-                    if timestamp <= 0 || frame.timebase.cmtime(for: timestamp).seconds < self.seekTime {
-                        return
-                    } else {
-                        self.seekTime = 0.0
-                    }
-                }
-                if let frame = frame as? Frame {
-                    self.outputRenderQueue.push(frame)
-                }
-                self.delegate?.codecDidChangeCapacity(track: self)
-            }
-        }
+        decoderMap[assetTrack.streamIndex] = assetTrack.makeDecode(options: options, delegate: self)
     }
 
     func decode() {
@@ -229,7 +208,7 @@ class FFPlayerItemTrack<Frame: MEFrame>: PlayerItemTrackProtocol, CustomStringCo
     }
 
     fileprivate func doDecode(packet: Packet) {
-        let decoder = decoderMap.value(for: packet.assetTrack.streamIndex, default: packet.assetTrack.makeDecode(options: options))
+        let decoder = decoderMap.value(for: packet.assetTrack.streamIndex, default: packet.assetTrack.makeDecode(options: options, delegate: self))
         do {
             try decoder.doDecode(packet: packet.corePacket)
             if options.decodeAudioTime == 0, mediaType == .audio {
@@ -241,13 +220,36 @@ class FFPlayerItemTrack<Frame: MEFrame>: PlayerItemTrackProtocol, CustomStringCo
         } catch {
             KSLog("Decoder did Failed : \(error)")
             if decoder is VideoHardwareDecode {
-                decoderMap[packet.assetTrack.streamIndex] = SoftwareDecode(assetTrack: packet.assetTrack, options: options)
+                decoderMap[packet.assetTrack.streamIndex] = SoftwareDecode(assetTrack: packet.assetTrack, options: options, delegate: self)
                 KSLog("VideoCodec switch to software decompression")
                 doDecode(packet: packet)
             } else {
                 state = .failed
             }
         }
+    }
+}
+
+extension FFPlayerItemTrack: DecodeResultDelegate {
+    func decodeResult(frame: MEFrame?) {
+        guard let frame = frame else {
+            return
+        }
+        if state == .flush || state == .closed {
+            return
+        }
+        if seekTime > 0, options.isAccurateSeek {
+            let timestamp = frame.position + frame.duration
+            if timestamp <= 0 || frame.timebase.cmtime(for: timestamp).seconds < seekTime {
+                return
+            } else {
+                seekTime = 0.0
+            }
+        }
+        if let frame = frame as? Frame {
+            outputRenderQueue.push(frame)
+        }
+        delegate?.codecDidChangeCapacity(track: self)
     }
 }
 
