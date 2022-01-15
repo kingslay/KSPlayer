@@ -42,7 +42,7 @@ class SoftwareDecode: DecodeProtocol {
             }
             swresample = VideoSwresample()
         } else {
-            filter = options.videoFilters.flatMap { str -> MEFilter? in
+            filter = options.audioFilters.flatMap { str -> MEFilter? in
                 let fmt = String(describing: av_get_sample_fmt_name(AVSampleFormat(rawValue: codecpar.format)))
                 let timebase = assetTrack.timebase
                 let args = "sample_rate=\(codecpar.sample_rate):sample_fmt=\(fmt):time_base=\(timebase.num)/\(timebase.den):channels=\(codecpar.channels):channel_layout=\(codecpar.channel_layout)"
