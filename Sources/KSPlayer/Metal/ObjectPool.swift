@@ -25,7 +25,7 @@ class ObjectPool {
         semaphore.wait()
         defer { semaphore.signal() }
         var array = pool[key, default: ContiguousArray<Any>()]
-        if array.count > 8 {
+        if array.count > 16 {
             return
         }
         array.append(item)
