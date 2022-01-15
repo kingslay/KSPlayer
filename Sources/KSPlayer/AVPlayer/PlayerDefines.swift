@@ -324,7 +324,7 @@ open class KSOptions {
     }
 
     open func audioFrameMaxCount(fps _: Float) -> Int {
-        16
+        32
     }
 
     /// customize dar
