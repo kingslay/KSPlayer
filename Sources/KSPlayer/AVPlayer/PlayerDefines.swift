@@ -225,11 +225,6 @@ open class KSOptions {
     public internal(set) var readVideoTime = 0.0
     public internal(set) var decodeAudioTime = 0.0
     public internal(set) var decodeVideoTime = 0.0
-
-    // 加个节流器，防止频繁的更新加载状态
-    private var throttle = mach_absolute_time()
-    private let concurrentQueue = DispatchQueue(label: "throttle", attributes: .concurrent)
-    private let throttleDiff: UInt64
     public init() {
         formatContextOptions["auto_convert"] = 0
         formatContextOptions["fps_probe_size"] = 3
@@ -241,10 +236,6 @@ open class KSOptions {
         formatContextOptions["user_agent"] = "ksplayer"
         decoderOptions["threads"] = "auto"
         decoderOptions["refcounted_frames"] = "1"
-        var timebaseInfo = mach_timebase_info_data_t()
-        mach_timebase_info(&timebaseInfo)
-        // 间隔0.1s
-        throttleDiff = UInt64(100_000_000 * timebaseInfo.denom / timebaseInfo.numer)
     }
 
     public func setCookie(_ cookies: [HTTPCookie]) {
@@ -262,12 +253,6 @@ open class KSOptions {
 
     // 缓冲算法函数
     open func playable(capacitys: [CapacityProtocol], isFirst: Bool, isSeek: Bool) -> LoadingState? {
-        guard isFirst || isSeek || !isThrottle() else {
-            return nil
-        }
-        concurrentQueue.sync(flags: .barrier) {
-            self.throttle = mach_absolute_time()
-        }
         let packetCount = capacitys.map(\.packetCount).min() ?? 0
         let frameCount = capacitys.map(\.frameCount).min() ?? 0
         let isEndOfFile = capacitys.allSatisfy(\.isEndOfFile)
@@ -298,14 +283,6 @@ open class KSOptions {
         return LoadingState(loadedTime: loadedTime, progress: progress, packetCount: packetCount,
                             frameCount: frameCount, isEndOfFile: isEndOfFile, isPlayable: isPlayable,
                             isFirst: isFirst, isSeek: isSeek)
-    }
-
-    private func isThrottle() -> Bool {
-        var isThrottle = false
-        concurrentQueue.sync {
-            isThrottle = mach_absolute_time() - self.throttle < throttleDiff
-        }
-        return isThrottle
     }
 
     open func adaptable(state: VideoAdaptationState) -> (Int64, Int64)? {

@@ -19,7 +19,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UISplitViewControllerDele
         KSPlayerManager.firstPlayerType = KSMEPlayer.self
         KSPlayerManager.secondPlayerType = KSMEPlayer.self
 //        KSPlayerManager.supportedInterfaceOrientations = .all
-        KSOptions.preferredForwardBufferDuration = 10
         KSOptions.isAutoPlay = true
         KSOptions.isSecondOpen = true
         KSOptions.isAccurateSeek = true

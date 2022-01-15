@@ -43,7 +43,6 @@ protocol OutputRenderSourceDelegate: AnyObject {
 }
 
 protocol CodecCapacityDelegate: AnyObject {
-    func codecDidChangeCapacity(track: PlayerItemTrackProtocol)
     func codecDidFinished(track: PlayerItemTrackProtocol)
 }
 
