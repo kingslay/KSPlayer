@@ -143,7 +143,8 @@ class FFPlayerItemTrack<Frame: MEFrame>: PlayerItemTrackProtocol, CustomStringCo
         fps = assetTrack.nominalFrameRate
         // 默认缓存队列大小跟帧率挂钩,经测试除以4，最优
         if mediaType == .audio {
-            outputRenderQueue = CircularBuffer(initialCapacity: options.audioFrameMaxCount(fps: fps), expanding: false)
+            let capacity = options.audioFrameMaxCount(fps: fps, channels: Int(assetTrack.stream.pointee.codecpar.pointee.channels))
+            outputRenderQueue = CircularBuffer(initialCapacity: capacity, expanding: false)
         } else if mediaType == .video {
             outputRenderQueue = CircularBuffer(initialCapacity: options.videoFrameMaxCount(fps: fps), sorted: true, expanding: false)
         } else {
