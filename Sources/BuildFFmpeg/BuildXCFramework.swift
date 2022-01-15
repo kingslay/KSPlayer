@@ -33,7 +33,7 @@ class BaseBuild {
         createXCFramework()
     }
 
-    func build(platform: PlatformType, arch: ArchType) {
+    private func build(platform: PlatformType, arch: ArchType) {
         let url = URL.currentDirectory + [library, platform.rawValue, "scratch", arch.rawValue]
         try? FileManager.default.createDirectory(at: url, withIntermediateDirectories: true, attributes: nil)
         var cflags = "-arch \(arch.rawValue) \(platform.deploymentTarget())"
@@ -43,11 +43,13 @@ class BaseBuild {
 
     func innerBuid(platform _: PlatformType, arch _: ArchType, cflags _: String, buildDir _: URL) {}
 
-    func createXCFramework() {
+    private func createXCFramework() {
         for framework in frameworks() {
             var arguments = ""
             let XCFrameworkFile = URL.currentDirectory + ["../Sources", framework + ".xcframework"]
-            try? FileManager.default.removeItem(at: XCFrameworkFile)
+            if FileManager.default.fileExists(atPath: XCFrameworkFile.path) {
+                try? FileManager.default.removeItem(at: XCFrameworkFile)
+            }
             for platform in platforms {
                 arguments += " -framework \(createFramework(framework: framework, platform: platform, archs: platform.architectures()))"
             }
@@ -147,7 +149,7 @@ class BaseBuild {
 }
 
 class BuildFFMPEG: BaseBuild {
-    private let ffmpegFile = "ffmpeg-4.4.1"
+    private let ffmpegFile = "ffmpeg-5.0"
     private let isDebug: Bool
     private let isFFplay: Bool
     init() {
@@ -252,10 +254,10 @@ class BuildFFMPEG: BaseBuild {
     }
 
     private let ffmpegConfiguers = [
-        "--enable-optimizations", "--enable-gpl", "--enable-version3", "--enable-nonfree", "--disable-zlib",
+        "--enable-optimizations", "--enable-gpl", "--enable-version3", "--enable-nonfree",
         "--disable-xlib", "--disable-devices", "--disable-indevs", "--disable-outdevs", "--disable-iconv",
         "--disable-bsfs", "--disable-symver", "--disable-armv5te", "--disable-armv6", " --disable-armv6t2",
-        "--disable-audiotoolbox", "--disable-videotoolbox", "--disable-linux-perf", "--disable-bzlib",
+        "--disable-linux-perf", "--disable-bzlib", "--disable-videotoolbox",
         // Configuration options:
         "--enable-cross-compile", "--enable-stripping", "--enable-libxml2", "--enable-thumb", "--enable-asm",
         "--enable-static", "--disable-shared", "--enable-runtime-cpudetect", "--disable-gray", "--disable-swscale-alpha",
@@ -263,11 +265,10 @@ class BuildFFMPEG: BaseBuild {
         "--disable-doc", "--disable-htmlpages", "--disable-manpages", "--disable-podpages", "--disable-txtpages",
         // Component options:
         "--disable-avdevice", "--enable-avcodec", "--enable-avformat", "--enable-avutil",
-        "--enable-swresample", "--enable-swscale", "--disable-postproc", "--disable-avresample",
+        "--enable-swresample", "--enable-swscale", "--disable-postproc", "--enable-network",
         // ,"--disable-pthreads"
         // ,"--disable-w32threads"
         // ,"--disable-os2threads"
-        "--enable-network",
         // ,"--disable-dct"
         // ,"--disable-dwt"
         // ,"--disable-lsp"
@@ -303,7 +304,7 @@ class BuildFFMPEG: BaseBuild {
         // ./configure --list-demuxers
         "--disable-demuxers", "--enable-demuxer=aac", "--enable-demuxer=concat", "--enable-demuxer=data", "--enable-demuxer=flv",
         "--enable-demuxer=live_flv", "--enable-demuxer=loas", "--enable-demuxer=m4v", "--enable-demuxer=mov",
-        "--enable-demuxer=mp3", "--enable-demuxer=mp4", "--enable-demuxer=hls",
+        "--enable-demuxer=mp3", "--enable-demuxer=hls",
         "--enable-demuxer=mpegts", "--enable-demuxer=mpegtsraw", "--enable-demuxer=mpegvideo",
         "--enable-demuxer=hevc", "--enable-demuxer=dash", "--enable-demuxer=wav", "--enable-demuxer=ogg",
         "--enable-demuxer=ape", "--enable-demuxer=aiff", "--enable-demuxer=flac", "--enable-demuxer=amr",
@@ -318,7 +319,7 @@ class BuildFFMPEG: BaseBuild {
         "--disable-protocol=srtp", "--disable-protocol=subfile", "--disable-protocol=unix",
 
         // filters
-        "--disable-filters", "--enable-filter=amix", "--enable-filter=aforma", "--enable-filter=scale",
+        "--disable-filters", "--enable-filter=amix", "--enable-filter=scale",
         "--enable-filter=format", "--enable-filter=aformat", "--enable-filter=fps", "--enable-filter=trim",
         "--enable-filter=atrim", "--enable-filter=vflip", "--enable-filter=hflip", "--enable-filter=transpose",
         "--enable-filter=rotate", "--enable-filter=yadif", "--enable-filter=pan", "--enable-filter=volume",

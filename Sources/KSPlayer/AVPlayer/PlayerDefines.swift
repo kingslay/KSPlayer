@@ -277,7 +277,7 @@ open class KSOptions {
             if capacity.isEndOfFile && capacity.packetCount == 0 {
                 return true
             }
-            guard capacity.frameCount >= capacity.frameMaxCount >> 1 else {
+            guard capacity.frameCount >= capacity.frameMaxCount >> 2 else {
                 return false
             }
             if (syncDecodeVideo && capacity.mediaType == .video) || (syncDecodeAudio && capacity.mediaType == .audio) {
