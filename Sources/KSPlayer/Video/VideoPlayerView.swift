@@ -81,6 +81,8 @@ open class VideoPlayerView: PlayerView {
         }
     }
 
+    public let contentOverlayView = UIView()
+    public let controllerView = UIView()
     public var navigationBar = UIStackView()
     public var titleLabel = UILabel()
     public var subtitleLabel = UILabel()
@@ -90,8 +92,9 @@ open class VideoPlayerView: PlayerView {
     public var loadingIndector: UIView & LoadingIndector = UIActivityIndicatorView(frame: CGRect(x: 0, y: 0, width: 30, height: 30))
     public var seekToView: UIView & SeekViewProtocol = SeekView()
     public var replayButton = UIButton()
+    public var lockButton = UIButton()
     public let srtControl = KSSubtitleController()
-    public var isLock: Bool { false }
+    public var isLock: Bool { lockButton.isSelected }
     open var isMaskShow = true {
         didSet {
             let alpha: CGFloat = isMaskShow && !isLock ? 1.0 : 0.0
@@ -99,6 +102,7 @@ open class VideoPlayerView: PlayerView {
                 if self.isPlayed {
                     self.replayButton.alpha = self.isMaskShow ? 1.0 : 0.0
                 }
+                self.lockButton.alpha = self.isMaskShow ? 1.0 : 0.0
                 self.topMaskView.alpha = alpha
                 self.bottomMaskView.alpha = alpha
                 self.delegate?.playerController(maskShow: self.isMaskShow)
@@ -193,7 +197,8 @@ open class VideoPlayerView: PlayerView {
     open func setupUIComponents() {
         addSubview(playerLayer)
         backgroundColor = .black
-        setupSrtControl()
+        addSubview(contentOverlayView)
+        addSubview(controllerView)
         #if os(macOS)
         topMaskView.gradientLayer.colors = [UIColor.clear.cgColor, UIColor.black.withAlphaComponent(0.5).cgColor]
         #else
@@ -206,7 +211,7 @@ open class VideoPlayerView: PlayerView {
         bottomMaskView.gradientLayer.endPoint = .zero
 
         loadingIndector.isHidden = true
-        addSubview(loadingIndector)
+        controllerView.addSubview(loadingIndector)
         // Top views
         topMaskView.addSubview(navigationBar)
         navigationBar.addArrangedSubview(titleLabel)
@@ -215,8 +220,8 @@ open class VideoPlayerView: PlayerView {
         // Bottom views
         bottomMaskView.addSubview(toolBar)
         toolBar.timeSlider.delegate = self
-        addSubview(seekToView)
-        addSubview(replayButton)
+        controllerView.addSubview(seekToView)
+        controllerView.addSubview(replayButton)
         replayButton.cornerRadius = 32
         replayButton.titleFont = .systemFont(ofSize: 16)
         replayButton.backgroundColor = UIColor.black.withAlphaComponent(0.5)
@@ -224,10 +229,19 @@ open class VideoPlayerView: PlayerView {
         replayButton.setImage(KSPlayerManager.image(named: "KSPlayer_replay"), for: .selected)
         replayButton.addTarget(self, action: #selector(onButtonPressed(_:)), for: .primaryActionTriggered)
         replayButton.tag = PlayerButtonType.replay.rawValue
-        addSubview(topMaskView)
-        addSubview(bottomMaskView)
+        lockButton.backgroundColor = UIColor.black.withAlphaComponent(0.5)
+        lockButton.cornerRadius = 32
+        lockButton.setImage(KSPlayerManager.image(named: "KSPlayer_unlocking"), for: .normal)
+        lockButton.setImage(KSPlayerManager.image(named: "KSPlayer_autoRotationLock"), for: .selected)
+        lockButton.tag = PlayerButtonType.lock.rawValue
+        lockButton.addTarget(self, action: #selector(onButtonPressed(_:)), for: .primaryActionTriggered)
+        lockButton.isHidden = true
+        controllerView.addSubview(lockButton)
+        controllerView.addSubview(topMaskView)
+        controllerView.addSubview(bottomMaskView)
         addConstraint()
         customizeUIComponents()
+        setupSrtControl()
         layoutIfNeeded()
     }
 
@@ -235,13 +249,13 @@ open class VideoPlayerView: PlayerView {
     open func customizeUIComponents() {
         tapGesture.addTarget(self, action: #selector(tapGestureAction(_:)))
         tapGesture.numberOfTapsRequired = 1
-        addGestureRecognizer(tapGesture)
+        controllerView.addGestureRecognizer(tapGesture)
         panGesture.addTarget(self, action: #selector(panGestureAction(_:)))
-        addGestureRecognizer(panGesture)
+        controllerView.addGestureRecognizer(panGesture)
         doubleTapGesture.addTarget(self, action: #selector(doubleTapGestureAction))
         doubleTapGesture.numberOfTapsRequired = 2
         tapGesture.require(toFail: doubleTapGesture)
-        addGestureRecognizer(doubleTapGesture)
+        controllerView.addGestureRecognizer(doubleTapGesture)
     }
 
     override open func player(layer: KSPlayerLayer, currentTime: TimeInterval, totalTime: TimeInterval) {
@@ -298,6 +312,7 @@ open class VideoPlayerView: PlayerView {
         seekToView.isHidden = true
         isPlayed = false
         embedSubtitleDataSouce = nil
+        lockButton.isSelected = false
     }
 
     // MARK: - KSSliderDelegate
@@ -475,6 +490,22 @@ extension VideoPlayerView {
         addSubview(subtitleBackView)
         addSubview(srtControl.view)
         srtControl.view.isHidden = true
+        subtitleBackView.translatesAutoresizingMaskIntoConstraints = false
+        subtitleLabel.translatesAutoresizingMaskIntoConstraints = false
+        srtControl.view.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            subtitleBackView.bottomAnchor.constraint(equalTo: safeBottomAnchor, constant: -5),
+            subtitleBackView.centerXAnchor.constraint(equalTo: centerXAnchor),
+            subtitleBackView.widthAnchor.constraint(lessThanOrEqualTo: widthAnchor, constant: -10),
+            subtitleLabel.leadingAnchor.constraint(equalTo: subtitleBackView.leadingAnchor, constant: 10),
+            subtitleLabel.trailingAnchor.constraint(equalTo: subtitleBackView.trailingAnchor, constant: -10),
+            subtitleLabel.topAnchor.constraint(equalTo: subtitleBackView.topAnchor, constant: 2),
+            subtitleLabel.bottomAnchor.constraint(equalTo: subtitleBackView.bottomAnchor, constant: -2),
+            srtControl.view.topAnchor.constraint(equalTo: topAnchor),
+            srtControl.view.leadingAnchor.constraint(equalTo: leadingAnchor),
+            srtControl.view.bottomAnchor.constraint(equalTo: bottomAnchor),
+            srtControl.view.trailingAnchor.constraint(equalTo: trailingAnchor),
+        ])
         srtControl.selectWithFilePath = { [weak self] result in
             guard let self = self else { return }
             if let subtitle = try? result.get() {
@@ -482,6 +513,7 @@ extension VideoPlayerView {
                 self.resource?.subtitle = subtitle
             } else {
                 self.subtitleBackView.isHidden = true
+                self.resource?.subtitle = nil
             }
         }
     }
@@ -554,6 +586,8 @@ extension VideoPlayerView {
         toolBar.setCustomSpacing(20, after: toolBar.playbackRateButton)
         toolBar.setCustomSpacing(20, after: toolBar.definitionButton)
         toolBar.setCustomSpacing(20, after: toolBar.srtButton)
+        contentOverlayView.translatesAutoresizingMaskIntoConstraints = false
+        controllerView.translatesAutoresizingMaskIntoConstraints = false
         toolBar.timeSlider.translatesAutoresizingMaskIntoConstraints = false
         topMaskView.translatesAutoresizingMaskIntoConstraints = false
         bottomMaskView.translatesAutoresizingMaskIntoConstraints = false
@@ -562,15 +596,21 @@ extension VideoPlayerView {
         loadingIndector.translatesAutoresizingMaskIntoConstraints = false
         seekToView.translatesAutoresizingMaskIntoConstraints = false
         replayButton.translatesAutoresizingMaskIntoConstraints = false
-        subtitleBackView.translatesAutoresizingMaskIntoConstraints = false
-        subtitleLabel.translatesAutoresizingMaskIntoConstraints = false
         playerLayer.translatesAutoresizingMaskIntoConstraints = false
-        srtControl.view.translatesAutoresizingMaskIntoConstraints = false
+        lockButton.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
             playerLayer.topAnchor.constraint(equalTo: topAnchor),
             playerLayer.leadingAnchor.constraint(equalTo: leadingAnchor),
             playerLayer.bottomAnchor.constraint(equalTo: bottomAnchor),
             playerLayer.trailingAnchor.constraint(equalTo: trailingAnchor),
+            contentOverlayView.topAnchor.constraint(equalTo: topAnchor),
+            contentOverlayView.leadingAnchor.constraint(equalTo: leadingAnchor),
+            contentOverlayView.bottomAnchor.constraint(equalTo: bottomAnchor),
+            contentOverlayView.trailingAnchor.constraint(equalTo: trailingAnchor),
+            controllerView.topAnchor.constraint(equalTo: topAnchor),
+            controllerView.leadingAnchor.constraint(equalTo: leadingAnchor),
+            controllerView.bottomAnchor.constraint(equalTo: bottomAnchor),
+            controllerView.trailingAnchor.constraint(equalTo: trailingAnchor),
             topMaskView.topAnchor.constraint(equalTo: topAnchor),
             topMaskView.leadingAnchor.constraint(equalTo: leadingAnchor),
             topMaskView.trailingAnchor.constraint(equalTo: trailingAnchor),
@@ -598,17 +638,8 @@ extension VideoPlayerView {
             seekToView.heightAnchor.constraint(equalToConstant: 40),
             replayButton.centerYAnchor.constraint(equalTo: centerYAnchor),
             replayButton.centerXAnchor.constraint(equalTo: centerXAnchor),
-            subtitleBackView.bottomAnchor.constraint(equalTo: safeBottomAnchor, constant: -5),
-            subtitleBackView.centerXAnchor.constraint(equalTo: centerXAnchor),
-            subtitleBackView.widthAnchor.constraint(lessThanOrEqualTo: widthAnchor, constant: -10),
-            subtitleLabel.leadingAnchor.constraint(equalTo: subtitleBackView.leadingAnchor, constant: 10),
-            subtitleLabel.trailingAnchor.constraint(equalTo: subtitleBackView.trailingAnchor, constant: -10),
-            subtitleLabel.topAnchor.constraint(equalTo: subtitleBackView.topAnchor, constant: 2),
-            subtitleLabel.bottomAnchor.constraint(equalTo: subtitleBackView.bottomAnchor, constant: -2),
-            srtControl.view.topAnchor.constraint(equalTo: topAnchor),
-            srtControl.view.leadingAnchor.constraint(equalTo: leadingAnchor),
-            srtControl.view.bottomAnchor.constraint(equalTo: bottomAnchor),
-            srtControl.view.trailingAnchor.constraint(equalTo: trailingAnchor),
+            lockButton.leadingAnchor.constraint(equalTo: safeLeadingAnchor, constant: 22),
+            lockButton.centerYAnchor.constraint(equalTo: centerYAnchor),
         ])
     }
 
