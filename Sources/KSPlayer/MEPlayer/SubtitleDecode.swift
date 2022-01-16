@@ -21,7 +21,8 @@ class SubtitleDecode: DecodeProtocol {
     private var subtitle = AVSubtitle()
     private var preSubtitleFrame: SubtitleFrame?
     private let timebase: Timebase
-    required init(assetTrack: TrackProtocol, options: KSOptions, delegate _: DecodeResultDelegate) {
+    required init(assetTrack: TrackProtocol, options: KSOptions, delegate: DecodeResultDelegate) {
+        self.delegate = delegate
         timebase = assetTrack.timebase
         do {
             codecContext = try assetTrack.stream.pointee.codecpar.pointee.ceateContext(options: options)

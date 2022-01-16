@@ -21,6 +21,7 @@ public class EmbedSubtitleInfo: SubtitleInfo {
     }
 
     public func makeSubtitle(completion: @escaping (Result<KSSubtitleProtocol?, NSError>) -> Void) {
+        subtitle.assetTrack.setIsEnabled(true)
         completion(.success(subtitle))
     }
 }
@@ -29,7 +30,7 @@ extension FFPlayerItemTrack: KSSubtitleProtocol {
     func search(for time: TimeInterval) -> SubtitlePart? {
         let frame = getOutputRender { item -> Bool in
             if let subtitle = item as? SubtitleFrame {
-                return subtitle.part == time
+                return subtitle.part < time || subtitle.part == time
             }
             return false
         }

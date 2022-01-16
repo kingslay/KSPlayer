@@ -13,7 +13,8 @@ final class AudioHardwareDecode: DecodeProtocol {
     private let timebase: Timebase
     private var converter: AudioConverterRef?
     private var outAudioBufferList = AudioBufferList()
-    required init(assetTrack: TrackProtocol, options _: KSOptions, delegate _: DecodeResultDelegate) {
+    required init(assetTrack: TrackProtocol, options _: KSOptions, delegate: DecodeResultDelegate) {
+        self.delegate = delegate
         let codecpar = assetTrack.stream.pointee.codecpar.pointee
         timebase = assetTrack.timebase
         var inputFormat = codecpar.inputFormat

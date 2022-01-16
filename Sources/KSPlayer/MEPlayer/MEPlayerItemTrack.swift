@@ -16,8 +16,11 @@ protocol TrackProtocol: MediaPlayerTrack, CustomStringConvertible {
 extension TrackProtocol {
     var description: String { name }
     var isEnabled: Bool {
-        get { stream.pointee.discard == AVDISCARD_DEFAULT }
-        set { stream.pointee.discard = newValue ? AVDISCARD_DEFAULT : AVDISCARD_ALL }
+        stream.pointee.discard == AVDISCARD_DEFAULT
+    }
+
+    func setIsEnabled(_ isEnabled: Bool) {
+        stream.pointee.discard = isEnabled ? AVDISCARD_DEFAULT : AVDISCARD_ALL
     }
 }
 
