@@ -22,6 +22,10 @@ extension TrackProtocol {
     func setIsEnabled(_ isEnabled: Bool) {
         stream.pointee.discard = isEnabled ? AVDISCARD_DEFAULT : AVDISCARD_ALL
     }
+
+    var isImageSubtitle: Bool {
+        [AV_CODEC_ID_DVD_SUBTITLE, AV_CODEC_ID_DVB_SUBTITLE, AV_CODEC_ID_DVB_TELETEXT].contains(stream.pointee.codecpar.pointee.codec_id)
+    }
 }
 
 extension TrackProtocol {
@@ -190,11 +194,9 @@ class FFPlayerItemTrack<Frame: MEFrame>: PlayerItemTrackProtocol, CustomStringCo
 
     func getOutputRender(where predicate: ((MEFrame) -> Bool)?) -> MEFrame? {
         let outputFecthRender = outputRenderQueue.pop(where: predicate)
-        if mediaType != .subtitle {
-            if outputFecthRender == nil {
-                if state == .finished, frameCount == 0 {
-                    delegate?.codecDidFinished(track: self)
-                }
+        if outputFecthRender == nil {
+            if state == .finished, frameCount == 0 {
+                delegate?.codecDidFinished(track: self)
             }
         }
         return outputFecthRender
