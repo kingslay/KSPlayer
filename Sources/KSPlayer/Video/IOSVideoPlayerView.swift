@@ -21,7 +21,6 @@ open class IOSVideoPlayerView: VideoPlayerView {
     private var isVolume = false
     private let volumeView = BrightnessVolume()
     public var volumeViewSlider = UXSlider()
-    public var lockButton = UIButton()
     public var backButton = UIButton()
     public var airplayStatusView: UIView = AirplayStatusView()
     public var routeButton = MPVolumeView()
@@ -31,14 +30,7 @@ open class IOSVideoPlayerView: VideoPlayerView {
     override open var isMaskShow: Bool {
         didSet {
             fullScreenDelegate?.player(isMaskShow: isMaskShow, isFullScreen: landscapeButton.isSelected)
-            UIView.animate(withDuration: 0.3) {
-                self.lockButton.alpha = self.isMaskShow ? 1.0 : 0.0
-            }
         }
-    }
-
-    override public var isLock: Bool {
-        lockButton.isSelected
     }
 
     override open func customizeUIComponents() {
@@ -66,14 +58,6 @@ open class IOSVideoPlayerView: VideoPlayerView {
         backButton.setImage(KSPlayerManager.image(named: "KSPlayer_back"), for: .normal)
         backButton.addTarget(self, action: #selector(onButtonPressed(_:)), for: .touchUpInside)
         navigationBar.insertArrangedSubview(backButton, at: 0)
-        lockButton.backgroundColor = UIColor.black.withAlphaComponent(0.5)
-        lockButton.cornerRadius = 32
-        lockButton.setImage(KSPlayerManager.image(named: "KSPlayer_unlocking"), for: .normal)
-        lockButton.setImage(KSPlayerManager.image(named: "KSPlayer_autoRotationLock"), for: .selected)
-        lockButton.tag = PlayerButtonType.lock.rawValue
-        lockButton.addTarget(self, action: #selector(onButtonPressed(_:)), for: .touchUpInside)
-        lockButton.isHidden = true
-        addSubview(lockButton)
         routeButton.showsRouteButton = true
         routeButton.showsVolumeSlider = false
         routeButton.sizeToFit()
@@ -87,7 +71,6 @@ open class IOSVideoPlayerView: VideoPlayerView {
             volumeViewSlider = first
         }
         routeButton.translatesAutoresizingMaskIntoConstraints = false
-        lockButton.translatesAutoresizingMaskIntoConstraints = false
         backButton.translatesAutoresizingMaskIntoConstraints = false
         landscapeButton.translatesAutoresizingMaskIntoConstraints = false
         maskImageView.translatesAutoresizingMaskIntoConstraints = false
@@ -97,8 +80,6 @@ open class IOSVideoPlayerView: VideoPlayerView {
             maskImageView.bottomAnchor.constraint(equalTo: bottomAnchor),
             maskImageView.trailingAnchor.constraint(equalTo: trailingAnchor),
             backButton.widthAnchor.constraint(equalToConstant: 25),
-            lockButton.leadingAnchor.constraint(equalTo: safeLeadingAnchor, constant: 22),
-            lockButton.centerYAnchor.constraint(equalTo: centerYAnchor),
             routeButton.widthAnchor.constraint(equalToConstant: 25),
             landscapeButton.widthAnchor.constraint(equalToConstant: 30),
             airplayStatusView.centerXAnchor.constraint(equalTo: centerXAnchor),
@@ -111,7 +92,6 @@ open class IOSVideoPlayerView: VideoPlayerView {
         super.resetPlayer()
         maskImageView.alpha = 1
         maskImageView.image = nil
-        lockButton.isSelected = false
         panGesture.isEnabled = false
         routeButton.isHidden = !routeButton.areWirelessRoutesAvailable
     }
