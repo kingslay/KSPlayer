@@ -37,22 +37,37 @@ public class AssParse: KSParseProtocol {
     }
 
     // Dialogue: 0,0:12:37.73,0:12:38.83,Aki Default,,0,0,0,,{\be8}原来如此
+    // 875,,Default,NTP,0000,0000,0000,!Effect,- 你们两个别冲这么快\\N- 我会取消所有行程尽快赶过去
     public class func parse(scanner: Scanner, reg: NSRegularExpression?) -> SubtitlePart? {
-        guard scanner.scanString("Dialogue:", into: nil) else {
-            scanner.scanUpToCharacters(from: .newlines, into: nil)
-            return nil
-        }
-        scanner.scanUpTo(",", into: nil)
-        scanner.scanString(",", into: nil)
-        var startString: NSString?
-        scanner.scanUpTo(",", into: &startString)
-        scanner.scanString(",", into: nil)
-        var endString: NSString?
-        scanner.scanUpTo(",", into: &endString)
-        scanner.scanString(",", into: nil)
-        (0 ..< 6).forEach { _ in
+        let isDialogue = scanner.scanString("Dialogue:", into: nil)
+        let start: TimeInterval
+        let end: TimeInterval
+        if isDialogue {
             scanner.scanUpTo(",", into: nil)
             scanner.scanString(",", into: nil)
+            var startString: NSString?
+            scanner.scanUpTo(",", into: &startString)
+            scanner.scanString(",", into: nil)
+            var endString: NSString?
+            scanner.scanUpTo(",", into: &endString)
+            scanner.scanString(",", into: nil)
+            (0 ..< 6).forEach { _ in
+                scanner.scanUpTo(",", into: nil)
+                scanner.scanString(",", into: nil)
+            }
+            if let startString = startString as String?, let endString = endString as String? {
+                start = parseDuration(startString)
+                end = parseDuration(endString)
+            } else {
+                return nil
+            }
+        } else {
+            start = 0
+            end = 0
+            (0 ..< 8).forEach { _ in
+                scanner.scanUpTo(",", into: nil)
+                scanner.scanString(",", into: nil)
+            }
         }
         var textString: NSString?
         scanner.scanUpToCharacters(from: .newlines, into: &textString)
@@ -63,12 +78,7 @@ public class AssParse: KSParseProtocol {
         if let reg = reg {
             text = reg.stringByReplacingMatches(in: text, range: NSRange(location: 0, length: text.count), withTemplate: "")
         }
-        if let startString = startString as String?, let endString = endString as String? {
-            let start = parseDuration(startString)
-            let end = parseDuration(endString)
-            return SubtitlePart(start, end, text)
-        }
-        return nil
+        return SubtitlePart(start, end, text)
     }
 
     public func parse(subtitle: String) -> [SubtitlePart] {
