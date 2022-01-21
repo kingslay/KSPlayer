@@ -36,7 +36,7 @@ final class MEPlayerItem {
     private(set) var assetTracks = [TrackProtocol]()
     private var videoAdaptation: VideoAdaptationState?
     private(set) var subtitleTracks = [FFPlayerItemTrack<SubtitleFrame>]()
-    var currentPlaybackTime = TimeInterval(0)
+    private(set) var currentPlaybackTime = TimeInterval(0)
     private var startTime = TimeInterval(0)
     private(set) var rotation = 0.0
     private(set) var duration: TimeInterval = 0
@@ -274,8 +274,8 @@ extension MEPlayerItem {
                 allTracks.forEach { $0.seek(time: currentPlaybackTime) }
                 let timeStamp = Int64(currentPlaybackTime * TimeInterval(AV_TIME_BASE))
                 // can not seek to key frame
-//                let result = avformat_seek_file(formatCtx, -1, timeStamp - 2, timeStamp, timeStamp + 2, AVSEEK_FLAG_BACKWARD)
-                let result = av_seek_frame(formatCtx, -1, timeStamp, AVSEEK_FLAG_BACKWARD)
+                _ = avformat_seek_file(formatCtx, -1, Int64.min, timeStamp, Int64.max, options.seekFlags)
+                let result = avformat_seek_file(formatCtx, -1, Int64.min, timeStamp, Int64.max, options.seekFlags)
                 if state == .closed {
                     break
                 }
@@ -410,14 +410,14 @@ extension MEPlayerItem: MediaPlayback {
 
     func seek(time: TimeInterval, completion handler: ((Bool) -> Void)?) {
         if state == .reading || state == .paused {
+            state = .seeking
             currentPlaybackTime = time
             seekingCompletionHandler = handler
-            state = .seeking
             condition.broadcast()
         } else if state == .finished {
+            state = .seeking
             currentPlaybackTime = time
             seekingCompletionHandler = handler
-            state = .seeking
             read()
         }
         isAudioStalled = audioTrack == nil
@@ -494,6 +494,9 @@ extension MEPlayerItem: CodecCapacityDelegate {
 
 extension MEPlayerItem: OutputRenderSourceDelegate {
     func setVideo(time: CMTime) {
+        if state == .seeking {
+            return
+        }
         if isAudioStalled {
             currentPlaybackTime = time.seconds - options.audioDelay
             videoMediaTime = CACurrentMediaTime()
@@ -501,6 +504,9 @@ extension MEPlayerItem: OutputRenderSourceDelegate {
     }
 
     func setAudio(time: CMTime) {
+        if state == .seeking {
+            return
+        }
         if !isAudioStalled {
             currentPlaybackTime = time.seconds
         }

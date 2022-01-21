@@ -200,6 +200,13 @@ open class KSOptions {
     public var isAutoPlay = KSOptions.isAutoPlay
     /// seek完是否自动播放
     public var isSeekedAutoPlay = KSOptions.isSeekedAutoPlay
+    /*
+     AVSEEK_FLAG_BACKWARD: 1
+     AVSEEK_FLAG_BYTE: 2
+     AVSEEK_FLAG_ANY: 4
+     AVSEEK_FLAG_FRAME: 8
+     */
+    public var seekFlags = Int32(1)
 //    ffmpeg only cache http
     public var cache = false
     public var display = DisplayEnum.plane
