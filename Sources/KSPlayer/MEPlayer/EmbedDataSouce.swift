@@ -20,7 +20,11 @@ public class EmbedSubtitleInfo: SubtitleInfo {
         self.subtitle = subtitle
     }
 
-    public func makeSubtitle(completion: @escaping (Result<KSSubtitleProtocol?, NSError>) -> Void) {
+    public func disableSubtitle() {
+        subtitle.assetTrack.setIsEnabled(false)
+    }
+
+    public func enableSubtitle(completion: @escaping (Result<KSSubtitleProtocol?, NSError>) -> Void) {
         subtitle.assetTrack.setIsEnabled(true)
         completion(.success(subtitle))
     }
