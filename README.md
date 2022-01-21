@@ -5,7 +5,7 @@
 
 KSPlayer is a powerful media play framework foriOS, tvOS, macOS,Mac Catalyst, SwiftUI,  Apple Silicon M1 .
 
-English | [简体中文](./README.zh-CN.md)
+English | [简体中文](./README_CN.md)
 
 ## Based On
 
@@ -240,7 +240,7 @@ public protocol PlayerControllerDelegate: class {
 
 ## Effect
 
-![gif](https://github.com/kingslay/KSPlayer/raw/master/Demo/demo.gif)
+![gif](./Demo/demo.gif)
 
 ## Debug FFmpeg
 
@@ -251,7 +251,7 @@ dwarfdump -F --debug-info ../Sources/libavformat.xcframework/macos-arm64_x86_64/
 
 run demo-macOS
 
-![6](https://github.com/kingslay/KSPlayer/blob/develop/Documents/6.png?raw=true)
+![6](./Documents/6.png?raw=true)
 
 ## Developments and Tests
 
