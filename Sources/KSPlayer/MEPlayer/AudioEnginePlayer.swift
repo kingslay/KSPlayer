@@ -5,22 +5,64 @@
 //  Created by kintan on 2018/3/11.
 //
 
-import AudioToolbox
 import AVFoundation
 import CoreAudio
-import CoreMedia
-import QuartzCore
 
 final class AudioEnginePlayer: AudioPlayer, FrameOutput {
-    var attackTime: Float = 0
+    public var attackTime: Float {
+        get {
+            var value = AudioUnitParameterValue(1.0)
+            AudioUnitGetParameter(dynamicsProcessor.audioUnit, kDynamicsProcessorParam_AttackTime, kAudioUnitScope_Global, 0, &value)
+            return value
+        }
+        set {
+            AudioUnitSetParameter(dynamicsProcessor.audioUnit, kDynamicsProcessorParam_AttackTime, kAudioUnitScope_Global, 0, AudioUnitParameterValue(newValue), 0)
+        }
+    }
 
-    var releaseTime: Float = 0
+    public var releaseTime: Float {
+        get {
+            var value = AudioUnitParameterValue(1.0)
+            AudioUnitGetParameter(dynamicsProcessor.audioUnit, kDynamicsProcessorParam_ReleaseTime, kAudioUnitScope_Global, 0, &value)
+            return value
+        }
+        set {
+            AudioUnitSetParameter(dynamicsProcessor.audioUnit, kDynamicsProcessorParam_ReleaseTime, kAudioUnitScope_Global, 0, AudioUnitParameterValue(newValue), 0)
+        }
+    }
 
-    var threshold: Float = 0
+    public var threshold: Float {
+        get {
+            var value = AudioUnitParameterValue(1.0)
+            AudioUnitGetParameter(dynamicsProcessor.audioUnit, kDynamicsProcessorParam_Threshold, kAudioUnitScope_Global, 0, &value)
+            return value
+        }
+        set {
+            AudioUnitSetParameter(dynamicsProcessor.audioUnit, kDynamicsProcessorParam_Threshold, kAudioUnitScope_Global, 0, AudioUnitParameterValue(newValue), 0)
+        }
+    }
 
-    var expansionRatio: Float = 0
+    public var expansionRatio: Float {
+        get {
+            var value = AudioUnitParameterValue(1.0)
+            AudioUnitGetParameter(dynamicsProcessor.audioUnit, kDynamicsProcessorParam_ExpansionRatio, kAudioUnitScope_Global, 0, &value)
+            return value
+        }
+        set {
+            AudioUnitSetParameter(dynamicsProcessor.audioUnit, kDynamicsProcessorParam_ExpansionRatio, kAudioUnitScope_Global, 0, AudioUnitParameterValue(newValue), 0)
+        }
+    }
 
-    var overallGain: Float = 0
+    public var overallGain: Float {
+        get {
+            var value = AudioUnitParameterValue(1.0)
+            AudioUnitGetParameter(dynamicsProcessor.audioUnit, kDynamicsProcessorParam_OverallGain, kAudioUnitScope_Global, 0, &value)
+            return value
+        }
+        set {
+            AudioUnitSetParameter(dynamicsProcessor.audioUnit, kDynamicsProcessorParam_OverallGain, kAudioUnitScope_Global, 0, AudioUnitParameterValue(newValue), 0)
+        }
+    }
 
     private let engine = AVAudioEngine()
 
@@ -28,6 +70,12 @@ final class AudioEnginePlayer: AudioPlayer, FrameOutput {
     private let nbandEQ = AVAudioUnitEQ()
     private let distortion = AVAudioUnitDistortion()
     private let delay = AVAudioUnitDelay()
+    private let dynamicsProcessor = AVAudioUnitEffect(audioComponentDescription:
+        AudioComponentDescription(componentType: kAudioUnitType_Effect,
+                                  componentSubType: kAudioUnitSubType_DynamicsProcessor,
+                                  componentManufacturer: kAudioUnitManufacturer_Apple,
+                                  componentFlags: 0,
+                                  componentFlagsMask: 0))
     private var audioStreamBasicDescription = KSPlayerManager.outputFormat()
     private var currentRenderReadOffset = 0
     weak var renderSource: OutputRenderSourceDelegate?
@@ -86,6 +134,7 @@ final class AudioEnginePlayer: AudioPlayer, FrameOutput {
         engine.attach(nbandEQ)
         engine.attach(distortion)
         engine.attach(delay)
+        engine.attach(dynamicsProcessor)
         if #available(macOS 10.15, iOS 13.0, tvOS 13.0, *) {
             try? engine.inputNode.setVoiceProcessingEnabled(true)
         }
@@ -93,7 +142,8 @@ final class AudioEnginePlayer: AudioPlayer, FrameOutput {
         engine.connect(engine.inputNode, to: reverb, format: format)
         engine.connect(reverb, to: nbandEQ, format: format)
         engine.connect(nbandEQ, to: distortion, format: format)
-        engine.connect(distortion, to: delay, format: format)
+        engine.connect(distortion, to: dynamicsProcessor, format: format)
+        engine.connect(dynamicsProcessor, to: delay, format: format)
         engine.connect(delay, to: engine.mainMixerNode, format: format)
         engine.connect(engine.mainMixerNode, to: engine.outputNode, format: format)
         if let audioUnit = engine.inputNode.audioUnit {
