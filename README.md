@@ -3,7 +3,7 @@
 ![License](https://img.shields.io/badge/license-GPL-blue.svg)
 # KSPlayer 
 
-KSPlayer is a powerful media play framework foriOS, tvOS, macOS,Mac Catalyst, SwiftUI,  Apple Silicon M1 .
+KSPlayer is a powerful media play framework foriOS, tvOS, macOS,Mac Catalyst, SwiftUI, Apple Silicon M1 .
 
 English | [简体中文](./README_CN.md)
 
@@ -11,11 +11,11 @@ English | [简体中文](./README_CN.md)
 
 - FFmpeg
 - Metal
-- AudioUnit
+- AVAudioEngine
 
 ## Features
 
-- iOS, tvOS, macOS,Mac Catalyst,  Apple Silicon M1, SwiftUI.
+- iOS, tvOS, macOS,Mac Catalyst, Apple Silicon M1, SwiftUI.
 - 360° panorama video.
 - Background playback.
 - RTMP/RTSP/Dash/HLS streaming.
@@ -23,7 +23,7 @@ English | [简体中文](./README_CN.md)
 - Multiple audio/video tracks.
 - H.264/H.265 hardware accelerator.
 - 4k/HDR
-- dvb_subtitle
+- subtitle/dvb_subtitle
 - Picture in Picture
 
 ## Requirements
