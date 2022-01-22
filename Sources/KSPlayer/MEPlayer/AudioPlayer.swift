@@ -26,10 +26,10 @@ final class AudioGraphPlayer: AudioPlayer, FrameOutput {
     private var audioUnitForTimePitch: AudioUnit!
     private var audioUnitForDynamicsProcessor: AudioUnit!
     private var audioStreamBasicDescription = KSPlayerManager.outputFormat()
-    private var currentRenderReadOffset = 0
     #if os(macOS)
     private var volumeBeforeMute: Float = 0.0
     #endif
+    private var currentRenderReadOffset = 0
     weak var renderSource: OutputRenderSourceDelegate?
     private var currentRender: AudioFrame? {
         didSet {
@@ -258,7 +258,7 @@ extension AudioGraphPlayer {
                 return noErr
             }
             let `self` = Unmanaged<AudioGraphPlayer>.fromOpaque(refCon).takeUnretainedValue()
-            self.audioPlayerShouldInputData(ioData: UnsafeMutableAudioBufferListPointer(ioData), numberOfFrames: inNumberFrames, numberOfChannels: self.audioStreamBasicDescription.mChannelsPerFrame)
+            self.audioPlayerShouldInputData(ioData: UnsafeMutableAudioBufferListPointer(ioData), numberOfFrames: inNumberFrames)
             return noErr
         }
         return inputCallbackStruct
@@ -276,7 +276,7 @@ extension AudioGraphPlayer {
         }, Unmanaged.passUnretained(self).toOpaque())
     }
 
-    private func audioPlayerShouldInputData(ioData: UnsafeMutableAudioBufferListPointer, numberOfFrames: UInt32, numberOfChannels _: UInt32) {
+    private func audioPlayerShouldInputData(ioData: UnsafeMutableAudioBufferListPointer, numberOfFrames: UInt32) {
         var ioDataWriteOffset = 0
         var numberOfSamples = Int(numberOfFrames)
         while numberOfSamples > 0 {
