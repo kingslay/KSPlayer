@@ -69,7 +69,6 @@ public class KSMEPlayer: NSObject {
     public private(set) var playbackState = MediaPlaybackState.idle {
         didSet {
             if playbackState != oldValue {
-                videoOutput.isPaused = playbackState != .playing
                 playOrPause()
                 if playbackState == .finished {
                     delegate?.finish(player: self, error: nil)
@@ -100,7 +99,9 @@ extension KSMEPlayer {
     private func playOrPause() {
         runInMainqueue { [weak self] in
             guard let self = self else { return }
-            self.audioOutput.isPaused = !(self.playbackState == .playing && self.loadState == .playable)
+            let isPaused = !(self.playbackState == .playing && self.loadState == .playable)
+            self.audioOutput.isPaused = isPaused
+            self.videoOutput.isPaused = isPaused
             self.delegate?.changeLoadState(player: self)
         }
     }
