@@ -140,7 +140,7 @@ class CustomVideoPlayerView: VideoPlayerView {
             subtitleInfos.forEach {
                 print($0.name)
             }
-            subtitleInfos.first?.makeSubtitle { result in
+            subtitleInfos.first?.enableSubtitle { result in
                 self.resource?.subtitle = try? result.get()
             }
             for track in player.tracks(mediaType: .audio) {
