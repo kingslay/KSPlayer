@@ -66,10 +66,10 @@ final class AudioEnginePlayer: AudioPlayer, FrameOutput {
 
     private let engine = AVAudioEngine()
 
-    private let reverb = AVAudioUnitReverb()
-    private let nbandEQ = AVAudioUnitEQ()
-    private let distortion = AVAudioUnitDistortion()
-    private let delay = AVAudioUnitDelay()
+//    private let reverb = AVAudioUnitReverb()
+//    private let nbandEQ = AVAudioUnitEQ()
+//    private let distortion = AVAudioUnitDistortion()
+//    private let delay = AVAudioUnitDelay()
     private let dynamicsProcessor = AVAudioUnitEffect(audioComponentDescription:
         AudioComponentDescription(componentType: kAudioUnitType_Effect,
                                   componentSubType: kAudioUnitSubType_DynamicsProcessor,
@@ -130,24 +130,24 @@ final class AudioEnginePlayer: AudioPlayer, FrameOutput {
     }
 
     init() {
-        engine.attach(reverb)
-        engine.attach(nbandEQ)
-        engine.attach(distortion)
-        engine.attach(delay)
         engine.attach(dynamicsProcessor)
-        if #available(macOS 10.15, iOS 13.0, tvOS 13.0, *) {
-            try? engine.inputNode.setVoiceProcessingEnabled(true)
-        }
+//        engine.attach(reverb)
+//        engine.attach(nbandEQ)
+//        engine.attach(distortion)
+//        engine.attach(delay)
         let format = KSPlayerManager.audioDefaultFormat
-        engine.connect(engine.inputNode, to: reverb, format: format)
-        engine.connect(reverb, to: nbandEQ, format: format)
-        engine.connect(nbandEQ, to: distortion, format: format)
-        engine.connect(distortion, to: dynamicsProcessor, format: format)
-        engine.connect(dynamicsProcessor, to: delay, format: format)
-        engine.connect(delay, to: engine.mainMixerNode, format: format)
-        engine.connect(engine.mainMixerNode, to: engine.outputNode, format: format)
-        if let audioUnit = engine.inputNode.audioUnit {
-            addRenderCallback(audioUnit: audioUnit)
+        if #available(macOS 10.15, iOS 13.0, tvOS 13.0, *) {
+            let sourceNode = AVAudioSourceNode(format: format) { [weak self] _, _, frameCount, audioBufferList in
+                self?.audioPlayerShouldInputData(ioData: UnsafeMutableAudioBufferListPointer(audioBufferList), numberOfFrames: frameCount)
+                return noErr
+            }
+            engine.attach(sourceNode)
+            engine.connect(nodes: [sourceNode, dynamicsProcessor, engine.mainMixerNode, engine.outputNode], format: format)
+        } else {
+            engine.connect(nodes: [engine.inputNode, dynamicsProcessor, engine.mainMixerNode, engine.outputNode], format: format)
+            if let audioUnit = engine.inputNode.audioUnit {
+                addRenderCallback(audioUnit: audioUnit)
+            }
         }
         if let audioUnit = engine.outputNode.audioUnit {
             addRenderNotify(audioUnit: audioUnit)
@@ -237,6 +237,17 @@ final class AudioEnginePlayer: AudioPlayer, FrameOutput {
         buffer.frameLength = buffer.frameCapacity
         let ioData = UnsafeMutableAudioBufferListPointer(buffer.mutableAudioBufferList)
         audioPlayerShouldInputData(ioData: ioData, numberOfFrames: numberOfFrames)
+    }
+}
+
+extension AVAudioEngine {
+    func connect(nodes: [AVAudioNode], format: AVAudioFormat?) {
+        if nodes.count < 2 {
+            return
+        }
+        for i in 0 ..< nodes.count - 1 {
+            connect(nodes[i], to: nodes[i + 1], format: format)
+        }
     }
 }
 
