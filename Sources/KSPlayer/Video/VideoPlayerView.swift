@@ -72,6 +72,9 @@ open class VideoPlayerView: PlayerView {
         didSet {
             if let resource = resource, oldValue !== resource {
                 srtControl.searchSubtitle(name: resource.name)
+                subtitleBackView.isHidden = true
+                subtitleBackView.image = nil
+                subtitleLabel.attributedText = nil
                 titleLabel.text = resource.name
                 toolBar.definitionButton.isHidden = resource.definitions.count < 2
                 autoFadeOutViewWithAnimation()
