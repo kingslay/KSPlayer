@@ -149,10 +149,10 @@ class DecompressionSession {
             kCVImageBufferChromaLocationBottomFieldKey: kCVImageBufferChromaLocation_Left,
             kCVImageBufferChromaLocationTopFieldKey: kCVImageBufferChromaLocation_Left,
             kCMFormatDescriptionExtension_FullRangeVideo: isFullRangeVideo,
-            videoCodecType == kCMVideoCodecType_HEVC ?
-                "EnableHardwareAcceleratedVideoDecoder" : "RequireHardwareAcceleratedVideoDecoder": true, kCMFormatDescriptionExtension_SampleDescriptionExtensionAtoms: [
-                    videoCodecType.avc: NSData(bytes: extradata, length: Int(extradataSize)),
-                ],
+            videoCodecType == kCMVideoCodecType_HEVC ? "EnableHardwareAcceleratedVideoDecoder" : "RequireHardwareAcceleratedVideoDecoder": true,
+            kCMFormatDescriptionExtension_SampleDescriptionExtensionAtoms: [
+                videoCodecType.avc: NSData(bytes: extradata, length: Int(extradataSize)),
+            ],
         ]
         dic[kCVImageBufferPixelAspectRatioKey] = codecpar.sample_aspect_ratio.size.aspectRatio
         dic[kCVImageBufferColorPrimariesKey] = codecpar.color_primaries.colorPrimaries
@@ -278,6 +278,32 @@ extension CMVideoCodecType {
     }
 }
 
+/**
+ Clients who specify AVVideoColorPropertiesKey must specify a color primary, transfer function, and Y'CbCr matrix.
+ Most clients will want to specify HD, which consists of:
+
+ AVVideoColorPrimaries_ITU_R_709_2
+ AVVideoTransferFunction_ITU_R_709_2
+ AVVideoYCbCrMatrix_ITU_R_709_2
+
+ If you require SD colorimetry use:
+
+ AVVideoColorPrimaries_SMPTE_C
+ AVVideoTransferFunction_ITU_R_709_2
+ AVVideoYCbCrMatrix_ITU_R_601_4
+
+ If you require wide gamut HD colorimetry, you can use:
+
+ AVVideoColorPrimaries_P3_D65
+ AVVideoTransferFunction_ITU_R_709_2
+ AVVideoYCbCrMatrix_ITU_R_709_2
+
+ If you require 10-bit wide gamut HD colorimetry, you can use:
+
+ AVVideoColorPrimaries_P3_D65
+ AVVideoTransferFunction_ITU_R_2100_HLG
+ AVVideoYCbCrMatrix_ITU_R_709_2
+ */
 extension AVColorPrimaries {
     var colorPrimaries: CFString? {
         switch self {
