@@ -144,22 +144,23 @@ class DecompressionSession {
             isConvertNALSize = false
         }
         let isFullRangeVideo = codecpar.color_range == AVCOL_RANGE_JPEG
+        let videoCodecType = codecpar.codec_id.videoCodecType
         let dic: NSMutableDictionary = [
             kCVImageBufferChromaLocationBottomFieldKey: kCVImageBufferChromaLocation_Left,
             kCVImageBufferChromaLocationTopFieldKey: kCVImageBufferChromaLocation_Left,
             kCMFormatDescriptionExtension_FullRangeVideo: isFullRangeVideo,
-            kCMFormatDescriptionExtension_SampleDescriptionExtensionAtoms: [
-                codecpar.codec_id == AV_CODEC_ID_HEVC ? "hvcC" : "avcC": NSData(bytes: extradata, length: Int(extradataSize)),
-            ],
+            videoCodecType == kCMVideoCodecType_HEVC ?
+                "EnableHardwareAcceleratedVideoDecoder" : "RequireHardwareAcceleratedVideoDecoder": true, kCMFormatDescriptionExtension_SampleDescriptionExtensionAtoms: [
+                    videoCodecType.avc: NSData(bytes: extradata, length: Int(extradataSize)),
+                ],
         ]
         dic[kCVImageBufferPixelAspectRatioKey] = codecpar.sample_aspect_ratio.size.aspectRatio
         dic[kCVImageBufferColorPrimariesKey] = codecpar.color_primaries.colorPrimaries
         dic[kCVImageBufferTransferFunctionKey] = codecpar.color_trc.transferFunction
         dic[kCVImageBufferYCbCrMatrixKey] = codecpar.color_space.ycbcrMatrix
-        let type = codecpar.codec_id == AV_CODEC_ID_HEVC ? kCMVideoCodecType_HEVC : kCMVideoCodecType_H264
         // swiftlint:disable line_length
         var description: CMFormatDescription?
-        var status = CMVideoFormatDescriptionCreate(allocator: kCFAllocatorDefault, codecType: type, width: codecpar.width, height: codecpar.height, extensions: dic, formatDescriptionOut: &description)
+        var status = CMVideoFormatDescriptionCreate(allocator: kCFAllocatorDefault, codecType: videoCodecType, width: codecpar.width, height: codecpar.height, extensions: dic, formatDescriptionOut: &description)
         // swiftlint:enable line_length
         guard status == noErr, let formatDescription = description else {
             return nil
@@ -240,6 +241,43 @@ extension CMFormatDescription {
     }
 }
 
+extension AVCodecID {
+    var videoCodecType: CMVideoCodecType {
+        switch self {
+        case AV_CODEC_ID_H263:
+            return kCMVideoCodecType_H263
+        case AV_CODEC_ID_H264:
+            return kCMVideoCodecType_H264
+        case AV_CODEC_ID_HEVC:
+            return kCMVideoCodecType_HEVC
+        case AV_CODEC_ID_MPEG1VIDEO:
+            return kCMVideoCodecType_MPEG1Video
+        case AV_CODEC_ID_MPEG2VIDEO:
+            return kCMVideoCodecType_MPEG2Video
+        case AV_CODEC_ID_MPEG4:
+            return kCMVideoCodecType_MPEG4Video
+        default:
+            return kCMVideoCodecType_H264
+        }
+    }
+}
+
+extension CMVideoCodecType {
+    var avc: String {
+        switch self {
+        case kCMVideoCodecType_MPEG4Video:
+            return "esds"
+        case kCMVideoCodecType_H264:
+            return "avcC"
+        case kCMVideoCodecType_HEVC:
+            return "hvcC"
+        case kCMVideoCodecType_VP9:
+            return "vpcC"
+        default: return "avcC"
+        }
+    }
+}
+
 extension AVColorPrimaries {
     var colorPrimaries: CFString? {
         switch self {
@@ -252,7 +290,7 @@ extension AVColorPrimaries {
         case AVCOL_PRI_BT2020:
             return kCVImageBufferColorPrimaries_ITU_R_2020
         default:
-            return nil
+            return CVColorPrimariesGetStringForIntegerCodePoint(Int32(rawValue))?.takeUnretainedValue()
         }
     }
 }
@@ -260,26 +298,28 @@ extension AVColorPrimaries {
 extension AVColorTransferCharacteristic {
     var transferFunction: CFString? {
         switch self {
+        case AVCOL_TRC_SMPTE2084:
+            return kCVImageBufferTransferFunction_SMPTE_ST_2084_PQ
+        case AVCOL_TRC_BT2020_10, AVCOL_TRC_BT2020_12:
+            return kCVImageBufferTransferFunction_ITU_R_2020
         case AVCOL_TRC_BT709:
             return kCVImageBufferTransferFunction_ITU_R_709_2
         case AVCOL_TRC_SMPTE240M:
             return kCVImageBufferTransferFunction_SMPTE_240M_1995
-        case AVCOL_TRC_SMPTE2084:
-            return kCVImageBufferTransferFunction_SMPTE_ST_2084_PQ
         case AVCOL_TRC_LINEAR:
             if #available(iOS 12.0, tvOS 12.0, OSX 10.14, *) {
                 return kCVImageBufferTransferFunction_Linear
             } else {
                 return nil
             }
+        case AVCOL_TRC_SMPTE428:
+            return kCVImageBufferTransferFunction_SMPTE_ST_428_1
         case AVCOL_TRC_ARIB_STD_B67:
             return kCVImageBufferTransferFunction_ITU_R_2100_HLG
         case AVCOL_TRC_GAMMA22, AVCOL_TRC_GAMMA28:
             return kCVImageBufferTransferFunction_UseGamma
-        case AVCOL_TRC_BT2020_10, AVCOL_TRC_BT2020_12:
-            return kCVImageBufferTransferFunction_ITU_R_2020
         default:
-            return nil
+            return CVTransferFunctionGetStringForIntegerCodePoint(Int32(rawValue))?.takeUnretainedValue()
         }
     }
 }
@@ -293,10 +333,10 @@ extension AVColorSpace {
             return kCVImageBufferYCbCrMatrix_ITU_R_601_4
         case AVCOL_SPC_SMPTE240M:
             return kCVImageBufferYCbCrMatrix_SMPTE_240M_1995
-        case AVCOL_SPC_BT2020_NCL:
+        case AVCOL_SPC_BT2020_CL, AVCOL_SPC_BT2020_NCL:
             return kCVImageBufferYCbCrMatrix_ITU_R_2020
         default:
-            return nil
+            return CVYCbCrMatrixGetStringForIntegerCodePoint(Int32(rawValue))?.takeUnretainedValue()
         }
     }
 
@@ -306,7 +346,7 @@ extension AVColorSpace {
             return CGColorSpace(name: CGColorSpace.itur_709)
         case AVCOL_SPC_BT470BG, AVCOL_SPC_SMPTE170M:
             return CGColorSpace(name: CGColorSpace.sRGB)
-        case AVCOL_SPC_BT2020_NCL:
+        case AVCOL_SPC_BT2020_CL, AVCOL_SPC_BT2020_NCL:
             return CGColorSpace(name: CGColorSpace.itur_2020)
         default:
             return nil

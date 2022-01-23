@@ -56,11 +56,12 @@ final class MEPlayerItem {
                 delegate?.sourceDidOpened()
             case .failed:
                 delegate?.sourceDidFailed(error: error)
-                case .idle, .opening, .seeking, .paused,.reading, .finished, .closed:
+            case .idle, .opening, .seeking, .paused, .reading, .finished, .closed:
                 break
             }
         }
     }
+
     weak var delegate: MEPlayerDelegate?
 
     init(url: URL, options: KSOptions) {
