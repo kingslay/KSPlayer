@@ -54,29 +54,18 @@ final class MEPlayerItem {
             switch state {
             case .opened:
                 delegate?.sourceDidOpened()
-            case .reading:
-                timer.fireDate = Date.distantPast
-            case .closed:
-                timer.fireDate = Date.distantFuture
             case .failed:
                 delegate?.sourceDidFailed(error: error)
-                timer.fireDate = Date.distantFuture
-            case .idle, .opening, .seeking, .paused, .finished:
+                case .idle, .opening, .seeking, .paused,.reading, .finished, .closed:
                 break
             }
         }
     }
-
-    private lazy var timer: Timer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { [weak self] _ in
-        self?.codecDidChangeCapacity()
-    }
-
     weak var delegate: MEPlayerDelegate?
 
     init(url: URL, options: KSOptions) {
         self.url = url
         self.options = options
-        timer.fireDate = Date.distantFuture
         avformat_network_init()
         av_log_set_callback { _, level, format, args in
             guard let format = format, level <= KSPlayerManager.logLevel.rawValue else {
@@ -452,7 +441,6 @@ extension MEPlayerItem: CodecCapacityDelegate {
         let allSatisfy = videoAudioTracks.allSatisfy { $0.isEndOfFile && $0.frameCount == 0 && $0.packetCount == 0 }
         delegate?.sourceDidFinished(type: track.mediaType, allSatisfy: allSatisfy)
         if allSatisfy {
-            timer.fireDate = Date.distantFuture
             if options.isLoopPlay {
                 isAudioStalled = audioTrack == nil
                 audioTrack?.isLoopModel = false
@@ -526,6 +514,7 @@ extension MEPlayerItem: OutputRenderSourceDelegate {
             if let frame = frame, frame.seconds + 0.4 < currentPlaybackTime + options.audioDelay {
                 _ = videoTrack?.getOutputRender(where: nil)
             }
+            codecDidChangeCapacity()
             return frame
         } else {
             return audioTrack?.getOutputRender(where: nil)
