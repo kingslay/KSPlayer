@@ -101,6 +101,7 @@ extension KSMEPlayer {
             guard let self = self else { return }
             let isPaused = !(self.playbackState == .playing && self.loadState == .playable)
             self.audioOutput.isPaused = isPaused
+            self.videoOutput.isPaused = isPaused
             self.delegate?.changeLoadState(player: self)
         }
     }
@@ -133,10 +134,13 @@ extension KSMEPlayer: MEPlayerDelegate {
                     self.loopCount += 1
                     self.delegate?.playBack(player: self, loopCount: self.loopCount)
                     self.audioOutput.isPaused = false
+                    self.videoOutput.isPaused = false
                 } else {
                     self.playbackState = .finished
                     if type == .audio {
                         self.audioOutput.isPaused = true
+                    } else if type == .video {
+                        self.videoOutput.isPaused = true
                     }
                 }
             }
