@@ -1,6 +1,6 @@
 {
   "name": "FFmpeg",
-  "version": "4.4",
+  "version": "5.0",
   "summary": "FFmpeg",
   "description": "OpenSSL",
   "homepage": "https://github.com/kingslay/KSPlayer",
@@ -10,7 +10,7 @@
   "license": "MIT",
   "source": {
     "git": "https://github.com/kingslay/KSPlayer.git",
-    "tag": "4.4"
+    "tag": "5.0"
   },
   "platforms": {
     "ios": "11.0",

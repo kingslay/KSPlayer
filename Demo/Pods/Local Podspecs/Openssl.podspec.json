@@ -1,6 +1,6 @@
 {
   "name": "OpenSSL",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "summary": "OpenSSL",
   "description": "OpenSSL",
   "homepage": "https://github.com/kingslay/KSPlayer",
@@ -10,7 +10,7 @@
   "license": "MIT",
   "source": {
     "git": "https://github.com/kingslay/KSPlayer.git",
-    "tag": "3.0.0"
+    "tag": "3.0.1"
   },
   "platforms": {
     "ios": "11.0",

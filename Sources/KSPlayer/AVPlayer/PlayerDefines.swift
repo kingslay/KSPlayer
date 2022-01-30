@@ -10,8 +10,20 @@ import AVKit
 import CoreMedia
 #if canImport(UIKit)
 import UIKit
+extension UIScreen {
+    static var size: CGSize {
+        main.bounds.size
+    }
+}
 #else
 import AppKit
+public typealias UIView = NSView
+public typealias UIScreen = NSScreen
+extension NSScreen {
+    static var size: CGSize {
+        main?.frame.size ?? .zero
+    }
+}
 #endif
 
 public protocol MediaPlayback: AnyObject {
@@ -469,5 +481,168 @@ extension NSError {
         var userInfo = userInfo
         userInfo[NSLocalizedDescriptionKey] = errorCode.description
         self.init(domain: KSPlayerErrorDomain, code: errorCode.rawValue, userInfo: userInfo)
+    }
+}
+
+@propertyWrapper public final class KSObservable<T> {
+    public var observer: ((_ oldValue: T, _ newValue: T) -> Void)? {
+        didSet {
+            observer?(wrappedValue, wrappedValue)
+        }
+    }
+
+    public var wrappedValue: T {
+        didSet {
+            observer?(oldValue, wrappedValue)
+        }
+    }
+
+    public var projectedValue: KSObservable { self }
+
+    public init(wrappedValue: T) {
+        self.wrappedValue = wrappedValue
+    }
+}
+
+extension CMTime {
+    init(seconds: TimeInterval) {
+        self.init(seconds: seconds, preferredTimescale: Int32(NSEC_PER_SEC))
+    }
+}
+
+extension CMTimeRange {
+    init(start: TimeInterval, end: TimeInterval) {
+        self.init(start: CMTime(seconds: start), end: CMTime(seconds: end))
+    }
+}
+
+extension CGPoint {
+    var reverse: CGPoint {
+        CGPoint(x: y, y: x)
+    }
+}
+
+extension CGSize {
+    var reverse: CGSize {
+        CGSize(width: height, height: width)
+    }
+
+    var toPoint: CGPoint {
+        CGPoint(x: width, y: height)
+    }
+
+    var isHorizonal: Bool {
+        width > height
+    }
+}
+
+func * (left: CGSize, right: CGFloat) -> CGSize {
+    CGSize(width: left.width * right, height: left.height * right)
+}
+
+func * (left: CGPoint, right: CGFloat) -> CGPoint {
+    CGPoint(x: left.x * right, y: left.y * right)
+}
+
+func * (left: CGRect, right: CGFloat) -> CGRect {
+    CGRect(origin: left.origin * right, size: left.size * right)
+}
+
+func - (left: CGSize, right: CGSize) -> CGSize {
+    CGSize(width: left.width - right.width, height: left.height - right.height)
+}
+
+public func runInMainqueue(block: @escaping () -> Void) {
+    if Thread.isMainThread {
+        block()
+    } else {
+        DispatchQueue.main.async(execute: block)
+    }
+}
+
+extension UIView {
+    var widthConstraint: NSLayoutConstraint? {
+        // 防止返回NSContentSizeLayoutConstraint
+        constraints.first { $0.isMember(of: NSLayoutConstraint.self) && $0.firstAttribute == .width }
+    }
+
+    var heightConstraint: NSLayoutConstraint? {
+        // 防止返回NSContentSizeLayoutConstraint
+        constraints.first { $0.isMember(of: NSLayoutConstraint.self) && $0.firstAttribute == .height }
+    }
+
+    var trailingConstraint: NSLayoutConstraint? {
+        superview?.constraints.first { $0.firstItem === self && $0.firstAttribute == .trailing }
+    }
+
+    var leadingConstraint: NSLayoutConstraint? {
+        superview?.constraints.first { $0.firstItem === self && $0.firstAttribute == .leading }
+    }
+
+    var topConstraint: NSLayoutConstraint? {
+        superview?.constraints.first { $0.firstItem === self && $0.firstAttribute == .top }
+    }
+
+    var bottomConstraint: NSLayoutConstraint? {
+        superview?.constraints.first { $0.firstItem === self && $0.firstAttribute == .bottom }
+    }
+
+    var centerXConstraint: NSLayoutConstraint? {
+        superview?.constraints.first { $0.firstItem === self && $0.firstAttribute == .centerX }
+    }
+
+    var centerYConstraint: NSLayoutConstraint? {
+        superview?.constraints.first { $0.firstItem === self && $0.firstAttribute == .centerY }
+    }
+
+    var frameConstraints: [NSLayoutConstraint] {
+        var frameConstraint = superview?.constraints.filter { constraint in
+            constraint.firstItem === self
+        } ?? [NSLayoutConstraint]()
+        for constraint in constraints where
+            constraint.isMember(of: NSLayoutConstraint.self) && constraint.firstItem === self && (constraint.firstAttribute == .width || constraint.firstAttribute == .height) {
+            frameConstraint.append(constraint)
+        }
+        return frameConstraint
+    }
+
+    var safeTopAnchor: NSLayoutYAxisAnchor {
+        if #available(macOS 11.0, *) {
+            return self.safeAreaLayoutGuide.topAnchor
+        } else {
+            return topAnchor
+        }
+    }
+
+    var readableTopAnchor: NSLayoutYAxisAnchor {
+        #if os(macOS)
+        topAnchor
+        #else
+        readableContentGuide.topAnchor
+        #endif
+    }
+
+    var safeLeadingAnchor: NSLayoutXAxisAnchor {
+        if #available(macOS 11.0, *) {
+            return self.safeAreaLayoutGuide.leadingAnchor
+        } else {
+            return leadingAnchor
+        }
+    }
+
+    var safeTrailingAnchor: NSLayoutXAxisAnchor {
+        if #available(macOS 11.0, *) {
+            return self.safeAreaLayoutGuide.trailingAnchor
+        } else {
+            return trailingAnchor
+        }
+    }
+
+    var safeBottomAnchor: NSLayoutYAxisAnchor {
+        if #available(macOS 11.0, *) {
+            return self.safeAreaLayoutGuide.bottomAnchor
+        } else {
+            return bottomAnchor
+        }
     }
 }

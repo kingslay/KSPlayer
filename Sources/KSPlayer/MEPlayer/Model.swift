@@ -314,6 +314,24 @@ public extension AVError {
     static let eof = AVError(code: swift_AVERROR_EOF)
 }
 
+extension Array {
+    init(tuple: (Element, Element, Element, Element, Element, Element, Element, Element)) {
+        self.init([tuple.0, tuple.1, tuple.2, tuple.3, tuple.4, tuple.5, tuple.6, tuple.7])
+    }
+
+    init(tuple: (Element, Element, Element, Element)) {
+        self.init([tuple.0, tuple.1, tuple.2, tuple.3])
+    }
+
+    var tuple8: (Element, Element, Element, Element, Element, Element, Element, Element) {
+        (self[0], self[1], self[2], self[3], self[4], self[5], self[6], self[7])
+    }
+
+    var tuple4: (Element, Element, Element, Element) {
+        (self[0], self[1], self[2], self[3])
+    }
+}
+
 //// swiftlint:disable identifier_name
 // extension Character {
 //    @inlinable public var asciiValueInt32: Int32 {

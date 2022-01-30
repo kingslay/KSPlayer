@@ -4,6 +4,7 @@ import AVKit
 import UIKit
 #else
 import AppKit
+public typealias UIImage = NSImage
 #endif
 public final class KSAVPlayerView: UIView {
     public let player = AVQueuePlayer()
@@ -515,6 +516,28 @@ struct AVMediaPlayerTrack: MediaPlayerTrack {
             transferFunction = nil
             yCbCrMatrix = nil
             codecType = 0
+        }
+    }
+}
+
+public extension AVAsset {
+    func ceateImageGenerator() -> AVAssetImageGenerator {
+        let imageGenerator = AVAssetImageGenerator(asset: self)
+        imageGenerator.requestedTimeToleranceBefore = .zero
+        imageGenerator.requestedTimeToleranceAfter = .zero
+        return imageGenerator
+    }
+
+    func thumbnailImage(currentTime: CMTime, handler: @escaping (UIImage?) -> Void) {
+        let imageGenerator = ceateImageGenerator()
+        imageGenerator.requestedTimeToleranceBefore = .zero
+        imageGenerator.requestedTimeToleranceAfter = .zero
+        imageGenerator.generateCGImagesAsynchronously(forTimes: [NSValue(time: currentTime)]) { _, cgImage, _, _, _ in
+            if let cgImage = cgImage {
+                handler(UIImage(cgImage: cgImage))
+            } else {
+                handler(nil)
+            }
         }
     }
 }

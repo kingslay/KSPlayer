@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		476675E7F5DE5A4755C74699 /* Pods_demo_SPM__iOS_.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 338B9D99F584C9F6DF2DE31C /* Pods_demo_SPM__iOS_.framework */; };
 		AC77DFC326402329001351AE /* demo_SPMApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC77DFB026402327001351AE /* demo_SPMApp.swift */; };
 		AC77DFC426402329001351AE /* demo_SPMApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC77DFB026402327001351AE /* demo_SPMApp.swift */; };
 		AC77DFC526402329001351AE /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC77DFB126402327001351AE /* ContentView.swift */; };
@@ -60,6 +61,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				ACD2F772275F735C0006D16F /* KSPlayer in Frameworks */,
+				476675E7F5DE5A4755C74699 /* Pods_demo_SPM__iOS_.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
