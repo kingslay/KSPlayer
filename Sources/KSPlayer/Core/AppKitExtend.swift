@@ -9,12 +9,9 @@ import AppKit
 import CoreMedia
 import IOKit.pwr_mgt
 
-public typealias UIView = NSView
 public typealias UIWindow = NSWindow
 public typealias UIViewController = NSViewController
 public typealias UIColor = NSColor
-public typealias UIImage = NSImage
-public typealias UIScreen = NSScreen
 public typealias UIStackView = NSStackView
 public typealias UIPanGestureRecognizer = NSPanGestureRecognizer
 public typealias UIGestureRecognizer = NSGestureRecognizer
@@ -37,10 +34,6 @@ public typealias UIButton = KSButton
 extension NSScreen {
     var scale: CGFloat {
         backingScaleFactor
-    }
-
-    static var size: CGSize {
-        main?.frame.size ?? .zero
     }
 }
 

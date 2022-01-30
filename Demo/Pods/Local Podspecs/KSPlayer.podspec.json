@@ -29,20 +29,6 @@
   ],
   "subspecs": [
     {
-      "name": "UXKit",
-      "source_files": "Sources/KSPlayer/UXKit/*.{swift}",
-      "frameworks": "Foundation"
-    },
-    {
-      "name": "Basic",
-      "source_files": "Sources/KSPlayer/Basic/*.{swift}",
-      "dependencies": {
-        "KSPlayer/UXKit": [
-
-        ]
-      }
-    },
-    {
       "name": "Subtitle",
       "source_files": "Sources/KSPlayer/Subtitle/*.{swift}",
       "frameworks": "Foundation"
@@ -64,11 +50,6 @@
       },
       "osx": {
         "frameworks": "AppKit"
-      },
-      "dependencies": {
-        "KSPlayer/Basic": [
-
-        ]
       }
     },
     {
