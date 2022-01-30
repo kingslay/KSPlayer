@@ -59,12 +59,12 @@ public protocol KSPlayerLayerDelegate: AnyObject {
 }
 
 open class KSPlayerLayer: UIView {
-    public var isWirelessRouteActive = false
     public weak var delegate: KSPlayerLayerDelegate?
     @KSObservable
     public var bufferingProgress: Int = 0
     @KSObservable
     public var loopCount: Int = 0
+    private var isWirelessRouteActive = false
     private var options: KSOptions?
     private var bufferedCount = 0
     private var shouldSeekTo: TimeInterval = 0
@@ -143,6 +143,7 @@ open class KSPlayerLayer: UIView {
         #if canImport(UIKit)
         NotificationCenter.default.addObserver(self, selector: #selector(enterBackground), name: UIApplication.didEnterBackgroundNotification, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(enterForeground), name: UIApplication.willEnterForegroundNotification, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(wirelessRouteActiveDidChange(notification:)), name: .MPVolumeViewWirelessRouteActiveDidChange, object: nil)
         #endif
     }
 
@@ -434,6 +435,19 @@ extension KSPlayerLayer {
             player?.enterForeground()
         }
     }
+
+    #if canImport(UIKit)
+    @objc private func wirelessRouteActiveDidChange(notification: Notification) {
+        guard let volumeView = notification.object as? MPVolumeView, isWirelessRouteActive != volumeView.isWirelessRouteActive else { return }
+        if volumeView.isWirelessRouteActive {
+            if !(player?.allowsExternalPlayback ?? false) {
+                isWirelessRouteActive = true
+            }
+            player?.usesExternalPlaybackWhileExternalScreenIsActive = true
+        }
+        isWirelessRouteActive = volumeView.isWirelessRouteActive
+    }
+    #endif
 }
 
 public extension KSPlayerManager {

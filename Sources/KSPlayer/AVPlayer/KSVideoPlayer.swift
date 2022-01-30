@@ -9,11 +9,18 @@ import SwiftUI
 
 @available(iOS 13, tvOS 13, macOS 10.15, *)
 public struct KSVideoPlayer {
+    struct Handler {
+        var onPlay: ((TimeInterval, TimeInterval) -> Void)?
+        var onFinish: ((Error?) -> Void)?
+        var onStateChanged: ((KSPlayerState) -> Void)?
+        var onBufferChanged: ((Int, TimeInterval) -> Void)?
+    }
     private let url: URL
     private let options: KSOptions
     @Binding private var play: Bool
     @Binding private var time: CMTime
-    private var config = Config()
+    private var isMuted: Bool = false
+    fileprivate var handler: Handler = .init()
     public init(url: URL, options: KSOptions, play: Binding<Bool> = .constant(true), time: Binding<CMTime> = .constant(.zero)) {
         self.url = url
         self.options = options
@@ -24,49 +31,36 @@ public struct KSVideoPlayer {
 
 @available(iOS 13, tvOS 13, macOS 10.15, *)
 extension KSVideoPlayer {
-    struct Config {
-        struct Handler {
-            var onPlay: ((TimeInterval, TimeInterval) -> Void)?
-            var onFinish: ((Error?) -> Void)?
-            var onStateChanged: ((KSPlayerState) -> Void)?
-            var onBufferChanged: ((Int, TimeInterval) -> Void)?
-        }
-
-        fileprivate var handler: Handler = .init()
-        var autoReplay: Bool = false
-        var isMuted: Bool = false
-    }
-
     /// Whether the video is muted, only for this instance.
     func mute(_ value: Bool) -> Self {
         var view = self
-        view.config.isMuted = value
+        view.isMuted = value
         return view
     }
 
     func onBufferChanged(_ handler: @escaping (Int, TimeInterval) -> Void) -> Self {
         var view = self
-        view.config.handler.onBufferChanged = handler
+        view.handler.onBufferChanged = handler
         return view
     }
 
     /// Playing to the end.
     func onFinish(_ handler: @escaping (Error?) -> Void) -> Self {
         var view = self
-        view.config.handler.onFinish = handler
+        view.handler.onFinish = handler
         return view
     }
 
     func onPlay(_ handler: @escaping (TimeInterval, TimeInterval) -> Void) -> Self {
         var view = self
-        view.config.handler.onPlay = handler
+        view.handler.onPlay = handler
         return view
     }
 
     /// Playback status changes, such as from play to pause.
     func onStateChanged(_ handler: @escaping (KSPlayerState) -> Void) -> Self {
         var view = self
-        view.config.handler.onStateChanged = handler
+        view.handler.onStateChanged = handler
         return view
     }
 }
@@ -83,14 +77,12 @@ extension KSVideoPlayer: UIViewRepresentable {
 
     #if canImport(UIKit)
     public typealias UIViewType = KSPlayerLayer
-    public func makeUIView(context _: Context) -> UIViewType {
-        KSPlayerLayer()
+    public func makeUIView(context: Context) -> UIViewType {
+        makeView(context: context)
     }
 
     public func updateUIView(_ uiView: UIViewType, context: Context) {
-        uiView.set(url: url, options: options)
-        uiView.delegate = context.coordinator
-        uiView.player?.isMuted = config.isMuted
+        updateView(uiView, context: context)
     }
 
     public static func dismantleUIView(_ uiView: UIViewType, coordinator _: Coordinator) {
@@ -98,38 +90,52 @@ extension KSVideoPlayer: UIViewRepresentable {
     }
     #else
     public typealias NSViewType = KSPlayerLayer
-    public func makeNSView(context _: Context) -> NSViewType {
-        KSPlayerLayer()
+    public func makeNSView(context: Context) -> NSViewType {
+        makeView(context: context)
     }
 
     public func updateNSView(_ uiView: NSViewType, context: Context) {
-        uiView.set(url: url, options: options)
-        uiView.delegate = context.coordinator
-        uiView.player?.isMuted = config.isMuted
+        updateView(uiView, context: context)
+    }
+
+    public static func dismantleNSView(_ uiView: NSViewType, coordinator _: Coordinator) {
+        uiView.pause()
     }
     #endif
 
-    public class Coordinator: KSPlayerLayerDelegate {
-        private let KSVideoPlayer: KSVideoPlayer
+    private func makeView(context: Context) -> KSPlayerLayer {
+        let playerLayer = KSPlayerLayer()
+        playerLayer.set(url: url, options: options)
+        playerLayer.delegate = context.coordinator
+        return playerLayer
+    }
 
-        init(_ KSVideoPlayer: KSVideoPlayer) {
-            self.KSVideoPlayer = KSVideoPlayer
+    private func updateView(_ view: KSPlayerLayer, context _: Context) {
+        play ? view.play() : view.pause()
+        view.player?.isMuted = isMuted
+    }
+
+    final public class Coordinator: KSPlayerLayerDelegate {
+        private let videoPlayer: KSVideoPlayer
+
+        init(_ videoPlayer: KSVideoPlayer) {
+            self.videoPlayer = videoPlayer
         }
 
         public func player(layer _: KSPlayerLayer, state: KSPlayerState) {
-            KSVideoPlayer.config.handler.onStateChanged?(state)
+            videoPlayer.handler.onStateChanged?(state)
         }
 
         public func player(layer _: KSPlayerLayer, currentTime: TimeInterval, totalTime: TimeInterval) {
-            KSVideoPlayer.config.handler.onPlay?(currentTime, totalTime)
+            videoPlayer.handler.onPlay?(currentTime, totalTime)
         }
 
         public func player(layer _: KSPlayerLayer, finish error: Error?) {
-            KSVideoPlayer.config.handler.onFinish?(error)
+            videoPlayer.handler.onFinish?(error)
         }
 
         public func player(layer _: KSPlayerLayer, bufferedCount: Int, consumeTime: TimeInterval) {
-            KSVideoPlayer.config.handler.onBufferChanged?(bufferedCount, consumeTime)
+            videoPlayer.handler.onBufferChanged?(bufferedCount, consumeTime)
         }
     }
 }

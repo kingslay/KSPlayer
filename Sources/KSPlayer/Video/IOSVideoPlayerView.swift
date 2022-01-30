@@ -296,23 +296,11 @@ extension IOSVideoPlayerView {
     private func addNotification() {
         NotificationCenter.default.addObserver(self, selector: #selector(orientationChanged), name: UIApplication.didChangeStatusBarOrientationNotification, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(routesAvailableDidChange), name: .AVRouteDetectorMultipleRoutesDetectedDidChange, object: nil)
-        NotificationCenter.default.addObserver(self, selector: #selector(wirelessRouteActiveDidChange(notification:)), name: .MPVolumeViewWirelessRouteActiveDidChange, object: nil)
         callCenter.setDelegate(self, queue: DispatchQueue.main)
     }
 
     @objc private func routesAvailableDidChange(notification _: Notification) {
         routeButton.isHidden = !routeButton.areWirelessRoutesAvailable
-    }
-
-    @objc private func wirelessRouteActiveDidChange(notification: Notification) {
-        guard let volumeView = notification.object as? MPVolumeView, playerLayer.isWirelessRouteActive != volumeView.isWirelessRouteActive else { return }
-        if volumeView.isWirelessRouteActive {
-            if !(playerLayer.player?.allowsExternalPlayback ?? false) {
-                playerLayer.isWirelessRouteActive = true
-            }
-            playerLayer.player?.usesExternalPlaybackWhileExternalScreenIsActive = true
-        }
-        playerLayer.isWirelessRouteActive = volumeView.isWirelessRouteActive
     }
 
     @objc private func orientationChanged(notification _: Notification) {
