@@ -101,7 +101,7 @@ public extension KSPlayerManager {
     static var audioPlayerMaximumChannels = AVAudioChannelCount(2)
     #else
     static var audioPlayerSampleRate = Int32(AVAudioSession.sharedInstance().sampleRate)
-    static var audioPlayerMaximumChannels = AVAudioChannelCount(AVAudioSession.sharedInstance().maximumOutputNumberOfChannels)
+    static var audioPlayerMaximumChannels = AVAudioChannelCount(AVAudioSession.sharedInstance().outputNumberOfChannels)
     #endif
     internal static func outputFormat() -> AudioStreamBasicDescription {
         #if !os(macOS)
