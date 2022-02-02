@@ -114,7 +114,7 @@ struct MasterView: View {
             TextField("Search", text: $searchText)
             List {
                 ForEach(resources.filter { $0.name.contains(searchText) || searchText.count == 0 }, id: \.self) { resource in
-                    NavigationLink(resource.name, destination: StructPlayerView(resource: resource))
+                    NavigationLink(resource.name, destination: KSVideoPlayerView(resource: resource))
                 }.onDelete { indices in
                     indices.forEach { self.resources.remove(at: $0) }
                 }
@@ -129,28 +129,9 @@ struct ContentView_Previews: PreviewProvider {
     }
 }
 
-#if !canImport(UIKit)
-typealias UIViewRepresentable = NSViewRepresentable
-#endif
-struct StructPlayerView: UIViewRepresentable {
-    var resource: KSPlayerResource
-    #if canImport(UIKit)
-    typealias UIViewType = VideoPlayerView
-    func makeUIView(context _: Context) -> VideoPlayerView {
-        VideoPlayerView()
+extension KSVideoPlayerView {
+    init(resource: KSPlayerResource) {
+        let definition = resource.definitions.first!
+        self.init(url: definition.url, options: definition.options)
     }
-
-    func updateUIView(_ uiView: VideoPlayerView, context _: Context) {
-        uiView.set(resource: resource)
-    }
-    #else
-    typealias NSViewType = VideoPlayerView
-    func makeNSView(context _: Context) -> VideoPlayerView {
-        VideoPlayerView()
-    }
-
-    func updateNSView(_ nsView: VideoPlayerView, context _: Context) {
-        nsView.set(resource: resource)
-    }
-    #endif
 }

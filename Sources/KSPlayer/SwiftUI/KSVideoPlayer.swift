@@ -7,6 +7,83 @@
 import AVFoundation
 import SwiftUI
 
+@available(iOS 15, tvOS 15, macOS 12, *)
+public struct KSVideoPlayerView: View {
+    @State private var isPlay: Bool
+    @State private var isMuted = false
+    @State private var currentTime = TimeInterval(0)
+    @State private var totalTime = TimeInterval(1)
+    private let url: URL
+    private let options: KSOptions
+    public init(url: URL, options: KSOptions) {
+        self.url = url
+        self.options = options
+        _isPlay = .init(initialValue: options.isAutoPlay)
+    }
+
+    public var body: some View {
+        ZStack {
+            KSVideoPlayer(url: url, options: options, isPlay: $isPlay).onPlay { current, total in
+                currentTime = current
+                totalTime = total
+            }.mute(isMuted)
+            VideoControllerView(isPlay: $isPlay, isMuted: $isMuted, currentTime: $currentTime, totalTime: _totalTime)
+        }
+    }
+}
+
+@available(iOS 15, tvOS 15, macOS 12, *)
+public struct VideoControllerView: View {
+    @Binding private var isPlay: Bool
+    @Binding private var isMuted: Bool
+    @Binding private var currentTime: TimeInterval
+    @State private var totalTime: TimeInterval
+    private let backgroundColor = Color(red: 0.145, green: 0.145, blue: 0.145).opacity(0.6)
+    public init(isPlay: Binding<Bool>, isMuted: Binding<Bool>, currentTime: Binding<TimeInterval>, totalTime: State<TimeInterval>) {
+        _isPlay = isPlay
+        _isMuted = isMuted
+        _currentTime = currentTime
+        _totalTime = totalTime
+    }
+
+    public var body: some View {
+        VStack {
+            HStack {
+                Spacer(minLength: 5)
+                HStack {
+                    Button(action: {}, label: {
+                        Image(systemName: "arrow.up.left.and.arrow.down.right")
+                    }).background(backgroundColor)
+                    Spacer()
+                    Button(action: {
+                        isMuted.toggle()
+                    }, label: {
+                        Image(systemName: isMuted ? "speaker.slash.fill" : "speaker.wave.2.fill")
+                    }).background(backgroundColor)
+                }
+                Spacer(minLength: 5)
+            }
+            Spacer()
+            HStack(spacing: 8) {
+                Spacer(minLength: 5)
+                Button(action: {
+                    isPlay.toggle()
+                }, label: {
+                    Image(systemName: isPlay ? "pause.fill" : "play.fill")
+                }).frame(width: 15)
+                Text(currentTime.toString(for: .minOrHour)).font(Font.custom("SFProText-Regular", size: 11)).foregroundColor(.secondary)
+                ProgressView(value: currentTime, total: totalTime)
+                Text("-" + (totalTime - currentTime).toString(for: .minOrHour)).font(Font.custom("SFProText-Regular", size: 11)).foregroundColor(.secondary)
+                Button(action: {}, label: {
+                    Image(systemName: "ellipsis")
+                })
+                Spacer(minLength: 5)
+            }.frame(height: 32).background(backgroundColor)
+                .cornerRadius(8).padding(EdgeInsets(top: 0, leading: 10, bottom: 0, trailing: 10))
+        }.foregroundColor(.primary)
+    }
+}
+
 @available(iOS 13, tvOS 13, macOS 10.15, *)
 public struct KSVideoPlayer {
     struct Handler {
@@ -15,16 +92,17 @@ public struct KSVideoPlayer {
         var onStateChanged: ((KSPlayerState) -> Void)?
         var onBufferChanged: ((Int, TimeInterval) -> Void)?
     }
+
     private let url: URL
     private let options: KSOptions
-    @Binding private var play: Bool
+    @Binding private var isPlay: Bool
     @Binding private var time: CMTime
     private var isMuted: Bool = false
     fileprivate var handler: Handler = .init()
-    public init(url: URL, options: KSOptions, play: Binding<Bool> = .constant(true), time: Binding<CMTime> = .constant(.zero)) {
+    public init(url: URL, options: KSOptions, isPlay: Binding<Bool> = .constant(true), time: Binding<CMTime> = .constant(.zero)) {
         self.url = url
         self.options = options
-        _play = play
+        _isPlay = isPlay
         _time = time
     }
 }
@@ -111,11 +189,11 @@ extension KSVideoPlayer: UIViewRepresentable {
     }
 
     private func updateView(_ view: KSPlayerLayer, context _: Context) {
-        play ? view.play() : view.pause()
+        isPlay ? view.play() : view.pause()
         view.player?.isMuted = isMuted
     }
 
-    final public class Coordinator: KSPlayerLayerDelegate {
+    public final class Coordinator: KSPlayerLayerDelegate {
         private let videoPlayer: KSVideoPlayer
 
         init(_ videoPlayer: KSVideoPlayer) {

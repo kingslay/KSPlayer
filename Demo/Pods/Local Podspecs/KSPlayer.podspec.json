@@ -90,6 +90,15 @@
       }
     },
     {
+      "name": "SwiftUI",
+      "source_files": "Sources/KSPlayer/SwiftUI/*.swift",
+      "dependencies": {
+        "KSPlayer/Core": [
+
+        ]
+      }
+    },
+    {
       "name": "Audio",
       "source_files": "Sources/KSPlayer/Audio/*.swift",
       "dependencies": {
