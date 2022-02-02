@@ -51,6 +51,12 @@ Pod::Spec.new do |s|
             'KSPlayer_KSPlayer' => ['Sources/KSPlayer/Core/Resources/*', 'Sources/KSPlayer/Metal/*.metal']
         } 
     end
+
+    s.subspec 'SwiftUI'do |ss|
+        ss.source_files = 'Sources/KSPlayer/SwiftUI/*.swift'
+        ss.dependency 'KSPlayer/AVPlayer'
+    end
+
     s.subspec 'Audio'do |ss|
         ss.source_files = 'Sources/KSPlayer/Audio/*.swift'
         ss.dependency 'KSPlayer/Core'

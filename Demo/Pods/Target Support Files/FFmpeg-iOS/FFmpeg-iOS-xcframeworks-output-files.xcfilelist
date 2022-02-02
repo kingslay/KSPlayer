@@ -1,6 +1,6 @@
-${PODS_XCFRAMEWORKS_BUILD_DIR}/Libavcodec
-${PODS_XCFRAMEWORKS_BUILD_DIR}/Libavfilter
-${PODS_XCFRAMEWORKS_BUILD_DIR}/Libavformat
-${PODS_XCFRAMEWORKS_BUILD_DIR}/Libavutil
-${PODS_XCFRAMEWORKS_BUILD_DIR}/Libswresample
-${PODS_XCFRAMEWORKS_BUILD_DIR}/Libswscale
+${PODS_XCFRAMEWORKS_BUILD_DIR}/FFmpeg/FFmpeg/Libavcodec.framework
+${PODS_XCFRAMEWORKS_BUILD_DIR}/FFmpeg/FFmpeg/Libavfilter.framework
+${PODS_XCFRAMEWORKS_BUILD_DIR}/FFmpeg/FFmpeg/Libavformat.framework
+${PODS_XCFRAMEWORKS_BUILD_DIR}/FFmpeg/FFmpeg/Libavutil.framework
+${PODS_XCFRAMEWORKS_BUILD_DIR}/FFmpeg/FFmpeg/Libswresample.framework
+${PODS_XCFRAMEWORKS_BUILD_DIR}/FFmpeg/FFmpeg/Libswscale.framework
