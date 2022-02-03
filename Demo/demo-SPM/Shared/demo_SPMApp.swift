@@ -26,8 +26,8 @@ struct demo_SPMApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView()
-//            VideoPlayer(player: AVPlayer(url: URL(string: "http://clips.vorwaerts-gmbh.de/big_buck_bunny.mp4")!))
-//            KSVideoPlayerView(url: URL(string: "http://clips.vorwaerts-gmbh.de/big_buck_bunny.mp4")!, options: KSOptions())
+//            VideoPlayer(player: AVPlayer(url: URL(string: "https://bitmovin-a.akamaihd.net/content/dataset/multi-codec/hevc/stream_fmp4.m3u8")!))
+//            AVContentView()
         }
     }
 }
