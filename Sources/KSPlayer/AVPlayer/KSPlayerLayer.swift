@@ -122,6 +122,14 @@ open class KSPlayerLayer: UIView {
                     player.playbackRate = oldValue.playbackRate
                     player.playbackVolume = oldValue.playbackVolume
                 }
+                addSubview(player.view)
+                player.view.translatesAutoresizingMaskIntoConstraints = false
+                NSLayoutConstraint.activate([
+                    player.view.leftAnchor.constraint(equalTo: leftAnchor),
+                    player.view.topAnchor.constraint(equalTo: topAnchor),
+                    player.view.centerXAnchor.constraint(equalTo: centerXAnchor),
+                    player.view.centerYAnchor.constraint(equalTo: centerYAnchor),
+                ])
                 prepareToPlay()
             }
         }
@@ -234,20 +242,12 @@ open class KSPlayerLayer: UIView {
             shouldSeekTo = time
         }
     }
-
-    override open func didAddSubview(_ subview: UIView) {
-        super.didAddSubview(subview)
-        if subview == player?.view {
-            player?.updateConstraint()
-        }
-    }
 }
 
 // MARK: - MediaPlayerDelegate
 
 extension KSPlayerLayer: MediaPlayerDelegate {
     public func preparedToPlay(player: MediaPlayerProtocol) {
-        addSubview(player.view)
         updateNowPlayingInfo()
         state = .readyToPlay
         if isAutoPlay {
