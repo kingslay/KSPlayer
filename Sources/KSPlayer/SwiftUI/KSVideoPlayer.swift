@@ -9,39 +9,39 @@ import SwiftUI
 
 @available(iOS 15, tvOS 15, macOS 12, *)
 public struct KSVideoPlayerView: View {
-    @State private var isPlay: Bool
-    @State private var isMuted = false
     @State private var currentTime = TimeInterval(0)
     @State private var totalTime = TimeInterval(1)
+    @State private var isMaskShow: Bool = true
+    @State private var config: KSVideoPlayer.Config
     private let url: URL
     private let options: KSOptions
     public init(url: URL, options: KSOptions) {
         self.url = url
         self.options = options
-        _isPlay = .init(initialValue: options.isAutoPlay)
+        _config = .init(initialValue: KSVideoPlayer.Config(isPlay: options.isAutoPlay))
     }
 
     public var body: some View {
         ZStack {
-            KSVideoPlayer(url: url, options: options, isPlay: $isPlay).onPlay { current, total in
+            KSVideoPlayer(url: url, options: options, config: config).onPlay { current, total in
                 currentTime = current
                 totalTime = total
-            }.mute(isMuted)
-            VideoControllerView(isPlay: $isPlay, isMuted: $isMuted, currentTime: $currentTime, totalTime: _totalTime)
+            }
+            VideoControllerView(config: $config, currentTime: $currentTime, totalTime: _totalTime).opacity(isMaskShow ? 1 : 0)
+        }.onTapGesture {
+            isMaskShow.toggle()
         }
     }
 }
 
 @available(iOS 15, tvOS 15, macOS 12, *)
 public struct VideoControllerView: View {
-    @Binding private var isPlay: Bool
-    @Binding private var isMuted: Bool
+    @Binding private var config: KSVideoPlayer.Config
     @Binding private var currentTime: TimeInterval
     @State private var totalTime: TimeInterval
     private let backgroundColor = Color(red: 0.145, green: 0.145, blue: 0.145).opacity(0.6)
-    public init(isPlay: Binding<Bool>, isMuted: Binding<Bool>, currentTime: Binding<TimeInterval>, totalTime: State<TimeInterval>) {
-        _isPlay = isPlay
-        _isMuted = isMuted
+    public init(config: Binding<KSVideoPlayer.Config>, currentTime: Binding<TimeInterval>, totalTime: State<TimeInterval>) {
+        _config = config
         _currentTime = currentTime
         _totalTime = totalTime
     }
@@ -49,37 +49,48 @@ public struct VideoControllerView: View {
     public var body: some View {
         VStack {
             HStack {
-                Spacer(minLength: 5)
-                HStack {
+                Spacer().frame(width: 5)
+                HStack(spacing: 15) {
                     Button(action: {}, label: {
                         Image(systemName: "arrow.up.left.and.arrow.down.right")
-                    }).background(backgroundColor)
-                    Spacer()
+                    })
                     Button(action: {
-                        isMuted.toggle()
+                        config.isPipActive.toggle()
                     }, label: {
-                        Image(systemName: isMuted ? "speaker.slash.fill" : "speaker.wave.2.fill")
-                    }).background(backgroundColor)
-                }
-                Spacer(minLength: 5)
+                        Image(systemName: config.isPipActive ? "pip.exit" : "pip.enter")
+                    })
+                    Button(action: {
+                        config.isScaleAspectFill.toggle()
+                    }, label: {
+                        Image(systemName: config.isScaleAspectFill ? "rectangle.arrowtriangle.2.inward" : "rectangle.arrowtriangle.2.outward")
+                    })
+                }.padding(.all).background(backgroundColor, ignoresSafeAreaEdges: []).cornerRadius(8)
+
+                Spacer()
+                Button(action: {
+                    config.isMuted.toggle()
+                }, label: {
+                    Image(systemName: config.isMuted ? "speaker.slash.fill" : "speaker.wave.2.fill")
+                }).padding(.all).background(backgroundColor, ignoresSafeAreaEdges: []).cornerRadius(8)
+                Spacer().frame(width: 5)
             }
             Spacer()
             HStack(spacing: 8) {
                 Spacer(minLength: 5)
                 Button(action: {
-                    isPlay.toggle()
+                    config.isPlay.toggle()
                 }, label: {
-                    Image(systemName: isPlay ? "pause.fill" : "play.fill")
+                    Image(systemName: config.isPlay ? "pause.fill" : "play.fill")
                 }).frame(width: 15)
                 Text(currentTime.toString(for: .minOrHour)).font(Font.custom("SFProText-Regular", size: 11)).foregroundColor(.secondary)
-                ProgressView(value: currentTime, total: totalTime)
+                ProgressView(value: currentTime, total: totalTime).foregroundColor(.red)
                 Text("-" + (totalTime - currentTime).toString(for: .minOrHour)).font(Font.custom("SFProText-Regular", size: 11)).foregroundColor(.secondary)
                 Button(action: {}, label: {
                     Image(systemName: "ellipsis")
                 })
                 Spacer(minLength: 5)
             }.frame(height: 32).background(backgroundColor)
-                .cornerRadius(8).padding(EdgeInsets(top: 0, leading: 10, bottom: 0, trailing: 10))
+                .cornerRadius(8).padding(.horizontal)
         }.foregroundColor(.primary)
     }
 }
@@ -92,27 +103,29 @@ public struct KSVideoPlayer {
         var onStateChanged: ((KSPlayerState) -> Void)?
         var onBufferChanged: ((Int, TimeInterval) -> Void)?
     }
-
+    public struct Config {
+        var isPlay: Bool
+        var isMuted: Bool = false
+        var isPipActive = false
+        var isScaleAspectFill = false
+    }
     private let url: URL
     private let options: KSOptions
-    @Binding private var isPlay: Bool
-    @Binding private var time: CMTime
-    private var isMuted: Bool = false
+    private var config: Config
     fileprivate var handler: Handler = .init()
-    public init(url: URL, options: KSOptions, isPlay: Binding<Bool> = .constant(true), time: Binding<CMTime> = .constant(.zero)) {
+    public init(url: URL, options: KSOptions, config: Config) {
         self.url = url
         self.options = options
-        _isPlay = isPlay
-        _time = time
+        self.config = config
     }
 }
 
 @available(iOS 13, tvOS 13, macOS 10.15, *)
 extension KSVideoPlayer {
     /// Whether the video is muted, only for this instance.
-    func mute(_ value: Bool) -> Self {
+    func config(_ value: Config) -> Self {
         var view = self
-        view.isMuted = value
+        view.config = value
         return view
     }
 
@@ -188,9 +201,17 @@ extension KSVideoPlayer: UIViewRepresentable {
         return playerLayer
     }
 
-    private func updateView(_ view: KSPlayerLayer, context _: Context) {
-        isPlay ? view.play() : view.pause()
-        view.player?.isMuted = isMuted
+    private func updateView(_ view: KSPlayerLayer, context: Context) {
+        config.isPlay ? view.play() : view.pause()
+        view.player?.isMuted = config.isMuted
+        view.player?.contentMode = config.isScaleAspectFill ? .scaleAspectFill : .scaleAspectFit
+        if let pipController = view.player?.pipController, config.isPipActive != pipController.isPictureInPictureActive {
+            if pipController.isPictureInPictureActive {
+                pipController.stopPictureInPicture()
+            } else {
+                pipController.startPictureInPicture()
+            }
+        }
     }
 
     public final class Coordinator: KSPlayerLayerDelegate {
