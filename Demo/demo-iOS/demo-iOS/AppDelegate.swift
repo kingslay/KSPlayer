@@ -104,13 +104,13 @@ var objects: [KSPlayerResource] = {
     }
     if let url = URL(string: "https://devstreaming-cdn.apple.com/videos/wwdc/2019/244gmopitz5ezs2kkq/244/hls_vod_mvp.m3u8") {
         let options = KSOptions()
-        options.formatContextOptions["timeout"] = 0
+//        options.formatContextOptions["listen_timeout"] = 0
         objects.append(KSPlayerResource(url: url, options: options, name: "https视频"))
     }
 
-    if let url = URL(string: "rtsp://wowzaec2demo.streamlock.net/vod/mp4:BigBuckBunny_115k.mov") {
+    if let url = URL(string: "rtsp://rtsp.stream/pattern") {
         let options = KSOptions()
-        options.formatContextOptions["timeout"] = 0
+//        options.formatContextOptions["listen_timeout"] = 0
         objects.append(KSPlayerResource(url: url, options: options, name: "rtsp video"))
     }
 
