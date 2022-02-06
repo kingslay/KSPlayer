@@ -14,30 +14,31 @@ public struct KSVideoPlayerView: View {
     @State private var isMaskShow: Bool = true
     private let url: URL
     public let options: KSOptions
-    public let playerLayer = KSPlayerLayer()
     public init(url: URL, options: KSOptions) {
         self.url = url
         self.options = options
     }
 
     public var body: some View {
+        let player = KSVideoPlayer()
         ZStack {
-            KSVideoPlayer(playerLayer: playerLayer).onPlay { current, total in
+            player.onPlay { current, total in
                 currentTime = current
                 totalTime = total
             }.onAppear {
-                playerLayer.set(url: url, options: options)
+                player.playerLayer.set(url: url, options: options)
             }.onDisappear {
-                playerLayer.pause()
+                player.playerLayer.pause()
             }
-            VideoControllerView(config: VideoControllerView.Config(isPlay: options.isAutoPlay, playerLayer: playerLayer), currentTime: $currentTime, totalTime: _totalTime).opacity(isMaskShow ? 1 : 0)
-        }.onTapGesture {
+            VideoControllerView(config: VideoControllerView.Config(isPlay: options.isAutoPlay, playerLayer: player.playerLayer), currentTime: $currentTime, totalTime: _totalTime).opacity(isMaskShow ? 1 : 0)
+        }
+        #if !os(tvOS)
+        .onTapGesture {
             isMaskShow.toggle()
         }
+        #endif
     }
 }
-
-extension KSPlayerLayer {}
 
 @available(iOS 15, tvOS 15, macOS 12, *)
 struct VideoControllerView: View {
@@ -94,43 +95,43 @@ struct VideoControllerView: View {
             HStack {
                 Spacer().frame(width: 5)
                 HStack(spacing: 15) {
-                    Button(action: {}, label: {
+                    Button {} label: {
                         Image(systemName: "arrow.up.left.and.arrow.down.right")
-                    })
-                    Button(action: {
+                    }
+                    Button {
                         config.isPipActive.toggle()
-                    }, label: {
+                    } label: {
                         Image(systemName: config.isPipActive ? "pip.exit" : "pip.enter")
-                    })
-                    Button(action: {
+                    }
+                    Button {
                         config.isScaleAspectFill.toggle()
-                    }, label: {
+                    } label: {
                         Image(systemName: config.isScaleAspectFill ? "rectangle.arrowtriangle.2.inward" : "rectangle.arrowtriangle.2.outward")
-                    })
+                    }
                 }.padding(.all).background(backgroundColor, ignoresSafeAreaEdges: []).cornerRadius(8)
 
                 Spacer()
-                Button(action: {
+                Button {
                     config.isMuted.toggle()
-                }, label: {
+                } label: {
                     Image(systemName: config.isMuted ? "speaker.slash.fill" : "speaker.wave.2.fill")
-                }).padding(.all).background(backgroundColor, ignoresSafeAreaEdges: []).cornerRadius(8)
+                }.padding(.all).background(backgroundColor, ignoresSafeAreaEdges: []).cornerRadius(8)
                 Spacer().frame(width: 5)
             }
             Spacer()
             HStack(spacing: 8) {
                 Spacer(minLength: 5)
-                Button(action: {
+                Button {
                     config.isPlay.toggle()
-                }, label: {
+                } label: {
                     Image(systemName: config.isPlay ? "pause.fill" : "play.fill")
-                }).frame(width: 15)
+                }.frame(width: 15)
                 Text(currentTime.toString(for: .minOrHour)).font(Font.custom("SFProText-Regular", size: 11)).foregroundColor(.secondary)
                 ProgressView(value: currentTime, total: totalTime).foregroundColor(.red)
                 Text("-" + (totalTime - currentTime).toString(for: .minOrHour)).font(Font.custom("SFProText-Regular", size: 11)).foregroundColor(.secondary)
-                Button(action: {}, label: {
+                Button {} label: {
                     Image(systemName: "ellipsis")
-                })
+                }
                 Spacer(minLength: 5)
             }.frame(height: 32).background(backgroundColor)
                 .cornerRadius(8).padding(.horizontal)
@@ -147,11 +148,9 @@ public struct KSVideoPlayer {
         var onBufferChanged: ((Int, TimeInterval) -> Void)?
     }
 
-    public let playerLayer: KSPlayerLayer
+    public let playerLayer: KSPlayerLayer = .init()
     fileprivate var handler: Handler = .init()
-    public init(playerLayer: KSPlayerLayer) {
-        self.playerLayer = playerLayer
-    }
+    public init() {}
 }
 
 @available(iOS 13, tvOS 13, macOS 10.15, *)

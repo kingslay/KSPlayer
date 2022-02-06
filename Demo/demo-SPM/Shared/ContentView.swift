@@ -10,38 +10,38 @@ import KSPlayer
 import SwiftUI
 
 struct ContentView: View {
+    @State var showAddActionSheet = false
     @State private var resources = [KSPlayerResource]()
+    @State private var playURL: String = ""
+    @State private var playList: String = ""
+
     var body: some View {
         NavigationView {
             MasterView(resources: $resources)
-                .navigationBarTitle("m3u8")
+                .navigationTitle("m3u8")
+            #if !os(macOS)
                 .navigationBarItems(trailing: Button(action: {
-                    let alert = UIAlertController(title: "Input URL", message: nil, preferredStyle: .alert)
-                    alert.addTextField { textField in
-                        textField.placeholder = "play url"
-                    }
-                    alert.addTextField { textField in
-                        textField.placeholder = "play list"
-                    }
-                    alert.addAction(UIAlertAction(title: "Done", style: .default) { _ in
-                        if let text = alert.textFields?[0].text, let url = URL(string: text.trimmingCharacters(in: .whitespacesAndNewlines)) {
-                            let options = KSOptions()
-                            if url.absoluteString.hasPrefix("rtmp") || url.absoluteString.hasPrefix("rtsp") {
-                                options.formatContextOptions["timeout"] = 0
-                            }
-                            self.resources.insert(KSPlayerResource(url: url, options: options, name: "new add"), at: 0)
-                        } else if let list = alert.textFields?[1].text {
-                            self.updatem3u8(list.trimmingCharacters(in: .whitespacesAndNewlines))
-                        }
-                    })
-                    UIApplication.shared.windows.first?.rootViewController?.present(alert, animated: true, completion: nil)
+                    showAddActionSheet = true
                 }) {
                     Image(systemName: "plus")
                 })
+            #endif
         }.onAppear {
             self.loadCachem3u8()
             if self.resources.count == 0 {
                 self.updatem3u8("https://iptv-org.github.io/iptv/countries/cn.m3u")
+            }
+        }.sheet(isPresented: $showAddActionSheet) {} content: {
+            Text("Input URL")
+            TextField("play url", text: $playURL)
+            TextField("play list", text: $playList)
+            Button("Done") {
+                if let url = URL(string: playURL.trimmingCharacters(in: NSMutableCharacterSet.whitespacesAndNewlines)) {
+                    self.resources.insert(KSPlayerResource(url: url, options: KSOptions(), name: "new add"), at: 0)
+                } else if !playList.isEmpty {
+                    self.updatem3u8(playList.trimmingCharacters(in: NSMutableCharacterSet.whitespacesAndNewlines))
+                }
+                showAddActionSheet = false
             }
         }
     }
