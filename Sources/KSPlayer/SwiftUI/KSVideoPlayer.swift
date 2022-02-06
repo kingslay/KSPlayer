@@ -12,36 +12,79 @@ public struct KSVideoPlayerView: View {
     @State private var currentTime = TimeInterval(0)
     @State private var totalTime = TimeInterval(1)
     @State private var isMaskShow: Bool = true
-    @State private var config: KSVideoPlayer.Config
     private let url: URL
-    private let options: KSOptions
+    public let options: KSOptions
+    public let playerLayer = KSPlayerLayer()
     public init(url: URL, options: KSOptions) {
         self.url = url
         self.options = options
-        _config = .init(initialValue: KSVideoPlayer.Config(isPlay: options.isAutoPlay))
     }
 
     public var body: some View {
         ZStack {
-            KSVideoPlayer(url: url, options: options, config: config).onPlay { current, total in
+            KSVideoPlayer(playerLayer: playerLayer).onPlay { current, total in
                 currentTime = current
                 totalTime = total
+            }.onAppear {
+                playerLayer.set(url: url, options: options)
+            }.onDisappear {
+                playerLayer.pause()
             }
-            VideoControllerView(config: $config, currentTime: $currentTime, totalTime: _totalTime).opacity(isMaskShow ? 1 : 0)
+            VideoControllerView(config: VideoControllerView.Config(isPlay: options.isAutoPlay, playerLayer: playerLayer), currentTime: $currentTime, totalTime: _totalTime).opacity(isMaskShow ? 1 : 0)
         }.onTapGesture {
             isMaskShow.toggle()
         }
     }
 }
 
+extension KSPlayerLayer {}
+
 @available(iOS 15, tvOS 15, macOS 12, *)
-public struct VideoControllerView: View {
-    @Binding private var config: KSVideoPlayer.Config
+struct VideoControllerView: View {
+    public struct Config {
+        private let playerLayer: KSPlayerLayer
+        init(isPlay: Bool, playerLayer: KSPlayerLayer) {
+            self.isPlay = isPlay
+            self.playerLayer = playerLayer
+        }
+
+        var isPlay: Bool {
+            didSet {
+                isPlay ? playerLayer.play() : playerLayer.pause()
+            }
+        }
+
+        var isMuted: Bool = false {
+            didSet {
+                playerLayer.player?.isMuted = isMuted
+            }
+        }
+
+        var isPipActive = false {
+            didSet {
+                if let pipController = playerLayer.player?.pipController, isPipActive != pipController.isPictureInPictureActive {
+                    if pipController.isPictureInPictureActive {
+                        pipController.stopPictureInPicture()
+                    } else {
+                        pipController.startPictureInPicture()
+                    }
+                }
+            }
+        }
+
+        var isScaleAspectFill = false {
+            didSet {
+                playerLayer.player?.contentMode = isScaleAspectFill ? .scaleAspectFill : .scaleAspectFit
+            }
+        }
+    }
+
+    @State private var config: Config
     @Binding private var currentTime: TimeInterval
     @State private var totalTime: TimeInterval
     private let backgroundColor = Color(red: 0.145, green: 0.145, blue: 0.145).opacity(0.6)
-    public init(config: Binding<KSVideoPlayer.Config>, currentTime: Binding<TimeInterval>, totalTime: State<TimeInterval>) {
-        _config = config
+    init(config: Config, currentTime: Binding<TimeInterval>, totalTime: State<TimeInterval>) {
+        self.config = config
         _currentTime = currentTime
         _totalTime = totalTime
     }
@@ -103,32 +146,16 @@ public struct KSVideoPlayer {
         var onStateChanged: ((KSPlayerState) -> Void)?
         var onBufferChanged: ((Int, TimeInterval) -> Void)?
     }
-    public struct Config {
-        var isPlay: Bool
-        var isMuted: Bool = false
-        var isPipActive = false
-        var isScaleAspectFill = false
-    }
-    private let url: URL
-    private let options: KSOptions
-    private var config: Config
+
+    public let playerLayer: KSPlayerLayer
     fileprivate var handler: Handler = .init()
-    public init(url: URL, options: KSOptions, config: Config) {
-        self.url = url
-        self.options = options
-        self.config = config
+    public init(playerLayer: KSPlayerLayer) {
+        self.playerLayer = playerLayer
     }
 }
 
 @available(iOS 13, tvOS 13, macOS 10.15, *)
 extension KSVideoPlayer {
-    /// Whether the video is muted, only for this instance.
-    func config(_ value: Config) -> Self {
-        var view = self
-        view.config = value
-        return view
-    }
-
     func onBufferChanged(_ handler: @escaping (Int, TimeInterval) -> Void) -> Self {
         var view = self
         view.handler.onBufferChanged = handler
@@ -176,9 +203,6 @@ extension KSVideoPlayer: UIViewRepresentable {
         updateView(uiView, context: context)
     }
 
-    public static func dismantleUIView(_ uiView: UIViewType, coordinator _: Coordinator) {
-        uiView.pause()
-    }
     #else
     public typealias NSViewType = KSPlayerLayer
     public func makeNSView(context: Context) -> NSViewType {
@@ -188,31 +212,13 @@ extension KSVideoPlayer: UIViewRepresentable {
     public func updateNSView(_ uiView: NSViewType, context: Context) {
         updateView(uiView, context: context)
     }
-
-    public static func dismantleNSView(_ uiView: NSViewType, coordinator _: Coordinator) {
-        uiView.pause()
-    }
     #endif
-
     private func makeView(context: Context) -> KSPlayerLayer {
-        let playerLayer = KSPlayerLayer()
-        playerLayer.set(url: url, options: options)
         playerLayer.delegate = context.coordinator
         return playerLayer
     }
 
-    private func updateView(_ view: KSPlayerLayer, context: Context) {
-        config.isPlay ? view.play() : view.pause()
-        view.player?.isMuted = config.isMuted
-        view.player?.contentMode = config.isScaleAspectFill ? .scaleAspectFill : .scaleAspectFit
-        if let pipController = view.player?.pipController, config.isPipActive != pipController.isPictureInPictureActive {
-            if pipController.isPictureInPictureActive {
-                pipController.stopPictureInPicture()
-            } else {
-                pipController.startPictureInPicture()
-            }
-        }
-    }
+    private func updateView(_: KSPlayerLayer, context _: Context) {}
 
     public final class Coordinator: KSPlayerLayerDelegate {
         private let videoPlayer: KSVideoPlayer
