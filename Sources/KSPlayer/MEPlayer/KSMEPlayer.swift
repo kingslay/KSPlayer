@@ -279,7 +279,6 @@ extension KSMEPlayer: MediaPlayerProtocol {
         guard time >= 0 else {
             return
         }
-        let oldPlaybackState = playbackState
         playbackState = .seeking
         runInMainqueue { [weak self] in
             self?.bufferingProgress = 0
@@ -290,11 +289,8 @@ extension KSMEPlayer: MediaPlayerProtocol {
         } else {
             seekTime = time
         }
-        playerItem.seek(time: seekTime) { [weak self] result in
-            guard let self = self else { return }
-            runInMainqueue { [weak self] in
-                guard let self = self else { return }
-                self.playbackState = oldPlaybackState
+        playerItem.seek(time: seekTime) { result in
+            runInMainqueue {
                 handler?(result)
             }
         }

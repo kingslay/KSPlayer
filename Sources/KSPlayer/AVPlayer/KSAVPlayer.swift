@@ -358,7 +358,6 @@ extension KSAVPlayer: MediaPlayerProtocol {
     public func seek(time: TimeInterval, completion handler: ((Bool) -> Void)? = nil) {
         guard time >= 0 else { return }
         shouldSeekTo = time
-        let oldPlaybackState = playbackState
         playbackState = .seeking
         runInMainqueue { [weak self] in
             self?.bufferingProgress = 0
@@ -366,7 +365,6 @@ extension KSAVPlayer: MediaPlayerProtocol {
         let tolerance: CMTime = options.isAccurateSeek ? .zero : .positiveInfinity
         player.seek(to: CMTime(seconds: time, preferredTimescale: Int32(NSEC_PER_SEC)), toleranceBefore: tolerance, toleranceAfter: tolerance) { [weak self] finished in
             guard let self = self else { return }
-            self.playbackState = oldPlaybackState
             self.shouldSeekTo = 0
             handler?(finished)
         }

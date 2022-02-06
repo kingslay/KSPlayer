@@ -92,10 +92,12 @@ open class KSPlayerLayer: UIView {
                         play()
                     }
                 } else {
+                    resetPlayer()
                     player.replace(url: url, options: options)
                     prepareToPlay()
                 }
             } else {
+                resetPlayer()
                 player = firstPlayerType.init(url: url, options: options)
             }
         }
@@ -178,18 +180,12 @@ open class KSPlayerLayer: UIView {
     }
 
     public func set(url: URL, options: KSOptions) {
-        if state != .notSetURL {
-            resetPlayer()
-        }
         isAutoPlay = options.isAutoPlay
         self.options = options
         self.url = url
     }
 
     public func set(urls: [URL], options: KSOptions) {
-        if state != .notSetURL {
-            resetPlayer()
-        }
         isAutoPlay = options.isAutoPlay
         self.options = options
         self.urls.removeAll()
@@ -201,9 +197,17 @@ open class KSPlayerLayer: UIView {
         UIApplication.shared.isIdleTimerDisabled = true
         isAutoPlay = true
         if let player = player {
-            if player.isPreparedToPlay {
-                player.play()
-                timer.fireDate = Date.distantPast
+           if player.isPreparedToPlay {
+               if state == .playedToTheEnd {
+                   player.seek(time: 0) { finished in
+                       if finished {
+                           player.play()
+                       }
+                   }
+               } else {
+                   player.play()
+               }
+               timer.fireDate = Date.distantPast
             } else {
                 if state == .error {
                     player.prepareToPlay()

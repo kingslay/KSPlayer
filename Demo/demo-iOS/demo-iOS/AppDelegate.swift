@@ -22,7 +22,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UISplitViewControllerDele
         KSOptions.isAutoPlay = true
         KSOptions.isSecondOpen = true
         KSOptions.isAccurateSeek = true
-        KSOptions.isLoopPlay = true
+//        KSOptions.isLoopPlay = true
         KSOptions.hardwareDecodeH265 = true
         KSOptions.hardwareDecodeH264 = true
         if UIDevice.current.userInterfaceIdiom == .phone {
@@ -104,13 +104,11 @@ var objects: [KSPlayerResource] = {
     }
     if let url = URL(string: "https://devstreaming-cdn.apple.com/videos/wwdc/2019/244gmopitz5ezs2kkq/244/hls_vod_mvp.m3u8") {
         let options = KSOptions()
-//        options.formatContextOptions["listen_timeout"] = 0
         objects.append(KSPlayerResource(url: url, options: options, name: "https视频"))
     }
 
     if let url = URL(string: "rtsp://rtsp.stream/pattern") {
         let options = KSOptions()
-//        options.formatContextOptions["listen_timeout"] = 0
         objects.append(KSPlayerResource(url: url, options: options, name: "rtsp video"))
     }
 
