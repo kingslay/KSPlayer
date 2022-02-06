@@ -87,8 +87,14 @@ open class KSPlayerLayer: UIView {
                 firstPlayerType = KSPlayerManager.firstPlayerType
             }
             if let player = player, type(of: player) == firstPlayerType {
-                player.replace(url: url, options: options)
-                prepareToPlay()
+                if url == oldValue {
+                    if options.isAutoPlay {
+                        play()
+                    }
+                } else {
+                    player.replace(url: url, options: options)
+                    prepareToPlay()
+                }
             } else {
                 player = firstPlayerType.init(url: url, options: options)
             }
@@ -172,12 +178,18 @@ open class KSPlayerLayer: UIView {
     }
 
     public func set(url: URL, options: KSOptions) {
+        if state != .notSetURL {
+            resetPlayer()
+        }
         isAutoPlay = options.isAutoPlay
         self.options = options
         self.url = url
     }
 
     public func set(urls: [URL], options: KSOptions) {
+        if state != .notSetURL {
+            resetPlayer()
+        }
         isAutoPlay = options.isAutoPlay
         self.options = options
         self.urls.removeAll()
@@ -247,7 +259,7 @@ open class KSPlayerLayer: UIView {
 // MARK: - MediaPlayerDelegate
 
 extension KSPlayerLayer: MediaPlayerDelegate {
-    public func preparedToPlay(player: MediaPlayerProtocol) {
+    public func preparedToPlay(player _: MediaPlayerProtocol) {
         updateNowPlayingInfo()
         state = .readyToPlay
         if isAutoPlay {
@@ -304,8 +316,8 @@ extension KSPlayerLayer: MediaPlayerDelegate {
 
     public func finish(player: MediaPlayerProtocol, error: Error?) {
         if let error = error {
-            if type(of: player) != KSPlayerManager.secondPlayerType, let secondPlayerType = KSPlayerManager.secondPlayerType {
-                self.player = secondPlayerType.init(url: url!, options: options!)
+            if type(of: player) != KSPlayerManager.secondPlayerType, let secondPlayerType = KSPlayerManager.secondPlayerType, let url = url, let options = options {
+                self.player = secondPlayerType.init(url: url, options: options)
                 return
             }
             state = .error
