@@ -197,17 +197,17 @@ open class KSPlayerLayer: UIView {
         UIApplication.shared.isIdleTimerDisabled = true
         isAutoPlay = true
         if let player = player {
-           if player.isPreparedToPlay {
-               if state == .playedToTheEnd {
-                   player.seek(time: 0) { finished in
-                       if finished {
-                           player.play()
-                       }
-                   }
-               } else {
-                   player.play()
-               }
-               timer.fireDate = Date.distantPast
+            if player.isPreparedToPlay {
+                if state == .playedToTheEnd {
+                    player.seek(time: 0) { finished in
+                        if finished {
+                            player.play()
+                        }
+                    }
+                } else {
+                    player.play()
+                }
+                timer.fireDate = Date.distantPast
             } else {
                 if state == .error {
                     player.prepareToPlay()
