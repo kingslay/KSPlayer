@@ -131,13 +131,6 @@ open class KSPlayerLayer: UIView {
                     player.playbackVolume = oldValue.playbackVolume
                 }
                 addSubview(player.view)
-                player.view.translatesAutoresizingMaskIntoConstraints = false
-                NSLayoutConstraint.activate([
-                    player.view.leftAnchor.constraint(equalTo: leftAnchor),
-                    player.view.topAnchor.constraint(equalTo: topAnchor),
-                    player.view.centerXAnchor.constraint(equalTo: centerXAnchor),
-                    player.view.centerYAnchor.constraint(equalTo: centerYAnchor),
-                ])
                 prepareToPlay()
             }
         }
@@ -256,6 +249,19 @@ open class KSPlayerLayer: UIView {
         } else {
             isAutoPlay = autoPlay
             shouldSeekTo = time
+        }
+    }
+
+    override open func didAddSubview(_ subview: UIView) {
+        super.didAddSubview(subview)
+        if subview == player?.view {
+            subview.translatesAutoresizingMaskIntoConstraints = false
+            NSLayoutConstraint.activate([
+                subview.leftAnchor.constraint(equalTo: leftAnchor),
+                subview.topAnchor.constraint(equalTo: topAnchor),
+                subview.centerXAnchor.constraint(equalTo: centerXAnchor),
+                subview.centerYAnchor.constraint(equalTo: centerYAnchor),
+            ])
         }
     }
 }

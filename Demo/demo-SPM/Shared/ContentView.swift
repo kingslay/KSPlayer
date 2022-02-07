@@ -28,11 +28,11 @@ struct ContentView: View {
             .searchable(text: $searchText)
             .navigationTitle("m3u8")
             #if !os(macOS)
-            .navigationBarItems(trailing: Button {
-                showAddActionSheet = true
-            } label: {
-                Image(systemName: "plus")
-            })
+                .navigationBarItems(trailing: Button {
+                    showAddActionSheet = true
+                } label: {
+                    Image(systemName: "plus")
+                })
             #endif
         }.onAppear {
             self.loadCachem3u8()
