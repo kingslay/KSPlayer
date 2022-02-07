@@ -12,19 +12,27 @@ import SwiftUI
 struct ContentView: View {
     @State var showAddActionSheet = false
     @State private var resources = [KSPlayerResource]()
+    @State private var searchText = ""
     @State private var playURL: String = ""
     @State private var playList: String = ""
 
     var body: some View {
         NavigationView {
-            MasterView(resources: $resources)
-                .navigationTitle("m3u8")
+            List {
+                ForEach(resources.filter { searchText.count == 0 || $0.name.contains(searchText) }, id: \.self) { resource in
+                    NavigationLink(resource.name, destination: KSVideoPlayerView(resource: resource))
+                }.onDelete { indices in
+                    indices.forEach { self.resources.remove(at: $0) }
+                }
+            }
+            .searchable(text: $searchText)
+            .navigationTitle("m3u8")
             #if !os(macOS)
-                .navigationBarItems(trailing: Button(action: {
-                    showAddActionSheet = true
-                }) {
-                    Image(systemName: "plus")
-                })
+            .navigationBarItems(trailing: Button {
+                showAddActionSheet = true
+            } label: {
+                Image(systemName: "plus")
+            })
             #endif
         }.onAppear {
             self.loadCachem3u8()
@@ -103,23 +111,6 @@ struct ContentView: View {
         do {
             try data.write(to: path)
         } catch {}
-    }
-}
-
-struct MasterView: View {
-    @Binding var resources: [KSPlayerResource]
-    @State private var searchText = ""
-    var body: some View {
-        VStack {
-            TextField("Search", text: $searchText)
-            List {
-                ForEach(resources.filter { $0.name.contains(searchText) || searchText.count == 0 }, id: \.self) { resource in
-                    NavigationLink(resource.name, destination: KSVideoPlayerView(resource: resource))
-                }.onDelete { indices in
-                    indices.forEach { self.resources.remove(at: $0) }
-                }
-            }
-        }
     }
 }
 
