@@ -25,12 +25,14 @@ public struct KSVideoPlayerView: View {
             player.onPlay { current, total in
                 currentTime = current
                 totalTime = total
-            }.onAppear {
+            }
+            .onAppear {
                 player.playerLayer.set(url: url, options: options)
-            }.onDisappear {
+            }
+            .onDisappear {
                 player.playerLayer.pause()
             }
-            VideoControllerView(config: VideoControllerView.Config(isPlay: options.isAutoPlay, playerLayer: player.playerLayer), currentTime: $currentTime, totalTime: _totalTime).opacity(isMaskShow ? 1 : 0)
+            VideoControllerView(config: VideoControllerView.Config(isPlay: options.isAutoPlay, playerLayer: player.playerLayer), currentTime: $currentTime, totalTime: $totalTime).opacity(isMaskShow ? 1 : 0)
         }
         #if !os(tvOS)
         .onTapGesture {
@@ -82,9 +84,9 @@ struct VideoControllerView: View {
 
     @State private var config: Config
     @Binding private var currentTime: TimeInterval
-    @State private var totalTime: TimeInterval
+    @Binding private var totalTime: TimeInterval
     private let backgroundColor = Color(red: 0.145, green: 0.145, blue: 0.145).opacity(0.6)
-    init(config: Config, currentTime: Binding<TimeInterval>, totalTime: State<TimeInterval>) {
+    init(config: Config, currentTime: Binding<TimeInterval>, totalTime: Binding<TimeInterval>) {
         self.config = config
         _currentTime = currentTime
         _totalTime = totalTime
