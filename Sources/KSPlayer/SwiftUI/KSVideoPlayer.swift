@@ -21,13 +21,11 @@ public struct KSVideoPlayerView: View {
 
     public var body: some View {
         let player = KSVideoPlayer()
-        ZStack {
+        player.playerLayer.set(url: url, options: options)
+        return ZStack {
             player.onPlay { current, total in
                 currentTime = current
                 totalTime = total
-            }
-            .onAppear {
-                player.playerLayer.set(url: url, options: options)
             }
             .onDisappear {
                 player.playerLayer.pause()
