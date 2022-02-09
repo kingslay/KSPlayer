@@ -32,6 +32,9 @@ public struct KSVideoPlayerView: View {
             }
             VideoControllerView(config: VideoControllerView.Config(isPlay: options.isAutoPlay, playerLayer: player.playerLayer), currentTime: $currentTime, totalTime: $totalTime).opacity(isMaskShow ? 1 : 0)
         }
+        #if os(iOS)
+        .navigationBarTitleDisplayMode(.inline)
+        #endif
         #if !os(tvOS)
         .onTapGesture {
             isMaskShow.toggle()
@@ -93,49 +96,42 @@ struct VideoControllerView: View {
     public var body: some View {
         VStack {
             HStack {
-                Spacer().frame(width: 5)
-                HStack(spacing: 15) {
+                HStack(spacing: 8) {
                     Button {} label: {
                         Image(systemName: "arrow.up.left.and.arrow.down.right")
                     }
-                    Button {
-                        config.isPipActive.toggle()
-                    } label: {
+                    Toggle(isOn: $config.isPipActive) {
                         Image(systemName: config.isPipActive ? "pip.exit" : "pip.enter")
-                    }
-                    Button {
-                        config.isScaleAspectFill.toggle()
-                    } label: {
+                    }.toggleStyle(.button)
+                    Toggle(isOn: $config.isScaleAspectFill) {
                         Image(systemName: config.isScaleAspectFill ? "rectangle.arrowtriangle.2.inward" : "rectangle.arrowtriangle.2.outward")
-                    }
-                }.padding(.all).background(backgroundColor, ignoresSafeAreaEdges: []).cornerRadius(8)
-
+                    }.toggleStyle(.button)
+                }.padding(.horizontal)
+                    .background(backgroundColor, ignoresSafeAreaEdges: []).cornerRadius(8)
                 Spacer()
-                Button {
-                    config.isMuted.toggle()
-                } label: {
+                Toggle(isOn: $config.isMuted) {
                     Image(systemName: config.isMuted ? "speaker.slash.fill" : "speaker.wave.2.fill")
-                }.padding(.all).background(backgroundColor, ignoresSafeAreaEdges: []).cornerRadius(8)
-                Spacer().frame(width: 5)
+                }
+                .toggleStyle(.button)
+                .frame(width: 48)
+                .background(backgroundColor, ignoresSafeAreaEdges: []).cornerRadius(8)
             }
             Spacer()
             HStack(spacing: 8) {
-                Spacer(minLength: 5)
-                Button {
-                    config.isPlay.toggle()
-                } label: {
+                Toggle(isOn: $config.isPlay) {
                     Image(systemName: config.isPlay ? "pause.fill" : "play.fill")
-                }.frame(width: 15)
-                Text(currentTime.toString(for: .minOrHour)).font(Font.custom("SFProText-Regular", size: 11)).foregroundColor(.secondary)
-                ProgressView(value: currentTime, total: totalTime).foregroundColor(.red)
-                Text("-" + (totalTime - currentTime).toString(for: .minOrHour)).font(Font.custom("SFProText-Regular", size: 11)).foregroundColor(.secondary)
+                }
+                .toggleStyle(.button).frame(width: 32, height: 32)
+                Text(currentTime.toString(for: .minOrHour)).font(Font.custom("SFProText-Regular", size: 11)).foregroundColor(.secondary.opacity(0.6))
+                ProgressView(value: currentTime, total: totalTime).tint(.secondary.opacity(0.32))
+                Text("-" + (totalTime - currentTime).toString(for: .minOrHour)).font(Font.custom("SFProText-Regular", size: 11)).foregroundColor(.secondary.opacity(0.6))
                 Button {} label: {
                     Image(systemName: "ellipsis")
                 }
-                Spacer(minLength: 5)
-            }.frame(height: 32).background(backgroundColor)
-                .cornerRadius(8).padding(.horizontal)
-        }.foregroundColor(.primary)
+            }
+            .background(backgroundColor)
+            .cornerRadius(8)
+        }.padding(.horizontal).tint(.clear).foregroundColor(.primary)
     }
 }
 
