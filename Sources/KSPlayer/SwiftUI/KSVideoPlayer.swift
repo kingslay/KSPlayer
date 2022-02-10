@@ -100,30 +100,43 @@ struct VideoControllerView: View {
                     Button {} label: {
                         Image(systemName: "arrow.up.left.and.arrow.down.right")
                     }
-                    Toggle(isOn: $config.isPipActive) {
+                    Button {
+                        config.isPipActive.toggle()
+                    } label: {
                         Image(systemName: config.isPipActive ? "pip.exit" : "pip.enter")
-                    }.toggleStyle(.button)
-                    Toggle(isOn: $config.isScaleAspectFill) {
+                    }
+                    Button {
+                        config.isScaleAspectFill.toggle()
+                    } label: {
                         Image(systemName: config.isScaleAspectFill ? "rectangle.arrowtriangle.2.inward" : "rectangle.arrowtriangle.2.outward")
-                    }.toggleStyle(.button)
+                    }
                 }.padding(.horizontal)
                     .background(backgroundColor, ignoresSafeAreaEdges: []).cornerRadius(8)
                 Spacer()
-                Toggle(isOn: $config.isMuted) {
+                Button {
+                    config.isMuted.toggle()
+                } label: {
                     Image(systemName: config.isMuted ? "speaker.slash.fill" : "speaker.wave.2.fill")
                 }
-                .toggleStyle(.button)
-                .frame(width: 48)
                 .background(backgroundColor, ignoresSafeAreaEdges: []).cornerRadius(8)
             }
             Spacer()
             HStack(spacing: 8) {
-                Toggle(isOn: $config.isPlay) {
+                Button {
+                    config.isPlay.toggle()
+                } label: {
                     Image(systemName: config.isPlay ? "pause.fill" : "play.fill")
-                }
-                .toggleStyle(.button).frame(width: 32, height: 32)
+                }.frame(width: 32, height: 32)
                 Text(currentTime.toString(for: .minOrHour)).font(Font.custom("SFProText-Regular", size: 11)).foregroundColor(.secondary.opacity(0.6))
+                #if os(tvOS)
                 ProgressView(value: currentTime, total: totalTime).tint(.secondary.opacity(0.32))
+                #else
+                Slider(value: $currentTime, in: 0 ... totalTime) {
+                    if $0 {
+                        config.playerLayer.seek(time: $0, autoPlay: true)
+                    }
+                }.tint(.secondary.opacity(0.32))
+                #endif
                 Text("-" + (totalTime - currentTime).toString(for: .minOrHour)).font(Font.custom("SFProText-Regular", size: 11)).foregroundColor(.secondary.opacity(0.6))
                 Button {} label: {
                     Image(systemName: "ellipsis")
