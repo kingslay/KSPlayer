@@ -132,9 +132,9 @@ struct VideoControllerView: View {
                 ProgressView(value: currentTime, total: totalTime).tint(.secondary.opacity(0.32))
                 #else
                 Slider(value: $currentTime, in: 0 ... totalTime) {
-                    if $0 {
-                        config.playerLayer.seek(time: $0, autoPlay: true)
-                    }
+//                    if $0 {
+//                        config.playerLayer.seek(time: currentTime, autoPlay: true)
+//                    }
                 }.tint(.secondary.opacity(0.32))
                 #endif
                 Text("-" + (totalTime - currentTime).toString(for: .minOrHour)).font(Font.custom("SFProText-Regular", size: 11)).foregroundColor(.secondary.opacity(0.6))
