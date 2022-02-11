@@ -333,7 +333,7 @@ extension AVColorTransferCharacteristic {
         case AVCOL_TRC_SMPTE240M:
             return kCVImageBufferTransferFunction_SMPTE_240M_1995
         case AVCOL_TRC_LINEAR:
-            if #available(iOS 12.0, tvOS 12.0, OSX 10.14, *) {
+            if #available(iOS 12.0, tvOS 12.0, macOS 10.14, *) {
                 return kCVImageBufferTransferFunction_Linear
             } else {
                 return nil

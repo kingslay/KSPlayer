@@ -532,11 +532,13 @@ enum ArchType: String, CaseIterable {
         guard let architecture = Bundle.main.executableArchitectures?.first?.intValue else {
             return false
         }
-        if #available(OSX 11.0, *) {
+        #if os(macOS)
+        if #available(iOS 14.0, tvOS 14.0, macOS 11.0, *) {
             if architecture == NSBundleExecutableArchitectureARM64, self == .arm64 {
                 return true
             }
         }
+        #endif
         if architecture == NSBundleExecutableArchitectureX86_64, self == .x86_64 {
             return true
         }
@@ -547,6 +549,7 @@ enum ArchType: String, CaseIterable {
 enum Utility {
     @discardableResult
     static func shell(_ command: String, isOutput: Bool = false, currentDirectoryURL: URL? = nil, environment: [String: String] = [:]) -> String? {
+        #if os(macOS)
         let task = Process()
         var environment = environment
         environment["PATH"] = "/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
@@ -571,6 +574,9 @@ enum Utility {
         } else {
             return nil
         }
+        #else
+        return nil
+        #endif
     }
 
 //    @discardableResult
