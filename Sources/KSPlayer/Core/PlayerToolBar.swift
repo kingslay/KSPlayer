@@ -154,9 +154,9 @@ public class PlayerToolBar: UIStackView {
 extension KSPlayerManager {
     static func image(named: String) -> UIImage? {
         #if canImport(UIKit)
-        return UIImage(named: named, in: KSPlayerManager.bundle, compatibleWith: nil)
+        return UIImage(named: named, in: .module, compatibleWith: nil)
         #else
-        return KSPlayerManager.bundle.image(forResource: named)
+        return Bundle.module.image(forResource: named)
         #endif
     }
 }

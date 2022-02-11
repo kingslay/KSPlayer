@@ -20,7 +20,7 @@ class MetalRender {
         var library: MTLLibrary!
         library = device.makeDefaultLibrary()
         if library == nil {
-            library = try? device.makeDefaultLibrary(bundle: KSPlayerManager.bundle)
+            library = try? device.makeDefaultLibrary(bundle: .module)
         }
         return library
     }()

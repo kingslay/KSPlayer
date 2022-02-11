@@ -520,5 +520,10 @@ public extension TimeInterval {
 public extension KSPlayerManager {
     static var firstPlayerType: MediaPlayerProtocol.Type = KSAVPlayer.self
     static var secondPlayerType: MediaPlayerProtocol.Type?
-    internal static let bundle = Bundle(for: KSPlayerLayer.self).path(forResource: "KSPlayer_KSPlayer", ofType: "bundle").map { Bundle(path: $0) ?? Bundle.main } ?? Bundle.main
 }
+
+#if !SWIFT_PACKAGE
+extension Bundle {
+    static let module = Bundle(for: KSPlayerLayer.self).path(forResource: "KSPlayer_KSPlayer", ofType: "bundle").flatMap { Bundle(path: $0) } ?? Bundle.main
+}
+#endif
