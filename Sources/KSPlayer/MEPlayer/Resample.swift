@@ -201,8 +201,8 @@ class PixelBuffer: BufferProtocol {
         ObjectPool.share.comeback(item: dataWrap, key: "VideoData")
     }
 
-    func textures(frome cache: MetalTextureCache) -> [MTLTexture] {
-        cache.textures(formats: formats, widths: widths, heights: heights, buffers: dataWrap.data, lineSizes: lineSize)
+    func textures() -> [MTLTexture] {
+        MetalRender.textures(formats: formats, widths: widths, heights: heights, buffers: dataWrap.data, lineSizes: lineSize)
     }
 
     func widthOfPlane(at planeIndex: Int) -> Int {
