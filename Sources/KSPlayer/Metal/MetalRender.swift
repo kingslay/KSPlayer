@@ -25,7 +25,6 @@ class MetalRender {
         return library
     }()
 
-    private let textureCache = MetalTextureCache()
     private let renderPassDescriptor = MTLRenderPassDescriptor()
     private let commandQueue = MetalRender.device.makeCommandQueue()
     private lazy var samplerState: MTLSamplerState? = {
@@ -76,7 +75,7 @@ class MetalRender {
     }
 
     func draw(pixelBuffer: BufferProtocol, display: DisplayEnum = .plane, drawable: CAMetalDrawable) {
-        let inputTextures = pixelBuffer.textures(frome: textureCache)
+        let inputTextures = pixelBuffer.textures()
         renderPassDescriptor.colorAttachments[0].texture = drawable.texture
         guard inputTextures.count > 0, let commandBuffer = commandQueue?.makeCommandBuffer(), let encoder = commandBuffer.makeRenderCommandEncoder(descriptor: renderPassDescriptor) else {
             return
@@ -134,6 +133,41 @@ class MetalRender {
         // swiftlint:disable force_try
         return try! library.device.makeRenderPipelineState(descriptor: descriptor)
         // swftlint:enable force_try
+    }
+
+    static func texture(pixelBuffer: CVPixelBuffer) -> [MTLTexture] {
+        guard let iosurface = CVPixelBufferGetIOSurface(pixelBuffer)?.takeUnretainedValue() else {
+            return []
+        }
+        let formats: [MTLPixelFormat]
+        if pixelBuffer.planeCount == 3 {
+            formats = [.r8Unorm, .r8Unorm, .r8Unorm]
+        } else if pixelBuffer.planeCount == 2 {
+            if pixelBuffer.bitDepth > 8 {
+                formats = [.r16Unorm, .rg16Unorm]
+            } else {
+                formats = [.r8Unorm, .rg8Unorm]
+            }
+        } else {
+            formats = [.bgra8Unorm]
+        }
+        return (0 ..< pixelBuffer.planeCount).compactMap { index in
+            let width = pixelBuffer.widthOfPlane(at: index)
+            let height = pixelBuffer.heightOfPlane(at: index)
+            let descriptor = MTLTextureDescriptor.texture2DDescriptor(pixelFormat: formats[index], width: width, height: height, mipmapped: false)
+            return device.makeTexture(descriptor: descriptor, iosurface: iosurface, plane: index)
+        }
+    }
+
+    static func textures(formats: [MTLPixelFormat], widths: [Int], heights: [Int], buffers: [MTLBuffer?], lineSizes: [Int]) -> [MTLTexture] {
+        (0 ..< formats.count).compactMap { i in
+            guard let buffer = buffers[i] else {
+                return nil
+            }
+            let descriptor = MTLTextureDescriptor.texture2DDescriptor(pixelFormat: formats[i], width: widths[i], height: heights[i], mipmapped: false)
+            descriptor.storageMode = buffer.storageMode
+            return buffer.makeTexture(descriptor: descriptor, offset: 0, bytesPerRow: lineSizes[i])
+        }
     }
 }
 

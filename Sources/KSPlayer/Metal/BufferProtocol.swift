@@ -26,7 +26,7 @@ public protocol BufferProtocol: AnyObject {
     var colorspace: CGColorSpace? { get }
     func widthOfPlane(at planeIndex: Int) -> Int
     func heightOfPlane(at planeIndex: Int) -> Int
-    func textures(frome cache: MetalTextureCache) -> [MTLTexture]
+    func textures() -> [MTLTexture]
     func image() -> CGImage?
 }
 
@@ -116,8 +116,8 @@ extension CVPixelBuffer: BufferProtocol {
         CVPixelBufferGetBaseAddressOfPlane(self, planeIndex)
     }
 
-    public func textures(frome cache: MetalTextureCache) -> [MTLTexture] {
-        cache.texture(pixelBuffer: self)
+    public func textures() -> [MTLTexture] {
+        MetalRender.texture(pixelBuffer: self)
     }
 }
 

@@ -337,7 +337,8 @@ open class KSOptions {
     }
 
     open func isUseDisplayLayer() -> Bool {
-        display == .plane
+        false
+//        display == .plane
     }
 }
 
