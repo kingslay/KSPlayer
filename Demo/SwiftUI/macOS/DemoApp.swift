@@ -10,7 +10,7 @@ import AVKit
 import KSPlayer
 import SwiftUI
 @main
-struct demo_SPMApp: App {
+struct DemoApp: App {
     init() {
         KSPlayerManager.canBackgroundPlay = true
         KSPlayerManager.logLevel = .debug

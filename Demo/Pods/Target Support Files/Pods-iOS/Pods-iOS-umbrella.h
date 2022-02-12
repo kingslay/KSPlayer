@@ -11,6 +11,6 @@
 #endif
 
 
-FOUNDATION_EXPORT double Pods_demo_SPM__iOS_VersionNumber;
-FOUNDATION_EXPORT const unsigned char Pods_demo_SPM__iOS_VersionString[];
+FOUNDATION_EXPORT double Pods_iOSVersionNumber;
+FOUNDATION_EXPORT const unsigned char Pods_iOSVersionString[];
 
