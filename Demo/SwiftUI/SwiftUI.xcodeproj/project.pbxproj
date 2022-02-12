@@ -7,14 +7,13 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		476675E7F5DE5A4755C74699 /* Pods_demo_SPM__iOS_.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 338B9D99F584C9F6DF2DE31C /* Pods_demo_SPM__iOS_.framework */; };
-		AC77DFC326402329001351AE /* demo_SPMApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC77DFB026402327001351AE /* demo_SPMApp.swift */; };
-		AC77DFC426402329001351AE /* demo_SPMApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC77DFB026402327001351AE /* demo_SPMApp.swift */; };
+		AC38147F27B7EAFD0070D60E /* DemoApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC77DFB026402327001351AE /* DemoApp.swift */; };
+		AC77DFC326402329001351AE /* DemoApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC77DFB026402327001351AE /* DemoApp.swift */; };
 		AC77DFC526402329001351AE /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC77DFB126402327001351AE /* ContentView.swift */; };
 		AC77DFC626402329001351AE /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC77DFB126402327001351AE /* ContentView.swift */; };
 		AC77DFC726402329001351AE /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AC77DFB226402329001351AE /* Assets.xcassets */; };
 		AC77DFC826402329001351AE /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AC77DFB226402329001351AE /* Assets.xcassets */; };
-		ACB8CA0A278AE433008B6582 /* demo_SPMApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC77DFB026402327001351AE /* demo_SPMApp.swift */; };
+		ACB8CA0A278AE433008B6582 /* DemoApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC77DFB026402327001351AE /* DemoApp.swift */; };
 		ACB8CA0B278AE436008B6582 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC77DFB126402327001351AE /* ContentView.swift */; };
 		ACB8CA0D278AE4A0008B6582 /* KSPlayer in Frameworks */ = {isa = PBXBuildFile; productRef = ACB8CA0C278AE4A0008B6582 /* KSPlayer */; };
 		ACD2F74E275F6EE60006D16F /* KSPlayer in Frameworks */ = {isa = PBXBuildFile; productRef = ACD2F74D275F6EE60006D16F /* KSPlayer */; };
@@ -31,13 +30,16 @@
 		ACD2F78F275F9BEE0006D16F /* 567082ac3ae39699f68de4fd2b7444b1e045515a.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = ACD2F784275F9BEE0006D16F /* 567082ac3ae39699f68de4fd2b7444b1e045515a.mp4 */; };
 		ACD2F790275F9BEE0006D16F /* video-h265.mkv in Resources */ = {isa = PBXBuildFile; fileRef = ACD2F785275F9BEE0006D16F /* video-h265.mkv */; };
 		ACD2F791275F9BEE0006D16F /* video-h265.mkv in Resources */ = {isa = PBXBuildFile; fileRef = ACD2F785275F9BEE0006D16F /* video-h265.mkv */; };
+		FF1221D132E35E95D9BD7E48 /* Pods_iOS.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7765B42EA1A94905C991FB83 /* Pods_iOS.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		338B9D99F584C9F6DF2DE31C /* Pods_demo_SPM__iOS_.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_demo_SPM__iOS_.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		409ED2C986B02A723617F1F1 /* Pods-demo-SPM (iOS).debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-demo-SPM (iOS).debug.xcconfig"; path = "Target Support Files/Pods-demo-SPM (iOS)/Pods-demo-SPM (iOS).debug.xcconfig"; sourceTree = "<group>"; };
+		441EBE688DFF2359CCB14126 /* Pods-iOS.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-iOS.debug.xcconfig"; path = "Target Support Files/Pods-iOS/Pods-iOS.debug.xcconfig"; sourceTree = "<group>"; };
 		6DA56DBB7D572623E48AEB27 /* Pods-demo-SPM (iOS).release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-demo-SPM (iOS).release.xcconfig"; path = "Target Support Files/Pods-demo-SPM (iOS)/Pods-demo-SPM (iOS).release.xcconfig"; sourceTree = "<group>"; };
-		AC77DFB026402327001351AE /* demo_SPMApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = demo_SPMApp.swift; sourceTree = "<group>"; };
+		7765B42EA1A94905C991FB83 /* Pods_iOS.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_iOS.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		7F970568F1C4865B93BF283D /* Pods-iOS.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-iOS.release.xcconfig"; path = "Target Support Files/Pods-iOS/Pods-iOS.release.xcconfig"; sourceTree = "<group>"; };
+		AC77DFB026402327001351AE /* DemoApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoApp.swift; sourceTree = "<group>"; };
 		AC77DFB126402327001351AE /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		AC77DFB226402329001351AE /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		AC77DFB726402329001351AE /* demo-SPM.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "demo-SPM.app"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -45,7 +47,7 @@
 		AC77DFBF26402329001351AE /* demo-SPM.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "demo-SPM.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		AC77DFC126402329001351AE /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		AC77DFC226402329001351AE /* macOS.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = macOS.entitlements; sourceTree = "<group>"; };
-		ACB8C9FC278AE3A6008B6582 /* demo-SPM (tvOS).app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "demo-SPM (tvOS).app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		ACB8C9FC278AE3A6008B6582 /* tvOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = tvOS.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		ACD2F747275F6E860006D16F /* KSPlayer */ = {isa = PBXFileReference; lastKnownFileType = folder; name = KSPlayer; path = ../..; sourceTree = "<group>"; };
 		ACD2F780275F9BEE0006D16F /* Polonaise.flac */ = {isa = PBXFileReference; lastKnownFileType = file; path = Polonaise.flac; sourceTree = "<group>"; };
 		ACD2F781275F9BEE0006D16F /* tos.mkv */ = {isa = PBXFileReference; lastKnownFileType = file; path = tos.mkv; sourceTree = "<group>"; };
@@ -61,7 +63,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				ACD2F772275F735C0006D16F /* KSPlayer in Frameworks */,
-				476675E7F5DE5A4755C74699 /* Pods_demo_SPM__iOS_.framework in Frameworks */,
+				FF1221D132E35E95D9BD7E48 /* Pods_iOS.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -89,6 +91,8 @@
 			children = (
 				409ED2C986B02A723617F1F1 /* Pods-demo-SPM (iOS).debug.xcconfig */,
 				6DA56DBB7D572623E48AEB27 /* Pods-demo-SPM (iOS).release.xcconfig */,
+				441EBE688DFF2359CCB14126 /* Pods-iOS.debug.xcconfig */,
+				7F970568F1C4865B93BF283D /* Pods-iOS.release.xcconfig */,
 			);
 			name = Pods;
 			path = ../Pods;
@@ -111,7 +115,7 @@
 		AC77DFAF26402327001351AE /* Shared */ = {
 			isa = PBXGroup;
 			children = (
-				AC77DFB026402327001351AE /* demo_SPMApp.swift */,
+				AC77DFB026402327001351AE /* DemoApp.swift */,
 				AC77DFB126402327001351AE /* ContentView.swift */,
 				AC77DFB226402329001351AE /* Assets.xcassets */,
 				ACD2F77F275F9BEE0006D16F /* Resources */,
@@ -124,7 +128,7 @@
 			children = (
 				AC77DFB726402329001351AE /* demo-SPM.app */,
 				AC77DFBF26402329001351AE /* demo-SPM.app */,
-				ACB8C9FC278AE3A6008B6582 /* demo-SPM (tvOS).app */,
+				ACB8C9FC278AE3A6008B6582 /* tvOS.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -164,7 +168,7 @@
 		ACD2F74C275F6EE60006D16F /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				338B9D99F584C9F6DF2DE31C /* Pods_demo_SPM__iOS_.framework */,
+				7765B42EA1A94905C991FB83 /* Pods_iOS.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -186,9 +190,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		AC77DFB626402329001351AE /* demo-SPM (iOS) */ = {
+		AC77DFB626402329001351AE /* iOS */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = AC77DFCB26402329001351AE /* Build configuration list for PBXNativeTarget "demo-SPM (iOS)" */;
+			buildConfigurationList = AC77DFCB26402329001351AE /* Build configuration list for PBXNativeTarget "iOS" */;
 			buildPhases = (
 				818BBAC3ABE09C8691BCC788 /* [CP] Check Pods Manifest.lock */,
 				AC77DFB326402329001351AE /* Sources */,
@@ -199,7 +203,7 @@
 			);
 			dependencies = (
 			);
-			name = "demo-SPM (iOS)";
+			name = iOS;
 			packageProductDependencies = (
 				ACD2F771275F735C0006D16F /* KSPlayer */,
 			);
@@ -207,9 +211,9 @@
 			productReference = AC77DFB726402329001351AE /* demo-SPM.app */;
 			productType = "com.apple.product-type.application";
 		};
-		AC77DFBE26402329001351AE /* demo-SPM (macOS) */ = {
+		AC77DFBE26402329001351AE /* macOS */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = AC77DFCE26402329001351AE /* Build configuration list for PBXNativeTarget "demo-SPM (macOS)" */;
+			buildConfigurationList = AC77DFCE26402329001351AE /* Build configuration list for PBXNativeTarget "macOS" */;
 			buildPhases = (
 				AC77DFBB26402329001351AE /* Sources */,
 				AC77DFBC26402329001351AE /* Frameworks */,
@@ -219,7 +223,7 @@
 			);
 			dependencies = (
 			);
-			name = "demo-SPM (macOS)";
+			name = macOS;
 			packageProductDependencies = (
 				ACD2F74D275F6EE60006D16F /* KSPlayer */,
 			);
@@ -227,9 +231,9 @@
 			productReference = AC77DFBF26402329001351AE /* demo-SPM.app */;
 			productType = "com.apple.product-type.application";
 		};
-		ACB8C9FB278AE3A6008B6582 /* demo-SPM (tvOS) */ = {
+		ACB8C9FB278AE3A6008B6582 /* tvOS */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = ACB8CA07278AE3A8008B6582 /* Build configuration list for PBXNativeTarget "demo-SPM (tvOS)" */;
+			buildConfigurationList = ACB8CA07278AE3A8008B6582 /* Build configuration list for PBXNativeTarget "tvOS" */;
 			buildPhases = (
 				ACB8C9F8278AE3A6008B6582 /* Sources */,
 				ACB8C9F9278AE3A6008B6582 /* Frameworks */,
@@ -239,12 +243,12 @@
 			);
 			dependencies = (
 			);
-			name = "demo-SPM (tvOS)";
+			name = tvOS;
 			packageProductDependencies = (
 				ACB8CA0C278AE4A0008B6582 /* KSPlayer */,
 			);
 			productName = "demo-SPM (tvOS)";
-			productReference = ACB8C9FC278AE3A6008B6582 /* demo-SPM (tvOS).app */;
+			productReference = ACB8C9FC278AE3A6008B6582 /* tvOS.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -267,7 +271,7 @@
 					};
 				};
 			};
-			buildConfigurationList = AC77DFAE26402327001351AE /* Build configuration list for PBXProject "demo-SPM" */;
+			buildConfigurationList = AC77DFAE26402327001351AE /* Build configuration list for PBXProject "SwiftUI" */;
 			compatibilityVersion = "Xcode 9.3";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -280,9 +284,9 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				AC77DFB626402329001351AE /* demo-SPM (iOS) */,
-				AC77DFBE26402329001351AE /* demo-SPM (macOS) */,
-				ACB8C9FB278AE3A6008B6582 /* demo-SPM (tvOS) */,
+				AC77DFB626402329001351AE /* iOS */,
+				AC77DFBE26402329001351AE /* macOS */,
+				ACB8C9FB278AE3A6008B6582 /* tvOS */,
 			);
 		};
 /* End PBXProject section */
@@ -341,7 +345,7 @@
 			outputFileListPaths = (
 			);
 			outputPaths = (
-				"$(DERIVED_FILE_DIR)/Pods-demo-SPM (iOS)-checkManifestLockResult.txt",
+				"$(DERIVED_FILE_DIR)/Pods-iOS-checkManifestLockResult.txt",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -356,7 +360,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				AC77DFC526402329001351AE /* ContentView.swift in Sources */,
-				AC77DFC326402329001351AE /* demo_SPMApp.swift in Sources */,
+				AC77DFC326402329001351AE /* DemoApp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -364,8 +368,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				AC38147F27B7EAFD0070D60E /* DemoApp.swift in Sources */,
 				AC77DFC626402329001351AE /* ContentView.swift in Sources */,
-				AC77DFC426402329001351AE /* demo_SPMApp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -374,7 +378,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				ACB8CA0B278AE436008B6582 /* ContentView.swift in Sources */,
-				ACB8CA0A278AE433008B6582 /* demo_SPMApp.swift in Sources */,
+				ACB8CA0A278AE433008B6582 /* DemoApp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -498,7 +502,7 @@
 		};
 		AC77DFCC26402329001351AE /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 409ED2C986B02A723617F1F1 /* Pods-demo-SPM (iOS).debug.xcconfig */;
+			baseConfigurationReference = 441EBE688DFF2359CCB14126 /* Pods-iOS.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -520,13 +524,13 @@
 				SDKROOT = iphoneos;
 				SUPPORTS_MACCATALYST = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = "1,2,6";
 			};
 			name = Debug;
 		};
 		AC77DFCD26402329001351AE /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 6DA56DBB7D572623E48AEB27 /* Pods-demo-SPM (iOS).release.xcconfig */;
+			baseConfigurationReference = 7F970568F1C4865B93BF283D /* Pods-iOS.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -548,7 +552,7 @@
 				SDKROOT = iphoneos;
 				SUPPORTS_MACCATALYST = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = "1,2,6";
 				VALIDATE_PRODUCT = YES;
 			};
 			name = Release;
@@ -657,7 +661,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		AC77DFAE26402327001351AE /* Build configuration list for PBXProject "demo-SPM" */ = {
+		AC77DFAE26402327001351AE /* Build configuration list for PBXProject "SwiftUI" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				AC77DFC926402329001351AE /* Debug */,
@@ -666,7 +670,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		AC77DFCB26402329001351AE /* Build configuration list for PBXNativeTarget "demo-SPM (iOS)" */ = {
+		AC77DFCB26402329001351AE /* Build configuration list for PBXNativeTarget "iOS" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				AC77DFCC26402329001351AE /* Debug */,
@@ -675,7 +679,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		AC77DFCE26402329001351AE /* Build configuration list for PBXNativeTarget "demo-SPM (macOS)" */ = {
+		AC77DFCE26402329001351AE /* Build configuration list for PBXNativeTarget "macOS" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				AC77DFCF26402329001351AE /* Debug */,
@@ -684,7 +688,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		ACB8CA07278AE3A8008B6582 /* Build configuration list for PBXNativeTarget "demo-SPM (tvOS)" */ = {
+		ACB8CA07278AE3A8008B6582 /* Build configuration list for PBXNativeTarget "tvOS" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				ACB8CA08278AE3A8008B6582 /* Debug */,

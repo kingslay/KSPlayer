@@ -25,7 +25,7 @@ PODS:
   - KSPlayer/Metal (1.0)
   - KSPlayer/Subtitle (1.0)
   - KSPlayer/SwiftUI (1.0):
-    - KSPlayer/Core
+    - KSPlayer/AVPlayer
   - KSPlayer/Tests (1.0)
   - KSPlayer/Video (1.0):
     - KSPlayer/Core
@@ -56,10 +56,10 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   FFmpeg: 6593f811126654982330f647e8c0a54b5fb38257
-  KSPlayer: 41384dc0ee39b81ca8ce08c20a860aa6738522ae
+  KSPlayer: f8dd9c7cac508db3ce1bd63288c1092dd6253440
   OpenSSL: a253b4b80f6c9512a45960472ddc5140342356bf
   SwiftLint: 22ccbbe3b8008684be5955693bab135e0ed6a447
 
-PODFILE CHECKSUM: d8ffe84a308aaa22750f9b2ec754d9faf8d70546
+PODFILE CHECKSUM: e7cf3fa54a91f251f732e3f3022a0d7874a0837a
 
 COCOAPODS: 1.11.2

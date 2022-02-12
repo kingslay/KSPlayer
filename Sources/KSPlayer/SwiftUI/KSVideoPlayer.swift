@@ -5,8 +5,8 @@
 //  Created by kintan on 2022/1/29.
 //
 import AVFoundation
+import AVKit
 import SwiftUI
-
 @available(iOS 15, tvOS 15, macOS 12, *)
 public struct KSVideoPlayerView: View {
     @State private var currentTime = TimeInterval(0)
@@ -46,7 +46,7 @@ public struct KSVideoPlayerView: View {
 @available(iOS 15, tvOS 15, macOS 12, *)
 struct VideoControllerView: View {
     public struct Config {
-        private let playerLayer: KSPlayerLayer
+        fileprivate let playerLayer: KSPlayerLayer
         init(isPlay: Bool, playerLayer: KSPlayerLayer) {
             self.isPlay = isPlay
             self.playerLayer = playerLayer
@@ -131,11 +131,12 @@ struct VideoControllerView: View {
                 #if os(tvOS)
                 ProgressView(value: currentTime, total: totalTime).tint(.secondary.opacity(0.32))
                 #else
-                Slider(value: $currentTime, in: 0 ... totalTime) {
-//                    if $0 {
-//                        config.playerLayer.seek(time: currentTime, autoPlay: true)
-//                    }
-                }.tint(.secondary.opacity(0.32))
+                Slider(value: Binding {
+                    currentTime
+                } set: { newValue in
+                    config.playerLayer.seek(time: newValue, autoPlay: true)
+                }, in: 0 ... totalTime)
+                    .tint(.secondary.opacity(0.32))
                 #endif
                 Text("-" + (totalTime - currentTime).toString(for: .minOrHour)).font(Font.custom("SFProText-Regular", size: 11)).foregroundColor(.secondary.opacity(0.6))
                 Button {} label: {
@@ -228,15 +229,18 @@ extension KSVideoPlayer: UIViewRepresentable {
 
     private func updateView(_: KSPlayerLayer, context _: Context) {}
 
-    public final class Coordinator: KSPlayerLayerDelegate {
+    public final class Coordinator: NSObject, KSPlayerLayerDelegate, AVPictureInPictureControllerDelegate {
         private let videoPlayer: KSVideoPlayer
 
         init(_ videoPlayer: KSVideoPlayer) {
             self.videoPlayer = videoPlayer
         }
 
-        public func player(layer _: KSPlayerLayer, state: KSPlayerState) {
+        public func player(layer: KSPlayerLayer, state: KSPlayerState) {
             videoPlayer.handler.onStateChanged?(state)
+            if state == .readyToPlay {
+                layer.player?.pipController?.delegate = self
+            }
         }
 
         public func player(layer _: KSPlayerLayer, currentTime: TimeInterval, totalTime: TimeInterval) {

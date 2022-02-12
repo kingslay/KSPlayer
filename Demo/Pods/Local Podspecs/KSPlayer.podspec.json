@@ -93,7 +93,7 @@
       "name": "SwiftUI",
       "source_files": "Sources/KSPlayer/SwiftUI/*.swift",
       "dependencies": {
-        "KSPlayer/Core": [
+        "KSPlayer/AVPlayer": [
 
         ]
       }
