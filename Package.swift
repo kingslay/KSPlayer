@@ -36,6 +36,22 @@ let package = Package(
         .target(
             name: "FFmpeg",
             dependencies: ["Libavcodec", "Libavfilter", "Libavformat", "Libavutil", "Libswresample", "Libswscale", "Libssl", "Libcrypto"],
+//            dependencies: ["Libssl", "Libcrypto"],
+//            exclude: ["include", "compat"],
+//            cSettings: [
+//                .headerSearchPath("compat"),
+//                .headerSearchPath("compat/cuda"),
+//                .headerSearchPath("include/libavcodec"),
+//                .headerSearchPath("include/libavcodec/aarch64"),
+//                .headerSearchPath("include/libavcodec/arm"),
+//                .headerSearchPath("include/libavcodec/x86"),
+//                .headerSearchPath("include/libavdevice"),
+//                .headerSearchPath("include/libavfilter"),
+//                .headerSearchPath("include/libavformat"),
+//                .headerSearchPath("include/libavutil"),
+//                .headerSearchPath("include/libswresample"),
+//                .headerSearchPath("include/libswscale"),
+//            ],
             linkerSettings: [
                 .linkedLibrary("bz2"),
                 .linkedLibrary("iconv"),
