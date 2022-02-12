@@ -16,7 +16,7 @@ class BaseBuild {
         BuildFFMPEG().buildALL()
     }
 
-    private let platforms = PlatformType.allCases
+    fileprivate let platforms = PlatformType.allCases
     // private let platforms = [PlatformType.tvos]
     private let library: String
     init(library: String) {
@@ -34,7 +34,7 @@ class BaseBuild {
     }
 
     private func build(platform: PlatformType, arch: ArchType) {
-        let url = URL.currentDirectory + [library, platform.rawValue, "scratch", arch.rawValue]
+        let url = scratch(platform: platform, arch: arch)
         try? FileManager.default.createDirectory(at: url, withIntermediateDirectories: true, attributes: nil)
         var cflags = "-arch \(arch.rawValue) \(platform.deploymentTarget())"
         cflags += " -fembed-bitcode"
@@ -43,7 +43,7 @@ class BaseBuild {
 
     func innerBuid(platform _: PlatformType, arch _: ArchType, cflags _: String, buildDir _: URL) {}
 
-    private func createXCFramework() {
+    func createXCFramework() {
         for framework in frameworks() {
             var arguments = ""
             let XCFrameworkFile = URL.currentDirectory + ["../Sources", framework + ".xcframework"]
@@ -98,6 +98,10 @@ class BaseBuild {
 
     func thinDir(platform: PlatformType, arch: ArchType) -> URL {
         URL.currentDirectory + [library, platform.rawValue, "thin", arch.rawValue]
+    }
+
+    func scratch(platform: PlatformType, arch: ArchType) -> URL {
+        URL.currentDirectory + [library, platform.rawValue, "scratch", arch.rawValue]
     }
 
     func frameworks() -> [String] {
@@ -163,7 +167,7 @@ class BuildFFMPEG: BaseBuild {
         if !isDebug {
             ffmpegcflags.append("--disable-debug")
         }
-        if isFFplay && platform == .macos && arch == .x86_64 {
+        if isFFplay, platform == .macos, arch == .x86_64 {
             ffmpegcflags.append("--enable-ffmpeg")
             ffmpegcflags.append("--enable-ffplay")
             ffmpegcflags.append("--enable-sdl2")
@@ -177,11 +181,9 @@ class BuildFFMPEG: BaseBuild {
             ffmpegcflags.append("--disable-ffplay")
             ffmpegcflags.append("--disable-ffprobe")
         }
-        if platform == .isimulator || platform == .tvsimulator {
-            ffmpegcflags.append("--assert-level=1")
-        } else if platform == .ios {
-            ffmpegcflags.append("--enable-small")
-        }
+//        if platform == .isimulator || platform == .tvsimulator {
+//            ffmpegcflags.append("--assert-level=1")
+//        }
         if platform == .maccatalyst {
             ffmpegcflags.append("--disable-asm")
         }
@@ -220,6 +222,71 @@ class BuildFFMPEG: BaseBuild {
         ["Libavcodec", "Libavformat", "Libavutil", "Libswresample", "Libswscale", "Libavfilter"]
     }
 
+    override func createXCFramework() {
+        super.createXCFramework()
+//        makeFFmpegSourece()
+    }
+
+    private func makeFFmpegSourece() {
+        guard let platform = platforms.first, let arch = platform.architectures().first else {
+            return
+        }
+        let target = URL.currentDirectory + ["../Sources", "FFmpeg"]
+        try? FileManager.default.removeItem(at: target)
+        try? FileManager.default.createDirectory(at: target, withIntermediateDirectories: true, attributes: nil)
+        let thin = thinDir(platform: platform, arch: arch)
+        try? FileManager.default.copyItem(at: thin + "include", to: target + "include")
+        let scratch = scratch(platform: platform, arch: arch)
+        try? FileManager.default.createDirectory(at: target + "include", withIntermediateDirectories: true, attributes: nil)
+        try? FileManager.default.copyItem(at: scratch + "config.h", to: target + "include" + "config.h")
+        guard let fileNames = try? FileManager.default.contentsOfDirectory(atPath: scratch.path) else {
+            return
+        }
+        for fileName in fileNames where fileName.hasPrefix("lib") {
+            var url = scratch + fileName
+            var isDir: ObjCBool = false
+            if FileManager.default.fileExists(atPath: url.path, isDirectory: &isDir), isDir.boolValue {
+                // copy .c
+                if let subpaths = FileManager.default.enumerator(atPath: url.path) {
+                    let dstDir = target + fileName
+                    while let subpath = subpaths.nextObject() as? String {
+                        if subpath.hasSuffix(".c") {
+                            let srcURL = url + subpath
+                            let dstURL = target + "include" + fileName + subpath
+                            try? FileManager.default.copyItem(at: srcURL, to: dstURL)
+                        } else if subpath.hasSuffix(".o") {
+                            let subpath = subpath.replacingOccurrences(of: ".o", with: ".c")
+                            let srcURL = scratch + "src" + fileName + subpath
+                            let dstURL = dstDir + subpath
+                            let dstURLDir = dstURL.deletingLastPathComponent()
+                            if !FileManager.default.fileExists(atPath: dstURLDir.path) {
+                                try? FileManager.default.createDirectory(at: dstURLDir, withIntermediateDirectories: true, attributes: nil)
+                            }
+                            try? FileManager.default.copyItem(at: srcURL, to: dstURL)
+                        }
+                    }
+                }
+                url = scratch + "src" + fileName
+                // copy .h
+                try? FileManager.default.copyItem(at: scratch + "src" + "compat", to: target + "compat")
+                if let subpaths = FileManager.default.enumerator(atPath: url.path) {
+                    let dstDir = target + "include" + fileName
+                    while let subpath = subpaths.nextObject() as? String {
+                        if subpath.hasSuffix(".h") || subpath.hasSuffix("_template.c") {
+                            let srcURL = url + subpath
+                            let dstURL = dstDir + subpath
+                            let dstURLDir = dstURL.deletingLastPathComponent()
+                            if !FileManager.default.fileExists(atPath: dstURLDir.path) {
+                                try? FileManager.default.createDirectory(at: dstURLDir, withIntermediateDirectories: true, attributes: nil)
+                            }
+                            try? FileManager.default.copyItem(at: srcURL, to: dstURL)
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     override func buildALL() {
         prepareYasm()
         if !FileManager.default.fileExists(atPath: (URL.currentDirectory + ffmpegFile).path) {
@@ -254,7 +321,7 @@ class BuildFFMPEG: BaseBuild {
     }
 
     private let ffmpegConfiguers = [
-        "--enable-optimizations", "--enable-gpl", "--enable-version3", "--enable-nonfree",
+        "--enable-optimizations", "--enable-gpl", "--enable-version3", "--enable-nonfree", "--enable-small",
         "--disable-xlib", "--disable-devices", "--disable-indevs", "--disable-outdevs", "--disable-iconv",
         "--disable-bsfs", "--disable-symver", "--disable-armv5te", "--disable-armv6", " --disable-armv6t2",
         "--disable-linux-perf", "--disable-bzlib", "--disable-videotoolbox",
