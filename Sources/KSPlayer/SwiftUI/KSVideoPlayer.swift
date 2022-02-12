@@ -239,7 +239,9 @@ extension KSVideoPlayer: UIViewRepresentable {
         public func player(layer: KSPlayerLayer, state: KSPlayerState) {
             videoPlayer.handler.onStateChanged?(state)
             if state == .readyToPlay {
-                layer.player?.pipController?.delegate = self
+                if #available(tvOS 14.0, *) {
+                    layer.player?.pipController?.delegate = self
+                }
             }
         }
 
