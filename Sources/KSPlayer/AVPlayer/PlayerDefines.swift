@@ -8,6 +8,7 @@
 import AVFoundation
 import AVKit
 import CoreMedia
+import CoreServices
 #if canImport(UIKit)
 import UIKit
 extension UIScreen {
@@ -618,5 +619,21 @@ extension UIView {
         } else {
             return bottomAnchor
         }
+    }
+}
+
+extension URL {
+    var isMovie: Bool {
+        if let typeID = try? resourceValues(forKeys: [.typeIdentifierKey]).typeIdentifier as CFString? {
+            return UTTypeConformsTo(typeID, kUTTypeMovie)
+        }
+        return false
+    }
+
+    var isAudio: Bool {
+        if let typeID = try? resourceValues(forKeys: [.typeIdentifierKey]).typeIdentifier as CFString? {
+            return UTTypeConformsTo(typeID, kUTTypeAudio)
+        }
+        return false
     }
 }

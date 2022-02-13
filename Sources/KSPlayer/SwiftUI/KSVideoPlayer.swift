@@ -15,8 +15,8 @@ public struct KSVideoPlayerView: View {
     private let url: URL
     public let options: KSOptions
     public init(url: URL, options: KSOptions) {
-        self.url = url
         self.options = options
+        self.url = url
     }
 
     public var body: some View {
@@ -38,6 +38,14 @@ public struct KSVideoPlayerView: View {
         #if !os(tvOS)
         .onTapGesture {
             isMaskShow.toggle()
+        }
+        .onDrop(of: ["public.file-url"], isTargeted: nil) { providers -> Bool in
+            providers.first?.loadDataRepresentation(forTypeIdentifier: "public.file-url") { data, _ in
+                if let data = data, let path = NSString(data: data, encoding: 4), let url = URL(string: path as String), url.isAudio || url.isMovie {
+                    player.playerLayer.set(url: url, options: options)
+                }
+            }
+            return true
         }
         #endif
     }
@@ -123,10 +131,30 @@ struct VideoControllerView: View {
             Spacer()
             HStack(spacing: 8) {
                 Button {
+                    config.playerLayer.seek(time: currentTime - 15, autoPlay: true)
+                } label: {
+                    Image(systemName: "gobackward.15")
+                }
+                #if !os(tvOS)
+                .keyboardShortcut(.leftArrow)
+                #endif
+                Button {
                     config.isPlay.toggle()
                 } label: {
                     Image(systemName: config.isPlay ? "pause.fill" : "play.fill")
-                }.frame(width: 32, height: 32)
+                }
+                .padding()
+                #if !os(tvOS)
+                    .keyboardShortcut(.space, modifiers: .option)
+                #endif
+                Button {
+                    config.playerLayer.seek(time: currentTime + 15, autoPlay: true)
+                } label: {
+                    Image(systemName: "goforward.15")
+                }
+                #if !os(tvOS)
+                .keyboardShortcut(.rightArrow)
+                #endif
                 Text(currentTime.toString(for: .minOrHour)).font(Font.custom("SFProText-Regular", size: 11)).foregroundColor(.secondary.opacity(0.6))
                 #if os(tvOS)
                 ProgressView(value: currentTime, total: totalTime).tint(.secondary.opacity(0.32))
@@ -145,7 +173,30 @@ struct VideoControllerView: View {
             }
             .background(backgroundColor)
             .cornerRadius(8)
-        }.padding(.horizontal).tint(.clear).foregroundColor(.primary)
+        }
+        .padding(.horizontal).tint(.clear).foregroundColor(.primary)
+        #if !os(iOS)
+            .focusable()
+            .onMoveCommand { direction in
+                switch direction {
+                case .left:
+                    config.playerLayer.seek(time: currentTime - 15, autoPlay: true)
+                case .right:
+                    config.playerLayer.seek(time: currentTime + 15, autoPlay: true)
+                case .up:
+                    config.playerLayer.player?.playbackVolume += 1
+                case .down:
+                    config.playerLayer.player?.playbackVolume -= 1
+                @unknown default:
+                    break
+                }
+            }
+        #if os(tvOS)
+            .onPlayPauseCommand {
+                config.isPlay.toggle()
+            }
+        #endif
+        #endif
     }
 }
 

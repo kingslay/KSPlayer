@@ -92,9 +92,12 @@ final class MetalPlayView: UIView {
     }
 
     func clear() {
-        displayLayer.flushAndRemoveImage()
-        if let drawable = view.currentDrawable, let renderPassDescriptor = view.currentRenderPassDescriptor {
-            render.clear(drawable: drawable, renderPassDescriptor: renderPassDescriptor)
+        if view.isHidden {
+            displayLayer.flushAndRemoveImage()
+        } else {
+            if let drawable = view.currentDrawable, let renderPassDescriptor = view.currentRenderPassDescriptor {
+                render.clear(drawable: drawable, renderPassDescriptor: renderPassDescriptor)
+            }
         }
     }
 }
