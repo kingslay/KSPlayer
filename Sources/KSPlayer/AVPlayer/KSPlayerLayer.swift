@@ -175,7 +175,9 @@ open class KSPlayerLayer: UIView {
     public func set(url: URL, options: KSOptions) {
         isAutoPlay = options.isAutoPlay
         self.options = options
-        self.url = url
+        runInMainqueue {
+            self.url = url
+        }
     }
 
     public func set(urls: [URL], options: KSOptions) {

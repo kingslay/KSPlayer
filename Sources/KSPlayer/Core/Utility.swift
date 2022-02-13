@@ -6,7 +6,6 @@
 //
 
 import AVFoundation
-import CoreMedia
 #if canImport(UIKit)
 import UIKit
 #else
@@ -210,21 +209,5 @@ extension UIImageView {
                 self.image = image
             }
         }
-    }
-}
-
-public extension URL {
-    var isMovie: Bool {
-        if let typeID = try? resourceValues(forKeys: [.typeIdentifierKey]).typeIdentifier as CFString? {
-            return UTTypeConformsTo(typeID, kUTTypeMovie)
-        }
-        return false
-    }
-
-    var isAudio: Bool {
-        if let typeID = try? resourceValues(forKeys: [.typeIdentifierKey]).typeIdentifier as CFString? {
-            return UTTypeConformsTo(typeID, kUTTypeAudio)
-        }
-        return false
     }
 }
