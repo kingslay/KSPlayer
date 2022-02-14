@@ -13,6 +13,7 @@ public struct KSVideoPlayerView: View {
     @State private var totalTime = TimeInterval(1)
     @State private var isMaskShow: Bool = true
     private let url: URL
+    private let player = KSVideoPlayer()
     public let options: KSOptions
     public init(url: URL, options: KSOptions) {
         self.options = options
@@ -20,7 +21,6 @@ public struct KSVideoPlayerView: View {
     }
 
     public var body: some View {
-        let player = KSVideoPlayer()
         player.playerLayer.set(url: url, options: options)
         return ZStack {
             player.onPlay { current, total in
@@ -209,9 +209,8 @@ public struct KSVideoPlayer {
         var onBufferChanged: ((Int, TimeInterval) -> Void)?
     }
 
-    public let playerLayer: KSPlayerLayer = .init()
-    fileprivate var handler: Handler = .init()
-    public init() {}
+    public let playerLayer = KSPlayerLayer()
+    fileprivate var handler = Handler()
 }
 
 @available(iOS 13, tvOS 13, macOS 10.15, *)
