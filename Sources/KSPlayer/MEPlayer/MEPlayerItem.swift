@@ -159,6 +159,12 @@ extension MEPlayerItem {
         formatCtx.pointee.flags |= AVFMT_FLAG_GENPTS
         av_format_inject_global_side_data(formatCtx)
         options.openTime = CACurrentMediaTime()
+        if let probesize = options.probesize {
+            formatCtx.pointee.probesize = probesize
+        }
+        if let maxAnalyzeDuration = options.maxAnalyzeDuration {
+            formatCtx.pointee.max_analyze_duration = maxAnalyzeDuration
+        }
         result = avformat_find_stream_info(formatCtx, nil)
         guard result == 0 else {
             error = .init(errorCode: .formatFindStreamInfo, ffmpegErrnum: result)
