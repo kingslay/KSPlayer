@@ -120,7 +120,7 @@ struct VideoControllerView: View {
                     } label: {
                         Image(systemName: config.isScaleAspectFill ? "rectangle.arrowtriangle.2.inward" : "rectangle.arrowtriangle.2.outward")
                     }
-                }.padding(.horizontal)
+                }.padding()
                     .background(backgroundColor, ignoresSafeAreaEdges: []).cornerRadius(8)
                 Spacer()
                 Button {
@@ -172,11 +172,11 @@ struct VideoControllerView: View {
                 Button {} label: {
                     Image(systemName: "ellipsis")
                 }
-            }
-            .background(backgroundColor)
-            .cornerRadius(8)
+            }.padding(.horizontal, 8)
+                .background(backgroundColor)
+                .cornerRadius(8)
         }
-        .padding(.horizontal).tint(.clear).foregroundColor(.primary)
+        .padding().tint(.clear).foregroundColor(.primary)
         #if !os(iOS)
             .focusable()
             .onMoveCommand { direction in
