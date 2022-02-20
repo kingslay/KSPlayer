@@ -198,9 +198,12 @@ final class ByteDataWrap {
     var size: [Int] = [0] {
         didSet {
             if size.description != oldValue.description {
-                for i in 0 ..< data.count where oldValue[i] > 0 {
-                    data[i]?.deinitialize(count: oldValue[i])
-                    data[i]?.deallocate()
+                for i in 0 ..< data.count {
+                    let count = oldValue[i]
+                    if count > 0 {
+                        data[i]?.deinitialize(count: oldValue[i])
+                        data[i]?.deallocate()
+                    }
                 }
                 data.removeAll()
                 for i in 0 ..< size.count {
