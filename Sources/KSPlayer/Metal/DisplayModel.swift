@@ -189,8 +189,10 @@ private class SphereDisplayModel {
         var runCount = 0
         let radius = Float(1.0)
         let step = (2.0 * Float.pi) / Float(slicesCount)
-        for i in 0 ... parallelsCount {
-            for j in 0 ... slicesCount {
+        var i = UInt16(0)
+        while i <= parallelsCount {
+            var j = UInt16(0)
+            while j <= slicesCount {
                 let vertex0 = radius * sinf(step * Float(i)) * cosf(step * Float(j))
                 let vertex1 = radius * cosf(step * Float(i))
                 let vertex2 = radius * sinf(step * Float(i)) * sinf(step * Float(j))
@@ -213,7 +215,9 @@ private class SphereDisplayModel {
                     indices[runCount] = UInt16(i * (slicesCount + 1) + (j + 1))
                     runCount += 1
                 }
+                j += 1
             }
+            i += 1
         }
         return (indices, positions, uvs)
     }

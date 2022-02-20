@@ -30,7 +30,9 @@ public struct KSVideoPlayerView: View {
             .onDisappear {
                 player.playerLayer.pause()
             }
-            VideoControllerView(config: VideoControllerView.Config(isPlay: options.isAutoPlay, playerLayer: player.playerLayer), currentTime: $currentTime, totalTime: $totalTime).opacity(isMaskShow ? 1 : 0)
+            let config = VideoControllerView.Config(isPlay: options.isAutoPlay, playerLayer: player.playerLayer)
+            VideoControllerView(config: config, currentTime: $currentTime, totalTime: $totalTime)
+                .opacity(isMaskShow ? 1 : 0)
         }
         #if os(iOS)
         .navigationBarTitleDisplayMode(.inline)

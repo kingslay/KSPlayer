@@ -190,8 +190,11 @@ class PixelBuffer: BufferProtocol {
             } else {
                 let contents = dataWrap.data[i]?.contents()
                 let source = bytes[i]!
-                for j in 0 ..< heights[i] {
+                let height = heights[i]
+                var j = 0
+                while j < height {
                     contents?.advanced(by: j * lineSize[i]).copyMemory(from: source.advanced(by: j * bytesPerRow[i]), byteCount: bytesPerRow[i])
+                    j += 1
                 }
             }
         }
@@ -365,9 +368,11 @@ extension CVPixelBufferPool {
                     var sourceU = data[i]!
                     var sourceV = data[i + 1]!
                     for _ in 0 ..< height {
-                        for j in 0 ..< size {
+                        var j = 0
+                        while j < size {
                             contents?.storeBytes(of: sourceU[j], toByteOffset: 2 * j, as: UInt8.self)
                             contents?.storeBytes(of: sourceV[j], toByteOffset: 2 * j + 1, as: UInt8.self)
+                            j += 1
                         }
                         contents = contents?.advanced(by: bytesPerRow)
                         sourceU = sourceU.advanced(by: size)
