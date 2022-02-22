@@ -79,14 +79,14 @@ public class PlayerToolBar: UIStackView {
     private func initUI() {
         distribution = .fill
         currentTimeLabel.textColor = UIColor(hex: 0x9B9B9B)
-        currentTimeLabel.font = UIFont(name: "HelveticaNeue-Medium", size: 14)
+        currentTimeLabel.font = UIFont.monospacedDigitSystemFont(ofSize: 14, weight: .regular)
         currentTimeLabel.text = 0.toString(for: timeType)
         totalTimeLabel.textColor = UIColor(hex: 0x9B9B9B)
-        totalTimeLabel.font = UIFont(name: "HelveticaNeue-Medium", size: 14)
+        totalTimeLabel.font = UIFont.monospacedDigitSystemFont(ofSize: 14, weight: .regular)
         totalTimeLabel.text = 0.toString(for: timeType)
         timeLabel.textColor = .white
         timeLabel.textAlignment = .left
-        timeLabel.font = UIFont(name: "HelveticaNeue-Medium", size: 14)
+        timeLabel.font = UIFont.monospacedDigitSystemFont(ofSize: 14, weight: .regular)
         timeLabel.text = "\(0.toString(for: timeType)) / \(0.toString(for: timeType))"
         timeSlider.minimumValue = 0
         timeSlider.maximumTrackTintColor = UIColor.white.withAlphaComponent(0.3)

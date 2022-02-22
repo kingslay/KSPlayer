@@ -157,7 +157,7 @@ struct VideoControllerView: View {
                 #if !os(tvOS)
                 .keyboardShortcut(.rightArrow)
                 #endif
-                Text(currentTime.toString(for: .minOrHour)).font(Font.custom("SFProText-Regular", size: 11)).foregroundColor(.secondary.opacity(0.6))
+                Text(currentTime.toString(for: .minOrHour)).font(.caption2.monospacedDigit()).foregroundColor(.secondary.opacity(0.6))
                 #if os(tvOS)
                 ProgressView(value: currentTime, total: totalTime).tint(.secondary.opacity(0.32))
                 #else
@@ -168,7 +168,7 @@ struct VideoControllerView: View {
                 }, in: 0 ... totalTime)
                     .tint(.secondary.opacity(0.32))
                 #endif
-                Text("-" + (totalTime - currentTime).toString(for: .minOrHour)).font(Font.custom("SFProText-Regular", size: 11)).foregroundColor(.secondary.opacity(0.6))
+                Text("-" + (totalTime - currentTime).toString(for: .minOrHour)).font(.caption2.monospacedDigit()).foregroundColor(.secondary.opacity(0.6))
                 Button {} label: {
                     Image(systemName: "ellipsis")
                 }
