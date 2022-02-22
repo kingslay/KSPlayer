@@ -167,7 +167,7 @@ class BuildFFMPEG: BaseBuild {
         if !isDebug {
             ffmpegcflags.append("--disable-debug")
         }
-        if isFFplay, platform == .macos, arch == .x86_64 {
+        if isFFplay, platform == .macos, arch.executable() {
             ffmpegcflags.append("--enable-ffmpeg")
             ffmpegcflags.append("--enable-ffplay")
             ffmpegcflags.append("--enable-sdl2")
@@ -208,7 +208,7 @@ class BuildFFMPEG: BaseBuild {
         print(args.joined(separator: " "))
         Utility.shell(args.joined(separator: " "), currentDirectoryURL: buildDir)
         Utility.shell("make -j8 install\(arch == .x86_64 ? "" : " GASPP_FIX_XCODE5=1") >>\(buildDir.path).log", currentDirectoryURL: buildDir)
-        if isDebug, platform == .macos, arch.executable() {
+        if isFFplay, platform == .macos, arch.executable() {
             try? FileManager.default.removeItem(at: URL(fileURLWithPath: "/usr/local/bin/ffmpeg"))
             try? FileManager.default.removeItem(at: URL(fileURLWithPath: "/usr/local/bin/ffplay"))
             try? FileManager.default.removeItem(at: URL(fileURLWithPath: "/usr/local/bin/ffprobe"))
@@ -357,26 +357,27 @@ class BuildFFMPEG: BaseBuild {
         "--enable-decoder=vc1", "--enable-decoder=vp6", "--enable-decoder=vp6a", "--enable-decoder=vp6f",
         "--enable-decoder=vp7", "--enable-decoder=vp8", "--enable-decoder=vp9",
         // 音频
-        "--enable-decoder=aac", "--enable-decoder=aac_latm", "--enable-decoder=ac3", "--enable-decoder=alac",
+        "--enable-decoder=aac*", "--enable-decoder=ac3*", "--enable-decoder=alac*",
         "--enable-decoder=amrnb", "--enable-decoder=amrwb", "--enable-decoder=ape", "--enable-decoder=cook",
-        "--enable-decoder=dca", "--enable-decoder=eac3", "--enable-decoder=flac", "--enable-decoder=mp1",
-        "--enable-decoder=mp2", "--enable-decoder=mp3*", "--enable-decoder=opus", "--enable-decoder=pcm*",
-        "--enable-decoder=wma*", "--enable-decoder=vorbis", "--enable-decoder=truehd", "--enable-decoder=dolby_e",
+        "--enable-decoder=dca", "--enable-decoder=dolby_e", "--enable-decoder=eac3*", "--enable-decoder=flac",
+        "--enable-decoder=mp1", "--enable-decoder=mp2", "--enable-decoder=mp3*", "--enable-decoder=opus", "--enable-decoder=pcm*",
+        "--enable-decoder=truehd", "--enable-decoder=vorbis", "--enable-decoder=wma*", 
         // 字幕
-        "--enable-decoder=ass", "--enable-decoder=srt", "--enable-decoder=ssa", "--enable-decoder=movtext", "--enable-decoder=subrip", "--enable-decoder=webvtt",
-        "--enable-decoder=dvdsub", "--enable-decoder=dvbsub",
+        "--enable-decoder=ass", "--enable-decoder=dvbsub", "--enable-decoder=dvdsub", "--enable-decoder=movtext",
+        "--enable-decoder=srt", "--enable-decoder=ssa", "--enable-decoder=subrip", "--enable-decoder=webvtt",
+       
         // ./configure --list-muxers
         "--disable-muxers",
         // "--enable-muxer=mpegts", "--enable-muxer=mp4",
         // ./configure --list-demuxers
-        "--disable-demuxers", "--enable-demuxer=aac", "--enable-demuxer=concat", "--enable-demuxer=data", "--enable-demuxer=flv",
-        "--enable-demuxer=live_flv", "--enable-demuxer=loas", "--enable-demuxer=m4v", "--enable-demuxer=mov",
-        "--enable-demuxer=mp3", "--enable-demuxer=hls",
-        "--enable-demuxer=mpegts", "--enable-demuxer=mpegtsraw", "--enable-demuxer=mpegvideo",
-        "--enable-demuxer=hevc", "--enable-demuxer=dash", "--enable-demuxer=wav", "--enable-demuxer=ogg",
-        "--enable-demuxer=ape", "--enable-demuxer=aiff", "--enable-demuxer=flac", "--enable-demuxer=amr",
-        "--enable-demuxer=rtsp", "--enable-demuxer=asf", "--enable-demuxer=avi", "--enable-demuxer=matroska",
-        "--enable-demuxer=rm", "--enable-demuxer=vc1", "--enable-demuxer=h264", "--enable-demuxer=mpegtsraw",
+        "--disable-demuxers", "--enable-demuxer=aac",  "--enable-demuxer=aiff", "--enable-demuxer=amr",
+        "--enable-demuxer=asf",  "--enable-demuxer=ape", "--enable-demuxer=avi", 
+        "--enable-demuxer=concat", "--enable-demuxer=dash", "--enable-demuxer=data", "--enable-demuxer=eac3", 
+        "--enable-demuxer=flac", "--enable-demuxer=flv",  "--enable-demuxer=h264", "--enable-demuxer=hevc", "--enable-demuxer=hls",
+        "--enable-demuxer=live_flv",  "--enable-demuxer=loas", 
+        "--enable-demuxer=m4v", "--enable-demuxer=matroska", "--enable-demuxer=mov", "--enable-demuxer=mp3", "--enable-demuxer=mpeg*",
+        "--enable-demuxer=ogg",  "--enable-demuxer=rm", "--enable-demuxer=rtsp",
+        "--enable-demuxer=vc1",  "--enable-demuxer=wav",
         // "--enable-demuxer=latm",
         // "--enable-demuxer=webm_dash_manifest",
         // ./configure --list-protocols

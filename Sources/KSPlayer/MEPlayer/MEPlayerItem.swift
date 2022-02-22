@@ -88,7 +88,7 @@ final class MEPlayerItem {
                 log = NSString(format: log, arguments: arguments) as String
             }
             // 找不到解码器
-            //            if log.hasPrefix("parser not found for codec") {}
+            if log.hasPrefix("parser not found for codec") {}
             KSLog(log)
         }
         operationQueue.name = "KSPlayer_" + String(describing: self).components(separatedBy: ".").last!
