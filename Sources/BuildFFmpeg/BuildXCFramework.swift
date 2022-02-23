@@ -185,6 +185,8 @@ class BuildFFMPEG: BaseBuild {
 //            ffmpegcflags.append("--assert-level=1")
 //        }
         if platform == .maccatalyst {
+            // aacpsdsp.o), building for Mac Catalyst, but linking in object file built for
+            // x86_64 binaries are built without ASM support, since ASM for x86_64 is actually x86 and that confuses `xcodebuild -create-xcframework`
             ffmpegcflags.append("--disable-asm")
         }
         var cflags = cflags
@@ -305,7 +307,7 @@ class BuildFFMPEG: BaseBuild {
         if Utility.shell("which pkg-config") == nil {
             Utility.shell("brew install pkg-config")
         }
-        if isDebug, Utility.shell("which sdl2-config") == nil {
+        if isFFplay, Utility.shell("which sdl2-config") == nil {
             Utility.shell("brew install sdl2")
         }
     }
@@ -361,23 +363,23 @@ class BuildFFMPEG: BaseBuild {
         "--enable-decoder=amrnb", "--enable-decoder=amrwb", "--enable-decoder=ape", "--enable-decoder=cook",
         "--enable-decoder=dca", "--enable-decoder=dolby_e", "--enable-decoder=eac3*", "--enable-decoder=flac",
         "--enable-decoder=mp1", "--enable-decoder=mp2", "--enable-decoder=mp3*", "--enable-decoder=opus", "--enable-decoder=pcm*",
-        "--enable-decoder=truehd", "--enable-decoder=vorbis", "--enable-decoder=wma*", 
+        "--enable-decoder=truehd", "--enable-decoder=vorbis", "--enable-decoder=wma*",
         // 字幕
         "--enable-decoder=ass", "--enable-decoder=dvbsub", "--enable-decoder=dvdsub", "--enable-decoder=movtext",
         "--enable-decoder=srt", "--enable-decoder=ssa", "--enable-decoder=subrip", "--enable-decoder=webvtt",
-       
+
         // ./configure --list-muxers
         "--disable-muxers",
         // "--enable-muxer=mpegts", "--enable-muxer=mp4",
         // ./configure --list-demuxers
-        "--disable-demuxers", "--enable-demuxer=aac",  "--enable-demuxer=aiff", "--enable-demuxer=amr",
-        "--enable-demuxer=asf",  "--enable-demuxer=ape", "--enable-demuxer=avi", 
-        "--enable-demuxer=concat", "--enable-demuxer=dash", "--enable-demuxer=data", "--enable-demuxer=eac3", 
-        "--enable-demuxer=flac", "--enable-demuxer=flv",  "--enable-demuxer=h264", "--enable-demuxer=hevc", "--enable-demuxer=hls",
-        "--enable-demuxer=live_flv",  "--enable-demuxer=loas", 
+        "--disable-demuxers", "--enable-demuxer=aac", "--enable-demuxer=ac3", "--enable-demuxer=aiff", "--enable-demuxer=amr",
+        "--enable-demuxer=asf", "--enable-demuxer=ape", "--enable-demuxer=avi",
+        "--enable-demuxer=concat", "--enable-demuxer=dash", "--enable-demuxer=data", "--enable-demuxer=eac3",
+        "--enable-demuxer=flac", "--enable-demuxer=flv", "--enable-demuxer=h264", "--enable-demuxer=hevc", "--enable-demuxer=hls",
+        "--enable-demuxer=live_flv", "--enable-demuxer=loas",
         "--enable-demuxer=m4v", "--enable-demuxer=matroska", "--enable-demuxer=mov", "--enable-demuxer=mp3", "--enable-demuxer=mpeg*",
-        "--enable-demuxer=ogg",  "--enable-demuxer=rm", "--enable-demuxer=rtsp",
-        "--enable-demuxer=vc1",  "--enable-demuxer=wav",
+        "--enable-demuxer=ogg", "--enable-demuxer=rm", "--enable-demuxer=rtsp",
+        "--enable-demuxer=vc1", "--enable-demuxer=wav",
         // "--enable-demuxer=latm",
         // "--enable-demuxer=webm_dash_manifest",
         // ./configure --list-protocols
