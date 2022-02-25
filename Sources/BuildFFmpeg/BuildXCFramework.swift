@@ -17,7 +17,7 @@ class BaseBuild {
     }
 
     fileprivate let platforms = PlatformType.allCases
-    // private let platforms = [PlatformType.tvos]
+//     fileprivate let platforms = [PlatformType.tvos]
     private let library: String
     init(library: String) {
         self.library = library
@@ -33,11 +33,14 @@ class BaseBuild {
         createXCFramework()
     }
 
+    func architectures(_ platform: PlatformType) -> [ArchType] {
+        platform.architectures()
+    }
+
     private func build(platform: PlatformType, arch: ArchType) {
         let url = scratch(platform: platform, arch: arch)
         try? FileManager.default.createDirectory(at: url, withIntermediateDirectories: true, attributes: nil)
-        var cflags = "-arch \(arch.rawValue) \(platform.deploymentTarget())"
-        cflags += " -fembed-bitcode"
+        let cflags = "-arch " + arch.rawValue + " -fembed-bitcode " + platform.deploymentTarget()
         innerBuid(platform: platform, arch: arch, cflags: cflags, buildDir: url)
     }
 
@@ -51,13 +54,14 @@ class BaseBuild {
                 try? FileManager.default.removeItem(at: XCFrameworkFile)
             }
             for platform in platforms {
-                arguments += " -framework \(createFramework(framework: framework, platform: platform, archs: platform.architectures()))"
+                arguments += " -framework \(createFramework(framework: framework, platform: platform))"
             }
             Utility.shell("xcodebuild -create-xcframework\(arguments) -output \(XCFrameworkFile.path)")
         }
     }
 
-    private func createFramework(framework: String, platform: PlatformType, archs: [ArchType]) -> String {
+    private func createFramework(framework: String, platform: PlatformType) -> String {
+        let archs = architectures(platform)
         let frameworkDir = URL.currentDirectory + [library, platform.rawValue, "\(framework).framework"]
         try? FileManager.default.removeItem(at: frameworkDir)
         try? FileManager.default.createDirectory(at: frameworkDir, withIntermediateDirectories: true, attributes: nil)
@@ -184,13 +188,8 @@ class BuildFFMPEG: BaseBuild {
 //        if platform == .isimulator || platform == .tvsimulator {
 //            ffmpegcflags.append("--assert-level=1")
 //        }
-        if platform == .maccatalyst {
-            // aacpsdsp.o), building for Mac Catalyst, but linking in object file built for
-            // x86_64 binaries are built without ASM support, since ASM for x86_64 is actually x86 and that confuses `xcodebuild -create-xcframework`
-            ffmpegcflags.append("--disable-asm")
-        }
         var cflags = cflags
-        var ldflags = "-arch \(arch.rawValue)"
+        var ldflags = "-arch \(arch.rawValue) "
         if platform == .maccatalyst {
             let syslibroot = platform.isysroot()
             cflags += " -isysroot \(syslibroot) -iframework \(syslibroot)/System/iOSSupport/System/Library/Frameworks"
@@ -204,7 +203,7 @@ class BuildFFMPEG: BaseBuild {
         }
         let prefix = thinDir(platform: platform, arch: arch)
         var args = ["set -o noglob &&", (URL.currentDirectory + [ffmpegFile, "configure"]).path, "--target-os=darwin",
-                    "--arch=\(arch)", "--cc='xcrun -sdk \(platform.sdk().lowercased()) clang'",
+                    "--arch=\(arch.arch())", platform.cpu(arch: arch), "--cc='xcrun -sdk \(platform.sdk().lowercased()) clang'",
                     "--extra-cflags='\(cflags)'", "--extra-ldflags='\(ldflags)'", "--prefix=\(prefix.path)"]
         args.append(contentsOf: ffmpegcflags)
         print(args.joined(separator: " "))
@@ -328,7 +327,7 @@ class BuildFFMPEG: BaseBuild {
         "--disable-bsfs", "--disable-symver", "--disable-armv5te", "--disable-armv6", " --disable-armv6t2",
         "--disable-linux-perf", "--disable-bzlib", "--disable-videotoolbox",
         // Configuration options:
-        "--enable-cross-compile", "--enable-stripping", "--enable-libxml2", "--enable-thumb", "--enable-asm",
+        "--enable-cross-compile", "--enable-stripping", "--enable-libxml2", "--enable-thumb",
         "--enable-static", "--disable-shared", "--enable-runtime-cpudetect", "--disable-gray", "--disable-swscale-alpha",
         // Documentation options:
         "--disable-doc", "--disable-htmlpages", "--disable-manpages", "--disable-podpages", "--disable-txtpages",
@@ -412,6 +411,14 @@ class BuildOpenSSL: BaseBuild {
         super.buildALL()
     }
 
+    override func architectures(_ platform: PlatformType) -> [ArchType] {
+        if platform == .ios {
+            return [.arm64e]
+        } else {
+            return super.architectures(platform)
+        }
+    }
+
     override func innerBuid(platform: PlatformType, arch: ArchType, cflags: String, buildDir: URL) {
         let directoryURL = URL.currentDirectory + sslFile
         var ccFlags = "/usr/bin/clang " + cflags
@@ -488,7 +495,7 @@ enum PlatformType: String, CaseIterable {
     func architectures() -> [ArchType] {
         switch self {
         case .ios:
-            return [.arm64]
+            return [.arm64, .arm64e]
         case .tvos:
             return [.arm64]
         case .isimulator, .tvsimulator:
@@ -496,7 +503,24 @@ enum PlatformType: String, CaseIterable {
         case .macos:
             return [.arm64, .x86_64]
         case .maccatalyst:
-            return [.x86_64]
+            return [.arm64, .x86_64]
+        }
+    }
+
+    func frameworkFileName() -> String {
+        switch self {
+        case .ios:
+            return "ios-" + architectures().map(\.rawValue).joined(separator: "_")
+        case .isimulator:
+            return "ios-" + architectures().map(\.rawValue).joined(separator: "_") + "-simulator"
+        case .tvos:
+            return "tvos-" + architectures().map(\.rawValue).joined(separator: "_")
+        case .tvsimulator:
+            return "tvos-" + architectures().map(\.rawValue).joined(separator: "_") + "-simulator"
+        case .macos:
+            return "macos-" + architectures().map(\.rawValue).joined(separator: "_")
+        case .maccatalyst:
+            return "ios-" + architectures().map(\.rawValue).joined(separator: "_") + "-maccatalyst"
         }
     }
 
@@ -565,6 +589,19 @@ enum PlatformType: String, CaseIterable {
         crossTop() + "/SDKs/" + crossSDK()
     }
 
+    func cpu(arch: ArchType) -> String {
+        switch arch {
+        case .arm64:
+            return "--cpu=armv8 --enable-neon --enable-asm"
+        case .x86_64:
+            // aacpsdsp.o), building for Mac Catalyst, but linking in object file built for
+            // x86_64 binaries are built without ASM support, since ASM for x86_64 is actually x86 and that confuses `xcodebuild -create-xcframework`
+            return self == .maccatalyst ? "--cpu=x86_64 --disable-neon --disable-asm" : "--cpu=x86_64 --enable-neon --enable-asm"
+        case .arm64e:
+            return "--cpu=armv8.3-a --enable-neon --enable-asm"
+        }
+    }
+
     func target(arch: ArchType) -> String {
         if arch == .x86_64 {
             return "darwin64-x86_64-cc"
@@ -613,6 +650,15 @@ enum ArchType: String, CaseIterable {
             return true
         }
         return false
+    }
+
+    func arch() -> String {
+        switch self {
+        case .arm64, .arm64e:
+            return "aarch64"
+        case .x86_64:
+            return "x86_64"
+        }
     }
 }
 
