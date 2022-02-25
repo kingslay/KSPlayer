@@ -19,61 +19,27 @@ protocol Swresample {
 }
 
 class VideoSwresample: Swresample {
-    private var dstFormat: AVPixelFormat
     private var imgConvertCtx: OpaquePointer?
     private var format: AVPixelFormat = AV_PIX_FMT_NONE
     private var height: Int32 = 0
     private var width: Int32 = 0
-    private var forceTransfer: Bool
     private var pool: CVPixelBufferPool?
-    var dstFrame: UnsafeMutablePointer<AVFrame>?
-    init(dstFormat: AVPixelFormat = AV_PIX_FMT_NV12, forceTransfer: Bool = false) {
-        self.dstFormat = dstFormat
-        self.forceTransfer = forceTransfer
-    }
-
-    private func setup(frame: UnsafeMutablePointer<AVFrame>) -> Bool {
-        let format = AVPixelFormat(rawValue: frame.pointee.format)
-        let width = frame.pointee.width
-        let height = frame.pointee.height
+    private func setup(format: AVPixelFormat, width: Int32, height: Int32, linesize: Int32) {
         if self.format == format, self.width == width, self.height == height {
-            return true
+            return
         }
-        let result = setup(format: format, width: width, height: height)
-        if result, let pixelFormatType = dstFormat.osType() {
-            pool = CVPixelBufferPool.ceate(width: width, height: height, bytesPerRowAlignment: frame.pointee.linesize.0, pixelFormatType: pixelFormatType)
-        }
-        return result
-    }
-
-    private func setup(format: AVPixelFormat, width: Int32, height: Int32) -> Bool {
-        shutdown()
         self.format = format
         self.height = height
         self.width = width
-        if !forceTransfer {
-            if let osType = self.format.osType(), osType.planeCount() == format.planeCount() {
-                dstFormat = self.format
-                return true
-            } else {
-                dstFormat = self.format.bestPixelFormat()
-            }
+        let pixelFormatType: OSType
+        if let osType = format.osType(), osType.planeCount() == format.planeCount() {
+            pixelFormatType = osType
+        } else {
+            let dstFormat = format.bestPixelFormat()
+            pixelFormatType = dstFormat.osType()!
+            imgConvertCtx = sws_getCachedContext(imgConvertCtx, width, height, self.format, width, height, dstFormat, SWS_BICUBIC, nil, nil, nil)
         }
-        imgConvertCtx = sws_getCachedContext(imgConvertCtx, width, height, self.format, width, height, dstFormat, SWS_BICUBIC, nil, nil, nil)
-        guard imgConvertCtx != nil else {
-            return false
-        }
-        dstFrame = av_frame_alloc()
-        guard let dstFrame = dstFrame else {
-            sws_freeContext(imgConvertCtx)
-            imgConvertCtx = nil
-            return false
-        }
-        dstFrame.pointee.width = width
-        dstFrame.pointee.height = height
-        dstFrame.pointee.format = dstFormat.rawValue
-        av_image_alloc(&dstFrame.pointee.data.0, &dstFrame.pointee.linesize.0, width, height, AVPixelFormat(rawValue: dstFrame.pointee.format), 64)
-        return true
+        pool = CVPixelBufferPool.ceate(width: width, height: height, bytesPerRowAlignment: linesize, pixelFormatType: pixelFormatType)
     }
 
     func transfer(avframe: UnsafeMutablePointer<AVFrame>) throws -> MEFrame {
@@ -83,38 +49,94 @@ class VideoSwresample: Swresample {
             frame.corePixelBuffer = avframe.pointee.data.3 as! CVPixelBuffer
             // swiftlint:enable force_cast
         } else {
-            _ = setup(frame: avframe)
-            if let dstFrame = dstFrame, swsConvert(data: Array(tuple: avframe.pointee.data), linesize: Array(tuple: avframe.pointee.linesize)) {
-                avframe.pointee.format = dstFrame.pointee.format
-                avframe.pointee.data = dstFrame.pointee.data
-                avframe.pointee.linesize = dstFrame.pointee.linesize
-            }
-            if let pool = pool {
-                frame.corePixelBuffer = pool.getPixelBuffer(fromFrame: avframe.pointee)
-            } else {
-                frame.corePixelBuffer = PixelBuffer(frame: avframe)
-            }
+            frame.corePixelBuffer = transfer(frame: avframe.pointee)
         }
         return frame
     }
 
-    func transfer(format: AVPixelFormat, width: Int32, height: Int32, data: [UnsafeMutablePointer<UInt8>?], linesize: [Int]) -> CGImage? {
-        if setup(format: format, width: width, height: height), swsConvert(data: data, linesize: linesize.compactMap { Int32($0) }), let frame = dstFrame?.pointee {
-            return CGImage.make(rgbData: frame.data.0!, linesize: Int(frame.linesize.0), width: Int(width), height: Int(height), isAlpha: dstFormat == AV_PIX_FMT_RGBA)
+    func transfer(frame: AVFrame) -> CVPixelBuffer? {
+        let format = AVPixelFormat(rawValue: frame.format)
+        let width = frame.width
+        let height = frame.height
+        let pbuf = transfer(format: format, width: width, height: height, data: Array(tuple: frame.data), linesize: Array(tuple: frame.linesize))
+        if let pbuf = pbuf {
+            if let aspectRatio = frame.sample_aspect_ratio.size.aspectRatio {
+                CVBufferSetAttachment(pbuf, kCVImageBufferPixelAspectRatioKey, aspectRatio, .shouldPropagate)
+            }
+            if let ycbcrMatrix = frame.colorspace.ycbcrMatrix {
+                CVBufferSetAttachment(pbuf, kCVImageBufferYCbCrMatrixKey, ycbcrMatrix, .shouldPropagate)
+            }
+            if let colorPrimaries = frame.color_primaries.colorPrimaries {
+                CVBufferSetAttachment(pbuf, kCVImageBufferColorPrimariesKey, colorPrimaries, .shouldPropagate)
+            }
+            if let transferFunction = frame.color_trc.transferFunction {
+                CVBufferSetAttachment(pbuf, kCVImageBufferTransferFunctionKey, transferFunction, .shouldPropagate)
+            }
+            if let colorSpace = frame.colorspace.colorSpace {
+                CVBufferSetAttachment(pbuf, kCVImageBufferCGColorSpaceKey, colorSpace, .shouldPropagate)
+            }
         }
-        return nil
+        return pbuf
     }
 
-    private func swsConvert(data: [UnsafeMutablePointer<UInt8>?], linesize: [Int32]) -> Bool {
-        guard let dstFrame = dstFrame else {
-            return false
+    func transfer(format: AVPixelFormat, width: Int32, height: Int32, data: [UnsafeMutablePointer<UInt8>?], linesize: [Int32]) -> CVPixelBuffer? {
+        setup(format: format, width: width, height: height, linesize: linesize[0])
+        guard let pool = pool else {
+            return nil
         }
-        let result = sws_scale(imgConvertCtx, data.map { UnsafePointer($0) }, linesize, 0, height, &dstFrame.pointee.data.0, &dstFrame.pointee.linesize.0)
-        return result > 0
+        var pbuf: CVPixelBuffer?
+        let ret = CVPixelBufferPoolCreatePixelBuffer(kCFAllocatorDefault, pool, &pbuf)
+        guard let pbuf = pbuf, ret == kCVReturnSuccess else {
+            return nil
+        }
+        CVPixelBufferLockBaseAddress(pbuf, CVPixelBufferLockFlags(rawValue: 0))
+        let bufferPlaneCount = pbuf.planeCount
+        if let imgConvertCtx = imgConvertCtx {
+            let bytesPerRow = (0 ..< bufferPlaneCount).map { i in
+                Int32(CVPixelBufferGetBytesPerRowOfPlane(pbuf, i))
+            }
+            let contents = (0 ..< bufferPlaneCount).map { i in
+                pbuf.baseAddressOfPlane(at: i)?.assumingMemoryBound(to: UInt8.self)
+            }
+            _ = sws_scale(imgConvertCtx, data.map { UnsafePointer($0) }, linesize, 0, height, contents, bytesPerRow)
+        } else {
+            let planeCount = format.planeCount()
+            for i in 0 ..< bufferPlaneCount {
+                let height = pbuf.heightOfPlane(at: i)
+                let size = Int(linesize[i])
+                let bytesPerRow = CVPixelBufferGetBytesPerRowOfPlane(pbuf, i)
+                var contents = pbuf.baseAddressOfPlane(at: i)
+                var source = data[i]!
+                if bufferPlaneCount < planeCount, i + 2 == planeCount {
+                    var sourceU = data[i]!
+                    var sourceV = data[i + 1]!
+                    for _ in 0 ..< height {
+                        var j = 0
+                        while j < size {
+                            contents?.advanced(by: 2 * j).copyMemory(from: sourceU.advanced(by: j), byteCount: 1)
+                            contents?.advanced(by: 2 * j + 1).copyMemory(from: sourceV.advanced(by: j), byteCount: 1)
+                            j += 1
+                        }
+                        contents = contents?.advanced(by: bytesPerRow)
+                        sourceU = sourceU.advanced(by: size)
+                        sourceV = sourceV.advanced(by: size)
+                    }
+                } else if bytesPerRow == size {
+                    contents?.copyMemory(from: source, byteCount: height * size)
+                } else {
+                    for _ in 0 ..< height {
+                        contents?.copyMemory(from: source, byteCount: size)
+                        contents = contents?.advanced(by: bytesPerRow)
+                        source = source.advanced(by: size)
+                    }
+                }
+            }
+        }
+        CVPixelBufferUnlockBaseAddress(pbuf, CVPixelBufferLockFlags(rawValue: 0))
+        return pbuf
     }
 
     func shutdown() {
-        av_frame_free(&dstFrame)
         sws_freeContext(imgConvertCtx)
         imgConvertCtx = nil
     }
@@ -221,8 +243,8 @@ class PixelBuffer: BufferProtocol {
         if format == AV_PIX_FMT_RGB24 {
             image = CGImage.make(rgbData: dataWrap.data[0]!.contents().assumingMemoryBound(to: UInt8.self), linesize: Int(lineSize[0]), width: width, height: height)
         } else {
-            let scale = VideoSwresample(dstFormat: AV_PIX_FMT_RGB24, forceTransfer: true)
-            image = scale.transfer(format: format, width: Int32(width), height: Int32(height), data: dataWrap.data.map { $0?.contents().assumingMemoryBound(to: UInt8.self) }, linesize: lineSize)
+            let scale = VideoSwresample()
+            image = scale.transfer(format: format, width: Int32(width), height: Int32(height), data: dataWrap.data.map { $0?.contents().assumingMemoryBound(to: UInt8.self) }, linesize: lineSize.compactMap { Int32($0) })?.image()
             scale.shutdown()
         }
         return image
@@ -348,64 +370,6 @@ extension CVPixelBufferPool {
         let pixelBufferPoolOptions: NSDictionary = [kCVPixelBufferPoolMinimumBufferCountKey: bufferCount]
         CVPixelBufferPoolCreate(kCFAllocatorDefault, pixelBufferPoolOptions, sourcePixelBufferOptions, &outputPool)
         return outputPool
-    }
-
-    func getPixelBuffer(fromFrame frame: AVFrame) -> CVPixelBuffer? {
-        var pbuf: CVPixelBuffer?
-        let ret = CVPixelBufferPoolCreatePixelBuffer(kCFAllocatorDefault, self, &pbuf)
-        if let pbuf = pbuf, ret == kCVReturnSuccess {
-            CVPixelBufferLockBaseAddress(pbuf, CVPixelBufferLockFlags(rawValue: 0))
-            let data = Array(tuple: frame.data)
-            let linesize = Array(tuple: frame.linesize)
-            let planeCount = AVPixelFormat(frame.format).planeCount()
-            for i in 0 ..< pbuf.planeCount {
-                let height = pbuf.heightOfPlane(at: i)
-                let size = Int(linesize[i])
-                let bytesPerRow = CVPixelBufferGetBytesPerRowOfPlane(pbuf, i)
-                var contents = pbuf.baseAddressOfPlane(at: i)
-                var source = data[i]!
-                if pbuf.planeCount < planeCount, i + 2 == planeCount {
-                    var sourceU = data[i]!
-                    var sourceV = data[i + 1]!
-                    for _ in 0 ..< height {
-                        var j = 0
-                        while j < size {
-                            contents?.storeBytes(of: sourceU[j], toByteOffset: 2 * j, as: UInt8.self)
-                            contents?.storeBytes(of: sourceV[j], toByteOffset: 2 * j + 1, as: UInt8.self)
-                            j += 1
-                        }
-                        contents = contents?.advanced(by: bytesPerRow)
-                        sourceU = sourceU.advanced(by: size)
-                        sourceV = sourceV.advanced(by: size)
-                    }
-                } else if bytesPerRow == size {
-                    contents?.copyMemory(from: source, byteCount: height * size)
-                } else {
-                    for _ in 0 ..< height {
-                        contents?.copyMemory(from: source, byteCount: size)
-                        contents = contents?.advanced(by: bytesPerRow)
-                        source = source.advanced(by: size)
-                    }
-                }
-            }
-            CVPixelBufferUnlockBaseAddress(pbuf, CVPixelBufferLockFlags(rawValue: 0))
-            if let aspectRatio = frame.sample_aspect_ratio.size.aspectRatio {
-                CVBufferSetAttachment(pbuf, kCVImageBufferPixelAspectRatioKey, aspectRatio, .shouldPropagate)
-            }
-            if let ycbcrMatrix = frame.colorspace.ycbcrMatrix {
-                CVBufferSetAttachment(pbuf, kCVImageBufferYCbCrMatrixKey, ycbcrMatrix, .shouldPropagate)
-            }
-            if let colorPrimaries = frame.color_primaries.colorPrimaries {
-                CVBufferSetAttachment(pbuf, kCVImageBufferColorPrimariesKey, colorPrimaries, .shouldPropagate)
-            }
-            if let transferFunction = frame.color_trc.transferFunction {
-                CVBufferSetAttachment(pbuf, kCVImageBufferTransferFunctionKey, transferFunction, .shouldPropagate)
-            }
-            if let colorSpace = frame.colorspace.colorSpace {
-                CVBufferSetAttachment(pbuf, kCVImageBufferCGColorSpaceKey, colorSpace, .shouldPropagate)
-            }
-        }
-        return pbuf
     }
 }
 

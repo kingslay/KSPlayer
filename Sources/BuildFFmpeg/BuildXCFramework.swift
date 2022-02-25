@@ -61,12 +61,11 @@ class BaseBuild {
     }
 
     private func createFramework(framework: String, platform: PlatformType) -> String {
-        let archs = architectures(platform)
         let frameworkDir = URL.currentDirectory + [library, platform.rawValue, "\(framework).framework"]
         try? FileManager.default.removeItem(at: frameworkDir)
         try? FileManager.default.createDirectory(at: frameworkDir, withIntermediateDirectories: true, attributes: nil)
         var command = "lipo -create"
-        for arch in archs {
+        for arch in architectures(platform) {
             let prefix = thinDir(platform: platform, arch: arch)
             command += " "
             command += (prefix + ["lib", "\(framework).a"]).path
@@ -412,10 +411,11 @@ class BuildOpenSSL: BaseBuild {
     }
 
     override func architectures(_ platform: PlatformType) -> [ArchType] {
-        if platform == .ios {
-            return [.arm64e]
+        let archs = super.architectures(platform)
+        if platform == .ios, archs.contains(.arm64e) {
+            return archs.filter { $0 != .arm64 }
         } else {
-            return super.architectures(platform)
+            return archs
         }
     }
 
