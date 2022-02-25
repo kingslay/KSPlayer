@@ -277,8 +277,9 @@ extension MEPlayerItem {
                 condition.wait()
             }
             if state == .seeking {
-                allTracks.forEach { $0.seek(time: currentPlaybackTime) }
-                let timeStamp = Int64(currentPlaybackTime * TimeInterval(AV_TIME_BASE))
+                let time = currentPlaybackTime + startTime
+                allTracks.forEach { $0.seek(time: time) }
+                let timeStamp = Int64(time * TimeInterval(AV_TIME_BASE))
                 // can not seek to key frame
                 _ = avformat_seek_file(formatCtx, -1, Int64.min, timeStamp, Int64.max, options.seekFlags)
                 let result = avformat_seek_file(formatCtx, -1, Int64.min, timeStamp, Int64.max, options.seekFlags)
@@ -286,7 +287,7 @@ extension MEPlayerItem {
                     break
                 }
                 isSeek = true
-                allTracks.forEach { $0.seek(time: currentPlaybackTime) }
+                allTracks.forEach { $0.seek(time: time) }
                 seekingCompletionHandler?(result >= 0)
                 seekingCompletionHandler = nil
                 state = .reading
@@ -504,7 +505,7 @@ extension MEPlayerItem: OutputRenderSourceDelegate {
             return
         }
         if isAudioStalled {
-            currentPlaybackTime = time.seconds - options.audioDelay
+            currentPlaybackTime = time.seconds - options.audioDelay - startTime
             videoMediaTime = CACurrentMediaTime()
         }
     }
@@ -514,7 +515,7 @@ extension MEPlayerItem: OutputRenderSourceDelegate {
             return
         }
         if !isAudioStalled {
-            currentPlaybackTime = time.seconds
+            currentPlaybackTime = time.seconds - startTime
         }
     }
 
@@ -522,7 +523,7 @@ extension MEPlayerItem: OutputRenderSourceDelegate {
         if type == .video {
             let predicate: (MEFrame) -> Bool = { [weak self] frame -> Bool in
                 guard let self = self else { return true }
-                var desire = self.currentPlaybackTime + self.options.audioDelay
+                var desire = self.currentPlaybackTime + self.options.audioDelay + self.startTime
                 if self.isAudioStalled {
                     desire += max(CACurrentMediaTime() - self.videoMediaTime, 0)
                 }

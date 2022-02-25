@@ -392,6 +392,18 @@ extension CVPixelBufferPool {
             if let aspectRatio = frame.sample_aspect_ratio.size.aspectRatio {
                 CVBufferSetAttachment(pbuf, kCVImageBufferPixelAspectRatioKey, aspectRatio, .shouldPropagate)
             }
+            if let ycbcrMatrix = frame.colorspace.ycbcrMatrix {
+                CVBufferSetAttachment(pbuf, kCVImageBufferYCbCrMatrixKey, ycbcrMatrix, .shouldPropagate)
+            }
+            if let colorPrimaries = frame.color_primaries.colorPrimaries {
+                CVBufferSetAttachment(pbuf, kCVImageBufferColorPrimariesKey, colorPrimaries, .shouldPropagate)
+            }
+            if let transferFunction = frame.color_trc.transferFunction {
+                CVBufferSetAttachment(pbuf, kCVImageBufferTransferFunctionKey, transferFunction, .shouldPropagate)
+            }
+            if let colorSpace = frame.colorspace.colorSpace {
+                CVBufferSetAttachment(pbuf, kCVImageBufferCGColorSpaceKey, colorSpace, .shouldPropagate)
+            }
         }
         return pbuf
     }
