@@ -255,6 +255,7 @@ open class VideoPlayerView: PlayerView {
         controllerView.addGestureRecognizer(tapGesture)
         panGesture.addTarget(self, action: #selector(panGestureAction(_:)))
         controllerView.addGestureRecognizer(panGesture)
+        panGesture.isEnabled = false
         doubleTapGesture.addTarget(self, action: #selector(doubleTapGestureAction))
         doubleTapGesture.numberOfTapsRequired = 2
         tapGesture.require(toFail: doubleTapGesture)
@@ -676,8 +677,6 @@ public extension KSPlayerManager {
     static var enableVolumeGestures = true
     /// 开启进度滑动手势 默认true
     static var enablePlaytimeGestures = true
-    /// 竖屏是否开启手势控制 默认false
-    static var enablePortraitGestures = false
     /// 播放内核选择策略 先使用firstPlayer，失败了自动切换到secondPlayer，播放内核有KSAVPlayer、KSMEPlayer两个选项
     /// 是否能后台播放视频
     static var canBackgroundPlay = false

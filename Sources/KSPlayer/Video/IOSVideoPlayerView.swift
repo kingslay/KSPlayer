@@ -35,7 +35,6 @@ open class IOSVideoPlayerView: VideoPlayerView {
 
     override open func customizeUIComponents() {
         super.customizeUIComponents()
-        panGesture.isEnabled = false
         if UIDevice.current.userInterfaceIdiom == .phone {
             subtitleLabel.font = .systemFont(ofSize: 14)
         }
@@ -310,15 +309,11 @@ extension IOSVideoPlayerView {
         updateUI(isFullScreen: UIApplication.isLandscape)
     }
 
-    private func judgePanGesture() {
+    open func judgePanGesture() {
         if landscapeButton.isSelected || UIDevice.current.userInterfaceIdiom == .pad {
             panGesture.isEnabled = isPlayed && !replayButton.isSelected
         } else {
-            if KSPlayerManager.enablePortraitGestures {
-                panGesture.isEnabled = toolBar.playButton.isSelected
-            } else {
-                panGesture.isEnabled = false
-            }
+            panGesture.isEnabled = toolBar.playButton.isSelected
         }
     }
 }

@@ -154,8 +154,6 @@ public protocol PlayerControllerDelegate: class {
       public static var enableVolumeGestures = true
       /// 开启进度滑动手势 默认true
       public static var enablePlaytimeGestures = true
-      /// 竖屏是否开启手势控制 默认false
-      public static var enablePortraitGestures = false
       /// 播放内核选择策略 先使用firstPlayer，失败了自动切换到secondPlayer，播放内核有KSAVPlayer、KSMEPlayer两个选项
       public static var firstPlayerType: MediaPlayerProtocol.Type = KSAVPlayer.self
       public static var secondPlayerType: MediaPlayerProtocol.Type?
