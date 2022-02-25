@@ -17,7 +17,7 @@ class SubtitleDecode: DecodeProtocol {
     private weak var delegate: DecodeResultDelegate?
     private let reg = AssParse.patternReg()
     private var codecContext: UnsafeMutablePointer<AVCodecContext>?
-    private let scale = VideoSwresample(dstFormat: AV_PIX_FMT_RGBA, forceTransfer: true)
+    private let scale = VideoSwresample()
     private var subtitle = AVSubtitle()
     private var preSubtitleFrame: SubtitleFrame?
     private let timebase: Timebase
@@ -103,7 +103,7 @@ class SubtitleDecode: DecodeProtocol {
                     attributedString.append(group.text)
                 }
             } else if rect.type == SUBTITLE_BITMAP {
-                image = scale.transfer(format: AV_PIX_FMT_PAL8, width: rect.w, height: rect.h, data: Array(tuple: rect.data), linesize: Array(tuple: rect.linesize).map { Int($0) })
+                image = scale.transfer(format: AV_PIX_FMT_PAL8, width: rect.w, height: rect.h, data: Array(tuple: rect.data), linesize: Array(tuple: rect.linesize))?.image()
             }
         }
         return (attributedString, image.map { UIImage(cgImage: $0) })

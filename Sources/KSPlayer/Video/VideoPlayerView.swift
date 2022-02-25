@@ -487,6 +487,7 @@ extension VideoPlayerView {
         subtitleLabel.textAlignment = .center
         subtitleLabel.textColor = .white
         subtitleLabel.font = .systemFont(ofSize: 16)
+        subtitleBackView.backgroundColor = UIColor.black.withAlphaComponent(0.3)
         subtitleBackView.cornerRadius = 2
         subtitleBackView.addSubview(subtitleLabel)
         subtitleBackView.isHidden = true
