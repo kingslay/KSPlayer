@@ -125,9 +125,9 @@ extension AVCodecParameters {
             avcodec_free_context(&codecContextOption)
             throw NSError(errorCode: .codecContextSetParam, ffmpegErrnum: result)
         }
-//        if options.canHardwareDecode(codecpar: pointee) {
-//            codecContext.getFormat()
-//        }
+        if options.enableHardwareDecode() {
+            codecContext.getFormat()
+        }
         guard let codec = avcodec_find_decoder(codecContext.pointee.codec_id) else {
             avcodec_free_context(&codecContextOption)
             throw NSError(errorCode: .codecContextFindDecoder, ffmpegErrnum: result)
@@ -161,11 +161,10 @@ extension UnsafeMutablePointer where Pointee == AVCodecContext {
             var i = 0
             while fmt[i] != AV_PIX_FMT_NONE {
                 if fmt[i] == AV_PIX_FMT_VIDEOTOOLBOX {
-                    var deviceCtx = av_hwdevice_ctx_alloc(AV_HWDEVICE_TYPE_VIDEOTOOLBOX)
+                    let deviceCtx = av_hwdevice_ctx_alloc(AV_HWDEVICE_TYPE_VIDEOTOOLBOX)
                     if deviceCtx == nil {
                         break
                     }
-                    av_buffer_unref(&deviceCtx)
                     var framesCtx = av_hwframe_ctx_alloc(deviceCtx)
                     if let framesCtx = framesCtx {
                         let framesCtxData = UnsafeMutableRawPointer(framesCtx.pointee.data)

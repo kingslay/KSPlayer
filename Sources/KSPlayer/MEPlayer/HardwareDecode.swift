@@ -25,26 +25,14 @@ extension TrackProtocol {
         autoreleasepool {
             if mediaType == .subtitle {
                 return SubtitleDecode(assetTrack: self, options: options, delegate: delegate)
-            } else if mediaType == .video, let session = DecompressionSession(codecpar: stream.pointee.codecpar.pointee, options: options) {
-                return VideoHardwareDecode(assetTrack: self, options: options, session: session, delegate: delegate)
-            } else {
+            }
+//            else if mediaType == .video, let session = DecompressionSession(codecpar: stream.pointee.codecpar.pointee, options: options) {
+//                return VideoHardwareDecode(assetTrack: self, options: options, session: session, delegate: delegate)
+//            }
+            else {
                 return SoftwareDecode(assetTrack: self, options: options, delegate: delegate)
             }
         }
-    }
-}
-
-extension KSOptions {
-    func canHardwareDecode(codecpar: AVCodecParameters) -> Bool {
-        if videoFilters != nil {
-            return false
-        }
-        if codecpar.codec_id == AV_CODEC_ID_H264, hardwareDecodeH264 {
-            return true
-        } else if codecpar.codec_id == AV_CODEC_ID_HEVC, VTIsHardwareDecodeSupported(kCMVideoCodecType_HEVC), hardwareDecodeH265 {
-            return true
-        }
-        return false
     }
 }
 
@@ -129,7 +117,7 @@ class DecompressionSession {
     fileprivate let decompressionSession: VTDecompressionSession
     init?(codecpar: AVCodecParameters, options: KSOptions) {
         let format = AVPixelFormat(codecpar.format)
-        guard options.canHardwareDecode(codecpar: codecpar), let pixelFormatType = format.osType(), let extradata = codecpar.extradata else {
+        guard let pixelFormatType = format.osType(), let extradata = codecpar.extradata else {
             return nil
         }
         let extradataSize = codecpar.extradata_size
@@ -166,7 +154,7 @@ class DecompressionSession {
             return nil
         }
         self.formatDescription = formatDescription
-
+//        VTDecompressionSessionCanAcceptFormatDescription(<#T##session: VTDecompressionSession##VTDecompressionSession#>, formatDescription: <#T##CMFormatDescription#>)
         let attributes: NSMutableDictionary = [
             kCVPixelBufferPixelFormatTypeKey: pixelFormatType,
             kCVPixelBufferMetalCompatibilityKey: true,

@@ -34,6 +34,8 @@ class VideoSwresample: Swresample {
         let pixelFormatType: OSType
         if let osType = format.osType(), osType.planeCount() == format.planeCount() {
             pixelFormatType = osType
+            sws_freeContext(imgConvertCtx)
+            imgConvertCtx = nil
         } else {
             let dstFormat = format.bestPixelFormat()
             pixelFormatType = dstFormat.osType()!
@@ -45,9 +47,7 @@ class VideoSwresample: Swresample {
     func transfer(avframe: UnsafeMutablePointer<AVFrame>) throws -> MEFrame {
         let frame = VideoVTBFrame()
         if avframe.pointee.format == AV_PIX_FMT_VIDEOTOOLBOX.rawValue {
-            // swiftlint:disable force_cast
-            frame.corePixelBuffer = avframe.pointee.data.3 as! CVPixelBuffer
-            // swiftlint:enable force_cast
+            frame.corePixelBuffer = unsafeBitCast(avframe.pointee.data.3, to: CVPixelBuffer.self)
         } else {
             frame.corePixelBuffer = transfer(frame: avframe.pointee)
         }
@@ -146,7 +146,7 @@ class VideoSwresample: Swresample {
     }
 }
 
-class PixelBuffer: BufferProtocol {
+class KSPixelBuffer: BufferProtocol {
     var attachmentsDic: CFDictionary?
     let bitDepth: Int32
     let format: AVPixelFormat
@@ -240,11 +240,12 @@ class PixelBuffer: BufferProtocol {
 
     func image() -> CGImage? {
         let image: CGImage?
+        let data = dataWrap.data.map { $0?.contents().assumingMemoryBound(to: UInt8.self) }
         if format == AV_PIX_FMT_RGB24 {
-            image = CGImage.make(rgbData: dataWrap.data[0]!.contents().assumingMemoryBound(to: UInt8.self), linesize: Int(lineSize[0]), width: width, height: height)
+            image = CGImage.make(rgbData: data[0]!, linesize: lineSize[0], width: width, height: height)
         } else {
             let scale = VideoSwresample()
-            image = scale.transfer(format: format, width: Int32(width), height: Int32(height), data: dataWrap.data.map { $0?.contents().assumingMemoryBound(to: UInt8.self) }, linesize: lineSize.compactMap { Int32($0) })?.image()
+            image = scale.transfer(format: format, width: Int32(width), height: Int32(height), data: data, linesize: lineSize.compactMap { Int32($0) })?.image()
             scale.shutdown()
         }
         return image

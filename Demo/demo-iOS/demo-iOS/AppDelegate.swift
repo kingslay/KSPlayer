@@ -23,8 +23,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UISplitViewControllerDele
         KSOptions.isSecondOpen = true
         KSOptions.isAccurateSeek = true
 //        KSOptions.isLoopPlay = true
-        KSOptions.hardwareDecodeH265 = true
-        KSOptions.hardwareDecodeH264 = true
         if UIDevice.current.userInterfaceIdiom == .phone {
             window.rootViewController = UINavigationController(rootViewController: RootViewController())
         } else {
@@ -81,7 +79,7 @@ var objects: [KSPlayerResource] = {
     if let url = URL(string: "http://clips.vorwaerts-gmbh.de/big_buck_bunny.mp4") {
         let options = KSOptions()
         options.videoFilters = "hflip,vflip"
-        let res0 = KSPlayerResourceDefinition(url: url, definition: "标准")
+        let res0 = KSPlayerResourceDefinition(url: url, definition: "标准", options: options)
         let res1 = KSPlayerResourceDefinition(url: url, definition: "颠倒", options: options)
         let asset = KSPlayerResource(name: "http视频", definitions: [res0, res1], cover: URL(string: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c5/Big_buck_bunny_poster_big.jpg/848px-Big_buck_bunny_poster_big.jpg"))
         objects.append(asset)
