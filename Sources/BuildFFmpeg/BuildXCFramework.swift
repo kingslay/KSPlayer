@@ -331,10 +331,9 @@ class BuildFFMPEG: BaseBuild {
         "--enable-optimizations", "--disable-xlib", "--disable-devices", "--disable-indevs", "--disable-outdevs",
         "--disable-iconv", "--disable-shared", "--disable-gray", "--disable-swscale-alpha",
         "--disable-bsfs", "--disable-symver", "--disable-armv5te", "--disable-armv6", " --disable-armv6t2",
-        "--disable-linux-perf", "--disable-bzlib",
-        "--enable-gpl", "--enable-version3", "--enable-nonfree", "--enable-small",
+        "--disable-linux-perf", "--disable-bzlib", "--disable-small",
+        "--enable-gpl", "--enable-version3", "--enable-nonfree", "--enable-static", "--enable-runtime-cpudetect",
         "--enable-cross-compile", "--enable-stripping", "--enable-libxml2", "--enable-thumb",
-        "--enable-static", "--enable-runtime-cpudetect",
         // Documentation options:
         "--disable-doc", "--disable-htmlpages", "--disable-manpages", "--disable-podpages", "--disable-txtpages",
         // Component options:
@@ -400,9 +399,9 @@ class BuildFFMPEG: BaseBuild {
         "--enable-filter=format", "--enable-filter=fps", "--enable-filter=hflip", "--enable-filter=null",
         "--enable-filter=overlay", "--enable-filter=palettegen", "--enable-filter=paletteuse", "--enable-filter=pan",
         "--enable-filter=rotate", "--enable-filter=setpts", "--enable-filter=scale",
-        "--enable-filter=trim", "--enable-filter=transpose",
-        "--enable-filter=vflip", "--enable-filter=volume",
-        "--enable-filter=yadif", "--enable-filter=yadif_videotoolbox",
+        "--enable-filter=trim", "--enable-filter=transpose", "--enable-filter=vflip", "--enable-filter=volume",
+        "--enable-filter=yadif",
+//        "--enable-filter=yadif_videotoolbox",
     ]
 }
 
