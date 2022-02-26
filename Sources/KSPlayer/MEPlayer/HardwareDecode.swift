@@ -115,7 +115,7 @@ class DecompressionSession {
     fileprivate let isConvertNALSize: Bool
     fileprivate let formatDescription: CMFormatDescription
     fileprivate let decompressionSession: VTDecompressionSession
-    init?(codecpar: AVCodecParameters, options: KSOptions) {
+    init?(codecpar: AVCodecParameters, options _: KSOptions) {
         let format = AVPixelFormat(codecpar.format)
         guard let pixelFormatType = format.osType(), let extradata = codecpar.extradata else {
             return nil
@@ -262,108 +262,6 @@ extension CMVideoCodecType {
         case kCMVideoCodecType_VP9:
             return "vpcC"
         default: return "avcC"
-        }
-    }
-}
-
-/**
- Clients who specify AVVideoColorPropertiesKey must specify a color primary, transfer function, and Y'CbCr matrix.
- Most clients will want to specify HD, which consists of:
-
- AVVideoColorPrimaries_ITU_R_709_2
- AVVideoTransferFunction_ITU_R_709_2
- AVVideoYCbCrMatrix_ITU_R_709_2
-
- If you require SD colorimetry use:
-
- AVVideoColorPrimaries_SMPTE_C
- AVVideoTransferFunction_ITU_R_709_2
- AVVideoYCbCrMatrix_ITU_R_601_4
-
- If you require wide gamut HD colorimetry, you can use:
-
- AVVideoColorPrimaries_P3_D65
- AVVideoTransferFunction_ITU_R_709_2
- AVVideoYCbCrMatrix_ITU_R_709_2
-
- If you require 10-bit wide gamut HD colorimetry, you can use:
-
- AVVideoColorPrimaries_P3_D65
- AVVideoTransferFunction_ITU_R_2100_HLG
- AVVideoYCbCrMatrix_ITU_R_709_2
- */
-extension AVColorPrimaries {
-    var colorPrimaries: CFString? {
-        switch self {
-        case AVCOL_PRI_BT470BG:
-            return kCVImageBufferColorPrimaries_EBU_3213
-        case AVCOL_PRI_SMPTE170M:
-            return kCVImageBufferColorPrimaries_SMPTE_C
-        case AVCOL_PRI_BT709:
-            return kCVImageBufferColorPrimaries_ITU_R_709_2
-        case AVCOL_PRI_BT2020:
-            return kCVImageBufferColorPrimaries_ITU_R_2020
-        default:
-            return CVColorPrimariesGetStringForIntegerCodePoint(Int32(rawValue))?.takeUnretainedValue()
-        }
-    }
-}
-
-extension AVColorTransferCharacteristic {
-    var transferFunction: CFString? {
-        switch self {
-        case AVCOL_TRC_SMPTE2084:
-            return kCVImageBufferTransferFunction_SMPTE_ST_2084_PQ
-        case AVCOL_TRC_BT2020_10, AVCOL_TRC_BT2020_12:
-            return kCVImageBufferTransferFunction_ITU_R_2020
-        case AVCOL_TRC_BT709:
-            return kCVImageBufferTransferFunction_ITU_R_709_2
-        case AVCOL_TRC_SMPTE240M:
-            return kCVImageBufferTransferFunction_SMPTE_240M_1995
-        case AVCOL_TRC_LINEAR:
-            if #available(iOS 12.0, tvOS 12.0, macOS 10.14, *) {
-                return kCVImageBufferTransferFunction_Linear
-            } else {
-                return nil
-            }
-        case AVCOL_TRC_SMPTE428:
-            return kCVImageBufferTransferFunction_SMPTE_ST_428_1
-        case AVCOL_TRC_ARIB_STD_B67:
-            return kCVImageBufferTransferFunction_ITU_R_2100_HLG
-        case AVCOL_TRC_GAMMA22, AVCOL_TRC_GAMMA28:
-            return kCVImageBufferTransferFunction_UseGamma
-        default:
-            return CVTransferFunctionGetStringForIntegerCodePoint(Int32(rawValue))?.takeUnretainedValue()
-        }
-    }
-}
-
-extension AVColorSpace {
-    var ycbcrMatrix: CFString? {
-        switch self {
-        case AVCOL_SPC_BT709:
-            return kCVImageBufferYCbCrMatrix_ITU_R_709_2
-        case AVCOL_SPC_BT470BG, AVCOL_SPC_SMPTE170M:
-            return kCVImageBufferYCbCrMatrix_ITU_R_601_4
-        case AVCOL_SPC_SMPTE240M:
-            return kCVImageBufferYCbCrMatrix_SMPTE_240M_1995
-        case AVCOL_SPC_BT2020_CL, AVCOL_SPC_BT2020_NCL:
-            return kCVImageBufferYCbCrMatrix_ITU_R_2020
-        default:
-            return CVYCbCrMatrixGetStringForIntegerCodePoint(Int32(rawValue))?.takeUnretainedValue()
-        }
-    }
-
-    var colorSpace: CGColorSpace? {
-        switch self {
-        case AVCOL_SPC_BT709:
-            return CGColorSpace(name: CGColorSpace.itur_709)
-        case AVCOL_SPC_BT470BG, AVCOL_SPC_SMPTE170M:
-            return CGColorSpace(name: CGColorSpace.sRGB)
-        case AVCOL_SPC_BT2020_CL, AVCOL_SPC_BT2020_NCL:
-            return CGColorSpace(name: CGColorSpace.itur_2020)
-        default:
-            return nil
         }
     }
 }

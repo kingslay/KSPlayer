@@ -24,6 +24,17 @@ class VideoSwresample: Swresample {
     private var height: Int32 = 0
     private var width: Int32 = 0
     private var pool: CVPixelBufferPool?
+
+    func transfer(avframe: UnsafeMutablePointer<AVFrame>) throws -> MEFrame {
+        let frame = VideoVTBFrame()
+        if avframe.pointee.format == AV_PIX_FMT_VIDEOTOOLBOX.rawValue {
+            frame.corePixelBuffer = unsafeBitCast(avframe.pointee.data.3, to: CVPixelBuffer.self)
+        } else {
+            frame.corePixelBuffer = transfer(frame: avframe.pointee)
+        }
+        return frame
+    }
+
     private func setup(format: AVPixelFormat, width: Int32, height: Int32, linesize: Int32) {
         if self.format == format, self.width == width, self.height == height {
             return
@@ -44,17 +55,7 @@ class VideoSwresample: Swresample {
         pool = CVPixelBufferPool.ceate(width: width, height: height, bytesPerRowAlignment: linesize, pixelFormatType: pixelFormatType)
     }
 
-    func transfer(avframe: UnsafeMutablePointer<AVFrame>) throws -> MEFrame {
-        let frame = VideoVTBFrame()
-        if avframe.pointee.format == AV_PIX_FMT_VIDEOTOOLBOX.rawValue {
-            frame.corePixelBuffer = unsafeBitCast(avframe.pointee.data.3, to: CVPixelBuffer.self)
-        } else {
-            frame.corePixelBuffer = transfer(frame: avframe.pointee)
-        }
-        return frame
-    }
-
-    func transfer(frame: AVFrame) -> CVPixelBuffer? {
+    private func transfer(frame: AVFrame) -> CVPixelBuffer? {
         let format = AVPixelFormat(rawValue: frame.format)
         let width = frame.width
         let height = frame.height
@@ -140,9 +141,107 @@ class VideoSwresample: Swresample {
         sws_freeContext(imgConvertCtx)
         imgConvertCtx = nil
     }
+}
 
-    static func == (lhs: VideoSwresample, rhs: AVFrame) -> Bool {
-        lhs.width == rhs.width && lhs.height == rhs.height && lhs.format.rawValue == rhs.format
+/**
+ Clients who specify AVVideoColorPropertiesKey must specify a color primary, transfer function, and Y'CbCr matrix.
+ Most clients will want to specify HD, which consists of:
+
+ AVVideoColorPrimaries_ITU_R_709_2
+ AVVideoTransferFunction_ITU_R_709_2
+ AVVideoYCbCrMatrix_ITU_R_709_2
+
+ If you require SD colorimetry use:
+
+ AVVideoColorPrimaries_SMPTE_C
+ AVVideoTransferFunction_ITU_R_709_2
+ AVVideoYCbCrMatrix_ITU_R_601_4
+
+ If you require wide gamut HD colorimetry, you can use:
+
+ AVVideoColorPrimaries_P3_D65
+ AVVideoTransferFunction_ITU_R_709_2
+ AVVideoYCbCrMatrix_ITU_R_709_2
+
+ If you require 10-bit wide gamut HD colorimetry, you can use:
+
+ AVVideoColorPrimaries_P3_D65
+ AVVideoTransferFunction_ITU_R_2100_HLG
+ AVVideoYCbCrMatrix_ITU_R_709_2
+ */
+extension AVColorPrimaries {
+    var colorPrimaries: CFString? {
+        switch self {
+        case AVCOL_PRI_BT470BG:
+            return kCVImageBufferColorPrimaries_EBU_3213
+        case AVCOL_PRI_SMPTE170M:
+            return kCVImageBufferColorPrimaries_SMPTE_C
+        case AVCOL_PRI_BT709:
+            return kCVImageBufferColorPrimaries_ITU_R_709_2
+        case AVCOL_PRI_BT2020:
+            return kCVImageBufferColorPrimaries_ITU_R_2020
+        default:
+            return CVColorPrimariesGetStringForIntegerCodePoint(Int32(rawValue))?.takeUnretainedValue()
+        }
+    }
+}
+
+extension AVColorTransferCharacteristic {
+    var transferFunction: CFString? {
+        switch self {
+        case AVCOL_TRC_SMPTE2084:
+            return kCVImageBufferTransferFunction_SMPTE_ST_2084_PQ
+        case AVCOL_TRC_BT2020_10, AVCOL_TRC_BT2020_12:
+            return kCVImageBufferTransferFunction_ITU_R_2020
+        case AVCOL_TRC_BT709:
+            return kCVImageBufferTransferFunction_ITU_R_709_2
+        case AVCOL_TRC_SMPTE240M:
+            return kCVImageBufferTransferFunction_SMPTE_240M_1995
+        case AVCOL_TRC_LINEAR:
+            if #available(iOS 12.0, tvOS 12.0, macOS 10.14, *) {
+                return kCVImageBufferTransferFunction_Linear
+            } else {
+                return nil
+            }
+        case AVCOL_TRC_SMPTE428:
+            return kCVImageBufferTransferFunction_SMPTE_ST_428_1
+        case AVCOL_TRC_ARIB_STD_B67:
+            return kCVImageBufferTransferFunction_ITU_R_2100_HLG
+        case AVCOL_TRC_GAMMA22, AVCOL_TRC_GAMMA28:
+            return kCVImageBufferTransferFunction_UseGamma
+        default:
+            return CVTransferFunctionGetStringForIntegerCodePoint(Int32(rawValue))?.takeUnretainedValue()
+        }
+    }
+}
+
+extension AVColorSpace {
+    var ycbcrMatrix: CFString? {
+        switch self {
+        case AVCOL_SPC_BT709:
+            return kCVImageBufferYCbCrMatrix_ITU_R_709_2
+        case AVCOL_SPC_BT470BG, AVCOL_SPC_SMPTE170M:
+            return kCVImageBufferYCbCrMatrix_ITU_R_601_4
+        case AVCOL_SPC_SMPTE240M:
+            return kCVImageBufferYCbCrMatrix_SMPTE_240M_1995
+        case AVCOL_SPC_BT2020_CL, AVCOL_SPC_BT2020_NCL:
+            return kCVImageBufferYCbCrMatrix_ITU_R_2020
+        default:
+            return CVYCbCrMatrixGetStringForIntegerCodePoint(Int32(rawValue))?.takeUnretainedValue()
+        }
+    }
+
+    var colorSpace: CGColorSpace? {
+        switch self {
+        case AVCOL_SPC_BT709:
+            return CGColorSpace(name: CGColorSpace.itur_709)
+        case AVCOL_SPC_BT470BG, AVCOL_SPC_SMPTE170M:
+            return CGColorSpace(name: CGColorSpace.sRGB)
+        case AVCOL_SPC_BT2020_CL, AVCOL_SPC_BT2020_NCL:
+            return CGColorSpace(name: CGColorSpace.itur_2020)
+        default:
+            return nil
+        }
     }
 }
 
@@ -167,22 +266,22 @@ class KSPixelBuffer: BufferProtocol {
         attachmentsDic.flatMap { CVImageBufferCreateColorSpaceFromAttachments($0)?.takeUnretainedValue() }
     }
 
-    init(frame: UnsafeMutablePointer<AVFrame>) {
-        format = AVPixelFormat(rawValue: frame.pointee.format)
-        yCbCrMatrix = frame.pointee.colorspace.ycbcrMatrix
-        colorPrimaries = frame.pointee.color_primaries.colorPrimaries
-        transferFunction = frame.pointee.color_trc.transferFunction
+    init(frame: AVFrame) {
+        format = AVPixelFormat(rawValue: frame.format)
+        yCbCrMatrix = frame.colorspace.ycbcrMatrix
+        colorPrimaries = frame.color_primaries.colorPrimaries
+        transferFunction = frame.color_trc.transferFunction
         var attachments = [CFString: CFString]()
         attachments[kCVImageBufferColorPrimariesKey] = colorPrimaries
         attachments[kCVImageBufferTransferFunctionKey] = transferFunction
         attachments[kCVImageBufferYCbCrMatrixKey] = yCbCrMatrix
         attachmentsDic = attachments as CFDictionary
-        width = Int(frame.pointee.width)
-        height = Int(frame.pointee.height)
-        isFullRangeVideo = frame.pointee.color_range == AVCOL_RANGE_JPEG
-        let bytesPerRow = Array(tuple: frame.pointee.linesize).compactMap { Int($0) }
+        width = Int(frame.width)
+        height = Int(frame.height)
+        isFullRangeVideo = frame.color_range == AVCOL_RANGE_JPEG
+        let bytesPerRow = Array(tuple: frame.linesize).compactMap { Int($0) }
         bitDepth = format.bitDepth()
-        aspectRatio = frame.pointee.sample_aspect_ratio.size
+        aspectRatio = frame.sample_aspect_ratio.size
         planeCount = Int(format.planeCount())
         switch planeCount {
         case 3:
@@ -205,7 +304,7 @@ class KSPixelBuffer: BufferProtocol {
         }
         dataWrap = ObjectPool.share.object(class: MTLBufferWrap.self, key: "VideoData") { MTLBufferWrap(size: size) }
         dataWrap.size = size
-        let bytes = Array(tuple: frame.pointee.data)
+        let bytes = Array(tuple: frame.data)
         for i in 0 ..< planeCount {
             if bytesPerRow[i] == lineSize[i] {
                 dataWrap.data[i]?.contents().copyMemory(from: bytes[i]!, byteCount: heights[i] * lineSize[i])
