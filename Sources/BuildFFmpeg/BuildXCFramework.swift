@@ -351,7 +351,8 @@ class BuildFFMPEG: BaseBuild {
         // ,"--disable-rdft"
         // ,"--disable-fft"
         // Hardware accelerators:
-        "--disable-d3d11va", "--disable-dxva2", "--disable-vaapi", "--disable-vdpau", "--enable-videotoolbox",
+        "--disable-d3d11va", "--disable-dxva2", "--disable-vaapi", "--disable-vdpau",
+        "--enable-videotoolbox", "--enable-audiotoolbox",
         // Individual component options:
         // ,"--disable-everything"
         "--disable-encoders",
@@ -365,9 +366,9 @@ class BuildFFMPEG: BaseBuild {
         "--enable-decoder=vp7", "--enable-decoder=vp8", "--enable-decoder=vp9",
         // 音频
         "--enable-decoder=aac*", "--enable-decoder=ac3*", "--enable-decoder=alac*",
-        "--enable-decoder=amrnb", "--enable-decoder=amrwb", "--enable-decoder=ape", "--enable-decoder=cook",
+        "--enable-decoder=amr*", "--enable-decoder=ape", "--enable-decoder=cook",
         "--enable-decoder=dca", "--enable-decoder=dolby_e", "--enable-decoder=eac3*", "--enable-decoder=flac",
-        "--enable-decoder=mp1", "--enable-decoder=mp2", "--enable-decoder=mp3*", "--enable-decoder=opus", "--enable-decoder=pcm*",
+        "--enable-decoder=mp1*", "--enable-decoder=mp2*", "--enable-decoder=mp3*", "--enable-decoder=opus", "--enable-decoder=pcm*",
         "--enable-decoder=truehd", "--enable-decoder=vorbis", "--enable-decoder=wma*",
         // 字幕
         "--enable-decoder=ass", "--enable-decoder=dvbsub", "--enable-decoder=dvdsub", "--enable-decoder=movtext",
@@ -394,13 +395,14 @@ class BuildFFMPEG: BaseBuild {
         "--disable-protocol=srtp", "--disable-protocol=subfile", "--disable-protocol=unix",
 
         // filters
-        "--disable-filters", "--enable-filter=amix", "--enable-filter=scale",
-        "--enable-filter=format", "--enable-filter=aformat", "--enable-filter=fps", "--enable-filter=trim",
-        "--enable-filter=atrim", "--enable-filter=vflip", "--enable-filter=hflip", "--enable-filter=transpose",
-        "--enable-filter=rotate", "--enable-filter=yadif", "--enable-filter=pan", "--enable-filter=volume",
-        "--enable-filter=aresample", "--enable-filter=atempo", "--enable-filter=asetrate", "--enable-filter=setpts",
-        "--enable-filter=overlay", "--enable-filter=paletteuse", "--enable-filter=areverse", "--enable-filter=anull",
-        "--enable-filter=palettegen", "--enable-filter=null",
+        "--disable-filters", "--enable-filter=amix", "--enable-filter=anull", "--enable-filter=aformat",
+        "--enable-filter=aresample", "--enable-filter=areverse", "--enable-filter=asetrate", "--enable-filter=atempo", "--enable-filter=atrim",
+        "--enable-filter=format", "--enable-filter=fps", "--enable-filter=hflip", "--enable-filter=null",
+        "--enable-filter=overlay", "--enable-filter=palettegen", "--enable-filter=paletteuse", "--enable-filter=pan",
+        "--enable-filter=rotate", "--enable-filter=setpts", "--enable-filter=scale",
+        "--enable-filter=trim", "--enable-filter=transpose",
+        "--enable-filter=vflip", "--enable-filter=volume",
+        "--enable-filter=yadif", "--enable-filter=yadif_videotoolbox",
     ]
 }
 
