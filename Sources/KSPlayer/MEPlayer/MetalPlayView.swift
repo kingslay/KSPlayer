@@ -150,7 +150,7 @@ extension MetalPlayView {
         renderSource?.setVideo(time: cmtime)
         let par = pixelBuffer.size
         let sar = pixelBuffer.aspectRatio
-        if pixelBuffer is PixelBuffer || !options.isUseDisplayLayer() {
+        if pixelBuffer is KSPixelBuffer || !options.isUseDisplayLayer() {
             if view.isHidden {
                 view.isHidden = false
                 displayLayer.flushAndRemoveImage()

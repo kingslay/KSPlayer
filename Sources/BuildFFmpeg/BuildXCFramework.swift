@@ -292,6 +292,12 @@ class BuildFFMPEG: BaseBuild {
         if !FileManager.default.fileExists(atPath: (URL.currentDirectory + ffmpegFile).path) {
             Utility.shell("curl http://www.ffmpeg.org/releases/\(ffmpegFile).tar.bz2 | tar xj")
         }
+        let path = URL.currentDirectory + ffmpegFile + "libavcodec/videotoolbox.c"
+        if let data = FileManager.default.contents(atPath: path.path), var str = String(data: data, encoding: .utf8) {
+            str = str.replacingOccurrences(of: "kCVPixelBufferOpenGLESCompatibilityKey", with: "kCVPixelBufferMetalCompatibilityKey")
+            str = str.replacingOccurrences(of: "kCVPixelBufferIOSurfaceOpenGLTextureCompatibilityKey", with: "kCVPixelBufferMetalCompatibilityKey")
+            try? str.write(toFile: path.path, atomically: true, encoding: .utf8)
+        }
         super.buildALL()
     }
 
@@ -321,13 +327,14 @@ class BuildFFMPEG: BaseBuild {
     }
 
     private let ffmpegConfiguers = [
-        "--enable-optimizations", "--enable-gpl", "--enable-version3", "--enable-nonfree", "--enable-small",
-        "--disable-xlib", "--disable-devices", "--disable-indevs", "--disable-outdevs", "--disable-iconv",
-        "--disable-bsfs", "--disable-symver", "--disable-armv5te", "--disable-armv6", " --disable-armv6t2",
-        "--disable-linux-perf", "--disable-bzlib", "--disable-videotoolbox",
         // Configuration options:
+        "--enable-optimizations", "--disable-xlib", "--disable-devices", "--disable-indevs", "--disable-outdevs",
+        "--disable-iconv", "--disable-shared", "--disable-gray", "--disable-swscale-alpha",
+        "--disable-bsfs", "--disable-symver", "--disable-armv5te", "--disable-armv6", " --disable-armv6t2",
+        "--disable-linux-perf", "--disable-bzlib",
+        "--enable-gpl", "--enable-version3", "--enable-nonfree", "--enable-small",
         "--enable-cross-compile", "--enable-stripping", "--enable-libxml2", "--enable-thumb",
-        "--enable-static", "--disable-shared", "--enable-runtime-cpudetect", "--disable-gray", "--disable-swscale-alpha",
+        "--enable-static", "--enable-runtime-cpudetect",
         // Documentation options:
         "--disable-doc", "--disable-htmlpages", "--disable-manpages", "--disable-podpages", "--disable-txtpages",
         // Component options:
@@ -344,7 +351,7 @@ class BuildFFMPEG: BaseBuild {
         // ,"--disable-rdft"
         // ,"--disable-fft"
         // Hardware accelerators:
-        "--disable-d3d11va", "--disable-dxva2", "--disable-vaapi", "--disable-vdpau",
+        "--disable-d3d11va", "--disable-dxva2", "--disable-vaapi", "--disable-vdpau", "--enable-videotoolbox",
         // Individual component options:
         // ,"--disable-everything"
         "--disable-encoders",

@@ -20,8 +20,6 @@ struct DemoApp: App {
         KSOptions.isSecondOpen = true
         KSOptions.isAccurateSeek = true
         KSOptions.isLoopPlay = true
-        KSOptions.hardwareDecodeH265 = true
-        KSOptions.hardwareDecodeH264 = true
     }
 
     var body: some Scene {

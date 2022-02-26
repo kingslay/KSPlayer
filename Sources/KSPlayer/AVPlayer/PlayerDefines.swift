@@ -152,8 +152,6 @@ public struct VideoAdaptationState {
 }
 
 open class KSOptions {
-    public static var hardwareDecodeH264 = true
-    public static var hardwareDecodeH265 = true
     /// 最低缓存视频时间
     public static var preferredForwardBufferDuration = 3.0
     /// 最大缓存视频时间
@@ -170,8 +168,6 @@ open class KSOptions {
     public static var isSeekedAutoPlay = true
 
     //    public static let shared = KSOptions()
-    public var hardwareDecodeH264 = KSOptions.hardwareDecodeH264
-    public var hardwareDecodeH265 = KSOptions.hardwareDecodeH265
     /// 最低缓存视频时间
     @KSObservable
     public var preferredForwardBufferDuration = KSOptions.preferredForwardBufferDuration
@@ -341,6 +337,10 @@ open class KSOptions {
 
     open func isUseDisplayLayer() -> Bool {
         display == .plane
+    }
+
+    open func enableHardwareDecode() -> Bool {
+        videoFilters == nil
     }
 }
 

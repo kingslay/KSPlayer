@@ -16,8 +16,6 @@ class MainWindow: NSWindow {
         KSPlayerManager.logLevel = .debug
         KSOptions.isAutoPlay = true
         KSOptions.isSeekedAutoPlay = true
-        KSOptions.hardwareDecodeH264 = true
-        KSOptions.hardwareDecodeH265 = true
         vc = ViewController()
         super.init(contentRect: contentRect, styleMask: style, backing: backingStoreType, defer: flag)
         contentViewController = vc
