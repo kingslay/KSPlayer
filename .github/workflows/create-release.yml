@@ -19,8 +19,6 @@ jobs:
         run: swift build -v -c release
       - name: Test
         run: swift test -v
-      - name: Create XCFramework
-        uses: unsignedapps/swift-create-xcframework@v2
       - uses: actions/upload-artifact@v2
         with:
             name: KSPlayer
