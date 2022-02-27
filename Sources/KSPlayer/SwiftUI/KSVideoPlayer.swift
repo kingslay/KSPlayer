@@ -25,7 +25,7 @@ public struct KSVideoPlayerView: View {
         return ZStack {
             player.onPlay { current, total in
                 currentTime = current
-                totalTime = total
+                totalTime = max(max(0, total), current)
             }
             .onDisappear {
                 player.playerLayer.pause()
