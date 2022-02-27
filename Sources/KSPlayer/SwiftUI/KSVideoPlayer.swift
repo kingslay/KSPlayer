@@ -34,8 +34,8 @@ public struct KSVideoPlayerView: View {
             VideoControllerView(config: config, currentTime: $currentTime, totalTime: $totalTime)
                 .opacity(isMaskShow ? 1 : 0)
         }
-        #if os(iOS)
-        .navigationBarTitleDisplayMode(.inline)
+        #if !os(macOS)
+        .navigationBarHidden(true)
         #endif
         #if !os(tvOS)
         .onTapGesture {
@@ -97,8 +97,9 @@ struct VideoControllerView: View {
     @Binding private var currentTime: TimeInterval
     @Binding private var totalTime: TimeInterval
     private let backgroundColor = Color(red: 0.145, green: 0.145, blue: 0.145).opacity(0.6)
+    @Environment(\.dismiss) private var dismiss
     init(config: Config, currentTime: Binding<TimeInterval>, totalTime: Binding<TimeInterval>) {
-        self.config = config
+        _config = .init(initialValue: config)
         _currentTime = currentTime
         _totalTime = totalTime
     }
@@ -107,8 +108,10 @@ struct VideoControllerView: View {
         VStack {
             HStack {
                 HStack(spacing: 8) {
-                    Button {} label: {
-                        Image(systemName: "arrow.up.left.and.arrow.down.right")
+                    Button {
+                        dismiss()
+                    } label: {
+                        Image(systemName: "xmark")
                     }
                     Button {
                         config.isPipActive.toggle()

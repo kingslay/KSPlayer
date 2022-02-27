@@ -26,7 +26,6 @@ struct ContentView: View {
                 }
             }
             .searchable(text: $searchText)
-            .navigationTitle("m3u8")
             #if !os(macOS)
                 .navigationBarItems(trailing: Button {
                     showAddActionSheet = true
