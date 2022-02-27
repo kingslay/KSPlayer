@@ -531,68 +531,6 @@ public class KSSlider: NSSlider {
     open func setThumbImage(_: UIImage?, for _: State) {}
 }
 
-import CoreVideo
-class CADisplayLink: NSObject {
-    private var displayLink: CVDisplayLink?
-    private var target: AnyObject
-    private var selector: Selector
-    private var runloop: RunLoop?
-    private var mode = RunLoop.Mode.default
-    public var timestamp: TimeInterval {
-        var timeStamp = CVTimeStamp()
-        if CVDisplayLinkGetCurrentTime(displayLink!, &timeStamp) == kCVReturnSuccess, (timeStamp.flags & CVTimeStampFlags.hostTimeValid.rawValue) != 0 {
-            return TimeInterval(timeStamp.hostTime / NSEC_PER_SEC)
-        }
-        return 0
-    }
-
-    public var duration: TimeInterval {
-        CVDisplayLinkGetActualOutputVideoRefreshPeriod(displayLink!)
-    }
-
-    public var targetTimestamp: TimeInterval {
-        duration + timestamp
-    }
-
-    public var isPaused: Bool {
-        get {
-            !CVDisplayLinkIsRunning(displayLink!)
-        }
-        set {
-            if newValue {
-                CVDisplayLinkStop(displayLink!)
-            } else {
-                CVDisplayLinkStart(displayLink!)
-            }
-        }
-    }
-
-    public init(target: NSObject, selector sel: Selector) {
-        self.target = target
-        selector = sel
-        super.init()
-        CVDisplayLinkCreateWithCGDisplay(CGMainDisplayID(), &displayLink)
-        CVDisplayLinkSetOutputCallback(displayLink!, { (_, _, _, _, _, userData: UnsafeMutableRawPointer?) -> CVReturn in
-            let `self` = Unmanaged<CADisplayLink>.fromOpaque(userData!).takeUnretainedValue()
-            self.target.performSelector(onMainThread: self.selector, with: self, waitUntilDone: false, modes: [String(self.mode.rawValue)])
-            // 用runloop会卡顿
-//            self.runloop?.perform(self.selector, target: self.target, argument: self, order: 0, modes: [self.mode])
-            return kCVReturnSuccess
-        }, Unmanaged.passUnretained(self).toOpaque())
-        CVDisplayLinkStart(displayLink!)
-    }
-
-    open func add(to runloop: RunLoop, forMode mode: RunLoop.Mode) {
-        self.runloop = runloop
-        self.mode = mode
-    }
-
-    public func invalidate() {
-        isPaused = true
-        runloop = nil
-    }
-}
-
 extension UIView {
     func image() -> UIImage? {
         guard let rep = bitmapImageRepForCachingDisplay(in: bounds) else {
