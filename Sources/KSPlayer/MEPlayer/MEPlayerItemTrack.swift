@@ -222,13 +222,7 @@ class FFPlayerItemTrack<Frame: MEFrame>: PlayerItemTrackProtocol, CustomStringCo
             }
         } catch {
             KSLog("Decoder did Failed : \(error)")
-            if decoder is VideoHardwareDecode {
-                decoderMap[packet.assetTrack.streamIndex] = SoftwareDecode(assetTrack: packet.assetTrack, options: options, delegate: self)
-                KSLog("VideoCodec switch to software decompression")
-                doDecode(packet: packet)
-            } else {
-                state = .failed
-            }
+            state = .failed
         }
     }
 }
@@ -365,6 +359,30 @@ public extension Dictionary {
             let value = defaultValue()
             self[key] = value
             return value
+        }
+    }
+}
+
+protocol DecodeProtocol {
+    init(assetTrack: TrackProtocol, options: KSOptions, delegate: DecodeResultDelegate)
+    func decode()
+    func doDecode(packet: UnsafeMutablePointer<AVPacket>) throws
+    func doFlushCodec()
+    func shutdown()
+}
+
+protocol DecodeResultDelegate: AnyObject {
+    func decodeResult(frame: MEFrame?)
+}
+
+extension TrackProtocol {
+    func makeDecode(options: KSOptions, delegate: DecodeResultDelegate) -> DecodeProtocol {
+        autoreleasepool {
+            if mediaType == .subtitle {
+                return SubtitleDecode(assetTrack: self, options: options, delegate: delegate)
+            } else {
+                return SoftwareDecode(assetTrack: self, options: options, delegate: delegate)
+            }
         }
     }
 }

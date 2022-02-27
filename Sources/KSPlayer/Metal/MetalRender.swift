@@ -74,7 +74,7 @@ class MetalRender {
         commandBuffer.waitUntilCompleted()
     }
 
-    func draw(pixelBuffer: BufferProtocol, display: DisplayEnum = .plane, drawable: CAMetalDrawable) {
+    func draw(pixelBuffer: CVPixelBuffer, display: DisplayEnum = .plane, drawable: CAMetalDrawable) {
         let inputTextures = pixelBuffer.textures()
         renderPassDescriptor.colorAttachments[0].texture = drawable.texture
         guard inputTextures.count > 0, let commandBuffer = commandQueue?.makeCommandBuffer(), let encoder = commandBuffer.makeRenderCommandEncoder(descriptor: renderPassDescriptor) else {
@@ -97,7 +97,7 @@ class MetalRender {
         commandBuffer.waitUntilCompleted()
     }
 
-    private func setFragmentBuffer(pixelBuffer: BufferProtocol, encoder: MTLRenderCommandEncoder) {
+    private func setFragmentBuffer(pixelBuffer: CVPixelBuffer, encoder: MTLRenderCommandEncoder) {
         if pixelBuffer.planeCount > 1 {
             let buffer: MTLBuffer?
             let yCbCrMatrix = pixelBuffer.yCbCrMatrix
