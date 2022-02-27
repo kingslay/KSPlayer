@@ -13,9 +13,8 @@ final class MetalPlayView: UIView {
     private let render = MetalRender()
     private let view = MTKView(frame: .zero, device: MetalRender.device)
     private var videoInfo: CMVideoFormatDescription?
-    private var pixelBuffer: BufferProtocol?
+    private var pixelBuffer: CVPixelBuffer?
     private lazy var displayLink: CADisplayLink = .init(target: self, selector: #selector(drawView))
-
     var options: KSOptions
     var isBackground = false
     weak var renderSource: OutputRenderSourceDelegate?
@@ -150,7 +149,19 @@ extension MetalPlayView {
         renderSource?.setVideo(time: cmtime)
         let par = pixelBuffer.size
         let sar = pixelBuffer.aspectRatio
-        if pixelBuffer is KSPixelBuffer || !options.isUseDisplayLayer() {
+        if options.isUseDisplayLayer() {
+            if !view.isHidden {
+                view.isHidden = true
+                if let drawable = view.currentDrawable, let renderPassDescriptor = view.currentRenderPassDescriptor {
+                    render.clear(drawable: drawable, renderPassDescriptor: renderPassDescriptor)
+                }
+            }
+            if let dar = options.customizeDar(sar: sar, par: par) {
+                pixelBuffer.aspectRatio = CGSize(width: dar.width, height: dar.height * par.width / par.height)
+            }
+            set(pixelBuffer: pixelBuffer, time: cmtime)
+
+        } else {
             if view.isHidden {
                 view.isHidden = false
                 displayLayer.flushAndRemoveImage()
@@ -181,19 +192,6 @@ extension MetalPlayView {
                 }
                 render.draw(pixelBuffer: pixelBuffer, display: options.display, drawable: drawable)
             }
-        } else {
-            if !view.isHidden {
-                view.isHidden = true
-                if let drawable = view.currentDrawable, let renderPassDescriptor = view.currentRenderPassDescriptor {
-                    render.clear(drawable: drawable, renderPassDescriptor: renderPassDescriptor)
-                }
-            }
-            // swiftlint:disable force_cast
-            if let dar = options.customizeDar(sar: sar, par: par) {
-                (pixelBuffer as! CVPixelBuffer).aspectRatio = CGSize(width: dar.width, height: dar.height * par.width / par.height)
-            }
-            set(pixelBuffer: pixelBuffer as! CVPixelBuffer, time: cmtime)
-            // swiftlint:enable force_cast
         }
     }
 }

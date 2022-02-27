@@ -12,34 +12,11 @@ import Metal
 import simd
 import VideoToolbox
 
-public protocol BufferProtocol: AnyObject {
-    var aspectRatio: CGSize { get }
-    var planeCount: Int { get }
-    var width: Int { get }
-    var height: Int { get }
-    var bitDepth: Int32 { get }
-    var isFullRangeVideo: Bool { get }
-//    var colorPrimaries: CFString? { get }
-//    var transferFunction: CFString? { get }
-    var yCbCrMatrix: CFString? { get }
-    var attachmentsDic: CFDictionary? { get }
-    var colorspace: CGColorSpace? { get }
-    func widthOfPlane(at planeIndex: Int) -> Int
-    func heightOfPlane(at planeIndex: Int) -> Int
-    func textures() -> [MTLTexture]
-    func image() -> CGImage?
-}
-
-extension BufferProtocol {
+public extension CVPixelBuffer {
+    var width: Int { CVPixelBufferGetWidth(self) }
+    var height: Int { CVPixelBufferGetHeight(self) }
     var size: CGSize { CGSize(width: width, height: height) }
-}
-
-extension CVPixelBuffer: BufferProtocol {
-    public var width: Int { CVPixelBufferGetWidth(self) }
-
-    public var height: Int { CVPixelBufferGetHeight(self) }
-
-    public var aspectRatio: CGSize {
+    var aspectRatio: CGSize {
         get {
             if let ratio = CVBufferGetAttachment(self, kCVImageBufferPixelAspectRatioKey, nil)?.takeUnretainedValue() as? NSDictionary,
                let horizontal = (ratio[kCVImageBufferPixelAspectRatioHorizontalSpacingKey] as? NSNumber)?.intValue,
@@ -57,31 +34,31 @@ extension CVPixelBuffer: BufferProtocol {
         }
     }
 
-    public var isPlanar: Bool { CVPixelBufferIsPlanar(self) }
+    var isPlanar: Bool { CVPixelBufferIsPlanar(self) }
 
-    public var planeCount: Int { isPlanar ? CVPixelBufferGetPlaneCount(self) : 1 }
+    var planeCount: Int { isPlanar ? CVPixelBufferGetPlaneCount(self) : 1 }
 
-    public var isFullRangeVideo: Bool {
+    var isFullRangeVideo: Bool {
         CVBufferGetAttachment(self, kCMFormatDescriptionExtension_FullRangeVideo, nil)?.takeUnretainedValue() as? Bool ?? true
     }
 
-    public var attachmentsDic: CFDictionary? {
+    var attachmentsDic: CFDictionary? {
         CVBufferGetAttachments(self, .shouldPropagate)
     }
 
-    public var yCbCrMatrix: CFString? {
+    var yCbCrMatrix: CFString? {
         CVBufferGetAttachment(self, kCVImageBufferYCbCrMatrixKey, nil)?.takeUnretainedValue() as? NSString
     }
 
-    public var colorPrimaries: CFString? {
+    var colorPrimaries: CFString? {
         CVBufferGetAttachment(self, kCVImageBufferColorPrimariesKey, nil)?.takeUnretainedValue() as? NSString
     }
 
-    public var transferFunction: CFString? {
+    var transferFunction: CFString? {
         CVBufferGetAttachment(self, kCVImageBufferTransferFunctionKey, nil)?.takeUnretainedValue() as? NSString
     }
 
-    public var colorspace: CGColorSpace? {
+    var colorspace: CGColorSpace? {
         #if os(macOS)
         return CVImageBufferGetColorSpace(self)?.takeUnretainedValue() ?? attachmentsDic.flatMap { CVImageBufferCreateColorSpaceFromAttachments($0)?.takeUnretainedValue() }
         #else
@@ -89,7 +66,7 @@ extension CVPixelBuffer: BufferProtocol {
         #endif
     }
 
-    public var bitDepth: Int32 {
+    var bitDepth: Int32 {
         switch CVPixelBufferGetPixelFormatType(self) {
         case kCVPixelFormatType_420YpCbCr10BiPlanarFullRange, kCVPixelFormatType_420YpCbCr10BiPlanarVideoRange:
             return 10
@@ -98,26 +75,37 @@ extension CVPixelBuffer: BufferProtocol {
         }
     }
 
-    public func image() -> CGImage? {
+    func image() -> CGImage? {
         let ciImage = CIImage(cvImageBuffer: self)
         let context = CIContext(options: nil)
         return context.createCGImage(ciImage, from: CGRect(origin: .zero, size: size))
     }
 
-    public func widthOfPlane(at planeIndex: Int) -> Int {
+    func widthOfPlane(at planeIndex: Int) -> Int {
         CVPixelBufferGetWidthOfPlane(self, planeIndex)
     }
 
-    public func heightOfPlane(at planeIndex: Int) -> Int {
+    func heightOfPlane(at planeIndex: Int) -> Int {
         CVPixelBufferGetHeightOfPlane(self, planeIndex)
     }
 
-    func baseAddressOfPlane(at planeIndex: Int) -> UnsafeMutableRawPointer? {
+    internal func baseAddressOfPlane(at planeIndex: Int) -> UnsafeMutableRawPointer? {
         CVPixelBufferGetBaseAddressOfPlane(self, planeIndex)
     }
 
-    public func textures() -> [MTLTexture] {
+    func textures() -> [MTLTexture] {
         MetalRender.texture(pixelBuffer: self)
+    }
+}
+
+extension CGSize {
+    var aspectRatio: NSDictionary? {
+        if width != 0, height != 0, width != height {
+            return [kCVImageBufferPixelAspectRatioHorizontalSpacingKey: width,
+                    kCVImageBufferPixelAspectRatioVerticalSpacingKey: height]
+        } else {
+            return nil
+        }
     }
 }
 

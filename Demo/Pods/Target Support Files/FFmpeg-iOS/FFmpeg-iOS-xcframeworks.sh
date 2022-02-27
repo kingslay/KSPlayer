@@ -105,10 +105,10 @@ install_xcframework() {
   echo "Copied $source to $destination"
 }
 
-install_xcframework "${PODS_ROOT}/../../Sources/Libavcodec.xcframework" "FFmpeg/FFmpeg" "framework" "ios-arm64_x86_64-maccatalyst" "ios-arm64_arm64e" "ios-arm64_x86_64-simulator"
-install_xcframework "${PODS_ROOT}/../../Sources/Libavfilter.xcframework" "FFmpeg/FFmpeg" "framework" "ios-arm64_x86_64-maccatalyst" "ios-arm64_arm64e" "ios-arm64_x86_64-simulator"
+install_xcframework "${PODS_ROOT}/../../Sources/Libavcodec.xcframework" "FFmpeg/FFmpeg" "framework" "ios-arm64_arm64e" "ios-arm64_x86_64-maccatalyst" "ios-arm64_x86_64-simulator"
+install_xcframework "${PODS_ROOT}/../../Sources/Libavfilter.xcframework" "FFmpeg/FFmpeg" "framework" "ios-arm64_arm64e" "ios-arm64_x86_64-maccatalyst" "ios-arm64_x86_64-simulator"
 install_xcframework "${PODS_ROOT}/../../Sources/Libavformat.xcframework" "FFmpeg/FFmpeg" "framework" "ios-arm64_x86_64-maccatalyst" "ios-arm64_x86_64-simulator" "ios-arm64_arm64e"
-install_xcframework "${PODS_ROOT}/../../Sources/Libavutil.xcframework" "FFmpeg/FFmpeg" "framework" "ios-arm64_arm64e" "ios-arm64_x86_64-simulator" "ios-arm64_x86_64-maccatalyst"
-install_xcframework "${PODS_ROOT}/../../Sources/Libswresample.xcframework" "FFmpeg/FFmpeg" "framework" "ios-arm64_x86_64-maccatalyst" "ios-arm64_x86_64-simulator" "ios-arm64_arm64e"
-install_xcframework "${PODS_ROOT}/../../Sources/Libswscale.xcframework" "FFmpeg/FFmpeg" "framework" "ios-arm64_x86_64-simulator" "ios-arm64_arm64e" "ios-arm64_x86_64-maccatalyst"
+install_xcframework "${PODS_ROOT}/../../Sources/Libavutil.xcframework" "FFmpeg/FFmpeg" "framework" "ios-arm64_x86_64-maccatalyst" "ios-arm64_x86_64-simulator" "ios-arm64_arm64e"
+install_xcframework "${PODS_ROOT}/../../Sources/Libswresample.xcframework" "FFmpeg/FFmpeg" "framework" "ios-arm64_x86_64-maccatalyst" "ios-arm64_arm64e" "ios-arm64_x86_64-simulator"
+install_xcframework "${PODS_ROOT}/../../Sources/Libswscale.xcframework" "FFmpeg/FFmpeg" "framework" "ios-arm64_x86_64-maccatalyst" "ios-arm64_x86_64-simulator" "ios-arm64_arm64e"
 

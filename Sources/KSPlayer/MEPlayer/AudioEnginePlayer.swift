@@ -8,6 +8,18 @@
 import AVFoundation
 import CoreAudio
 
+protocol AudioPlayer: AnyObject {
+    var playbackRate: Float { get set }
+    var volume: Float { get set }
+    var isMuted: Bool { get set }
+    var isPaused: Bool { get set }
+    var attackTime: Float { get set }
+    var releaseTime: Float { get set }
+    var threshold: Float { get set }
+    var expansionRatio: Float { get set }
+    var overallGain: Float { get set }
+}
+
 final class AudioEnginePlayer: AudioPlayer, FrameOutput {
     public var attackTime: Float {
         get {

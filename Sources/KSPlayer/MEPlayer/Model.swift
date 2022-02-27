@@ -226,29 +226,6 @@ final class ByteDataWrap {
     }
 }
 
-final class MTLBufferWrap {
-    var data: [MTLBuffer?]
-    var size: [Int] {
-        didSet {
-            if size.description != oldValue.description {
-                data = size.map { MetalRender.device.makeBuffer(length: $0) }
-            }
-        }
-    }
-
-    public init(size: [Int]) {
-        self.size = size
-        data = size.map { MetalRender.device.makeBuffer(length: $0) }
-    }
-
-    deinit {
-        (0 ..< data.count).forEach { i in
-            data[i] = nil
-        }
-        data.removeAll()
-    }
-}
-
 final class AudioFrame: MEFrame {
     var timebase = Timebase.defaultValue
     var duration: Int64 = 0
@@ -274,7 +251,7 @@ final class VideoVTBFrame: MEFrame {
     var duration: Int64 = 0
     var size: Int64 = 0
     var position: Int64 = 0
-    var corePixelBuffer: BufferProtocol?
+    var corePixelBuffer: CVPixelBuffer?
 }
 
 extension Dictionary where Key == String {
@@ -334,18 +311,3 @@ extension Array {
         (self[0], self[1], self[2], self[3])
     }
 }
-
-//// swiftlint:disable identifier_name
-// extension Character {
-//    @inlinable public var asciiValueInt32: Int32 {
-//        Int32(asciiValue ?? 0)
-//    }
-// }
-// private func swift_AVERROR(_ err: Int32) -> Int32 {
-//    return -err
-// }
-// private func MKTAG(a: Character, b: Character, c: Character, d: Character) -> Int32 {
-//    return a.asciiValueInt32 | b.asciiValueInt32 << 8 | c.asciiValueInt32 << 16 | d.asciiValueInt32 << 24
-// }
-// private let swift_AVERROR_EOF = swift_AVERROR(MKTAG(a: "E", b: "O", c: "F", d: " "))
-//// swiftlint:enable identifier_name
