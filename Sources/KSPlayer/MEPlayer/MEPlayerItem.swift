@@ -36,7 +36,7 @@ final class MEPlayerItem {
     private(set) var assetTracks = [TrackProtocol]()
     private var videoAdaptation: VideoAdaptationState?
     private(set) var subtitleTracks = [FFPlayerItemTrack<SubtitleFrame>]()
-    var currentPlaybackTime = TimeInterval(0)
+    private(set) var currentPlaybackTime = TimeInterval(0)
     private var startTime = TimeInterval(0)
     private(set) var rotation = 0.0
     private(set) var duration: TimeInterval = 0
@@ -54,12 +54,21 @@ final class MEPlayerItem {
             switch state {
             case .opened:
                 delegate?.sourceDidOpened()
+            case .reading:
+                timer.fireDate = Date.distantPast
+            case .closed:
+                timer.fireDate = Date.distantFuture
             case .failed:
                 delegate?.sourceDidFailed(error: error)
-            default:
+                timer.fireDate = Date.distantFuture
+            case .idle, .opening, .seeking, .paused, .finished:
                 break
             }
         }
+    }
+
+    private lazy var timer: Timer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { [weak self] _ in
+        self?.codecDidChangeCapacity()
     }
 
     weak var delegate: MEPlayerDelegate?
@@ -67,6 +76,7 @@ final class MEPlayerItem {
     init(url: URL, options: KSOptions) {
         self.url = url
         self.options = options
+        timer.fireDate = Date.distantFuture
         avformat_network_init()
         av_log_set_callback { _, level, format, args in
             guard let format = format, level <= KSPlayerManager.logLevel.rawValue else {
@@ -78,7 +88,7 @@ final class MEPlayerItem {
                 log = NSString(format: log, arguments: arguments) as String
             }
             // 找不到解码器
-            //            if log.hasPrefix("parser not found for codec") {}
+            if log.hasPrefix("parser not found for codec") {}
             KSLog(log)
         }
         operationQueue.name = "KSPlayer_" + String(describing: self).components(separatedBy: ".").last!
@@ -149,6 +159,12 @@ extension MEPlayerItem {
         formatCtx.pointee.flags |= AVFMT_FLAG_GENPTS
         av_format_inject_global_side_data(formatCtx)
         options.openTime = CACurrentMediaTime()
+        if let probesize = options.probesize {
+            formatCtx.pointee.probesize = probesize
+        }
+        if let maxAnalyzeDuration = options.maxAnalyzeDuration {
+            formatCtx.pointee.max_analyze_duration = maxAnalyzeDuration
+        }
         result = avformat_find_stream_info(formatCtx, nil)
         guard result == 0 else {
             error = .init(errorCode: .formatFindStreamInfo, ffmpegErrnum: result)
@@ -261,15 +277,17 @@ extension MEPlayerItem {
                 condition.wait()
             }
             if state == .seeking {
-                let timeStamp = Int64(currentPlaybackTime * TimeInterval(AV_TIME_BASE))
+                let time = currentPlaybackTime + startTime
+                allTracks.forEach { $0.seek(time: time) }
+                let timeStamp = Int64(time * TimeInterval(AV_TIME_BASE))
                 // can not seek to key frame
-//                let result = avformat_seek_file(formatCtx, -1, timeStamp - 2, timeStamp, timeStamp + 2, AVSEEK_FLAG_BACKWARD)
-                let result = av_seek_frame(formatCtx, -1, timeStamp, AVSEEK_FLAG_BACKWARD)
+//                let result = avformat_seek_file(formatCtx, -1, Int64.min, timeStamp, Int64.max, options.seekFlags)
+                let result = av_seek_frame(formatCtx, -1, timeStamp, options.seekFlags)
                 if state == .closed {
                     break
                 }
-                allTracks.forEach { $0.seek(time: currentPlaybackTime) }
                 isSeek = true
+                allTracks.forEach { $0.seek(time: time) }
                 seekingCompletionHandler?(result >= 0)
                 seekingCompletionHandler = nil
                 state = .reading
@@ -399,15 +417,14 @@ extension MEPlayerItem: MediaPlayback {
 
     func seek(time: TimeInterval, completion handler: ((Bool) -> Void)?) {
         if state == .reading || state == .paused {
+            state = .seeking
             currentPlaybackTime = time
             seekingCompletionHandler = handler
-            state = .seeking
             condition.broadcast()
-            allTracks.forEach { $0.seek(time: currentPlaybackTime) }
         } else if state == .finished {
+            state = .seeking
             currentPlaybackTime = time
             seekingCompletionHandler = handler
-            state = .seeking
             read()
         }
         isAudioStalled = audioTrack == nil
@@ -415,7 +432,7 @@ extension MEPlayerItem: MediaPlayback {
 }
 
 extension MEPlayerItem: CodecCapacityDelegate {
-    func codecDidChangeCapacity(track: PlayerItemTrackProtocol) {
+    func codecDidChangeCapacity() {
         guard let loadingState = options.playable(capacitys: videoAudioTracks, isFirst: isFirst, isSeek: isSeek) else {
             return
         }
@@ -424,14 +441,14 @@ extension MEPlayerItem: CodecCapacityDelegate {
             isFirst = false
             isSeek = false
             if loadingState.loadedTime > options.maxBufferDuration {
-                adaptable(track: track, loadingState: loadingState)
+                adaptableVideo(loadingState: loadingState)
                 pause()
             } else if loadingState.loadedTime < options.maxBufferDuration / 2 {
                 resume()
             }
         } else {
             resume()
-            adaptable(track: track, loadingState: loadingState)
+            adaptableVideo(loadingState: loadingState)
         }
     }
 
@@ -441,24 +458,27 @@ extension MEPlayerItem: CodecCapacityDelegate {
         }
         let allSatisfy = videoAudioTracks.allSatisfy { $0.isEndOfFile && $0.frameCount == 0 && $0.packetCount == 0 }
         delegate?.sourceDidFinished(type: track.mediaType, allSatisfy: allSatisfy)
-        if allSatisfy, options.isLoopPlay {
-            isAudioStalled = audioTrack == nil
-            audioTrack?.isLoopModel = false
-            videoTrack?.isLoopModel = false
-            if state == .finished {
-                state = .reading
-                read()
+        if allSatisfy {
+            timer.fireDate = Date.distantFuture
+            if options.isLoopPlay {
+                isAudioStalled = audioTrack == nil
+                audioTrack?.isLoopModel = false
+                videoTrack?.isLoopModel = false
+                if state == .finished {
+                    state = .reading
+                    read()
+                }
             }
         }
     }
 
-    private func adaptable(track: PlayerItemTrackProtocol, loadingState: LoadingState) {
-        guard var videoAdaptation = videoAdaptation, track.mediaType == .video, !loadingState.isEndOfFile else {
+    private func adaptableVideo(loadingState: LoadingState) {
+        guard videoAdaptation != nil, let track = videoTrack, !loadingState.isEndOfFile, !loadingState.isSeek, state != .seeking else {
             return
         }
-        videoAdaptation.loadedCount = track.packetCount + track.frameCount
-        videoAdaptation.currentPlaybackTime = currentPlaybackTime
-        videoAdaptation.isPlayable = loadingState.isPlayable
+        videoAdaptation?.loadedCount = track.packetCount + track.frameCount
+        videoAdaptation?.currentPlaybackTime = currentPlaybackTime
+        videoAdaptation?.isPlayable = loadingState.isPlayable
         guard let (oldBitRate, newBitrate) = options.adaptable(state: videoAdaptation) else {
             return
         }
@@ -474,22 +494,28 @@ extension MEPlayerItem: CodecCapacityDelegate {
             }
         }
         let bitRateState = VideoAdaptationState.BitRateState(bitRate: newBitrate, time: CACurrentMediaTime())
-        videoAdaptation.bitRateStates.append(bitRateState)
+        videoAdaptation?.bitRateStates.append(bitRateState)
         delegate?.sourceDidChange(oldBitRate: oldBitRate, newBitrate: newBitrate)
     }
 }
 
 extension MEPlayerItem: OutputRenderSourceDelegate {
     func setVideo(time: CMTime) {
+        if state == .seeking {
+            return
+        }
         if isAudioStalled {
-            currentPlaybackTime = time.seconds - options.audioDelay
+            currentPlaybackTime = time.seconds - options.audioDelay - startTime
             videoMediaTime = CACurrentMediaTime()
         }
     }
 
     func setAudio(time: CMTime) {
+        if state == .seeking {
+            return
+        }
         if !isAudioStalled {
-            currentPlaybackTime = time.seconds
+            currentPlaybackTime = time.seconds - startTime
         }
     }
 
@@ -497,7 +523,7 @@ extension MEPlayerItem: OutputRenderSourceDelegate {
         if type == .video {
             let predicate: (MEFrame) -> Bool = { [weak self] frame -> Bool in
                 guard let self = self else { return true }
-                var desire = self.currentPlaybackTime + self.options.audioDelay
+                var desire = self.currentPlaybackTime + self.options.audioDelay + self.startTime
                 if self.isAudioStalled {
                     desire += max(CACurrentMediaTime() - self.videoMediaTime, 0)
                 }

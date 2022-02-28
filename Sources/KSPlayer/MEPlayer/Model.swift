@@ -43,7 +43,6 @@ protocol OutputRenderSourceDelegate: AnyObject {
 }
 
 protocol CodecCapacityDelegate: AnyObject {
-    func codecDidChangeCapacity(track: PlayerItemTrackProtocol)
     func codecDidFinished(track: PlayerItemTrackProtocol)
 }
 
@@ -102,7 +101,7 @@ public extension KSPlayerManager {
     static var audioPlayerMaximumChannels = AVAudioChannelCount(2)
     #else
     static var audioPlayerSampleRate = Int32(AVAudioSession.sharedInstance().sampleRate)
-    static var audioPlayerMaximumChannels = AVAudioChannelCount(AVAudioSession.sharedInstance().maximumOutputNumberOfChannels)
+    static var audioPlayerMaximumChannels = AVAudioChannelCount(AVAudioSession.sharedInstance().outputNumberOfChannels)
     #endif
     internal static func outputFormat() -> AudioStreamBasicDescription {
         #if !os(macOS)
@@ -199,9 +198,12 @@ final class ByteDataWrap {
     var size: [Int] = [0] {
         didSet {
             if size.description != oldValue.description {
-                for i in 0 ..< data.count where oldValue[i] > 0 {
-                    data[i]?.deinitialize(count: oldValue[i])
-                    data[i]?.deallocate()
+                for i in 0 ..< data.count {
+                    let count = oldValue[i]
+                    if count > 0 {
+                        data[i]?.deinitialize(count: oldValue[i])
+                        data[i]?.deallocate()
+                    }
                 }
                 data.removeAll()
                 for i in 0 ..< size.count {
@@ -219,29 +221,6 @@ final class ByteDataWrap {
         for i in 0 ..< data.count {
             data[i]?.deinitialize(count: size[i])
             data[i]?.deallocate()
-        }
-        data.removeAll()
-    }
-}
-
-final class MTLBufferWrap {
-    var data: [MTLBuffer?]
-    var size: [Int] {
-        didSet {
-            if size.description != oldValue.description {
-                data = size.map { MetalRender.device.makeBuffer(length: $0) }
-            }
-        }
-    }
-
-    public init(size: [Int]) {
-        self.size = size
-        data = size.map { MetalRender.device.makeBuffer(length: $0) }
-    }
-
-    deinit {
-        (0 ..< data.count).forEach { i in
-            data[i] = nil
         }
         data.removeAll()
     }
@@ -272,7 +251,7 @@ final class VideoVTBFrame: MEFrame {
     var duration: Int64 = 0
     var size: Int64 = 0
     var position: Int64 = 0
-    var corePixelBuffer: BufferProtocol?
+    var corePixelBuffer: CVPixelBuffer?
 }
 
 extension Dictionary where Key == String {
@@ -315,17 +294,20 @@ public extension AVError {
     static let eof = AVError(code: swift_AVERROR_EOF)
 }
 
-//// swiftlint:disable identifier_name
-// extension Character {
-//    @inlinable public var asciiValueInt32: Int32 {
-//        Int32(asciiValue ?? 0)
-//    }
-// }
-// private func swift_AVERROR(_ err: Int32) -> Int32 {
-//    return -err
-// }
-// private func MKTAG(a: Character, b: Character, c: Character, d: Character) -> Int32 {
-//    return a.asciiValueInt32 | b.asciiValueInt32 << 8 | c.asciiValueInt32 << 16 | d.asciiValueInt32 << 24
-// }
-// private let swift_AVERROR_EOF = swift_AVERROR(MKTAG(a: "E", b: "O", c: "F", d: " "))
-//// swiftlint:enable identifier_name
+extension Array {
+    init(tuple: (Element, Element, Element, Element, Element, Element, Element, Element)) {
+        self.init([tuple.0, tuple.1, tuple.2, tuple.3, tuple.4, tuple.5, tuple.6, tuple.7])
+    }
+
+    init(tuple: (Element, Element, Element, Element)) {
+        self.init([tuple.0, tuple.1, tuple.2, tuple.3])
+    }
+
+    var tuple8: (Element, Element, Element, Element, Element, Element, Element, Element) {
+        (self[0], self[1], self[2], self[3], self[4], self[5], self[6], self[7])
+    }
+
+    var tuple4: (Element, Element, Element, Element) {
+        (self[0], self[1], self[2], self[3])
+    }
+}

@@ -1,9 +1,9 @@
 #ifndef AVUTIL_SHIM_H
 #define AVUTIL_SHIM_H
 
-#import <Libavutil/avutil.h>
-#import <Libavutil/display.h>
-#import <Libavutil/channel_layout.h>
+//#import <Libavutil/avutil.h>
+//#import <Libavutil/display.h>
+//#import <Libavutil/channel_layout.h>
 #import <Libavutil/opt.h>
 
 static const int64_t swift_AV_NOPTS_VALUE = AV_NOPTS_VALUE;

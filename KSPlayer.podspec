@@ -18,14 +18,6 @@ Pod::Spec.new do |s|
     s.tvos.deployment_target = '11.0'
     s.swift_version = '5.5'
     s.static_framework = true
-    s.subspec 'UXKit' do |ss|
-        ss.source_files = 'Sources/KSPlayer/UXKit/*.{swift}'
-        ss.frameworks = 'Foundation'
-    end
-    s.subspec 'Basic' do |ss|
-        ss.source_files = 'Sources/KSPlayer/Basic/*.{swift}'
-        ss.dependency 'KSPlayer/UXKit'
-    end
     s.subspec 'Subtitle' do |ss|
         ss.source_files = 'Sources/KSPlayer/Subtitle/*.{swift}'
         ss.frameworks = 'Foundation'
@@ -41,7 +33,6 @@ Pod::Spec.new do |s|
         ss.ios.frameworks  = 'UIKit'
         ss.tvos.frameworks  = 'UIKit'
         ss.osx.frameworks  = 'AppKit'
-        ss.dependency 'KSPlayer/Basic'
     end
     #ffmpeg播放内核
     s.subspec 'MEPlayer' do |ss|
@@ -60,6 +51,12 @@ Pod::Spec.new do |s|
             'KSPlayer_KSPlayer' => ['Sources/KSPlayer/Core/Resources/*', 'Sources/KSPlayer/Metal/*.metal']
         } 
     end
+
+    s.subspec 'SwiftUI'do |ss|
+        ss.source_files = 'Sources/KSPlayer/SwiftUI/*.swift'
+        ss.dependency 'KSPlayer/AVPlayer'
+    end
+
     s.subspec 'Audio'do |ss|
         ss.source_files = 'Sources/KSPlayer/Audio/*.swift'
         ss.dependency 'KSPlayer/Core'

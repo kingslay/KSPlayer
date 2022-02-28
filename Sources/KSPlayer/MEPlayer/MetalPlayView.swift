@@ -13,9 +13,8 @@ final class MetalPlayView: UIView {
     private let render = MetalRender()
     private let view = MTKView(frame: .zero, device: MetalRender.device)
     private var videoInfo: CMVideoFormatDescription?
-    private var pixelBuffer: BufferProtocol?
+    private var pixelBuffer: CVPixelBuffer?
     private lazy var displayLink: CADisplayLink = .init(target: self, selector: #selector(drawView))
-
     var options: KSOptions
     var isBackground = false
     weak var renderSource: OutputRenderSourceDelegate?
@@ -92,9 +91,12 @@ final class MetalPlayView: UIView {
     }
 
     func clear() {
-        displayLayer.flushAndRemoveImage()
-        if let drawable = view.currentDrawable, let renderPassDescriptor = view.currentRenderPassDescriptor {
-            render.clear(drawable: drawable, renderPassDescriptor: renderPassDescriptor)
+        if view.isHidden {
+            displayLayer.flushAndRemoveImage()
+        } else {
+            if let drawable = view.currentDrawable, let renderPassDescriptor = view.currentRenderPassDescriptor {
+                render.clear(drawable: drawable, renderPassDescriptor: renderPassDescriptor)
+            }
         }
     }
 }
@@ -113,7 +115,6 @@ extension MetalPlayView {
         // swiftlint:disable line_length
         CMSampleBufferCreateForImageBuffer(allocator: nil, imageBuffer: pixelBuffer, dataReady: true, makeDataReadyCallback: nil, refcon: nil, formatDescription: videoInfo, sampleTiming: &timing, sampleBufferOut: &sampleBuffer)
         // swiftlint:enable line_length
-
         if let sampleBuffer = sampleBuffer {
             if let attachmentsArray = CMSampleBufferGetSampleAttachmentsArray(sampleBuffer, createIfNecessary: true) as? [Any] {
                 if let dic = attachmentsArray.first as? NSMutableDictionary {
@@ -147,7 +148,18 @@ extension MetalPlayView {
         renderSource?.setVideo(time: cmtime)
         let par = pixelBuffer.size
         let sar = pixelBuffer.aspectRatio
-        if pixelBuffer is PixelBuffer || !options.isUseDisplayLayer() {
+        if options.isUseDisplayLayer() {
+            if !view.isHidden {
+                view.isHidden = true
+                if let drawable = view.currentDrawable, let renderPassDescriptor = view.currentRenderPassDescriptor {
+                    render.clear(drawable: drawable, renderPassDescriptor: renderPassDescriptor)
+                }
+            }
+            if let dar = options.customizeDar(sar: sar, par: par) {
+                pixelBuffer.aspectRatio = CGSize(width: dar.width, height: dar.height * par.width / par.height)
+            }
+            set(pixelBuffer: pixelBuffer, time: cmtime)
+        } else {
             if view.isHidden {
                 view.isHidden = false
                 displayLayer.flushAndRemoveImage()
@@ -178,19 +190,6 @@ extension MetalPlayView {
                 }
                 render.draw(pixelBuffer: pixelBuffer, display: options.display, drawable: drawable)
             }
-        } else {
-            if !view.isHidden {
-                view.isHidden = true
-                if let drawable = view.currentDrawable, let renderPassDescriptor = view.currentRenderPassDescriptor {
-                    render.clear(drawable: drawable, renderPassDescriptor: renderPassDescriptor)
-                }
-            }
-            // swiftlint:disable force_cast
-            if let dar = options.customizeDar(sar: sar, par: par) {
-                (pixelBuffer as! CVPixelBuffer).aspectRatio = CGSize(width: dar.width, height: dar.height * par.width / par.height)
-            }
-            set(pixelBuffer: pixelBuffer as! CVPixelBuffer, time: cmtime)
-            // swiftlint:enable force_cast
         }
     }
 }
@@ -215,3 +214,69 @@ extension MetalPlayView: FrameOutput {
         }
     }
 }
+
+#if os(macOS)
+import CoreVideo
+class CADisplayLink: NSObject {
+    private var displayLink: CVDisplayLink
+    private var target: AnyObject
+    private var selector: Selector
+    private var runloop: RunLoop?
+    private var mode = RunLoop.Mode.default
+    public var timestamp: TimeInterval {
+        var timeStamp = CVTimeStamp()
+        if CVDisplayLinkGetCurrentTime(displayLink, &timeStamp) == kCVReturnSuccess, (timeStamp.flags & CVTimeStampFlags.hostTimeValid.rawValue) != 0 {
+            return TimeInterval(timeStamp.hostTime / NSEC_PER_SEC)
+        }
+        return 0
+    }
+
+    public var duration: TimeInterval {
+        CVDisplayLinkGetActualOutputVideoRefreshPeriod(displayLink)
+    }
+
+    public var targetTimestamp: TimeInterval {
+        duration + timestamp
+    }
+
+    public var isPaused: Bool {
+        get {
+            !CVDisplayLinkIsRunning(displayLink)
+        }
+        set {
+            if newValue {
+                CVDisplayLinkStop(displayLink)
+            } else {
+                CVDisplayLinkStart(displayLink)
+            }
+        }
+    }
+
+    public init(target: NSObject, selector sel: Selector) {
+        self.target = target
+        selector = sel
+        var displayLink: CVDisplayLink?
+        CVDisplayLinkCreateWithCGDisplay(CGMainDisplayID(), &displayLink)
+        self.displayLink = displayLink!
+        super.init()
+        CVDisplayLinkSetOutputCallback(self.displayLink, { (_, _, _, _, _, userData: UnsafeMutableRawPointer?) -> CVReturn in
+            let `self` = Unmanaged<CADisplayLink>.fromOpaque(userData!).takeUnretainedValue()
+            self.target.performSelector(onMainThread: self.selector, with: self, waitUntilDone: false, modes: [String(self.mode.rawValue)])
+            // 用runloop会卡顿
+            //            self.runloop?.perform(self.selector, target: self.target, argument: self, order: 0, modes: [self.mode])
+            return kCVReturnSuccess
+        }, Unmanaged.passUnretained(self).toOpaque())
+        CVDisplayLinkStart(self.displayLink)
+    }
+
+    open func add(to runloop: RunLoop, forMode mode: RunLoop.Mode) {
+        self.runloop = runloop
+        self.mode = mode
+    }
+
+    public func invalidate() {
+        isPaused = true
+        runloop = nil
+    }
+}
+#endif

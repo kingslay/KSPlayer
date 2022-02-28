@@ -106,5 +106,5 @@ install_xcframework() {
 }
 
 install_xcframework "${PODS_ROOT}/../../Sources/Libssl.xcframework" "OpenSSL/OpenSSL" "framework" "tvos-arm64" "tvos-arm64_x86_64-simulator"
-install_xcframework "${PODS_ROOT}/../../Sources/Libcrypto.xcframework" "OpenSSL/OpenSSL" "framework" "tvos-arm64" "tvos-arm64_x86_64-simulator"
+install_xcframework "${PODS_ROOT}/../../Sources/Libcrypto.xcframework" "OpenSSL/OpenSSL" "framework" "tvos-arm64_x86_64-simulator" "tvos-arm64"
 

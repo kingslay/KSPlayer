@@ -6,8 +6,6 @@ class KSPlayerLayerTest: XCTestCase {
         KSPlayerManager.secondPlayerType = KSMEPlayer.self
         KSOptions.isSecondOpen = true
         KSOptions.isAccurateSeek = true
-        KSOptions.hardwareDecodeH264 = true
-        KSOptions.hardwareDecodeH265 = true
     }
 
     func testPlayerLayer() {

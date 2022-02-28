@@ -2,9 +2,6 @@
 <Workspace
    version = "1.0">
    <FileRef
-      location = "group:demo-SwiftUI/demo-SwiftUI.xcodeproj">
-   </FileRef>
-   <FileRef
       location = "group:demo-iOS/demo-iOS.xcodeproj">
    </FileRef>
    <FileRef
@@ -17,6 +14,6 @@
       location = "group:Pods/Pods.xcodeproj">
    </FileRef>
    <FileRef
-      location = "group:demo-SPM/demo-SPM.xcodeproj">
+      location = "group:SwiftUI/SwiftUI.xcodeproj">
    </FileRef>
 </Workspace>

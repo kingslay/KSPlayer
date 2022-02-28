@@ -105,10 +105,10 @@ install_xcframework() {
   echo "Copied $source to $destination"
 }
 
-install_xcframework "${PODS_ROOT}/../../Sources/Libavcodec.xcframework" "FFmpeg/FFmpeg" "framework" "tvos-arm64_x86_64-simulator" "tvos-arm64"
+install_xcframework "${PODS_ROOT}/../../Sources/Libavcodec.xcframework" "FFmpeg/FFmpeg" "framework" "tvos-arm64" "tvos-arm64_x86_64-simulator"
 install_xcframework "${PODS_ROOT}/../../Sources/Libavfilter.xcframework" "FFmpeg/FFmpeg" "framework" "tvos-arm64_x86_64-simulator" "tvos-arm64"
-install_xcframework "${PODS_ROOT}/../../Sources/Libavformat.xcframework" "FFmpeg/FFmpeg" "framework" "tvos-arm64_x86_64-simulator" "tvos-arm64"
+install_xcframework "${PODS_ROOT}/../../Sources/Libavformat.xcframework" "FFmpeg/FFmpeg" "framework" "tvos-arm64" "tvos-arm64_x86_64-simulator"
 install_xcframework "${PODS_ROOT}/../../Sources/Libavutil.xcframework" "FFmpeg/FFmpeg" "framework" "tvos-arm64_x86_64-simulator" "tvos-arm64"
-install_xcframework "${PODS_ROOT}/../../Sources/Libswresample.xcframework" "FFmpeg/FFmpeg" "framework" "tvos-arm64_x86_64-simulator" "tvos-arm64"
-install_xcframework "${PODS_ROOT}/../../Sources/Libswscale.xcframework" "FFmpeg/FFmpeg" "framework" "tvos-arm64_x86_64-simulator" "tvos-arm64"
+install_xcframework "${PODS_ROOT}/../../Sources/Libswresample.xcframework" "FFmpeg/FFmpeg" "framework" "tvos-arm64" "tvos-arm64_x86_64-simulator"
+install_xcframework "${PODS_ROOT}/../../Sources/Libswscale.xcframework" "FFmpeg/FFmpeg" "framework" "tvos-arm64" "tvos-arm64_x86_64-simulator"
 

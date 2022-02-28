@@ -19,17 +19,12 @@ target 'demo-macOS' do
   common
 end
 
-target 'demo-SwiftUI' do
-  project 'demo-SwiftUI/demo-SwiftUI.xcodeproj'
-  platform :ios, 11.0
-  common
-end
-
 target 'demo-tvOS' do
   project 'demo-tvOS/demo-tvOS.xcodeproj'
   platform :tvos, 11.0
   common
 end
-target 'demo-SPM (iOS)' do
-  project 'demo-SPM/demo-SPM.xcodeproj'
+target 'iOS' do
+  project 'SwiftUI/SwiftUI.xcodeproj'
+  platform :ios, 15.0
 end

@@ -20,18 +20,33 @@ public class EmbedSubtitleInfo: SubtitleInfo {
         self.subtitle = subtitle
     }
 
-    public func makeSubtitle(completion: @escaping (Result<KSSubtitleProtocol?, NSError>) -> Void) {
+    public func disableSubtitle() {
+        subtitle.assetTrack.setIsEnabled(false)
+    }
+
+    public func enableSubtitle(completion: @escaping (Result<KSSubtitleProtocol?, NSError>) -> Void) {
+        subtitle.assetTrack.setIsEnabled(true)
         completion(.success(subtitle))
     }
 }
 
 extension FFPlayerItemTrack: KSSubtitleProtocol {
     func search(for time: TimeInterval) -> SubtitlePart? {
-        let frame = getOutputRender { item -> Bool in
-            if let subtitle = item as? SubtitleFrame {
-                return subtitle.part == time
+        let frame: MEFrame?
+        if assetTrack.isImageSubtitle {
+            frame = outputRenderQueue.pop { item -> Bool in
+                if let subtitle = item as? SubtitleFrame {
+                    return subtitle.part < time || subtitle.part == time
+                }
+                return false
             }
-            return false
+        } else {
+            frame = outputRenderQueue.search { item -> Bool in
+                if let subtitle = item as? SubtitleFrame {
+                    return subtitle.part == time
+                }
+                return false
+            }
         }
         if let frame = frame as? SubtitleFrame {
             return frame.part

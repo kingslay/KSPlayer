@@ -19,18 +19,17 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UISplitViewControllerDele
         KSPlayerManager.firstPlayerType = KSMEPlayer.self
         KSPlayerManager.secondPlayerType = KSMEPlayer.self
 //        KSPlayerManager.supportedInterfaceOrientations = .all
-        KSOptions.preferredForwardBufferDuration = 10
         KSOptions.isAutoPlay = true
         KSOptions.isSecondOpen = true
         KSOptions.isAccurateSeek = true
-        KSOptions.isLoopPlay = true
-        KSOptions.hardwareDecodeH265 = true
-        KSOptions.hardwareDecodeH264 = true
+//        KSOptions.isLoopPlay = true
         if UIDevice.current.userInterfaceIdiom == .phone {
             window.rootViewController = UINavigationController(rootViewController: RootViewController())
-        } else if UIDevice.current.userInterfaceIdiom == .tv {
-            window.rootViewController = UINavigationController(rootViewController: TvOSViewController(style: .grouped))
         } else {
+        #if os(tvOS)
+            window.rootViewController = UINavigationController(rootViewController: TvOSViewController(style: .grouped))
+        #else
+            
             let splitViewController = UISplitViewController()
             splitViewController.preferredDisplayMode = .primaryOverlay
             splitViewController.delegate = self
@@ -41,6 +40,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UISplitViewControllerDele
             detailVC.navigationItem.leftItemsSupplementBackButton = true
             #endif
             window.rootViewController = splitViewController
+        #endif
         }
         window.makeKeyAndVisible()
         self.window = window
@@ -64,9 +64,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UISplitViewControllerDele
 var objects: [KSPlayerResource] = {
     var objects = [KSPlayerResource]()
     if let path = Bundle.main.path(forResource: "567082ac3ae39699f68de4fd2b7444b1e045515a", ofType: "mp4") {
-        let options = KSOptions()
-        options.videoFilters = "hflip,vflip"
-        objects.append(KSPlayerResource(url: URL(fileURLWithPath: path), options: options, name: "本地视频"))
+        objects.append(KSPlayerResource(url: URL(fileURLWithPath: path), name: "本地视频"))
     }
     if let path = Bundle.main.path(forResource: "tos", ofType: "mkv") {
         objects.append(KSPlayerResource(url: URL(fileURLWithPath: path), name: "本地mkv"))
@@ -84,8 +82,10 @@ var objects: [KSPlayerResource] = {
         objects.append(KSPlayerResource(url: URL(fileURLWithPath: path), name: "h265视频"))
     }
     if let url = URL(string: "http://clips.vorwaerts-gmbh.de/big_buck_bunny.mp4") {
-        let res0 = KSPlayerResourceDefinition(url: url, definition: "高清")
-        let res1 = KSPlayerResourceDefinition(url: URL(string: "http://devimages.apple.com/iphone/samples/bipbop/bipbopall.m3u8")!, definition: "标清")
+        let options = KSOptions()
+        options.videoFilters = "hflip,vflip"
+        let res0 = KSPlayerResourceDefinition(url: url, definition: "标准", options: options)
+        let res1 = KSPlayerResourceDefinition(url: url, definition: "颠倒", options: options)
         let asset = KSPlayerResource(name: "http视频", definitions: [res0, res1], cover: URL(string: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c5/Big_buck_bunny_poster_big.jpg/848px-Big_buck_bunny_poster_big.jpg"))
         objects.append(asset)
     }
@@ -107,13 +107,11 @@ var objects: [KSPlayerResource] = {
     }
     if let url = URL(string: "https://devstreaming-cdn.apple.com/videos/wwdc/2019/244gmopitz5ezs2kkq/244/hls_vod_mvp.m3u8") {
         let options = KSOptions()
-        options.formatContextOptions["timeout"] = 0
         objects.append(KSPlayerResource(url: url, options: options, name: "https视频"))
     }
 
-    if let url = URL(string: "rtsp://wowzaec2demo.streamlock.net/vod/mp4:BigBuckBunny_115k.mov") {
+    if let url = URL(string: "rtsp://rtsp.stream/pattern") {
         let options = KSOptions()
-        options.formatContextOptions["timeout"] = 0
         objects.append(KSPlayerResource(url: url, options: options, name: "rtsp video"))
     }
 
@@ -143,7 +141,7 @@ class CustomVideoPlayerView: VideoPlayerView {
             subtitleInfos.forEach {
                 print($0.name)
             }
-            subtitleInfos.first?.makeSubtitle { result in
+            subtitleInfos.first?.enableSubtitle { result in
                 self.resource?.subtitle = try? result.get()
             }
             for track in player.tracks(mediaType: .audio) {

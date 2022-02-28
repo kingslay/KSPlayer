@@ -3,7 +3,7 @@
 ## 一、介绍
 KSPlayer是一款基于 AVPlayer, FFmpeg  纯Swift的音视频播放器，支持所有视频格式和全景视频，支持苹果全平台。实现高可用，高性能的音视频播放能力。它包含UI控件模块、字幕模块、播放器内核模块。这些模块都是解耦的，可以通过pod按需接入。
 
- [原理详解](https://github.com/kingslay/KSPlayer/blob/master/documents/KSPlayer原理详解.md) 
+ [原理详解](./Documents/KSPlayer原理详解.md) 
 
 ## 二、功能
 - [x] 首屏秒开
@@ -26,14 +26,14 @@ KSPlayer是一款基于 AVPlayer, FFmpeg  纯Swift的音视频播放器，支持
 - [x] Bitcode
 
 ## 三、要求
-- iOS 10 +,  macOS 10.12 +, tvOS 10.2 +
-- Xcode 11
-- Swift 5.1
+- iOS 11 +,  macOS 10.13 +, tvOS 11 +
+- Xcode 13
+- Swift 5.5
 
 ## 四、安装
 ### CocoaPods
 
-确保使用最新版本 **cocoapods 1.9**, 可以使用命令 ` brew install cocoapods` 来安装
+确保使用最新版本 **cocoapods 1.10.1, 可以使用命令 ` brew install cocoapods` 来安装
 
 ```ruby
 target 'ProjectName' do
@@ -154,8 +154,6 @@ public protocol PlayerControllerDelegate: class {
       public static var enableVolumeGestures = true
       /// 开启进度滑动手势 默认true
       public static var enablePlaytimeGestures = true
-      /// 竖屏是否开启手势控制 默认false
-      public static var enablePortraitGestures = false
       /// 播放内核选择策略 先使用firstPlayer，失败了自动切换到secondPlayer，播放内核有KSAVPlayer、KSMEPlayer两个选项
       public static var firstPlayerType: MediaPlayerProtocol.Type = KSAVPlayer.self
       public static var secondPlayerType: MediaPlayerProtocol.Type?
@@ -175,8 +173,6 @@ public protocol PlayerControllerDelegate: class {
   public class KSOptions {
       /// 视频颜色编码方式 支持kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange kCVPixelFormatType_420YpCbCr8BiPlanarFullRange kCVPixelFormatType_32BGRA kCVPixelFormatType_420YpCbCr8Planar
       public static var bufferPixelFormatType = kCVPixelFormatType_420YpCbCr8BiPlanarFullRange
-      public static var hardwareDecodeH264 = true
-      public static var hardwareDecodeH265 = true
       /// 最低缓存视频时间
       public static var preferredForwardBufferDuration = 3.0
       /// 最大缓存视频时间
@@ -198,7 +194,7 @@ public protocol PlayerControllerDelegate: class {
 
 ## 七、效果:
 
-![gif](https://github.com/kingslay/KSPlayer/raw/master/Demo/demo.gif)
+![gif](./Demo/demo.gif)
 
 ## 八、参考：
 本项目参考了 [ZFPlayer](https://github.com/renzifeng/ZFPlayer)、**[SGPlayer](https://github.com/libobjc/SGPlayer)**

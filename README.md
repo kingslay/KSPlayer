@@ -1,27 +1,29 @@
-![Build Status](https://img.shields.io/badge/build-%20passing%20-brightgreen.svg)
+![Build Status](https://img.shields.io/badge/build-%20passing%20-blue.svg)
 ![Platform](https://img.shields.io/badge/Platform-%20iOS%20macOS%20tvOS%20-blue.svg)
-
+![License](https://img.shields.io/badge/license-GPL-blue.svg)
 # KSPlayer 
 
-- KSPlayer is a powerful media play framework foriOS, tvOS, macOS,Mac Catalyst, SwiftUI,  Apple Silicon M1 .
+KSPlayer is a powerful media play framework foriOS, tvOS, macOS,Mac Catalyst, SwiftUI, Apple Silicon M1 .
+
+English | [简体中文](./README_CN.md)
 
 ## Based On
 
 - FFmpeg
 - Metal
-- AudioUnit
+- AVAudioEngine
 
 ## Features
 
-- iOS, tvOS, macOS,Mac Catalyst,  Apple Silicon M1, SwiftUI.
+- iOS, tvOS, macOS,Mac Catalyst, Apple Silicon M1, SwiftUI.
 - 360° panorama video.
 - Background playback.
 - RTMP/RTSP/Dash/HLS streaming.
 - Setting playback speed.
 - Multiple audio/video tracks.
 - H.264/H.265 hardware accelerator.
-- HDR
-- dvb_subtitle
+- 4k/HDR
+- subtitle/dvb_subtitle
 - Picture in Picture
 
 ## Requirements
@@ -194,8 +196,6 @@ public protocol PlayerControllerDelegate: class {
       public static var enableVolumeGestures = true
       /// 开启进度滑动手势 默认true
       public static var enablePlaytimeGestures = true
-      /// 竖屏是否开启手势控制 默认false
-      public static var enablePortraitGestures = false
       /// 播放内核选择策略 先使用firstPlayer，失败了自动切换到secondPlayer，播放内核有KSAVPlayer、KSMEPlayer两个选项
       public static var firstPlayerType: MediaPlayerProtocol.Type = KSAVPlayer.self
       public static var secondPlayerType: MediaPlayerProtocol.Type?
@@ -215,8 +215,6 @@ public protocol PlayerControllerDelegate: class {
   public class KSOptions {
       /// 视频颜色编码方式 支持kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange kCVPixelFormatType_420YpCbCr8BiPlanarFullRange kCVPixelFormatType_32BGRA kCVPixelFormatType_420YpCbCr8Planar
       public static var bufferPixelFormatType = kCVPixelFormatType_420YpCbCr8BiPlanarFullRange
-      public static var hardwareDecodeH264 = true
-      public static var hardwareDecodeH265 = true
       /// 最低缓存视频时间
       public static var preferredForwardBufferDuration = 3.0
       /// 最大缓存视频时间
@@ -238,7 +236,7 @@ public protocol PlayerControllerDelegate: class {
 
 ## Effect
 
-![gif](https://github.com/kingslay/KSPlayer/raw/master/Demo/demo.gif)
+![gif](./Demo/demo.gif)
 
 ## Debug FFmpeg
 
@@ -249,7 +247,7 @@ dwarfdump -F --debug-info ../Sources/libavformat.xcframework/macos-arm64_x86_64/
 
 run demo-macOS
 
-![6](https://github.com/kingslay/KSPlayer/blob/develop/Documents/6.png?raw=true)
+![6](./Documents/6.png?raw=true)
 
 ## Developments and Tests
 

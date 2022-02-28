@@ -110,7 +110,8 @@ public class CircularBuffer<Item: ObjectQueueItem> {
     public func search(where predicate: (Item) -> Bool) -> Item? {
         condition.lock()
         defer { condition.unlock() }
-        for i in headIndex ..< tailIndex {
+        var i = headIndex
+        while i < tailIndex {
             if let item = _buffer[Int(i & mask)] {
                 if predicate(item) {
                     headIndex = i
@@ -120,6 +121,7 @@ public class CircularBuffer<Item: ObjectQueueItem> {
                 assertionFailure("value is nil of index: \(i) headIndex: \(headIndex), tailIndex: \(tailIndex), bufferCount: \(_buffer.count)")
                 return nil
             }
+            i += 1
         }
         return nil
     }

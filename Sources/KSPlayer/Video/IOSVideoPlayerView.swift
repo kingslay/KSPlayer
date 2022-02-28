@@ -21,7 +21,6 @@ open class IOSVideoPlayerView: VideoPlayerView {
     private var isVolume = false
     private let volumeView = BrightnessVolume()
     public var volumeViewSlider = UXSlider()
-    public var lockButton = UIButton()
     public var backButton = UIButton()
     public var airplayStatusView: UIView = AirplayStatusView()
     public var routeButton = MPVolumeView()
@@ -31,19 +30,11 @@ open class IOSVideoPlayerView: VideoPlayerView {
     override open var isMaskShow: Bool {
         didSet {
             fullScreenDelegate?.player(isMaskShow: isMaskShow, isFullScreen: landscapeButton.isSelected)
-            UIView.animate(withDuration: 0.3) {
-                self.lockButton.alpha = self.isMaskShow ? 1.0 : 0.0
-            }
         }
-    }
-
-    override public var isLock: Bool {
-        lockButton.isSelected
     }
 
     override open func customizeUIComponents() {
         super.customizeUIComponents()
-        panGesture.isEnabled = false
         if UIDevice.current.userInterfaceIdiom == .phone {
             subtitleLabel.font = .systemFont(ofSize: 14)
         }
@@ -66,14 +57,6 @@ open class IOSVideoPlayerView: VideoPlayerView {
         backButton.setImage(KSPlayerManager.image(named: "KSPlayer_back"), for: .normal)
         backButton.addTarget(self, action: #selector(onButtonPressed(_:)), for: .touchUpInside)
         navigationBar.insertArrangedSubview(backButton, at: 0)
-        lockButton.backgroundColor = UIColor.black.withAlphaComponent(0.5)
-        lockButton.cornerRadius = 32
-        lockButton.setImage(KSPlayerManager.image(named: "KSPlayer_unlocking"), for: .normal)
-        lockButton.setImage(KSPlayerManager.image(named: "KSPlayer_autoRotationLock"), for: .selected)
-        lockButton.tag = PlayerButtonType.lock.rawValue
-        lockButton.addTarget(self, action: #selector(onButtonPressed(_:)), for: .touchUpInside)
-        lockButton.isHidden = true
-        addSubview(lockButton)
         routeButton.showsRouteButton = true
         routeButton.showsVolumeSlider = false
         routeButton.sizeToFit()
@@ -87,7 +70,6 @@ open class IOSVideoPlayerView: VideoPlayerView {
             volumeViewSlider = first
         }
         routeButton.translatesAutoresizingMaskIntoConstraints = false
-        lockButton.translatesAutoresizingMaskIntoConstraints = false
         backButton.translatesAutoresizingMaskIntoConstraints = false
         landscapeButton.translatesAutoresizingMaskIntoConstraints = false
         maskImageView.translatesAutoresizingMaskIntoConstraints = false
@@ -97,8 +79,6 @@ open class IOSVideoPlayerView: VideoPlayerView {
             maskImageView.bottomAnchor.constraint(equalTo: bottomAnchor),
             maskImageView.trailingAnchor.constraint(equalTo: trailingAnchor),
             backButton.widthAnchor.constraint(equalToConstant: 25),
-            lockButton.leadingAnchor.constraint(equalTo: safeLeadingAnchor, constant: 22),
-            lockButton.centerYAnchor.constraint(equalTo: centerYAnchor),
             routeButton.widthAnchor.constraint(equalToConstant: 25),
             landscapeButton.widthAnchor.constraint(equalToConstant: 30),
             airplayStatusView.centerXAnchor.constraint(equalTo: centerXAnchor),
@@ -111,7 +91,6 @@ open class IOSVideoPlayerView: VideoPlayerView {
         super.resetPlayer()
         maskImageView.alpha = 1
         maskImageView.image = nil
-        lockButton.isSelected = false
         panGesture.isEnabled = false
         routeButton.isHidden = !routeButton.areWirelessRoutesAvailable
     }
@@ -316,23 +295,11 @@ extension IOSVideoPlayerView {
     private func addNotification() {
         NotificationCenter.default.addObserver(self, selector: #selector(orientationChanged), name: UIApplication.didChangeStatusBarOrientationNotification, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(routesAvailableDidChange), name: .AVRouteDetectorMultipleRoutesDetectedDidChange, object: nil)
-        NotificationCenter.default.addObserver(self, selector: #selector(wirelessRouteActiveDidChange(notification:)), name: .MPVolumeViewWirelessRouteActiveDidChange, object: nil)
         callCenter.setDelegate(self, queue: DispatchQueue.main)
     }
 
     @objc private func routesAvailableDidChange(notification _: Notification) {
         routeButton.isHidden = !routeButton.areWirelessRoutesAvailable
-    }
-
-    @objc private func wirelessRouteActiveDidChange(notification: Notification) {
-        guard let volumeView = notification.object as? MPVolumeView, playerLayer.isWirelessRouteActive != volumeView.isWirelessRouteActive else { return }
-        if volumeView.isWirelessRouteActive {
-            if !(playerLayer.player?.allowsExternalPlayback ?? false) {
-                playerLayer.isWirelessRouteActive = true
-            }
-            playerLayer.player?.usesExternalPlaybackWhileExternalScreenIsActive = true
-        }
-        playerLayer.isWirelessRouteActive = volumeView.isWirelessRouteActive
     }
 
     @objc private func orientationChanged(notification _: Notification) {
@@ -342,15 +309,11 @@ extension IOSVideoPlayerView {
         updateUI(isFullScreen: UIApplication.isLandscape)
     }
 
-    private func judgePanGesture() {
+    open func judgePanGesture() {
         if landscapeButton.isSelected || UIDevice.current.userInterfaceIdiom == .pad {
             panGesture.isEnabled = isPlayed && !replayButton.isSelected
         } else {
-            if KSPlayerManager.enablePortraitGestures {
-                panGesture.isEnabled = toolBar.playButton.isSelected
-            } else {
-                panGesture.isEnabled = false
-            }
+            panGesture.isEnabled = toolBar.playButton.isSelected
         }
     }
 }
