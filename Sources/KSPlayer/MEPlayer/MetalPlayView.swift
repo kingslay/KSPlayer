@@ -36,7 +36,7 @@ final class MetalPlayView: UIView {
         #endif
         view.framebufferOnly = true
         view.isPaused = true
-        displayLink.add(to: RunLoop.main, forMode: .default)
+        displayLink.add(to: RunLoop.main, forMode: .common)
         displayLink.isPaused = true
         addSubview(view)
         view.isHidden = true
@@ -217,10 +217,10 @@ extension MetalPlayView: FrameOutput {
 
 #if os(macOS)
 import CoreVideo
-class CADisplayLink: NSObject {
-    private var displayLink: CVDisplayLink
-    private var target: AnyObject
-    private var selector: Selector
+class CADisplayLink {
+    private let displayLink: CVDisplayLink
+    private let target: AnyObject
+    private let selector: Selector
     private var runloop: RunLoop?
     private var mode = RunLoop.Mode.default
     public var timestamp: TimeInterval {
@@ -258,16 +258,12 @@ class CADisplayLink: NSObject {
         var displayLink: CVDisplayLink?
         CVDisplayLinkCreateWithCGDisplay(CGMainDisplayID(), &displayLink)
         self.displayLink = displayLink!
-        super.init()
         CVDisplayLinkSetOutputCallback(self.displayLink, { (_, _, _, _, _, userData: UnsafeMutableRawPointer?) -> CVReturn in
-            let `self` = Unmanaged<CADisplayLink>.fromOpaque(userData!).takeUnretainedValue()
-            DispatchQueue.main.async {
-                _ = self.target.perform(self.selector)
+            guard let userData = userData else {
+                return kCVReturnError
             }
-            //移动的时候会卡住
-//            self.target.performSelector(onMainThread: self.selector, with: self, waitUntilDone: false, modes: [String(self.mode.rawValue)])
-            // 用runloop会卡顿
-            //            self.runloop?.perform(self.selector, target: self.target, argument: self, order: 0, modes: [self.mode])
+            let `self` = Unmanaged<CADisplayLink>.fromOpaque(userData).takeUnretainedValue()
+            self.runloop?.perform(self.selector, target: self.target, argument: self, order: 0, modes: [self.mode])
             return kCVReturnSuccess
         }, Unmanaged.passUnretained(self).toOpaque())
         CVDisplayLinkStart(self.displayLink)
