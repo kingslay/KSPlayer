@@ -479,18 +479,17 @@ extension MEPlayerItem: CodecCapacityDelegate {
         videoAdaptation?.loadedCount = track.packetCount + track.frameCount
         videoAdaptation?.currentPlaybackTime = currentPlaybackTime
         videoAdaptation?.isPlayable = loadingState.isPlayable
-        guard let (oldBitRate, newBitrate) = options.adaptable(state: videoAdaptation) else {
+        guard let (oldBitRate, newBitrate) = options.adaptable(state: videoAdaptation), oldBitRate != newBitrate,
+              let newAssetTrack = assetTracks.first(where: { $0.mediaType == .video && $0.bitRate == newBitrate }) else {
             return
         }
         assetTracks.first { $0.mediaType == .video && $0.bitRate == oldBitRate }?.stream.pointee.discard = AVDISCARD_ALL
-        if let newAssetTrack = assetTracks.first(where: { $0.mediaType == .video && $0.bitRate == newBitrate }) {
-            newAssetTrack.stream.pointee.discard = AVDISCARD_DEFAULT
-            if let first = assetTracks.first(where: { $0.mediaType == .audio && $0.isEnabled }) {
-                let index = av_find_best_stream(formatCtx, AVMEDIA_TYPE_AUDIO, first.streamIndex, newAssetTrack.streamIndex, nil, 0)
-                if index != first.streamIndex {
-                    first.stream.pointee.discard = AVDISCARD_ALL
-                    assetTracks.first { $0.mediaType == .audio && $0.streamIndex == index }?.stream.pointee.discard = AVDISCARD_DEFAULT
-                }
+        newAssetTrack.stream.pointee.discard = AVDISCARD_DEFAULT
+        if let first = assetTracks.first(where: { $0.mediaType == .audio && $0.isEnabled }) {
+            let index = av_find_best_stream(formatCtx, AVMEDIA_TYPE_AUDIO, first.streamIndex, newAssetTrack.streamIndex, nil, 0)
+            if index != first.streamIndex {
+                first.stream.pointee.discard = AVDISCARD_ALL
+                assetTracks.first { $0.mediaType == .audio && $0.streamIndex == index }?.stream.pointee.discard = AVDISCARD_DEFAULT
             }
         }
         let bitRateState = VideoAdaptationState.BitRateState(bitRate: newBitrate, time: CACurrentMediaTime())

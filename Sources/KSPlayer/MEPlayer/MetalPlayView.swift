@@ -261,7 +261,11 @@ class CADisplayLink: NSObject {
         super.init()
         CVDisplayLinkSetOutputCallback(self.displayLink, { (_, _, _, _, _, userData: UnsafeMutableRawPointer?) -> CVReturn in
             let `self` = Unmanaged<CADisplayLink>.fromOpaque(userData!).takeUnretainedValue()
-            self.target.performSelector(onMainThread: self.selector, with: self, waitUntilDone: false, modes: [String(self.mode.rawValue)])
+            DispatchQueue.main.async {
+                _ = self.target.perform(self.selector)
+            }
+            //移动的时候会卡住
+//            self.target.performSelector(onMainThread: self.selector, with: self, waitUntilDone: false, modes: [String(self.mode.rawValue)])
             // 用runloop会卡顿
             //            self.runloop?.perform(self.selector, target: self.target, argument: self, order: 0, modes: [self.mode])
             return kCVReturnSuccess
