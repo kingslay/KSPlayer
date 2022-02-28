@@ -281,8 +281,8 @@ extension MEPlayerItem {
                 allTracks.forEach { $0.seek(time: time) }
                 let timeStamp = Int64(time * TimeInterval(AV_TIME_BASE))
                 // can not seek to key frame
-                _ = avformat_seek_file(formatCtx, -1, Int64.min, timeStamp, Int64.max, options.seekFlags)
-                let result = avformat_seek_file(formatCtx, -1, Int64.min, timeStamp, Int64.max, options.seekFlags)
+//                let result = avformat_seek_file(formatCtx, -1, Int64.min, timeStamp, Int64.max, options.seekFlags)
+                let result = av_seek_frame(formatCtx, -1, timeStamp, options.seekFlags)
                 if state == .closed {
                     break
                 }
@@ -473,12 +473,12 @@ extension MEPlayerItem: CodecCapacityDelegate {
     }
 
     private func adaptableVideo(loadingState: LoadingState) {
-        guard var videoAdaptation = videoAdaptation, let track = videoTrack, !loadingState.isEndOfFile, !loadingState.isSeek, state != .seeking else {
+        guard videoAdaptation != nil, let track = videoTrack, !loadingState.isEndOfFile, !loadingState.isSeek, state != .seeking else {
             return
         }
-        videoAdaptation.loadedCount = track.packetCount + track.frameCount
-        videoAdaptation.currentPlaybackTime = currentPlaybackTime
-        videoAdaptation.isPlayable = loadingState.isPlayable
+        videoAdaptation?.loadedCount = track.packetCount + track.frameCount
+        videoAdaptation?.currentPlaybackTime = currentPlaybackTime
+        videoAdaptation?.isPlayable = loadingState.isPlayable
         guard let (oldBitRate, newBitrate) = options.adaptable(state: videoAdaptation) else {
             return
         }
@@ -494,7 +494,7 @@ extension MEPlayerItem: CodecCapacityDelegate {
             }
         }
         let bitRateState = VideoAdaptationState.BitRateState(bitRate: newBitrate, time: CACurrentMediaTime())
-        videoAdaptation.bitRateStates.append(bitRateState)
+        videoAdaptation?.bitRateStates.append(bitRateState)
         delegate?.sourceDidChange(oldBitRate: oldBitRate, newBitrate: newBitrate)
     }
 }
