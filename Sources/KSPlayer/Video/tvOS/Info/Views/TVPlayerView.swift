@@ -93,8 +93,10 @@ final class TVPlayerView: VideoPlayerView {
         set {
             if newValue == .reduceLoudSounds {
                 self.reduceLoudSounds()
+                TvOSUserDefaults.isReduceLoudSounds = true
             } else {
                 self.fullDynamicRange()
+                TvOSUserDefaults.isReduceLoudSounds = false
             }
         }
     }
@@ -139,6 +141,10 @@ final class TVPlayerView: VideoPlayerView {
         }
         if #available(tvOS 13.0, *) {
             set(fps: fps, contentMode: dynamicRange)
+        }
+        
+        if TvOSUserDefaults.isReduceLoudSounds {
+            reduceLoudSounds()
         }
     }
 }

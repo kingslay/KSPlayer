@@ -27,6 +27,7 @@
 		06C4061627CD185400B32098 /* InfoTableCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06C4061327CD185400B32098 /* InfoTableCell.swift */; };
 		06C4061727CD185400B32098 /* InfoTableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06C4061427CD185400B32098 /* InfoTableView.swift */; };
 		06C4061827CD185400B32098 /* TVPlayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06C4061527CD185400B32098 /* TVPlayerView.swift */; };
+		06C4063227CD1F5200B32098 /* TvOS_UserDefaults.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06C4063127CD1F5200B32098 /* TvOS_UserDefaults.swift */; };
 		0A6DA007C213EC53D7294B95782F0BD3 /* Filter.swift in Sources */ = {isa = PBXBuildFile; fileRef = A482CB29506EC308DA41490ADCBAA831 /* Filter.swift */; };
 		0B160F51CC9486BCC2F674A01959D8C2 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5F70BE389B12FA59A747BFD348BEF842 /* Foundation.framework */; };
 		0C1FC7ED98F258DE84326B4136C156B2 /* SubtitleDecode.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9AC8C273BACA37D1D8F0065F738CBD1 /* SubtitleDecode.swift */; };
@@ -319,6 +320,7 @@
 		06C4061327CD185400B32098 /* InfoTableCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InfoTableCell.swift; sourceTree = "<group>"; };
 		06C4061427CD185400B32098 /* InfoTableView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InfoTableView.swift; sourceTree = "<group>"; };
 		06C4061527CD185400B32098 /* TVPlayerView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TVPlayerView.swift; sourceTree = "<group>"; };
+		06C4063127CD1F5200B32098 /* TvOS_UserDefaults.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TvOS_UserDefaults.swift; sourceTree = "<group>"; };
 		0CE9C7B04AB0BF1DA323F2E46D778A95 /* Transforms.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = Transforms.swift; path = Sources/KSPlayer/Metal/Transforms.swift; sourceTree = "<group>"; };
 		0E1FABDC66E96D401CA063825EEACF5A /* KSPlayer-tvOS-Unit-Tests */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; name = "KSPlayer-tvOS-Unit-Tests"; path = "KSPlayer-tvOS-Unit-Tests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		0EE64F94E35546AE090390D05488F98E /* raw.h264 */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = file; name = raw.h264; path = Tests/KSPlayerTests/Resources/raw.h264; sourceTree = "<group>"; };
@@ -523,6 +525,7 @@
 				06C405FC27CD17C200B32098 /* Collection+.swift */,
 				06C405FA27CD17C200B32098 /* KSPlayerViewController.swift */,
 				06C405FB27CD17C200B32098 /* LocalizabeTvOS.strings */,
+				06C4063127CD1F5200B32098 /* TvOS_UserDefaults.swift */,
 			);
 			name = tvOS;
 			path = Sources/KSPlayer/Video/tvOS;
@@ -1496,6 +1499,7 @@
 				9176745520ADEF5E5503B2E4A85C33BF /* KSMEPlayer.swift in Sources */,
 				563A32867BC3F84799C6E451A4336417 /* KSParseProtocol.swift in Sources */,
 				1C02673D6170BBA814EAB2E86FA0D172 /* KSPlayer-tvOS-dummy.m in Sources */,
+				06C4063227CD1F5200B32098 /* TvOS_UserDefaults.swift in Sources */,
 				16EBD0B256A723C7B08E0F547E1B055E /* KSPlayerItem.swift in Sources */,
 				06C4061827CD185400B32098 /* TVPlayerView.swift in Sources */,
 				B15ED739E9BB8F3F54DB83510414F7B6 /* KSPlayerLayer.swift in Sources */,

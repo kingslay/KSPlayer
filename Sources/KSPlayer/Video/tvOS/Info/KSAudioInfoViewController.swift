@@ -14,7 +14,8 @@ final class KSAudioInfoViewController: InfoController {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         for subview in self.contentView.arrangedSubviews {
-            self.contentView.removeArrangedSubview(subview)
+            contentView.removeArrangedSubview(subview)
+            subview.removeFromSuperview()
         }
         self.showAudioSounds()
         self.showAudioTracks()

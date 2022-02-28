@@ -38,7 +38,9 @@ final class TvOSViewController: UITableViewController {
         alertController.addAction(confirmAction)
         let cancelAction = UIAlertAction(title: "Cancel", style: .cancel, handler: nil)
         alertController.addAction(cancelAction)
-        present(alertController, animated: true, completion: nil)
+        present(alertController, animated: true) {
+            alertController.textFields?.first?.becomeFirstResponder()
+        }
     }
 }
 

@@ -43,6 +43,7 @@ final public class KSPlayerViewController: UIViewController {
         self.addGestures()
         self.view.backgroundColor = .black
         self.navigationController?.navigationBar.isHidden = true
+        
     }
     
     public override func viewDidAppear(_ animated: Bool) {
