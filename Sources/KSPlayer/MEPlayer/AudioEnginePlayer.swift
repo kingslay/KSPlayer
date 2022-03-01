@@ -141,17 +141,20 @@ final class AudioEnginePlayer: AudioPlayer, FrameOutput {
     }
 
     init() {
+        KSMEPlayer.setAudioSession()
         engine.attach(dynamicsProcessor)
 
         let format = engine.outputNode.outputFormat(forBus: 0)
         if let channelLayout = format.channelLayout {
             KSPlayerManager.channelLayout = channelLayout
+            print("channelCount1 \(channelLayout.channelCount)")
         }
         KSPlayerManager.audioPlayerSampleRate = Int32(format.sampleRate)
 
         if #available(macOS 10.15, iOS 13.0, tvOS 13.0, *) {
             let sourceNode = AVAudioSourceNode(format: format) { [weak self] _, _, frameCount, audioBufferList in
-                self?.audioPlayerShouldInputData(ioData: UnsafeMutableAudioBufferListPointer(audioBufferList), numberOfFrames: frameCount)
+                self?.audioPlayerShouldInputData(ioData: UnsafeMutableAudioBufferListPointer(audioBufferList),
+                                                 numberOfFrames: frameCount)
                 return noErr
             }
             engine.attach(sourceNode)

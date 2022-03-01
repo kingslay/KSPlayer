@@ -85,11 +85,28 @@ public class KSMEPlayer: NSObject {
         playerItem.delegate = self
         audioOutput.renderSource = playerItem
         videoOutput.renderSource = playerItem
-        setAudioSession()
     }
 
     deinit {
         playerItem.shutdown()
+    }
+    
+    static func setAudioSession() {
+        #if os(macOS)
+//        try? AVAudioSession.sharedInstance().setRouteSharingPolicy(.longFormAudio)
+        #else
+        let category = AVAudioSession.sharedInstance().category
+        if category == .playback || category == .playAndRecord {
+            return
+        }
+        try? AVAudioSession.sharedInstance().setCategory(.playback, mode: .moviePlayback, policy: .longFormAudio)
+        try? AVAudioSession.sharedInstance().setActive(true)
+        let maxOut = AVAudioSession.sharedInstance().maximumOutputNumberOfChannels
+        try? AVAudioSession.sharedInstance().setPreferredOutputNumberOfChannels(maxOut)
+        if #available(tvOS 15.0, *), maxOut > 2 {
+            try? AVAudioSession.sharedInstance().setSupportsMultichannelContent(true)
+        }
+        #endif
     }
 }
 
