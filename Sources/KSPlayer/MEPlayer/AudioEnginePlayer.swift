@@ -159,6 +159,7 @@ final class AudioEnginePlayer: AudioPlayer, FrameOutput {
         if let channelLayout = engine.outputNode.outputFormat(forBus: 0).channelLayout {
             KSPlayerManager.channelLayout = channelLayout
         }
+        KSPlayerManager.audioPlayerSampleRate = Int32(engine.outputNode.outputFormat(forBus: 0).sampleRate)
 //        engine.attach(reverb)
 //        engine.attach(nbandEQ)
 //        engine.attach(distortion)
