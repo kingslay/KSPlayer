@@ -144,7 +144,13 @@ final class AudioEnginePlayer: AudioPlayer, FrameOutput {
         KSMEPlayer.setAudioSession()
         engine.attach(dynamicsProcessor)
 
-        let format = engine.outputNode.outputFormat(forBus: 0)
+        var format = engine.outputNode.outputFormat(forBus: 0)
+        let streamDescription = format.streamDescription
+        if let layout = AVAudioChannelLayout(layoutTag: kAudioChannelLayoutTag_Atmos_5_1_2),
+           let updateFormat = AVAudioFormat(streamDescription: streamDescription, channelLayout: layout) {
+            
+            format = updateFormat
+        }
         if let channelLayout = format.channelLayout {
             KSPlayerManager.channelLayout = channelLayout
             print("channelCount1 \(channelLayout.channelCount)")
