@@ -88,7 +88,20 @@ final class AudioEnginePlayer: AudioPlayer, FrameOutput {
                                   componentManufacturer: kAudioUnitManufacturer_Apple,
                                   componentFlags: 0,
                                   componentFlagsMask: 0))
-    private var audioStreamBasicDescription = KSPlayerManager.outputFormat()
+    private var audioStreamBasicDescription: AudioStreamBasicDescription = {
+        var audioStreamBasicDescription = AudioStreamBasicDescription()
+        let floatByteSize = UInt32(MemoryLayout<Float>.size)
+        audioStreamBasicDescription.mBitsPerChannel = 8 * floatByteSize
+        audioStreamBasicDescription.mBytesPerFrame = floatByteSize
+        audioStreamBasicDescription.mChannelsPerFrame = KSPlayerManager.channelLayout.channelCount
+        audioStreamBasicDescription.mFormatFlags = kAudioFormatFlagIsFloat | kAudioFormatFlagIsNonInterleaved
+        audioStreamBasicDescription.mFormatID = kAudioFormatLinearPCM
+        audioStreamBasicDescription.mFramesPerPacket = 1
+        audioStreamBasicDescription.mBytesPerPacket = audioStreamBasicDescription.mFramesPerPacket * audioStreamBasicDescription.mBytesPerFrame
+        audioStreamBasicDescription.mSampleRate = Float64(KSPlayerManager.audioPlayerSampleRate)
+        return audioStreamBasicDescription
+    }()
+
     private var currentRenderReadOffset = 0
     weak var renderSource: OutputRenderSourceDelegate?
     private var currentRender: AudioFrame? {
@@ -147,7 +160,7 @@ final class AudioEnginePlayer: AudioPlayer, FrameOutput {
 //        engine.attach(nbandEQ)
 //        engine.attach(distortion)
 //        engine.attach(delay)
-        let format = KSPlayerManager.audioDefaultFormat
+        let format = AVAudioFormat(commonFormat: .pcmFormatFloat32, sampleRate: Double(KSPlayerManager.audioPlayerSampleRate), interleaved: false, channelLayout: KSPlayerManager.channelLayout)
         if #available(macOS 10.15, iOS 13.0, tvOS 13.0, *) {
             let sourceNode = AVAudioSourceNode(format: format) { [weak self] _, _, frameCount, audioBufferList in
                 self?.audioPlayerShouldInputData(ioData: UnsafeMutableAudioBufferListPointer(audioBufferList), numberOfFrames: frameCount)
@@ -240,15 +253,6 @@ final class AudioEnginePlayer: AudioPlayer, FrameOutput {
                 renderSource?.setAudio(time: currentRender.timebase.cmtime(for: currentPreparePosition))
             }
         }
-    }
-
-    private func audioPlayerShouldInputData(numberOfFrames: UInt32) {
-        guard let buffer = AVAudioPCMBuffer(pcmFormat: KSPlayerManager.audioDefaultFormat, frameCapacity: numberOfFrames) else {
-            return
-        }
-        buffer.frameLength = buffer.frameCapacity
-        let ioData = UnsafeMutableAudioBufferListPointer(buffer.mutableAudioBufferList)
-        audioPlayerShouldInputData(ioData: ioData, numberOfFrames: numberOfFrames)
     }
 }
 
