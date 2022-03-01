@@ -16,7 +16,14 @@ final class MetalPlayView: UIView {
     private var pixelBuffer: CVPixelBuffer?
     private lazy var displayLink: CADisplayLink = .init(target: self, selector: #selector(drawView))
     var options: KSOptions
-    var isBackground = false
+    private var isBackground: Bool {
+        #if canImport(UIKit)
+        UIApplication.shared.applicationState == .background
+        #else
+        window?.isMiniaturized == true
+        #endif
+    }
+
     weak var renderSource: OutputRenderSourceDelegate?
     #if canImport(UIKit)
     override public class var layerClass: AnyClass { AVSampleBufferDisplayLayer.self }
