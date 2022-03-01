@@ -122,8 +122,13 @@ extension MediaPlayerProtocol {
         if category == .playback || category == .playAndRecord {
             return
         }
-        try? AVAudioSession.sharedInstance().setCategory(.playback, mode: .default, policy: .longFormAudio)
+        try? AVAudioSession.sharedInstance().setCategory(.playback, mode: .moviePlayback, policy: .longFormAudio)
         try? AVAudioSession.sharedInstance().setActive(true)
+        let maxOut = AVAudioSession.sharedInstance().maximumOutputNumberOfChannels
+        try? AVAudioSession.sharedInstance().setPreferredOutputNumberOfChannels(maxOut)
+        if #available(tvOS 15.0, *), maxOut > 2 {
+            try? AVAudioSession.sharedInstance().setSupportsMultichannelContent(true)
+        }
         #endif
     }
 }

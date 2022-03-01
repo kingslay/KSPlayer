@@ -168,7 +168,6 @@ public protocol PlayerControllerDelegate: class {
       /// 日志级别
       public static var logLevel = LogLevel.warning
       public static var stackSize = 16384
-      public static var audioPlayerMaximumFramesPerSlice = AVAudioFrameCount(4096)
   }
   public class KSOptions {
       /// 视频颜色编码方式 支持kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange kCVPixelFormatType_420YpCbCr8BiPlanarFullRange kCVPixelFormatType_32BGRA kCVPixelFormatType_420YpCbCr8Planar

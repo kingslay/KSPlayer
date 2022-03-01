@@ -349,7 +349,7 @@
 		3DAE7D6FC4AA401BEE3383493E13195E /* Model.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = Model.swift; path = Sources/KSPlayer/MEPlayer/Model.swift; sourceTree = "<group>"; };
 		3DE0A6BACF262F0E2E2BC64225B6ED23 /* SubtitleDataSouce.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = SubtitleDataSouce.swift; path = Sources/KSPlayer/Subtitle/SubtitleDataSouce.swift; sourceTree = "<group>"; };
 		3F057061DEA59FEAD2BF9AF7DA3EF17F /* KSPlayer-tvOS-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = "KSPlayer-tvOS-dummy.m"; path = "../KSPlayer-tvOS/KSPlayer-tvOS-dummy.m"; sourceTree = "<group>"; };
-		41708383F569BD487B5C58097F86DDB1 /* KSPlayer-tvOS-KSPlayer_KSPlayer */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; name = "KSPlayer-tvOS-KSPlayer_KSPlayer"; path = KSPlayer_KSPlayer.bundle; sourceTree = BUILT_PRODUCTS_DIR; };
+		41708383F569BD487B5C58097F86DDB1 /* KSPlayer_KSPlayer.bundle */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = KSPlayer_KSPlayer.bundle; sourceTree = BUILT_PRODUCTS_DIR; };
 		4344B0335530FBC9501C7A271FD2E102 /* Utility.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = Utility.swift; path = Sources/KSPlayer/Core/Utility.swift; sourceTree = "<group>"; };
 		451D26E49EDB4990E2975030D7A9BA2D /* ResourceBundle-KSPlayer_KSPlayer-KSPlayer-tvOS-Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; name = "ResourceBundle-KSPlayer_KSPlayer-KSPlayer-tvOS-Info.plist"; path = "../KSPlayer-tvOS/ResourceBundle-KSPlayer_KSPlayer-KSPlayer-tvOS-Info.plist"; sourceTree = "<group>"; };
 		49FE7C9D3DFE4033EFE475B0BE36FF13 /* UXKit.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = UXKit.swift; path = Sources/KSPlayer/Core/UXKit.swift; sourceTree = "<group>"; };
@@ -708,7 +708,7 @@
 				CC0401F08EEC9B2F84B4522D497FBCBB /* KSPlayer-macOS-KSPlayer_KSPlayer */,
 				F2451797988C9C4538E4FA8A4BD599B9 /* KSPlayer-macOS-Unit-Tests */,
 				880389D99D1EF36F926AA4C3DFAA257C /* KSPlayer.framework */,
-				41708383F569BD487B5C58097F86DDB1 /* KSPlayer-tvOS-KSPlayer_KSPlayer */,
+				41708383F569BD487B5C58097F86DDB1 /* KSPlayer_KSPlayer.bundle */,
 				0E1FABDC66E96D401CA063825EEACF5A /* KSPlayer-tvOS-Unit-Tests */,
 			);
 			name = Products;
@@ -1028,7 +1028,7 @@
 			);
 			name = "KSPlayer-tvOS-KSPlayer_KSPlayer";
 			productName = KSPlayer_KSPlayer;
-			productReference = 41708383F569BD487B5C58097F86DDB1 /* KSPlayer-tvOS-KSPlayer_KSPlayer */;
+			productReference = 41708383F569BD487B5C58097F86DDB1 /* KSPlayer_KSPlayer.bundle */;
 			productType = "com.apple.product-type.bundle";
 		};
 		F22803BCEDED223E4EE29EE62D7067B4 /* KSPlayer-iOS */ = {
@@ -1652,6 +1652,7 @@
 			baseConfigurationReference = 8E08537BB908A18642D85DDA89BE774C /* KSPlayer-tvOS.debug.xcconfig */;
 			buildSettings = {
 				CONFIGURATION_BUILD_DIR = "$(BUILD_DIR)/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)/KSPlayer-tvOS";
+				DEVELOPMENT_TEAM = KBU9Z89QAQ;
 				IBSC_MODULE = KSPlayer;
 				INFOPLIST_FILE = "Target Support Files/KSPlayer-tvOS/ResourceBundle-KSPlayer_KSPlayer-KSPlayer-tvOS-Info.plist";
 				PRODUCT_NAME = KSPlayer_KSPlayer;
@@ -1773,6 +1774,7 @@
 			baseConfigurationReference = A848E0F74FDCEC8062627C4E7FC90A9B /* KSPlayer-tvOS.release.xcconfig */;
 			buildSettings = {
 				CONFIGURATION_BUILD_DIR = "$(BUILD_DIR)/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)/KSPlayer-tvOS";
+				DEVELOPMENT_TEAM = KBU9Z89QAQ;
 				IBSC_MODULE = KSPlayer;
 				INFOPLIST_FILE = "Target Support Files/KSPlayer-tvOS/ResourceBundle-KSPlayer_KSPlayer-KSPlayer-tvOS-Info.plist";
 				PRODUCT_NAME = KSPlayer_KSPlayer;
