@@ -88,20 +88,6 @@ final class AudioEnginePlayer: AudioPlayer, FrameOutput {
                                   componentManufacturer: kAudioUnitManufacturer_Apple,
                                   componentFlags: 0,
                                   componentFlagsMask: 0))
-    private var audioStreamBasicDescription: AudioStreamBasicDescription = {
-        var audioStreamBasicDescription = AudioStreamBasicDescription()
-        let floatByteSize = UInt32(MemoryLayout<Float>.size)
-        audioStreamBasicDescription.mBitsPerChannel = 8 * floatByteSize
-        audioStreamBasicDescription.mBytesPerFrame = floatByteSize
-        audioStreamBasicDescription.mChannelsPerFrame = KSPlayerManager.channelLayout.channelCount
-        audioStreamBasicDescription.mFormatFlags = kAudioFormatFlagIsFloat | kAudioFormatFlagIsNonInterleaved
-        audioStreamBasicDescription.mFormatID = kAudioFormatLinearPCM
-        audioStreamBasicDescription.mFramesPerPacket = 1
-        audioStreamBasicDescription.mBytesPerPacket = audioStreamBasicDescription.mFramesPerPacket * audioStreamBasicDescription.mBytesPerFrame
-        audioStreamBasicDescription.mSampleRate = Float64(KSPlayerManager.audioPlayerSampleRate)
-        return audioStreamBasicDescription
-    }()
-
     private var currentRenderReadOffset = 0
     weak var renderSource: OutputRenderSourceDelegate?
     private var currentRender: AudioFrame? {
@@ -156,15 +142,14 @@ final class AudioEnginePlayer: AudioPlayer, FrameOutput {
 
     init() {
         engine.attach(dynamicsProcessor)
-        if let channelLayout = engine.outputNode.outputFormat(forBus: 0).channelLayout {
+        let format = engine.outputNode.outputFormat(forBus: 0)
+        if let channelLayout = format.channelLayout {
             KSPlayerManager.channelLayout = channelLayout
         }
-        KSPlayerManager.audioPlayerSampleRate = Int32(engine.outputNode.outputFormat(forBus: 0).sampleRate)
-//        engine.attach(reverb)
+        KSPlayerManager.audioPlayerSampleRate = Int32(format.sampleRate)
 //        engine.attach(nbandEQ)
 //        engine.attach(distortion)
 //        engine.attach(delay)
-        let format = AVAudioFormat(commonFormat: .pcmFormatFloat32, sampleRate: Double(KSPlayerManager.audioPlayerSampleRate), interleaved: false, channelLayout: KSPlayerManager.channelLayout)
         if #available(macOS 10.15, iOS 13.0, tvOS 13.0, *) {
             let sourceNode = AVAudioSourceNode(format: format) { [weak self] _, _, frameCount, audioBufferList in
                 self?.audioPlayerShouldInputData(ioData: UnsafeMutableAudioBufferListPointer(audioBufferList), numberOfFrames: frameCount)
@@ -175,7 +160,7 @@ final class AudioEnginePlayer: AudioPlayer, FrameOutput {
         } else {
             engine.connect(nodes: [engine.inputNode, dynamicsProcessor, engine.mainMixerNode, engine.outputNode], format: format)
             if let audioUnit = engine.inputNode.audioUnit {
-                addRenderCallback(audioUnit: audioUnit)
+                addRenderCallback(audioUnit: audioUnit, streamDescription: format.streamDescription)
             }
         }
         if let audioUnit = engine.outputNode.audioUnit {
@@ -196,12 +181,12 @@ final class AudioEnginePlayer: AudioPlayer, FrameOutput {
         }, Unmanaged.passUnretained(self).toOpaque())
     }
 
-    private func addRenderCallback(audioUnit: AudioUnit) {
+    private func addRenderCallback(audioUnit: AudioUnit, streamDescription: UnsafePointer<AudioStreamBasicDescription>) {
         _ = AudioUnitSetProperty(audioUnit,
                                  kAudioUnitProperty_StreamFormat,
                                  kAudioUnitScope_Input,
                                  0,
-                                 &audioStreamBasicDescription,
+                                 streamDescription,
                                  UInt32(MemoryLayout<AudioStreamBasicDescription>.size))
         var inputCallbackStruct = AURenderCallbackStruct()
         inputCallbackStruct.inputProcRefCon = Unmanaged.passUnretained(self).toOpaque()

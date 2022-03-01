@@ -430,7 +430,7 @@ class AudioSwresample: Swresample {
     }
 }
 
-fileprivate class AudioDescriptor: Equatable {
+private class AudioDescriptor: Equatable {
     fileprivate let inputNumberOfChannels: AVAudioChannelCount
     fileprivate let inputSampleRate: Int32
     fileprivate let inputFormat: AVSampleFormat
