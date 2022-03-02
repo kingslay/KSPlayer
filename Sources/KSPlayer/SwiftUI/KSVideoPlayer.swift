@@ -180,7 +180,7 @@ struct VideoControllerView: View {
                 .cornerRadius(8)
         }
         .padding().tint(.clear).foregroundColor(.primary)
-        #if !os(iOS)
+        #if os(macOS)
             .focusable()
             .onMoveCommand { direction in
                 switch direction {
@@ -196,11 +196,12 @@ struct VideoControllerView: View {
                     break
                 }
             }
-        #if os(tvOS)
-            .onPlayPauseCommand {
-                config.isPlay.toggle()
-            }
         #endif
+        #if os(tvOS)
+        .onPlayPauseCommand {
+            config.isPlay.toggle()
+        }
+
         #endif
     }
 }
