@@ -141,26 +141,19 @@ final class AudioEnginePlayer: AudioPlayer, FrameOutput {
     }
 
     init() {
-        KSMEPlayer.setAudioSession()
+        KSPlayerManager.setAudioSession()
         engine.attach(dynamicsProcessor)
-
         var format = engine.outputNode.outputFormat(forBus: 0)
-        let streamDescription = format.streamDescription
-        if let layout = AVAudioChannelLayout(layoutTag: kAudioChannelLayoutTag_Atmos_5_1_2),
-           let updateFormat = AVAudioFormat(streamDescription: streamDescription, channelLayout: layout) {
-            
-            format = updateFormat
-        }
-        if let channelLayout = format.channelLayout {
-            KSPlayerManager.channelLayout = channelLayout
-            print("channelCount1 \(channelLayout.channelCount)")
-        }
         KSPlayerManager.audioPlayerSampleRate = Int32(format.sampleRate)
-
+        if let channelLayout = format.channelLayout, KSPlayerManager.channelLayout != channelLayout {
+            format = AVAudioFormat(commonFormat: format.commonFormat, sampleRate: format.sampleRate, interleaved: format.isInterleaved, channelLayout: KSPlayerManager.channelLayout)
+        }
+//        engine.attach(nbandEQ)
+//        engine.attach(distortion)
+//        engine.attach(delay)
         if #available(macOS 10.15, iOS 13.0, tvOS 13.0, *) {
             let sourceNode = AVAudioSourceNode(format: format) { [weak self] _, _, frameCount, audioBufferList in
-                self?.audioPlayerShouldInputData(ioData: UnsafeMutableAudioBufferListPointer(audioBufferList),
-                                                 numberOfFrames: frameCount)
+                self?.audioPlayerShouldInputData(ioData: UnsafeMutableAudioBufferListPointer(audioBufferList), numberOfFrames: frameCount)
                 return noErr
             }
             engine.attach(sourceNode)
@@ -189,15 +182,13 @@ final class AudioEnginePlayer: AudioPlayer, FrameOutput {
         }, Unmanaged.passUnretained(self).toOpaque())
     }
 
-    private func addRenderCallback(audioUnit: AudioUnit,
-                                   streamDescription: UnsafePointer<AudioStreamBasicDescription>) {
-        let oss = AudioUnitSetProperty(audioUnit,
+    private func addRenderCallback(audioUnit: AudioUnit, streamDescription: UnsafePointer<AudioStreamBasicDescription>) {
+        _ = AudioUnitSetProperty(audioUnit,
                                  kAudioUnitProperty_StreamFormat,
                                  kAudioUnitScope_Input,
                                  0,
                                  streamDescription,
                                  UInt32(MemoryLayout<AudioStreamBasicDescription>.size))
-        print(oss)
         var inputCallbackStruct = AURenderCallbackStruct()
         inputCallbackStruct.inputProcRefCon = Unmanaged.passUnretained(self).toOpaque()
         inputCallbackStruct.inputProc = { refCon, _, _, _, inNumberFrames, ioData in
@@ -205,8 +196,7 @@ final class AudioEnginePlayer: AudioPlayer, FrameOutput {
                 return noErr
             }
             let `self` = Unmanaged<AudioEnginePlayer>.fromOpaque(refCon).takeUnretainedValue()
-            self.audioPlayerShouldInputData(ioData: UnsafeMutableAudioBufferListPointer(ioData),
-                                            numberOfFrames: inNumberFrames)
+            self.audioPlayerShouldInputData(ioData: UnsafeMutableAudioBufferListPointer(ioData), numberOfFrames: inNumberFrames)
             return noErr
         }
         _ = AudioUnitSetProperty(audioUnit, kAudioUnitProperty_SetRenderCallback, kAudioUnitScope_Input, 0, &inputCallbackStruct, UInt32(MemoryLayout<AURenderCallbackStruct>.size))
@@ -267,17 +257,17 @@ extension AVAudioEngine {
     }
 }
 
-//extension AVAudioFormat {
-//    private func toPCMBuffer(frame: AudioFrame) -> AVAudioPCMBuffer? {
-//        guard let pcmBuffer = AVAudioPCMBuffer(pcmFormat: self, frameCapacity: UInt32(frame.dataWrap.size[0]) / streamDescription.pointee.mBytesPerFrame) else {
-//            return nil
-//        }
-//        pcmBuffer.frameLength = pcmBuffer.frameCapacity
-//        for i in 0 ..< min(Int(pcmBuffer.format.channelCount), frame.dataWrap.size.count) {
-//            frame.dataWrap.data[i]?.withMemoryRebound(to: Float.self, capacity: Int(pcmBuffer.frameCapacity)) { srcFloatsForChannel in
-//                pcmBuffer.floatChannelData?[i].assign(from: srcFloatsForChannel, count: Int(pcmBuffer.frameCapacity))
-//            }
-//        }
-//        return pcmBuffer
-//    }
-//}
+extension AVAudioFormat {
+    private func toPCMBuffer(frame: AudioFrame) -> AVAudioPCMBuffer? {
+        guard let pcmBuffer = AVAudioPCMBuffer(pcmFormat: self, frameCapacity: UInt32(frame.dataWrap.size[0]) / streamDescription.pointee.mBytesPerFrame) else {
+            return nil
+        }
+        pcmBuffer.frameLength = pcmBuffer.frameCapacity
+        for i in 0 ..< min(Int(pcmBuffer.format.channelCount), frame.dataWrap.size.count) {
+            frame.dataWrap.data[i]?.withMemoryRebound(to: Float.self, capacity: Int(pcmBuffer.frameCapacity)) { srcFloatsForChannel in
+                pcmBuffer.floatChannelData?[i].assign(from: srcFloatsForChannel, count: Int(pcmBuffer.frameCapacity))
+            }
+        }
+        return pcmBuffer
+    }
+}

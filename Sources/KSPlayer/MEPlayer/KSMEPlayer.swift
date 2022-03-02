@@ -90,24 +90,6 @@ public class KSMEPlayer: NSObject {
     deinit {
         playerItem.shutdown()
     }
-    
-    static func setAudioSession() {
-        #if os(macOS)
-//        try? AVAudioSession.sharedInstance().setRouteSharingPolicy(.longFormAudio)
-        #else
-        let category = AVAudioSession.sharedInstance().category
-        if category == .playback || category == .playAndRecord {
-            return
-        }
-        try? AVAudioSession.sharedInstance().setCategory(.playback, mode: .moviePlayback, policy: .longFormAudio)
-        try? AVAudioSession.sharedInstance().setActive(true)
-        let maxOut = AVAudioSession.sharedInstance().maximumOutputNumberOfChannels
-        try? AVAudioSession.sharedInstance().setPreferredOutputNumberOfChannels(maxOut)
-        if #available(tvOS 15.0, *), maxOut > 2 {
-            try? AVAudioSession.sharedInstance().setSupportsMultichannelContent(true)
-        }
-        #endif
-    }
 }
 
 // MARK: - private functions
@@ -359,13 +341,9 @@ extension KSMEPlayer: MediaPlayerProtocol {
         handler(image)
     }
 
-    public func enterBackground() {
-        videoOutput.isBackground = true
-    }
+    public func enterBackground() {}
 
-    public func enterForeground() {
-        videoOutput.isBackground = false
-    }
+    public func enterForeground() {}
 
     public var isMuted: Bool {
         get {
