@@ -78,6 +78,7 @@ public class KSMEPlayer: NSObject {
     }
 
     public required init(url: URL, options: KSOptions) {
+        KSMEPlayer.setAudioSession()
         playerItem = MEPlayerItem(url: url, options: options)
         videoOutput = MetalPlayView(options: options)
         self.options = options
@@ -85,7 +86,6 @@ public class KSMEPlayer: NSObject {
         playerItem.delegate = self
         audioOutput.renderSource = playerItem
         videoOutput.renderSource = playerItem
-        setAudioSession()
     }
 
     deinit {

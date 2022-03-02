@@ -142,11 +142,11 @@ final class AudioEnginePlayer: AudioPlayer, FrameOutput {
 
     init() {
         engine.attach(dynamicsProcessor)
-        let format = engine.outputNode.outputFormat(forBus: 0)
-        if let channelLayout = format.channelLayout {
-            KSPlayerManager.channelLayout = channelLayout
-        }
+        var format = engine.outputNode.outputFormat(forBus: 0)
         KSPlayerManager.audioPlayerSampleRate = Int32(format.sampleRate)
+        if let channelLayout = format.channelLayout, KSPlayerManager.channelLayout != channelLayout {
+            format = AVAudioFormat(commonFormat: format.commonFormat, sampleRate: format.sampleRate, interleaved: format.isInterleaved, channelLayout: KSPlayerManager.channelLayout)
+        }
 //        engine.attach(nbandEQ)
 //        engine.attach(distortion)
 //        engine.attach(delay)
