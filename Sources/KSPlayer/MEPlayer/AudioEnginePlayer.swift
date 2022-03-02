@@ -141,6 +141,7 @@ final class AudioEnginePlayer: AudioPlayer, FrameOutput {
     }
 
     init() {
+        KSPlayerManager.setAudioSession()
         engine.attach(dynamicsProcessor)
         var format = engine.outputNode.outputFormat(forBus: 0)
         KSPlayerManager.audioPlayerSampleRate = Int32(format.sampleRate)
