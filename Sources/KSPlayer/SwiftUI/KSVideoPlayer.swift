@@ -9,9 +9,7 @@ import AVKit
 import SwiftUI
 @available(iOS 15, tvOS 15, macOS 12, *)
 public struct KSVideoPlayerView: View {
-    @State private var currentTime = TimeInterval(0)
-    @State private var totalTime = TimeInterval(1)
-    @State private var isMaskShow: Bool = true
+    @State private var model = VideoControllerView.ControllerViewModel()
     private let url: URL
     private let player = KSVideoPlayer()
     public let options: KSOptions
@@ -22,24 +20,31 @@ public struct KSVideoPlayerView: View {
 
     public var body: some View {
         player.playerLayer.set(url: url, options: options)
+        let config = VideoControllerView.Config(isPlay: options.isAutoPlay, playerLayer: player.playerLayer)
+        let controllerView = VideoControllerView(config: config, model: $model)
         return ZStack {
             player.onPlay { current, total in
-                currentTime = current
-                totalTime = max(max(0, total), current)
+                model.currentTime = current
+                model.totalTime = max(max(0, total), current)
             }
+            #if os(tvOS)
+            .onSwipe { direction in
+                if direction == .down {
+                    model.isMaskShow.toggle()
+                }
+            }
+            #endif
             .onDisappear {
                 player.playerLayer.pause()
             }
-            let config = VideoControllerView.Config(isPlay: options.isAutoPlay, playerLayer: player.playerLayer)
-            VideoControllerView(config: config, currentTime: $currentTime, totalTime: $totalTime)
-                .opacity(isMaskShow ? 1 : 0)
+            controllerView.opacity(model.isMaskShow ? 1 : 0)
         }
         #if !os(macOS)
         .navigationBarHidden(true)
         #endif
         #if !os(tvOS)
         .onTapGesture {
-            isMaskShow.toggle()
+            model.isMaskShow.toggle()
         }
         .onDrop(of: ["public.file-url"], isTargeted: nil) { providers -> Bool in
             providers.first?.loadDataRepresentation(forTypeIdentifier: "public.file-url") { data, _ in
@@ -93,15 +98,19 @@ struct VideoControllerView: View {
         }
     }
 
+    struct ControllerViewModel {
+        var currentTime = TimeInterval(0)
+        var totalTime = TimeInterval(1)
+        var isMaskShow: Bool = true
+    }
+
     @State private var config: Config
-    @Binding private var currentTime: TimeInterval
-    @Binding private var totalTime: TimeInterval
+    @Binding private var model: ControllerViewModel
     private let backgroundColor = Color(red: 0.145, green: 0.145, blue: 0.145).opacity(0.6)
     @Environment(\.dismiss) private var dismiss
-    init(config: Config, currentTime: Binding<TimeInterval>, totalTime: Binding<TimeInterval>) {
+    init(config: Config, model: Binding<ControllerViewModel>) {
         _config = .init(initialValue: config)
-        _currentTime = currentTime
-        _totalTime = totalTime
+        _model = model
     }
 
     public var body: some View {
@@ -109,7 +118,11 @@ struct VideoControllerView: View {
             HStack {
                 HStack(spacing: 8) {
                     Button {
+                        #if os(tvOS)
+                        model.isMaskShow = false
+                        #else
                         dismiss()
+                        #endif
                     } label: {
                         Image(systemName: "xmark")
                     }
@@ -136,7 +149,7 @@ struct VideoControllerView: View {
             Spacer()
             HStack(spacing: 8) {
                 Button {
-                    config.playerLayer.seek(time: currentTime - 15, autoPlay: true)
+                    config.playerLayer.seek(time: model.currentTime - 15, autoPlay: true)
                 } label: {
                     Image(systemName: "gobackward.15")
                 }
@@ -153,31 +166,32 @@ struct VideoControllerView: View {
                     .keyboardShortcut(.space, modifiers: .option)
                 #endif
                 Button {
-                    config.playerLayer.seek(time: currentTime + 15, autoPlay: true)
+                    config.playerLayer.seek(time: model.currentTime + 15, autoPlay: true)
                 } label: {
                     Image(systemName: "goforward.15")
                 }
                 #if !os(tvOS)
                 .keyboardShortcut(.rightArrow)
                 #endif
-                Text(currentTime.toString(for: .minOrHour)).font(.caption2.monospacedDigit()).foregroundColor(.secondary.opacity(0.6))
+                Text(model.currentTime.toString(for: .minOrHour)).font(.caption2.monospacedDigit()).foregroundColor(.secondary.opacity(0.6))
                 #if os(tvOS)
-                ProgressView(value: currentTime, total: totalTime).tint(.secondary.opacity(0.32))
+                ProgressView(value: model.currentTime, total: model.totalTime).tint(.secondary.opacity(0.32))
                 #else
                 Slider(value: Binding {
-                    currentTime
+                    model.currentTime
                 } set: { newValue in
                     config.playerLayer.seek(time: newValue, autoPlay: true)
                 }, in: 0 ... totalTime)
                     .tint(.secondary.opacity(0.32))
                 #endif
-                Text("-" + (totalTime - currentTime).toString(for: .minOrHour)).font(.caption2.monospacedDigit()).foregroundColor(.secondary.opacity(0.6))
+                Text("-" + (model.totalTime - model.currentTime).toString(for: .minOrHour)).font(.caption2.monospacedDigit()).foregroundColor(.secondary.opacity(0.6))
                 Button {} label: {
                     Image(systemName: "ellipsis")
                 }
-            }.padding(.horizontal, 8)
-                .background(backgroundColor)
-                .cornerRadius(8)
+            }
+            .padding(.horizontal, 8)
+            .background(backgroundColor)
+            .cornerRadius(8)
         }
         .padding().tint(.clear).foregroundColor(.primary)
         #if os(macOS)
@@ -201,7 +215,6 @@ struct VideoControllerView: View {
         .onPlayPauseCommand {
             config.isPlay.toggle()
         }
-
         #endif
     }
 }
@@ -213,6 +226,9 @@ public struct KSVideoPlayer {
         var onFinish: ((Error?) -> Void)?
         var onStateChanged: ((KSPlayerState) -> Void)?
         var onBufferChanged: ((Int, TimeInterval) -> Void)?
+        #if canImport(UIKit)
+        var onSwipe: ((UISwipeGestureRecognizer.Direction) -> Void)?
+        #endif
     }
 
     public let playerLayer = KSPlayerLayer()
@@ -246,6 +262,14 @@ extension KSVideoPlayer {
         view.handler.onStateChanged = handler
         return view
     }
+
+    #if canImport(UIKit)
+    func onSwipe(_ handler: @escaping (UISwipeGestureRecognizer.Direction) -> Void) -> Self {
+        var view = self
+        view.handler.onSwipe = handler
+        return view
+    }
+    #endif
 }
 
 #if !canImport(UIKit)
@@ -261,7 +285,11 @@ extension KSVideoPlayer: UIViewRepresentable {
     #if canImport(UIKit)
     public typealias UIViewType = KSPlayerLayer
     public func makeUIView(context: Context) -> UIViewType {
-        makeView(context: context)
+        let view = makeView(context: context)
+        let swipeDown = UISwipeGestureRecognizer(target: context.coordinator, action: #selector(Coordinator.swipeGestureAction(_:)))
+        swipeDown.direction = .down
+        view.addGestureRecognizer(swipeDown)
+        return view
     }
 
     public func updateUIView(_ uiView: UIViewType, context: Context) {
@@ -312,5 +340,11 @@ extension KSVideoPlayer: UIViewRepresentable {
         public func player(layer _: KSPlayerLayer, bufferedCount: Int, consumeTime: TimeInterval) {
             videoPlayer.handler.onBufferChanged?(bufferedCount, consumeTime)
         }
+
+        #if canImport(UIKit)
+        @objc fileprivate func swipeGestureAction(_ recognizer: UISwipeGestureRecognizer) {
+            videoPlayer.handler.onSwipe?(recognizer.direction)
+        }
+        #endif
     }
 }
