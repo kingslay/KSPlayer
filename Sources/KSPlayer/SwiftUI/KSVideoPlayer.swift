@@ -181,7 +181,7 @@ struct VideoControllerView: View {
                     model.currentTime
                 } set: { newValue in
                     config.playerLayer.seek(time: newValue, autoPlay: true)
-                }, in: 0 ... totalTime)
+                }, in: 0 ... model.totalTime)
                     .tint(.secondary.opacity(0.32))
                 #endif
                 Text("-" + (model.totalTime - model.currentTime).toString(for: .minOrHour)).font(.caption2.monospacedDigit()).foregroundColor(.secondary.opacity(0.6))
@@ -199,9 +199,9 @@ struct VideoControllerView: View {
             .onMoveCommand { direction in
                 switch direction {
                 case .left:
-                    config.playerLayer.seek(time: currentTime - 15, autoPlay: true)
+                    config.playerLayer.seek(time: model.currentTime - 15, autoPlay: true)
                 case .right:
-                    config.playerLayer.seek(time: currentTime + 15, autoPlay: true)
+                    config.playerLayer.seek(time: model.currentTime + 15, autoPlay: true)
                 case .up:
                     config.playerLayer.player?.playbackVolume += 1
                 case .down:
