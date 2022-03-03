@@ -155,9 +155,9 @@ public class KSAVPlayer {
     }
 
     public required init(url: URL, options: KSOptions) {
+        KSPlayerManager.setAudioSession()
         urlAsset = AVURLAsset(url: url, options: options.avOptions)
         self.options = options
-        setAudioSession()
         itemObservation = player.observe(\.currentItem) { [weak self] player, _ in
             guard let self = self else { return }
             self.observer(playerItem: player.currentItem)

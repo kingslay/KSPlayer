@@ -95,32 +95,12 @@ public extension KSPlayerManager {
     /// 日志级别
     static var logLevel = LogLevel.warning
     static var stackSize = 32768
-    static var audioPlayerMaximumFramesPerSlice = AVAudioFrameCount(4096)
+    static var channelLayout = AVAudioChannelLayout(layoutTag: kAudioChannelLayoutTag_Stereo)!
     #if os(macOS)
-    static var audioPlayerSampleRate = Int32(44100)
-    static var audioPlayerMaximumChannels = AVAudioChannelCount(2)
+    internal static var audioPlayerSampleRate = Int32(44100)
     #else
-    static var audioPlayerSampleRate = Int32(AVAudioSession.sharedInstance().sampleRate)
-    static var audioPlayerMaximumChannels = AVAudioChannelCount(AVAudioSession.sharedInstance().outputNumberOfChannels)
+    internal static var audioPlayerSampleRate = Int32(AVAudioSession.sharedInstance().sampleRate)
     #endif
-    internal static func outputFormat() -> AudioStreamBasicDescription {
-        #if !os(macOS)
-        try? AVAudioSession.sharedInstance().setPreferredOutputNumberOfChannels(Int(audioPlayerMaximumChannels))
-        #endif
-        var audioStreamBasicDescription = AudioStreamBasicDescription()
-        let floatByteSize = UInt32(MemoryLayout<Float>.size)
-        audioStreamBasicDescription.mBitsPerChannel = 8 * floatByteSize
-        audioStreamBasicDescription.mBytesPerFrame = floatByteSize
-        audioStreamBasicDescription.mChannelsPerFrame = audioPlayerMaximumChannels
-        audioStreamBasicDescription.mFormatFlags = kAudioFormatFlagIsFloat | kAudioFormatFlagIsNonInterleaved
-        audioStreamBasicDescription.mFormatID = kAudioFormatLinearPCM
-        audioStreamBasicDescription.mFramesPerPacket = 1
-        audioStreamBasicDescription.mBytesPerPacket = audioStreamBasicDescription.mFramesPerPacket * audioStreamBasicDescription.mBytesPerFrame
-        audioStreamBasicDescription.mSampleRate = Float64(audioPlayerSampleRate)
-        return audioStreamBasicDescription
-    }
-
-    internal static let audioDefaultFormat = AVAudioFormat(commonFormat: .pcmFormatFloat32, sampleRate: Double(audioPlayerSampleRate), channels: audioPlayerMaximumChannels, interleaved: false)!
 }
 
 enum MECodecState {
