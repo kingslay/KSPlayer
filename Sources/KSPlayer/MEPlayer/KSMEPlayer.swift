@@ -85,7 +85,6 @@ public class KSMEPlayer: NSObject {
         playerItem.delegate = self
         audioOutput.renderSource = playerItem
         videoOutput.renderSource = playerItem
-        setAudioSession()
     }
 
     deinit {

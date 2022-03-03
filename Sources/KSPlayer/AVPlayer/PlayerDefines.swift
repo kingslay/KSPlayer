@@ -113,21 +113,6 @@ public extension FourCharCode {
     }
 }
 
-extension MediaPlayerProtocol {
-    func setAudioSession() {
-        #if os(macOS)
-//        try? AVAudioSession.sharedInstance().setRouteSharingPolicy(.longFormAudio)
-        #else
-        let category = AVAudioSession.sharedInstance().category
-        if category == .playback || category == .playAndRecord {
-            return
-        }
-        try? AVAudioSession.sharedInstance().setCategory(.playback, mode: .default, policy: .longFormAudio)
-        try? AVAudioSession.sharedInstance().setActive(true)
-        #endif
-    }
-}
-
 public enum DisplayEnum {
     case plane
     // swiftlint:disable identifier_name
@@ -369,6 +354,24 @@ public enum KSPlayerManager {
     /// 日志输出方式
     public static var logFunctionPoint: (String) -> Void = {
         print($0)
+    }
+
+    static func setAudioSession() {
+        #if os(macOS)
+        //        try? AVAudioSession.sharedInstance().setRouteSharingPolicy(.longFormAudio)
+        #else
+        let category = AVAudioSession.sharedInstance().category
+        if category == .playback || category == .playAndRecord {
+            return
+        }
+        try? AVAudioSession.sharedInstance().setCategory(.playback, mode: .default, policy: .longFormAudio)
+        try? AVAudioSession.sharedInstance().setActive(true)
+        let maxOut = AVAudioSession.sharedInstance().maximumOutputNumberOfChannels
+        try? AVAudioSession.sharedInstance().setPreferredOutputNumberOfChannels(maxOut)
+        if #available(tvOS 15.0, iOS 15.0, *) {
+            try? AVAudioSession.sharedInstance().setSupportsMultichannelContent(true)
+        }
+        #endif
     }
 }
 
