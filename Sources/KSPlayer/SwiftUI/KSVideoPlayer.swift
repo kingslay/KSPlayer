@@ -31,6 +31,10 @@ public struct KSVideoPlayerView: View {
             .onSwipe { direction in
                 if direction == .down {
                     model.isMaskShow.toggle()
+                } else if direction == .left {
+                    config.playerLayer.seek(time: model.currentTime - 15, autoPlay: true)
+                } else if direction == .right {
+                    config.playerLayer.seek(time: model.currentTime + 15, autoPlay: true)
                 }
             }
             #endif
@@ -289,6 +293,12 @@ extension KSVideoPlayer: UIViewRepresentable {
         let swipeDown = UISwipeGestureRecognizer(target: context.coordinator, action: #selector(Coordinator.swipeGestureAction(_:)))
         swipeDown.direction = .down
         view.addGestureRecognizer(swipeDown)
+        let swipeLeft = UISwipeGestureRecognizer(target: context.coordinator, action: #selector(Coordinator.swipeGestureAction(_:)))
+        swipeLeft.direction = .left
+        view.addGestureRecognizer(swipeLeft)
+        let swipeRight = UISwipeGestureRecognizer(target: context.coordinator, action: #selector(Coordinator.swipeGestureAction(_:)))
+        swipeRight.direction = .right
+        view.addGestureRecognizer(swipeRight)
         return view
     }
 
@@ -313,20 +323,15 @@ extension KSVideoPlayer: UIViewRepresentable {
 
     private func updateView(_: KSPlayerLayer, context _: Context) {}
 
-    public final class Coordinator: NSObject, KSPlayerLayerDelegate, AVPictureInPictureControllerDelegate {
+    public final class Coordinator: KSPlayerLayerDelegate {
         private let videoPlayer: KSVideoPlayer
 
         init(_ videoPlayer: KSVideoPlayer) {
             self.videoPlayer = videoPlayer
         }
 
-        public func player(layer: KSPlayerLayer, state: KSPlayerState) {
+        public func player(layer _: KSPlayerLayer, state: KSPlayerState) {
             videoPlayer.handler.onStateChanged?(state)
-            if state == .readyToPlay {
-                if #available(tvOS 14.0, *) {
-                    layer.player?.pipController?.delegate = self
-                }
-            }
         }
 
         public func player(layer _: KSPlayerLayer, currentTime: TimeInterval, totalTime: TimeInterval) {
