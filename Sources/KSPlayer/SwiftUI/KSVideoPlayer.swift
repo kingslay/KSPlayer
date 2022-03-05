@@ -37,6 +37,7 @@ public struct KSVideoPlayerView: View {
                     config.playerLayer.seek(time: model.currentTime + 15, autoPlay: true)
                 }
             }
+            .edgesIgnoringSafeArea(.all)
             #endif
             .onDisappear {
                 player.playerLayer.pause()
@@ -120,7 +121,7 @@ struct VideoControllerView: View {
     public var body: some View {
         VStack {
             HStack {
-                HStack(spacing: 8) {
+                HStack {
                     Button {
                         #if os(tvOS)
                         model.isMaskShow = false
@@ -140,18 +141,21 @@ struct VideoControllerView: View {
                     } label: {
                         Image(systemName: config.isScaleAspectFill ? "rectangle.arrowtriangle.2.inward" : "rectangle.arrowtriangle.2.outward")
                     }
-                }.padding()
-                    .background(backgroundColor, ignoresSafeAreaEdges: []).cornerRadius(8)
+                }
+                .padding()
+                .background(backgroundColor, ignoresSafeAreaEdges: []).cornerRadius(8)
                 Spacer()
                 Button {
                     config.isMuted.toggle()
                 } label: {
                     Image(systemName: config.isMuted ? "speaker.slash.fill" : "speaker.wave.2.fill")
                 }
+                .padding()
                 .background(backgroundColor, ignoresSafeAreaEdges: []).cornerRadius(8)
             }
+
             Spacer()
-            HStack(spacing: 8) {
+            HStack {
                 Button {
                     config.playerLayer.seek(time: model.currentTime - 15, autoPlay: true)
                 } label: {
@@ -165,9 +169,8 @@ struct VideoControllerView: View {
                 } label: {
                     Image(systemName: config.isPlay ? "pause.fill" : "play.fill")
                 }
-                .padding()
                 #if !os(tvOS)
-                    .keyboardShortcut(.space, modifiers: .option)
+                .keyboardShortcut(.space, modifiers: .option)
                 #endif
                 Button {
                     config.playerLayer.seek(time: model.currentTime + 15, autoPlay: true)
@@ -193,11 +196,12 @@ struct VideoControllerView: View {
                     Image(systemName: "ellipsis")
                 }
             }
-            .padding(.horizontal, 8)
+            .padding()
             .background(backgroundColor)
             .cornerRadius(8)
         }
-        .padding().tint(.clear).foregroundColor(.primary)
+        .tint(.clear)
+        .foregroundColor(.primary)
         #if os(macOS)
             .focusable()
             .onMoveCommand { direction in

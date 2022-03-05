@@ -361,7 +361,7 @@ public enum KSPlayerManager {
         //        try? AVAudioSession.sharedInstance().setRouteSharingPolicy(.longFormAudio)
         #else
         let category = AVAudioSession.sharedInstance().category
-        if category != .playback && category != .playAndRecord {
+        if category != .playback, category != .playAndRecord {
             try? AVAudioSession.sharedInstance().setCategory(.playback, mode: .default, policy: .longFormAudio)
         }
         try? AVAudioSession.sharedInstance().setActive(true)
