@@ -37,8 +37,8 @@ public struct KSVideoPlayerView: View {
                     config.playerLayer.seek(time: model.currentTime + 15, autoPlay: true)
                 }
             }
-            .edgesIgnoringSafeArea(.all)
             #endif
+            .edgesIgnoringSafeArea(.all)
             .onDisappear {
                 player.playerLayer.pause()
             }
