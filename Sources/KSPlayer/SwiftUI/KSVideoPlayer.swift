@@ -38,6 +38,7 @@ public struct KSVideoPlayerView: View {
                 }
             }
             #endif
+            .background(.black)
             .edgesIgnoringSafeArea(.all)
             .onDisappear {
                 player.playerLayer.pause()
@@ -180,7 +181,7 @@ struct VideoControllerView: View {
                 #if !os(tvOS)
                 .keyboardShortcut(.rightArrow)
                 #endif
-                Text(model.currentTime.toString(for: .minOrHour)).font(.caption2.monospacedDigit()).foregroundColor(.secondary.opacity(0.6))
+                Text(model.currentTime.toString(for: .minOrHour)).font(.caption2.monospacedDigit())
                 #if os(tvOS)
                 ProgressView(value: model.currentTime, total: model.totalTime).tint(.secondary.opacity(0.32))
                 #else
@@ -191,7 +192,7 @@ struct VideoControllerView: View {
                 }, in: 0 ... model.totalTime)
                     .tint(.secondary.opacity(0.32))
                 #endif
-                Text("-" + (model.totalTime - model.currentTime).toString(for: .minOrHour)).font(.caption2.monospacedDigit()).foregroundColor(.secondary.opacity(0.6))
+                Text("-" + (model.totalTime - model.currentTime).toString(for: .minOrHour)).font(.caption2.monospacedDigit())
                 Button {} label: {
                     Image(systemName: "ellipsis")
                 }
@@ -201,7 +202,7 @@ struct VideoControllerView: View {
             .cornerRadius(8)
         }
         .tint(.clear)
-        .foregroundColor(.primary)
+        .foregroundColor(.white)
         #if os(macOS)
             .focusable()
             .onMoveCommand { direction in
