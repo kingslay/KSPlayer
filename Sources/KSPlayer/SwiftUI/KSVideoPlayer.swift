@@ -182,16 +182,12 @@ struct VideoControllerView: View {
                 .keyboardShortcut(.rightArrow)
                 #endif
                 Text(model.currentTime.toString(for: .minOrHour)).font(.caption2.monospacedDigit())
-                #if os(tvOS)
-                ProgressView(value: model.currentTime, total: model.totalTime).tint(.secondary.opacity(0.32))
-                #else
                 Slider(value: Binding {
                     model.currentTime
                 } set: { newValue in
                     config.playerLayer.seek(time: newValue, autoPlay: true)
                 }, in: 0 ... model.totalTime)
                     .tint(.secondary.opacity(0.32))
-                #endif
                 Text("-" + (model.totalTime - model.currentTime).toString(for: .minOrHour)).font(.caption2.monospacedDigit())
                 Button {} label: {
                     Image(systemName: "ellipsis")
@@ -358,3 +354,73 @@ extension KSVideoPlayer: UIViewRepresentable {
         #endif
     }
 }
+
+#if os(tvOS)
+import Combine
+@available(tvOS 13.0, *)
+struct Slider: UIViewRepresentable {
+    private let process: Binding<Float>
+    init(value: Binding<Double>, in bounds: ClosedRange<Double> = 0 ... 1, onEditingChanged _: @escaping (Bool) -> Void = { _ in }) {
+        process = Binding {
+            Float((value.wrappedValue - bounds.lowerBound) / (bounds.upperBound - bounds.lowerBound))
+        } set: { newValue in
+            value.wrappedValue = (bounds.upperBound - bounds.lowerBound) * Double(newValue) + bounds.lowerBound
+        }
+    }
+
+    public typealias UIViewType = TVSlide
+    public func makeUIView(context _: Context) -> UIViewType {
+        TVSlide(process: process)
+    }
+
+    public func updateUIView(_: UIViewType, context _: Context) {}
+}
+
+@available(tvOS 13.0, *)
+class TVSlide: UIControl {
+    @Binding var process: Float {
+        willSet {
+            if newValue != processView.progress {
+                processView.progress = newValue
+            }
+        }
+    }
+
+    private let processView = UIProgressView()
+    init(process: Binding<Float>) {
+        _process = process
+        super.init(frame: .zero)
+        setUpView()
+    }
+
+    @available(*, unavailable)
+    required init?(coder _: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+
+    private func setUpView() {
+        _ = processView.publisher(for: \.progress, options: [.new]).sink { newValue in
+            self.process = newValue
+        }
+        processView.translatesAutoresizingMaskIntoConstraints = false
+        addSubview(processView)
+        NSLayoutConstraint.activate([
+            processView.topAnchor.constraint(equalTo: topAnchor),
+            processView.leadingAnchor.constraint(equalTo: leadingAnchor),
+            processView.trailingAnchor.constraint(equalTo: trailingAnchor),
+            processView.bottomAnchor.constraint(equalTo: bottomAnchor),
+            processView.heightAnchor.constraint(equalToConstant: 100),
+        ])
+        let panGestureRecognizer = UIPanGestureRecognizer(target: self, action: #selector(actionPanGesture(sender:)))
+        addGestureRecognizer(panGestureRecognizer)
+    }
+
+    @objc private func actionPanGesture(sender: UIPanGestureRecognizer) {
+        let touchPoint = sender.location(in: self)
+        process = Float(touchPoint.x / frame.size.width)
+        if sender.state == .began {
+        } else if sender.state == .ended {
+        } else {}
+    }
+}
+#endif
