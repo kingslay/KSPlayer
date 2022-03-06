@@ -154,7 +154,9 @@ struct VideoControllerView: View {
                 .padding()
                 .background(backgroundColor, ignoresSafeAreaEdges: []).cornerRadius(8)
             }
-
+            #if os(tvOS)
+            .focusSection()
+            #endif
             Spacer()
             HStack {
                 Button {
@@ -187,7 +189,7 @@ struct VideoControllerView: View {
                 } set: { newValue in
                     config.playerLayer.seek(time: newValue, autoPlay: true)
                 }, in: 0 ... model.totalTime)
-                    .tint(.secondary.opacity(0.32)).frame(maxHeight: 20)
+                    .frame(maxHeight: 20)
                 Text("-" + (model.totalTime - model.currentTime).toString(for: .minOrHour)).font(.caption2.monospacedDigit())
                 Button {} label: {
                     Image(systemName: "ellipsis")
@@ -197,7 +199,6 @@ struct VideoControllerView: View {
             .background(backgroundColor)
             .cornerRadius(8)
         }
-        .tint(.clear)
         .foregroundColor(.white)
         #if os(macOS)
             .focusable()
@@ -394,15 +395,6 @@ class TVSlide: UIControl {
     init(process: Binding<Float>) {
         self.process = process
         super.init(frame: .zero)
-        setUpView()
-    }
-
-    @available(*, unavailable)
-    required init?(coder _: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
-
-    private func setUpView() {
         processView.translatesAutoresizingMaskIntoConstraints = false
         addSubview(processView)
         NSLayoutConstraint.activate([
@@ -414,10 +406,17 @@ class TVSlide: UIControl {
         addGestureRecognizer(panGestureRecognizer)
         let tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(actionTapGesture(sender:)))
         addGestureRecognizer(tapGestureRecognizer)
+        processView.tintColor = .blue
+    }
+
+    @available(*, unavailable)
+    required init?(coder _: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
     }
 
     @objc private func actionTapGesture(sender _: UITapGestureRecognizer) {
         panGestureRecognizer.isEnabled.toggle()
+        processView.tintColor = panGestureRecognizer.isEnabled ? .blue : .white
     }
 
     @objc private func actionPanGesture(sender: UIPanGestureRecognizer) {
