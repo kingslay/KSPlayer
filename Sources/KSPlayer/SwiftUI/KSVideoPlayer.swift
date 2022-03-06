@@ -187,7 +187,7 @@ struct VideoControllerView: View {
                 } set: { newValue in
                     config.playerLayer.seek(time: newValue, autoPlay: true)
                 }, in: 0 ... model.totalTime)
-                    .tint(.secondary.opacity(0.32))
+                    .tint(.secondary.opacity(0.32)).frame(maxHeight: 20)
                 Text("-" + (model.totalTime - model.currentTime).toString(for: .minOrHour)).font(.caption2.monospacedDigit())
                 Button {} label: {
                     Image(systemName: "ellipsis")
@@ -373,22 +373,25 @@ struct Slider: UIViewRepresentable {
         TVSlide(process: process)
     }
 
-    public func updateUIView(_: UIViewType, context _: Context) {}
+    public func updateUIView(_ view: UIViewType, context _: Context) {
+        view.process = process
+    }
 }
 
 @available(tvOS 13.0, *)
 class TVSlide: UIControl {
-    @Binding var process: Float {
+    private let processView = UIProgressView()
+    private var isTouch = false
+    var process: Binding<Float> {
         willSet {
-            if newValue != processView.progress {
-                processView.progress = newValue
+            if !isTouch, newValue.wrappedValue != processView.progress {
+                processView.progress = newValue.wrappedValue
             }
         }
     }
 
-    private let processView = UIProgressView()
     init(process: Binding<Float>) {
-        _process = process
+        self.process = process
         super.init(frame: .zero)
         setUpView()
     }
@@ -399,9 +402,6 @@ class TVSlide: UIControl {
     }
 
     private func setUpView() {
-        _ = processView.publisher(for: \.progress, options: [.new]).sink { newValue in
-            self.process = newValue
-        }
         processView.translatesAutoresizingMaskIntoConstraints = false
         addSubview(processView)
         NSLayoutConstraint.activate([
@@ -409,7 +409,6 @@ class TVSlide: UIControl {
             processView.leadingAnchor.constraint(equalTo: leadingAnchor),
             processView.trailingAnchor.constraint(equalTo: trailingAnchor),
             processView.bottomAnchor.constraint(equalTo: bottomAnchor),
-            processView.heightAnchor.constraint(equalToConstant: 100),
         ])
         let panGestureRecognizer = UIPanGestureRecognizer(target: self, action: #selector(actionPanGesture(sender:)))
         addGestureRecognizer(panGestureRecognizer)
@@ -417,10 +416,22 @@ class TVSlide: UIControl {
 
     @objc private func actionPanGesture(sender: UIPanGestureRecognizer) {
         let touchPoint = sender.location(in: self)
-        process = Float(touchPoint.x / frame.size.width)
-        if sender.state == .began {
-        } else if sender.state == .ended {
-        } else {}
+        let value = Float(touchPoint.x / frame.size.width)
+        switch sender.state {
+        case .began, .possible:
+            isTouch = true
+        case .changed:
+            processView.progress = value
+        case .ended:
+            process.wrappedValue = value
+            isTouch = false
+        case .cancelled:
+            isTouch = false
+        case .failed:
+            isTouch = false
+        @unknown default:
+            break
+        }
     }
 }
 #endif
