@@ -368,12 +368,12 @@ struct Slider: UIViewRepresentable {
         }
     }
 
-    public typealias UIViewType = TVSlide
-    public func makeUIView(context _: Context) -> UIViewType {
+    typealias UIViewType = TVSlide
+    func makeUIView(context _: Context) -> UIViewType {
         TVSlide(process: process)
     }
 
-    public func updateUIView(_ view: UIViewType, context _: Context) {
+    func updateUIView(_ view: UIViewType, context _: Context) {
         view.process = process
     }
 }
@@ -382,6 +382,7 @@ struct Slider: UIViewRepresentable {
 class TVSlide: UIControl {
     private let processView = UIProgressView()
     private var isTouch = false
+    private lazy var panGestureRecognizer = UIPanGestureRecognizer(target: self, action: #selector(actionPanGesture(sender:)))
     var process: Binding<Float> {
         willSet {
             if !isTouch, newValue.wrappedValue != processView.progress {
@@ -410,11 +411,20 @@ class TVSlide: UIControl {
             processView.trailingAnchor.constraint(equalTo: trailingAnchor),
             processView.bottomAnchor.constraint(equalTo: bottomAnchor),
         ])
-        let panGestureRecognizer = UIPanGestureRecognizer(target: self, action: #selector(actionPanGesture(sender:)))
         addGestureRecognizer(panGestureRecognizer)
+        let tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(actionTapGesture(sender:)))
+        addGestureRecognizer(tapGestureRecognizer)
+    }
+
+    @objc private func actionTapGesture(sender _: UITapGestureRecognizer) {
+        panGestureRecognizer.isEnabled.toggle()
     }
 
     @objc private func actionPanGesture(sender: UIPanGestureRecognizer) {
+        let translation = sender.translation(in: self)
+        if abs(translation.y) > abs(translation.x) {
+            return
+        }
         let touchPoint = sender.location(in: self)
         let value = Float(touchPoint.x / frame.size.width)
         switch sender.state {
