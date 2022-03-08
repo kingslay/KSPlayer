@@ -72,6 +72,7 @@ open class KSPlayerLayer: UIView {
     private var url: URL? {
         didSet {
             guard let url = url, let options = options else {
+                player = nil
                 return
             }
             let firstPlayerType: MediaPlayerProtocol.Type
@@ -229,6 +230,8 @@ open class KSPlayerLayer: UIView {
         shouldSeekTo = 0
         player?.playbackRate = 1
         player?.playbackVolume = 1
+        options = nil
+        url = nil
         UIApplication.shared.isIdleTimerDisabled = false
         MPNowPlayingInfoCenter.default().nowPlayingInfo = nil
     }
