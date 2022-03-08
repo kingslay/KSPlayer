@@ -72,6 +72,7 @@ open class KSPlayerLayer: UIView {
     private var url: URL? {
         didSet {
             guard let url = url, let options = options else {
+                player = nil
                 return
             }
             let firstPlayerType: MediaPlayerProtocol.Type
@@ -231,6 +232,12 @@ open class KSPlayerLayer: UIView {
         player?.playbackVolume = 1
         UIApplication.shared.isIdleTimerDisabled = false
         MPNowPlayingInfoCenter.default().nowPlayingInfo = nil
+    }
+
+    open func shutdown() {
+        resetPlayer()
+        options = nil
+        url = nil
     }
 
     open func seek(time: TimeInterval, autoPlay: Bool, completion handler: ((Bool) -> Void)? = nil) {

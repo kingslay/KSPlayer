@@ -9,20 +9,18 @@ import AVKit
 import SwiftUI
 @available(iOS 15, tvOS 15, macOS 12, *)
 public struct KSVideoPlayerView: View {
-    @State private var model = VideoControllerView.ControllerViewModel()
+    @State private var model = ControllerViewModel()
     private let url: URL
-    private let player = KSVideoPlayer()
     public let options: KSOptions
+    @State private var player: KSVideoPlayer
     public init(url: URL, options: KSOptions) {
         self.options = options
         self.url = url
+        _player = State(initialValue: KSVideoPlayer(url: url, options: options))
     }
 
     public var body: some View {
-        player.playerLayer.set(url: url, options: options)
-        let config = VideoControllerView.Config(isPlay: options.isAutoPlay, playerLayer: player.playerLayer)
-        let controllerView = VideoControllerView(config: config, model: $model)
-        return ZStack {
+        ZStack {
             player.onPlay { current, total in
                 model.currentTime = current
                 model.totalTime = max(max(0, total), current)
@@ -32,18 +30,18 @@ public struct KSVideoPlayerView: View {
                 if direction == .down {
                     model.isMaskShow.toggle()
                 } else if direction == .left {
-                    config.playerLayer.seek(time: model.currentTime - 15, autoPlay: true)
+                    player.config.seek(time: model.currentTime - 15)
                 } else if direction == .right {
-                    config.playerLayer.seek(time: model.currentTime + 15, autoPlay: true)
+                    player.config.seek(time: model.currentTime + 15)
                 }
             }
             #endif
             .background(.black)
             .edgesIgnoringSafeArea(.all)
             .onDisappear {
-                player.playerLayer.pause()
+                player.config.coordinator.playerLayer?.pause()
             }
-            controllerView.opacity(model.isMaskShow ? 1 : 0)
+            VideoControllerView(config: $player.config, model: $model).opacity(model.isMaskShow ? 1 : 0)
         }
         #if !os(macOS)
         .navigationBarHidden(true)
@@ -55,7 +53,7 @@ public struct KSVideoPlayerView: View {
         .onDrop(of: ["public.file-url"], isTargeted: nil) { providers -> Bool in
             providers.first?.loadDataRepresentation(forTypeIdentifier: "public.file-url") { data, _ in
                 if let data = data, let path = NSString(data: data, encoding: 4), let url = URL(string: path as String), url.isAudio || url.isMovie {
-                    player.playerLayer.set(url: url, options: options)
+                    player = KSVideoPlayer(url: url, options: options)
                 }
             }
             return true
@@ -64,58 +62,20 @@ public struct KSVideoPlayerView: View {
     }
 }
 
+struct ControllerViewModel {
+    var currentTime = TimeInterval(0)
+    var totalTime = TimeInterval(1)
+    var isMaskShow: Bool = true
+}
+
 @available(iOS 15, tvOS 15, macOS 12, *)
 struct VideoControllerView: View {
-    public struct Config {
-        fileprivate let playerLayer: KSPlayerLayer
-        init(isPlay: Bool, playerLayer: KSPlayerLayer) {
-            self.isPlay = isPlay
-            self.playerLayer = playerLayer
-        }
-
-        var isPlay: Bool {
-            didSet {
-                isPlay ? playerLayer.play() : playerLayer.pause()
-            }
-        }
-
-        var isMuted: Bool = false {
-            didSet {
-                playerLayer.player?.isMuted = isMuted
-            }
-        }
-
-        var isPipActive = false {
-            didSet {
-                if let pipController = playerLayer.player?.pipController, isPipActive != pipController.isPictureInPictureActive {
-                    if pipController.isPictureInPictureActive {
-                        pipController.stopPictureInPicture()
-                    } else {
-                        pipController.startPictureInPicture()
-                    }
-                }
-            }
-        }
-
-        var isScaleAspectFill = false {
-            didSet {
-                playerLayer.player?.contentMode = isScaleAspectFill ? .scaleAspectFill : .scaleAspectFit
-            }
-        }
-    }
-
-    struct ControllerViewModel {
-        var currentTime = TimeInterval(0)
-        var totalTime = TimeInterval(1)
-        var isMaskShow: Bool = true
-    }
-
-    @State private var config: Config
+    @Binding private var config: KSVideoPlayer.Config
     @Binding private var model: ControllerViewModel
     private let backgroundColor = Color(red: 0.145, green: 0.145, blue: 0.145).opacity(0.6)
     @Environment(\.dismiss) private var dismiss
-    init(config: Config, model: Binding<ControllerViewModel>) {
-        _config = .init(initialValue: config)
+    init(config: Binding<KSVideoPlayer.Config>, model: Binding<ControllerViewModel>) {
+        _config = config
         _model = model
     }
 
@@ -160,7 +120,7 @@ struct VideoControllerView: View {
             Spacer()
             HStack {
                 Button {
-                    config.playerLayer.seek(time: model.currentTime - 15, autoPlay: true)
+                    config.seek(time: model.currentTime - 15)
                 } label: {
                     Image(systemName: "gobackward.15")
                 }
@@ -176,7 +136,7 @@ struct VideoControllerView: View {
                 .keyboardShortcut(.space, modifiers: .option)
                 #endif
                 Button {
-                    config.playerLayer.seek(time: model.currentTime + 15, autoPlay: true)
+                    config.seek(time: model.currentTime + 15)
                 } label: {
                     Image(systemName: "goforward.15")
                 }
@@ -187,7 +147,7 @@ struct VideoControllerView: View {
                 Slider(value: Binding {
                     model.currentTime
                 } set: { newValue in
-                    config.playerLayer.seek(time: newValue, autoPlay: true)
+                    config.seek(time: newValue)
                 }, in: 0 ... model.totalTime)
                     .frame(maxHeight: 20)
                 Text("-" + (model.totalTime - model.currentTime).toString(for: .minOrHour)).font(.caption2.monospacedDigit())
@@ -205,13 +165,13 @@ struct VideoControllerView: View {
             .onMoveCommand { direction in
                 switch direction {
                 case .left:
-                    config.playerLayer.seek(time: model.currentTime - 15, autoPlay: true)
+                    config.seek(time: model.currentTime - 15)
                 case .right:
-                    config.playerLayer.seek(time: model.currentTime + 15, autoPlay: true)
+                    config.seek(time: model.currentTime + 15)
                 case .up:
-                    config.playerLayer.player?.playbackVolume += 1
+                    config.coordinator.playerLayer?.player?.playbackVolume += 1
                 case .down:
-                    config.playerLayer.player?.playbackVolume -= 1
+                    config.coordinator.playerLayer?.player?.playbackVolume -= 1
                 @unknown default:
                     break
                 }
@@ -227,53 +187,83 @@ struct VideoControllerView: View {
 
 @available(iOS 13, tvOS 13, macOS 10.15, *)
 public struct KSVideoPlayer {
-    struct Handler {
-        var onPlay: ((TimeInterval, TimeInterval) -> Void)?
-        var onFinish: ((Error?) -> Void)?
-        var onStateChanged: ((KSPlayerState) -> Void)?
-        var onBufferChanged: ((Int, TimeInterval) -> Void)?
-        #if canImport(UIKit)
-        var onSwipe: ((UISwipeGestureRecognizer.Direction) -> Void)?
-        #endif
+    public struct Config {
+        let coordinator = Coordinator()
+        var isPlay: Bool = false {
+            didSet {
+                isPlay ? coordinator.playerLayer?.play() : coordinator.playerLayer?.pause()
+            }
+        }
+
+        var isMuted: Bool = false {
+            didSet {
+                coordinator.playerLayer?.player?.isMuted = isMuted
+            }
+        }
+
+        var isPipActive = false {
+            didSet {
+                if #available(tvOS 14.0, *) {
+                    if let pipController = coordinator.playerLayer?.player?.pipController, isPipActive != pipController.isPictureInPictureActive {
+                        if pipController.isPictureInPictureActive {
+                            pipController.stopPictureInPicture()
+                        } else {
+                            pipController.startPictureInPicture()
+                        }
+                    }
+                }
+            }
+        }
+
+        var isScaleAspectFill = false {
+            didSet {
+                coordinator.playerLayer?.player?.contentMode = isScaleAspectFill ? .scaleAspectFill : .scaleAspectFit
+            }
+        }
+
+        func seek(time: TimeInterval) {
+            coordinator.playerLayer?.seek(time: time, autoPlay: true)
+        }
     }
 
-    public let playerLayer = KSPlayerLayer()
-    fileprivate var handler = Handler()
+    public var config = Config()
+    private let url: URL
+    public let options: KSOptions
+    public init(url: URL, options: KSOptions) {
+        self.options = options
+        self.url = url
+        config.isPlay = options.isAutoPlay
+    }
 }
 
 @available(iOS 13, tvOS 13, macOS 10.15, *)
 extension KSVideoPlayer {
     func onBufferChanged(_ handler: @escaping (Int, TimeInterval) -> Void) -> Self {
-        var view = self
-        view.handler.onBufferChanged = handler
-        return view
+        config.coordinator.onBufferChanged = handler
+        return self
     }
 
     /// Playing to the end.
     func onFinish(_ handler: @escaping (Error?) -> Void) -> Self {
-        var view = self
-        view.handler.onFinish = handler
-        return view
+        config.coordinator.onFinish = handler
+        return self
     }
 
     func onPlay(_ handler: @escaping (TimeInterval, TimeInterval) -> Void) -> Self {
-        var view = self
-        view.handler.onPlay = handler
-        return view
+        config.coordinator.onPlay = handler
+        return self
     }
 
     /// Playback status changes, such as from play to pause.
     func onStateChanged(_ handler: @escaping (KSPlayerState) -> Void) -> Self {
-        var view = self
-        view.handler.onStateChanged = handler
-        return view
+        config.coordinator.onStateChanged = handler
+        return self
     }
 
     #if canImport(UIKit)
     func onSwipe(_ handler: @escaping (UISwipeGestureRecognizer.Direction) -> Void) -> Self {
-        var view = self
-        view.handler.onSwipe = handler
-        return view
+        config.coordinator.onSwipe = handler
+        return self
     }
     #endif
 }
@@ -285,7 +275,7 @@ typealias UIViewRepresentable = NSViewRepresentable
 @available(iOS 13, tvOS 13, macOS 10.15, *)
 extension KSVideoPlayer: UIViewRepresentable {
     public func makeCoordinator() -> Coordinator {
-        Coordinator(self)
+        config.coordinator
     }
 
     #if canImport(UIKit)
@@ -308,6 +298,9 @@ extension KSVideoPlayer: UIViewRepresentable {
         updateView(uiView, context: context)
     }
 
+    public static func dismantleUIView(_ uiView: UIViewType, coordinator _: Coordinator) {
+        uiView.shutdown()
+    }
     #else
     public typealias NSViewType = KSPlayerLayer
     public func makeNSView(context: Context) -> NSViewType {
@@ -317,40 +310,49 @@ extension KSVideoPlayer: UIViewRepresentable {
     public func updateNSView(_ uiView: NSViewType, context: Context) {
         updateView(uiView, context: context)
     }
+
+    public static func dismantleNSView(_ uiView: NSViewType, coordinator _: Coordinator) {
+        uiView.shutdown()
+    }
     #endif
     private func makeView(context: Context) -> KSPlayerLayer {
+        let playerLayer = KSPlayerLayer()
+        playerLayer.set(url: url, options: options)
         playerLayer.delegate = context.coordinator
+        context.coordinator.playerLayer = playerLayer
         return playerLayer
     }
 
     private func updateView(_: KSPlayerLayer, context _: Context) {}
 
     public final class Coordinator: KSPlayerLayerDelegate {
-        private let videoPlayer: KSVideoPlayer
-
-        init(_ videoPlayer: KSVideoPlayer) {
-            self.videoPlayer = videoPlayer
-        }
-
+        fileprivate var playerLayer: KSPlayerLayer?
+        fileprivate var onPlay: ((TimeInterval, TimeInterval) -> Void)?
+        fileprivate var onFinish: ((Error?) -> Void)?
+        fileprivate var onStateChanged: ((KSPlayerState) -> Void)?
+        fileprivate var onBufferChanged: ((Int, TimeInterval) -> Void)?
+        #if canImport(UIKit)
+        fileprivate var onSwipe: ((UISwipeGestureRecognizer.Direction) -> Void)?
+        #endif
         public func player(layer _: KSPlayerLayer, state: KSPlayerState) {
-            videoPlayer.handler.onStateChanged?(state)
+            onStateChanged?(state)
         }
 
         public func player(layer _: KSPlayerLayer, currentTime: TimeInterval, totalTime: TimeInterval) {
-            videoPlayer.handler.onPlay?(currentTime, totalTime)
+            onPlay?(currentTime, totalTime)
         }
 
         public func player(layer _: KSPlayerLayer, finish error: Error?) {
-            videoPlayer.handler.onFinish?(error)
+            onFinish?(error)
         }
 
         public func player(layer _: KSPlayerLayer, bufferedCount: Int, consumeTime: TimeInterval) {
-            videoPlayer.handler.onBufferChanged?(bufferedCount, consumeTime)
+            onBufferChanged?(bufferedCount, consumeTime)
         }
 
         #if canImport(UIKit)
         @objc fileprivate func swipeGestureAction(_ recognizer: UISwipeGestureRecognizer) {
-            videoPlayer.handler.onSwipe?(recognizer.direction)
+            onSwipe?(recognizer.direction)
         }
         #endif
     }
