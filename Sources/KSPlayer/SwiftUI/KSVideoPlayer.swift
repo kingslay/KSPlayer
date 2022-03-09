@@ -12,11 +12,11 @@ public struct KSVideoPlayerView: View {
     @State private var model = ControllerViewModel()
     private let url: URL
     public let options: KSOptions
-    @State private var player: KSVideoPlayer
+    private let player: KSVideoPlayer
     public init(url: URL, options: KSOptions) {
         self.options = options
         self.url = url
-        _player = State(initialValue: KSVideoPlayer(url: url, options: options))
+        player = KSVideoPlayer(url: url, options: options)
     }
 
     public var body: some View {
@@ -41,7 +41,7 @@ public struct KSVideoPlayerView: View {
             .onDisappear {
                 player.config.coordinator.playerLayer?.pause()
             }
-            VideoControllerView(config: $player.config, model: $model).opacity(model.isMaskShow ? 1 : 0)
+            VideoControllerView(config: player.config, model: $model).opacity(model.isMaskShow ? 1 : 0)
         }
         #if !os(macOS)
         .navigationBarHidden(true)
@@ -53,7 +53,7 @@ public struct KSVideoPlayerView: View {
         .onDrop(of: ["public.file-url"], isTargeted: nil) { providers -> Bool in
             providers.first?.loadDataRepresentation(forTypeIdentifier: "public.file-url") { data, _ in
                 if let data = data, let path = NSString(data: data, encoding: 4), let url = URL(string: path as String), url.isAudio || url.isMovie {
-                    player = KSVideoPlayer(url: url, options: options)
+//                    player = KSVideoPlayer(url: url, options: options)
                 }
             }
             return true
@@ -70,12 +70,12 @@ struct ControllerViewModel {
 
 @available(iOS 15, tvOS 15, macOS 12, *)
 struct VideoControllerView: View {
-    @Binding private var config: KSVideoPlayer.Config
+    @State private var config: KSVideoPlayer.Config
     @Binding private var model: ControllerViewModel
     private let backgroundColor = Color(red: 0.145, green: 0.145, blue: 0.145).opacity(0.6)
     @Environment(\.dismiss) private var dismiss
-    init(config: Binding<KSVideoPlayer.Config>, model: Binding<ControllerViewModel>) {
-        _config = config
+    init(config: KSVideoPlayer.Config, model: Binding<ControllerViewModel>) {
+        _config = State(initialValue: config)
         _model = model
     }
 
@@ -114,9 +114,10 @@ struct VideoControllerView: View {
                 .padding()
                 .background(backgroundColor, ignoresSafeAreaEdges: []).cornerRadius(8)
             }
-            #if os(tvOS)
-            .focusSection()
-            #endif
+//            #if os(tvOS)
+            // can not add focusSection
+//            .focusSection()
+//            #endif
             Spacer()
             HStack {
                 Button {
@@ -189,7 +190,7 @@ struct VideoControllerView: View {
 public struct KSVideoPlayer {
     public struct Config {
         let coordinator = Coordinator()
-        var isPlay: Bool = false {
+        var isPlay: Bool {
             didSet {
                 isPlay ? coordinator.playerLayer?.play() : coordinator.playerLayer?.pause()
             }
@@ -226,13 +227,13 @@ public struct KSVideoPlayer {
         }
     }
 
-    public var config = Config()
+    public let config: Config
     private let url: URL
     public let options: KSOptions
     public init(url: URL, options: KSOptions) {
         self.options = options
         self.url = url
-        config.isPlay = options.isAutoPlay
+        config = Config(isPlay: options.isAutoPlay)
     }
 }
 
@@ -299,7 +300,7 @@ extension KSVideoPlayer: UIViewRepresentable {
     }
 
     public static func dismantleUIView(_ uiView: UIViewType, coordinator _: Coordinator) {
-        uiView.shutdown()
+        uiView.pause()
     }
     #else
     public typealias NSViewType = KSPlayerLayer
@@ -312,7 +313,7 @@ extension KSVideoPlayer: UIViewRepresentable {
     }
 
     public static func dismantleNSView(_ uiView: NSViewType, coordinator _: Coordinator) {
-        uiView.shutdown()
+        uiView.pause()
     }
     #endif
     private func makeView(context: Context) -> KSPlayerLayer {
@@ -326,7 +327,7 @@ extension KSVideoPlayer: UIViewRepresentable {
     private func updateView(_: KSPlayerLayer, context _: Context) {}
 
     public final class Coordinator: KSPlayerLayerDelegate {
-        fileprivate var playerLayer: KSPlayerLayer?
+        fileprivate weak var playerLayer: KSPlayerLayer?
         fileprivate var onPlay: ((TimeInterval, TimeInterval) -> Void)?
         fileprivate var onFinish: ((Error?) -> Void)?
         fileprivate var onStateChanged: ((KSPlayerState) -> Void)?
