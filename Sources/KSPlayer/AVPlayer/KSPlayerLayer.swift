@@ -234,12 +234,6 @@ open class KSPlayerLayer: UIView {
         MPNowPlayingInfoCenter.default().nowPlayingInfo = nil
     }
 
-    open func shutdown() {
-        resetPlayer()
-        options = nil
-        url = nil
-    }
-
     open func seek(time: TimeInterval, autoPlay: Bool, completion handler: ((Bool) -> Void)? = nil) {
         if time.isInfinite || time.isNaN {
             return
