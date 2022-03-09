@@ -53,7 +53,7 @@ public struct KSVideoPlayerView: View {
         .onDrop(of: ["public.file-url"], isTargeted: nil) { providers -> Bool in
             providers.first?.loadDataRepresentation(forTypeIdentifier: "public.file-url") { data, _ in
                 if let data = data, let path = NSString(data: data, encoding: 4), let url = URL(string: path as String), url.isAudio || url.isMovie {
-//                    player = KSVideoPlayer(url: url, options: options)
+                    player.config.coordinator.playerLayer?.set(url: url, options: options)
                 }
             }
             return true
