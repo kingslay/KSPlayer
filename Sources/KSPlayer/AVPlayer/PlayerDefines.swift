@@ -416,6 +416,7 @@ public enum KSPlayerErrorCode: Int {
     case subtitleUnEncoding
     case subtitleUnParse
     case subtitleFormatUnSupport
+    case subtitleParamsEmpty
 }
 
 extension KSPlayerErrorCode: CustomStringConvertible {
@@ -447,6 +448,8 @@ extension KSPlayerErrorCode: CustomStringConvertible {
             return "Subtitle parsing error"
         case .subtitleFormatUnSupport:
             return "Current subtitle format is not supported"
+        case .subtitleParamsEmpty:
+            return "Subtitle Params is empty"
         case .auidoSwrInit:
             return "swr_init swrContext fail"
         default:

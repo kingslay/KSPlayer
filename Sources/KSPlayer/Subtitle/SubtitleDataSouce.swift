@@ -12,7 +12,7 @@ public protocol SubtitleInfo: AnyObject {
     var name: String { get }
     var subtitleID: String { get }
     var comment: String? { get }
-    func enableSubtitle(completion: @escaping (Result<KSSubtitleProtocol?, NSError>) -> Void)
+    func enableSubtitle(completion: @escaping (Result<KSSubtitleProtocol, NSError>) -> Void)
     func disableSubtitle()
 }
 
@@ -29,7 +29,7 @@ public class URLSubtitleInfo: SubtitleInfo {
     }
 
     public func disableSubtitle() {}
-    public func enableSubtitle(completion: @escaping (Result<KSSubtitleProtocol?, NSError>) -> Void) {
+    public func enableSubtitle(completion: @escaping (Result<KSSubtitleProtocol, NSError>) -> Void) {
         let block = { (url: URL) in
             let subtitles = KSURLSubtitle()
             do {
@@ -52,11 +52,11 @@ public class URLSubtitleInfo: SubtitleInfo {
                         cache.addCache(subtitleID: self.subtitleID, downloadURL: downloadURL)
                     }
                 } else {
-                    completion(.success(nil))
+                    completion(.failure(NSError(errorCode: .subtitleParamsEmpty)))
                 }
             }
         } else {
-            completion(.success(nil))
+            completion(.failure(NSError(errorCode: .subtitleParamsEmpty)))
         }
     }
 }

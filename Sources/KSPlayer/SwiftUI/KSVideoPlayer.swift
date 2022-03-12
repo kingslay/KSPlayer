@@ -10,6 +10,7 @@ import SwiftUI
 @available(iOS 15, tvOS 15, macOS 12, *)
 public struct KSVideoPlayerView: View {
     @State private var model = ControllerViewModel()
+    @State private var subtitleModel = SubtitleModel()
     private let url: URL
     public let options: KSOptions
     private let player: KSVideoPlayer
@@ -24,6 +25,39 @@ public struct KSVideoPlayerView: View {
             player.onPlay { current, total in
                 model.currentTime = current
                 model.totalTime = max(max(0, total), current)
+                if let subtile = subtitleModel.selectedSubtitle {
+                    let time = current + options.subtitleDelay
+                    if let part = subtile.search(for: time) {
+                        subtitleModel.endTime = part.end
+                        if let image = part.image {
+                            subtitleModel.image = image
+                        } else {
+                            subtitleModel.text = part.text
+                        }
+                    } else {
+                        if time > subtitleModel.endTime {
+                            subtitleModel.image = nil
+                            subtitleModel.text = nil
+                        }
+                    }
+                } else {
+                    subtitleModel.image = nil
+                    subtitleModel.text = nil
+                }
+            }
+            .onStateChanged { layer, state in
+                if state == .readyToPlay, let player = layer.player {
+                    player.subtitleDataSouce?.searchSubtitle(name: "") { infos in
+                        guard let infos = infos else {
+                            return
+                        }
+                        subtitleModel.infos = infos
+                        guard let info = subtitleModel.infos.first else {
+                            return
+                        }
+                        _subtitleModel.selecte(info: info)
+                    }
+                }
             }
             #if os(tvOS)
             .onSwipe { direction in
@@ -41,7 +75,28 @@ public struct KSVideoPlayerView: View {
             .onDisappear {
                 player.config.coordinator.playerLayer?.pause()
             }
+            VideoSubtitleView(model: $subtitleModel)
             VideoControllerView(config: player.config, model: $model).opacity(model.isMaskShow ? 1 : 0)
+        }
+        .confirmationDialog(Text("Setting"), isPresented: $model.isShowSetting) {
+            Button {} label: {
+                Text("Audio Setting")
+            }
+            Button {
+                model.isShowSubtitleSetting.toggle()
+            } label: {
+                Text("Subtitle Setting")
+            }
+        }
+        .confirmationDialog(Text("Subtitle Select"), isPresented: $model.isShowSubtitleSetting) {
+            ForEach(subtitleModel.infos, id: \.subtitleID) { info in
+                Button(info.name) {
+                    _subtitleModel.selecte(info: info)
+                }.background(subtitleModel.selectedInfo?.subtitleID == info.subtitleID ? .red : .white)
+            }
+            Button("dismiss Subtitle", role: .cancel) {
+                _subtitleModel.selecte(info: nil)
+            }
         }
         #if !os(macOS)
         .navigationBarHidden(true)
@@ -65,7 +120,30 @@ public struct KSVideoPlayerView: View {
 struct ControllerViewModel {
     var currentTime = TimeInterval(0)
     var totalTime = TimeInterval(1)
-    var isMaskShow: Bool = true
+    var isMaskShow = true
+    var isShowSetting = false
+    var isShowSubtitleSetting = false
+}
+
+struct SubtitleModel {
+    var infos = [SubtitleInfo]()
+    var selectedInfo: SubtitleInfo?
+    var selectedSubtitle: KSSubtitleProtocol?
+    var text: NSMutableAttributedString?
+    var image: UIImage?
+    var endTime = TimeInterval(0)
+}
+
+@available(iOS 13, tvOS 13, macOS 10.15, *)
+extension State where Value == SubtitleModel {
+    func selecte(info: SubtitleInfo?) {
+        wrappedValue.selectedInfo?.disableSubtitle()
+        wrappedValue.selectedSubtitle = nil
+        wrappedValue.selectedInfo = info
+        info?.enableSubtitle { result in
+            wrappedValue.selectedSubtitle = try? result.get()
+        }
+    }
 }
 
 @available(iOS 15, tvOS 15, macOS 12, *)
@@ -104,7 +182,7 @@ struct VideoControllerView: View {
                     }
                 }
                 .padding()
-                .background(backgroundColor, ignoresSafeAreaEdges: []).cornerRadius(8)
+                .background(backgroundColor).cornerRadius(8)
                 Spacer()
                 Button {
                     config.isMuted.toggle()
@@ -112,7 +190,7 @@ struct VideoControllerView: View {
                     Image(systemName: config.isMuted ? "speaker.slash.fill" : "speaker.wave.2.fill")
                 }
                 .padding()
-                .background(backgroundColor, ignoresSafeAreaEdges: []).cornerRadius(8)
+                .background(backgroundColor).cornerRadius(8)
             }
 //            #if os(tvOS)
             // can not add focusSection
@@ -152,7 +230,9 @@ struct VideoControllerView: View {
                 }, in: 0 ... model.totalTime)
                     .frame(maxHeight: 20)
                 Text("-" + (model.totalTime - model.currentTime).toString(for: .minOrHour)).font(.caption2.monospacedDigit())
-                Button {} label: {
+                Button {
+                    model.isShowSetting.toggle()
+                } label: {
                     Image(systemName: "ellipsis")
                 }
             }
@@ -183,6 +263,29 @@ struct VideoControllerView: View {
             config.isPlay.toggle()
         }
         #endif
+    }
+}
+
+@available(iOS 13, tvOS 13, macOS 10.15, *)
+struct VideoSubtitleView: View {
+    @Binding private var model: SubtitleModel
+    init(model: Binding<SubtitleModel>) {
+        _model = model
+    }
+
+    var body: some View {
+        VStack {
+            Spacer()
+            if let image = model.image {
+                #if os(macOS)
+                Image(nsImage: image)
+                #else
+                Image(uiImage: image)
+                #endif
+            } else if let text = model.text {
+                Text(text.string).foregroundColor(.white).shadow(color: .black.opacity(0.9), radius: 1, x: 1, y: 1)
+            }
+        }.padding()
     }
 }
 
@@ -235,38 +338,6 @@ public struct KSVideoPlayer {
         self.url = url
         config = Config(isPlay: options.isAutoPlay)
     }
-}
-
-@available(iOS 13, tvOS 13, macOS 10.15, *)
-extension KSVideoPlayer {
-    func onBufferChanged(_ handler: @escaping (Int, TimeInterval) -> Void) -> Self {
-        config.coordinator.onBufferChanged = handler
-        return self
-    }
-
-    /// Playing to the end.
-    func onFinish(_ handler: @escaping (Error?) -> Void) -> Self {
-        config.coordinator.onFinish = handler
-        return self
-    }
-
-    func onPlay(_ handler: @escaping (TimeInterval, TimeInterval) -> Void) -> Self {
-        config.coordinator.onPlay = handler
-        return self
-    }
-
-    /// Playback status changes, such as from play to pause.
-    func onStateChanged(_ handler: @escaping (KSPlayerState) -> Void) -> Self {
-        config.coordinator.onStateChanged = handler
-        return self
-    }
-
-    #if canImport(UIKit)
-    func onSwipe(_ handler: @escaping (UISwipeGestureRecognizer.Direction) -> Void) -> Self {
-        config.coordinator.onSwipe = handler
-        return self
-    }
-    #endif
 }
 
 #if !canImport(UIKit)
@@ -329,22 +400,22 @@ extension KSVideoPlayer: UIViewRepresentable {
     public final class Coordinator: KSPlayerLayerDelegate {
         fileprivate weak var playerLayer: KSPlayerLayer?
         fileprivate var onPlay: ((TimeInterval, TimeInterval) -> Void)?
-        fileprivate var onFinish: ((Error?) -> Void)?
-        fileprivate var onStateChanged: ((KSPlayerState) -> Void)?
+        fileprivate var onFinish: ((KSPlayerLayer, Error?) -> Void)?
+        fileprivate var onStateChanged: ((KSPlayerLayer, KSPlayerState) -> Void)?
         fileprivate var onBufferChanged: ((Int, TimeInterval) -> Void)?
         #if canImport(UIKit)
         fileprivate var onSwipe: ((UISwipeGestureRecognizer.Direction) -> Void)?
         #endif
-        public func player(layer _: KSPlayerLayer, state: KSPlayerState) {
-            onStateChanged?(state)
+        public func player(layer: KSPlayerLayer, state: KSPlayerState) {
+            onStateChanged?(layer, state)
         }
 
         public func player(layer _: KSPlayerLayer, currentTime: TimeInterval, totalTime: TimeInterval) {
             onPlay?(currentTime, totalTime)
         }
 
-        public func player(layer _: KSPlayerLayer, finish error: Error?) {
-            onFinish?(error)
+        public func player(layer: KSPlayerLayer, finish error: Error?) {
+            onFinish?(layer, error)
         }
 
         public func player(layer _: KSPlayerLayer, bufferedCount: Int, consumeTime: TimeInterval) {
@@ -357,6 +428,38 @@ extension KSVideoPlayer: UIViewRepresentable {
         }
         #endif
     }
+}
+
+@available(iOS 13, tvOS 13, macOS 10.15, *)
+extension KSVideoPlayer {
+    func onBufferChanged(_ handler: @escaping (Int, TimeInterval) -> Void) -> Self {
+        config.coordinator.onBufferChanged = handler
+        return self
+    }
+
+    /// Playing to the end.
+    func onFinish(_ handler: @escaping (KSPlayerLayer, Error?) -> Void) -> Self {
+        config.coordinator.onFinish = handler
+        return self
+    }
+
+    func onPlay(_ handler: @escaping (TimeInterval, TimeInterval) -> Void) -> Self {
+        config.coordinator.onPlay = handler
+        return self
+    }
+
+    /// Playback status changes, such as from play to pause.
+    func onStateChanged(_ handler: @escaping (KSPlayerLayer, KSPlayerState) -> Void) -> Self {
+        config.coordinator.onStateChanged = handler
+        return self
+    }
+
+    #if canImport(UIKit)
+    func onSwipe(_ handler: @escaping (UISwipeGestureRecognizer.Direction) -> Void) -> Self {
+        config.coordinator.onSwipe = handler
+        return self
+    }
+    #endif
 }
 
 #if os(tvOS)
