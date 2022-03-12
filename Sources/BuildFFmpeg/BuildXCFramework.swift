@@ -371,8 +371,7 @@ class BuildFFMPEG: BaseBuild {
         "--enable-decoder=truehd", "--enable-decoder=vorbis", "--enable-decoder=wma*",
         // 字幕
         "--enable-decoder=ass", "--enable-decoder=dvbsub", "--enable-decoder=dvdsub", "--enable-decoder=movtext",
-        "--enable-decoder=srt", "--enable-decoder=ssa", "--enable-decoder=subrip", "--enable-decoder=webvtt",
-
+        "--enable-decoder=pgssub", "--enable-decoder=srt", "--enable-decoder=ssa", "--enable-decoder=subrip", "--enable-decoder=webvtt",
         // ./configure --list-muxers
         "--disable-muxers",
         // "--enable-muxer=mpegts", "--enable-muxer=mp4",
