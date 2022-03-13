@@ -35,13 +35,12 @@ public class KSSubtitleController {
         }
         view.isHidden = true
         subtitleDataSouces = [cacheDataSouce]
-        view.selectedInfo.observer = { [weak self] old, info in
+        view.selectedInfo.observer = { [weak self] _, info in
             guard let self = self, let selectWithFilePath = self.selectWithFilePath else { return }
             DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 0.2) { [weak self] in
                 guard let self = self else { return }
                 self.view.isHidden = true
             }
-            old.disableSubtitle()
             info.enableSubtitle(completion: selectWithFilePath)
         }
     }

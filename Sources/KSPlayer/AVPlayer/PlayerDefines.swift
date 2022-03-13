@@ -85,6 +85,7 @@ public protocol MediaPlayerDelegate: AnyObject {
 }
 
 public protocol MediaPlayerTrack {
+    var trackID: Int32 { get }
     var name: String { get }
     var language: String? { get }
     var mediaType: AVFoundation.AVMediaType { get }
@@ -98,6 +99,16 @@ public protocol MediaPlayerTrack {
     var colorPrimaries: String? { get }
     var transferFunction: String? { get }
     var yCbCrMatrix: String? { get }
+    var subtitle: SubtitleInfo? { get set }
+}
+
+public protocol SubtitleInfo: AnyObject {
+    var userInfo: NSMutableDictionary? { get set }
+    var subtitleDataSouce: SubtitleDataSouce? { get set }
+    var name: String { get }
+    var subtitleID: String { get }
+    var comment: String? { get }
+    func enableSubtitle(completion: @escaping (Result<KSSubtitleProtocol, NSError>) -> Void)
 }
 
 public extension FourCharCode {
@@ -194,6 +205,7 @@ open class KSOptions {
     public var probesize: Int64?
     public var maxAnalyzeDuration: Int64?
     public var lowres = UInt8(0)
+    public var autoSelectEmbedSubtitle = true
     public internal(set) var formatName = ""
     public internal(set) var starTime = 0.0
     public internal(set) var openTime = 0.0

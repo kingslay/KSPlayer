@@ -468,8 +468,10 @@ extension AVMediaType {
 }
 
 struct AVMediaPlayerTrack: MediaPlayerTrack {
+    var subtitle: SubtitleInfo?
     private let track: AVPlayerItemTrack
     let nominalFrameRate: Float
+    let trackID: Int32
     let codecType: FourCharCode
     let rotation: Double = 0
     let bitRate: Int64 = 0
@@ -493,6 +495,7 @@ struct AVMediaPlayerTrack: MediaPlayerTrack {
 
     init(track: AVPlayerItemTrack) {
         self.track = track
+        trackID = track.assetTrack?.trackID ?? 0
         mediaType = track.assetTrack?.mediaType ?? .video
         name = track.assetTrack?.languageCode ?? ""
         language = track.assetTrack?.extendedLanguageTag

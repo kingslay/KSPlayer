@@ -468,6 +468,4 @@ extension KSMEPlayer: AVPlaybackCoordinatorPlaybackControlDelegate {
 
 public extension KSMEPlayer {
     var subtitleDataSouce: SubtitleDataSouce? { playerItem }
-
-    var subtitles: [KSSubtitleProtocol] { playerItem.subtitleTracks }
 }

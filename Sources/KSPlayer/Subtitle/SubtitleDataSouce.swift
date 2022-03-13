@@ -6,16 +6,6 @@
 //
 import Foundation
 
-public protocol SubtitleInfo: AnyObject {
-    var userInfo: NSMutableDictionary? { get set }
-    var subtitleDataSouce: SubtitleDataSouce? { get set }
-    var name: String { get }
-    var subtitleID: String { get }
-    var comment: String? { get }
-    func enableSubtitle(completion: @escaping (Result<KSSubtitleProtocol, NSError>) -> Void)
-    func disableSubtitle()
-}
-
 public class URLSubtitleInfo: SubtitleInfo {
     public weak var subtitleDataSouce: SubtitleDataSouce?
     public let name: String

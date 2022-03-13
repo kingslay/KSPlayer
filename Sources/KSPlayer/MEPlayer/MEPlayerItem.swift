@@ -35,7 +35,6 @@ final class MEPlayerItem {
 
     private(set) var assetTracks = [TrackProtocol]()
     private var videoAdaptation: VideoAdaptationState?
-    private(set) var subtitleTracks = [FFPlayerItemTrack<SubtitleFrame>]()
     private(set) var currentPlaybackTime = TimeInterval(0)
     private var startTime = TimeInterval(0)
     private(set) var rotation = 0.0
@@ -98,8 +97,16 @@ final class MEPlayerItem {
 
     func select(track: MediaPlayerTrack) {
         if let track = track as? TrackProtocol {
-            assetTracks.filter { $0.mediaType == track.mediaType }.forEach { $0.stream.pointee.discard = AVDISCARD_ALL }
+            assetTracks.filter { $0.mediaType == track.mediaType }.forEach {
+                if $0.mediaType == .subtitle, !$0.isImageSubtitle {
+                    return
+                }
+                $0.stream.pointee.discard = AVDISCARD_ALL
+            }
             track.stream.pointee.discard = AVDISCARD_DEFAULT
+            if track.mediaType == .subtitle, !track.isImageSubtitle {
+                return
+            }
             seek(time: currentPlaybackTime, completion: nil)
         }
     }
@@ -196,10 +203,17 @@ extension MEPlayerItem {
         assetTracks = (0 ..< Int(formatCtx.pointee.nb_streams)).compactMap { i in
             if let coreStream = formatCtx.pointee.streams[i] {
                 coreStream.pointee.discard = AVDISCARD_ALL
-                return AssetTrack(stream: coreStream)
-            } else {
-                return nil
+                let assetTrack = AssetTrack(stream: coreStream)
+                if var assetTrack = assetTrack {
+                    if !options.subtitleDisable, assetTrack.mediaType == .subtitle {
+                        let track = FFPlayerItemTrack<SubtitleFrame>(assetTrack: assetTrack, options: options)
+                        assetTrack.subtitle = EmbedSubtitleInfo(subtitleID: String(assetTrack.trackID), name: assetTrack.name, subtitle: track, isImageSubtitle: assetTrack.isImageSubtitle)
+                        allTracks.append(track)
+                    }
+                    return assetTrack
+                }
             }
+            return nil
         }
         var videoIndex: Int32 = -1
         if !options.videoDisable {
@@ -207,12 +221,12 @@ extension MEPlayerItem {
             let bitRates = videos.map(\.bitRate)
             let wantedStreamNb: Int32
             if videos.count > 0, let index = options.wantedVideo(bitRates: bitRates) {
-                wantedStreamNb = videos[index].streamIndex
+                wantedStreamNb = videos[index].trackID
             } else {
                 wantedStreamNb = -1
             }
             videoIndex = av_find_best_stream(formatCtx, AVMEDIA_TYPE_VIDEO, wantedStreamNb, -1, nil, 0)
-            if let first = videos.first(where: { $0.streamIndex == videoIndex }) {
+            if let first = videos.first(where: { $0.trackID == videoIndex }) {
                 first.stream.pointee.discard = AVDISCARD_DEFAULT
                 rotation = first.rotation
                 naturalSize = first.naturalSize
@@ -230,12 +244,12 @@ extension MEPlayerItem {
             let audios = assetTracks.filter { $0.mediaType == .audio }
             let wantedStreamNb: Int32
             if audios.count > 0, let index = options.wantedAudio(infos: audios.map { ($0.bitRate, $0.language) }) {
-                wantedStreamNb = audios[index].streamIndex
+                wantedStreamNb = audios[index].trackID
             } else {
                 wantedStreamNb = -1
             }
             let index = av_find_best_stream(formatCtx, AVMEDIA_TYPE_AUDIO, wantedStreamNb, videoIndex, nil, 0)
-            if let first = assetTracks.first(where: { $0.mediaType == .audio && $0.streamIndex == index }) {
+            if let first = assetTracks.first(where: { $0.mediaType == .audio && $0.trackID == index }) {
                 first.stream.pointee.discard = AVDISCARD_DEFAULT
                 let track = options.syncDecodeAudio ? FFPlayerItemTrack<AudioFrame>(assetTrack: first, options: options) : AsyncPlayerItemTrack<AudioFrame>(assetTrack: first, options: options)
                 track.delegate = self
@@ -244,12 +258,7 @@ extension MEPlayerItem {
                 isAudioStalled = false
             }
         }
-        if !options.subtitleDisable {
-            subtitleTracks = assetTracks.filter { $0.mediaType == .subtitle }.map {
-                FFPlayerItemTrack<SubtitleFrame>(assetTrack: $0, options: options)
-            }
-            allTracks.append(contentsOf: subtitleTracks)
-        }
+
         allTracks.append(contentsOf: videoAudioTracks)
     }
 
@@ -310,7 +319,7 @@ extension MEPlayerItem {
                 return
             }
             packet.fill()
-            let first = assetTracks.first { $0.stream.pointee.index == packet.corePacket.pointee.stream_index }
+            let first = assetTracks.first { $0.trackID == packet.corePacket.pointee.stream_index }
             if let first = first, first.isEnabled {
                 packet.assetTrack = first
                 if first.mediaType == .video {
@@ -324,7 +333,7 @@ extension MEPlayerItem {
                     }
                     audioTrack?.putPacket(packet: packet)
                 } else {
-                    subtitleTracks.first { $0.assetTrack == first }?.putPacket(packet: packet)
+                    (first.subtitle as? EmbedSubtitleInfo)?.subtitle.putPacket(packet: packet)
                 }
             }
         } else {
@@ -486,10 +495,10 @@ extension MEPlayerItem: CodecCapacityDelegate {
         assetTracks.first { $0.mediaType == .video && $0.bitRate == oldBitRate }?.stream.pointee.discard = AVDISCARD_ALL
         newAssetTrack.stream.pointee.discard = AVDISCARD_DEFAULT
         if let first = assetTracks.first(where: { $0.mediaType == .audio && $0.isEnabled }) {
-            let index = av_find_best_stream(formatCtx, AVMEDIA_TYPE_AUDIO, first.streamIndex, newAssetTrack.streamIndex, nil, 0)
-            if index != first.streamIndex {
+            let index = av_find_best_stream(formatCtx, AVMEDIA_TYPE_AUDIO, first.trackID, newAssetTrack.trackID, nil, 0)
+            if index != first.trackID {
                 first.stream.pointee.discard = AVDISCARD_ALL
-                assetTracks.first { $0.mediaType == .audio && $0.streamIndex == index }?.stream.pointee.discard = AVDISCARD_DEFAULT
+                assetTracks.first { $0.mediaType == .audio && $0.trackID == index }?.stream.pointee.discard = AVDISCARD_DEFAULT
             }
         }
         let bitRateState = VideoAdaptationState.BitRateState(bitRate: newBitrate, time: CACurrentMediaTime())
