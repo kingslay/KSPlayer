@@ -62,9 +62,9 @@ public struct KSVideoPlayerView: View {
                 if direction == .down {
                     model.isMaskShow.toggle()
                 } else if direction == .left {
-                    player.config.seek(time: model.currentTime - 15)
+                    player.coordinator.seek(time: model.currentTime - 15)
                 } else if direction == .right {
-                    player.config.seek(time: model.currentTime + 15)
+                    player.coordinator.seek(time: model.currentTime + 15)
                 }
             }
             #endif
