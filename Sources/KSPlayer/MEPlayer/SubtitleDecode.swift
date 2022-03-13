@@ -17,7 +17,7 @@ class SubtitleDecode: DecodeProtocol {
     private weak var delegate: DecodeResultDelegate?
     private let reg = AssParse.patternReg()
     private var codecContext: UnsafeMutablePointer<AVCodecContext>?
-    private let scale = VideoSwresample()
+    private let scale = VideoSwresample(dstFormat: AV_PIX_FMT_BGR0)
     private var subtitle = AVSubtitle()
     private var preSubtitleFrame: SubtitleFrame?
     private let timebase: Timebase

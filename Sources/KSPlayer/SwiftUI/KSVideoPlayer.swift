@@ -266,14 +266,15 @@ struct VideoSubtitleView: View {
             Spacer()
             if let image = model.image {
                 #if os(macOS)
-                Image(nsImage: image)
+                Image(nsImage: image).resizable().scaledToFit()
                 #else
-                Image(uiImage: image)
+                Image(uiImage: image).resizable().scaledToFit()
                 #endif
+
             } else if let text = model.text {
                 Text(text.string).foregroundColor(.white).shadow(color: .black.opacity(0.9), radius: 1, x: 1, y: 1)
             }
-        }.padding()
+        }
     }
 }
 
