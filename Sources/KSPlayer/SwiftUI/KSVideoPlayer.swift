@@ -48,11 +48,13 @@ public struct KSVideoPlayerView: View {
             .onStateChanged { layer, state in
                 if state == .readyToPlay, let player = layer.player {
                     subtitleModel.tracks = player.tracks(mediaType: .subtitle)
-                    guard let track = subtitleModel.tracks.first, let info = track.subtitle, options.autoSelectEmbedSubtitle else {
+                    guard let track = subtitleModel.tracks.first, let subtitle = track.subtitle, options.autoSelectEmbedSubtitle else {
                         return
                     }
+                    subtitle.enableSubtitle { result in
+                        subtitleModel.selectedSubtitle = try? result.get()
+                    }
                     player.select(track: track)
-                    _subtitleModel.selecte(info: info)
                 }
             }
             #if os(tvOS)
@@ -88,11 +90,13 @@ public struct KSVideoPlayerView: View {
             ForEach(subtitleModel.tracks, id: \.trackID) { track in
                 Button(track.name) {
                     player.config.coordinator.playerLayer?.player?.select(track: track)
-                    _subtitleModel.selecte(info: track.subtitle)
-                }.background(subtitleModel.selectedInfo?.subtitleID == String(track.trackID) ? .red : .white)
+                    track.subtitle?.enableSubtitle { result in
+                        subtitleModel.selectedSubtitle = try? result.get()
+                    }
+                }
             }
             Button("dismiss Subtitle", role: .cancel) {
-                _subtitleModel.selecte(info: nil)
+                subtitleModel.selectedSubtitle = nil
             }
         }
         #if !os(macOS)
@@ -124,22 +128,10 @@ struct ControllerViewModel {
 
 struct SubtitleModel {
     var tracks = [MediaPlayerTrack]()
-    var selectedInfo: SubtitleInfo?
     var selectedSubtitle: KSSubtitleProtocol?
     var text: NSMutableAttributedString?
     var image: UIImage?
     var endTime = TimeInterval(0)
-}
-
-@available(iOS 13, tvOS 13, macOS 10.15, *)
-extension State where Value == SubtitleModel {
-    func selecte(info: SubtitleInfo?) {
-        wrappedValue.selectedSubtitle = nil
-        wrappedValue.selectedInfo = info
-        info?.enableSubtitle { result in
-            wrappedValue.selectedSubtitle = try? result.get()
-        }
-    }
 }
 
 @available(iOS 15, tvOS 15, macOS 12, *)

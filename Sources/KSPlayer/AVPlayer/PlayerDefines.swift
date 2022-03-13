@@ -102,15 +102,6 @@ public protocol MediaPlayerTrack {
     var subtitle: SubtitleInfo? { get set }
 }
 
-public protocol SubtitleInfo: AnyObject {
-    var userInfo: NSMutableDictionary? { get set }
-    var subtitleDataSouce: SubtitleDataSouce? { get set }
-    var name: String { get }
-    var subtitleID: String { get }
-    var comment: String? { get }
-    func enableSubtitle(completion: @escaping (Result<KSSubtitleProtocol, NSError>) -> Void)
-}
-
 public extension FourCharCode {
     var string: String {
         let cString: [CChar] = [
