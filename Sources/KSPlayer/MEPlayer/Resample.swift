@@ -24,6 +24,10 @@ class VideoSwresample: Swresample {
     private var height: Int32 = 0
     private var width: Int32 = 0
     private var pool: CVPixelBufferPool?
+    private let dstFormat: AVPixelFormat?
+    init(dstFormat: AVPixelFormat? = nil) {
+        self.dstFormat = dstFormat
+    }
 
     func transfer(avframe: UnsafeMutablePointer<AVFrame>) throws -> MEFrame {
         let frame = VideoVTBFrame()
@@ -48,7 +52,7 @@ class VideoSwresample: Swresample {
             sws_freeContext(imgConvertCtx)
             imgConvertCtx = nil
         } else {
-            let dstFormat = format.bestPixelFormat()
+            let dstFormat = dstFormat ?? format.bestPixelFormat()
             pixelFormatType = dstFormat.osType()!
             imgConvertCtx = sws_getCachedContext(imgConvertCtx, width, height, self.format, width, height, dstFormat, SWS_BICUBIC, nil, nil, nil)
         }
