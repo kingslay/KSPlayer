@@ -632,7 +632,7 @@ extension UIView {
     }
 }
 
-extension URL {
+public extension URL {
     var isMovie: Bool {
         if let typeID = try? resourceValues(forKeys: [.typeIdentifierKey]).typeIdentifier as CFString? {
             return UTTypeConformsTo(typeID, kUTTypeMovie)

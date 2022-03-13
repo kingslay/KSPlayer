@@ -10,7 +10,7 @@ import SwiftUI
 @available(iOS 15, tvOS 15, macOS 12, *)
 public struct KSVideoPlayerView: View {
     @State private var model = ControllerViewModel()
-    @State private var subtitleModel = SubtitleModel()
+    @State public var subtitleModel = SubtitleModel()
     private let url: URL
     public let options: KSOptions
     private let player: KSVideoPlayer
@@ -71,10 +71,10 @@ public struct KSVideoPlayerView: View {
             .background(.black)
             .edgesIgnoringSafeArea(.all)
             .onDisappear {
-                player.config.coordinator.playerLayer?.pause()
+                player.coordinator.playerLayer?.pause()
             }
             VideoSubtitleView(model: $subtitleModel)
-            VideoControllerView(config: player.config, model: $model).opacity(model.isMaskShow ? 1 : 0)
+            VideoControllerView(config: player.coordinator, model: $model).opacity(model.isMaskShow ? 1 : 0)
         }
         .confirmationDialog(Text("Setting"), isPresented: $model.isShowSetting) {
             Button {} label: {
@@ -89,7 +89,7 @@ public struct KSVideoPlayerView: View {
         .confirmationDialog(Text("Subtitle Select"), isPresented: $model.isShowSubtitleSetting) {
             ForEach(subtitleModel.tracks, id: \.trackID) { track in
                 Button(track.name) {
-                    player.config.coordinator.playerLayer?.player?.select(track: track)
+                    player.coordinator.playerLayer?.player?.select(track: track)
                     track.subtitle?.enableSubtitle { result in
                         subtitleModel.selectedSubtitle = try? result.get()
                     }
@@ -108,8 +108,16 @@ public struct KSVideoPlayerView: View {
         }
         .onDrop(of: ["public.file-url"], isTargeted: nil) { providers -> Bool in
             providers.first?.loadDataRepresentation(forTypeIdentifier: "public.file-url") { data, _ in
-                if let data = data, let path = NSString(data: data, encoding: 4), let url = URL(string: path as String), url.isAudio || url.isMovie {
-                    player.config.coordinator.playerLayer?.set(url: url, options: options)
+                if let data = data, let path = NSString(data: data, encoding: 4), let url = URL(string: path as String) {
+                    if url.isAudio || url.isMovie {
+                        player.coordinator.playerLayer?.set(url: url, options: options)
+                    } else {
+                        let info = URLSubtitleInfo(subtitleID: url.path, name: url.lastPathComponent)
+                        info.downloadURL = url
+                        info.enableSubtitle {
+                            subtitleModel.selectedSubtitle = try? $0.get()
+                        }
+                    }
                 }
             }
             return true
@@ -126,9 +134,9 @@ struct ControllerViewModel {
     var isShowSubtitleSetting = false
 }
 
-struct SubtitleModel {
+public struct SubtitleModel {
+    public var selectedSubtitle: KSSubtitleProtocol?
     var tracks = [MediaPlayerTrack]()
-    var selectedSubtitle: KSSubtitleProtocol?
     var text: NSMutableAttributedString?
     var image: UIImage?
     var endTime = TimeInterval(0)
@@ -136,12 +144,12 @@ struct SubtitleModel {
 
 @available(iOS 15, tvOS 15, macOS 12, *)
 struct VideoControllerView: View {
-    @State private var config: KSVideoPlayer.Config
+    @ObservedObject private var config: KSVideoPlayer.Coordinator
     @Binding private var model: ControllerViewModel
     private let backgroundColor = Color(red: 0.145, green: 0.145, blue: 0.145).opacity(0.6)
     @Environment(\.dismiss) private var dismiss
-    init(config: KSVideoPlayer.Config, model: Binding<ControllerViewModel>) {
-        _config = State(initialValue: config)
+    init(config: KSVideoPlayer.Coordinator, model: Binding<ControllerViewModel>) {
+        _config = .init(initialValue: config)
         _model = model
     }
 
@@ -238,9 +246,9 @@ struct VideoControllerView: View {
                 case .right:
                     config.seek(time: model.currentTime + 15)
                 case .up:
-                    config.coordinator.playerLayer?.player?.playbackVolume += 1
+                    config.playerLayer?.player?.playbackVolume += 1
                 case .down:
-                    config.coordinator.playerLayer?.player?.playbackVolume -= 1
+                    config.playerLayer?.player?.playbackVolume -= 1
                 @unknown default:
                     break
                 }
@@ -280,52 +288,13 @@ struct VideoSubtitleView: View {
 
 @available(iOS 13, tvOS 13, macOS 10.15, *)
 public struct KSVideoPlayer {
-    public struct Config {
-        let coordinator = Coordinator()
-        var isPlay: Bool {
-            didSet {
-                isPlay ? coordinator.playerLayer?.play() : coordinator.playerLayer?.pause()
-            }
-        }
-
-        var isMuted: Bool = false {
-            didSet {
-                coordinator.playerLayer?.player?.isMuted = isMuted
-            }
-        }
-
-        var isPipActive = false {
-            didSet {
-                if #available(tvOS 14.0, *) {
-                    if let pipController = coordinator.playerLayer?.player?.pipController, isPipActive != pipController.isPictureInPictureActive {
-                        if pipController.isPictureInPictureActive {
-                            pipController.stopPictureInPicture()
-                        } else {
-                            pipController.startPictureInPicture()
-                        }
-                    }
-                }
-            }
-        }
-
-        var isScaleAspectFill = false {
-            didSet {
-                coordinator.playerLayer?.player?.contentMode = isScaleAspectFill ? .scaleAspectFill : .scaleAspectFit
-            }
-        }
-
-        func seek(time: TimeInterval) {
-            coordinator.playerLayer?.seek(time: time, autoPlay: true)
-        }
-    }
-
-    public let config: Config
+    public let coordinator: Coordinator
     private let url: URL
     public let options: KSOptions
     public init(url: URL, options: KSOptions) {
         self.options = options
         self.url = url
-        config = Config(isPlay: options.isAutoPlay)
+        coordinator = Coordinator(isPlay: options.isAutoPlay)
     }
 }
 
@@ -336,7 +305,7 @@ typealias UIViewRepresentable = NSViewRepresentable
 @available(iOS 13, tvOS 13, macOS 10.15, *)
 extension KSVideoPlayer: UIViewRepresentable {
     public func makeCoordinator() -> Coordinator {
-        config.coordinator
+        coordinator
     }
 
     #if canImport(UIKit)
@@ -386,7 +355,39 @@ extension KSVideoPlayer: UIViewRepresentable {
 
     private func updateView(_: KSPlayerLayer, context _: Context) {}
 
-    public final class Coordinator: KSPlayerLayerDelegate {
+    public final class Coordinator: KSPlayerLayerDelegate, ObservableObject {
+        @Published var isPlay: Bool {
+            didSet {
+                isPlay ? playerLayer?.play() : playerLayer?.pause()
+            }
+        }
+
+        @Published var isMuted: Bool = false {
+            didSet {
+                playerLayer?.player?.isMuted = isMuted
+            }
+        }
+
+        @Published var isPipActive = false {
+            didSet {
+                if #available(tvOS 14.0, *) {
+                    if let pipController = playerLayer?.player?.pipController, isPipActive != pipController.isPictureInPictureActive {
+                        if pipController.isPictureInPictureActive {
+                            pipController.stopPictureInPicture()
+                        } else {
+                            pipController.startPictureInPicture()
+                        }
+                    }
+                }
+            }
+        }
+
+        @Published var isScaleAspectFill = false {
+            didSet {
+                playerLayer?.player?.contentMode = isScaleAspectFill ? .scaleAspectFill : .scaleAspectFit
+            }
+        }
+
         fileprivate weak var playerLayer: KSPlayerLayer?
         fileprivate var onPlay: ((TimeInterval, TimeInterval) -> Void)?
         fileprivate var onFinish: ((KSPlayerLayer, Error?) -> Void)?
@@ -395,6 +396,15 @@ extension KSVideoPlayer: UIViewRepresentable {
         #if canImport(UIKit)
         fileprivate var onSwipe: ((UISwipeGestureRecognizer.Direction) -> Void)?
         #endif
+
+        init(isPlay: Bool) {
+            self.isPlay = isPlay
+        }
+
+        func seek(time: TimeInterval) {
+            playerLayer?.seek(time: time, autoPlay: true)
+        }
+
         public func player(layer: KSPlayerLayer, state: KSPlayerState) {
             onStateChanged?(layer, state)
         }
@@ -422,30 +432,30 @@ extension KSVideoPlayer: UIViewRepresentable {
 @available(iOS 13, tvOS 13, macOS 10.15, *)
 extension KSVideoPlayer {
     func onBufferChanged(_ handler: @escaping (Int, TimeInterval) -> Void) -> Self {
-        config.coordinator.onBufferChanged = handler
+        coordinator.onBufferChanged = handler
         return self
     }
 
     /// Playing to the end.
     func onFinish(_ handler: @escaping (KSPlayerLayer, Error?) -> Void) -> Self {
-        config.coordinator.onFinish = handler
+        coordinator.onFinish = handler
         return self
     }
 
     func onPlay(_ handler: @escaping (TimeInterval, TimeInterval) -> Void) -> Self {
-        config.coordinator.onPlay = handler
+        coordinator.onPlay = handler
         return self
     }
 
     /// Playback status changes, such as from play to pause.
     func onStateChanged(_ handler: @escaping (KSPlayerLayer, KSPlayerState) -> Void) -> Self {
-        config.coordinator.onStateChanged = handler
+        coordinator.onStateChanged = handler
         return self
     }
 
     #if canImport(UIKit)
     func onSwipe(_ handler: @escaping (UISwipeGestureRecognizer.Direction) -> Void) -> Self {
-        config.coordinator.onSwipe = handler
+        coordinator.onSwipe = handler
         return self
     }
     #endif

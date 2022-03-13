@@ -33,26 +33,21 @@ public class EmbedSubtitleInfo: SubtitleInfo {
 
 extension EmbedSubtitleInfo: KSSubtitleProtocol {
     public func search(for time: TimeInterval) -> SubtitlePart? {
-        let frame: MEFrame?
         if isImageSubtitle {
-            frame = subtitle.outputRenderQueue.pop { item -> Bool in
+            return subtitle.outputRenderQueue.pop { item -> Bool in
                 item.part < time || item.part == time
-            }
+            }?.part
         } else {
-            frame = subtitle.outputRenderQueue.search { item -> Bool in
+            return subtitle.outputRenderQueue.search { item -> Bool in
                 item.part == time
-            }
+            }?.part
         }
-        if let frame = frame as? SubtitleFrame {
-            return frame.part
-        }
-        return nil
     }
 }
 
 extension MEPlayerItem: SubtitleDataSouce {
     func searchSubtitle(name _: String, completion: @escaping ([SubtitleInfo]?) -> Void) {
-        let infos = assetTracks.filter { $0.mediaType == .subtitle }.flatMap(\.subtitle)
+        let infos = assetTracks.filter { $0.mediaType == .subtitle }.compactMap(\.subtitle)
         completion(infos)
     }
 
