@@ -52,7 +52,7 @@ open class VideoPlayerView: PlayerView {
                 if let embedSubtitleDataSouce = embedSubtitleDataSouce {
                     srtControl.add(dataSouce: embedSubtitleDataSouce)
                     let infos = srtControl.filterInfos { $0.subtitleDataSouce === embedSubtitleDataSouce }
-                    if KSPlayerManager.autoSelectEmbedSubtitle, let first = infos.first {
+                    if resource?.definitions[currentDefinition].options.autoSelectEmbedSubtitle ?? false, let first = infos.first {
                         srtControl.view.selectedInfo.wrappedValue = first
                     }
                 }
@@ -685,6 +685,4 @@ public extension KSPlayerManager {
     /// 播放内核选择策略 先使用firstPlayer，失败了自动切换到secondPlayer，播放内核有KSAVPlayer、KSMEPlayer两个选项
     /// 是否能后台播放视频
     static var canBackgroundPlay = false
-
-    static var autoSelectEmbedSubtitle = true
 }

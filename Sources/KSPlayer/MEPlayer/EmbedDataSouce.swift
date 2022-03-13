@@ -8,44 +8,39 @@ import Foundation
 import Libavcodec
 import Libavutil
 public class EmbedSubtitleInfo: SubtitleInfo {
-    private let subtitle: FFPlayerItemTrack<SubtitleFrame>
+    let subtitle: FFPlayerItemTrack<SubtitleFrame>
+    private let isImageSubtitle: Bool
     public var userInfo: NSMutableDictionary?
     public weak var subtitleDataSouce: SubtitleDataSouce?
     public let name: String
     public let subtitleID: String
     public var comment: String?
-    init(subtitleID: String, name: String, subtitle: FFPlayerItemTrack<SubtitleFrame>) {
+    init(subtitleID: String, name: String, subtitle: FFPlayerItemTrack<SubtitleFrame>, isImageSubtitle: Bool) {
         self.subtitleID = subtitleID
         self.name = name
         self.subtitle = subtitle
-    }
-
-    public func disableSubtitle() {
-        subtitle.assetTrack.setIsEnabled(false)
+        self.isImageSubtitle = isImageSubtitle
     }
 
     public func enableSubtitle(completion: @escaping (Result<KSSubtitleProtocol, NSError>) -> Void) {
-        subtitle.assetTrack.setIsEnabled(true)
-        completion(.success(subtitle))
+        completion(.success(self))
+    }
+
+    public static func == (lhs: EmbedSubtitleInfo, rhs: EmbedSubtitleInfo) -> Bool {
+        lhs.subtitleID == rhs.subtitleID
     }
 }
 
-extension FFPlayerItemTrack: KSSubtitleProtocol {
-    func search(for time: TimeInterval) -> SubtitlePart? {
+extension EmbedSubtitleInfo: KSSubtitleProtocol {
+    public func search(for time: TimeInterval) -> SubtitlePart? {
         let frame: MEFrame?
-        if assetTrack.isImageSubtitle {
-            frame = outputRenderQueue.pop { item -> Bool in
-                if let subtitle = item as? SubtitleFrame {
-                    return subtitle.part < time || subtitle.part == time
-                }
-                return false
+        if isImageSubtitle {
+            frame = subtitle.outputRenderQueue.pop { item -> Bool in
+                item.part < time || item.part == time
             }
         } else {
-            frame = outputRenderQueue.search { item -> Bool in
-                if let subtitle = item as? SubtitleFrame {
-                    return subtitle.part == time
-                }
-                return false
+            frame = subtitle.outputRenderQueue.search { item -> Bool in
+                item.part == time
             }
         }
         if let frame = frame as? SubtitleFrame {
@@ -57,9 +52,7 @@ extension FFPlayerItemTrack: KSSubtitleProtocol {
 
 extension MEPlayerItem: SubtitleDataSouce {
     func searchSubtitle(name _: String, completion: @escaping ([SubtitleInfo]?) -> Void) {
-        let infos = subtitleTracks.map { subtitleDecompress -> SubtitleInfo in
-            EmbedSubtitleInfo(subtitleID: "Embed-\(subtitleDecompress.assetTrack.streamIndex)", name: subtitleDecompress.assetTrack.name, subtitle: subtitleDecompress)
-        }
+        let infos = assetTracks.filter { $0.mediaType == .subtitle }.flatMap(\.subtitle)
         completion(infos)
     }
 

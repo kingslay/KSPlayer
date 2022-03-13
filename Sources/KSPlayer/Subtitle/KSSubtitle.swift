@@ -71,15 +71,8 @@ extension SubtitlePart: NumericComparable {
     }
 }
 
-public protocol KSSubtitleProtocol: AnyObject {
+public protocol KSSubtitleProtocol {
     func search(for time: TimeInterval) -> SubtitlePart?
-}
-
-public func == (lhs: KSSubtitleProtocol, rhs: KSSubtitleProtocol) -> Bool {
-    if let lhs = lhs as? KSURLSubtitle, let rhs = rhs as? KSURLSubtitle {
-        return lhs.url == rhs.url
-    }
-    return lhs === rhs
 }
 
 public class KSSubtitle {
@@ -155,6 +148,10 @@ public class KSURLSubtitle: KSSubtitle {
         } catch {
             throw NSError(errorCode: .subtitleUnEncoding, userInfo: ["url": url.absoluteString])
         }
+    }
+
+    public static func == (lhs: KSURLSubtitle, rhs: KSURLSubtitle) -> Bool {
+        lhs.url == rhs.url
     }
 }
 

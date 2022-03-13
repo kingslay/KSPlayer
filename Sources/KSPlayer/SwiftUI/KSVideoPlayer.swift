@@ -47,16 +47,12 @@ public struct KSVideoPlayerView: View {
             }
             .onStateChanged { layer, state in
                 if state == .readyToPlay, let player = layer.player {
-                    player.subtitleDataSouce?.searchSubtitle(name: "") { infos in
-                        guard let infos = infos else {
-                            return
-                        }
-                        subtitleModel.infos = infos
-                        guard let info = subtitleModel.infos.first else {
-                            return
-                        }
-                        _subtitleModel.selecte(info: info)
+                    subtitleModel.tracks = player.tracks(mediaType: .subtitle)
+                    guard let track = subtitleModel.tracks.first, let info = track.subtitle, options.autoSelectEmbedSubtitle else {
+                        return
                     }
+                    player.select(track: track)
+                    _subtitleModel.selecte(info: info)
                 }
             }
             #if os(tvOS)
@@ -89,10 +85,11 @@ public struct KSVideoPlayerView: View {
             }
         }
         .confirmationDialog(Text("Subtitle Select"), isPresented: $model.isShowSubtitleSetting) {
-            ForEach(subtitleModel.infos, id: \.subtitleID) { info in
-                Button(info.name) {
-                    _subtitleModel.selecte(info: info)
-                }.background(subtitleModel.selectedInfo?.subtitleID == info.subtitleID ? .red : .white)
+            ForEach(subtitleModel.tracks, id: \.trackID) { track in
+                Button(track.name) {
+                    player.config.coordinator.playerLayer?.player?.select(track: track)
+                    _subtitleModel.selecte(info: track.subtitle)
+                }.background(subtitleModel.selectedInfo?.subtitleID == String(track.trackID) ? .red : .white)
             }
             Button("dismiss Subtitle", role: .cancel) {
                 _subtitleModel.selecte(info: nil)
@@ -126,7 +123,7 @@ struct ControllerViewModel {
 }
 
 struct SubtitleModel {
-    var infos = [SubtitleInfo]()
+    var tracks = [MediaPlayerTrack]()
     var selectedInfo: SubtitleInfo?
     var selectedSubtitle: KSSubtitleProtocol?
     var text: NSMutableAttributedString?
@@ -137,7 +134,6 @@ struct SubtitleModel {
 @available(iOS 13, tvOS 13, macOS 10.15, *)
 extension State where Value == SubtitleModel {
     func selecte(info: SubtitleInfo?) {
-        wrappedValue.selectedInfo?.disableSubtitle()
         wrappedValue.selectedSubtitle = nil
         wrappedValue.selectedInfo = info
         info?.enableSubtitle { result in
