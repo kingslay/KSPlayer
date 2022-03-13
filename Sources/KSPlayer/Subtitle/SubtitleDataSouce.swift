@@ -18,7 +18,6 @@ public class URLSubtitleInfo: SubtitleInfo {
         self.name = name
     }
 
-    public func disableSubtitle() {}
     public func enableSubtitle(completion: @escaping (Result<KSSubtitleProtocol, NSError>) -> Void) {
         let block = { (url: URL) in
             let subtitles = KSURLSubtitle()

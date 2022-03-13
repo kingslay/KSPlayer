@@ -22,6 +22,9 @@ struct DemoApp: App {
         KSOptions.isLoopPlay = true
     }
 
+    #if os(macOS)
+    @State var playerView: KSVideoPlayerView?
+    #endif
     var body: some Scene {
         let content = ContentView()
         WindowGroup {
@@ -49,14 +52,26 @@ struct DemoApp: App {
                         for url in panel.urls {
                             NSDocumentController.shared.noteNewRecentDocumentURL(url)
                         }
-                        if let url = panel.urls.first {
+                        guard let url = panel.urls.first else {
+                            return
+                        }
+                        if url.isAudio || url.isMovie {
                             let view = KSVideoPlayerView(url: url, options: KSOptions())
+                            playerView = view
                             let controller = NSHostingController(rootView: view)
                             let win = NSWindow(contentViewController: controller)
                             win.contentViewController = controller
                             win.makeKeyAndOrderFront(nil)
                             if let frame = win.screen?.frame {
                                 win.setFrame(frame, display: true)
+                            }
+                        } else {
+                            if let playerView = playerView {
+                                let info = URLSubtitleInfo(subtitleID: url.path, name: url.lastPathComponent)
+                                info.downloadURL = url
+                                info.enableSubtitle {
+                                    playerView.subtitleModel.selectedSubtitle = try? $0.get()
+                                }
                             }
                         }
                     }
