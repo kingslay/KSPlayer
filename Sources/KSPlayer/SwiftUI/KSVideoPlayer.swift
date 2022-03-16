@@ -9,8 +9,8 @@ import AVKit
 import SwiftUI
 @available(iOS 15, tvOS 15, macOS 12, *)
 public struct KSVideoPlayerView: View {
+    @ObservedObject public var subtitleModel = SubtitleModel()
     @State private var model = ControllerViewModel()
-    @State public var subtitleModel = SubtitleModel()
     private let url: URL
     public let options: KSOptions
     private let player: KSVideoPlayer
@@ -73,7 +73,7 @@ public struct KSVideoPlayerView: View {
             .onDisappear {
                 player.coordinator.playerLayer?.pause()
             }
-            VideoSubtitleView(model: $subtitleModel)
+            VideoSubtitleView(model: subtitleModel)
             VideoControllerView(config: player.coordinator, model: $model).opacity(model.isMaskShow ? 1 : 0)
         }
         .confirmationDialog(Text("Setting"), isPresented: $model.isShowSetting) {
@@ -134,24 +134,12 @@ struct ControllerViewModel {
     var isShowSubtitleSetting = false
 }
 
-public struct SubtitleModel {
-    public var selectedSubtitle: KSSubtitleProtocol?
-    var tracks = [MediaPlayerTrack]()
-    var text: NSMutableAttributedString?
-    var image: UIImage?
-    var endTime = TimeInterval(0)
-}
-
 @available(iOS 15, tvOS 15, macOS 12, *)
 struct VideoControllerView: View {
-    @ObservedObject private var config: KSVideoPlayer.Coordinator
-    @Binding private var model: ControllerViewModel
+    @ObservedObject fileprivate var config: KSVideoPlayer.Coordinator
+    @Binding fileprivate var model: ControllerViewModel
     private let backgroundColor = Color(red: 0.145, green: 0.145, blue: 0.145).opacity(0.6)
     @Environment(\.dismiss) private var dismiss
-    init(config: KSVideoPlayer.Coordinator, model: Binding<ControllerViewModel>) {
-        _config = .init(initialValue: config)
-        _model = model
-    }
 
     public var body: some View {
         VStack {
@@ -267,12 +255,17 @@ extension EventModifiers {
 }
 
 @available(iOS 13, tvOS 13, macOS 10.15, *)
-struct VideoSubtitleView: View {
-    @Binding private var model: SubtitleModel
-    init(model: Binding<SubtitleModel>) {
-        _model = model
-    }
+public class SubtitleModel: ObservableObject {
+    public var selectedSubtitle: KSSubtitleProtocol?
+    fileprivate var tracks = [MediaPlayerTrack]()
+    fileprivate var endTime = TimeInterval(0)
+    @Published fileprivate var text: NSMutableAttributedString?
+    @Published fileprivate var image: UIImage?
+}
 
+@available(iOS 13, tvOS 13, macOS 10.15, *)
+struct VideoSubtitleView: View {
+    @ObservedObject fileprivate var model: SubtitleModel
     var body: some View {
         VStack {
             Spacer()
