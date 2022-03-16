@@ -9,9 +9,26 @@ import AVFoundation
 import AVKit
 import KSPlayer
 import SwiftUI
+#if !canImport(UIKit)
+typealias UIHostingController = NSHostingController
+typealias UIWindow = NSWindow
+
+#endif
 @main
 struct DemoApp: App {
-    @State private var playerView: KSVideoPlayerView?
+    @State private var playerView: KSVideoPlayerView? {
+        didSet {
+            if let view = playerView {
+                let controller = UIHostingController(rootView: view)
+                let win = UIWindow(contentViewController: controller)
+                win.contentViewController = controller
+                win.makeKeyAndOrderFront(nil)
+                if let frame = win.screen?.frame {
+                    win.setFrame(frame, display: true)
+                }
+            }
+        }
+    }
     @State private var isImporting: Bool = false
     init() {
         KSPlayerManager.canBackgroundPlay = true
@@ -44,17 +61,9 @@ struct DemoApp: App {
         }
     }
 
-    @ViewBuilder var content: some View {
-        if let playerView = playerView {
-            playerView
-        } else {
-            ContentView()
-        }
-    }
-
     var body: some Scene {
         WindowGroup {
-            content
+            ContentView()
                 .onOpenURL { url in
                     playerView = KSVideoPlayerView(url: url, options: KSOptions())
                 }
@@ -67,15 +76,7 @@ struct DemoApp: App {
                     NSDocumentController.shared.noteNewRecentDocumentURL(url)
                     #endif
                     if url.isAudio || url.isMovie {
-                        let view = KSVideoPlayerView(url: url, options: KSOptions())
-                        let controller = NSHostingController(rootView: view)
-                        let win = NSWindow(contentViewController: controller)
-                        win.contentViewController = controller
-                        win.makeKeyAndOrderFront(nil)
-                        if let frame = win.screen?.frame {
-                            win.setFrame(frame, display: true)
-                        }
-                        playerView = view
+                        playerView = KSVideoPlayerView(url: url, options: KSOptions())
                     } else {
                         if let playerView = playerView {
                             let info = URLSubtitleInfo(subtitleID: url.path, name: url.lastPathComponent)
