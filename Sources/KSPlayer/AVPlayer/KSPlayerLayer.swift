@@ -461,40 +461,40 @@ extension KSPlayerLayer {
         // remoteCommand.changeShuffleModeCommand.addTarget {})
         remoteCommand.changePlaybackRateCommand.supportedPlaybackRates = [0.5, 1, 1.5, 2]
         remoteCommand.changePlaybackRateCommand.addTarget { [weak self] event in
-            guard let self = self else {
+            guard let self = self, let event = event as? MPChangePlaybackRateCommandEvent else {
                 return .commandFailed
             }
-            self.player?.playbackRate = (event as! MPChangePlaybackRateCommandEvent).playbackRate
+            self.player?.playbackRate = event.playbackRate
             return .success
         }
         remoteCommand.skipForwardCommand.preferredIntervals = [15]
         remoteCommand.skipForwardCommand.addTarget { [weak self] event in
-            guard let self = self else {
+            guard let self = self, let event = event as? MPSkipIntervalCommandEvent else {
                 return .commandFailed
             }
-            self.seek(time: self.player?.currentPlaybackTime ?? 0 + (event as! MPSkipIntervalCommandEvent).interval, autoPlay: self.options?.isSeekedAutoPlay ?? false)
+            self.seek(time: self.player?.currentPlaybackTime ?? 0 + event.interval, autoPlay: self.options?.isSeekedAutoPlay ?? false)
             return .success
         }
         remoteCommand.skipBackwardCommand.preferredIntervals = [15]
         remoteCommand.skipBackwardCommand.addTarget { [weak self] event in
-            guard let self = self else {
+            guard let self = self, let event = event as? MPSkipIntervalCommandEvent else {
                 return .commandFailed
             }
-            self.seek(time: self.player?.currentPlaybackTime ?? 0 - (event as! MPSkipIntervalCommandEvent).interval, autoPlay: self.options?.isSeekedAutoPlay ?? false)
+            self.seek(time: self.player?.currentPlaybackTime ?? 0 - event.interval, autoPlay: self.options?.isSeekedAutoPlay ?? false)
             return .success
         }
         remoteCommand.changePlaybackPositionCommand.addTarget { [weak self] event in
-            guard let self = self else {
+            guard let self = self, let event = event as? MPChangePlaybackPositionCommandEvent else {
                 return .commandFailed
             }
-            self.seek(time: (event as! MPChangePlaybackPositionCommandEvent).positionTime, autoPlay: self.options?.isSeekedAutoPlay ?? false)
+            self.seek(time: event.positionTime, autoPlay: self.options?.isSeekedAutoPlay ?? false)
             return .success
         }
         remoteCommand.enableLanguageOptionCommand.addTarget { [weak self] event in
-            guard let self = self else {
+            guard let self = self, let event = event as? MPChangeLanguageOptionCommandEvent else {
                 return .commandFailed
             }
-            let selectLang = (event as! MPChangeLanguageOptionCommandEvent).languageOption
+            let selectLang = event.languageOption
             if selectLang.languageOptionType == .audible,
                let trackToSelect = self.player?.tracks(mediaType: .audio).first(where: { $0.name == selectLang.displayName }) {
                 self.player?.select(track: trackToSelect)
