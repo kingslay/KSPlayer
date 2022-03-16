@@ -11,6 +11,8 @@ import KSPlayer
 import SwiftUI
 @main
 struct DemoApp: App {
+    @State private var playerView: KSVideoPlayerView?
+    @State private var isImporting: Bool = false
     init() {
         KSPlayerManager.canBackgroundPlay = true
         KSPlayerManager.logLevel = .debug
@@ -20,15 +22,72 @@ struct DemoApp: App {
         KSOptions.isSecondOpen = true
         KSOptions.isAccurateSeek = true
         KSOptions.isLoopPlay = true
+        let arguments = ProcessInfo.processInfo.arguments.dropFirst()
+        var dropNextArg = false
+        var playerArgs = [String]()
+        var filenames = [String]()
+        for argument in arguments {
+            if dropNextArg {
+                dropNextArg = false
+                continue
+            }
+            if argument.starts(with: "--") {
+                playerArgs.append(argument)
+            } else if argument.starts(with: "-") {
+                dropNextArg = true
+            } else {
+                filenames.append(argument)
+            }
+        }
+        if let urlString = filenames.first {
+            _playerView = .init(initialValue: KSVideoPlayerView(url: URL(fileURLWithPath: urlString), options: KSOptions()))
+        }
     }
 
-    #if os(macOS)
-    @State var playerView: KSVideoPlayerView?
-    #endif
+    @ViewBuilder var content: some View {
+        if let playerView = playerView {
+            playerView
+        } else {
+            ContentView()
+        }
+    }
+
     var body: some Scene {
-        let content = ContentView()
         WindowGroup {
             content
+                .onOpenURL { url in
+                    playerView = KSVideoPlayerView(url: url, options: KSOptions())
+                }
+            #if !os(tvOS)
+                .fileImporter(isPresented: $isImporting, allowedContentTypes: [.movie, .audio, .data]) { result in
+                    guard let url = try? result.get() else {
+                        return
+                    }
+                    #if os(macOS)
+                    NSDocumentController.shared.noteNewRecentDocumentURL(url)
+                    #endif
+                    if url.isAudio || url.isMovie {
+                        let view = KSVideoPlayerView(url: url, options: KSOptions())
+                        let controller = NSHostingController(rootView: view)
+                        let win = NSWindow(contentViewController: controller)
+                        win.contentViewController = controller
+                        win.makeKeyAndOrderFront(nil)
+                        if let frame = win.screen?.frame {
+                            win.setFrame(frame, display: true)
+                        }
+                        playerView = view
+                    } else {
+                        if let playerView = playerView {
+                            let info = URLSubtitleInfo(subtitleID: url.path, name: url.lastPathComponent)
+                            info.downloadURL = url
+                            info.enableSubtitle {
+                                playerView.subtitleModel.selectedSubtitle = try? $0.get()
+                            }
+                        }
+                    }
+                }
+            #endif
+//
 //            VideoPlayer(player: AVPlayer(url: URL(string: "https://bitmovin-a.akamaihd.net/content/dataset/multi-codec/hevc/stream_fmp4.m3u8")!))
 //            AVContentView()
         }
@@ -36,45 +95,13 @@ struct DemoApp: App {
         .commands {
             CommandGroup(replacing: .newItem) {
                 Button("Add") {
-                    content.showAddActionSheet = true
+//                    content.showAddActionSheet = true
                 }
             }
             #if os(macOS)
             CommandGroup(before: .newItem) {
                 Button("Open") {
-                    let panel = NSOpenPanel()
-                    panel.title = NSLocalizedString("alert.choose_media_file.title", comment: "Choose Media File")
-                    panel.canCreateDirectories = false
-                    panel.canChooseFiles = true
-                    panel.canChooseDirectories = true
-                    panel.allowsMultipleSelection = false
-                    if panel.runModal() == .OK {
-                        for url in panel.urls {
-                            NSDocumentController.shared.noteNewRecentDocumentURL(url)
-                        }
-                        guard let url = panel.urls.first else {
-                            return
-                        }
-                        if url.isAudio || url.isMovie {
-                            let view = KSVideoPlayerView(url: url, options: KSOptions())
-                            playerView = view
-                            let controller = NSHostingController(rootView: view)
-                            let win = NSWindow(contentViewController: controller)
-                            win.contentViewController = controller
-                            win.makeKeyAndOrderFront(nil)
-                            if let frame = win.screen?.frame {
-                                win.setFrame(frame, display: true)
-                            }
-                        } else {
-                            if let playerView = playerView {
-                                let info = URLSubtitleInfo(subtitleID: url.path, name: url.lastPathComponent)
-                                info.downloadURL = url
-                                info.enableSubtitle {
-                                    playerView.subtitleModel.selectedSubtitle = try? $0.get()
-                                }
-                            }
-                        }
-                    }
+                    isImporting = true
                 }.keyboardShortcut("o")
             }
             #endif
