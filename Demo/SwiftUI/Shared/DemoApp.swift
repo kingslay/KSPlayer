@@ -78,13 +78,7 @@ struct DemoApp: App {
                     if url.isAudio || url.isMovie {
                         playerView = KSVideoPlayerView(url: url, options: KSOptions())
                     } else {
-                        if let playerView = playerView {
-                            let info = URLSubtitleInfo(subtitleID: url.path, name: url.lastPathComponent)
-                            info.downloadURL = url
-                            info.enableSubtitle {
-                                playerView.subtitleModel.selectedSubtitle = try? $0.get()
-                            }
-                        }
+                        playerView?.subtitleModel.selectedSubtitle = KSURLSubtitle(url: url)
                     }
                 }
             #endif
