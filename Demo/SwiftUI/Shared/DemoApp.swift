@@ -11,24 +11,10 @@ import KSPlayer
 import SwiftUI
 #if !canImport(UIKit)
 typealias UIHostingController = NSHostingController
-typealias UIWindow = NSWindow
-
+typealias UIApplication = NSApplication
 #endif
 @main
 struct DemoApp: App {
-    @State private var playerView: KSVideoPlayerView? {
-        didSet {
-            if let view = playerView {
-                let controller = UIHostingController(rootView: view)
-                let win = UIWindow(contentViewController: controller)
-                win.contentViewController = controller
-                win.makeKeyAndOrderFront(nil)
-                if let frame = win.screen?.frame {
-                    win.setFrame(frame, display: true)
-                }
-            }
-        }
-    }
     @State private var isImporting: Bool = false
     init() {
         KSPlayerManager.canBackgroundPlay = true
@@ -57,7 +43,7 @@ struct DemoApp: App {
             }
         }
         if let urlString = filenames.first {
-            _playerView = .init(initialValue: KSVideoPlayerView(url: URL(fileURLWithPath: urlString), options: KSOptions()))
+            newPlayerView(KSVideoPlayerView(url: URL(fileURLWithPath: urlString), options: KSOptions()))
         }
     }
 
@@ -65,7 +51,7 @@ struct DemoApp: App {
         WindowGroup {
             ContentView()
                 .onOpenURL { url in
-                    playerView = KSVideoPlayerView(url: url, options: KSOptions())
+                    newPlayerView(KSVideoPlayerView(url: url, options: KSOptions()))
                 }
             #if !os(tvOS)
                 .fileImporter(isPresented: $isImporting, allowedContentTypes: [.movie, .audio, .data]) { result in
@@ -76,9 +62,19 @@ struct DemoApp: App {
                     NSDocumentController.shared.noteNewRecentDocumentURL(url)
                     #endif
                     if url.isAudio || url.isMovie {
-                        playerView = KSVideoPlayerView(url: url, options: KSOptions())
+                        newPlayerView(KSVideoPlayerView(url: url, options: KSOptions()))
                     } else {
-                        playerView?.subtitleModel.selectedSubtitle = KSURLSubtitle(url: url)
+                        let controllers = UIApplication.shared.windows.reversed().compactMap {
+                            #if os(macOS)
+                            $0.contentViewController as? UIHostingController<KSVideoPlayerView>
+                            #else
+                            $0.rootViewController as? UIHostingController<KSVideoPlayerView>
+                            #endif
+                        }
+                        if let hostingController = controllers.first {
+                            hostingController.becomeFirstResponder()
+                            hostingController.rootView.subtitleModel.selectedSubtitle = KSURLSubtitle(url: url)
+                        }
                     }
                 }
             #endif
@@ -101,6 +97,21 @@ struct DemoApp: App {
             }
             #endif
         }
+        #endif
+    }
+
+    private func newPlayerView(_ view: KSVideoPlayerView) {
+        let controller = UIHostingController(rootView: view)
+        #if os(macOS)
+        let win = UIWindow(contentViewController: controller)
+        win.makeKeyAndOrderFront(nil)
+        if let frame = win.screen?.frame {
+            win.setFrame(frame, display: true)
+        }
+        #else
+        let win = UIWindow()
+        win.rootViewController = controller
+        win.makeKey()
         #endif
     }
 }
