@@ -200,7 +200,7 @@ struct VideoControllerView: View {
                     Image(systemName: "gobackward.15")
                 }
                 #if !os(tvOS)
-                .keyboardShortcut(.leftArrow)
+                .keyboardShortcut(.leftArrow, modifiers: .none)
                 #endif
                 Button {
                     config.isPlay.toggle()
@@ -208,7 +208,7 @@ struct VideoControllerView: View {
                     Image(systemName: config.isPlay ? "pause.fill" : "play.fill")
                 }
                 #if !os(tvOS)
-                .keyboardShortcut(.space, modifiers: .option)
+                .keyboardShortcut(.space, modifiers: .none)
                 #endif
                 Button {
                     config.seek(time: model.currentTime + 15)
@@ -216,7 +216,7 @@ struct VideoControllerView: View {
                     Image(systemName: "goforward.15")
                 }
                 #if !os(tvOS)
-                .keyboardShortcut(.rightArrow)
+                .keyboardShortcut(.rightArrow, modifiers: .none)
                 #endif
                 Text(model.currentTime.toString(for: .minOrHour)).font(.caption2.monospacedDigit())
                 Slider(value: Binding {
@@ -237,8 +237,7 @@ struct VideoControllerView: View {
             .cornerRadius(8)
         }
         .foregroundColor(.white)
-        #if os(macOS)
-            .focusable()
+        #if !os(iOS)
             .onMoveCommand { direction in
                 switch direction {
                 case .left:
@@ -260,6 +259,11 @@ struct VideoControllerView: View {
         }
         #endif
     }
+}
+
+@available(iOS 13, tvOS 13, macOS 10.15, *)
+extension EventModifiers {
+    static let none = Self()
 }
 
 @available(iOS 13, tvOS 13, macOS 10.15, *)
