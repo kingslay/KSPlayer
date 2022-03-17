@@ -14,10 +14,12 @@ public struct KSVideoPlayerView: View {
     private let url: URL
     public let options: KSOptions
     private let player: KSVideoPlayer
+    private let subtitleView: VideoSubtitleView
     public init(url: URL, options: KSOptions) {
         self.options = options
         self.url = url
         player = KSVideoPlayer(url: url, options: options)
+        subtitleView = VideoSubtitleView()
     }
 
     public var body: some View {
@@ -73,8 +75,8 @@ public struct KSVideoPlayerView: View {
             .onDisappear {
                 player.coordinator.playerLayer?.pause()
             }
-            VideoSubtitleView(model: subtitleModel)
-            VideoControllerView(config: player.coordinator, model: $model).opacity(model.isMaskShow ? 1 : 0)
+            subtitleView.environmentObject(subtitleModel)
+            VideoControllerView(model: $model).environmentObject(player.coordinator).opacity(model.isMaskShow ? 1 : 0)
         }
         .confirmationDialog(Text("Setting"), isPresented: $model.isShowSetting) {
             Button {} label: {
@@ -136,7 +138,7 @@ struct ControllerViewModel {
 
 @available(iOS 15, tvOS 15, macOS 12, *)
 struct VideoControllerView: View {
-    @ObservedObject fileprivate var config: KSVideoPlayer.Coordinator
+    @EnvironmentObject fileprivate var config: KSVideoPlayer.Coordinator
     @Binding fileprivate var model: ControllerViewModel
     private let backgroundColor = Color(red: 0.145, green: 0.145, blue: 0.145).opacity(0.6)
     @Environment(\.dismiss) private var dismiss
@@ -265,7 +267,7 @@ public class SubtitleModel: ObservableObject {
 
 @available(iOS 13, tvOS 13, macOS 10.15, *)
 struct VideoSubtitleView: View {
-    @ObservedObject fileprivate var model: SubtitleModel
+    @EnvironmentObject fileprivate var model: SubtitleModel
     var body: some View {
         VStack {
             Spacer()
