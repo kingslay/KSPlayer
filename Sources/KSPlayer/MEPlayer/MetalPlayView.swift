@@ -109,7 +109,7 @@ final class MetalPlayView: UIView {
 }
 
 extension MetalPlayView {
-    private func set(pixelBuffer: CVPixelBuffer, time: CMTime) {
+    private func set(pixelBuffer: CVPixelBuffer, time _: CMTime) {
         if videoInfo == nil || !CMVideoFormatDescriptionMatchesImageBuffer(videoInfo!, imageBuffer: pixelBuffer) {
             let err = CMVideoFormatDescriptionCreateForImageBuffer(allocator: nil, imageBuffer: pixelBuffer, formatDescriptionOut: &videoInfo)
             if err != noErr {
@@ -117,16 +117,15 @@ extension MetalPlayView {
             }
         }
         guard let videoInfo = videoInfo else { return }
-        var timing = CMSampleTimingInfo(duration: .invalid, presentationTimeStamp: time, decodeTimeStamp: .invalid)
+        var timing = CMSampleTimingInfo(duration: .invalid, presentationTimeStamp: .invalid, decodeTimeStamp: .invalid)
+//        var timing = CMSampleTimingInfo(duration: .invalid, presentationTimeStamp: time, decodeTimeStamp: .invalid)
         var sampleBuffer: CMSampleBuffer?
         // swiftlint:disable line_length
-        CMSampleBufferCreateForImageBuffer(allocator: nil, imageBuffer: pixelBuffer, dataReady: true, makeDataReadyCallback: nil, refcon: nil, formatDescription: videoInfo, sampleTiming: &timing, sampleBufferOut: &sampleBuffer)
+        CMSampleBufferCreateForImageBuffer(allocator: kCFAllocatorDefault, imageBuffer: pixelBuffer, dataReady: true, makeDataReadyCallback: nil, refcon: nil, formatDescription: videoInfo, sampleTiming: &timing, sampleBufferOut: &sampleBuffer)
         // swiftlint:enable line_length
         if let sampleBuffer = sampleBuffer {
-            if let attachmentsArray = CMSampleBufferGetSampleAttachmentsArray(sampleBuffer, createIfNecessary: true) as? [Any] {
-                if let dic = attachmentsArray.first as? NSMutableDictionary {
-                    dic[kCMSampleAttachmentKey_DisplayImmediately] = true
-                }
+            if let attachmentsArray = CMSampleBufferGetSampleAttachmentsArray(sampleBuffer, createIfNecessary: true) as? [NSMutableDictionary], let dic = attachmentsArray.first {
+                dic[kCMSampleAttachmentKey_DisplayImmediately] = true
             }
             if displayLayer.isReadyForMoreMediaData {
                 displayLayer.enqueue(sampleBuffer)
@@ -137,9 +136,9 @@ extension MetalPlayView {
                 //                        displayLayer.stopRequestingMediaData()
                 //                    }
             }
-            if let controlTimebase = displayLayer.controlTimebase {
-                CMTimebaseSetTime(controlTimebase, time: time)
-            }
+//            if let controlTimebase = displayLayer.controlTimebase {
+//                CMTimebaseSetTime(controlTimebase, time: time)
+//            }
         }
     }
 
