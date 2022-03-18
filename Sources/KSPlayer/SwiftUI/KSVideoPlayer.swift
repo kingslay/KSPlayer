@@ -107,6 +107,9 @@ public struct KSVideoPlayerView: View {
         #if !os(tvOS)
         .onTapGesture {
             model.isMaskShow.toggle()
+            #if os(macOS)
+            model.isMaskShow ? NSCursor.unhide() : NSCursor.hide()
+            #endif
         }
         .onDrop(of: ["public.file-url"], isTargeted: nil) { providers -> Bool in
             providers.first?.loadDataRepresentation(forTypeIdentifier: "public.file-url") { data, _ in

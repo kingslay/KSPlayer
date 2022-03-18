@@ -32,7 +32,7 @@
 			<key>UTTypeDescription</key>
 			<string>Flash Video File</string>
 			<key>UTTypeIdentifier</key>
-			<string>io.iina.flash</string>
+			<string>io.ks.flash</string>
 			<key>UTTypeTagSpecification</key>
 			<dict>
 				<key>public.filename-extension</key>
@@ -53,7 +53,7 @@
 			<key>UTTypeDescription</key>
 			<string>Monkey&apos;s Audio Lossless Audio</string>
 			<key>UTTypeIdentifier</key>
-			<string>io.iina.ape</string>
+			<string>io.ks.ape</string>
 			<key>UTTypeTagSpecification</key>
 			<dict>
 				<key>public.filename-extension</key>
@@ -70,7 +70,7 @@
 			<key>UTTypeDescription</key>
 			<string>FLAC Audio File</string>
 			<key>UTTypeIdentifier</key>
-			<string>io.iina.flac</string>
+			<string>io.ks.flac</string>
 			<key>UTTypeTagSpecification</key>
 			<dict>
 				<key>public.filename-extension</key>
@@ -87,7 +87,7 @@
 			<key>UTTypeDescription</key>
 			<string>WavePack Audio File</string>
 			<key>UTTypeIdentifier</key>
-			<string>io.iina.wv</string>
+			<string>io.ks.wv</string>
 			<key>UTTypeTagSpecification</key>
 			<dict>
 				<key>public.filename-extension</key>
@@ -104,7 +104,7 @@
 			<key>UTTypeDescription</key>
 			<string>RealPlayer Media Files</string>
 			<key>UTTypeIdentifier</key>
-			<string>io.iina.realmedia</string>
+			<string>io.ks.realmedia</string>
 			<key>UTTypeTagSpecification</key>
 			<dict>
 				<key>public.filename-extension</key>
@@ -123,7 +123,7 @@
 			<key>UTTypeDescription</key>
 			<string>XM audio file</string>
 			<key>UTTypeIdentifier</key>
-			<string>io.iina.xm</string>
+			<string>io.ks.xm</string>
 			<key>UTTypeTagSpecification</key>
 			<dict>
 				<key>public.filename-extension</key>
@@ -141,7 +141,7 @@
 			<key>UTTypeDescription</key>
 			<string>AIFF file</string>
 			<key>UTTypeIdentifier</key>
-			<string>io.iina.aiff</string>
+			<string>io.ks.aiff</string>
 			<key>UTTypeTagSpecification</key>
 			<dict>
 				<key>public.filename-extension</key>
@@ -159,7 +159,7 @@
 			<key>UTTypeDescription</key>
 			<string>WAVE Audio File</string>
 			<key>UTTypeIdentifier</key>
-			<string>io.iina.wav</string>
+			<string>io.ks.wav</string>
 			<key>UTTypeTagSpecification</key>
 			<dict>
 				<key>public.filename-extension</key>
@@ -176,7 +176,7 @@
 			<key>UTTypeDescription</key>
 			<string>VOB File (DVD Video)</string>
 			<key>UTTypeIdentifier</key>
-			<string>io.iina.vob</string>
+			<string>io.ks.vob</string>
 			<key>UTTypeTagSpecification</key>
 			<dict>
 				<key>public.filename-extension</key>
@@ -193,7 +193,7 @@
 			<key>UTTypeDescription</key>
 			<string>Digital Audio</string>
 			<key>UTTypeIdentifier</key>
-			<string>io.iina.ac3</string>
+			<string>io.ks.ac3</string>
 			<key>UTTypeTagSpecification</key>
 			<dict>
 				<key>public.filename-extension</key>
@@ -211,7 +211,7 @@
 			<key>UTTypeDescription</key>
 			<string>AAC file</string>
 			<key>UTTypeIdentifier</key>
-			<string>io.iina.aac</string>
+			<string>io.ks.aac</string>
 			<key>UTTypeTagSpecification</key>
 			<dict>
 				<key>public.filename-extension</key>
@@ -228,7 +228,7 @@
 			<key>UTTypeDescription</key>
 			<string>OPUS file</string>
 			<key>UTTypeIdentifier</key>
-			<string>io.iina.opus</string>
+			<string>io.ks.opus</string>
 			<key>UTTypeTagSpecification</key>
 			<dict>
 				<key>public.filename-extension</key>
@@ -245,7 +245,7 @@
 			<key>UTTypeDescription</key>
 			<string>Ogg Video File</string>
 			<key>UTTypeIdentifier</key>
-			<string>io.iina.ogg-video</string>
+			<string>io.ks.ogg-video</string>
 			<key>UTTypeTagSpecification</key>
 			<dict>
 				<key>public.filename-extension</key>
@@ -263,7 +263,7 @@
 			<key>UTTypeDescription</key>
 			<string>Ogg Audio File</string>
 			<key>UTTypeIdentifier</key>
-			<string>io.iina.ogg-audio</string>
+			<string>io.ks.ogg-audio</string>
 			<key>UTTypeTagSpecification</key>
 			<dict>
 				<key>public.filename-extension</key>
@@ -282,7 +282,7 @@
 			<key>UTTypeDescription</key>
 			<string>AVI container</string>
 			<key>UTTypeIdentifier</key>
-			<string>io.iina.avi</string>
+			<string>io.ks.avi</string>
 			<key>UTTypeTagSpecification</key>
 			<dict>
 				<key>public.filename-extension</key>
@@ -299,7 +299,7 @@
 			<key>UTTypeDescription</key>
 			<string>Apple QuickTime container</string>
 			<key>UTTypeIdentifier</key>
-			<string>io.iina.quicktime</string>
+			<string>io.ks.quicktime</string>
 			<key>UTTypeTagSpecification</key>
 			<dict>
 				<key>public.filename-extension</key>
@@ -318,7 +318,7 @@
 			<key>UTTypeDescription</key>
 			<string>DivX file</string>
 			<key>UTTypeIdentifier</key>
-			<string>io.iina.divx</string>
+			<string>io.ks.divx</string>
 			<key>UTTypeTagSpecification</key>
 			<dict>
 				<key>public.filename-extension</key>
@@ -335,7 +335,7 @@
 			<key>UTTypeDescription</key>
 			<string>DV file</string>
 			<key>UTTypeIdentifier</key>
-			<string>io.iina.dv</string>
+			<string>io.ks.dv</string>
 			<key>UTTypeTagSpecification</key>
 			<dict>
 				<key>public.filename-extension</key>
@@ -352,7 +352,7 @@
 			<key>UTTypeDescription</key>
 			<string>Advanced Streaming Format</string>
 			<key>UTTypeIdentifier</key>
-			<string>io.iina.asf</string>
+			<string>io.ks.asf</string>
 			<key>UTTypeTagSpecification</key>
 			<dict>
 				<key>public.filename-extension</key>
@@ -369,7 +369,7 @@
 			<key>UTTypeDescription</key>
 			<string>Windows Media Audio</string>
 			<key>UTTypeIdentifier</key>
-			<string>io.iina.wma</string>
+			<string>io.ks.wma</string>
 			<key>UTTypeTagSpecification</key>
 			<dict>
 				<key>public.filename-extension</key>
@@ -386,7 +386,7 @@
 			<key>UTTypeDescription</key>
 			<string>Windows Media Video</string>
 			<key>UTTypeIdentifier</key>
-			<string>io.iina.wmv</string>
+			<string>io.ks.wmv</string>
 			<key>UTTypeTagSpecification</key>
 			<dict>
 				<key>public.filename-extension</key>
@@ -403,7 +403,7 @@
 			<key>UTTypeDescription</key>
 			<string>Windows Recorded TV Show</string>
 			<key>UTTypeIdentifier</key>
-			<string>io.iina.wtv</string>
+			<string>io.ks.wtv</string>
 			<key>UTTypeTagSpecification</key>
 			<dict>
 				<key>public.filename-extension</key>
@@ -421,7 +421,7 @@
 			<key>UTTypeDescription</key>
 			<string>MPEG Video File</string>
 			<key>UTTypeIdentifier</key>
-			<string>io.iina.mpeg-video</string>
+			<string>io.ks.mpeg-video</string>
 			<key>UTTypeTagSpecification</key>
 			<dict>
 				<key>public.filename-extension</key>
@@ -445,7 +445,7 @@
 			<key>UTTypeDescription</key>
 			<string>MPEG4 Video File</string>
 			<key>UTTypeIdentifier</key>
-			<string>io.iina.mpeg4-video</string>
+			<string>io.ks.mpeg4-video</string>
 			<key>UTTypeTagSpecification</key>
 			<dict>
 				<key>public.filename-extension</key>
@@ -464,7 +464,7 @@
 			<key>UTTypeDescription</key>
 			<string>MPEG Audio File</string>
 			<key>UTTypeIdentifier</key>
-			<string>io.iina.mpeg-audio</string>
+			<string>io.ks.mpeg-audio</string>
 			<key>UTTypeTagSpecification</key>
 			<dict>
 				<key>public.filename-extension</key>
@@ -485,7 +485,7 @@
 			<key>UTTypeDescription</key>
 			<string>MPEG4 Audio File</string>
 			<key>UTTypeIdentifier</key>
-			<string>io.iina.mpeg4-audio</string>
+			<string>io.ks.mpeg4-audio</string>
 			<key>UTTypeTagSpecification</key>
 			<dict>
 				<key>public.filename-extension</key>
@@ -503,7 +503,7 @@
 			<key>UTTypeDescription</key>
 			<string>MPEG3 Audio File</string>
 			<key>UTTypeIdentifier</key>
-			<string>io.iina.mpeg3-audio</string>
+			<string>io.ks.mpeg3-audio</string>
 			<key>UTTypeTagSpecification</key>
 			<dict>
 				<key>public.filename-extension</key>
@@ -521,7 +521,7 @@
 			<key>UTTypeDescription</key>
 			<string>MPEG-2 Stream</string>
 			<key>UTTypeIdentifier</key>
-			<string>io.iina.mpeg-stream</string>
+			<string>io.ks.mpeg-stream</string>
 			<key>UTTypeTagSpecification</key>
 			<dict>
 				<key>public.filename-extension</key>
@@ -544,7 +544,7 @@
 			<key>UTTypeDescription</key>
 			<string>3GPP File</string>
 			<key>UTTypeIdentifier</key>
-			<string>io.iina.3gpp</string>
+			<string>io.ks.3gpp</string>
 			<key>UTTypeTagSpecification</key>
 			<dict>
 				<key>public.filename-extension</key>
@@ -563,7 +563,7 @@
 			<key>UTTypeDescription</key>
 			<string>3GPP2 File</string>
 			<key>UTTypeIdentifier</key>
-			<string>io.iina.3gpp2</string>
+			<string>io.ks.3gpp2</string>
 			<key>UTTypeTagSpecification</key>
 			<dict>
 				<key>public.filename-extension</key>
@@ -581,7 +581,7 @@
 			<key>UTTypeDescription</key>
 			<string>MIDI File</string>
 			<key>UTTypeIdentifier</key>
-			<string>io.iina.mid</string>
+			<string>io.ks.mid</string>
 			<key>UTTypeTagSpecification</key>
 			<dict>
 				<key>public.filename-extension</key>
@@ -598,7 +598,7 @@
 			<key>UTTypeDescription</key>
 			<string>Matroska Audio File</string>
 			<key>UTTypeIdentifier</key>
-			<string>io.iina.mka</string>
+			<string>io.ks.mka</string>
 			<key>UTTypeTagSpecification</key>
 			<dict>
 				<key>public.filename-extension</key>
@@ -615,7 +615,7 @@
 			<key>UTTypeDescription</key>
 			<string>Matroska Video File</string>
 			<key>UTTypeIdentifier</key>
-			<string>io.iina.mkv</string>
+			<string>io.ks.mkv</string>
 			<key>UTTypeTagSpecification</key>
 			<dict>
 				<key>public.filename-extension</key>
@@ -632,7 +632,7 @@
 			<key>UTTypeDescription</key>
 			<string>WebM Video File</string>
 			<key>UTTypeIdentifier</key>
-			<string>io.iina.webm</string>
+			<string>io.ks.webm</string>
 			<key>UTTypeTagSpecification</key>
 			<dict>
 				<key>public.filename-extension</key>
@@ -647,7 +647,7 @@
 				<string>public.text</string>
 			</array>
 			<key>UTTypeIdentifier</key>
-			<string>io.iina.playlist</string>
+			<string>io.ks.playlist</string>
 			<key>UTTypeTagSpecification</key>
 			<dict>
 				<key>public.filename-extension</key>
