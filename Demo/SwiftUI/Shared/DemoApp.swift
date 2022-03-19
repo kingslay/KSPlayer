@@ -108,6 +108,7 @@ struct DemoApp: App {
         if let frame = win.screen?.frame {
             win.setFrame(frame, display: true)
         }
+        win.title = view.url.lastPathComponent
         #else
         let win = UIWindow()
         win.rootViewController = controller
