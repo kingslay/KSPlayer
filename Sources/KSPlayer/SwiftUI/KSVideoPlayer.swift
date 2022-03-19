@@ -11,7 +11,7 @@ import SwiftUI
 public struct KSVideoPlayerView: View {
     @ObservedObject public var subtitleModel = SubtitleModel()
     @State private var model = ControllerViewModel()
-    private let url: URL
+    public let url: URL
     public let options: KSOptions
     private let player: KSVideoPlayer
     private let subtitleView: VideoSubtitleView
@@ -101,7 +101,9 @@ public struct KSVideoPlayerView: View {
                 subtitleModel.selectedSubtitle = nil
             }
         }
-        #if !os(macOS)
+        #if os(macOS)
+        .navigationTitle(url.lastPathComponent)
+        #else
         .navigationBarHidden(true)
         #endif
         #if !os(tvOS)
@@ -268,7 +270,7 @@ public class SubtitleModel: ObservableObject {
     @Published fileprivate var image: UIImage?
 }
 
-@available(iOS 13, tvOS 13, macOS 10.15, *)
+@available(iOS 15, tvOS 15, macOS 12, *)
 struct VideoSubtitleView: View {
     @EnvironmentObject fileprivate var model: SubtitleModel
     var body: some View {
@@ -282,7 +284,7 @@ struct VideoSubtitleView: View {
                 #endif
 
             } else if let text = model.text {
-                Text(text.string)
+                Text(AttributedString(text))
                     .multilineTextAlignment(.center)
                     .font(.largeTitle)
                     .foregroundColor(.white).shadow(color: .black.opacity(0.9), radius: 1, x: 1, y: 1)
