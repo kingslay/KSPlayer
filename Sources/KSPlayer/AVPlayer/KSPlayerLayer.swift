@@ -450,11 +450,11 @@ extension KSPlayerLayer {
             self.previousPlayer()
             return .success
         }
-        remoteCommand.changeRepeatModeCommand.addTarget { [weak self] _ in
-            guard let self = self else {
+        remoteCommand.changeRepeatModeCommand.addTarget { [weak self] event in
+            guard let self = self, let event = event as? MPChangeRepeatModeCommandEvent else {
                 return .commandFailed
             }
-            self.options?.isLoopPlay.toggle()
+            self.options?.isLoopPlay = event.repeatType != .off
             return .success
         }
         remoteCommand.changeShuffleModeCommand.isEnabled = false
