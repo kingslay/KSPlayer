@@ -42,9 +42,8 @@ final class MetalPlayView: UIView {
         layer = AVSampleBufferDisplayLayer()
         #endif
         view.framebufferOnly = true
-        view.isPaused = true
         displayLink.add(to: RunLoop.main, forMode: .common)
-        displayLink.isPaused = true
+        isPaused = true
         addSubview(view)
         view.isHidden = true
         view.translatesAutoresizingMaskIntoConstraints = false

@@ -10,7 +10,7 @@ import KSPlayer
 import SwiftUI
 
 struct ContentView: View {
-    @State var showAddActionSheet = false
+    @State private var showAddActionSheet = false
     @State private var resources = [KSPlayerResource]()
     @State private var searchText = ""
     @State private var playURL: String = ""
