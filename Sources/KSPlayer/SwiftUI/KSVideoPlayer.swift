@@ -47,16 +47,19 @@ public struct KSVideoPlayerView: View {
                     subtitleModel.text = nil
                 }
             }
-            .onStateChanged { layer, state in
-                if state == .readyToPlay, let player = layer.player {
-                    subtitleModel.tracks = player.tracks(mediaType: .subtitle)
-                    guard let track = subtitleModel.tracks.first, let subtitle = track.subtitle, options.autoSelectEmbedSubtitle else {
-                        return
+            .onStateChanged { _, state in
+                if state == .readyToPlay {
+                    if let track = player.coordinator.subtitleTracks.first, options.autoSelectEmbedSubtitle {
+                        player.coordinator.selectedSubtitileTrack = track
                     }
-                    subtitle.enableSubtitle { result in
-                        subtitleModel.selectedSubtitle = try? result.get()
-                    }
-                    player.select(track: track)
+                }
+            }
+            .onReceive(player.coordinator.$selectedSubtitileTrack) { track in
+                guard let subtitle = track?.subtitle else {
+                    return
+                }
+                subtitle.enableSubtitle { result in
+                    subtitleModel.selectedSubtitle = try? result.get()
                 }
             }
             #if os(tvOS)
@@ -75,36 +78,15 @@ public struct KSVideoPlayerView: View {
             .onDisappear {
                 player.coordinator.playerLayer?.pause()
             }
-            subtitleView.environmentObject(subtitleModel)
-            VideoControllerView(model: $model).environmentObject(player.coordinator).opacity(model.isMaskShow ? 1 : 0)
+            subtitleView
+            VideoControllerView(model: $model).opacity(model.isMaskShow ? 1 : 0)
         }
-        .confirmationDialog(Text("Setting"), isPresented: $model.isShowSetting) {
-            Button {} label: {
-                Text("Audio Setting")
-            }
-            Button {
-                model.isShowSubtitleSetting.toggle()
-            } label: {
-                Text("Subtitle Setting")
-            }
-        }
-        .confirmationDialog(Text("Subtitle Select"), isPresented: $model.isShowSubtitleSetting) {
-            ForEach(subtitleModel.tracks, id: \.trackID) { track in
-                Button(track.name) {
-                    player.coordinator.playerLayer?.player?.select(track: track)
-                    track.subtitle?.enableSubtitle { result in
-                        subtitleModel.selectedSubtitle = try? result.get()
-                    }
-                }
-            }
-            Button("dismiss Subtitle", role: .cancel) {
-                subtitleModel.selectedSubtitle = nil
-            }
-        }
+        .environmentObject(subtitleModel)
+        .environmentObject(player.coordinator)
         #if os(macOS)
-        .navigationTitle(url.lastPathComponent)
+            .navigationTitle(url.lastPathComponent)
         #else
-        .navigationBarHidden(true)
+            .navigationBarHidden(true)
         #endif
         #if !os(tvOS)
         .onTapGesture {
@@ -138,7 +120,6 @@ struct ControllerViewModel {
     var totalTime = TimeInterval(1)
     var isMaskShow = true
     var isShowSetting = false
-    var isShowSubtitleSetting = false
 }
 
 @available(iOS 15, tvOS 15, macOS 12, *)
@@ -231,6 +212,9 @@ struct VideoControllerView: View {
             .background(backgroundColor)
             .cornerRadius(8)
         }
+        .sheet(isPresented: $model.isShowSetting) {
+            VideoSettingView(showingModal: $model.isShowSetting)
+        }
         .foregroundColor(.white)
         #if !os(iOS)
             .onMoveCommand { direction in
@@ -264,7 +248,6 @@ extension EventModifiers {
 @available(iOS 13, tvOS 13, macOS 10.15, *)
 public class SubtitleModel: ObservableObject {
     public var selectedSubtitle: KSSubtitleProtocol?
-    fileprivate var tracks = [MediaPlayerTrack]()
     fileprivate var endTime = TimeInterval(0)
     @Published fileprivate var text: NSMutableAttributedString?
     @Published fileprivate var image: UIImage?
@@ -290,6 +273,66 @@ struct VideoSubtitleView: View {
                     .foregroundColor(.white).shadow(color: .black.opacity(0.9), radius: 1, x: 1, y: 1)
             }
         }
+    }
+}
+
+@available(iOS 14, tvOS 14, macOS 11, *)
+struct VideoSettingView: View {
+    @Binding fileprivate var showingModal: Bool
+    @EnvironmentObject private var subtitleModel: SubtitleModel
+    @EnvironmentObject private var config: KSVideoPlayer.Coordinator
+    var body: some View {
+        config.selectedAudioTrack = config.audioTracks.first { $0.isEnabled }
+        config.selectedVideoTrack = config.videoTracks.first { $0.isEnabled }
+        return TabView {
+            Picker("audio tracks", selection: Binding(get: {
+                config.selectedAudioTrack?.trackID
+            }, set: { value in
+                config.selectedAudioTrack = config.audioTracks.first { $0.trackID == value }
+            })) {
+                Text("None").tag(nil as Int32?)
+                ForEach(config.audioTracks, id: \.trackID) { track in
+                    Text(track.name).tag(track.trackID as Int32?)
+                }
+            }
+            .pickerStyle(.inline)
+            .tabItem {
+                Text("audio")
+            }
+            Picker("subtitle tracks", selection: Binding(get: {
+                config.selectedSubtitileTrack?.trackID
+            }, set: { value in
+                config.selectedSubtitileTrack = config.subtitleTracks.first { $0.trackID == value }
+            })) {
+                Text("None").tag(nil as Int32?)
+                ForEach(config.subtitleTracks, id: \.trackID) { track in
+                    Text(track.name).tag(track.trackID as Int32?)
+                }
+            }
+            .pickerStyle(.inline)
+            .tabItem {
+                Text("subtitle")
+            }
+            Picker("video tracks", selection: Binding(get: {
+                config.selectedVideoTrack?.trackID
+            }, set: { value in
+                config.selectedVideoTrack = config.videoTracks.first { $0.trackID == value }
+            })) {
+                Text("None").tag(nil as Int32?)
+                ForEach(config.videoTracks, id: \.trackID) { track in
+                    Text(track.name).tag(track.trackID as Int32?)
+                }
+            }
+            .pickerStyle(.inline)
+            .tabItem {
+                Text("video")
+            }
+        }.toolbar {
+            Button("Done") {
+                showingModal.toggle()
+            }
+        }
+        .padding()
     }
 }
 
@@ -403,7 +446,39 @@ extension KSVideoPlayer: UIViewRepresentable {
         #if canImport(UIKit)
         fileprivate var onSwipe: ((UISwipeGestureRecognizer.Direction) -> Void)?
         #endif
+        fileprivate var selectedAudioTrack: MediaPlayerTrack? {
+            didSet {
+                if let track = selectedAudioTrack {
+                    playerLayer?.player?.select(track: track)
+                } else {
+                    oldValue?.setIsEnabled(false)
+                }
+            }
+        }
 
+        @Published fileprivate var selectedSubtitileTrack: MediaPlayerTrack? {
+            didSet {
+                if let track = selectedAudioTrack {
+                    playerLayer?.player?.select(track: track)
+                } else {
+                    oldValue?.setIsEnabled(false)
+                }
+            }
+        }
+
+        fileprivate var selectedVideoTrack: MediaPlayerTrack? {
+            didSet {
+                if let track = selectedAudioTrack {
+                    playerLayer?.player?.select(track: track)
+                } else {
+                    oldValue?.setIsEnabled(false)
+                }
+            }
+        }
+
+        fileprivate var audioTracks = [MediaPlayerTrack]()
+        fileprivate var subtitleTracks = [MediaPlayerTrack]()
+        fileprivate var videoTracks = [MediaPlayerTrack]()
         init(isPlay: Bool) {
             self.isPlay = isPlay
         }
@@ -415,6 +490,11 @@ extension KSVideoPlayer: UIViewRepresentable {
         public func player(layer: KSPlayerLayer, state: KSPlayerState) {
             if state == .buffering || state == .bufferFinished {
                 isPlay = true
+            }
+            if state == .readyToPlay, let player = layer.player {
+                subtitleTracks = player.tracks(mediaType: .subtitle)
+                videoTracks = player.tracks(mediaType: .video)
+                audioTracks = player.tracks(mediaType: .audio)
             }
             onStateChanged?(layer, state)
         }

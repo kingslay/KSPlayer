@@ -84,11 +84,6 @@ struct DemoApp: App {
         }
         #if !os(tvOS)
         .commands {
-            CommandGroup(replacing: .newItem) {
-                Button("Add") {
-//                    content.showAddActionSheet = true
-                }
-            }
             #if os(macOS)
             CommandGroup(before: .newItem) {
                 Button("Open") {

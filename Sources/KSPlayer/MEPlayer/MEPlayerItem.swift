@@ -96,19 +96,20 @@ final class MEPlayerItem {
     }
 
     func select(track: MediaPlayerTrack) {
-        if let track = track as? TrackProtocol {
-            assetTracks.filter { $0.mediaType == track.mediaType }.forEach {
-                if $0.mediaType == .subtitle, !$0.isImageSubtitle {
-                    return
-                }
-                $0.stream.pointee.discard = AVDISCARD_ALL
-            }
-            track.stream.pointee.discard = AVDISCARD_DEFAULT
-            if track.mediaType == .subtitle, !track.isImageSubtitle {
+        guard !track.isEnabled else {
+            return
+        }
+        assetTracks.filter { $0.mediaType == track.mediaType }.forEach {
+            if $0.mediaType == .subtitle, !$0.isImageSubtitle {
                 return
             }
-            seek(time: currentPlaybackTime, completion: nil)
+            $0.stream.pointee.discard = AVDISCARD_ALL
         }
+        track.setIsEnabled(true)
+        if track.mediaType == .subtitle, !((track as? TrackProtocol)?.isImageSubtitle ?? false) {
+            return
+        }
+        seek(time: currentPlaybackTime, completion: nil)
     }
 }
 

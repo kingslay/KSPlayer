@@ -26,11 +26,19 @@ struct ContentView: View {
                 }
             }
             .searchable(text: $searchText)
-            #if !os(macOS)
+            #if os(macOS)
+                .toolbar {
+                    Button {
+                        showAddActionSheet = true
+                    } label: {
+                        Label("Add", systemImage: "plus")
+                    }
+                }
+            #else
                 .navigationBarItems(trailing: Button {
                     showAddActionSheet = true
                 } label: {
-                    Image(systemName: "plus")
+                    Label("Add", systemImage: "plus")
                 })
             #endif
         }.onAppear {
@@ -39,17 +47,23 @@ struct ContentView: View {
                 self.updatem3u8("https://iptv-org.github.io/iptv/countries/cn.m3u")
             }
         }.sheet(isPresented: $showAddActionSheet) {} content: {
-            Text("Input URL")
-            TextField("play url", text: $playURL)
-            TextField("play list", text: $playList)
-            Button("Done") {
-                if let url = URL(string: playURL.trimmingCharacters(in: NSMutableCharacterSet.whitespacesAndNewlines)) {
-                    self.resources.insert(KSPlayerResource(url: url, options: KSOptions(), name: "new add"), at: 0)
-                } else if !playList.isEmpty {
-                    self.updatem3u8(playList.trimmingCharacters(in: NSMutableCharacterSet.whitespacesAndNewlines))
+            Form {
+                Text("Input URL")
+                TextField("play url", text: $playURL)
+                TextField("play list", text: $playList)
+                Button("Done") {
+                    if let url = URL(string: playURL.trimmingCharacters(in: NSMutableCharacterSet.whitespacesAndNewlines)) {
+                        self.resources.insert(KSPlayerResource(url: url, options: KSOptions(), name: "new add"), at: 0)
+                    } else if !playList.isEmpty {
+                        self.updatem3u8(playList.trimmingCharacters(in: NSMutableCharacterSet.whitespacesAndNewlines))
+                    }
+                    showAddActionSheet = false
                 }
-                showAddActionSheet = false
             }
+            #if os(macOS)
+            .fixedSize()
+            #endif
+            .padding()
         }
     }
 

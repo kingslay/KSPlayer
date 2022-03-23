@@ -28,10 +28,6 @@ extension TrackProtocol {
     }
 }
 
-func == (lhs: TrackProtocol, rhs: TrackProtocol) -> Bool {
-    lhs.trackID == rhs.trackID
-}
-
 struct AssetTrack: TrackProtocol {
     let trackID: Int32
     let name: String
