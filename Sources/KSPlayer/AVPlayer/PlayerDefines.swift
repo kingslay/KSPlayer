@@ -99,7 +99,8 @@ public protocol MediaPlayerTrack {
     var colorPrimaries: String? { get }
     var transferFunction: String? { get }
     var yCbCrMatrix: String? { get }
-    var subtitle: SubtitleInfo? { get set }
+    var subtitle: SubtitleInfo? { get }
+    func setIsEnabled(_ isEnabled: Bool)
 }
 
 public extension FourCharCode {

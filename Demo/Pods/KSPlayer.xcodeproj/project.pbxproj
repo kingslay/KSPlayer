@@ -349,7 +349,7 @@
 		8E08537BB908A18642D85DDA89BE774C /* KSPlayer-tvOS.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "KSPlayer-tvOS.debug.xcconfig"; path = "../KSPlayer-tvOS/KSPlayer-tvOS.debug.xcconfig"; sourceTree = "<group>"; };
 		904AA7292CED01F4E4B8E6D64FC792C0 /* ResourceBundle-KSPlayer_KSPlayer-KSPlayer-macOS-Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; name = "ResourceBundle-KSPlayer_KSPlayer-KSPlayer-macOS-Info.plist"; path = "../KSPlayer-macOS/ResourceBundle-KSPlayer_KSPlayer-KSPlayer-macOS-Info.plist"; sourceTree = "<group>"; };
 		92AD2D2794B60E806104BB5B2CB63191 /* KSPlayer-tvOS-Unit-Tests-prefix.pch */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = "KSPlayer-tvOS-Unit-Tests-prefix.pch"; path = "../KSPlayer-tvOS/KSPlayer-tvOS-Unit-Tests-prefix.pch"; sourceTree = "<group>"; };
-		92C970804A17DE949D66F13575EA5367 /* KSPlayer-iOS */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; name = "KSPlayer-iOS"; path = KSPlayer.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		92C970804A17DE949D66F13575EA5367 /* KSPlayer.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = KSPlayer.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		931C4BA6CF258A2C9A43833805E73A97 /* KSSubtitle.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = KSSubtitle.swift; path = Sources/KSPlayer/Subtitle/KSSubtitle.swift; sourceTree = "<group>"; };
 		950F3A29BA90CBEE7CA6C8949840145E /* PlayerTransitionAnimator.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = PlayerTransitionAnimator.swift; path = Sources/KSPlayer/Video/PlayerTransitionAnimator.swift; sourceTree = "<group>"; };
 		98054848AF5C9A78D10AD36873386014 /* KSPlayer-iOS-Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "KSPlayer-iOS-Info.plist"; sourceTree = "<group>"; };
@@ -620,7 +620,7 @@
 		9D09C6C8713D1717B3ABBD99B6C506C1 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				92C970804A17DE949D66F13575EA5367 /* KSPlayer-iOS */,
+				92C970804A17DE949D66F13575EA5367 /* KSPlayer.framework */,
 				BB4826C3671D3BF28BE6B5397DFB7E07 /* KSPlayer_KSPlayer.bundle */,
 				C472C97B903FFE1D7C131A47557F2B35 /* KSPlayer-iOS-Unit-Tests */,
 				60C43558171822E74AADF86FBF5AABF3 /* KSPlayer-macOS */,
@@ -966,7 +966,7 @@
 			);
 			name = "KSPlayer-iOS";
 			productName = KSPlayer;
-			productReference = 92C970804A17DE949D66F13575EA5367 /* KSPlayer-iOS */;
+			productReference = 92C970804A17DE949D66F13575EA5367 /* KSPlayer.framework */;
 			productType = "com.apple.product-type.framework";
 		};
 /* End PBXNativeTarget section */

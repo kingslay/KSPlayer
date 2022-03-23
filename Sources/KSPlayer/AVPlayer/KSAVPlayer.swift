@@ -445,10 +445,8 @@ extension KSAVPlayer: MediaPlayerProtocol {
     }
 
     public func select(track: MediaPlayerTrack) {
-        if var track = track as? AVMediaPlayerTrack {
-            player.currentItem?.tracks.filter { $0.assetTrack?.mediaType == track.mediaType }.forEach { $0.isEnabled = false }
-            track.isEnabled = true
-        }
+        player.currentItem?.tracks.filter { $0.assetTrack?.mediaType == track.mediaType }.forEach { $0.isEnabled = false }
+        track.setIsEnabled(true)
     }
 }
 
@@ -485,12 +483,7 @@ struct AVMediaPlayerTrack: MediaPlayerTrack {
     let yCbCrMatrix: String?
 
     var isEnabled: Bool {
-        get {
-            track.isEnabled
-        }
-        set {
-            track.isEnabled = newValue
-        }
+        track.isEnabled
     }
 
     init(track: AVPlayerItemTrack) {
@@ -518,6 +511,10 @@ struct AVMediaPlayerTrack: MediaPlayerTrack {
             yCbCrMatrix = nil
             codecType = 0
         }
+    }
+
+    func setIsEnabled(_ isEnabled: Bool) {
+        track.isEnabled = isEnabled
     }
 }
 
