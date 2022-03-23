@@ -14,6 +14,234 @@ trap 'on_error $LINENO' ERR
 RSYNC_PROTECT_TMP_FILES=(--filter "P .*.??????")
 
 
+variant_for_slice()
+{
+  case "$1" in
+  "Libavcodec.xcframework/tvos-arm64_x86_64-simulator")
+    echo "simulator"
+    ;;
+  "Libavcodec.xcframework/tvos-arm64")
+    echo ""
+    ;;
+  "Libavcodec.xcframework/macos-arm64_x86_64")
+    echo ""
+    ;;
+  "Libavcodec.xcframework/ios-arm64_x86_64-maccatalyst")
+    echo "maccatalyst"
+    ;;
+  "Libavcodec.xcframework/ios-arm64_x86_64-simulator")
+    echo "simulator"
+    ;;
+  "Libavcodec.xcframework/ios-arm64_arm64e")
+    echo ""
+    ;;
+  "Libavfilter.xcframework/tvos-arm64_x86_64-simulator")
+    echo "simulator"
+    ;;
+  "Libavfilter.xcframework/ios-arm64_x86_64-maccatalyst")
+    echo "maccatalyst"
+    ;;
+  "Libavfilter.xcframework/ios-arm64_arm64e")
+    echo ""
+    ;;
+  "Libavfilter.xcframework/ios-arm64_x86_64-simulator")
+    echo "simulator"
+    ;;
+  "Libavfilter.xcframework/tvos-arm64")
+    echo ""
+    ;;
+  "Libavfilter.xcframework/macos-arm64_x86_64")
+    echo ""
+    ;;
+  "Libavformat.xcframework/ios-arm64_x86_64-maccatalyst")
+    echo "maccatalyst"
+    ;;
+  "Libavformat.xcframework/tvos-arm64_x86_64-simulator")
+    echo "simulator"
+    ;;
+  "Libavformat.xcframework/tvos-arm64")
+    echo ""
+    ;;
+  "Libavformat.xcframework/ios-arm64_x86_64-simulator")
+    echo "simulator"
+    ;;
+  "Libavformat.xcframework/macos-arm64_x86_64")
+    echo ""
+    ;;
+  "Libavformat.xcframework/ios-arm64_arm64e")
+    echo ""
+    ;;
+  "Libavutil.xcframework/ios-arm64_x86_64-maccatalyst")
+    echo "maccatalyst"
+    ;;
+  "Libavutil.xcframework/ios-arm64_x86_64-simulator")
+    echo "simulator"
+    ;;
+  "Libavutil.xcframework/tvos-arm64")
+    echo ""
+    ;;
+  "Libavutil.xcframework/ios-arm64_arm64e")
+    echo ""
+    ;;
+  "Libavutil.xcframework/tvos-arm64_x86_64-simulator")
+    echo "simulator"
+    ;;
+  "Libavutil.xcframework/macos-arm64_x86_64")
+    echo ""
+    ;;
+  "Libswresample.xcframework/ios-arm64_x86_64-simulator")
+    echo "simulator"
+    ;;
+  "Libswresample.xcframework/ios-arm64_arm64e")
+    echo ""
+    ;;
+  "Libswresample.xcframework/tvos-arm64")
+    echo ""
+    ;;
+  "Libswresample.xcframework/ios-arm64_x86_64-maccatalyst")
+    echo "maccatalyst"
+    ;;
+  "Libswresample.xcframework/macos-arm64_x86_64")
+    echo ""
+    ;;
+  "Libswresample.xcframework/tvos-arm64_x86_64-simulator")
+    echo "simulator"
+    ;;
+  "Libswscale.xcframework/macos-arm64_x86_64")
+    echo ""
+    ;;
+  "Libswscale.xcframework/ios-arm64_x86_64-simulator")
+    echo "simulator"
+    ;;
+  "Libswscale.xcframework/tvos-arm64_x86_64-simulator")
+    echo "simulator"
+    ;;
+  "Libswscale.xcframework/tvos-arm64")
+    echo ""
+    ;;
+  "Libswscale.xcframework/ios-arm64_arm64e")
+    echo ""
+    ;;
+  "Libswscale.xcframework/ios-arm64_x86_64-maccatalyst")
+    echo "maccatalyst"
+    ;;
+  esac
+}
+
+archs_for_slice()
+{
+  case "$1" in
+  "Libavcodec.xcframework/tvos-arm64_x86_64-simulator")
+    echo "arm64 x86_64"
+    ;;
+  "Libavcodec.xcframework/tvos-arm64")
+    echo "arm64"
+    ;;
+  "Libavcodec.xcframework/macos-arm64_x86_64")
+    echo "arm64 x86_64"
+    ;;
+  "Libavcodec.xcframework/ios-arm64_x86_64-maccatalyst")
+    echo "arm64 x86_64"
+    ;;
+  "Libavcodec.xcframework/ios-arm64_x86_64-simulator")
+    echo "arm64 x86_64"
+    ;;
+  "Libavcodec.xcframework/ios-arm64_arm64e")
+    echo "arm64 arm64e"
+    ;;
+  "Libavfilter.xcframework/tvos-arm64_x86_64-simulator")
+    echo "arm64 x86_64"
+    ;;
+  "Libavfilter.xcframework/ios-arm64_x86_64-maccatalyst")
+    echo "arm64 x86_64"
+    ;;
+  "Libavfilter.xcframework/ios-arm64_arm64e")
+    echo "arm64 arm64e"
+    ;;
+  "Libavfilter.xcframework/ios-arm64_x86_64-simulator")
+    echo "arm64 x86_64"
+    ;;
+  "Libavfilter.xcframework/tvos-arm64")
+    echo "arm64"
+    ;;
+  "Libavfilter.xcframework/macos-arm64_x86_64")
+    echo "arm64 x86_64"
+    ;;
+  "Libavformat.xcframework/ios-arm64_x86_64-maccatalyst")
+    echo "arm64 x86_64"
+    ;;
+  "Libavformat.xcframework/tvos-arm64_x86_64-simulator")
+    echo "arm64 x86_64"
+    ;;
+  "Libavformat.xcframework/tvos-arm64")
+    echo "arm64"
+    ;;
+  "Libavformat.xcframework/ios-arm64_x86_64-simulator")
+    echo "arm64 x86_64"
+    ;;
+  "Libavformat.xcframework/macos-arm64_x86_64")
+    echo "arm64 x86_64"
+    ;;
+  "Libavformat.xcframework/ios-arm64_arm64e")
+    echo "arm64 arm64e"
+    ;;
+  "Libavutil.xcframework/ios-arm64_x86_64-maccatalyst")
+    echo "arm64 x86_64"
+    ;;
+  "Libavutil.xcframework/ios-arm64_x86_64-simulator")
+    echo "arm64 x86_64"
+    ;;
+  "Libavutil.xcframework/tvos-arm64")
+    echo "arm64"
+    ;;
+  "Libavutil.xcframework/ios-arm64_arm64e")
+    echo "arm64 arm64e"
+    ;;
+  "Libavutil.xcframework/tvos-arm64_x86_64-simulator")
+    echo "arm64 x86_64"
+    ;;
+  "Libavutil.xcframework/macos-arm64_x86_64")
+    echo "arm64 x86_64"
+    ;;
+  "Libswresample.xcframework/ios-arm64_x86_64-simulator")
+    echo "arm64 x86_64"
+    ;;
+  "Libswresample.xcframework/ios-arm64_arm64e")
+    echo "arm64 arm64e"
+    ;;
+  "Libswresample.xcframework/tvos-arm64")
+    echo "arm64"
+    ;;
+  "Libswresample.xcframework/ios-arm64_x86_64-maccatalyst")
+    echo "arm64 x86_64"
+    ;;
+  "Libswresample.xcframework/macos-arm64_x86_64")
+    echo "arm64 x86_64"
+    ;;
+  "Libswresample.xcframework/tvos-arm64_x86_64-simulator")
+    echo "arm64 x86_64"
+    ;;
+  "Libswscale.xcframework/macos-arm64_x86_64")
+    echo "arm64 x86_64"
+    ;;
+  "Libswscale.xcframework/ios-arm64_x86_64-simulator")
+    echo "arm64 x86_64"
+    ;;
+  "Libswscale.xcframework/tvos-arm64_x86_64-simulator")
+    echo "arm64 x86_64"
+    ;;
+  "Libswscale.xcframework/tvos-arm64")
+    echo "arm64"
+    ;;
+  "Libswscale.xcframework/ios-arm64_arm64e")
+    echo "arm64 arm64e"
+    ;;
+  "Libswscale.xcframework/ios-arm64_x86_64-maccatalyst")
+    echo "arm64 x86_64"
+    ;;
+  esac
+}
+
 copy_dir()
 {
   local source="$1"
@@ -27,7 +255,9 @@ copy_dir()
 SELECT_SLICE_RETVAL=""
 
 select_slice() {
-  local paths=("$@")
+  local xcframework_name="$1"
+  xcframework_name="${xcframework_name##*/}"
+  local paths=("${@:2}")
   # Locate the correct slice of the .xcframework for the current architectures
   local target_path=""
 
@@ -43,29 +273,15 @@ select_slice() {
   fi
   for i in ${!paths[@]}; do
     local matched_all_archs="1"
-    for target_arch in $target_archs
-    do
-      if ! [[ "${paths[$i]}" == *"$target_variant"* ]]; then
+    local slice_archs="$(archs_for_slice "${xcframework_name}/${paths[$i]}")"
+    local slice_variant="$(variant_for_slice "${xcframework_name}/${paths[$i]}")"
+    for target_arch in $target_archs; do
+      if ! [[ "${slice_variant}" == "$target_variant" ]]; then
         matched_all_archs="0"
         break
       fi
 
-      # Verifies that the path contains the variant string (simulator or maccatalyst) if the variant is set.
-      if [[ -z "$target_variant" && ("${paths[$i]}" == *"simulator"* || "${paths[$i]}" == *"maccatalyst"*) ]]; then
-        matched_all_archs="0"
-        break
-      fi
-
-      # This regex matches all possible variants of the arch in the folder name:
-      # Let's say the folder name is: ios-armv7_armv7s_arm64_arm64e/CoconutLib.framework
-      # We match the following: -armv7_, _armv7s_, _arm64_ and _arm64e/.
-      # If we have a specific variant: ios-i386_x86_64-simulator/CoconutLib.framework
-      # We match the following: -i386_ and _x86_64-
-      # When the .xcframework wraps a static library, the folder name does not include
-      # any .framework. In that case, the folder name can be: ios-arm64_armv7
-      # We also match _armv7$ to handle that case.
-      local target_arch_regex="[_\-]${target_arch}([\/_\-]|$)"
-      if ! [[ "${paths[$i]}" =~ $target_arch_regex ]]; then
+      if ! echo "${slice_archs}" | tr " " "\n" | grep -F -q -x "$target_arch"; then
         matched_all_archs="0"
         break
       fi
@@ -87,10 +303,10 @@ install_xcframework() {
   local paths=("${@:4}")
 
   # Locate the correct slice of the .xcframework for the current architectures
-  select_slice "${paths[@]}"
+  select_slice "${basepath}" "${paths[@]}"
   local target_path="$SELECT_SLICE_RETVAL"
   if [[ -z "$target_path" ]]; then
-    echo "warning: [CP] Unable to find matching .xcframework slice in '${paths[@]}' for the current build architectures ($ARCHS)."
+    echo "warning: [CP] $(basename ${basepath}): Unable to find matching slice in '${paths[@]}' for the current build architectures ($ARCHS) and platform (${EFFECTIVE_PLATFORM_NAME-${PLATFORM_NAME}})."
     return
   fi
   local source="$basepath/$target_path"
@@ -105,10 +321,10 @@ install_xcframework() {
   echo "Copied $source to $destination"
 }
 
-install_xcframework "${PODS_ROOT}/../../Sources/Libavcodec.xcframework" "FFmpeg/FFmpeg" "framework" "tvos-arm64" "tvos-arm64_x86_64-simulator"
+install_xcframework "${PODS_ROOT}/../../Sources/Libavcodec.xcframework" "FFmpeg/FFmpeg" "framework" "tvos-arm64_x86_64-simulator" "tvos-arm64"
 install_xcframework "${PODS_ROOT}/../../Sources/Libavfilter.xcframework" "FFmpeg/FFmpeg" "framework" "tvos-arm64_x86_64-simulator" "tvos-arm64"
-install_xcframework "${PODS_ROOT}/../../Sources/Libavformat.xcframework" "FFmpeg/FFmpeg" "framework" "tvos-arm64" "tvos-arm64_x86_64-simulator"
-install_xcframework "${PODS_ROOT}/../../Sources/Libavutil.xcframework" "FFmpeg/FFmpeg" "framework" "tvos-arm64_x86_64-simulator" "tvos-arm64"
+install_xcframework "${PODS_ROOT}/../../Sources/Libavformat.xcframework" "FFmpeg/FFmpeg" "framework" "tvos-arm64_x86_64-simulator" "tvos-arm64"
+install_xcframework "${PODS_ROOT}/../../Sources/Libavutil.xcframework" "FFmpeg/FFmpeg" "framework" "tvos-arm64" "tvos-arm64_x86_64-simulator"
 install_xcframework "${PODS_ROOT}/../../Sources/Libswresample.xcframework" "FFmpeg/FFmpeg" "framework" "tvos-arm64" "tvos-arm64_x86_64-simulator"
-install_xcframework "${PODS_ROOT}/../../Sources/Libswscale.xcframework" "FFmpeg/FFmpeg" "framework" "tvos-arm64" "tvos-arm64_x86_64-simulator"
+install_xcframework "${PODS_ROOT}/../../Sources/Libswscale.xcframework" "FFmpeg/FFmpeg" "framework" "tvos-arm64_x86_64-simulator" "tvos-arm64"
 

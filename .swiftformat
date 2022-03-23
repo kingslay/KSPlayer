@@ -1,4 +1,4 @@
 # 格式化规则
---swiftversion 5.5
+--swiftversion 5.6
 --disable wrapMultilineStatementBraces
 --ifdef noindent

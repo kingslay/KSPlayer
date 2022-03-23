@@ -472,7 +472,7 @@ struct AVMediaPlayerTrack: MediaPlayerTrack {
     let trackID: Int32
     let codecType: FourCharCode
     let rotation: Double = 0
-    let bitRate: Int64 = 0
+    let bitRate: Int64
     let naturalSize: CGSize
     let name: String
     let language: String?
@@ -494,6 +494,7 @@ struct AVMediaPlayerTrack: MediaPlayerTrack {
         language = track.assetTrack?.extendedLanguageTag
         nominalFrameRate = track.assetTrack?.nominalFrameRate ?? 24.0
         naturalSize = track.assetTrack?.naturalSize ?? .zero
+        bitRate = Int64(track.assetTrack?.estimatedDataRate ?? 0)
         if let formatDescription = track.assetTrack?.formatDescriptions.first {
             // swiftlint:disable force_cast
             let desc = formatDescription as! CMFormatDescription
