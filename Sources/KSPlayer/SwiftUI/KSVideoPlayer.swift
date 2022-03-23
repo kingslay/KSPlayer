@@ -54,14 +54,6 @@ public struct KSVideoPlayerView: View {
                     }
                 }
             }
-            .onReceive(player.coordinator.$selectedSubtitileTrack) { track in
-                guard let subtitle = track?.subtitle else {
-                    return
-                }
-                subtitle.enableSubtitle { result in
-                    subtitleModel.selectedSubtitle = try? result.get()
-                }
-            }
             #if os(tvOS)
             .onSwipe { direction in
                 if direction == .down {
@@ -73,6 +65,14 @@ public struct KSVideoPlayerView: View {
                 }
             }
             #endif
+            .onReceive(player.coordinator.$selectedSubtitileTrack) { track in
+                guard let subtitle = track?.subtitle else {
+                    return
+                }
+                subtitle.enableSubtitle { result in
+                    subtitleModel.selectedSubtitle = try? result.get()
+                }
+            }
             .background(.black)
             .edgesIgnoringSafeArea(.all)
             .onDisappear {
