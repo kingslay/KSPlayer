@@ -12,14 +12,14 @@ on:
 jobs:
   create_release:
     name: Create Release
-    runs-on: macos-12
+    runs-on: macos-11
     steps:
       - uses: actions/checkout@main
       - name: Build
         run: swift build -v -c release
       - name: Test
         run: swift test -v
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@main
         with:
             name: KSPlayer
             path: Sources
