@@ -365,8 +365,12 @@ public enum KSPlayerManager {
         //        try? AVAudioSession.sharedInstance().setRouteSharingPolicy(.longFormAudio)
         #else
         let category = AVAudioSession.sharedInstance().category
-        if category != .playback, category != .playAndRecord {
-            try? AVAudioSession.sharedInstance().setCategory(.playback, mode: .default, policy: .longFormAudio)
+        if #available(macOS 10.15, iOS 13.0, tvOS 13.0, *) {
+            if category != .playback, category != .playAndRecord {
+                try? AVAudioSession.sharedInstance().setCategory(.playback, mode: .default, policy: .longFormAudio)
+            }
+        } else {
+            try? AVAudioSession.sharedInstance().setCategory(.playAndRecord, options: .defaultToSpeaker)
         }
         try? AVAudioSession.sharedInstance().setActive(true)
         let maxOut = AVAudioSession.sharedInstance().maximumOutputNumberOfChannels
