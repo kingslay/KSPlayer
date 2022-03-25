@@ -328,12 +328,13 @@ struct VideoSettingView: View {
                 Text("video")
             }
         }
+        .fixedSize()
+        .padding()
         .toolbar {
             Button("Done") {
                 showingModal.toggle()
             }
         }
-        .padding()
     }
 }
 
