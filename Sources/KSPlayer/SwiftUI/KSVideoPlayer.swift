@@ -327,7 +327,8 @@ struct VideoSettingView: View {
             .tabItem {
                 Text("video")
             }
-        }.toolbar {
+        }
+        .toolbar {
             Button("Done") {
                 showingModal.toggle()
             }

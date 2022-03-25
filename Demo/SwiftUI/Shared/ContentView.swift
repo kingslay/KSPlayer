@@ -26,21 +26,13 @@ struct ContentView: View {
                 }
             }
             .searchable(text: $searchText)
-            #if os(macOS)
-                .toolbar {
-                    Button {
-                        showAddActionSheet = true
-                    } label: {
-                        Label("Add", systemImage: "plus")
-                    }
-                }
-            #else
-                .navigationBarItems(trailing: Button {
+            .toolbar {
+                Button {
                     showAddActionSheet = true
                 } label: {
                     Label("Add", systemImage: "plus")
-                })
-            #endif
+                }
+            }
         }.onAppear {
             self.loadCachem3u8()
             if self.resources.count == 0 {
