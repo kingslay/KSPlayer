@@ -85,6 +85,9 @@ public struct KSVideoPlayerView: View {
         .environmentObject(player.coordinator)
         #if os(macOS)
             .navigationTitle(url.lastPathComponent)
+            .onTapGesture(count: 2) {
+                NSApplication.shared.keyWindow?.toggleFullScreen(self)
+            }
         #else
             .navigationBarHidden(true)
         #endif
