@@ -110,7 +110,7 @@ public class PlayerToolBar: UIStackView {
         srtButton.titleFont = .systemFont(ofSize: 14, weight: .medium)
         pipButton.tag = PlayerButtonType.pictureInPicture.rawValue
         pipButton.titleFont = .systemFont(ofSize: 14, weight: .medium)
-        if #available(iOS 13.0, tvOS 14.0, macOS 10.15, *) {
+        if #available(tvOS 14.0, *) {
             pipButton.setImage(AVPictureInPictureController.pictureInPictureButtonStartImage, for: .normal)
             pipButton.setImage(AVPictureInPictureController.pictureInPictureButtonStopImage, for: .selected)
         } else {

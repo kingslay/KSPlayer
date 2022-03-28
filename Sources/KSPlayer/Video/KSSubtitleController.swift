@@ -24,7 +24,7 @@ public class KSSubtitleController {
     private var subtitleName: String?
     public let view: UIView & SubtitleViewProtocol
     public var subtitle: KSSubtitleProtocol?
-    public var selectWithFilePath: ((Result<KSSubtitleProtocol?, NSError>) -> Void)?
+    public var selectWithFilePath: ((Result<KSSubtitleProtocol, NSError>) -> Void)?
     @KSObservable
     public var srtListCount: Int = 0
     public init(customControlView: (UIView & SubtitleViewProtocol)? = nil) {
@@ -35,13 +35,12 @@ public class KSSubtitleController {
         }
         view.isHidden = true
         subtitleDataSouces = [cacheDataSouce]
-        view.selectedInfo.observer = { [weak self] old, info in
+        view.selectedInfo.observer = { [weak self] _, info in
             guard let self = self, let selectWithFilePath = self.selectWithFilePath else { return }
             DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 0.2) { [weak self] in
                 guard let self = self else { return }
                 self.view.isHidden = true
             }
-            old.disableSubtitle()
             info.enableSubtitle(completion: selectWithFilePath)
         }
     }

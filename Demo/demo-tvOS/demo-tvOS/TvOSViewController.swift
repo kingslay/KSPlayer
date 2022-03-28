@@ -27,6 +27,7 @@ final class TvOSViewController: UITableViewController {
         let alertController = UIAlertController(title: "", message: "", preferredStyle: .alert)
         alertController.addTextField { textField in
             textField.placeholder = "URL"
+//            textField.text = ""
         }
         let confirmAction = UIAlertAction(title: "OK", style: .default) { [weak self] _ in
             guard let text = alertController.textFields?.first?.text,

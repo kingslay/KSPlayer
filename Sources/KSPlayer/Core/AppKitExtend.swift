@@ -295,17 +295,6 @@ extension NSStackView {
     }
 }
 
-extension NSWindow {
-    open var rootViewController: NSViewController? {
-        get {
-            contentViewController
-        }
-        set {
-            contentViewController = newValue
-        }
-    }
-}
-
 extension NSGestureRecognizer {
     open func addTarget(_ target: AnyObject, action: Selector) {
         self.target = target

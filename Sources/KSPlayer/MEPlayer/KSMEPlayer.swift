@@ -26,10 +26,10 @@ public class KSMEPlayer: NSObject {
         }
     }
 
-    @available(tvOS 14.0, macOS 10.15, *)
+    @available(tvOS 14.0, *)
     public private(set) lazy var pipController: AVPictureInPictureController? = _pipController()
 
-    @available(tvOS 14.0, macOS 10.15, *)
+    @available(tvOS 14.0, *)
     private func _pipController() -> AVPictureInPictureController? {
         if #available(iOS 15.0, tvOS 15.0, macOS 12.0, *) {
             let contentSource = AVPictureInPictureController.ContentSource(sampleBufferDisplayLayer: videoOutput.displayLayer, playbackDelegate: self)
@@ -363,7 +363,7 @@ extension KSMEPlayer: MediaPlayerProtocol {
     }
 }
 
-@available(tvOS 14.0, macOS 10.15, *)
+@available(tvOS 14.0, *)
 extension KSMEPlayer: AVPictureInPictureSampleBufferPlaybackDelegate {
     public func pictureInPictureController(_: AVPictureInPictureController, setPlaying playing: Bool) {
         playing ? play() : pause()
@@ -468,6 +468,4 @@ extension KSMEPlayer: AVPlaybackCoordinatorPlaybackControlDelegate {
 
 public extension KSMEPlayer {
     var subtitleDataSouce: SubtitleDataSouce? { playerItem }
-
-    var subtitles: [KSSubtitleProtocol] { playerItem.subtitleTracks }
 }

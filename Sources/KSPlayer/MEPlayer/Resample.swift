@@ -24,6 +24,10 @@ class VideoSwresample: Swresample {
     private var height: Int32 = 0
     private var width: Int32 = 0
     private var pool: CVPixelBufferPool?
+    private let dstFormat: AVPixelFormat?
+    init(dstFormat: AVPixelFormat? = nil) {
+        self.dstFormat = dstFormat
+    }
 
     func transfer(avframe: UnsafeMutablePointer<AVFrame>) throws -> MEFrame {
         let frame = VideoVTBFrame()
@@ -48,7 +52,7 @@ class VideoSwresample: Swresample {
             sws_freeContext(imgConvertCtx)
             imgConvertCtx = nil
         } else {
-            let dstFormat = format.bestPixelFormat()
+            let dstFormat = dstFormat ?? format.bestPixelFormat()
             pixelFormatType = dstFormat.osType()!
             imgConvertCtx = sws_getCachedContext(imgConvertCtx, width, height, self.format, width, height, dstFormat, SWS_BICUBIC, nil, nil, nil)
         }
@@ -198,11 +202,7 @@ extension AVColorTransferCharacteristic {
         case AVCOL_TRC_SMPTE240M:
             return kCVImageBufferTransferFunction_SMPTE_240M_1995
         case AVCOL_TRC_LINEAR:
-            if #available(iOS 12.0, tvOS 12.0, macOS 10.14, *) {
-                return kCVImageBufferTransferFunction_Linear
-            } else {
-                return nil
-            }
+            return kCVImageBufferTransferFunction_Linear
         case AVCOL_TRC_SMPTE428:
             return kCVImageBufferTransferFunction_SMPTE_ST_428_1
         case AVCOL_TRC_ARIB_STD_B67:
@@ -388,9 +388,7 @@ class AudioSwresample: Swresample {
     private let channels: Int32
     init(codecpar: AVCodecParameters) {
         descriptor = AudioDescriptor(codecpar: codecpar)
-        let channelOutCount = KSPlayerManager.channelLayout.channelCount
-        let channelInCount = descriptor.inputNumberOfChannels
-        channels = Int32(max(min(channelOutCount, channelInCount), 2))
+        channels = Int32(max(min(KSPlayerManager.channelLayout.channelCount, descriptor.inputNumberOfChannels), 2))
         _ = setup(descriptor: descriptor)
     }
 

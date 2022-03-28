@@ -6,16 +6,6 @@
 //
 import Foundation
 
-public protocol SubtitleInfo: AnyObject {
-    var userInfo: NSMutableDictionary? { get set }
-    var subtitleDataSouce: SubtitleDataSouce? { get set }
-    var name: String { get }
-    var subtitleID: String { get }
-    var comment: String? { get }
-    func enableSubtitle(completion: @escaping (Result<KSSubtitleProtocol?, NSError>) -> Void)
-    func disableSubtitle()
-}
-
 public class URLSubtitleInfo: SubtitleInfo {
     public weak var subtitleDataSouce: SubtitleDataSouce?
     public let name: String
@@ -28,8 +18,7 @@ public class URLSubtitleInfo: SubtitleInfo {
         self.name = name
     }
 
-    public func disableSubtitle() {}
-    public func enableSubtitle(completion: @escaping (Result<KSSubtitleProtocol?, NSError>) -> Void) {
+    public func enableSubtitle(completion: @escaping (Result<KSSubtitleProtocol, NSError>) -> Void) {
         let block = { (url: URL) in
             let subtitles = KSURLSubtitle()
             do {
@@ -52,11 +41,11 @@ public class URLSubtitleInfo: SubtitleInfo {
                         cache.addCache(subtitleID: self.subtitleID, downloadURL: downloadURL)
                     }
                 } else {
-                    completion(.success(nil))
+                    completion(.failure(NSError(errorCode: .subtitleParamsEmpty)))
                 }
             }
         } else {
-            completion(.success(nil))
+            completion(.failure(NSError(errorCode: .subtitleParamsEmpty)))
         }
     }
 }

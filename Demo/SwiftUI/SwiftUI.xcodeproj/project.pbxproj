@@ -42,12 +42,13 @@
 		AC77DFB026402327001351AE /* DemoApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoApp.swift; sourceTree = "<group>"; };
 		AC77DFB126402327001351AE /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		AC77DFB226402329001351AE /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		AC77DFB726402329001351AE /* demo-SPM.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "demo-SPM.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		AC77DFB726402329001351AE /* .app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = .app; sourceTree = BUILT_PRODUCTS_DIR; };
 		AC77DFBA26402329001351AE /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		AC77DFBF26402329001351AE /* demo-SPM.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "demo-SPM.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		AC77DFBF26402329001351AE /* .app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = .app; sourceTree = BUILT_PRODUCTS_DIR; };
 		AC77DFC126402329001351AE /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		AC77DFC226402329001351AE /* macOS.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = macOS.entitlements; sourceTree = "<group>"; };
-		ACB8C9FC278AE3A6008B6582 /* tvOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = tvOS.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		ACAD6F7427E39B75006D960B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		ACB8C9FC278AE3A6008B6582 /* .app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = .app; sourceTree = BUILT_PRODUCTS_DIR; };
 		ACD2F747275F6E860006D16F /* KSPlayer */ = {isa = PBXFileReference; lastKnownFileType = folder; name = KSPlayer; path = ../..; sourceTree = "<group>"; };
 		ACD2F780275F9BEE0006D16F /* Polonaise.flac */ = {isa = PBXFileReference; lastKnownFileType = file; path = Polonaise.flac; sourceTree = "<group>"; };
 		ACD2F781275F9BEE0006D16F /* tos.mkv */ = {isa = PBXFileReference; lastKnownFileType = file; path = tos.mkv; sourceTree = "<group>"; };
@@ -126,9 +127,9 @@
 		AC77DFB826402329001351AE /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				AC77DFB726402329001351AE /* demo-SPM.app */,
-				AC77DFBF26402329001351AE /* demo-SPM.app */,
-				ACB8C9FC278AE3A6008B6582 /* tvOS.app */,
+				AC77DFB726402329001351AE /* .app */,
+				AC77DFBF26402329001351AE /* .app */,
+				ACB8C9FC278AE3A6008B6582 /* .app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -153,6 +154,7 @@
 		ACB8C9FD278AE3A6008B6582 /* tvOS */ = {
 			isa = PBXGroup;
 			children = (
+				ACAD6F7427E39B75006D960B /* Info.plist */,
 			);
 			path = tvOS;
 			sourceTree = "<group>";
@@ -208,7 +210,7 @@
 				ACD2F771275F735C0006D16F /* KSPlayer */,
 			);
 			productName = "demo-SPM (iOS)";
-			productReference = AC77DFB726402329001351AE /* demo-SPM.app */;
+			productReference = AC77DFB726402329001351AE /* .app */;
 			productType = "com.apple.product-type.application";
 		};
 		AC77DFBE26402329001351AE /* macOS */ = {
@@ -228,7 +230,7 @@
 				ACD2F74D275F6EE60006D16F /* KSPlayer */,
 			);
 			productName = "demo-SPM (macOS)";
-			productReference = AC77DFBF26402329001351AE /* demo-SPM.app */;
+			productReference = AC77DFBF26402329001351AE /* .app */;
 			productType = "com.apple.product-type.application";
 		};
 		ACB8C9FB278AE3A6008B6582 /* tvOS */ = {
@@ -248,7 +250,7 @@
 				ACB8CA0C278AE4A0008B6582 /* KSPlayer */,
 			);
 			productName = "demo-SPM (tvOS)";
-			productReference = ACB8C9FC278AE3A6008B6582 /* tvOS.app */;
+			productReference = ACB8C9FC278AE3A6008B6582 /* .app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -441,6 +443,7 @@
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "KS Player";
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 			};
@@ -495,6 +498,7 @@
 				MACOSX_DEPLOYMENT_TARGET = 12.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "KS Player";
 				SWIFT_COMPILATION_MODE = wholemodule;
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
 			};
@@ -518,7 +522,6 @@
 					"@executable_path/Frameworks",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "kintan.demo-SPM";
-				PRODUCT_NAME = "demo-SPM";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				"PROVISIONING_PROFILE_SPECIFIER[sdk=macosx*]" = "";
 				SDKROOT = iphoneos;
@@ -546,7 +549,6 @@
 					"@executable_path/Frameworks",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "kintan.demo-SPM";
-				PRODUCT_NAME = "demo-SPM";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				"PROVISIONING_PROFILE_SPECIFIER[sdk=macosx*]" = "";
 				SDKROOT = iphoneos;
@@ -574,7 +576,6 @@
 				);
 				MACOSX_DEPLOYMENT_TARGET = 12.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "kintan.demo-SPM";
-				PRODUCT_NAME = "demo-SPM";
 				SDKROOT = macosx;
 				SWIFT_VERSION = 5.0;
 			};
@@ -597,7 +598,6 @@
 				);
 				MACOSX_DEPLOYMENT_TARGET = 12.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "kintan.demo-SPM";
-				PRODUCT_NAME = "demo-SPM";
 				SDKROOT = macosx;
 				SWIFT_VERSION = 5.0;
 			};
@@ -613,6 +613,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = tvOS/Info.plist;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UIUserInterfaceStyle = Automatic;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -621,7 +622,6 @@
 				);
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "kintan.demo-SPM--tvOS-";
-				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = appletvos;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -640,6 +640,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = tvOS/Info.plist;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UIUserInterfaceStyle = Automatic;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -648,7 +649,6 @@
 				);
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "kintan.demo-SPM--tvOS-";
-				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = appletvos;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;

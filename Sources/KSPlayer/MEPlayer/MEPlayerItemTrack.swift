@@ -24,19 +24,12 @@ extension TrackProtocol {
     }
 
     var isImageSubtitle: Bool {
-        [AV_CODEC_ID_DVD_SUBTITLE, AV_CODEC_ID_DVB_SUBTITLE, AV_CODEC_ID_DVB_TELETEXT].contains(stream.pointee.codecpar.pointee.codec_id)
+        [AV_CODEC_ID_DVD_SUBTITLE, AV_CODEC_ID_DVB_SUBTITLE, AV_CODEC_ID_DVB_TELETEXT, AV_CODEC_ID_HDMV_PGS_SUBTITLE].contains(stream.pointee.codecpar.pointee.codec_id)
     }
 }
 
-extension TrackProtocol {
-    var streamIndex: Int32 { stream.pointee.index }
-}
-
-func == (lhs: TrackProtocol, rhs: TrackProtocol) -> Bool {
-    lhs.streamIndex == rhs.streamIndex
-}
-
 struct AssetTrack: TrackProtocol {
+    let trackID: Int32
     let name: String
     let language: String?
     let stream: UnsafeMutablePointer<AVStream>
@@ -51,8 +44,10 @@ struct AssetTrack: TrackProtocol {
     let transferFunction: String?
     let yCbCrMatrix: String?
     let codecType: FourCharCode
+    var subtitle: SubtitleInfo?
     init?(stream: UnsafeMutablePointer<AVStream>) {
         self.stream = stream
+        trackID = stream.pointee.index
         if let bitrateEntry = av_dict_get(stream.pointee.metadata, "variant_bitrate", nil, 0) ?? av_dict_get(stream.pointee.metadata, "BPS", nil, 0),
            let bitRate = Int64(String(cString: bitrateEntry.pointee.value)) {
             self.bitRate = bitRate
@@ -98,11 +93,7 @@ struct AssetTrack: TrackProtocol {
         if let entry = av_dict_get(stream.pointee.metadata, "title", nil, 0), let title = entry.pointee.value {
             name = String(cString: title)
         } else {
-            if let language = language {
-                name = language
-            } else {
-                name = mediaType == .subtitle ? NSLocalizedString("built-in subtitles", comment: "") : mediaType.rawValue
-            }
+            name = language ?? mediaType.rawValue
         }
     }
 }
@@ -137,13 +128,11 @@ class FFPlayerItemTrack<Frame: MEFrame>: PlayerItemTrackProtocol, CustomStringCo
     let description: String
     weak var delegate: CodecCapacityDelegate?
     let fps: Float
-    let assetTrack: TrackProtocol
     let mediaType: AVFoundation.AVMediaType
     let outputRenderQueue: CircularBuffer<Frame>
     var isLoopModel = false
 
     required init(assetTrack: TrackProtocol, options: KSOptions) {
-        self.assetTrack = assetTrack
         self.options = options
         mediaType = assetTrack.mediaType
         description = mediaType.rawValue
@@ -158,7 +147,7 @@ class FFPlayerItemTrack<Frame: MEFrame>: PlayerItemTrackProtocol, CustomStringCo
             outputRenderQueue = CircularBuffer()
         }
         frameMaxCount = outputRenderQueue.maxCount
-        decoderMap[assetTrack.streamIndex] = assetTrack.makeDecode(options: options, delegate: self)
+        decoderMap[assetTrack.trackID] = assetTrack.makeDecode(options: options, delegate: self)
     }
 
     func decode() {
@@ -211,7 +200,7 @@ class FFPlayerItemTrack<Frame: MEFrame>: PlayerItemTrackProtocol, CustomStringCo
     }
 
     fileprivate func doDecode(packet: Packet) {
-        let decoder = decoderMap.value(for: packet.assetTrack.streamIndex, default: packet.assetTrack.makeDecode(options: options, delegate: self))
+        let decoder = decoderMap.value(for: packet.assetTrack.trackID, default: packet.assetTrack.makeDecode(options: options, delegate: self))
         do {
             try decoder.doDecode(packet: packet.corePacket)
             if options.decodeAudioTime == 0, mediaType == .audio {

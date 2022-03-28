@@ -9,8 +9,13 @@ import AVFoundation
 import AVKit
 import KSPlayer
 import SwiftUI
+#if !canImport(UIKit)
+typealias UIHostingController = NSHostingController
+typealias UIApplication = NSApplication
+#endif
 @main
 struct DemoApp: App {
+    @State private var isImporting: Bool = false
     init() {
         KSPlayerManager.canBackgroundPlay = true
         KSPlayerManager.logLevel = .debug
@@ -20,50 +25,89 @@ struct DemoApp: App {
         KSOptions.isSecondOpen = true
         KSOptions.isAccurateSeek = true
         KSOptions.isLoopPlay = true
+        let arguments = ProcessInfo.processInfo.arguments.dropFirst()
+        var dropNextArg = false
+        var playerArgs = [String]()
+        var filenames = [String]()
+        for argument in arguments {
+            if dropNextArg {
+                dropNextArg = false
+                continue
+            }
+            if argument.starts(with: "--") {
+                playerArgs.append(argument)
+            } else if argument.starts(with: "-") {
+                dropNextArg = true
+            } else {
+                filenames.append(argument)
+            }
+        }
+        if let urlString = filenames.first {
+            newPlayerView(KSVideoPlayerView(url: URL(fileURLWithPath: urlString), options: KSOptions()))
+        }
     }
 
     var body: some Scene {
-        let content = ContentView()
         WindowGroup {
-            content
+            ContentView()
+                .onOpenURL { url in
+                    newPlayerView(KSVideoPlayerView(url: url, options: KSOptions()))
+                }
+            #if !os(tvOS)
+                .fileImporter(isPresented: $isImporting, allowedContentTypes: [.movie, .audio, .data]) { result in
+                    guard let url = try? result.get() else {
+                        return
+                    }
+                    #if os(macOS)
+                    NSDocumentController.shared.noteNewRecentDocumentURL(url)
+                    #endif
+                    if url.isAudio || url.isMovie {
+                        newPlayerView(KSVideoPlayerView(url: url, options: KSOptions()))
+                    } else {
+                        let controllers = UIApplication.shared.windows.reversed().compactMap {
+                            #if os(macOS)
+                            $0.contentViewController as? UIHostingController<KSVideoPlayerView>
+                            #else
+                            $0.rootViewController as? UIHostingController<KSVideoPlayerView>
+                            #endif
+                        }
+                        if let hostingController = controllers.first {
+                            hostingController.becomeFirstResponder()
+                            hostingController.rootView.subtitleModel.selectedSubtitle = KSURLSubtitle(url: url)
+                        }
+                    }
+                }
+            #endif
+//
 //            VideoPlayer(player: AVPlayer(url: URL(string: "https://bitmovin-a.akamaihd.net/content/dataset/multi-codec/hevc/stream_fmp4.m3u8")!))
 //            AVContentView()
         }
         #if !os(tvOS)
         .commands {
-            CommandGroup(replacing: .newItem) {
-                Button("Add") {
-                    content.showAddActionSheet = true
-                }
-            }
             #if os(macOS)
             CommandGroup(before: .newItem) {
                 Button("Open") {
-                    let panel = NSOpenPanel()
-                    panel.title = NSLocalizedString("alert.choose_media_file.title", comment: "Choose Media File")
-                    panel.canCreateDirectories = false
-                    panel.canChooseFiles = true
-                    panel.canChooseDirectories = true
-                    panel.allowsMultipleSelection = false
-                    if panel.runModal() == .OK {
-                        for url in panel.urls {
-                            NSDocumentController.shared.noteNewRecentDocumentURL(url)
-                        }
-                        if let url = panel.urls.first {
-                            let view = KSVideoPlayerView(url: url, options: KSOptions())
-                            let controller = NSHostingController(rootView: view)
-                            let win = NSWindow(contentViewController: controller)
-                            win.contentViewController = controller
-                            win.makeKeyAndOrderFront(nil)
-                            if let frame = win.screen?.frame {
-                                win.setFrame(frame, display: true)
-                            }
-                        }
-                    }
+                    isImporting = true
                 }.keyboardShortcut("o")
             }
             #endif
         }
+        #endif
+    }
+
+    private func newPlayerView(_ view: KSVideoPlayerView) {
+        let controller = UIHostingController(rootView: view)
+        #if os(macOS)
+        let win = UIWindow(contentViewController: controller)
+        win.makeKeyAndOrderFront(nil)
+        if let frame = win.screen?.frame {
+            win.setFrame(frame, display: true)
+        }
+        win.title = view.url.lastPathComponent
+        #else
+        let win = UIWindow()
+        win.rootViewController = controller
+        win.makeKey()
         #endif
     }
 }

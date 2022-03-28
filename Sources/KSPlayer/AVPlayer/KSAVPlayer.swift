@@ -91,7 +91,7 @@ public class KSAVPlayer {
         }
     }
 
-    @available(tvOS 14.0, macOS 10.15, *)
+    @available(tvOS 14.0, *)
     public private(set) lazy var pipController: AVPictureInPictureController? = AVPictureInPictureController(playerLayer: playerView.playerLayer)
     @available(macOS 12.0, iOS 15.0, tvOS 15.0, *)
     public private(set) lazy var playbackCoordinator: AVPlaybackCoordinator = playerView.player.playbackCoordinator
@@ -445,10 +445,8 @@ extension KSAVPlayer: MediaPlayerProtocol {
     }
 
     public func select(track: MediaPlayerTrack) {
-        if var track = track as? AVMediaPlayerTrack {
-            player.currentItem?.tracks.filter { $0.assetTrack?.mediaType == track.mediaType }.forEach { $0.isEnabled = false }
-            track.isEnabled = true
-        }
+        player.currentItem?.tracks.filter { $0.assetTrack?.mediaType == track.mediaType }.forEach { $0.isEnabled = false }
+        track.setIsEnabled(true)
     }
 }
 
@@ -468,11 +466,13 @@ extension AVMediaType {
 }
 
 struct AVMediaPlayerTrack: MediaPlayerTrack {
+    var subtitle: SubtitleInfo?
     private let track: AVPlayerItemTrack
     let nominalFrameRate: Float
+    let trackID: Int32
     let codecType: FourCharCode
     let rotation: Double = 0
-    let bitRate: Int64 = 0
+    let bitRate: Int64
     let naturalSize: CGSize
     let name: String
     let language: String?
@@ -483,21 +483,18 @@ struct AVMediaPlayerTrack: MediaPlayerTrack {
     let yCbCrMatrix: String?
 
     var isEnabled: Bool {
-        get {
-            track.isEnabled
-        }
-        set {
-            track.isEnabled = newValue
-        }
+        track.isEnabled
     }
 
     init(track: AVPlayerItemTrack) {
         self.track = track
+        trackID = track.assetTrack?.trackID ?? 0
         mediaType = track.assetTrack?.mediaType ?? .video
         name = track.assetTrack?.languageCode ?? ""
         language = track.assetTrack?.extendedLanguageTag
         nominalFrameRate = track.assetTrack?.nominalFrameRate ?? 24.0
         naturalSize = track.assetTrack?.naturalSize ?? .zero
+        bitRate = Int64(track.assetTrack?.estimatedDataRate ?? 0)
         if let formatDescription = track.assetTrack?.formatDescriptions.first {
             // swiftlint:disable force_cast
             let desc = formatDescription as! CMFormatDescription
@@ -515,6 +512,10 @@ struct AVMediaPlayerTrack: MediaPlayerTrack {
             yCbCrMatrix = nil
             codecType = 0
         }
+    }
+
+    func setIsEnabled(_ isEnabled: Bool) {
+        track.isEnabled = isEnabled
     }
 }
 

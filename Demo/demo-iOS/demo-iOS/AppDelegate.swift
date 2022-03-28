@@ -8,14 +8,14 @@
 
 import KSPlayer
 import UIKit
-@available(iOS 13.0, tvOS 13.0, *)
+
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate, UISplitViewControllerDelegate {
     var window: UIWindow?
     func application(_: UIApplication, didFinishLaunchingWithOptions _: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         let window = UIWindow()
         KSPlayerManager.canBackgroundPlay = true
-        KSPlayerManager.logLevel = .debug
+        KSPlayerManager.logLevel = .fatal
         KSPlayerManager.firstPlayerType = KSMEPlayer.self
         KSPlayerManager.secondPlayerType = KSMEPlayer.self
 //        KSPlayerManager.supportedInterfaceOrientations = .all

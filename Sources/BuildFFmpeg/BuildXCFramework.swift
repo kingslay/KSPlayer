@@ -371,8 +371,7 @@ class BuildFFMPEG: BaseBuild {
         "--enable-decoder=truehd", "--enable-decoder=vorbis", "--enable-decoder=wma*",
         // 字幕
         "--enable-decoder=ass", "--enable-decoder=dvbsub", "--enable-decoder=dvdsub", "--enable-decoder=movtext",
-        "--enable-decoder=srt", "--enable-decoder=ssa", "--enable-decoder=subrip", "--enable-decoder=webvtt",
-
+        "--enable-decoder=pgssub", "--enable-decoder=srt", "--enable-decoder=ssa", "--enable-decoder=subrip", "--enable-decoder=webvtt",
         // ./configure --list-muxers
         "--disable-muxers",
         // "--enable-muxer=mpegts", "--enable-muxer=mp4",
@@ -406,7 +405,7 @@ class BuildFFMPEG: BaseBuild {
 }
 
 class BuildOpenSSL: BaseBuild {
-    private let sslFile = "openssl-3.0.1"
+    private let sslFile = "openssl-3.0.2"
     init() {
         super.init(library: "SSL")
     }
@@ -490,11 +489,11 @@ enum PlatformType: String, CaseIterable {
     var minVersion: String {
         switch self {
         case .ios, .isimulator:
-            return "11.0"
+            return "13.0"
         case .tvos, .tvsimulator:
-            return "11.0"
+            return "13.0"
         case .macos:
-            return "10.13"
+            return "10.15"
         case .maccatalyst:
             return "13.0"
         }

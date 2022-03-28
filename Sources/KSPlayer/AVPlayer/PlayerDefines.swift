@@ -54,7 +54,7 @@ public protocol MediaPlayerProtocol: MediaPlayback {
     var playbackVolume: Float { get set }
     var contentMode: UIViewContentMode { get set }
     var subtitleDataSouce: SubtitleDataSouce? { get }
-    @available(tvOS 14.0, macOS 10.15, *)
+    @available(tvOS 14.0, *)
     var pipController: AVPictureInPictureController? { get }
     @available(macOS 12.0, iOS 15.0, tvOS 15.0, *)
     var playbackCoordinator: AVPlaybackCoordinator { get }
@@ -85,6 +85,7 @@ public protocol MediaPlayerDelegate: AnyObject {
 }
 
 public protocol MediaPlayerTrack {
+    var trackID: Int32 { get }
     var name: String { get }
     var language: String? { get }
     var mediaType: AVFoundation.AVMediaType { get }
@@ -98,6 +99,8 @@ public protocol MediaPlayerTrack {
     var colorPrimaries: String? { get }
     var transferFunction: String? { get }
     var yCbCrMatrix: String? { get }
+    var subtitle: SubtitleInfo? { get }
+    func setIsEnabled(_ isEnabled: Bool)
 }
 
 public extension FourCharCode {
@@ -194,6 +197,7 @@ open class KSOptions {
     public var probesize: Int64?
     public var maxAnalyzeDuration: Int64?
     public var lowres = UInt8(0)
+    public var autoSelectEmbedSubtitle = true
     public internal(set) var formatName = ""
     public internal(set) var starTime = 0.0
     public internal(set) var openTime = 0.0
@@ -361,10 +365,9 @@ public enum KSPlayerManager {
         //        try? AVAudioSession.sharedInstance().setRouteSharingPolicy(.longFormAudio)
         #else
         let category = AVAudioSession.sharedInstance().category
-        if category == .playback || category == .playAndRecord {
-            return
+        if category != .playback, category != .playAndRecord {
+            try? AVAudioSession.sharedInstance().setCategory(.playback, mode: .default, policy: .longFormAudio)
         }
-        try? AVAudioSession.sharedInstance().setCategory(.playback, mode: .default, policy: .longFormAudio)
         try? AVAudioSession.sharedInstance().setActive(true)
         let maxOut = AVAudioSession.sharedInstance().maximumOutputNumberOfChannels
         try? AVAudioSession.sharedInstance().setPreferredOutputNumberOfChannels(maxOut)
@@ -417,6 +420,7 @@ public enum KSPlayerErrorCode: Int {
     case subtitleUnEncoding
     case subtitleUnParse
     case subtitleFormatUnSupport
+    case subtitleParamsEmpty
 }
 
 extension KSPlayerErrorCode: CustomStringConvertible {
@@ -448,6 +452,8 @@ extension KSPlayerErrorCode: CustomStringConvertible {
             return "Subtitle parsing error"
         case .subtitleFormatUnSupport:
             return "Current subtitle format is not supported"
+        case .subtitleParamsEmpty:
+            return "Subtitle Params is empty"
         case .auidoSwrInit:
             return "swr_init swrContext fail"
         default:
@@ -627,7 +633,7 @@ extension UIView {
     }
 }
 
-extension URL {
+public extension URL {
     var isMovie: Bool {
         if let typeID = try? resourceValues(forKeys: [.typeIdentifierKey]).typeIdentifier as CFString? {
             return UTTypeConformsTo(typeID, kUTTypeMovie)
