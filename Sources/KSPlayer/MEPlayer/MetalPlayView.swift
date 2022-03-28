@@ -41,6 +41,9 @@ final class MetalPlayView: UIView {
         #if !canImport(UIKit)
         layer = AVSampleBufferDisplayLayer()
         #endif
+        #if os(macOS) || targetEnvironment(macCatalyst)
+        (view.layer as? CAMetalLayer)?.wantsExtendedDynamicRangeContent = true
+        #endif
         view.framebufferOnly = true
         displayLink.add(to: RunLoop.main, forMode: .common)
         isPaused = true
@@ -181,9 +184,6 @@ extension MetalPlayView {
                 }
                 view.colorPixelFormat = KSOptions.colorPixelFormat(bitDepth: pixelBuffer.bitDepth)
                 (view.layer as? CAMetalLayer)?.colorspace = pixelBuffer.colorspace
-                #if os(macOS) || targetEnvironment(macCatalyst)
-                (view.layer as? CAMetalLayer)?.wantsExtendedDynamicRangeContent = true
-                #endif
                 guard let drawable = view.currentDrawable else {
                     return
                 }
