@@ -151,19 +151,13 @@ final class AudioEnginePlayer: AudioPlayer, FrameOutput {
 //        engine.attach(nbandEQ)
 //        engine.attach(distortion)
 //        engine.attach(delay)
-        if #available(macOS 10.15, iOS 13.0, tvOS 13.0, *) {
-            let sourceNode = AVAudioSourceNode(format: format) { [weak self] _, _, frameCount, audioBufferList in
-                self?.audioPlayerShouldInputData(ioData: UnsafeMutableAudioBufferListPointer(audioBufferList), numberOfFrames: frameCount)
-                return noErr
-            }
-            engine.attach(sourceNode)
-            engine.connect(nodes: [sourceNode, dynamicsProcessor, engine.mainMixerNode, engine.outputNode], format: format)
-        } else {
-            engine.connect(nodes: [engine.inputNode, dynamicsProcessor, engine.mainMixerNode, engine.outputNode], format: format)
-            if let audioUnit = engine.inputNode.audioUnit {
-                addRenderCallback(audioUnit: audioUnit, streamDescription: format.streamDescription)
-            }
+        let sourceNode = AVAudioSourceNode(format: format) { [weak self] _, _, frameCount, audioBufferList in
+            self?.audioPlayerShouldInputData(ioData: UnsafeMutableAudioBufferListPointer(audioBufferList), numberOfFrames: frameCount)
+            return noErr
         }
+        engine.attach(sourceNode)
+        engine.connect(nodes: [sourceNode, dynamicsProcessor, engine.mainMixerNode, engine.outputNode], format: format)
+
         if let audioUnit = engine.outputNode.audioUnit {
             addRenderNotify(audioUnit: audioUnit)
         }

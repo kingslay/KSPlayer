@@ -405,7 +405,7 @@ class BuildFFMPEG: BaseBuild {
 }
 
 class BuildOpenSSL: BaseBuild {
-    private let sslFile = "openssl-3.0.1"
+    private let sslFile = "openssl-3.0.2"
     init() {
         super.init(library: "SSL")
     }
@@ -489,11 +489,11 @@ enum PlatformType: String, CaseIterable {
     var minVersion: String {
         switch self {
         case .ios, .isimulator:
-            return "11.0"
+            return "13.0"
         case .tvos, .tvsimulator:
-            return "11.0"
+            return "13.0"
         case .macos:
-            return "10.13"
+            return "10.15"
         case .maccatalyst:
             return "13.0"
         }

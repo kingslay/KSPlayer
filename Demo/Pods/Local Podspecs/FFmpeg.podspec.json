@@ -13,9 +13,9 @@
     "tag": "5.0"
   },
   "platforms": {
-    "ios": "11.0",
-    "osx": "10.13",
-    "tvos": "11.0"
+    "ios": "13.0",
+    "osx": "10.15",
+    "tvos": "13.0"
   },
   "default_subspecs": "FFmpeg",
   "static_framework": true,

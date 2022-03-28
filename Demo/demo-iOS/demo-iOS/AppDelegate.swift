@@ -8,7 +8,7 @@
 
 import KSPlayer
 import UIKit
-@available(iOS 13.0, tvOS 13.0, *)
+
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate, UISplitViewControllerDelegate {
     var window: UIWindow?

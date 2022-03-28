@@ -28,7 +28,7 @@ English | [简体中文](./README_CN.md)
 
 ## Requirements
 
-- iOS 11 +,  macOS 10.13 +, tvOS 11 +
+- iOS 13 +,  macOS 10.15 +, tvOS 13 +
 - Xcode 13
 - Swift 5.5
 
