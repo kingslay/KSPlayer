@@ -26,7 +26,7 @@ KSPlayer是一款基于 AVPlayer, FFmpeg  纯Swift的音视频播放器，支持
 - [x] Bitcode
 
 ## 三、要求
-- iOS 11 +,  macOS 10.13 +, tvOS 11 +
+- iOS 13 +,  macOS 10.15 +, tvOS 13 +
 - Xcode 13
 - Swift 5.5
 

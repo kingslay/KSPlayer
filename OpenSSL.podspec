@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
     s.name             = 'OpenSSL'
-    s.version          = '3.0.1'
+    s.version          = '3.0.2'
     s.summary          = 'OpenSSL'
 
     s.description      = <<-DESC
@@ -12,10 +12,10 @@ Pod::Spec.new do |s|
     s.license          = 'MIT'
     s.source           = { :git => 'https://github.com/kingslay/KSPlayer.git', :tag => s.version.to_s }
 
-    s.ios.deployment_target = '11.0'
-    s.osx.deployment_target = '10.13'
+    s.ios.deployment_target = '13.0'
+    s.osx.deployment_target = '10.15'
     # s.watchos.deployment_target = '2.0'
-    s.tvos.deployment_target = '11.0'
+    s.tvos.deployment_target = '13.0'
     s.default_subspec = 'OpenSSL'
     s.static_framework = true
     s.subspec 'OpenSSL' do |openssl|

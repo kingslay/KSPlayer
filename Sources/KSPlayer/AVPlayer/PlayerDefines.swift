@@ -54,7 +54,7 @@ public protocol MediaPlayerProtocol: MediaPlayback {
     var playbackVolume: Float { get set }
     var contentMode: UIViewContentMode { get set }
     var subtitleDataSouce: SubtitleDataSouce? { get }
-    @available(tvOS 14.0, macOS 10.15, *)
+    @available(tvOS 14.0, *)
     var pipController: AVPictureInPictureController? { get }
     @available(macOS 12.0, iOS 15.0, tvOS 15.0, *)
     var playbackCoordinator: AVPlaybackCoordinator { get }
@@ -365,16 +365,8 @@ public enum KSPlayerManager {
         //        try? AVAudioSession.sharedInstance().setRouteSharingPolicy(.longFormAudio)
         #else
         let category = AVAudioSession.sharedInstance().category
-        if #available(iOS 13.0, tvOS 13.0, *) {
-            if category != .playback, category != .playAndRecord {
-                try? AVAudioSession.sharedInstance().setCategory(.playback, mode: .default, policy: .longFormAudio)
-            }
-        } else {
-            #if os(iOS)
-            try? AVAudioSession.sharedInstance().setCategory(.playAndRecord, options: .defaultToSpeaker)
-            #else
-            try? AVAudioSession.sharedInstance().setCategory(.playAndRecord)
-            #endif
+        if category != .playback, category != .playAndRecord {
+            try? AVAudioSession.sharedInstance().setCategory(.playback, mode: .default, policy: .longFormAudio)
         }
         try? AVAudioSession.sharedInstance().setActive(true)
         let maxOut = AVAudioSession.sharedInstance().maximumOutputNumberOfChannels

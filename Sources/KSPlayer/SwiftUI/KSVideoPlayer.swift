@@ -14,12 +14,11 @@ public struct KSVideoPlayerView: View {
     public let url: URL
     public let options: KSOptions
     private let player: KSVideoPlayer
-    private let subtitleView: VideoSubtitleView
+    private let subtitleView = VideoSubtitleView()
     public init(url: URL, options: KSOptions) {
         self.options = options
         self.url = url
         player = KSVideoPlayer(url: url, options: options)
-        subtitleView = VideoSubtitleView()
     }
 
     public var body: some View {
@@ -243,12 +242,10 @@ struct VideoControllerView: View {
     }
 }
 
-@available(iOS 13, tvOS 13, macOS 10.15, *)
 extension EventModifiers {
     static let none = Self()
 }
 
-@available(iOS 13, tvOS 13, macOS 10.15, *)
 public class SubtitleModel: ObservableObject {
     public var selectedSubtitle: KSSubtitleProtocol?
     fileprivate var endTime = TimeInterval(0)
@@ -341,7 +338,6 @@ struct VideoSettingView: View {
     }
 }
 
-@available(iOS 13, tvOS 13, macOS 10.15, *)
 public struct KSVideoPlayer {
     public let coordinator: Coordinator
     private let url: URL
@@ -354,10 +350,9 @@ public struct KSVideoPlayer {
 }
 
 #if !canImport(UIKit)
-@available(macOS 10.15, *)
 typealias UIViewRepresentable = NSViewRepresentable
 #endif
-@available(iOS 13, tvOS 13, macOS 10.15, *)
+
 extension KSVideoPlayer: UIViewRepresentable {
     public func makeCoordinator() -> Coordinator {
         coordinator
@@ -524,7 +519,6 @@ extension KSVideoPlayer: UIViewRepresentable {
     }
 }
 
-@available(iOS 13, tvOS 13, macOS 10.15, *)
 extension KSVideoPlayer {
     func onBufferChanged(_ handler: @escaping (Int, TimeInterval) -> Void) -> Self {
         coordinator.onBufferChanged = handler

@@ -206,9 +206,7 @@ open class KSPlayerLayer: UIView {
         } else {
             state = .buffering
         }
-        if #available(iOS 13.0, tvOS 13.0, *) {
-            MPNowPlayingInfoCenter.default().playbackState = .playing
-        }
+        MPNowPlayingInfoCenter.default().playbackState = .playing
     }
 
     open func pause() {
@@ -217,9 +215,7 @@ open class KSPlayerLayer: UIView {
         timer.fireDate = Date.distantFuture
         state = .paused
         UIApplication.shared.isIdleTimerDisabled = false
-        if #available(iOS 13.0, tvOS 13.0, *) {
-            MPNowPlayingInfoCenter.default().playbackState = .paused
-        }
+        MPNowPlayingInfoCenter.default().playbackState = .paused
     }
 
     open func resetPlayer() {
@@ -508,7 +504,7 @@ extension KSPlayerLayer {
             return
         }
 
-        if #available(tvOS 14.0, macOS 10.15, *) {
+        if #available(tvOS 14.0, *) {
             if player.pipController?.isPictureInPictureActive ?? false {
                 return
             }

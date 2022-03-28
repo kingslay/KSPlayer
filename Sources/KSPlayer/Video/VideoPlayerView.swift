@@ -146,7 +146,7 @@ open class VideoPlayerView: PlayerView {
             alertController.addAction(UIAlertAction(title: NSLocalizedString("cancel", comment: ""), style: .cancel, handler: nil))
             viewController?.present(alertController, animated: true, completion: nil)
         } else if type == .pictureInPicture {
-            if #available(tvOS 14.0, macOS 10.15, *) {
+            if #available(tvOS 14.0, *) {
                 guard let pipController = playerLayer.player?.pipController else {
                     return
                 }
@@ -587,7 +587,7 @@ extension VideoPlayerView {
         toolBar.addArrangedSubview(toolBar.pipButton)
         toolBar.audioSwitchButton.isHidden = true
         toolBar.videoSwitchButton.isHidden = true
-        if #available(tvOS 14.0, macOS 10.15, *) {
+        if #available(tvOS 14.0, *) {
             toolBar.pipButton.isHidden = !AVPictureInPictureController.isPictureInPictureSupported()
         } else {
             toolBar.pipButton.isHidden = true

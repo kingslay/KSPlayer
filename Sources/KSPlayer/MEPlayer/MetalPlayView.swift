@@ -180,13 +180,7 @@ extension MetalPlayView {
                     view.drawableSize = UIScreen.size
                 }
                 view.colorPixelFormat = KSOptions.colorPixelFormat(bitDepth: pixelBuffer.bitDepth)
-                #if targetEnvironment(simulator)
-                if #available(iOS 13.0, tvOS 13.0, *) {
-                    (view.layer as? CAMetalLayer)?.colorspace = pixelBuffer.colorspace
-                }
-                #else
                 (view.layer as? CAMetalLayer)?.colorspace = pixelBuffer.colorspace
-                #endif
                 #if os(macOS) || targetEnvironment(macCatalyst)
                 (view.layer as? CAMetalLayer)?.wantsExtendedDynamicRangeContent = true
                 #endif

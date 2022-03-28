@@ -566,7 +566,7 @@
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
-		004A14A9247A2DA7C8CB8BA33E29B142 /* Release */ = {
+		1057F66A7B03814D47B7D4A9E5F00F1C /* Release */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 9FF269A64F5FF35AEB910C8056556E75 /* FFmpeg-macOS.release.xcconfig */;
 			buildSettings = {
@@ -590,7 +590,7 @@
 					"@loader_path/Frameworks",
 				);
 				MACH_O_TYPE = staticlib;
-				MACOSX_DEPLOYMENT_TARGET = 10.13;
+				MACOSX_DEPLOYMENT_TARGET = 10.15;
 				MODULEMAP_FILE = "Target Support Files/FFmpeg-macOS/FFmpeg-macOS.modulemap";
 				PRODUCT_MODULE_NAME = FFmpeg;
 				PRODUCT_NAME = FFmpeg;
@@ -603,7 +603,7 @@
 			};
 			name = Release;
 		};
-		08CE68468B2E340E1D605209D7B517A8 /* Debug */ = {
+		42EE6E6DC0D4B052E99B6B2B4F1027FD /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -656,8 +656,8 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
-				MACOSX_DEPLOYMENT_TARGET = 10.13;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				MACOSX_DEPLOYMENT_TARGET = 10.15;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -667,14 +667,15 @@
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 				SYMROOT = "${SRCROOT}/../build";
-				TVOS_DEPLOYMENT_TARGET = 11.0;
+				TVOS_DEPLOYMENT_TARGET = 13.0;
 			};
 			name = Debug;
 		};
-		0B55D11393A897732AC1757E58085E45 /* Release */ = {
+		5264F171F07EB078DBEB686F81F404F1 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 692FC7FC0B757187649B110760B38A19 /* FFmpeg-tvOS.release.xcconfig */;
+			baseConfigurationReference = 5AABB5D2B6432C3557C914367A66B98A /* FFmpeg-iOS.debug.xcconfig */;
 			buildSettings = {
+				CLANG_ENABLE_OBJC_WEAK = NO;
 				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
 				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
@@ -683,31 +684,30 @@
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
-				GCC_PREFIX_HEADER = "Target Support Files/FFmpeg-tvOS/FFmpeg-tvOS-prefix.pch";
-				INFOPLIST_FILE = "Target Support Files/FFmpeg-tvOS/FFmpeg-tvOS-Info.plist";
+				GCC_PREFIX_HEADER = "Target Support Files/FFmpeg-iOS/FFmpeg-iOS-prefix.pch";
+				INFOPLIST_FILE = "Target Support Files/FFmpeg-iOS/FFmpeg-iOS-Info.plist";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
 				MACH_O_TYPE = staticlib;
-				MODULEMAP_FILE = "Target Support Files/FFmpeg-tvOS/FFmpeg-tvOS.modulemap";
+				MODULEMAP_FILE = "Target Support Files/FFmpeg-iOS/FFmpeg-iOS.modulemap";
 				PRODUCT_MODULE_NAME = FFmpeg;
 				PRODUCT_NAME = FFmpeg;
-				SDKROOT = appletvos;
+				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) ";
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = 3;
-				TVOS_DEPLOYMENT_TARGET = 11.0;
-				VALIDATE_PRODUCT = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
 				VERSIONING_SYSTEM = "apple-generic";
 				VERSION_INFO_PREFIX = "";
 			};
-			name = Release;
+			name = Debug;
 		};
-		1FD03CD1A8EC81D1CF737FD35119E9A4 /* Release */ = {
+		54885AD56F2230FEE2C97DC5EC611A9B /* Release */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 6F45476BCA2692A1EA20F4F441B91E4C /* FFmpeg-iOS.release.xcconfig */;
 			buildSettings = {
@@ -723,7 +723,7 @@
 				GCC_PREFIX_HEADER = "Target Support Files/FFmpeg-iOS/FFmpeg-iOS-prefix.pch";
 				INFOPLIST_FILE = "Target Support Files/FFmpeg-iOS/FFmpeg-iOS-Info.plist";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -744,42 +744,7 @@
 			};
 			name = Release;
 		};
-		2B41C0EEDF141628E3825A338E92A2F1 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			baseConfigurationReference = FB3C224B3298EB954F33B108458C4035 /* FFmpeg-tvOS.debug.xcconfig */;
-			buildSettings = {
-				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
-				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
-				CURRENT_PROJECT_VERSION = 1;
-				DEFINES_MODULE = YES;
-				DYLIB_COMPATIBILITY_VERSION = 1;
-				DYLIB_CURRENT_VERSION = 1;
-				DYLIB_INSTALL_NAME_BASE = "@rpath";
-				GCC_PREFIX_HEADER = "Target Support Files/FFmpeg-tvOS/FFmpeg-tvOS-prefix.pch";
-				INFOPLIST_FILE = "Target Support Files/FFmpeg-tvOS/FFmpeg-tvOS-Info.plist";
-				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@loader_path/Frameworks",
-				);
-				MACH_O_TYPE = staticlib;
-				MODULEMAP_FILE = "Target Support Files/FFmpeg-tvOS/FFmpeg-tvOS.modulemap";
-				PRODUCT_MODULE_NAME = FFmpeg;
-				PRODUCT_NAME = FFmpeg;
-				SDKROOT = appletvos;
-				SKIP_INSTALL = YES;
-				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) ";
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = 3;
-				TVOS_DEPLOYMENT_TARGET = 11.0;
-				VERSIONING_SYSTEM = "apple-generic";
-				VERSION_INFO_PREFIX = "";
-			};
-			name = Debug;
-		};
-		8FC2946D881E381FF7267AA28D5A55CD /* Release */ = {
+		9CE1C5F0B783C6AB2DCEFABDB401256C /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -829,8 +794,8 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
-				MACOSX_DEPLOYMENT_TARGET = 10.13;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				MACOSX_DEPLOYMENT_TARGET = 10.15;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -839,11 +804,11 @@
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
 				SWIFT_VERSION = 5.0;
 				SYMROOT = "${SRCROOT}/../build";
-				TVOS_DEPLOYMENT_TARGET = 11.0;
+				TVOS_DEPLOYMENT_TARGET = 13.0;
 			};
 			name = Release;
 		};
-		C70E25FA66B537C33AA97DD33026CC4C /* Debug */ = {
+		A8C594299BF53E08BC31C10D6692B439 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 71039C28F62B6DBB69158B333707AD4E /* FFmpeg-macOS.debug.xcconfig */;
 			buildSettings = {
@@ -867,7 +832,7 @@
 					"@loader_path/Frameworks",
 				);
 				MACH_O_TYPE = staticlib;
-				MACOSX_DEPLOYMENT_TARGET = 10.13;
+				MACOSX_DEPLOYMENT_TARGET = 10.15;
 				MODULEMAP_FILE = "Target Support Files/FFmpeg-macOS/FFmpeg-macOS.modulemap";
 				PRODUCT_MODULE_NAME = FFmpeg;
 				PRODUCT_NAME = FFmpeg;
@@ -880,11 +845,10 @@
 			};
 			name = Debug;
 		};
-		F0A969F6AE124A800B9245FCC95AACC3 /* Debug */ = {
+		DD187708AF274B6FF5952B32A7052462 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 5AABB5D2B6432C3557C914367A66B98A /* FFmpeg-iOS.debug.xcconfig */;
+			baseConfigurationReference = FB3C224B3298EB954F33B108458C4035 /* FFmpeg-tvOS.debug.xcconfig */;
 			buildSettings = {
-				CLANG_ENABLE_OBJC_WEAK = NO;
 				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
 				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
@@ -893,28 +857,64 @@
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
-				GCC_PREFIX_HEADER = "Target Support Files/FFmpeg-iOS/FFmpeg-iOS-prefix.pch";
-				INFOPLIST_FILE = "Target Support Files/FFmpeg-iOS/FFmpeg-iOS-Info.plist";
+				GCC_PREFIX_HEADER = "Target Support Files/FFmpeg-tvOS/FFmpeg-tvOS-prefix.pch";
+				INFOPLIST_FILE = "Target Support Files/FFmpeg-tvOS/FFmpeg-tvOS-Info.plist";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
 				MACH_O_TYPE = staticlib;
-				MODULEMAP_FILE = "Target Support Files/FFmpeg-iOS/FFmpeg-iOS.modulemap";
+				MODULEMAP_FILE = "Target Support Files/FFmpeg-tvOS/FFmpeg-tvOS.modulemap";
 				PRODUCT_MODULE_NAME = FFmpeg;
 				PRODUCT_NAME = FFmpeg;
-				SDKROOT = iphoneos;
+				SDKROOT = appletvos;
 				SKIP_INSTALL = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) ";
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 3;
+				TVOS_DEPLOYMENT_TARGET = 13.0;
 				VERSIONING_SYSTEM = "apple-generic";
 				VERSION_INFO_PREFIX = "";
 			};
 			name = Debug;
+		};
+		F4956C9AE8C6B1782A7FE9CE5DCB539D /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 692FC7FC0B757187649B110760B38A19 /* FFmpeg-tvOS.release.xcconfig */;
+			buildSettings = {
+				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
+				CURRENT_PROJECT_VERSION = 1;
+				DEFINES_MODULE = YES;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				GCC_PREFIX_HEADER = "Target Support Files/FFmpeg-tvOS/FFmpeg-tvOS-prefix.pch";
+				INFOPLIST_FILE = "Target Support Files/FFmpeg-tvOS/FFmpeg-tvOS-Info.plist";
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MACH_O_TYPE = staticlib;
+				MODULEMAP_FILE = "Target Support Files/FFmpeg-tvOS/FFmpeg-tvOS.modulemap";
+				PRODUCT_MODULE_NAME = FFmpeg;
+				PRODUCT_NAME = FFmpeg;
+				SDKROOT = appletvos;
+				SKIP_INSTALL = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) ";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 3;
+				TVOS_DEPLOYMENT_TARGET = 13.0;
+				VALIDATE_PRODUCT = YES;
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Release;
 		};
 /* End XCBuildConfiguration section */
 
@@ -922,8 +922,8 @@
 		20E2142F98118C068482E8EC6D031B77 /* Build configuration list for PBXProject "FFmpeg" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				08CE68468B2E340E1D605209D7B517A8 /* Debug */,
-				8FC2946D881E381FF7267AA28D5A55CD /* Release */,
+				42EE6E6DC0D4B052E99B6B2B4F1027FD /* Debug */,
+				9CE1C5F0B783C6AB2DCEFABDB401256C /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
@@ -931,8 +931,8 @@
 		39DCD08B6E24A94AEF5FC7C2BCDB0E05 /* Build configuration list for PBXNativeTarget "FFmpeg-tvOS" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				2B41C0EEDF141628E3825A338E92A2F1 /* Debug */,
-				0B55D11393A897732AC1757E58085E45 /* Release */,
+				DD187708AF274B6FF5952B32A7052462 /* Debug */,
+				F4956C9AE8C6B1782A7FE9CE5DCB539D /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
@@ -940,8 +940,8 @@
 		66D86AD2094E721194E72C95A1357CA6 /* Build configuration list for PBXNativeTarget "FFmpeg-iOS" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				F0A969F6AE124A800B9245FCC95AACC3 /* Debug */,
-				1FD03CD1A8EC81D1CF737FD35119E9A4 /* Release */,
+				5264F171F07EB078DBEB686F81F404F1 /* Debug */,
+				54885AD56F2230FEE2C97DC5EC611A9B /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
@@ -949,8 +949,8 @@
 		DC373B5939C9A8B282269B0D549A0583 /* Build configuration list for PBXNativeTarget "FFmpeg-macOS" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				C70E25FA66B537C33AA97DD33026CC4C /* Debug */,
-				004A14A9247A2DA7C8CB8BA33E29B142 /* Release */,
+				A8C594299BF53E08BC31C10D6692B439 /* Debug */,
+				1057F66A7B03814D47B7D4A9E5F00F1C /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

@@ -362,11 +362,7 @@ public extension KSPlayerManager {
 
 extension UIApplication {
     static var isLandscape: Bool {
-        if #available(iOS 13.0, *) {
-            return UIApplication.shared.windows.first?.windowScene?.interfaceOrientation.isLandscape ?? false
-        } else {
-            return UIApplication.shared.statusBarOrientation.isLandscape
-        }
+        UIApplication.shared.windows.first?.windowScene?.interfaceOrientation.isLandscape ?? false
     }
 }
 
@@ -406,7 +402,6 @@ extension IOSVideoPlayerView: UIDocumentPickerDelegate {
 #endif
 
 #if os(iOS)
-@available(iOS 13.0, *)
 public class MenuController {
     public init(with builder: UIMenuBuilder) {
         builder.remove(menu: .format)

@@ -13,11 +13,10 @@
     "tag": "1.0"
   },
   "platforms": {
-    "ios": "11.0",
-    "osx": "10.13",
-    "tvos": "11.0"
+    "ios": "13.0",
+    "osx": "10.15",
+    "tvos": "13.0"
   },
-  "swift_versions": "5.5",
   "static_framework": true,
   "testspecs": [
     {
@@ -119,6 +118,5 @@
         ]
       }
     }
-  ],
-  "swift_version": "5.5"
+  ]
 }
