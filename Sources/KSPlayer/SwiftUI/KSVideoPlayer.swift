@@ -72,7 +72,6 @@ public struct KSVideoPlayerView: View {
                     subtitleModel.selectedSubtitle = try? result.get()
                 }
             }
-            .background(.black)
             .edgesIgnoringSafeArea(.all)
             .onDisappear {
                 player.coordinator.playerLayer?.pause()
