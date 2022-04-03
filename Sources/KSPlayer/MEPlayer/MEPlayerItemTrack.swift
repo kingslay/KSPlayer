@@ -115,13 +115,15 @@ class FFPlayerItemTrack<Frame: MEFrame>: PlayerItemTrackProtocol, CustomStringCo
     private let options: KSOptions
     private var seekTime = 0.0
     fileprivate var decoderMap = [Int32: DecodeProtocol]()
-    fileprivate var state = MECodecState.idle
-    var isEndOfFile: Bool = false {
+    fileprivate var state = MECodecState.idle {
         didSet {
-            set(isEndOfFile: isEndOfFile)
+            if state == .finished {
+                seekTime = 0
+            }
         }
     }
 
+    var isEndOfFile: Bool = false
     var packetCount: Int { 0 }
     var frameCount: Int { outputRenderQueue.count }
     let frameMaxCount: Int
@@ -172,12 +174,6 @@ class FFPlayerItemTrack<Frame: MEFrame>: PlayerItemTrackProtocol, CustomStringCo
             autoreleasepool {
                 doDecode(packet: packet)
             }
-        }
-    }
-
-    func set(isEndOfFile: Bool) {
-        if isEndOfFile {
-            state = .finished
         }
     }
 
@@ -255,6 +251,9 @@ final class AsyncPlayerItemTrack<Frame: MEFrame>: FFPlayerItemTrack<Frame> {
                     packetQueue.shutdown()
                     packetQueue = loopPacketQueue
                     self.loopPacketQueue = nil
+                    if decodeOperation.isFinished {
+                        decode()
+                    }
                 }
             }
         }
@@ -267,14 +266,6 @@ final class AsyncPlayerItemTrack<Frame: MEFrame>: FFPlayerItemTrack<Frame> {
         operationQueue.qualityOfService = .userInteractive
     }
 
-    override func set(isEndOfFile: Bool) {
-        if isEndOfFile {
-            if state == .finished, frameCount == 0 {
-                delegate?.codecDidFinished(track: self)
-            }
-        }
-    }
-
     override func putPacket(packet: Packet) {
         if isLoopModel {
             loopPacketQueue?.push(packet)
@@ -284,6 +275,7 @@ final class AsyncPlayerItemTrack<Frame: MEFrame>: FFPlayerItemTrack<Frame> {
     }
 
     override func decode() {
+        isEndOfFile = false
         guard operationQueue.operationCount == 0 else { return }
         decodeOperation = BlockOperation { [weak self] in
             guard let self = self else { return }
@@ -325,7 +317,9 @@ final class AsyncPlayerItemTrack<Frame: MEFrame>: FFPlayerItemTrack<Frame> {
     }
 
     override func seek(time: TimeInterval) {
-        isEndOfFile = false
+        if decodeOperation.isFinished {
+            decode()
+        }
         packetQueue.flush()
         super.seek(time: time)
         loopPacketQueue = nil
