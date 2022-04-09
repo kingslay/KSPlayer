@@ -24,7 +24,7 @@ struct DemoApp: App {
         KSOptions.isAutoPlay = true
         KSOptions.isSecondOpen = true
         KSOptions.isAccurateSeek = true
-        KSOptions.isLoopPlay = true
+//        KSOptions.isLoopPlay = true
         let arguments = ProcessInfo.processInfo.arguments.dropFirst()
         var dropNextArg = false
         var playerArgs = [String]()
