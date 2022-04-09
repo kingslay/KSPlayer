@@ -60,19 +60,20 @@ class SoftwareDecode: DecodeProtocol {
         while true {
             let result = avcodec_receive_frame(codecContext, coreFrame)
             if result == 0, let avframe = coreFrame {
-                let timestamp = max(avframe.pointee.best_effort_timestamp, avframe.pointee.pts, avframe.pointee.pkt_dts)
-                if timestamp >= bestEffortTimestamp {
-                    bestEffortTimestamp = timestamp
-                }
                 var frame = try swresample.transfer(avframe: filter?.filter(inputFrame: avframe) ?? avframe)
                 frame.timebase = timebase
                 frame.duration = avframe.pointee.pkt_duration
                 frame.size = Int64(avframe.pointee.pkt_size)
-                if mediaType == .audio, frame.duration == 0 {
-                    frame.duration = Int64(avframe.pointee.nb_samples) * Int64(frame.timebase.den) / (Int64(avframe.pointee.sample_rate) * Int64(frame.timebase.num))
+                if mediaType == .audio {
+                    bestEffortTimestamp = max(bestEffortTimestamp, avframe.pointee.pts)
+                    frame.position = bestEffortTimestamp
+                    if frame.duration == 0 {
+                        frame.duration = Int64(avframe.pointee.nb_samples) * Int64(frame.timebase.den) / (Int64(avframe.pointee.sample_rate) * Int64(frame.timebase.num))
+                    }
+                    bestEffortTimestamp += frame.duration
+                } else {
+                    frame.position = avframe.pointee.best_effort_timestamp
                 }
-                frame.position = bestEffortTimestamp
-                bestEffortTimestamp += frame.duration
                 delegate?.decodeResult(frame: frame)
             } else {
                 if result == AVError.eof.code {
