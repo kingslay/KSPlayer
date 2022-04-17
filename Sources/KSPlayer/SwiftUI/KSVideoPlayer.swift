@@ -6,7 +6,6 @@
 //
 import AVFoundation
 import AVKit
-import MediaPlayer
 import SwiftUI
 @available(iOS 15, tvOS 15, macOS 12, *)
 public struct KSVideoPlayerView: View {

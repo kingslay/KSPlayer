@@ -5,6 +5,7 @@
 //  Created by kintan on 2018/10/31.
 //
 #if canImport(UIKit) && canImport(CallKit)
+import AVKit
 import CallKit
 import CoreServices
 import MediaPlayer
@@ -23,7 +24,8 @@ open class IOSVideoPlayerView: VideoPlayerView {
     public var volumeViewSlider = UXSlider()
     public var backButton = UIButton()
     public var airplayStatusView: UIView = AirplayStatusView()
-    public var routeButton = MPVolumeView()
+    public var routeButton = AVRoutePickerView()
+    private let routeDetector = AVRouteDetector()
     /// Image view to show video cover
     public var maskImageView = UIImageView()
     public var landscapeButton = UIButton()
@@ -57,9 +59,6 @@ open class IOSVideoPlayerView: VideoPlayerView {
         backButton.setImage(KSPlayerManager.image(named: "KSPlayer_back"), for: .normal)
         backButton.addTarget(self, action: #selector(onButtonPressed(_:)), for: .touchUpInside)
         navigationBar.insertArrangedSubview(backButton, at: 0)
-        routeButton.showsRouteButton = true
-        routeButton.showsVolumeSlider = false
-        routeButton.sizeToFit()
         routeButton.isHidden = true
         navigationBar.addArrangedSubview(routeButton)
         addSubview(airplayStatusView)
@@ -92,7 +91,7 @@ open class IOSVideoPlayerView: VideoPlayerView {
         maskImageView.alpha = 1
         maskImageView.image = nil
         panGesture.isEnabled = false
-        routeButton.isHidden = !routeButton.areWirelessRoutesAvailable
+        routeButton.isHidden = !routeDetector.multipleRoutesDetected
     }
 
     override open func onButtonPressed(type: PlayerButtonType, button: UIButton) {
@@ -299,7 +298,7 @@ extension IOSVideoPlayerView {
     }
 
     @objc private func routesAvailableDidChange(notification _: Notification) {
-        routeButton.isHidden = !routeButton.areWirelessRoutesAvailable
+        routeButton.isHidden = !routeDetector.multipleRoutesDetected
     }
 
     @objc private func orientationChanged(notification _: Notification) {
