@@ -6,6 +6,7 @@
 //
 import AVFoundation
 import AVKit
+import MediaPlayer
 import SwiftUI
 @available(iOS 15, tvOS 15, macOS 12, *)
 public struct KSVideoPlayerView: View {
@@ -153,6 +154,9 @@ struct VideoControllerView: View {
                     } label: {
                         Image(systemName: config.isScaleAspectFill ? "rectangle.arrowtriangle.2.inward" : "rectangle.arrowtriangle.2.outward")
                     }
+                    #if !os(tvOS)
+                    AirPlayView().fixedSize()
+                    #endif
                 }
                 .padding()
                 .background(backgroundColor).cornerRadius(8)
@@ -545,6 +549,35 @@ extension KSVideoPlayer {
     func onSwipe(_ handler: @escaping (UISwipeGestureRecognizer.Direction) -> Void) -> Self {
         coordinator.onSwipe = handler
         return self
+    }
+    #endif
+}
+
+struct AirPlayView: UIViewRepresentable {
+    #if canImport(UIKit)
+    public typealias UIViewType = RoutePickerView
+    func makeUIView(context _: Context) -> UIViewType {
+        let routePickerView = RoutePickerView()
+        routePickerView.tintColor = .white
+        return routePickerView
+    }
+
+    func updateUIView(_: UIViewType, context _: Context) {}
+    #else
+    public typealias NSViewType = RoutePickerView
+    func makeNSView(context _: Context) -> NSViewType {
+        let routePickerView = RoutePickerView()
+        return routePickerView
+    }
+
+    func updateNSView(_: NSViewType, context _: Context) {}
+    #endif
+}
+
+class RoutePickerView: AVRoutePickerView {
+    #if canImport(UIKit)
+    override func gestureRecognizerShouldBegin(_: UIGestureRecognizer) -> Bool {
+        false
     }
     #endif
 }
