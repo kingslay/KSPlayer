@@ -63,19 +63,26 @@ public struct KSVideoPlayerView: View {
                     player.coordinator.seek(time: model.currentTime + 15)
                 }
             }
+            #else
+                .onTapGesture {
+                    model.isMaskShow.toggle()
+                    #if os(macOS)
+                    model.isMaskShow ? NSCursor.unhide() : NSCursor.hide()
+                    #endif
+                }
             #endif
-            .onReceive(player.coordinator.$selectedSubtitileTrack) { track in
-                guard let subtitle = track?.subtitle else {
-                    return
+                .onReceive(player.coordinator.$selectedSubtitileTrack) { track in
+                    guard let subtitle = track?.subtitle else {
+                        return
+                    }
+                    subtitle.enableSubtitle { result in
+                        subtitleModel.selectedSubtitle = try? result.get()
+                    }
                 }
-                subtitle.enableSubtitle { result in
-                    subtitleModel.selectedSubtitle = try? result.get()
+                .edgesIgnoringSafeArea(.all)
+                .onDisappear {
+                    player.coordinator.playerLayer?.pause()
                 }
-            }
-            .edgesIgnoringSafeArea(.all)
-            .onDisappear {
-                player.coordinator.playerLayer?.pause()
-            }
             subtitleView
             VideoControllerView(model: $model).opacity(model.isMaskShow ? 1 : 0)
         }
@@ -90,12 +97,6 @@ public struct KSVideoPlayerView: View {
             .navigationBarHidden(true)
         #endif
         #if !os(tvOS)
-        .onTapGesture {
-            model.isMaskShow.toggle()
-            #if os(macOS)
-            model.isMaskShow ? NSCursor.unhide() : NSCursor.hide()
-            #endif
-        }
         .onDrop(of: ["public.file-url"], isTargeted: nil) { providers -> Bool in
             providers.first?.loadDataRepresentation(forTypeIdentifier: "public.file-url") { data, _ in
                 if let data = data, let path = NSString(data: data, encoding: 4), let url = URL(string: path as String) {
