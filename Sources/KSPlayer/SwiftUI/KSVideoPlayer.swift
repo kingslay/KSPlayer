@@ -555,30 +555,22 @@ extension KSVideoPlayer {
 
 struct AirPlayView: UIViewRepresentable {
     #if canImport(UIKit)
-    public typealias UIViewType = RoutePickerView
+    public typealias UIViewType = AVRoutePickerView
     func makeUIView(context _: Context) -> UIViewType {
-        let routePickerView = RoutePickerView()
+        let routePickerView = AVRoutePickerView()
         routePickerView.tintColor = .white
         return routePickerView
     }
 
     func updateUIView(_: UIViewType, context _: Context) {}
     #else
-    public typealias NSViewType = RoutePickerView
+    public typealias NSViewType = AVRoutePickerView
     func makeNSView(context _: Context) -> NSViewType {
-        let routePickerView = RoutePickerView()
+        let routePickerView = AVRoutePickerView()
         return routePickerView
     }
 
     func updateNSView(_: NSViewType, context _: Context) {}
-    #endif
-}
-
-class RoutePickerView: AVRoutePickerView {
-    #if canImport(UIKit)
-    override func gestureRecognizerShouldBegin(_: UIGestureRecognizer) -> Bool {
-        false
-    }
     #endif
 }
 
