@@ -244,6 +244,9 @@ extension Dictionary where Key == String {
                 av_dict_set_int(&avOptions, key, Int64(i), 0)
             } else if let string = value as? String {
                 av_dict_set(&avOptions, key, string, 0)
+            } else if let dic = value as? Dictionary {
+                let string = dic.map { "\($0.0)=\($0.1)" }.joined(separator: ";")
+                av_dict_set(&avOptions, key, string, 0)
             }
         }
         return avOptions
