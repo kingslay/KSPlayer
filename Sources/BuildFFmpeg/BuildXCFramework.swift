@@ -40,7 +40,7 @@ class BaseBuild {
     private func build(platform: PlatformType, arch: ArchType) {
         let url = scratch(platform: platform, arch: arch)
         try? FileManager.default.createDirectory(at: url, withIntermediateDirectories: true, attributes: nil)
-        let cflags = "-arch " + arch.rawValue + " -fembed-bitcode " + platform.deploymentTarget()
+        let cflags = "-arch " + arch.rawValue + " -fembed-bitcode " + platform.deploymentTarget(arch)
         innerBuid(platform: platform, arch: arch, cflags: cflags, buildDir: url)
     }
 
@@ -156,7 +156,7 @@ class BaseBuild {
 }
 
 class BuildFFMPEG: BaseBuild {
-    private let ffmpegFile = "ffmpeg-5.0"
+    private let ffmpegFile = "ffmpeg-5.0.1"
     private let isDebug: Bool
     private let isFFplay: Bool
     init() {
@@ -390,7 +390,7 @@ class BuildFFMPEG: BaseBuild {
         "--enable-protocols", "--disable-protocol=bluray", "--disable-protocol=ffrtmpcrypt", "--disable-protocol=gopher",
         "--disable-protocol=icecast", "--disable-protocol=librtmp*", "--disable-protocol=libssh",
         "--disable-protocol=md5", "--disable-protocol=mmsh", "--disable-protocol=mmst", "--disable-protocol=sctp",
-        "--disable-protocol=srtp", "--disable-protocol=subfile", "--disable-protocol=unix",
+        "--disable-protocol=subfile", "--disable-protocol=unix",
 
         // filters
         "--disable-filters", "--enable-filter=amix", "--enable-filter=anull", "--enable-filter=aformat",
@@ -542,7 +542,7 @@ enum PlatformType: String, CaseIterable {
         }
     }
 
-    func deploymentTarget() -> String {
+    func deploymentTarget(_ arch: ArchType) -> String {
         switch self {
         case .ios:
             return "-mios-version-min=\(minVersion)"
@@ -555,7 +555,7 @@ enum PlatformType: String, CaseIterable {
         case .macos:
             return "-mmacosx-version-min=\(minVersion)"
         case .maccatalyst:
-            return "-target x86_64-apple-ios13.0-macabi"
+            return arch == .x86_64 ? "-target x86_64-apple-ios-macabi" : "-target arm64-apple-ios-macabi"
         }
     }
 
