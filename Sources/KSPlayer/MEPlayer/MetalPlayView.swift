@@ -16,13 +16,6 @@ final class MetalPlayView: UIView {
     private var pixelBuffer: CVPixelBuffer?
     private lazy var displayLink: CADisplayLink = .init(target: self, selector: #selector(drawView))
     var options: KSOptions
-    private var isBackground: Bool {
-        #if canImport(UIKit)
-        UIApplication.shared.applicationState == .background
-        #else
-        window?.isMiniaturized == true
-        #endif
-    }
 
     weak var renderSource: OutputRenderSourceDelegate?
     #if canImport(UIKit)
@@ -145,7 +138,7 @@ extension MetalPlayView {
     }
 
     @objc private func drawView() {
-        guard let frame = renderSource?.getOutputRender(type: .video) as? VideoVTBFrame, !isBackground else {
+        guard let frame = renderSource?.getOutputRender(type: .video) as? VideoVTBFrame else {
             return
         }
         pixelBuffer = frame.corePixelBuffer
