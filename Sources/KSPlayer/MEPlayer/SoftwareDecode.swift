@@ -11,8 +11,6 @@ import Libavcodec
 
 class SoftwareDecode: DecodeProtocol {
     private weak var delegate: DecodeResultDelegate?
-    private let mediaType: AVFoundation.AVMediaType
-    private let timebase: Timebase
     private let options: KSOptions
     // 第一次seek不要调用avcodec_flush_buffers。否则seek完之后可能会因为不是关键帧而导致蓝屏
     private var firstSeek = true
@@ -21,9 +19,7 @@ class SoftwareDecode: DecodeProtocol {
     private var bestEffortTimestamp = Int64(0)
     private let swresample: Swresample
     private let filter: MEFilter?
-    required init(assetTrack: TrackProtocol, options: KSOptions, delegate: DecodeResultDelegate) {
-        timebase = assetTrack.timebase
-        mediaType = assetTrack.mediaType
+    required init(assetTrack: AssetTrack, options: KSOptions, delegate: DecodeResultDelegate) {
         self.delegate = delegate
         self.options = options
         var codecpar = assetTrack.stream.pointee.codecpar.pointee
@@ -32,8 +28,8 @@ class SoftwareDecode: DecodeProtocol {
         } catch {
             KSLog(error as CustomStringConvertible)
         }
-        codecContext?.pointee.time_base = timebase.rational
-        if mediaType == .video {
+        codecContext?.pointee.time_base = assetTrack.timebase.rational
+        if assetTrack.mediaType == .video {
             filter = options.videoFilters.flatMap { str -> MEFilter? in
                 let ratio = codecpar.sample_aspect_ratio
                 let timebase = assetTrack.timebase
@@ -52,8 +48,8 @@ class SoftwareDecode: DecodeProtocol {
         }
     }
 
-    func doDecode(packet: UnsafeMutablePointer<AVPacket>) throws {
-        guard let codecContext = codecContext, avcodec_send_packet(codecContext, packet) == 0 else {
+    func doDecode(packet: Packet) throws {
+        guard let codecContext = codecContext, avcodec_send_packet(codecContext, packet.corePacket) == 0 else {
             delegate?.decodeResult(frame: nil)
             return
         }
@@ -61,10 +57,10 @@ class SoftwareDecode: DecodeProtocol {
             let result = avcodec_receive_frame(codecContext, coreFrame)
             if result == 0, let avframe = coreFrame {
                 var frame = try swresample.transfer(avframe: filter?.filter(inputFrame: avframe) ?? avframe)
-                frame.timebase = timebase
+                frame.timebase = packet.assetTrack.timebase
                 frame.duration = avframe.pointee.pkt_duration
                 frame.size = Int64(avframe.pointee.pkt_size)
-                if mediaType == .audio {
+                if packet.assetTrack.mediaType == .audio {
                     bestEffortTimestamp = max(bestEffortTimestamp, avframe.pointee.pts)
                     frame.position = bestEffortTimestamp
                     if frame.duration == 0 {
@@ -82,7 +78,7 @@ class SoftwareDecode: DecodeProtocol {
                 } else if result == AVError.tryAgain.code {
                     break
                 } else {
-                    let error = NSError(errorCode: mediaType == .audio ? .codecAudioReceiveFrame : .codecVideoReceiveFrame, ffmpegErrnum: result)
+                    let error = NSError(errorCode: packet.assetTrack.mediaType == .audio ? .codecAudioReceiveFrame : .codecVideoReceiveFrame, ffmpegErrnum: result)
                     KSLog(error)
                     throw error
                 }

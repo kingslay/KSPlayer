@@ -15,7 +15,7 @@ import AppKit
 
 public class KSMEPlayer: NSObject {
     private var loopCount = 1
-    private let audioOutput: AudioPlayer & FrameOutput = AudioEnginePlayer()
+    private let audioOutput = AudioEnginePlayer()
     private var playerItem: MEPlayerItem
     private let videoOutput: MetalPlayView
     private var options: KSOptions

@@ -483,7 +483,12 @@ struct AVMediaPlayerTrack: MediaPlayerTrack {
     let yCbCrMatrix: String?
 
     var isEnabled: Bool {
-        track.isEnabled
+        get {
+            track.isEnabled
+        }
+        set {
+            track.isEnabled = newValue
+        }
     }
 
     init(track: AVPlayerItemTrack) {

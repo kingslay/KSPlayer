@@ -302,17 +302,19 @@ struct VideoSettingView: View {
             .tabItem {
                 Text("audio")
             }
-            Picker("subtitle tracks", selection: Binding(get: {
-                config.selectedSubtitileTrack?.trackID
-            }, set: { value in
-                config.selectedSubtitileTrack = config.subtitleTracks.first { $0.trackID == value }
-            })) {
-                Text("None").tag(nil as Int32?)
-                ForEach(config.subtitleTracks, id: \.trackID) { track in
-                    Text(track.name).tag(track.trackID as Int32?)
+            List {
+                Picker("subtitle tracks", selection: Binding(get: {
+                    config.selectedSubtitileTrack?.trackID
+                }, set: { value in
+                    config.selectedSubtitileTrack = config.subtitleTracks.first { $0.trackID == value }
+                })) {
+                    Text("None").tag(nil as Int32?)
+                    ForEach(config.subtitleTracks, id: \.trackID) { track in
+                        Text(track.name).tag(track.trackID as Int32?)
+                    }
                 }
+                .pickerStyle(.inline)
             }
-            .pickerStyle(.inline)
             .tabItem {
                 Text("subtitle")
             }
@@ -331,13 +333,11 @@ struct VideoSettingView: View {
                 Text("video")
             }
         }
-        .fixedSize()
-        .padding()
         .toolbar {
             Button("Done") {
                 showingModal.toggle()
             }
-        }
+        }.frame(width: UIScreen.size.width / 2, height: UIScreen.size.height / 2)
     }
 }
 

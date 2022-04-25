@@ -147,7 +147,7 @@ final class Packet: ObjectQueueItem {
     var duration: Int64 = 0
     var size: Int64 = 0
     var position: Int64 = 0
-    var assetTrack: TrackProtocol!
+    var assetTrack: AssetTrack!
     var corePacket: UnsafeMutablePointer<AVPacket> { packetWrap.corePacket! }
     private let packetWrap = ObjectPool.share.object(class: AVPacketWrap.self, key: "AVPacketWrap") { AVPacketWrap() }
     func fill() {
@@ -163,13 +163,14 @@ final class Packet: ObjectQueueItem {
 }
 
 final class SubtitleFrame: MEFrame {
-    var timebase = Timebase.defaultValue
+    var timebase: Timebase
     var duration: Int64 = 0
     var size: Int64 = 0
     var position: Int64 = 0
     let part: SubtitlePart
-    init(part: SubtitlePart) {
+    init(part: SubtitlePart, timebase: Timebase) {
         self.part = part
+        self.timebase = timebase
     }
 }
 

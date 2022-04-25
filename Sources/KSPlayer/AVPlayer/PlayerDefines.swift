@@ -94,7 +94,7 @@ public protocol MediaPlayerTrack {
     var rotation: Double { get }
     var bitRate: Int64 { get }
     var naturalSize: CGSize { get }
-    var isEnabled: Bool { get }
+    var isEnabled: Bool { get set }
     var bitDepth: Int32 { get }
     var colorPrimaries: String? { get }
     var transferFunction: String? { get }
