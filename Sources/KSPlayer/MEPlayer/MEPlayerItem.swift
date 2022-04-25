@@ -26,14 +26,14 @@ final class MEPlayerItem {
     private var isSeek = false
     private var allTracks = [PlayerItemTrackProtocol]()
     private var videoAudioTracks = [PlayerItemTrackProtocol]()
-    private var videoTrack: PlayerItemTrackProtocol?
-    private var audioTrack: PlayerItemTrackProtocol? {
+    private var videoTrack: FFPlayerItemTrack<VideoVTBFrame>?
+    private var audioTrack: FFPlayerItemTrack<AudioFrame>? {
         didSet {
             audioTrack?.delegate = self
         }
     }
 
-    private(set) var assetTracks = [TrackProtocol]()
+    private(set) var assetTracks = [AssetTrack]()
     private var videoAdaptation: VideoAdaptationState?
     private(set) var currentPlaybackTime = TimeInterval(0)
     private var startTime = TimeInterval(0)
@@ -106,7 +106,7 @@ final class MEPlayerItem {
             $0.stream.pointee.discard = AVDISCARD_ALL
         }
         track.setIsEnabled(true)
-        if track.mediaType == .subtitle, !((track as? TrackProtocol)?.isImageSubtitle ?? false) {
+        if track.mediaType == .subtitle, !((track as? AssetTrack)?.isImageSubtitle ?? false) {
             return
         }
         seek(time: currentPlaybackTime, completion: nil)

@@ -8,27 +8,7 @@ import AVFoundation
 import CoreMedia
 import Libavformat
 
-protocol TrackProtocol: MediaPlayerTrack, CustomStringConvertible {
-    var stream: UnsafeMutablePointer<AVStream> { get }
-    var timebase: Timebase { get }
-}
-
-extension TrackProtocol {
-    var description: String { name }
-    var isEnabled: Bool {
-        stream.pointee.discard == AVDISCARD_DEFAULT
-    }
-
-    func setIsEnabled(_ isEnabled: Bool) {
-        stream.pointee.discard = isEnabled ? AVDISCARD_DEFAULT : AVDISCARD_ALL
-    }
-
-    var isImageSubtitle: Bool {
-        [AV_CODEC_ID_DVD_SUBTITLE, AV_CODEC_ID_DVB_SUBTITLE, AV_CODEC_ID_DVB_TELETEXT, AV_CODEC_ID_HDMV_PGS_SUBTITLE].contains(stream.pointee.codecpar.pointee.codec_id)
-    }
-}
-
-struct AssetTrack: TrackProtocol {
+struct AssetTrack: MediaPlayerTrack, CustomStringConvertible {
     let trackID: Int32
     let name: String
     let language: String?
@@ -96,10 +76,28 @@ struct AssetTrack: TrackProtocol {
             name = language ?? mediaType.rawValue
         }
     }
+
+    var description: String { name }
+    var isEnabled: Bool {
+        get {
+            stream.pointee.discard == AVDISCARD_DEFAULT
+        }
+        set {
+            stream.pointee.discard = newValue ? AVDISCARD_DEFAULT : AVDISCARD_ALL
+        }
+    }
+
+    var isImageSubtitle: Bool {
+        [AV_CODEC_ID_DVD_SUBTITLE, AV_CODEC_ID_DVB_SUBTITLE, AV_CODEC_ID_DVB_TELETEXT, AV_CODEC_ID_HDMV_PGS_SUBTITLE].contains(stream.pointee.codecpar.pointee.codec_id)
+    }
+
+    func setIsEnabled(_ isEnabled: Bool) {
+        stream.pointee.discard = isEnabled ? AVDISCARD_DEFAULT : AVDISCARD_ALL
+    }
 }
 
 protocol PlayerItemTrackProtocol: CapacityProtocol, AnyObject {
-    init(assetTrack: TrackProtocol, options: KSOptions)
+    init(assetTrack: AssetTrack, options: KSOptions)
     // 是否无缝循环
     var isLoopModel: Bool { get set }
     var isEndOfFile: Bool { get set }
@@ -134,7 +132,7 @@ class FFPlayerItemTrack<Frame: MEFrame>: PlayerItemTrackProtocol, CustomStringCo
     let outputRenderQueue: CircularBuffer<Frame>
     var isLoopModel = false
 
-    required init(assetTrack: TrackProtocol, options: KSOptions) {
+    required init(assetTrack: AssetTrack, options: KSOptions) {
         self.options = options
         mediaType = assetTrack.mediaType
         description = mediaType.rawValue
@@ -198,7 +196,7 @@ class FFPlayerItemTrack<Frame: MEFrame>: PlayerItemTrackProtocol, CustomStringCo
     fileprivate func doDecode(packet: Packet) {
         let decoder = decoderMap.value(for: packet.assetTrack.trackID, default: packet.assetTrack.makeDecode(options: options, delegate: self))
         do {
-            try decoder.doDecode(packet: packet.corePacket)
+            try decoder.doDecode(packet: packet)
             if options.decodeAudioTime == 0, mediaType == .audio {
                 options.decodeAudioTime = CACurrentMediaTime()
             }
@@ -259,7 +257,7 @@ final class AsyncPlayerItemTrack<Frame: MEFrame>: FFPlayerItemTrack<Frame> {
         }
     }
 
-    required init(assetTrack: TrackProtocol, options: KSOptions) {
+    required init(assetTrack: AssetTrack, options: KSOptions) {
         super.init(assetTrack: assetTrack, options: options)
         operationQueue.name = "KSPlayer_" + description
         operationQueue.maxConcurrentOperationCount = 1
@@ -347,9 +345,9 @@ public extension Dictionary {
 }
 
 protocol DecodeProtocol {
-    init(assetTrack: TrackProtocol, options: KSOptions, delegate: DecodeResultDelegate)
+    init(assetTrack: AssetTrack, options: KSOptions, delegate: DecodeResultDelegate)
     func decode()
-    func doDecode(packet: UnsafeMutablePointer<AVPacket>) throws
+    func doDecode(packet: Packet) throws
     func doFlushCodec()
     func shutdown()
 }
@@ -358,7 +356,7 @@ protocol DecodeResultDelegate: AnyObject {
     func decodeResult(frame: MEFrame?)
 }
 
-extension TrackProtocol {
+extension AssetTrack {
     func makeDecode(options: KSOptions, delegate: DecodeResultDelegate) -> DecodeProtocol {
         autoreleasepool {
             if mediaType == .subtitle {
