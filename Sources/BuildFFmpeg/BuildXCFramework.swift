@@ -3,6 +3,14 @@ import Foundation
 class BaseBuild {
     fileprivate static let argumentsArray = Array(CommandLine.arguments.dropFirst())
     static func main() {
+        if Utility.shell("which brew") == nil {
+            print("""
+            You need to run the script first
+            /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+            """)
+            return
+        }
+
         let path = URL.currentDirectory + "Script"
         if !FileManager.default.fileExists(atPath: path.path) {
             try? FileManager.default.createDirectory(at: path, withIntermediateDirectories: false, attributes: nil)
@@ -302,11 +310,6 @@ class BuildFFMPEG: BaseBuild {
     }
 
     private func prepareYasm() {
-        if Utility.shell("which brew") == nil {
-            Utility.shell("""
-                /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-            """)
-        }
         if Utility.shell("which yasm") == nil {
             Utility.shell("brew install yasm")
         }
