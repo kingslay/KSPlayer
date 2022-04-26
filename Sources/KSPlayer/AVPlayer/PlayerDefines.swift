@@ -198,6 +198,7 @@ open class KSOptions {
     public var maxAnalyzeDuration: Int64?
     public var lowres = UInt8(0)
     public var autoSelectEmbedSubtitle = true
+    @Published var preferredFramesPerSecond = Float(60)
     public internal(set) var formatName = ""
     public internal(set) var starTime = 0.0
     public internal(set) var openTime = 0.0
