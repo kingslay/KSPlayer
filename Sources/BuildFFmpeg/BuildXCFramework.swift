@@ -303,7 +303,9 @@ class BuildFFMPEG: BaseBuild {
 
     private func prepareYasm() {
         if Utility.shell("which brew") == nil {
-            Utility.shell("ruby -e \"$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)\"")
+            Utility.shell("""
+                /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+            """)
         }
         if Utility.shell("which yasm") == nil {
             Utility.shell("brew install yasm")
