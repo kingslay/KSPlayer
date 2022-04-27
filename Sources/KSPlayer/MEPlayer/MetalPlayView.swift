@@ -15,7 +15,7 @@ final class MetalPlayView: UIView {
     private var videoInfo: CMVideoFormatDescription?
     private var pixelBuffer: CVPixelBuffer?
 //    private lazy var displayLink: CADisplayLink = .init(target: self, selector: #selector(drawView))
-    private let timer = DispatchSource.makeTimerSource(queue: DispatchQueue.main)
+    private var timer: DispatchSourceTimer?
     var options: KSOptions
     weak var renderSource: OutputRenderSourceDelegate?
     #if canImport(UIKit)
@@ -31,11 +31,6 @@ final class MetalPlayView: UIView {
     init(options: KSOptions) {
         self.options = options
         super.init(frame: .zero)
-        _ = options.$preferredFramesPerSecond.sink { value in
-            self.timer.schedule(deadline: .now(), repeating: .milliseconds(Int(ceil(1000.0 / value))))
-        }
-        timer.setEventHandler(handler: drawView)
-        timer.activate()
         #if !canImport(UIKit)
         layer = AVSampleBufferDisplayLayer()
         #endif
@@ -103,6 +98,27 @@ final class MetalPlayView: UIView {
             if let drawable = view.currentDrawable, let renderPassDescriptor = view.currentRenderPassDescriptor {
                 render.clear(drawable: drawable, renderPassDescriptor: renderPassDescriptor)
             }
+        }
+    }
+    
+    func startTimer() {
+        if timer == nil {
+            timer = DispatchSource.makeTimerSource(queue: DispatchQueue.main)
+            timer?.setEventHandler(handler: { [weak self] in
+                self?.drawView()
+            })
+            _ = options.$preferredFramesPerSecond.sink { value in
+                self.timer?.schedule(deadline: .now(), repeating: .milliseconds(Int(ceil(1000.0 / value))))
+            }
+            timer?.activate()
+        }
+    }
+    
+    func stopTimer() {
+        if timer != nil {
+            timer?.setEventHandler(handler: { })
+            timer?.cancel()
+            timer = nil
         }
     }
 }
@@ -197,7 +213,7 @@ extension MetalPlayView: FrameOutput {
         }
         set {
             view.isPaused = newValue
-            newValue ? timer.suspend() : timer.resume()
+            newValue ? stopTimer() : startTimer()
         }
     }
 
