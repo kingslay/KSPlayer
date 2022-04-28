@@ -25,7 +25,7 @@ final class MEPlayerItem {
     private var isFirst = true
     private var isSeek = false
     private var allTracks = [PlayerItemTrackProtocol]()
-    private var videoAudioTracks = [PlayerItemTrackProtocol]()
+    private var videoAudioTracks = [CapacityProtocol]()
     private var videoTrack: FFPlayerItemTrack<VideoVTBFrame>?
     private var audioTrack: FFPlayerItemTrack<AudioFrame>? {
         didSet {
@@ -234,6 +234,7 @@ extension MEPlayerItem {
                 let track = options.syncDecodeVideo ? FFPlayerItemTrack<VideoVTBFrame>(assetTrack: first, options: options) : AsyncPlayerItemTrack<VideoVTBFrame>(assetTrack: first, options: options)
                 track.delegate = self
                 videoAudioTracks.append(track)
+                allTracks.append(track)
                 videoTrack = track
                 if videos.count > 1, options.videoAdaptable {
                     let bitRateState = VideoAdaptationState.BitRateState(bitRate: first.bitRate, time: CACurrentMediaTime())
@@ -255,12 +256,11 @@ extension MEPlayerItem {
                 let track = options.syncDecodeAudio ? FFPlayerItemTrack<AudioFrame>(assetTrack: first, options: options) : AsyncPlayerItemTrack<AudioFrame>(assetTrack: first, options: options)
                 track.delegate = self
                 videoAudioTracks.append(track)
+                allTracks.append(track)
                 audioTrack = track
                 isAudioStalled = false
             }
         }
-
-        allTracks.append(contentsOf: videoAudioTracks)
     }
 
     private func read() {
@@ -462,7 +462,7 @@ extension MEPlayerItem: CodecCapacityDelegate {
         }
     }
 
-    func codecDidFinished(track: PlayerItemTrackProtocol) {
+    func codecDidFinished(track: CapacityProtocol) {
         if track.mediaType == .audio {
             isAudioStalled = true
         }
@@ -528,24 +528,24 @@ extension MEPlayerItem: OutputRenderSourceDelegate {
         }
     }
 
-    func getOutputRender(type: AVFoundation.AVMediaType) -> MEFrame? {
-        if type == .video {
-            let predicate: (MEFrame) -> Bool = { [weak self] frame -> Bool in
-                guard let self = self else { return true }
-                var desire = self.currentPlaybackTime + self.options.audioDelay + self.startTime
-                if self.isAudioStalled {
-                    desire += max(CACurrentMediaTime() - self.videoMediaTime, 0)
-                }
-                return frame.cmtime.seconds <= desire
+    func getVideoOutputRender() -> VideoVTBFrame? {
+        let predicate: (VideoVTBFrame) -> Bool = { [weak self] frame -> Bool in
+            guard let self = self else { return true }
+            var desire = self.currentPlaybackTime + self.options.audioDelay + self.startTime
+            if self.isAudioStalled {
+                desire += max(CACurrentMediaTime() - self.videoMediaTime, 0)
             }
-            let frame = videoTrack?.getOutputRender(where: predicate)
-            if let frame = frame, frame.seconds + 0.4 < currentPlaybackTime + options.audioDelay {
-                _ = videoTrack?.getOutputRender(where: nil)
-            }
-            return frame
-        } else {
-            return audioTrack?.getOutputRender(where: nil)
+            return frame.cmtime.seconds <= desire
         }
+        let frame = videoTrack?.getOutputRender(where: predicate)
+        if let frame = frame, frame.seconds + 0.4 < currentPlaybackTime + options.audioDelay {
+            _ = videoTrack?.getOutputRender(where: nil)
+        }
+        return frame
+    }
+
+    func getAudioOutputRender() -> AudioFrame? {
+        audioTrack?.getOutputRender(where: nil)
     }
 }
 

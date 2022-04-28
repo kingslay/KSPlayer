@@ -105,7 +105,7 @@ protocol PlayerItemTrackProtocol: CapacityProtocol, AnyObject {
     func decode()
     func seek(time: TimeInterval)
     func putPacket(packet: Packet)
-    func getOutputRender(where predicate: ((MEFrame) -> Bool)?) -> MEFrame?
+//    func getOutputRender<Frame: ObjectQueueItem>(where predicate: ((Frame) -> Bool)?) -> Frame?
     func shutdown()
 }
 
@@ -176,7 +176,7 @@ class FFPlayerItemTrack<Frame: MEFrame>: PlayerItemTrackProtocol, CustomStringCo
         }
     }
 
-    func getOutputRender(where predicate: ((MEFrame) -> Bool)?) -> MEFrame? {
+    func getOutputRender(where predicate: ((Frame) -> Bool)?) -> Frame? {
         let outputFecthRender = outputRenderQueue.pop(where: predicate)
         if outputFecthRender == nil {
             if state == .finished, frameCount == 0 {

@@ -37,13 +37,14 @@ enum MESourceState {
 
 protocol OutputRenderSourceDelegate: AnyObject {
     var currentPlaybackTime: TimeInterval { get }
-    func getOutputRender(type: AVFoundation.AVMediaType) -> MEFrame?
+    func getVideoOutputRender() -> VideoVTBFrame?
+    func getAudioOutputRender() -> AudioFrame?
     func setVideo(time: CMTime)
     func setAudio(time: CMTime)
 }
 
 protocol CodecCapacityDelegate: AnyObject {
-    func codecDidFinished(track: PlayerItemTrackProtocol)
+    func codecDidFinished(track: CapacityProtocol)
 }
 
 protocol MEPlayerDelegate: AnyObject {
