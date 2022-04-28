@@ -34,7 +34,9 @@ final class MetalPlayView: UIView {
         _ = options.$preferredFramesPerSecond.sink { value in
             self.timer.schedule(deadline: .now(), repeating: .milliseconds(Int(ceil(1000.0 / value))))
         }
-        timer.setEventHandler(handler: drawView)
+        timer.setEventHandler { [weak self] in
+            self?.drawView()
+        }
         timer.activate()
         #if !canImport(UIKit)
         layer = AVSampleBufferDisplayLayer()
@@ -105,6 +107,13 @@ final class MetalPlayView: UIView {
             }
         }
     }
+
+    deinit {
+        if isPaused {
+            timer.resume()
+        }
+        timer.cancel()
+    }
 }
 
 extension MetalPlayView {
@@ -142,7 +151,7 @@ extension MetalPlayView {
     }
 
     @objc private func drawView() {
-        guard let frame = renderSource?.getOutputRender(type: .video) as? VideoVTBFrame else {
+        guard let frame = renderSource?.getVideoOutputRender() else {
             return
         }
         pixelBuffer = frame.corePixelBuffer

@@ -201,7 +201,7 @@ final class AudioEnginePlayer: AudioPlayer, FrameOutput {
         var numberOfSamples = Int(numberOfFrames)
         while numberOfSamples > 0 {
             if currentRender == nil {
-                currentRender = renderSource?.getOutputRender(type: .audio) as? AudioFrame
+                currentRender = renderSource?.getAudioOutputRender()
             }
             guard let currentRender = currentRender else {
                 break
