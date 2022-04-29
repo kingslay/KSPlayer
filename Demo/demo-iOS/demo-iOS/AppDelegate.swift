@@ -24,7 +24,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UISplitViewControllerDele
         KSOptions.isAccurateSeek = true
 //        KSOptions.isLoopPlay = true
         if UIDevice.current.userInterfaceIdiom == .phone {
-            window.rootViewController = UINavigationController(rootViewController: RootViewController())
+            window.rootViewController = UINavigationController(rootViewController: MasterViewController())
         } else {
             let splitViewController = UISplitViewController()
             splitViewController.preferredDisplayMode = .primaryOverlay
