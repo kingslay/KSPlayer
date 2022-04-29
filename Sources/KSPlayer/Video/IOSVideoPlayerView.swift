@@ -64,7 +64,6 @@ open class IOSVideoPlayerView: VideoPlayerView {
         addSubview(airplayStatusView)
         volumeView.move(to: self)
         let tmp = MPVolumeView(frame: CGRect(x: -100, y: -100, width: 0, height: 0))
-        UIApplication.shared.keyWindow?.addSubview(tmp)
         if let first = (tmp.subviews.first { $0 is UISlider }) as? UISlider {
             volumeViewSlider = first
         }
