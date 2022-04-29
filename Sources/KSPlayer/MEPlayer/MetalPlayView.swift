@@ -205,8 +205,10 @@ extension MetalPlayView: FrameOutput {
             view.isPaused
         }
         set {
-            view.isPaused = newValue
-            newValue ? timer.suspend() : timer.resume()
+            if isPaused != newValue {
+                view.isPaused = newValue
+                newValue ? timer.suspend() : timer.resume()
+            }
         }
     }
 
