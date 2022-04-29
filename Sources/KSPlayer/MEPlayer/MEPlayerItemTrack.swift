@@ -291,26 +291,28 @@ final class AsyncPlayerItemTrack<Frame: MEFrame>: FFPlayerItemTrack<Frame> {
         state = .decoding
         isEndOfFile = false
         decoderMap.values.forEach { $0.decode() }
-        while !decodeOperation.isCancelled {
-            if state == .closed {
+        outerLoop: while !decodeOperation.isCancelled {
+            switch state {
+            case .idle:
+                break outerLoop
+            case .finished, .closed, .failed:
                 decoderMap.values.forEach { $0.shutdown() }
-                break
-            }
-            if state == .flush {
+                decoderMap.removeAll()
+                break outerLoop
+            case .flush:
                 decoderMap.values.forEach { $0.doFlushCodec() }
                 state = .decoding
-            } else if isEndOfFile, packetQueue.count == 0 {
-                state = .finished
-                break
-            } else if state == .decoding {
-                guard let packet = packetQueue.pop(wait: true), state != .flush, state != .closed else {
-                    continue
+            case .decoding:
+                if isEndOfFile, packetQueue.count == 0 {
+                    state = .finished
+                } else {
+                    guard let packet = packetQueue.pop(wait: true), state != .flush, state != .closed else {
+                        continue
+                    }
+                    autoreleasepool {
+                        doDecode(packet: packet)
+                    }
                 }
-                autoreleasepool {
-                    doDecode(packet: packet)
-                }
-            } else {
-                break
             }
         }
     }
