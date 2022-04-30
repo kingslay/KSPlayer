@@ -56,7 +56,7 @@ final class MEPlayerItem {
             case .reading:
                 timer.fireDate = Date.distantPast
             case .closed:
-                timer.fireDate = Date.distantFuture
+                timer.invalidate()
             case .failed:
                 delegate?.sourceDidFailed(error: error)
                 timer.fireDate = Date.distantFuture
