@@ -267,9 +267,14 @@ open class KSPlayerLayer: UIView {
 // MARK: - MediaPlayerDelegate
 
 extension KSPlayerLayer: MediaPlayerDelegate {
-    public func preparedToPlay(player _: MediaPlayerProtocol) {
+    public func preparedToPlay(player: MediaPlayerProtocol) {
         updateNowPlayingInfo()
         state = .readyToPlay
+        for track in player.tracks(mediaType: .video) where track.isEnabled {
+            #if os(tvOS)
+            setDisplayCriteria(track: track)
+            #endif
+        }
         if isAutoPlay {
             if shouldSeekTo > 0 {
                 seek(time: shouldSeekTo, autoPlay: true) { [weak self] _ in
@@ -347,6 +352,39 @@ extension KSPlayerLayer: MediaPlayerDelegate {
 // MARK: - private functions
 
 extension KSPlayerLayer {
+    #if os(tvOS)
+    private enum DynamicRange: Int32 {
+        case SDR = 0
+        case HDR = 2
+        // swiftlint:disable identifier_name
+        case DV = 5
+        // swiftlint:enable identifier_name
+    }
+
+    private func setDisplayCriteria(track: MediaPlayerTrack) {
+        let dynamicRange: DynamicRange
+        let fps = track.nominalFrameRate
+        if track.codecType.string == "ehvd" {
+            dynamicRange = .DV
+        } else if let colorPrimaries = track.colorPrimaries, /// HDR
+                  colorPrimaries.contains("2020") {
+            dynamicRange = .HDR
+        } else {
+            dynamicRange = .SDR
+        }
+        guard let displayManager = UIApplication.shared.keyWindow?.avDisplayManager else {
+            return
+        }
+        if displayManager.isDisplayCriteriaMatchingEnabled,
+           !displayManager.isDisplayModeSwitchInProgress {
+            if let criteria = options?.preferredDisplayCriteria(refreshRate: fps, videoDynamicRange: dynamicRange.rawValue) {
+                displayManager.preferredDisplayCriteria = criteria
+            }
+
+        }
+    }
+    #endif
+
     private func prepareToPlay() {
         startTime = CACurrentMediaTime()
         bufferedCount = 0
