@@ -21,11 +21,18 @@ class BaseBuild {
             BuildOpenSSL().buildALL()
             // BuildBoringSSL().buildALL()
         }
+        if Utility.shell("which pkg-config") == nil {
+            Utility.shell("brew install pkg-config")
+        }
+        let enableSrt = argumentsArray.firstIndex(of: "enable-libsrt") != nil
+        if enableSrt {
+            BuildSRT().buildALL()
+        }
         BuildFFMPEG().buildALL()
     }
 
     fileprivate let platforms = PlatformType.allCases
-//     fileprivate let platforms = [PlatformType.tvos]
+//     fileprivate let platforms = [PlatformType.ios]
     private let library: String
     init(library: String) {
         self.library = library
@@ -208,6 +215,13 @@ class BuildFFMPEG: BaseBuild {
             ldflags += " -L\(opensslPath.path)/lib"
             ffmpegcflags.append("--enable-openssl")
         }
+        let srtPath = URL.currentDirectory + ["SRT", platform.rawValue, "thin", arch.rawValue]
+        if FileManager.default.fileExists(atPath: srtPath.path) {
+            cflags += " -I\(srtPath.path)/include"
+            ldflags += " -L\(srtPath.path)/lib"
+            ffmpegcflags.append("--enable-libsrt")
+            ffmpegcflags.append("--enable-protocol=libsrt")
+        }
         let prefix = thinDir(platform: platform, arch: arch)
         var args = ["set -o noglob &&", (URL.currentDirectory + [ffmpegFile, "configure"]).path, "--target-os=darwin",
                     "--arch=\(arch.arch())", platform.cpu(arch: arch), "--cc='xcrun -sdk \(platform.sdk().lowercased()) clang'",
@@ -313,9 +327,6 @@ class BuildFFMPEG: BaseBuild {
         if Utility.shell("which yasm") == nil {
             Utility.shell("brew install yasm")
         }
-        if Utility.shell("which pkg-config") == nil {
-            Utility.shell("brew install pkg-config")
-        }
         if isFFplay, Utility.shell("which sdl2-config") == nil {
             Utility.shell("brew install sdl2")
         }
@@ -407,6 +418,73 @@ class BuildFFMPEG: BaseBuild {
         "--enable-filter=yadif",
 //        "--enable-filter=yadif_videotoolbox",
     ]
+}
+
+class BuildSRT: BaseBuild {
+    private let srtVersion = "v1.4.4"
+    private let srtFile = "srt-1.4.4"
+
+    init() {
+        super.init(library: "SRT")
+    }
+
+    override func buildALL() {
+        if Utility.shell("which cmake") == nil {
+            Utility.shell("brew install cmake")
+        }
+        if Utility.shell("which wget") == nil {
+            Utility.shell("brew install wget")
+        }
+        if !FileManager.default.fileExists(atPath: (URL.currentDirectory + srtFile).path) {
+            Utility.shell("curl -L https://github.com/Haivision/srt/archive/refs/tags/\(srtVersion).tar.gz | tar xj")
+        }
+        super.buildALL()
+    }
+
+    override func architectures(_ platform: PlatformType) -> [ArchType] {
+        let archs = super.architectures(platform)
+        if platform == .ios, archs.contains(.arm64e) {
+            return archs.filter { $0 != .arm64 }
+        } else {
+            return archs
+        }
+    }
+
+    override func innerBuid(platform: PlatformType, arch: ArchType, cflags: String, buildDir: URL) {
+        let opensslPath = URL.currentDirectory + ["SSL", platform.rawValue, "thin", arch.rawValue]
+        let directoryURL = URL.currentDirectory + srtFile
+        let cmakeDir = directoryURL + "\(platform)-\(arch)"
+
+        if !FileManager.default.fileExists(atPath: cmakeDir.path) {
+            try? FileManager.default.createDirectory(at: cmakeDir, withIntermediateDirectories: false, attributes: nil)
+        }
+
+        let srtPlatform = toSRTPlatform(platform: platform)
+
+        try? FileManager.default.createDirectory(at: directoryURL + "/\(platform)-\(arch)", withIntermediateDirectories: true, attributes: nil)
+
+        let command = "cmake .. -DCMAKE_PREFIX_PATH=\(thinDir(platform: platform, arch: arch).path) -DCMAKE_INSTALL_PREFIX=\(thinDir(platform: platform, arch: arch).path) -DUSE_OPENSSL_PC=OFF -DCMAKE_TOOLCHAIN_FILE=scripts/iOS.cmake -DIOS_ARCH=\(arch) -DIOS_PLATFORM=\(srtPlatform)  -DCMAKE_IOS_DEVELOPER_ROOT=\(platform.crossTop()) -D_CMAKE_IOS_SDK_ROOT=\(platform.crossSDK()) -DOPENSSL_ROOT_DIR=\(opensslPath.path) -DOPENSSL_CRYPTO_LIBRARY=\(opensslPath.path)/lib/libcrypto.a -DOPENSSL_SSL_LIBRARY=\(opensslPath.path)/lib/libssl.a -DOPENSSL_INCLUDE_DIR=\(opensslPath.path)/include"
+        print(command)
+        Utility.shell(command, currentDirectoryURL: cmakeDir)
+        Utility.shell("make >>\(buildDir.path).log && make install >>\(buildDir.path).log ", currentDirectoryURL: cmakeDir)
+    }
+
+    override func frameworks() -> [String] {
+        ["Libsrt"]
+    }
+
+    private func toSRTPlatform(platform: PlatformType) -> String {
+        switch platform {
+        case .ios:
+            return "OS"
+        case .isimulator:
+            return "SIMULATOR64"
+        default:
+            let message = "Platform not supported: \(platform)"
+            print(message)
+            return message
+        }
+    }
 }
 
 class BuildOpenSSL: BaseBuild {
