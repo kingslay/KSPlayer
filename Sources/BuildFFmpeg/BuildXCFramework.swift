@@ -16,8 +16,8 @@ class BaseBuild {
             try? FileManager.default.createDirectory(at: path, withIntermediateDirectories: false, attributes: nil)
         }
         FileManager.default.changeCurrentDirectoryPath(path.path)
-        let onlyFFmpeg = argumentsArray.firstIndex(of: "only-ffmpeg") != nil
-        if !onlyFFmpeg {
+        let enableOpenssl = argumentsArray.firstIndex(of: "enable-openssl") != nil
+        if enableOpenssl {
             BuildOpenSSL().buildALL()
             // BuildBoringSSL().buildALL()
         }
