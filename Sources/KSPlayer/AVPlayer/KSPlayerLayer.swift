@@ -383,7 +383,6 @@ extension KSPlayerLayer {
             if let criteria = options?.preferredDisplayCriteria(refreshRate: fps, videoDynamicRange: dynamicRange.rawValue) {
                 displayManager.preferredDisplayCriteria = criteria
             }
-
         }
     }
     #endif

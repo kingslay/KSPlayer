@@ -175,8 +175,8 @@ class BuildFFMPEG: BaseBuild {
     private let isDebug: Bool
     private let isFFplay: Bool
     init() {
-        isDebug = BaseBuild.argumentsArray.firstIndex(of: "debug") != nil
-        isFFplay = BaseBuild.argumentsArray.firstIndex(of: "ffplay") != nil
+        isDebug = BaseBuild.argumentsArray.firstIndex(of: "enable-debug") != nil
+        isFFplay = BaseBuild.argumentsArray.firstIndex(of: "enable-ffplay") != nil
         super.init(library: "FFmpeg")
     }
 
@@ -186,18 +186,29 @@ class BuildFFMPEG: BaseBuild {
             ffmpegcflags.append("--disable-debug")
         }
         if isFFplay, platform == .macos, arch.executable() {
+            if isFFplay, Utility.shell("which sdl2-config") == nil {
+                Utility.shell("brew install sdl2")
+            }
             ffmpegcflags.append("--enable-ffmpeg")
             ffmpegcflags.append("--enable-ffplay")
+            ffmpegcflags.append("--enable-avdevice")
             ffmpegcflags.append("--enable-sdl2")
+            ffmpegcflags.append("--enable-decoder=rawvideo")
             ffmpegcflags.append("--enable-encoder=mpeg4")
             ffmpegcflags.append("--enable-encoder=aac")
             ffmpegcflags.append("--enable-muxer=m4v")
             ffmpegcflags.append("--enable-muxer=dash")
+            ffmpegcflags.append("--enable-indev=lavfi")
+            ffmpegcflags.append("--enable-filter=color")
+            ffmpegcflags.append("--enable-filter=lut")
+            ffmpegcflags.append("--enable-filter=negate")
+            ffmpegcflags.append("--enable-filter=testsrc")
         } else {
             ffmpegcflags.append("--disable-programs")
             ffmpegcflags.append("--disable-ffmpeg")
             ffmpegcflags.append("--disable-ffplay")
             ffmpegcflags.append("--disable-ffprobe")
+            ffmpegcflags.append("--disable-avdevice")
         }
 //        if platform == .isimulator || platform == .tvsimulator {
 //            ffmpegcflags.append("--assert-level=1")
@@ -327,9 +338,6 @@ class BuildFFMPEG: BaseBuild {
         if Utility.shell("which yasm") == nil {
             Utility.shell("brew install yasm")
         }
-        if isFFplay, Utility.shell("which sdl2-config") == nil {
-            Utility.shell("brew install sdl2")
-        }
     }
 
     override func frameworkExcludeHeaders(_ framework: String) -> [String] {
@@ -344,16 +352,18 @@ class BuildFFMPEG: BaseBuild {
 
     private let ffmpegConfiguers = [
         // Configuration options:
-        "--enable-optimizations", "--disable-xlib", "--disable-devices", "--disable-indevs", "--disable-outdevs",
-        "--disable-iconv", "--disable-shared", "--disable-gray", "--disable-swscale-alpha",
-        "--disable-bsfs", "--disable-symver", "--disable-armv5te", "--disable-armv6", " --disable-armv6t2",
-        "--disable-linux-perf", "--disable-bzlib", "--disable-small",
-        "--enable-gpl", "--enable-version3", "--enable-nonfree", "--enable-static", "--enable-runtime-cpudetect",
+        "--disable-armv5te", "--disable-armv6", "--disable-armv6t2", "--disable-bsfs",
+        "--disable-bzlib", "--disable-devices", "--disable-gray", "--disable-iconv", "--disable-indevs",
+        "--disable-linux-perf", "--disable-outdevs", "--disable-xlib", "--disable-shared",
+        "--disable-swscale-alpha", "--disable-symver", "--disable-small",
+        "--enable-gpl", "--enable-version3", "--enable-nonfree", "--enable-static",
+        "--enable-runtime-cpudetect", "--enable-optimizations",
         "--enable-cross-compile", "--enable-stripping", "--enable-libxml2", "--enable-thumb",
+        "--pkg-config-flags=--static",
         // Documentation options:
         "--disable-doc", "--disable-htmlpages", "--disable-manpages", "--disable-podpages", "--disable-txtpages",
         // Component options:
-        "--disable-avdevice", "--enable-avcodec", "--enable-avformat", "--enable-avutil",
+        "--enable-avcodec", "--enable-avformat", "--enable-avutil",
         "--enable-swresample", "--enable-swscale", "--disable-postproc", "--enable-network",
         // ,"--disable-pthreads"
         // ,"--disable-w32threads"
@@ -450,7 +460,7 @@ class BuildSRT: BaseBuild {
         }
     }
 
-    override func innerBuid(platform: PlatformType, arch: ArchType, cflags: String, buildDir: URL) {
+    override func innerBuid(platform: PlatformType, arch: ArchType, cflags _: String, buildDir: URL) {
         let opensslPath = URL.currentDirectory + ["SSL", platform.rawValue, "thin", arch.rawValue]
         let directoryURL = URL.currentDirectory + srtFile
         let cmakeDir = directoryURL + "\(platform)-\(arch)"

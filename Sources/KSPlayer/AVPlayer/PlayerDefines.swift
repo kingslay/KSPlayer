@@ -332,8 +332,9 @@ open class KSOptions {
     open func enableHardwareDecode() -> Bool {
         videoFilters == nil
     }
+
     #if os(tvOS)
-    open func preferredDisplayCriteria(refreshRate: Float, videoDynamicRange: Int32) -> AVDisplayCriteria? {
+    open func preferredDisplayCriteria(refreshRate _: Float, videoDynamicRange _: Int32) -> AVDisplayCriteria? {
 //        AVDisplayCriteria(refreshRate: fps, videoDynamicRange: dynamicRange.rawValue)
         nil
     }
