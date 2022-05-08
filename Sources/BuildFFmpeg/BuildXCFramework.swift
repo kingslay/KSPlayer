@@ -234,9 +234,15 @@ class BuildFFMPEG: BaseBuild {
             ffmpegcflags.append("--enable-protocol=libsrt")
         }
         let prefix = thinDir(platform: platform, arch: arch)
-        var args = ["set -o noglob &&", (URL.currentDirectory + [ffmpegFile, "configure"]).path, "--target-os=darwin",
-                    "--arch=\(arch.arch())", platform.cpu(arch: arch), "--cc='xcrun -sdk \(platform.sdk().lowercased()) clang'",
-                    "--extra-cflags='\(cflags)'", "--extra-ldflags='\(ldflags)'", "--prefix=\(prefix.path)"]
+        var args = ["set -o noglob &&",
+                    (URL.currentDirectory + [ffmpegFile, "configure"]).path,
+                    "--target-os=darwin",
+                    "--arch=\(arch.arch())",
+                    platform.cpu(arch: arch),
+                    "--cc='xcrun -sdk \(platform.sdk().lowercased()) clang'",
+                    "--extra-cflags='\(cflags)'",
+                    "--extra-ldflags='\(ldflags)'",
+                    "--prefix=\(prefix.path)"]
         args.append(contentsOf: ffmpegcflags)
         print(args.joined(separator: " "))
         Utility.shell(args.joined(separator: " "), currentDirectoryURL: buildDir)
