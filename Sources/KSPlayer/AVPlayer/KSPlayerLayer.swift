@@ -365,6 +365,11 @@ extension KSPlayerLayer {
     }
 
     private func setDisplayCriteria(track: MediaPlayerTrack) {
+        guard let displayManager = UIApplication.shared.keyWindow?.avDisplayManager,
+              displayManager.isDisplayCriteriaMatchingEnabled,
+              !displayManager.isDisplayModeSwitchInProgress else {
+            return
+        }
         let dynamicRange: DynamicRange
         let fps = track.nominalFrameRate
         if track.codecType.string == "ehvd" {
@@ -375,14 +380,8 @@ extension KSPlayerLayer {
         } else {
             dynamicRange = .SDR
         }
-        guard let displayManager = UIApplication.shared.keyWindow?.avDisplayManager else {
-            return
-        }
-        if displayManager.isDisplayCriteriaMatchingEnabled,
-           !displayManager.isDisplayModeSwitchInProgress {
-            if let criteria = options?.preferredDisplayCriteria(refreshRate: fps, videoDynamicRange: dynamicRange.rawValue) {
-                displayManager.preferredDisplayCriteria = criteria
-            }
+        if let criteria = options?.preferredDisplayCriteria(refreshRate: fps, videoDynamicRange: dynamicRange.rawValue) {
+            displayManager.preferredDisplayCriteria = criteria
         }
     }
     #endif
