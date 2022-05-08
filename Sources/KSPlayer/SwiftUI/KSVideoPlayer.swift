@@ -411,7 +411,9 @@ extension KSVideoPlayer: UIViewRepresentable {
     public final class Coordinator: KSPlayerLayerDelegate, ObservableObject {
         @Published var isPlay: Bool {
             didSet {
-                isPlay ? playerLayer?.play() : playerLayer?.pause()
+                if isPlay != oldValue {
+                    isPlay ? playerLayer?.play() : playerLayer?.pause()
+                }
             }
         }
 
@@ -491,13 +493,12 @@ extension KSVideoPlayer: UIViewRepresentable {
         }
 
         public func player(layer: KSPlayerLayer, state: KSPlayerState) {
-            if state == .buffering || state == .bufferFinished {
-                isPlay = true
-            }
             if state == .readyToPlay, let player = layer.player {
                 subtitleTracks = player.tracks(mediaType: .subtitle)
                 videoTracks = player.tracks(mediaType: .video)
                 audioTracks = player.tracks(mediaType: .audio)
+            } else {
+                isPlay = state.isPlaying
             }
             onStateChanged?(layer, state)
         }

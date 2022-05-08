@@ -237,10 +237,16 @@ public protocol PlayerControllerDelegate: class {
 
 ![gif](./Demo/demo.gif)
 
+## Custom FFmpeg
+edit BuildXCFramework.swift And run
+```bash
+swift run BuildFFmpeg enable-openssl
+```
+
 ## Debug FFmpeg
 
 ```bash
-swift run BuildFFmpeg debug
+swift run BuildFFmpeg enable-debug
 dwarfdump -F --debug-info ../Sources/libavformat.xcframework/macos-arm64_x86_64/Libavformat.framework/Libavformat | head -n 20
 ```
 
