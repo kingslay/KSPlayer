@@ -603,6 +603,7 @@ class TVSlide: UIControl {
     private let processView = UIProgressView()
     private var isTouch = false
     private lazy var panGestureRecognizer = UIPanGestureRecognizer(target: self, action: #selector(actionPanGesture(sender:)))
+    private var beganOffset = Float(0.0)
     var process: Binding<Float> {
         willSet {
             if !isTouch, newValue.wrappedValue != processView.progress {
@@ -643,15 +644,16 @@ class TVSlide: UIControl {
         if abs(translation.y) > abs(translation.x) {
             return
         }
-        let touchPoint = sender.location(in: self)
-        let value = Float(touchPoint.x / frame.size.width)
+
         switch sender.state {
         case .began, .possible:
             isTouch = true
+            beganOffset = processView.progress * Float(frame.size.width)
         case .changed:
+            let value = (beganOffset + Float(translation.x) / 5) / Float(frame.size.width)
             processView.progress = value
         case .ended:
-            process.wrappedValue = value
+            process.wrappedValue = processView.progress
             isTouch = false
         case .cancelled:
             isTouch = false
