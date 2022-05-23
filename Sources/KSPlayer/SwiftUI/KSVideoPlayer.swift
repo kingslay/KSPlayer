@@ -200,12 +200,14 @@ struct VideoControllerView: View {
                 .keyboardShortcut(.rightArrow, modifiers: .none)
                 #endif
                 Text(model.currentTime.toString(for: .minOrHour)).font(.caption2.monospacedDigit())
-                Slider(value: Binding {
-                    model.currentTime
-                } set: { newValue in
-                    config.seek(time: newValue)
-                }, in: 0 ... model.totalTime)
-                    .frame(maxHeight: 20)
+                Slider(value: $model.currentTime, in: 0 ... model.totalTime) { onEditingChanged in
+                    if onEditingChanged {
+                        config.isPlay = false
+                    } else {
+                        config.seek(time: model.currentTime)
+                    }
+                }
+                .frame(maxHeight: 20)
                 Text("-" + (model.totalTime - model.currentTime).toString(for: .minOrHour)).font(.caption2.monospacedDigit())
                 Button {
                     model.isShowSetting.toggle()
@@ -580,17 +582,19 @@ import Combine
 @available(tvOS 13.0, *)
 struct Slider: UIViewRepresentable {
     private let process: Binding<Float>
-    init(value: Binding<Double>, in bounds: ClosedRange<Double> = 0 ... 1, onEditingChanged _: @escaping (Bool) -> Void = { _ in }) {
+    private let onEditingChanged: (Bool) -> Void
+    init(value: Binding<Double>, in bounds: ClosedRange<Double> = 0 ... 1, onEditingChanged: @escaping (Bool) -> Void = { _ in }) {
         process = Binding {
             Float((value.wrappedValue - bounds.lowerBound) / (bounds.upperBound - bounds.lowerBound))
         } set: { newValue in
             value.wrappedValue = (bounds.upperBound - bounds.lowerBound) * Double(newValue) + bounds.lowerBound
         }
+        self.onEditingChanged = onEditingChanged
     }
 
     typealias UIViewType = TVSlide
     func makeUIView(context _: Context) -> UIViewType {
-        TVSlide(process: process)
+        TVSlide(process: process, onEditingChanged: onEditingChanged)
     }
 
     func updateUIView(_ view: UIViewType, context _: Context) {
@@ -601,19 +605,20 @@ struct Slider: UIViewRepresentable {
 @available(tvOS 13.0, *)
 class TVSlide: UIControl {
     private let processView = UIProgressView()
-    private var isTouch = false
     private lazy var panGestureRecognizer = UIPanGestureRecognizer(target: self, action: #selector(actionPanGesture(sender:)))
-    private var beganOffset = Float(0.0)
+    private var beganProgress = Float(0.0)
+    private let onEditingChanged: (Bool) -> Void
     var process: Binding<Float> {
         willSet {
-            if !isTouch, newValue.wrappedValue != processView.progress {
+            if newValue.wrappedValue != processView.progress {
                 processView.progress = newValue.wrappedValue
             }
         }
     }
 
-    init(process: Binding<Float>) {
+    init(process: Binding<Float>, onEditingChanged: @escaping (Bool) -> Void) {
         self.process = process
+        self.onEditingChanged = onEditingChanged
         super.init(frame: .zero)
         processView.translatesAutoresizingMaskIntoConstraints = false
         addSubview(processView)
@@ -647,18 +652,16 @@ class TVSlide: UIControl {
 
         switch sender.state {
         case .began, .possible:
-            isTouch = true
-            beganOffset = processView.progress * Float(frame.size.width)
+            beganProgress = processView.progress
         case .changed:
-            let value = (beganOffset + Float(translation.x) / 5) / Float(frame.size.width)
-            processView.progress = value
+            let value = beganProgress + Float(translation.x) / 5 / Float(frame.size.width)
+            process.wrappedValue = value
+            onEditingChanged(true)
         case .ended:
-            process.wrappedValue = processView.progress
-            isTouch = false
-        case .cancelled:
-            isTouch = false
-        case .failed:
-            isTouch = false
+            onEditingChanged(false)
+        case .cancelled, .failed:
+            process.wrappedValue = beganProgress
+            onEditingChanged(false)
         @unknown default:
             break
         }
