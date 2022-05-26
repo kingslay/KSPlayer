@@ -206,7 +206,14 @@ class FFPlayerItemTrack<Frame: MEFrame>: PlayerItemTrackProtocol, CustomStringCo
             }
         } catch {
             KSLog("Decoder did Failed : \(error)")
-            state = .failed
+            if decoder is VideoHardwareDecode {
+                decoder.shutdown()
+                decoderMap[packet.assetTrack.trackID] = SoftwareDecode(assetTrack: packet.assetTrack, options: options, delegate: self)
+                KSLog("VideoCodec switch to software decompression")
+                doDecode(packet: packet)
+            } else {
+                state = .failed
+            }
         }
     }
 }
@@ -365,7 +372,11 @@ extension AssetTrack {
             if mediaType == .subtitle {
                 return SubtitleDecode(assetTrack: self, options: options, delegate: delegate)
             } else {
-                return SoftwareDecode(assetTrack: self, options: options, delegate: delegate)
+                if mediaType == .video, options.asynchronousDecompression, options.enableHardwareDecode(), let session = DecompressionSession(codecpar: stream.pointee.codecpar.pointee, options: options) {
+                    return VideoHardwareDecode(assetTrack: self, options: options, session: session, delegate: delegate)
+                } else {
+                    return SoftwareDecode(assetTrack: self, options: options, delegate: delegate)
+                }
             }
         }
     }
