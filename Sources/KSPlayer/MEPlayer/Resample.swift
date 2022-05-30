@@ -300,7 +300,7 @@ extension AVPixelFormat {
         case AV_PIX_FMT_YUV420P: return kCVPixelFormatType_420YpCbCr8Planar
         case AV_PIX_FMT_UYVY422: return kCVPixelFormatType_422YpCbCr8
         case AV_PIX_FMT_YUYV422: return kCVPixelFormatType_422YpCbCr8_yuvs
-//        case AV_PIX_FMT_YUVJ420P:   return kCVPixelFormatType_420YpCbCr8PlanarFullRange
+        case AV_PIX_FMT_YUVJ420P: return kCVPixelFormatType_420YpCbCr8PlanarFullRange
         case AV_PIX_FMT_YUV422P10LE: return kCVPixelFormatType_422YpCbCr10
         case AV_PIX_FMT_YUV422P16LE: return kCVPixelFormatType_422YpCbCr16
         case AV_PIX_FMT_YUV444P: return kCVPixelFormatType_444YpCbCr8
