@@ -16,6 +16,7 @@ class VideoHardwareDecode: DecodeProtocol {
     private let options: KSOptions
     private var startTime = Int64(0)
     private var lastPosition = Int64(0)
+    private var error: NSError?
     required convenience init(assetTrack: AssetTrack, options: KSOptions, delegate: DecodeResultDelegate) {
         self.init(assetTrack: assetTrack, options: options, session: DecompressionSession(codecpar: assetTrack.stream.pointee.codecpar.pointee, options: options), delegate: delegate)
     }
@@ -42,9 +43,21 @@ class VideoHardwareDecode: DecodeProtocol {
         let duration = corePacket.duration
         let size = Int64(corePacket.size)
         let status = VTDecompressionSessionDecodeFrame(session.decompressionSession, sampleBuffer: sampleBuffer, flags: flags, infoFlagsOut: &flagOut) { [weak self] status, infoFlags, imageBuffer, _, _ in
-            guard let self = self, status == noErr, !infoFlags.contains(.frameDropped) else {
+            guard let self = self, !infoFlags.contains(.frameDropped) else {
                 return
             }
+            guard status == noErr else {
+                if status == kVTInvalidSessionErr || status == kVTVideoDecoderMalfunctionErr || status == kVTVideoDecoderBadDataErr {
+                    if corePacket.flags & AV_PKT_FLAG_KEY == 1 {
+                        self.error = NSError(errorCode: .codecVideoReceiveFrame, ffmpegErrnum: status)
+                    } else {
+                        // 解决从后台切换到前台，解码失败的问题
+                        self.doFlushCodec()
+                    }
+                }
+                return
+            }
+            self.error = nil
             let frame = VideoVTBFrame()
             frame.corePixelBuffer = imageBuffer
             frame.timebase = self.timebase
@@ -57,6 +70,9 @@ class VideoHardwareDecode: DecodeProtocol {
             frame.size = size
             self.lastPosition += frame.duration
             self.delegate?.decodeResult(frame: frame)
+        }
+        if let error = error {
+            throw error
         }
         if status == kVTInvalidSessionErr || status == kVTVideoDecoderMalfunctionErr || status == kVTVideoDecoderBadDataErr {
             if corePacket.flags & AV_PKT_FLAG_KEY == 1 {
@@ -94,11 +110,7 @@ class DecompressionSession {
             return nil
         }
         let extradataSize = codecpar.extradata_size
-        guard extradataSize >= 7, extradata[0] == 1 else {
-            return nil
-        }
-
-        if extradata[4] == 0xFE {
+        if extradataSize >= 5, extradata[4] == 0xFE {
             extradata[4] = 0xFF
             isConvertNALSize = true
         } else {
