@@ -37,6 +37,7 @@ final class MEPlayerItem {
     private var videoAdaptation: VideoAdaptationState?
     private(set) var currentPlaybackTime = TimeInterval(0)
     private var startTime = TimeInterval(0)
+    private var videoClockDelay = TimeInterval(0)
     private(set) var rotation = 0.0
     private(set) var duration: TimeInterval = 0
     private(set) var naturalSize = CGSize.zero
@@ -527,17 +528,21 @@ extension MEPlayerItem: OutputRenderSourceDelegate {
     }
 
     func getVideoOutputRender() -> VideoVTBFrame? {
+        var desire = currentPlaybackTime + options.audioDelay + startTime
         let predicate: (VideoVTBFrame) -> Bool = { [weak self] frame -> Bool in
             guard let self = self else { return true }
-            var desire = self.currentPlaybackTime + self.options.audioDelay + self.startTime
+            desire = self.currentPlaybackTime + self.options.audioDelay + self.startTime
             if self.isAudioStalled {
-                desire += max(CACurrentMediaTime() - self.videoMediaTime, 0)
+                desire += max(CACurrentMediaTime() - self.videoMediaTime, 0) + self.videoClockDelay
             }
-            return frame.cmtime.seconds <= desire
+            return frame.seconds <= desire
         }
         let frame = videoTrack?.getOutputRender(where: predicate)
-        if let frame = frame, frame.seconds + 0.4 < currentPlaybackTime + options.audioDelay {
-            _ = videoTrack?.getOutputRender(where: nil)
+        if let frame = frame {
+            videoClockDelay = desire - frame.seconds
+            if frame.seconds + 0.4 < desire {
+                _ = videoTrack?.getOutputRender(where: nil)
+            }
         }
         return frame
     }
