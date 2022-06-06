@@ -49,7 +49,7 @@ public struct KSVideoPlayerView: View {
             .onStateChanged { _, state in
                 if state == .readyToPlay {
                     if let track = player.coordinator.subtitleTracks.first, options.autoSelectEmbedSubtitle {
-                        player.coordinator.selectedSubtitileTrack = track
+                        player.coordinator.selectedSubtitleTrack = track
                     }
                 }
             }
@@ -71,7 +71,7 @@ public struct KSVideoPlayerView: View {
                     #endif
                 }
             #endif
-                .onReceive(player.coordinator.$selectedSubtitileTrack) { track in
+                .onReceive(player.coordinator.$selectedSubtitleTrack) { track in
                     guard let subtitle = track?.subtitle else {
                         return
                     }
@@ -306,9 +306,9 @@ struct VideoSettingView: View {
             }
             List {
                 Picker("subtitle tracks", selection: Binding(get: {
-                    config.selectedSubtitileTrack?.trackID
+                    config.selectedSubtitleTrack?.trackID
                 }, set: { value in
-                    config.selectedSubtitileTrack = config.subtitleTracks.first { $0.trackID == value }
+                    config.selectedSubtitleTrack = config.subtitleTracks.first { $0.trackID == value }
                 })) {
                     Text("None").tag(nil as Int32?)
                     ForEach(config.subtitleTracks, id: \.trackID) { track in
@@ -463,9 +463,9 @@ extension KSVideoPlayer: UIViewRepresentable {
             }
         }
 
-        @Published fileprivate var selectedSubtitileTrack: MediaPlayerTrack? {
+        @Published fileprivate var selectedSubtitleTrack: MediaPlayerTrack? {
             didSet {
-                if let track = selectedAudioTrack {
+                if let track = selectedSubtitleTrack {
                     playerLayer?.player?.select(track: track)
                 } else {
                     oldValue?.setIsEnabled(false)
@@ -475,7 +475,7 @@ extension KSVideoPlayer: UIViewRepresentable {
 
         fileprivate var selectedVideoTrack: MediaPlayerTrack? {
             didSet {
-                if let track = selectedAudioTrack {
+                if let track = selectedVideoTrack {
                     playerLayer?.player?.select(track: track)
                 } else {
                     oldValue?.setIsEnabled(false)
