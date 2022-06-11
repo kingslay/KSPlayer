@@ -15,7 +15,7 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "AC77DFBE26402329001351AE"
-               BuildableName = "KS Player.app"
+               BuildableName = "TracyPlayer.app"
                BlueprintName = "macOS"
                ReferencedContainer = "container:SwiftUI.xcodeproj">
             </BuildableReference>
@@ -45,7 +45,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "AC77DFBE26402329001351AE"
-            BuildableName = "KS Player.app"
+            BuildableName = "TracyPlayer.app"
             BlueprintName = "macOS"
             ReferencedContainer = "container:SwiftUI.xcodeproj">
          </BuildableReference>
@@ -62,7 +62,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "AC77DFBE26402329001351AE"
-            BuildableName = "KS Player.app"
+            BuildableName = "TracyPlayer.app"
             BlueprintName = "macOS"
             ReferencedContainer = "container:SwiftUI.xcodeproj">
          </BuildableReference>
