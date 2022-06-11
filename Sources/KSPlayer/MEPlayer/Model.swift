@@ -36,7 +36,6 @@ enum MESourceState {
 // MARK: delegate
 
 protocol OutputRenderSourceDelegate: AnyObject {
-    var currentPlaybackTime: TimeInterval { get }
     func getVideoOutputRender() -> VideoVTBFrame?
     func getAudioOutputRender() -> AudioFrame?
     func setVideo(time: CMTime)
