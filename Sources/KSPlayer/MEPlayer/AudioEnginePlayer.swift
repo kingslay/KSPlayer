@@ -20,7 +20,7 @@ protocol AudioPlayer: AnyObject {
     var overallGain: Float { get set }
 }
 
-final class AudioEnginePlayer: AudioPlayer, FrameOutput {
+final public class AudioEnginePlayer: AudioPlayer, FrameOutput {
     public var attackTime: Float {
         get {
             var value = AudioUnitParameterValue(1.0)
