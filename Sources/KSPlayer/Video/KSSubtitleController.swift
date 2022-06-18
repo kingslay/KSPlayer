@@ -11,23 +11,19 @@ import UIKit
 #else
 import AppKit
 #endif
-
-public protocol SubtitleViewProtocol {
-    var selectedInfo: KSObservable<SubtitleInfo> { get }
-    func setupDatas(infos: [SubtitleInfo])
-}
-
+import Combine
 public class KSSubtitleController {
     private let cacheDataSouce = CacheDataSouce()
     private var subtitleDataSouces: [SubtitleDataSouce] = []
     private var infos = [SubtitleInfo]()
     private var subtitleName: String?
-    public let view: UIView & SubtitleViewProtocol
+    public var view: KSSubtitleView
     public var subtitle: KSSubtitleProtocol?
     public var selectWithFilePath: ((Result<KSSubtitleProtocol, NSError>) -> Void)?
-    @KSObservable
+    @Published
     public var srtListCount: Int = 0
-    public init(customControlView: (UIView & SubtitleViewProtocol)? = nil) {
+    private var cancellable: AnyCancellable?
+    public init(customControlView: KSSubtitleView? = nil) {
         if let customView = customControlView {
             view = customView
         } else {
@@ -35,7 +31,7 @@ public class KSSubtitleController {
         }
         view.isHidden = true
         subtitleDataSouces = [cacheDataSouce]
-        view.selectedInfo.observer = { [weak self] _, info in
+        cancellable = view.$selectedInfo.sink { [weak self] info in
             guard let self = self, let selectWithFilePath = self.selectWithFilePath else { return }
             DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 0.2) { [weak self] in
                 guard let self = self else { return }

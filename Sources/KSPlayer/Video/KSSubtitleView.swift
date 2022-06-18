@@ -11,13 +11,14 @@ import UIKit
 import AppKit
 #endif
 
-public class KSSubtitleView: UIControl, SubtitleViewProtocol {
+public class KSSubtitleView: UIControl {
     private var infos = [SubtitleInfo]()
     private let closeInfo = URLSubtitleInfo(subtitleID: "", name: NSLocalizedString("no show subtitle", comment: ""))
     private let tableView = UITableView()
     private let tableWidth = CGFloat(360)
     private var tableViewTrailingConstraint: NSLayoutConstraint!
-    public let selectedInfo: KSObservable<SubtitleInfo>
+    @Published
+    public var selectedInfo: SubtitleInfo
     override public var isHidden: Bool {
         didSet {
             if isHidden {
@@ -46,7 +47,7 @@ public class KSSubtitleView: UIControl, SubtitleViewProtocol {
     }
 
     override public init(frame: CGRect) {
-        selectedInfo = KSObservable(wrappedValue: closeInfo)
+        selectedInfo = closeInfo
         super.init(frame: frame)
         tableView.rowHeight = 52
         tableView.backgroundColor = UIColor(white: 0, alpha: 0.7)
@@ -101,7 +102,7 @@ public class KSSubtitleView: UIControl, SubtitleViewProtocol {
 #if canImport(UIKit)
 extension KSSubtitleView: UITableViewDelegate {
     public func tableView(_: UITableView, didSelectRowAt indexPath: IndexPath) {
-        selectedInfo.wrappedValue = infos[indexPath.row]
+        selectedInfo = infos[indexPath.row]
     }
 }
 
@@ -119,7 +120,7 @@ extension KSSubtitleView: UITableViewDataSource {
                 srtCell.localIconViewWidth.constant = 0
                 srtCell.localIconView.isHidden = true
             }
-            srtCell.checked(info === selectedInfo.wrappedValue)
+            srtCell.checked(info === selectedInfo)
         }
         return cell
     }

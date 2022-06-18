@@ -6,6 +6,7 @@ import UIKit
 import AppKit
 public typealias UIImage = NSImage
 #endif
+import Combine
 public final class KSAVPlayerView: UIView {
     public let player = AVQueuePlayer()
     override public init(frame: CGRect) {
@@ -62,10 +63,11 @@ public final class KSAVPlayerView: UIView {
 }
 
 public class KSAVPlayer {
+    private var cancellable: AnyCancellable?
     private var options: KSOptions {
         didSet {
             player.currentItem?.preferredForwardBufferDuration = options.preferredForwardBufferDuration
-            options.$preferredForwardBufferDuration.observer = { [weak self] _, newValue in
+            cancellable = options.$preferredForwardBufferDuration.sink { [weak self] newValue in
                 self?.player.currentItem?.preferredForwardBufferDuration = newValue
             }
         }

@@ -7,10 +7,10 @@
 #if canImport(UIKit) && canImport(CallKit)
 import AVKit
 import CallKit
+import Combine
 import CoreServices
 import MediaPlayer
 import UIKit
-
 open class IOSVideoPlayerView: VideoPlayerView {
     private weak var originalSuperView: UIView?
     private var originalframeConstraints: [NSLayoutConstraint]?
@@ -21,6 +21,7 @@ open class IOSVideoPlayerView: VideoPlayerView {
     private let callCenter = CXCallObserver()
     private var isVolume = false
     private let volumeView = BrightnessVolume()
+    private var cancellable: AnyCancellable?
     public var volumeViewSlider = UXSlider()
     public var backButton = UIButton()
     public var airplayStatusView: UIView = AirplayStatusView()
@@ -40,7 +41,7 @@ open class IOSVideoPlayerView: VideoPlayerView {
         if UIDevice.current.userInterfaceIdiom == .phone {
             subtitleLabel.font = .systemFont(ofSize: 14)
         }
-        srtControl.$srtListCount.observer = { [weak self] _, count in
+        cancellable = srtControl.$srtListCount.sink { [weak self] count in
             guard let self = self, count > 0 else {
                 return
             }
@@ -354,7 +355,6 @@ public class AirplayStatusView: UIView {
 
 public extension KSPlayerManager {
     /// func application(_ application: UIApplication, supportedInterfaceOrientationsFor window: UIWindow?) -> UIInterfaceOrientationMask
-    @KSObservable
     static var supportedInterfaceOrientations = UIInterfaceOrientationMask.portrait
 }
 

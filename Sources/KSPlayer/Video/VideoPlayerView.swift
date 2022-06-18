@@ -53,7 +53,7 @@ open class VideoPlayerView: PlayerView {
                     srtControl.add(dataSouce: embedSubtitleDataSouce)
                     let infos = srtControl.filterInfos { $0.subtitleDataSouce === embedSubtitleDataSouce }
                     if resource?.definitions[currentDefinition].options.autoSelectEmbedSubtitle ?? false, let first = infos.first {
-                        srtControl.view.selectedInfo.wrappedValue = first
+                        srtControl.view.selectedInfo = first
                     }
                 }
             }
