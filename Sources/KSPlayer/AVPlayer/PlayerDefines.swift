@@ -157,7 +157,7 @@ open class KSOptions {
 
     //    public static let shared = KSOptions()
     /// 最低缓存视频时间
-    @KSObservable
+    @Published
     public var preferredForwardBufferDuration = KSOptions.preferredForwardBufferDuration
     /// 最大缓存视频时间
     public var maxBufferDuration = KSOptions.maxBufferDuration
@@ -479,26 +479,6 @@ extension NSError {
         var userInfo = userInfo
         userInfo[NSLocalizedDescriptionKey] = errorCode.description
         self.init(domain: KSPlayerErrorDomain, code: errorCode.rawValue, userInfo: userInfo)
-    }
-}
-
-@propertyWrapper public final class KSObservable<T> {
-    public var observer: ((_ oldValue: T, _ newValue: T) -> Void)? {
-        didSet {
-            observer?(wrappedValue, wrappedValue)
-        }
-    }
-
-    public var wrappedValue: T {
-        didSet {
-            observer?(oldValue, wrappedValue)
-        }
-    }
-
-    public var projectedValue: KSObservable { self }
-
-    public init(wrappedValue: T) {
-        self.wrappedValue = wrappedValue
     }
 }
 

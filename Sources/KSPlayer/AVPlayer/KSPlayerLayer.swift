@@ -60,9 +60,9 @@ public protocol KSPlayerLayerDelegate: AnyObject {
 
 open class KSPlayerLayer: UIView {
     public weak var delegate: KSPlayerLayerDelegate?
-    @KSObservable
+    @Published
     public var bufferingProgress: Int = 0
-    @KSObservable
+    @Published
     public var loopCount: Int = 0
     private var isWirelessRouteActive = false
     private var options: KSOptions?
