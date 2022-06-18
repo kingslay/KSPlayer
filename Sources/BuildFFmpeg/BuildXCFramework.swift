@@ -196,7 +196,9 @@ class BuildFFMPEG: BaseBuild {
             ffmpegcflags.append("--enable-decoder=rawvideo")
             ffmpegcflags.append("--enable-encoder=mpeg4")
             ffmpegcflags.append("--enable-encoder=aac")
+            ffmpegcflags.append("--enable-encoder=movtext")
             ffmpegcflags.append("--enable-muxer=m4v")
+            ffmpegcflags.append("--enable-muxer=mov")
             ffmpegcflags.append("--enable-muxer=dash")
             ffmpegcflags.append("--enable-indev=lavfi")
             ffmpegcflags.append("--enable-filter=color")
@@ -388,7 +390,8 @@ class BuildFFMPEG: BaseBuild {
         // ,"--disable-everything"
         "--disable-encoders",
         // ./configure --list-decoders
-        "--disable-decoders", "--enable-decoder=dca", "--enable-decoder=flv", "--enable-decoder=h263",
+        "--disable-decoders",
+        "--enable-decoder=dca", "--enable-decoder=flv", "--enable-decoder=h263",
         "--enable-decoder=h263i", "--enable-decoder=h263p", "--enable-decoder=h264", "--enable-decoder=hevc",
         "--enable-decoder=mjpeg", "--enable-decoder=mjpegb", "--enable-decoder=mpeg1video", "--enable-decoder=mpeg2video",
         "--enable-decoder=mpeg4", "--enable-decoder=mpegvideo", "--enable-decoder=rv30", "--enable-decoder=rv40",
@@ -408,25 +411,28 @@ class BuildFFMPEG: BaseBuild {
         "--disable-muxers",
         // "--enable-muxer=mpegts", "--enable-muxer=mp4",
         // ./configure --list-demuxers
-        "--disable-demuxers", "--enable-demuxer=aac", "--enable-demuxer=ac3", "--enable-demuxer=aiff", "--enable-demuxer=amr",
-        "--enable-demuxer=asf", "--enable-demuxer=ape", "--enable-demuxer=avi",
+        "--disable-demuxers",
+        "--enable-demuxer=aac", "--enable-demuxer=ac3", "--enable-demuxer=aiff", "--enable-demuxer=amr",
+        "--enable-demuxer=ape", "--enable-demuxer=asf", "--enable-demuxer=ass", "--enable-demuxer=avi",
         "--enable-demuxer=concat", "--enable-demuxer=dash", "--enable-demuxer=data", "--enable-demuxer=eac3",
         "--enable-demuxer=flac", "--enable-demuxer=flv", "--enable-demuxer=h264", "--enable-demuxer=hevc", "--enable-demuxer=hls",
         "--enable-demuxer=live_flv", "--enable-demuxer=loas",
         "--enable-demuxer=m4v", "--enable-demuxer=matroska", "--enable-demuxer=mov", "--enable-demuxer=mp3", "--enable-demuxer=mpeg*",
-        "--enable-demuxer=ogg", "--enable-demuxer=rm", "--enable-demuxer=rtsp",
+        "--enable-demuxer=ogg", "--enable-demuxer=rm", "--enable-demuxer=rtsp", "--enable-demuxer=srt",
         "--enable-demuxer=vc1", "--enable-demuxer=wav",
         // "--enable-demuxer=latm",
         // "--enable-demuxer=webm_dash_manifest",
         // ./configure --list-protocols
-        "--enable-protocols", "--disable-protocol=bluray", "--disable-protocol=ffrtmpcrypt", "--disable-protocol=gopher",
+        "--enable-protocols",
+        "--disable-protocol=bluray", "--disable-protocol=ffrtmpcrypt", "--disable-protocol=gopher",
         "--disable-protocol=icecast", "--disable-protocol=librtmp*", "--disable-protocol=libssh",
         "--disable-protocol=md5", "--disable-protocol=mmsh", "--disable-protocol=mmst", "--disable-protocol=sctp",
         "--disable-protocol=subfile", "--disable-protocol=unix",
 
         // filters
-        "--disable-filters", "--enable-filter=amix", "--enable-filter=anull", "--enable-filter=aformat",
-        "--enable-filter=aresample", "--enable-filter=areverse", "--enable-filter=asetrate", "--enable-filter=atempo", "--enable-filter=atrim",
+        "--disable-filters",
+        "--enable-filter=amix", "--enable-filter=anull", "--enable-filter=aformat", "--enable-filter=aresample",
+        "--enable-filter=areverse", "--enable-filter=asetrate", "--enable-filter=atempo", "--enable-filter=atrim",
         "--enable-filter=format", "--enable-filter=fps", "--enable-filter=hflip", "--enable-filter=null",
         "--enable-filter=overlay", "--enable-filter=palettegen", "--enable-filter=paletteuse", "--enable-filter=pan",
         "--enable-filter=rotate", "--enable-filter=setpts", "--enable-filter=scale",
