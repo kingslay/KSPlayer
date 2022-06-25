@@ -96,7 +96,9 @@ public class KSAVPlayer {
     @available(tvOS 14.0, *)
     public private(set) lazy var pipController: AVPictureInPictureController? = AVPictureInPictureController(playerLayer: playerView.playerLayer)
     @available(macOS 12.0, iOS 15.0, tvOS 15.0, *)
-    public private(set) lazy var playbackCoordinator: AVPlaybackCoordinator = playerView.player.playbackCoordinator
+    public var playbackCoordinator: AVPlaybackCoordinator {
+        playerView.player.playbackCoordinator
+    }
 
     public private(set) var bufferingProgress = 0 {
         didSet {

@@ -39,12 +39,22 @@ public class KSMEPlayer: NSObject {
         }
     }
 
-    @available(macOS 12.0, iOS 15.0, tvOS 15.0, *)
-    public private(set) lazy var playbackCoordinator: AVPlaybackCoordinator = {
-        let coordinator = AVDelegatingPlaybackCoordinator(playbackControlDelegate: self)
-        coordinator.suspensionReasonsThatTriggerWaiting = [.stallRecovery]
-        return coordinator
+    private lazy var _playbackCoordinator: Any? = {
+        if #available(macOS 12.0, iOS 15.0, tvOS 15.0, *) {
+            let coordinator = AVDelegatingPlaybackCoordinator(playbackControlDelegate: self)
+            coordinator.suspensionReasonsThatTriggerWaiting = [.stallRecovery]
+            return coordinator
+        } else {
+            return nil
+        }
     }()
+
+    @available(macOS 12.0, iOS 15.0, tvOS 15.0, *)
+    public var playbackCoordinator: AVPlaybackCoordinator {
+        // swiftlint:disable force_cast
+        _playbackCoordinator as! AVPlaybackCoordinator
+        // swiftlint:enable force_cast
+    }
 
     public private(set) var playableTime = TimeInterval(0)
     public weak var delegate: MediaPlayerDelegate?

@@ -22,8 +22,8 @@ class MeOptions: KSOptions {
         return nil
     }
 
-    override func isUseDisplayLayer() -> Bool {
-        super.isUseDisplayLayer()
+    override func enableHardwareDecode() -> Bool {
+        false
     }
 }
 
