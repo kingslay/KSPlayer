@@ -41,7 +41,7 @@ final class MetalPlayView: UIView {
         #if !canImport(UIKit)
         layer = AVSampleBufferDisplayLayer()
         #endif
-        #if os(macOS) || targetEnvironment(macCatalyst)
+        #if os(macOS)
         (view.layer as? CAMetalLayer)?.wantsExtendedDynamicRangeContent = true
         #endif
         view.framebufferOnly = true
