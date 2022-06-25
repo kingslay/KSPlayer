@@ -193,13 +193,16 @@ class BuildFFMPEG: BaseBuild {
             ffmpegcflags.append("--enable-ffplay")
             ffmpegcflags.append("--enable-avdevice")
             ffmpegcflags.append("--enable-sdl2")
-            ffmpegcflags.append("--enable-decoder=rawvideo")
-            ffmpegcflags.append("--enable-encoder=mpeg4")
             ffmpegcflags.append("--enable-encoder=aac")
             ffmpegcflags.append("--enable-encoder=movtext")
+            ffmpegcflags.append("--enable-encoder=mpeg4")
+            ffmpegcflags.append("--enable-muxer=dash")
             ffmpegcflags.append("--enable-muxer=m4v")
             ffmpegcflags.append("--enable-muxer=mov")
-            ffmpegcflags.append("--enable-muxer=dash")
+            ffmpegcflags.append("--enable-muxer=mp4")
+            ffmpegcflags.append("--enable-muxer=mpegts")
+            ffmpegcflags.append("--enable-muxer=webm*")
+            ffmpegcflags.append("--enable-decoder=rawvideo")
             ffmpegcflags.append("--enable-indev=lavfi")
             ffmpegcflags.append("--enable-filter=color")
             ffmpegcflags.append("--enable-filter=lut")
@@ -409,7 +412,6 @@ class BuildFFMPEG: BaseBuild {
         "--enable-decoder=pgssub", "--enable-decoder=srt", "--enable-decoder=ssa", "--enable-decoder=subrip", "--enable-decoder=webvtt",
         // ./configure --list-muxers
         "--disable-muxers",
-        // "--enable-muxer=mpegts", "--enable-muxer=mp4",
         // ./configure --list-demuxers
         "--disable-demuxers",
         "--enable-demuxer=aac", "--enable-demuxer=ac3", "--enable-demuxer=aiff", "--enable-demuxer=amr",
@@ -419,9 +421,7 @@ class BuildFFMPEG: BaseBuild {
         "--enable-demuxer=live_flv", "--enable-demuxer=loas",
         "--enable-demuxer=m4v", "--enable-demuxer=matroska", "--enable-demuxer=mov", "--enable-demuxer=mp3", "--enable-demuxer=mpeg*",
         "--enable-demuxer=ogg", "--enable-demuxer=rm", "--enable-demuxer=rtsp", "--enable-demuxer=srt",
-        "--enable-demuxer=vc1", "--enable-demuxer=wav",
-        // "--enable-demuxer=latm",
-        // "--enable-demuxer=webm_dash_manifest",
+        "--enable-demuxer=vc1", "--enable-demuxer=wav", "--enable-demuxer=webm_dash_manifest",
         // ./configure --list-protocols
         "--enable-protocols",
         "--disable-protocol=bluray", "--disable-protocol=ffrtmpcrypt", "--disable-protocol=gopher",
@@ -510,7 +510,7 @@ class BuildSRT: BaseBuild {
 }
 
 class BuildOpenSSL: BaseBuild {
-    private let sslFile = "openssl-3.0.2"
+    private let sslFile = "openssl-3.0.3"
     init() {
         super.init(library: "SSL")
     }
