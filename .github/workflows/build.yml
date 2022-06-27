@@ -9,7 +9,7 @@ on:
 jobs:
   buidMacOS:
     name: buidMacOS
-    runs-on: macos-11
+    runs-on: macos-12
     steps:
       - uses: actions/checkout@main
       - name: Build
@@ -19,7 +19,7 @@ jobs:
 
   buidIOS:
     name: buidIOS
-    runs-on: macos-11
+    runs-on: macos-12
     steps:
       - uses: actions/checkout@main
       - name: Build
@@ -27,7 +27,7 @@ jobs:
 
   buidTVOS:
     name: buidTVOS
-    runs-on: macos-11
+    runs-on: macos-12
     steps:
       - uses: actions/checkout@main
       - name: Build
