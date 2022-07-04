@@ -252,7 +252,7 @@ extension AVAudioEngine {
 }
 
 extension AVAudioFormat {
-    private func toPCMBuffer(frame: AudioFrame) -> AVAudioPCMBuffer? {
+    func toPCMBuffer(frame: AudioFrame) -> AVAudioPCMBuffer? {
         guard let pcmBuffer = AVAudioPCMBuffer(pcmFormat: self, frameCapacity: UInt32(frame.dataWrap.size[0]) / streamDescription.pointee.mBytesPerFrame) else {
             return nil
         }
