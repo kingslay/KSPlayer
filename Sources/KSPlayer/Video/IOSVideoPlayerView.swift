@@ -109,12 +109,16 @@ open class IOSVideoPlayerView: VideoPlayerView {
         }
     }
 
+    open func isHorizonal() -> Bool {
+        playerLayer.player?.naturalSize.isHorizonal ?? true
+    }
+
     open func updateUI(isFullScreen: Bool) {
         guard let viewController = viewController else {
             return
         }
         landscapeButton.isSelected = isFullScreen
-        let isHorizonal = playerLayer.player?.naturalSize.isHorizonal ?? true
+        let isHorizonal = isHorizonal()
         viewController.navigationController?.interactivePopGestureRecognizer?.isEnabled = !isFullScreen
         if isFullScreen {
             if viewController is PlayerFullScreenViewController {
@@ -254,6 +258,14 @@ open class IOSVideoPlayerView: VideoPlayerView {
             super.panGestureChanged(velocity: point, direction: direction)
         }
     }
+
+    open func judgePanGesture() {
+        if landscapeButton.isSelected || UIDevice.current.userInterfaceIdiom == .pad {
+            panGesture.isEnabled = isPlayed && !replayButton.isSelected
+        } else {
+            panGesture.isEnabled = toolBar.playButton.isSelected
+        }
+    }
 }
 
 extension IOSVideoPlayerView: CXCallObserverDelegate {
@@ -302,18 +314,10 @@ extension IOSVideoPlayerView {
     }
 
     @objc private func orientationChanged(notification _: Notification) {
-        guard let isHorizonal = playerLayer.player?.naturalSize.isHorizonal, isHorizonal else {
+        guard isHorizonal() else {
             return
         }
         updateUI(isFullScreen: UIApplication.isLandscape)
-    }
-
-    open func judgePanGesture() {
-        if landscapeButton.isSelected || UIDevice.current.userInterfaceIdiom == .pad {
-            panGesture.isEnabled = isPlayed && !replayButton.isSelected
-        } else {
-            panGesture.isEnabled = toolBar.playButton.isSelected
-        }
     }
 }
 

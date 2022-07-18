@@ -418,6 +418,23 @@ open class VideoPlayerView: PlayerView {
         }
     }
 
+    open func showSubtile(from subtitle: KSSubtitleProtocol, at time: TimeInterval) {
+        let time = time + (resource?.definitions[currentDefinition].options.subtitleDelay ?? 0.0)
+        if let part = subtitle.search(for: time) {
+            subtitleEndTime = part.end
+            if let image = part.image {
+                subtitleBackView.image = image
+            } else {
+                subtitleLabel.attributedText = part.text
+            }
+        } else {
+            if time > subtitleEndTime {
+                subtitleBackView.image = nil
+                subtitleLabel.attributedText = nil
+            }
+        }
+    }
+
     #if canImport(UIKit)
     override open func pressesBegan(_ presses: Set<UIPress>, with event: UIPressesEvent?) {
         guard let presse = presses.first else {
@@ -550,23 +567,6 @@ extension VideoPlayerView {
     private func hideLoader() {
         loadingIndector.isHidden = true
         loadingIndector.stopAnimating()
-    }
-
-    open func showSubtile(from subtitle: KSSubtitleProtocol, at time: TimeInterval) {
-        let time = time + (resource?.definitions[currentDefinition].options.subtitleDelay ?? 0.0)
-        if let part = subtitle.search(for: time) {
-            subtitleEndTime = part.end
-            if let image = part.image {
-                subtitleBackView.image = image
-            } else {
-                subtitleLabel.attributedText = part.text
-            }
-        } else {
-            if time > subtitleEndTime {
-                subtitleBackView.image = nil
-                subtitleLabel.attributedText = nil
-            }
-        }
     }
 
     private func addConstraint() {

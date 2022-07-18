@@ -37,8 +37,8 @@ extension NSScreen {
     }
 }
 
-extension NSClickGestureRecognizer {
-    open var numberOfTapsRequired: Int {
+public extension NSClickGestureRecognizer {
+    var numberOfTapsRequired: Int {
         get {
             numberOfClicksRequired
         }
@@ -47,13 +47,13 @@ extension NSClickGestureRecognizer {
         }
     }
 
-    open func require(toFail otherGestureRecognizer: NSClickGestureRecognizer) {
+    func require(toFail otherGestureRecognizer: NSClickGestureRecognizer) {
         buttonMask = otherGestureRecognizer.buttonMask << 1
     }
 }
 
-extension NSView {
-    @objc var contentMode: UIViewContentMode {
+public extension NSView {
+    @objc internal var contentMode: UIViewContentMode {
         get {
             if let contentsGravity = backingLayer?.contentsGravity {
                 switch contentsGravity {
@@ -86,11 +86,11 @@ extension NSView {
         }
     }
 
-    open var center: CGPoint {
+    var center: CGPoint {
         CGPoint(x: frame.midX, y: frame.midY)
     }
 
-    public var alpha: CGFloat {
+    var alpha: CGFloat {
         get {
             alphaValue
         }
@@ -99,7 +99,7 @@ extension NSView {
         }
     }
 
-    public var backgroundColor: UIColor? {
+    var backgroundColor: UIColor? {
         get {
             if let layer = layer, let cgColor = layer.backgroundColor {
                 return UIColor(cgColor: cgColor)
@@ -112,7 +112,7 @@ extension NSView {
         }
     }
 
-    public var clipsToBounds: Bool {
+    var clipsToBounds: Bool {
         get {
             if let layer = layer {
                 return layer.masksToBounds
@@ -125,7 +125,7 @@ extension NSView {
         }
     }
 
-    open class func animate(withDuration duration: TimeInterval, animations: @escaping () -> Void, completion: ((Bool) -> Void)? = nil) {
+    class func animate(withDuration duration: TimeInterval, animations: @escaping () -> Void, completion: ((Bool) -> Void)? = nil) {
         CATransaction.begin()
         CATransaction.setAnimationDuration(duration)
         CATransaction.setCompletionBlock {
@@ -135,15 +135,15 @@ extension NSView {
         CATransaction.commit()
     }
 
-    open class func animate(withDuration duration: TimeInterval, animations: @escaping () -> Void) {
+    class func animate(withDuration duration: TimeInterval, animations: @escaping () -> Void) {
         animate(withDuration: duration, animations: animations, completion: nil)
     }
 
-    open func layoutIfNeeded() {
+    func layoutIfNeeded() {
         backingLayer?.layoutIfNeeded()
     }
 
-    public func centerRotate(byDegrees: Double) {
+    func centerRotate(byDegrees: Double) {
         let degrees = CGFloat(-byDegrees)
         if degrees != boundsRotation {
             backingLayer?.anchorPoint = CGPoint(x: 0.5, y: 0.5)
@@ -239,8 +239,8 @@ public extension NSResponder {
     }
 }
 
-extension NSSlider {
-    open var minimumTrackTintColor: UIColor? {
+public extension NSSlider {
+    var minimumTrackTintColor: UIColor? {
         get {
             trackFillColor
         }
@@ -249,14 +249,14 @@ extension NSSlider {
         }
     }
 
-    open var maximumTrackTintColor: UIColor? {
+    var maximumTrackTintColor: UIColor? {
         get {
             nil
         }
         set {}
     }
 
-    @IBInspectable public var maximumValue: Float {
+    @IBInspectable var maximumValue: Float {
         get {
             Float(maxValue)
         }
@@ -265,7 +265,7 @@ extension NSSlider {
         }
     }
 
-    @IBInspectable public var minimumValue: Float {
+    @IBInspectable var minimumValue: Float {
         get {
             Float(minValue)
         }
@@ -274,7 +274,7 @@ extension NSSlider {
         }
     }
 
-    @IBInspectable public var value: Float {
+    @IBInspectable var value: Float {
         get {
             floatValue
         }
@@ -284,8 +284,8 @@ extension NSSlider {
     }
 }
 
-extension NSStackView {
-    open var axis: NSUserInterfaceLayoutOrientation {
+public extension NSStackView {
+    var axis: NSUserInterfaceLayoutOrientation {
         get {
             orientation
         }
@@ -295,8 +295,8 @@ extension NSStackView {
     }
 }
 
-extension NSGestureRecognizer {
-    open func addTarget(_ target: AnyObject, action: Selector) {
+public extension NSGestureRecognizer {
+    func addTarget(_ target: AnyObject, action: Selector) {
         self.target = target
         self.action = action
     }
@@ -562,7 +562,7 @@ open class UIAlertAction: NSObject {
     }
 }
 
-extension UIViewController {
-    open func present(_: UIViewController, animated _: Bool, completion _: (() -> Void)? = nil) {}
+public extension UIViewController {
+    func present(_: UIViewController, animated _: Bool, completion _: (() -> Void)? = nil) {}
 }
 #endif
