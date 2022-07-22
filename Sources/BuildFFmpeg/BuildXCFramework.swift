@@ -394,7 +394,7 @@ class BuildFFMPEG: BaseBuild {
         "--disable-encoders",
         // ./configure --list-decoders
         "--disable-decoders",
-        "--enable-decoder=dca", "--enable-decoder=flv", "--enable-decoder=h263",
+        "--enable-decoder=av1", "--enable-decoder=dca", "--enable-decoder=flv", "--enable-decoder=h263",
         "--enable-decoder=h263i", "--enable-decoder=h263p", "--enable-decoder=h264", "--enable-decoder=hevc",
         "--enable-decoder=mjpeg", "--enable-decoder=mjpegb", "--enable-decoder=mpeg1video", "--enable-decoder=mpeg2video",
         "--enable-decoder=mpeg4", "--enable-decoder=mpegvideo", "--enable-decoder=rv30", "--enable-decoder=rv40",
