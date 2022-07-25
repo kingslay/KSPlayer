@@ -256,6 +256,7 @@ open class KSPlayerLayer: UIView {
     override open func didAddSubview(_ subview: UIView) {
         super.didAddSubview(subview)
         if subview == player?.view {
+            subview.frame = frame
             subview.translatesAutoresizingMaskIntoConstraints = false
             NSLayoutConstraint.activate([
                 subview.leftAnchor.constraint(equalTo: leftAnchor),
