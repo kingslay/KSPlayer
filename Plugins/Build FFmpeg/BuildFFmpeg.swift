@@ -1,8 +1,16 @@
 import Foundation
-@main
-class BaseBuild {
-    fileprivate static let argumentsArray = Array(CommandLine.arguments.dropFirst())
+//import PackagePlugin
+//
+//@main struct BuildFFmpeg: CommandPlugin {
+@main struct BuildFFmpeg {
+
     static func main() {
+        performCommand(arguments: Array(CommandLine.arguments.dropFirst()))
+    }
+//    func performCommand(context _: PluginContext, arguments: [String]) throws {
+//        performCommand(arguments: arguments)
+//    }
+    static func performCommand(arguments: [String]) {
         if Utility.shell("which brew") == nil {
             print("""
             You need to run the script first
@@ -16,7 +24,7 @@ class BaseBuild {
             try? FileManager.default.createDirectory(at: path, withIntermediateDirectories: false, attributes: nil)
         }
         FileManager.default.changeCurrentDirectoryPath(path.path)
-        let enableOpenssl = argumentsArray.firstIndex(of: "enable-openssl") != nil
+        let enableOpenssl = arguments.firstIndex(of: "enable-openssl") != nil
         if enableOpenssl {
             BuildOpenSSL().buildALL()
             // BuildBoringSSL().buildALL()
@@ -24,13 +32,15 @@ class BaseBuild {
         if Utility.shell("which pkg-config") == nil {
             Utility.shell("brew install pkg-config")
         }
-        let enableSrt = argumentsArray.firstIndex(of: "enable-libsrt") != nil
+        let enableSrt = arguments.firstIndex(of: "enable-libsrt") != nil
         if enableSrt {
             BuildSRT().buildALL()
         }
-        BuildFFMPEG().buildALL()
+        BuildFFMPEG(arguments: arguments).buildALL()
     }
+}
 
+class BaseBuild {
     fileprivate let platforms = PlatformType.allCases
 //     fileprivate let platforms = [PlatformType.ios]
     private let library: String
@@ -171,12 +181,12 @@ class BaseBuild {
 }
 
 class BuildFFMPEG: BaseBuild {
-    private let ffmpegFile = "ffmpeg-5.0.1"
+    private let ffmpegFile = "ffmpeg-5.1"
     private let isDebug: Bool
     private let isFFplay: Bool
-    init() {
-        isDebug = BaseBuild.argumentsArray.firstIndex(of: "enable-debug") != nil
-        isFFplay = BaseBuild.argumentsArray.firstIndex(of: "enable-ffplay") != nil
+    init(arguments: [String]) {
+        isDebug = arguments.firstIndex(of: "enable-debug") != nil
+        isFFplay = arguments.firstIndex(of: "enable-ffplay") != nil
         super.init(library: "FFmpeg")
     }
 

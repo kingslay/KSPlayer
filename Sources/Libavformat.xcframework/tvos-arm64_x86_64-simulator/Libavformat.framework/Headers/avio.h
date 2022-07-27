@@ -27,12 +27,13 @@
  */
 
 #include <stdint.h>
+#include <stdio.h>
 
-#include "libavutil/common.h"
+#include "libavutil/attributes.h"
 #include "libavutil/dict.h"
 #include "libavutil/log.h"
 
-#include "libavformat/version.h"
+#include "libavformat/version_major.h"
 
 /**
  * Seeking works like for a local file.
@@ -517,6 +518,12 @@ int64_t avio_size(AVIOContext *s);
  * @return non zero if and only if at end of file or a read error happened when reading.
  */
 int avio_feof(AVIOContext *s);
+
+/**
+ * Writes a formatted string to the context taking a va_list.
+ * @return number of bytes written, < 0 on error.
+ */
+int avio_vprintf(AVIOContext *s, const char *fmt, va_list ap);
 
 /**
  * Writes a formatted string to the context.
