@@ -1,12 +1,12 @@
 import Foundation
-//import PackagePlugin
+// import PackagePlugin
 //
-//@main struct BuildFFmpeg: CommandPlugin {
-@main struct BuildFFmpeg {
-
+// @main struct BuildFFmpeg: CommandPlugin {
+@main enum BuildFFmpeg {
     static func main() {
         performCommand(arguments: Array(CommandLine.arguments.dropFirst()))
     }
+
 //    func performCommand(context _: PluginContext, arguments: [String]) throws {
 //        performCommand(arguments: arguments)
 //    }

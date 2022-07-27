@@ -341,7 +341,9 @@ extension KSAVPlayer: MediaPlayerProtocol {
             }
         }
         set {
-            seek(time: newValue)
+            Task {
+                _ = await seek(time: newValue)
+            }
         }
     }
 
@@ -352,26 +354,28 @@ extension KSAVPlayer: MediaPlayerProtocol {
         return event.numberOfBytesTransferred
     }
 
-    public func thumbnailImageAtCurrentTime(handler: @escaping (UIImage?) -> Void) {
+    public func thumbnailImageAtCurrentTime() async -> UIImage? {
         guard let playerItem = player.currentItem, isPreparedToPlay else {
-            return handler(nil)
+            return nil
         }
-        return urlAsset.thumbnailImage(currentTime: playerItem.currentTime(), handler: handler)
+        return await withCheckedContinuation { continuation in
+            urlAsset.thumbnailImage(currentTime: playerItem.currentTime()) { result in
+                continuation.resume(returning: result)
+            }
+        }
     }
 
-    public func seek(time: TimeInterval, completion handler: ((Bool) -> Void)? = nil) {
-        guard time >= 0 else { return }
+    public func seek(time: TimeInterval) async -> Bool {
+        guard time >= 0 else { return false }
         shouldSeekTo = time
         playbackState = .seeking
         runInMainqueue { [weak self] in
             self?.bufferingProgress = 0
         }
         let tolerance: CMTime = options.isAccurateSeek ? .zero : .positiveInfinity
-        player.seek(to: CMTime(seconds: time, preferredTimescale: Int32(NSEC_PER_SEC)), toleranceBefore: tolerance, toleranceAfter: tolerance) { [weak self] finished in
-            guard let self = self else { return }
-            self.shouldSeekTo = 0
-            handler?(finished)
-        }
+        let finished = await player.seek(to: CMTime(seconds: time, preferredTimescale: Int32(NSEC_PER_SEC)), toleranceBefore: tolerance, toleranceAfter: tolerance)
+        shouldSeekTo = 0
+        return finished
     }
 
     public func prepareToPlay() {

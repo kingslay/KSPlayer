@@ -33,7 +33,7 @@ public protocol MediaPlayback: AnyObject {
     var currentPlaybackTime: TimeInterval { get }
     func prepareToPlay()
     func shutdown()
-    func seek(time: TimeInterval, completion handler: ((Bool) -> Void)?)
+    func seek(time: TimeInterval) async -> Bool
 }
 
 public protocol MediaPlayerProtocol: MediaPlayback {
@@ -64,7 +64,7 @@ public protocol MediaPlayerProtocol: MediaPlayback {
     func pause()
     func enterBackground()
     func enterForeground()
-    func thumbnailImageAtCurrentTime(handler: @escaping (UIImage?) -> Void)
+    func thumbnailImageAtCurrentTime() async -> UIImage?
     func tracks(mediaType: AVFoundation.AVMediaType) -> [MediaPlayerTrack]
     func select(track: MediaPlayerTrack)
 }

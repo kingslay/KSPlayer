@@ -188,7 +188,8 @@ open class KSPlayerLayer: UIView {
         if let player = player {
             if player.isPreparedToPlay {
                 if state == .playedToTheEnd {
-                    player.seek(time: 0) { finished in
+                    Task {
+                        let finished = await player.seek(time: 0)
                         if finished {
                             player.play()
                         }
@@ -232,24 +233,23 @@ open class KSPlayerLayer: UIView {
         #endif
     }
 
-    open func seek(time: TimeInterval, autoPlay: Bool, completion handler: ((Bool) -> Void)? = nil) {
+    open func seek(time: TimeInterval, autoPlay: Bool) async -> Bool {
         if time.isInfinite || time.isNaN {
-            return
+            return false
         }
         if autoPlay {
             state = .buffering
         }
         if let player = player, player.isPreparedToPlay {
-            player.seek(time: time) { [weak self] finished in
-                guard let self = self else { return }
-                if finished, autoPlay {
-                    self.play()
-                }
-                handler?(finished)
+            let finished = await player.seek(time: time)
+            if finished, autoPlay {
+                play()
             }
+            return finished
         } else {
             isAutoPlay = autoPlay
             shouldSeekTo = time
+            return false
         }
     }
 
@@ -281,9 +281,9 @@ extension KSPlayerLayer: MediaPlayerDelegate {
         }
         if isAutoPlay {
             if shouldSeekTo > 0 {
-                seek(time: shouldSeekTo, autoPlay: true) { [weak self] _ in
-                    guard let self = self else { return }
-                    self.shouldSeekTo = 0
+                Task {
+                    _ = await seek(time: shouldSeekTo, autoPlay: true)
+                    shouldSeekTo = 0
                 }
             } else {
                 play()
@@ -438,6 +438,12 @@ extension KSPlayerLayer {
         }
     }
 
+    private func seek(time: TimeInterval) {
+        Task {
+            await self.seek(time: time, autoPlay: self.options?.isSeekedAutoPlay ?? false)
+        }
+    }
+
     private func registerRemoteControllEvent() {
         let remoteCommand = MPRemoteCommandCenter.shared()
         remoteCommand.playCommand.addTarget { [weak self] _ in
@@ -508,7 +514,7 @@ extension KSPlayerLayer {
             guard let self = self, let event = event as? MPSkipIntervalCommandEvent else {
                 return .commandFailed
             }
-            self.seek(time: self.player?.currentPlaybackTime ?? 0 + event.interval, autoPlay: self.options?.isSeekedAutoPlay ?? false)
+            self.seek(time: self.player?.currentPlaybackTime ?? 0 + event.interval)
             return .success
         }
         remoteCommand.skipBackwardCommand.preferredIntervals = [15]
@@ -516,14 +522,14 @@ extension KSPlayerLayer {
             guard let self = self, let event = event as? MPSkipIntervalCommandEvent else {
                 return .commandFailed
             }
-            self.seek(time: self.player?.currentPlaybackTime ?? 0 - event.interval, autoPlay: self.options?.isSeekedAutoPlay ?? false)
+            self.seek(time: self.player?.currentPlaybackTime ?? 0 - event.interval)
             return .success
         }
         remoteCommand.changePlaybackPositionCommand.addTarget { [weak self] event in
             guard let self = self, let event = event as? MPChangePlaybackPositionCommandEvent else {
                 return .commandFailed
             }
-            self.seek(time: event.positionTime, autoPlay: self.options?.isSeekedAutoPlay ?? false)
+            self.seek(time: event.positionTime)
             return .success
         }
         remoteCommand.enableLanguageOptionCommand.addTarget { [weak self] event in

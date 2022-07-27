@@ -345,7 +345,9 @@ open class VideoPlayerView: PlayerView {
         let asset = resource.definitions[currentDefinition]
         super.set(url: asset.url, options: asset.options)
         if shouldSeekTo > 0 {
-            seek(time: shouldSeekTo)
+            Task {
+                await seek(time: shouldSeekTo)
+            }
         }
     }
 

@@ -276,7 +276,9 @@ extension KSMEPlayer: MediaPlayerProtocol {
             playerItem.currentPlaybackTime
         }
         set {
-            seek(time: newValue)
+            Task {
+                await seek(time: newValue)
+            }
         }
     }
 
@@ -284,9 +286,9 @@ extension KSMEPlayer: MediaPlayerProtocol {
 
     public var seekable: Bool { playerItem.seekable }
 
-    public func seek(time: TimeInterval, completion handler: ((Bool) -> Void)? = nil) {
+    public func seek(time: TimeInterval) async -> Bool {
         guard time >= 0 else {
-            return
+            return false
         }
         playbackState = .seeking
         runInMainqueue { [weak self] in
@@ -298,11 +300,7 @@ extension KSMEPlayer: MediaPlayerProtocol {
         } else {
             seekTime = time
         }
-        playerItem.seek(time: seekTime) { result in
-            runInMainqueue {
-                handler?(result)
-            }
-        }
+        return await playerItem.seek(time: seekTime)
     }
 
     public func prepareToPlay() {
@@ -346,9 +344,8 @@ extension KSMEPlayer: MediaPlayerProtocol {
         }
     }
 
-    public func thumbnailImageAtCurrentTime(handler: @escaping (UIImage?) -> Void) {
-        let image = videoOutput.toImage()
-        handler(image)
+    public func thumbnailImageAtCurrentTime() async -> UIImage? {
+        await videoOutput.toImage()
     }
 
     public func enterBackground() {}
@@ -388,11 +385,8 @@ extension KSMEPlayer: AVPictureInPictureSampleBufferPlaybackDelegate {
     }
 
     public func pictureInPictureController(_: AVPictureInPictureController, didTransitionToRenderSize _: CMVideoDimensions) {}
-
-    public func pictureInPictureController(_: AVPictureInPictureController, skipByInterval skipInterval: CMTime, completion completionHandler: @escaping () -> Void) {
-        seek(time: currentPlaybackTime + skipInterval.seconds) { _ in
-            completionHandler()
-        }
+    public func pictureInPictureController(_: AVPictureInPictureController, skipByInterval skipInterval: CMTime) async {
+        await seek(time: currentPlaybackTime + skipInterval.seconds)
     }
 
     public func pictureInPictureControllerShouldProhibitBackgroundAudioPlayback(_: AVPictureInPictureController) -> Bool {
@@ -434,24 +428,15 @@ extension KSMEPlayer: AVPlaybackCoordinatorPlaybackControlDelegate {
         }
     }
 
-    public func playbackCoordinator(_: AVDelegatingPlaybackCoordinator, didIssue seekCommand: AVDelegatingPlaybackCoordinatorSeekCommand, completionHandler: @escaping () -> Void) {
+    public func playbackCoordinator(_: AVDelegatingPlaybackCoordinator, didIssue seekCommand: AVDelegatingPlaybackCoordinatorSeekCommand) async {
         guard seekCommand.expectedCurrentItemIdentifier == (playbackCoordinator as? AVDelegatingPlaybackCoordinator)?.currentItemIdentifier else {
-            completionHandler()
             return
         }
-        DispatchQueue.main.async { [weak self] in
-            guard let self = self else {
-                return
-            }
-            let seekTime = fmod(seekCommand.itemTime.seconds, self.duration)
-            if abs(self.currentPlaybackTime - seekTime) < CGFLOAT_EPSILON {
-                completionHandler()
-                return
-            }
-            self.seek(time: seekTime) { _ in
-                completionHandler()
-            }
+        let seekTime = fmod(seekCommand.itemTime.seconds, duration)
+        if abs(currentPlaybackTime - seekTime) < CGFLOAT_EPSILON {
+            return
         }
+        await seek(time: seekTime)
     }
 
     public func playbackCoordinator(_: AVDelegatingPlaybackCoordinator, didIssue bufferingCommand: AVDelegatingPlaybackCoordinatorBufferingCommand, completionHandler: @escaping () -> Void) {

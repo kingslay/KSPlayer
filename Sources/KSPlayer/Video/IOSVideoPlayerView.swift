@@ -217,17 +217,14 @@ open class IOSVideoPlayerView: VideoPlayerView {
     }
 
     override open func change(definitionIndex: Int) {
-        playerLayer.player?.thumbnailImageAtCurrentTime { [weak self] image in
-            if let self = self, let image = image {
-                DispatchQueue.main.async { [weak self] in
-                    if let self = self {
-                        self.maskImageView.image = image
-                        self.maskImageView.alpha = 1
-                    }
-                }
+        Task {
+            let image = await playerLayer.player?.thumbnailImageAtCurrentTime()
+            if let image = image {
+                self.maskImageView.image = image
+                self.maskImageView.alpha = 1
             }
+            super.change(definitionIndex: definitionIndex)
         }
-        super.change(definitionIndex: definitionIndex)
     }
 
     override open func panGestureBegan(location point: CGPoint, direction: KSPanDirection) {

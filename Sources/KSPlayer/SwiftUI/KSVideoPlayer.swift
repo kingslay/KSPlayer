@@ -491,7 +491,9 @@ extension KSVideoPlayer: UIViewRepresentable {
         }
 
         func seek(time: TimeInterval) {
-            playerLayer?.seek(time: time, autoPlay: true)
+            Task {
+                await playerLayer?.seek(time: time, autoPlay: true)
+            }
         }
 
         public func player(layer: KSPlayerLayer, state: KSPlayerState) {
