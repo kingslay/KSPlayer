@@ -110,7 +110,8 @@ final class MEPlayerItem {
         if track.mediaType == .subtitle, !((track as? AssetTrack)?.isImageSubtitle ?? false) {
             return
         }
-        seek(time: currentPlaybackTime, completion: nil)
+        seek(time: currentPlaybackTime) { _ in
+        }
     }
 }
 
@@ -426,16 +427,24 @@ extension MEPlayerItem: MediaPlayback {
         self.closeOperation = closeOperation
     }
 
-    func seek(time: TimeInterval, completion handler: ((Bool) -> Void)?) {
+    func seek(time: TimeInterval) async -> Bool {
+        await withCheckedContinuation { continuation in
+            seek(time: time) { result in
+                continuation.resume(returning: result)
+            }
+        }
+    }
+
+    private func seek(time: TimeInterval, completion: @escaping ((Bool) -> Void)) {
         if state == .reading || state == .paused {
             state = .seeking
             currentPlaybackTime = time
-            seekingCompletionHandler = handler
+            seekingCompletionHandler = completion
             condition.broadcast()
         } else if state == .finished {
             state = .seeking
             currentPlaybackTime = time
-            seekingCompletionHandler = handler
+            seekingCompletionHandler = completion
             read()
         }
         isAudioStalled = audioTrack == nil
