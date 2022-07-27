@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
     s.name             = 'FFmpeg'
-    s.version          = '5.0'
+    s.version          = '5.1'
     s.summary          = 'FFmpeg'
 
     s.description      = <<-DESC

@@ -43,7 +43,13 @@
 #include "codec_id.h"
 #include "defs.h"
 #include "packet.h"
+#include "version_major.h"
+#ifndef HAVE_AV_CONFIG_H
+/* When included as part of the ffmpeg build, only include the major version
+ * to avoid unnecessary rebuilds. When included externally, keep including
+ * the full version information. */
 #include "version.h"
+#endif
 
 /**
  * @defgroup libavc libavcodec
@@ -990,7 +996,15 @@ typedef struct AVCodecContext {
 
     /* audio only */
     int sample_rate; ///< samples per second
-    int channels;    ///< number of audio channels
+
+#if FF_API_OLD_CHANNEL_LAYOUT
+    /**
+     * number of audio channels
+     * @deprecated use ch_layout.nb_channels
+     */
+    attribute_deprecated
+    int channels;
+#endif
 
     /**
      * audio sample format
@@ -1035,19 +1049,25 @@ typedef struct AVCodecContext {
      */
     int cutoff;
 
+#if FF_API_OLD_CHANNEL_LAYOUT
     /**
      * Audio channel layout.
      * - encoding: set by user.
      * - decoding: set by user, may be overwritten by libavcodec.
+     * @deprecated use ch_layout
      */
+    attribute_deprecated
     uint64_t channel_layout;
 
     /**
      * Request decoder to use this channel layout if it can (0 for default)
      * - encoding: unused
      * - decoding: Set by user.
+     * @deprecated use "downmix" codec private option
      */
+    attribute_deprecated
     uint64_t request_channel_layout;
+#endif
 
     /**
      * Type of service that the audio stream conveys.
@@ -1407,7 +1427,10 @@ typedef struct AVCodecContext {
 #define FF_IDCT_SIMPLEARMV6   17
 #define FF_IDCT_FAAN          20
 #define FF_IDCT_SIMPLENEON    22
-#define FF_IDCT_NONE          24 /* Used by XvMC to extract IDCT coefficients with FF_IDCT_PERM_NONE */
+#if FF_API_IDCT_NONE
+// formerly used by xvmc
+#define FF_IDCT_NONE          24
+#endif
 #define FF_IDCT_SIMPLEAUTO    128
 
     /**
@@ -1495,7 +1518,6 @@ typedef struct AVCodecContext {
      * It will return only after finishing all tasks.
      * The user may replace this with some multithreaded implementation,
      * the default implementation will execute the parts serially.
-     * Also see avcodec_thread_init and e.g. the --enable-pthread configure option.
      * @param c context passed also to func
      * @param count the number of things to execute
      * @param arg2 argument passed unchanged to func
@@ -2024,9 +2046,15 @@ typedef struct AVCodecContext {
      * - decoding: unused
      */
     int (*get_encode_buffer)(struct AVCodecContext *s, AVPacket *pkt, int flags);
-} AVCodecContext;
 
-struct MpegEncContext;
+    /**
+     * Audio channel layout.
+     * - encoding: must be set by the caller, to one of AVCodec.ch_layouts.
+     * - decoding: may be set by the caller if known e.g. from the container.
+     *             The decoder can then override during decoding as needed.
+     */
+    AVChannelLayout ch_layout;
+} AVCodecContext;
 
 /**
  * @defgroup lavc_hwaccel AVHWAccel
@@ -2119,7 +2147,6 @@ typedef struct AVHWAccel {
      *
      * Meaningful slice information (codec specific) is guaranteed to
      * be parsed at this point. This function is mandatory.
-     * The only exception is XvMC, that works on MB level.
      *
      * @param avctx the codec context
      * @param buf the slice data buffer base
@@ -2147,17 +2174,6 @@ typedef struct AVHWAccel {
      * AVCodecContext.release_buffer().
      */
     int frame_priv_data_size;
-
-    /**
-     * Called for every Macroblock in a slice.
-     *
-     * XvMC uses it to replace the ff_mpv_reconstruct_mb().
-     * Instead of decoding to raw picture, MB parameters are
-     * stored in an array provided by the video driver.
-     *
-     * @param s the mpeg context
-     */
-    void (*decode_mb)(struct MpegEncContext *s);
 
     /**
      * Initialize the hwaccel private data.
@@ -2383,8 +2399,6 @@ int avcodec_parameters_to_context(AVCodecContext *codec,
  * The functions avcodec_find_decoder_by_name(), avcodec_find_encoder_by_name(),
  * avcodec_find_decoder() and avcodec_find_encoder() provide an easy way for
  * retrieving a codec.
- *
- * @warning This function is not thread safe!
  *
  * @note Always call this function before using decoding routines (such as
  * @ref avcodec_receive_frame()).

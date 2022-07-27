@@ -1,4 +1,4 @@
-// swift-tools-version:5.5
+// swift-tools-version:5.6
 import PackageDescription
 
 let package = Package(
@@ -60,9 +60,21 @@ let package = Package(
             ]
         ),
         .executableTarget(
-            name: "BuildFFmpeg",
-            dependencies: []
+            name: "build-FFmpeg",
+            path: "Plugins/Build FFmpeg"
         ),
+        // .plugin(
+        //     name: "Build FFmpeg",
+        //     capability: .command(
+        //         intent: .custom(
+        //             verb: "build-FFmpeg",
+        //             description: "You can customize FFmpeg and then compile FFmpeg"
+        //         ),
+        //         permissions: [
+        //             .writeToPackageDirectory(reason: "This command compile FFmpeg and generate xcframework. So you need run swift package build-FFmpeg --allow-writing-to-package-directory"),
+        //         ]
+        //     )
+        // ),
         .testTarget(
             name: "KSPlayerTests",
             dependencies: ["KSPlayer"],
