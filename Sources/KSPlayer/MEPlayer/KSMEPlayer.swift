@@ -27,13 +27,14 @@ public class KSMEPlayer: NSObject {
     }
 
     @available(tvOS 14.0, *)
-    public private(set) lazy var pipController: AVPictureInPictureController? = _pipController()
+    public var pipController: AVPictureInPictureController? {
+        _pipController as? AVPictureInPictureController
+    }
 
-    @available(tvOS 14.0, *)
-    private func _pipController() -> AVPictureInPictureController? {
+    private lazy var _pipController: Any? = {
         if #available(iOS 15.0, tvOS 15.0, macOS 12.0, *) {
-            let contentSource = AVPictureInPictureController.ContentSource(sampleBufferDisplayLayer: videoOutput.displayLayer, playbackDelegate: self)
-            return AVPictureInPictureController(contentSource: contentSource)
+            let contentSource = AVPictureInPictureController.ContentSource(sampleBufferDisplayLayer: self.videoOutput.displayLayer, playbackDelegate: self)
+            return AVPictureInPictureController(contentSource: contentSource) as? AVPictureInPictureController
         } else {
             return nil
         }
@@ -386,7 +387,7 @@ extension KSMEPlayer: AVPictureInPictureSampleBufferPlaybackDelegate {
 
     public func pictureInPictureController(_: AVPictureInPictureController, didTransitionToRenderSize _: CMVideoDimensions) {}
     public func pictureInPictureController(_: AVPictureInPictureController, skipByInterval skipInterval: CMTime) async {
-        await seek(time: currentPlaybackTime + skipInterval.seconds)
+        _ = await seek(time: currentPlaybackTime + skipInterval.seconds)
     }
 
     public func pictureInPictureControllerShouldProhibitBackgroundAudioPlayback(_: AVPictureInPictureController) -> Bool {
@@ -436,7 +437,7 @@ extension KSMEPlayer: AVPlaybackCoordinatorPlaybackControlDelegate {
         if abs(currentPlaybackTime - seekTime) < CGFLOAT_EPSILON {
             return
         }
-        await seek(time: seekTime)
+        _ = await seek(time: seekTime)
     }
 
     public func playbackCoordinator(_: AVDelegatingPlaybackCoordinator, didIssue bufferingCommand: AVDelegatingPlaybackCoordinatorBufferingCommand, completionHandler: @escaping () -> Void) {
