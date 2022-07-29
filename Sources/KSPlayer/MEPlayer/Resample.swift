@@ -393,9 +393,11 @@ class AudioSwresample: Swresample {
     }
 
     private func setup(descriptor: AudioDescriptor) -> Bool {
-        let outChannel = av_get_default_channel_layout(channels)
-        let inChannel = av_get_default_channel_layout(Int32(descriptor.inputNumberOfChannels))
-        swrContext = swr_alloc_set_opts(nil, outChannel, AV_SAMPLE_FMT_FLTP, KSPlayerManager.audioPlayerSampleRate, inChannel, descriptor.inputFormat, descriptor.inputSampleRate, 0, nil)
+        var outChannel = AVChannelLayout()
+        var inChannel = AVChannelLayout()
+        av_channel_layout_default(&outChannel, channels)
+        av_channel_layout_default(&inChannel, Int32(descriptor.inputNumberOfChannels))
+        _ = swr_alloc_set_opts2(&swrContext, &outChannel, AV_SAMPLE_FMT_FLTP, KSPlayerManager.audioPlayerSampleRate, &inChannel, descriptor.inputFormat, descriptor.inputSampleRate, 0, nil)
         let result = swr_init(swrContext)
         if result < 0 {
             shutdown()
@@ -435,14 +437,14 @@ private class AudioDescriptor: Equatable {
     fileprivate let inputSampleRate: Int32
     fileprivate let inputFormat: AVSampleFormat
     init(codecpar: AVCodecParameters) {
-        inputNumberOfChannels = max(UInt32(codecpar.channels), 1)
+        inputNumberOfChannels = max(UInt32(codecpar.ch_layout.nb_channels), 1)
         let sampleRate = codecpar.sample_rate
         inputSampleRate = sampleRate == 0 ? KSPlayerManager.audioPlayerSampleRate : sampleRate
         inputFormat = AVSampleFormat(rawValue: codecpar.format)
     }
 
     init(frame: UnsafeMutablePointer<AVFrame>) {
-        inputNumberOfChannels = max(UInt32(frame.pointee.channels), 1)
+        inputNumberOfChannels = max(UInt32(frame.pointee.ch_layout.nb_channels), 1)
         let sampleRate = frame.pointee.sample_rate
         inputSampleRate = sampleRate == 0 ? KSPlayerManager.audioPlayerSampleRate : sampleRate
         inputFormat = AVSampleFormat(rawValue: frame.pointee.format)
@@ -453,6 +455,6 @@ private class AudioDescriptor: Equatable {
     }
 
     static func == (lhs: AudioDescriptor, rhs: AVFrame) -> Bool {
-        lhs.inputFormat.rawValue == rhs.format && lhs.inputSampleRate == rhs.sample_rate && lhs.inputNumberOfChannels == rhs.channels
+        lhs.inputFormat.rawValue == rhs.format && lhs.inputSampleRate == rhs.sample_rate && lhs.inputNumberOfChannels == rhs.ch_layout.nb_channels
     }
 }

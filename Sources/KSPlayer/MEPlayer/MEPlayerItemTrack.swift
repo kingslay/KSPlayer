@@ -139,7 +139,7 @@ class FFPlayerItemTrack<Frame: MEFrame>: PlayerItemTrackProtocol, CustomStringCo
         fps = assetTrack.nominalFrameRate
         // 默认缓存队列大小跟帧率挂钩,经测试除以4，最优
         if mediaType == .audio {
-            let capacity = options.audioFrameMaxCount(fps: fps, channels: Int(assetTrack.stream.pointee.codecpar.pointee.channels))
+            let capacity = options.audioFrameMaxCount(fps: fps, channels: Int(assetTrack.stream.pointee.codecpar.pointee.ch_layout.nb_channels))
             outputRenderQueue = CircularBuffer(initialCapacity: capacity, expanding: false)
         } else if mediaType == .video {
             outputRenderQueue = CircularBuffer(initialCapacity: options.videoFrameMaxCount(fps: fps), sorted: true, expanding: false)
@@ -372,7 +372,8 @@ extension AssetTrack {
             if mediaType == .subtitle {
                 return SubtitleDecode(assetTrack: self, options: options, delegate: delegate)
             } else {
-                if mediaType == .video, options.asynchronousDecompression, options.enableHardwareDecode(), let session = DecompressionSession(codecpar: stream.pointee.codecpar.pointee, options: options) {
+                if mediaType == .video, options.asynchronousDecompression, options.enableHardwareDecode(),
+                   let session = DecompressionSession(codecpar: stream.pointee.codecpar.pointee, options: options) {
                     return VideoHardwareDecode(assetTrack: self, options: options, session: session, delegate: delegate)
                 } else {
                     return SoftwareDecode(assetTrack: self, options: options, delegate: delegate)
