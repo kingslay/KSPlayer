@@ -39,10 +39,12 @@ class KSPlayerLayerTest: XCTestCase {
             XCTAssert(!options.isAutoPlay)
             XCTAssertEqual(playerLayer.state, .paused)
             let seekExpectation = self.expectation(description: "seek")
-            playerLayer.seek(time: 2, autoPlay: true) { _ in
+            Task {
+                _ = await playerLayer.seek(time: 2, autoPlay: true)
                 XCTAssert(options.isAutoPlay)
                 seekExpectation.fulfill()
             }
+          
             XCTAssertEqual(playerLayer.state, .buffering)
             self.waitForExpectations(timeout: 1000) { _ in
                 playerLayer.finish(player: playerLayer.player!, error: nil)
