@@ -24,7 +24,7 @@ struct AssetTrack: MediaPlayerTrack, CustomStringConvertible {
     let transferFunction: String?
     let yCbCrMatrix: String?
     let codecType: FourCharCode
-    var subtitle: SubtitleInfo?
+    var subtitle: FFPlayerItemTrack<SubtitleFrame>?
     init?(stream: UnsafeMutablePointer<AVStream>) {
         self.stream = stream
         trackID = stream.pointee.index

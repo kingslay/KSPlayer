@@ -19,10 +19,14 @@ public class KSSubtitleController {
     private var subtitleName: String?
     public var view: KSSubtitleView
     public var subtitle: KSSubtitleProtocol?
-    public var selectWithFilePath: ((Result<KSSubtitleProtocol, NSError>) -> Void)?
+    public var selectWithFilePath: ((Result<KSSubtitleProtocol, NSError>) -> Void)? {
+        didSet {
+            view.selectWithFilePath = selectWithFilePath
+        }
+    }
+
     @Published
     public var srtListCount: Int = 0
-    private var cancellable: AnyCancellable?
     public init(customControlView: KSSubtitleView? = nil) {
         if let customView = customControlView {
             view = customView
@@ -31,14 +35,6 @@ public class KSSubtitleController {
         }
         view.isHidden = true
         subtitleDataSouces = [cacheDataSouce]
-        cancellable = view.$selectedInfo.sink { [weak self] info in
-            guard let self = self, let selectWithFilePath = self.selectWithFilePath else { return }
-            DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 0.2) { [weak self] in
-                guard let self = self else { return }
-                self.view.isHidden = true
-            }
-            info.enableSubtitle(completion: selectWithFilePath)
-        }
     }
 
     public func searchSubtitle(name: String) {
@@ -55,7 +51,11 @@ public class KSSubtitleController {
         subtitleDataSouces.removeAll { $0 === dataSouce }
         runInMainqueue { [weak self] in
             guard let self = self else { return }
-            self.infos.removeAll { $0.subtitleDataSouce === dataSouce }
+            dataSouce.infos?.forEach { info in
+                self.infos.removeAll { other in
+                    other.subtitleID == info.subtitleID
+                }
+            }
             self.srtListCount = self.infos.count
             self.view.setupDatas(infos: self.infos)
         }
@@ -76,9 +76,8 @@ public class KSSubtitleController {
     }
 
     private func searchSubtitle(datasouce: SubtitleDataSouce, name: String) {
-        datasouce.searchSubtitle(name: name) { array in
-            guard let array = array else { return }
-            array.forEach { $0.subtitleDataSouce = datasouce }
+        datasouce.searchSubtitle(name: name) {
+            guard let array = datasouce.infos else { return }
             runInMainqueue { [weak self] in
                 guard let self = self else { return }
                 self.infos.append(contentsOf: array)

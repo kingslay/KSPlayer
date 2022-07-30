@@ -209,9 +209,9 @@ extension MEPlayerItem {
                 let assetTrack = AssetTrack(stream: coreStream)
                 if var assetTrack = assetTrack {
                     if !options.subtitleDisable, assetTrack.mediaType == .subtitle {
-                        let track = FFPlayerItemTrack<SubtitleFrame>(assetTrack: assetTrack, options: options)
-                        assetTrack.subtitle = EmbedSubtitleInfo(subtitleID: String(assetTrack.trackID), name: assetTrack.name, subtitle: track, isImageSubtitle: assetTrack.isImageSubtitle)
-                        allTracks.append(track)
+                        let subtitle = FFPlayerItemTrack<SubtitleFrame>(assetTrack: assetTrack, options: options)
+                        assetTrack.subtitle = subtitle
+                        allTracks.append(subtitle)
                     }
                     return assetTrack
                 }
@@ -336,7 +336,7 @@ extension MEPlayerItem {
                     }
                     audioTrack?.putPacket(packet: packet)
                 } else {
-                    (first.subtitle as? EmbedSubtitleInfo)?.subtitle.putPacket(packet: packet)
+                    first.subtitle?.putPacket(packet: packet)
                 }
             }
         } else {
