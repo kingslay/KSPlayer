@@ -485,7 +485,6 @@ extension AVMediaType {
 }
 
 struct AVMediaPlayerTrack: MediaPlayerTrack {
-    var subtitle: SubtitleInfo?
     private let track: AVPlayerItemTrack
     let nominalFrameRate: Float
     let trackID: Int32

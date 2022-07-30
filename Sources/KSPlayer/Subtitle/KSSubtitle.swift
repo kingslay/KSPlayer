@@ -75,12 +75,13 @@ public protocol KSSubtitleProtocol {
     func search(for time: TimeInterval) -> SubtitlePart?
 }
 
-public protocol SubtitleInfo: AnyObject {
-    var userInfo: NSMutableDictionary? { get set }
-    var subtitleDataSouce: SubtitleDataSouce? { get set }
-    var name: String { get }
+public protocol SubtitleInfo {
     var subtitleID: String { get }
-    var comment: String? { get }
+    var name: String { get }
+    //    var userInfo: NSMutableDictionary? { get set }
+    //    var subtitleDataSouce: SubtitleDataSouce? { get set }
+//    var comment: String? { get }
+    func disableSubtitle()
     func enableSubtitle(completion: @escaping (Result<KSSubtitleProtocol, NSError>) -> Void)
 }
 

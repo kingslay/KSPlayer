@@ -7,38 +7,32 @@
 import Foundation
 import Libavcodec
 import Libavutil
-public class EmbedSubtitleInfo: SubtitleInfo {
-    let subtitle: FFPlayerItemTrack<SubtitleFrame>
-    private let isImageSubtitle: Bool
-    public var userInfo: NSMutableDictionary?
-    public weak var subtitleDataSouce: SubtitleDataSouce?
-    public let name: String
-    public let subtitleID: String
-    public var comment: String?
-    init(subtitleID: String, name: String, subtitle: FFPlayerItemTrack<SubtitleFrame>, isImageSubtitle: Bool) {
-        self.subtitleID = subtitleID
-        self.name = name
-        self.subtitle = subtitle
-        self.isImageSubtitle = isImageSubtitle
+
+extension AssetTrack: SubtitleInfo {
+    var subtitleID: String {
+        String(trackID)
+    }
+
+    public func disableSubtitle() {
+        if isImageSubtitle {
+            setIsEnabled(false)
+        }
     }
 
     public func enableSubtitle(completion: @escaping (Result<KSSubtitleProtocol, NSError>) -> Void) {
+        setIsEnabled(true)
         completion(.success(self))
-    }
-
-    public static func == (lhs: EmbedSubtitleInfo, rhs: EmbedSubtitleInfo) -> Bool {
-        lhs.subtitleID == rhs.subtitleID
     }
 }
 
-extension EmbedSubtitleInfo: KSSubtitleProtocol {
+extension AssetTrack: KSSubtitleProtocol {
     public func search(for time: TimeInterval) -> SubtitlePart? {
         if isImageSubtitle {
-            return subtitle.outputRenderQueue.pop { item -> Bool in
+            return subtitle?.outputRenderQueue.pop { item -> Bool in
                 item.part < time || item.part == time
             }?.part
         } else {
-            return subtitle.outputRenderQueue.search { item -> Bool in
+            return subtitle?.outputRenderQueue.search { item -> Bool in
                 item.part == time
             }?.part
         }
@@ -46,10 +40,11 @@ extension EmbedSubtitleInfo: KSSubtitleProtocol {
 }
 
 extension MEPlayerItem: SubtitleDataSouce {
-    func searchSubtitle(name _: String, completion: @escaping ([SubtitleInfo]?) -> Void) {
-        let infos = assetTracks.filter { $0.mediaType == .subtitle }.compactMap(\.subtitle)
-        completion(infos)
+    var infos: [SubtitleInfo]? {
+        assetTracks.filter { $0.mediaType == .subtitle }
     }
 
-    func fetchSubtitleDetail(info _: SubtitleInfo, completion _: @escaping (SubtitleInfo, NSError?) -> Void) {}
+    func searchSubtitle(name _: String, completion: @escaping (() -> Void)) {
+        completion()
+    }
 }

@@ -17,8 +17,20 @@ public class KSSubtitleView: UIControl {
     private let tableView = UITableView()
     private let tableWidth = CGFloat(360)
     private var tableViewTrailingConstraint: NSLayoutConstraint!
-    @Published
-    public var selectedInfo: SubtitleInfo
+    public var selectedInfo: SubtitleInfo {
+        didSet {
+            DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 0.2) { [weak self] in
+                guard let self = self else { return }
+                self.isHidden = true
+            }
+            oldValue.disableSubtitle()
+            if let selectWithFilePath = selectWithFilePath {
+                selectedInfo.enableSubtitle(completion: selectWithFilePath)
+            }
+        }
+    }
+
+    public var selectWithFilePath: ((Result<KSSubtitleProtocol, NSError>) -> Void)?
     override public var isHidden: Bool {
         didSet {
             if isHidden {
@@ -112,15 +124,15 @@ extension KSSubtitleView: UITableViewDataSource {
         if let srtCell = cell as? SrtListCell {
             let info = infos[indexPath.row]
             srtCell.titleLabel.text = info.name
-            if let comment = info.comment {
-                srtCell.localIconView.setTitle(comment, for: .normal)
-                srtCell.localIconViewWidth.constant = 34
-                srtCell.localIconView.isHidden = false
-            } else {
-                srtCell.localIconViewWidth.constant = 0
-                srtCell.localIconView.isHidden = true
-            }
-            srtCell.checked(info === selectedInfo)
+//            if let comment = info.comment {
+//                srtCell.localIconView.setTitle(comment, for: .normal)
+//                srtCell.localIconViewWidth.constant = 34
+//                srtCell.localIconView.isHidden = false
+//            } else {
+            srtCell.localIconViewWidth.constant = 0
+            srtCell.localIconView.isHidden = true
+//            }
+            srtCell.checked(info.subtitleID == selectedInfo.subtitleID)
         }
         return cell
     }

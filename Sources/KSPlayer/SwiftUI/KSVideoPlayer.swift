@@ -72,7 +72,7 @@ public struct KSVideoPlayerView: View {
                 }
             #endif
                 .onReceive(player.coordinator.$selectedSubtitleTrack) { track in
-                    guard let subtitle = track?.subtitle else {
+                    guard let subtitle = track as? SubtitleInfo else {
                         return
                     }
                     subtitle.enableSubtitle { result in
