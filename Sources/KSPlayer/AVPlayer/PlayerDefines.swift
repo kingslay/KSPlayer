@@ -153,6 +153,8 @@ open class KSOptions {
     public static var isAutoPlay = false
     /// seek完是否自动播放
     public static var isSeekedAutoPlay = true
+    public static var isClearVideoWhereReplace = true
+    public static var enableMaxOutputChannels = true
 
     //    public static let shared = KSOptions()
     /// 最低缓存视频时间
@@ -380,8 +382,10 @@ public enum KSPlayerManager {
             try? AVAudioSession.sharedInstance().setCategory(.playback, mode: .default, policy: .longFormAudio)
         }
         try? AVAudioSession.sharedInstance().setActive(true)
-        let maxOut = AVAudioSession.sharedInstance().maximumOutputNumberOfChannels
-        try? AVAudioSession.sharedInstance().setPreferredOutputNumberOfChannels(maxOut)
+        if KSOptions.enableMaxOutputChannels {
+            let maxOut = AVAudioSession.sharedInstance().maximumOutputNumberOfChannels
+            try? AVAudioSession.sharedInstance().setPreferredOutputNumberOfChannels(maxOut)
+        }
         if #available(tvOS 15.0, iOS 15.0, *) {
             try? AVAudioSession.sharedInstance().setSupportsMultichannelContent(true)
         }
