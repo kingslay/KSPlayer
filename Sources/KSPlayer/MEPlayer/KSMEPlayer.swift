@@ -270,7 +270,7 @@ extension KSMEPlayer: MediaPlayerProtocol {
         videoOutput.renderSource = playerItem
         videoOutput.options = options
         if KSOptions.isClearVideoWhereReplace {
-            videoOutput.clear()            
+            videoOutput.clear()
         }
     }
 

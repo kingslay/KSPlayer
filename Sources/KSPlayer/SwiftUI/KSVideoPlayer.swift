@@ -86,6 +86,7 @@ public struct KSVideoPlayerView: View {
             subtitleView
             VideoControllerView(model: $model).opacity(model.isMaskShow ? 1 : 0)
         }
+        .preferredColorScheme(.dark)
         .environmentObject(subtitleModel)
         .environmentObject(player.coordinator)
         #if os(macOS)
@@ -128,7 +129,6 @@ struct ControllerViewModel {
 struct VideoControllerView: View {
     @EnvironmentObject fileprivate var config: KSVideoPlayer.Coordinator
     @Binding fileprivate var model: ControllerViewModel
-    private let backgroundColor = Color(red: 0.145, green: 0.145, blue: 0.145).opacity(0.6)
     @Environment(\.dismiss) private var dismiss
 
     public var body: some View {
@@ -154,20 +154,13 @@ struct VideoControllerView: View {
                     } label: {
                         Image(systemName: config.isScaleAspectFill ? "rectangle.arrowtriangle.2.inward" : "rectangle.arrowtriangle.2.outward")
                     }
-                    #if !os(tvOS)
-                    AirPlayView().fixedSize()
-                    #endif
                 }
-                .padding()
-                .background(backgroundColor).cornerRadius(8)
                 Spacer()
                 Button {
                     config.isMuted.toggle()
                 } label: {
                     Image(systemName: config.isMuted ? "speaker.slash.fill" : "speaker.wave.2.fill")
                 }
-                .padding()
-                .background(backgroundColor).cornerRadius(8)
             }
 //            #if os(tvOS)
             // can not add focusSection
@@ -175,6 +168,7 @@ struct VideoControllerView: View {
 //            #endif
             Spacer()
             HStack {
+                Spacer()
                 Button {
                     config.seek(time: model.currentTime - 15)
                 } label: {
@@ -183,6 +177,7 @@ struct VideoControllerView: View {
                 #if !os(tvOS)
                 .keyboardShortcut(.leftArrow, modifiers: .none)
                 #endif
+                Spacer()
                 Button {
                     config.isPlay.toggle()
                 } label: {
@@ -191,6 +186,7 @@ struct VideoControllerView: View {
                 #if !os(tvOS)
                 .keyboardShortcut(.space, modifiers: .none)
                 #endif
+                Spacer()
                 Button {
                     config.seek(time: model.currentTime + 15)
                 } label: {
@@ -199,26 +195,35 @@ struct VideoControllerView: View {
                 #if !os(tvOS)
                 .keyboardShortcut(.rightArrow, modifiers: .none)
                 #endif
-                Text(model.currentTime.toString(for: .minOrHour)).font(.caption2.monospacedDigit())
-                Slider(value: $model.currentTime, in: 0 ... model.totalTime) { onEditingChanged in
-                    if onEditingChanged {
-                        config.isPlay = false
-                    } else {
-                        config.seek(time: model.currentTime)
-                    }
-                }
-                .frame(maxHeight: 20)
-                Text("-" + (model.totalTime - model.currentTime).toString(for: .minOrHour)).font(.caption2.monospacedDigit())
+                Spacer()
+            }
+            Spacer()
+            HStack {
+                Spacer()
+                #if !os(tvOS)
+                AirPlayView().fixedSize()
+                #endif
                 Button {
                     model.isShowSetting.toggle()
                 } label: {
                     Image(systemName: "ellipsis")
                 }
             }
-            .padding()
-            .background(backgroundColor)
-            .cornerRadius(8)
+            Slider(value: $model.currentTime, in: 0 ... model.totalTime) { onEditingChanged in
+                if onEditingChanged {
+                    config.isPlay = false
+                } else {
+                    config.seek(time: model.currentTime)
+                }
+            }
+            .frame(maxHeight: 20)
+            HStack {
+                Text(model.currentTime.toString(for: .minOrHour)).font(.caption2.monospacedDigit())
+                Spacer()
+                Text("-" + (model.totalTime - model.currentTime).toString(for: .minOrHour)).font(.caption2.monospacedDigit())
+            }
         }
+        .padding()
         .sheet(isPresented: $model.isShowSetting) {
             VideoSettingView(showingModal: $model.isShowSetting)
         }
