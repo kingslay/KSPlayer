@@ -82,6 +82,9 @@ public extension CVPixelBuffer {
         guard let cgImage = cgImage else {
             return nil
         }
+        #if os(macOS)
+        return UIImage(cgImage: cgImage)
+        #else
         UIGraphicsBeginImageContextWithOptions(size, false, 0)
         defer { UIGraphicsEndImageContext() }
         guard let ctx = UIGraphicsGetCurrentContext() else {
@@ -93,6 +96,7 @@ public extension CVPixelBuffer {
         ctx.concatenate(CGAffineTransform(a: 1, b: 0, c: 0, d: -1, tx: 0, ty: size.height))
         ctx.draw(cgImage, in: rect)
         return UIGraphicsGetImageFromCurrentImageContext() ?? UIImage(cgImage: cgImage)
+        #endif
     }
 
     func widthOfPlane(at planeIndex: Int) -> Int {
