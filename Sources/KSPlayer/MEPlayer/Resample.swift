@@ -290,9 +290,12 @@ extension AVPixelFormat {
         case AV_PIX_FMT_BGR24: return kCVPixelFormatType_24BGR
         case AV_PIX_FMT_RGB24: return kCVPixelFormatType_24RGB
         case AV_PIX_FMT_0RGB: return kCVPixelFormatType_32ARGB
+        case AV_PIX_FMT_ARGB: return kCVPixelFormatType_32ARGB
         case AV_PIX_FMT_BGR0: return kCVPixelFormatType_32BGRA
+        case AV_PIX_FMT_BGRA: return kCVPixelFormatType_32BGRA
         case AV_PIX_FMT_0BGR: return kCVPixelFormatType_32ABGR
         case AV_PIX_FMT_RGB0: return kCVPixelFormatType_32RGBA
+        case AV_PIX_FMT_RGBA: return kCVPixelFormatType_32RGBA
         case AV_PIX_FMT_BGR48BE: return kCVPixelFormatType_48RGB
         case AV_PIX_FMT_NV12: return kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange
         case AV_PIX_FMT_P010LE: return kCVPixelFormatType_420YpCbCr10BiPlanarFullRange
