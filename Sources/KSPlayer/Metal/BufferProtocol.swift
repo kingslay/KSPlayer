@@ -80,8 +80,8 @@ public extension CVPixelBuffer {
 
     func image() -> UIImage? {
         var cgImage: CGImage?
-//        cgImage = CIContext(options: nil).createCGImage(CIImage(cvImageBuffer: self), from: CGRect(origin: .zero, size: size))
-        VTCreateCGImageFromCVPixelBuffer(self, options: nil, imageOut: &cgImage)
+        cgImage = CIContext(options: nil).createCGImage(CIImage(cvImageBuffer: self), from: CGRect(origin: .zero, size: size))
+//        VTCreateCGImageFromCVPixelBuffer(self, options: nil, imageOut: &cgImage)
         guard let cgImage = cgImage else {
             return nil
         }
