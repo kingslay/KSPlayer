@@ -11,6 +11,9 @@ import Foundation
 import Metal
 import simd
 import VideoToolbox
+#if canImport(UIKit)
+import UIKit
+#endif
 
 public extension CVPixelBuffer {
     var width: Int { CVPixelBufferGetWidth(self) }
@@ -82,7 +85,7 @@ public extension CVPixelBuffer {
         guard let cgImage = cgImage else {
             return nil
         }
-        #if os(macOS)
+        #if os(macOS) || targetEnvironment(macCatalyst)
         return UIImage(cgImage: cgImage)
         #else
         UIGraphicsBeginImageContextWithOptions(size, false, 0)
