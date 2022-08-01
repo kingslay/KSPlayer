@@ -271,11 +271,12 @@ struct VideoSubtitleView: View {
             Spacer()
             if let image = model.image {
                 #if os(macOS)
-                Image(nsImage: image).resizable().scaledToFit()
+                Image(nsImage: image)
+                    .scaledToFit()
                 #else
-                Image(uiImage: image).resizable().scaledToFit()
+                Image(uiImage: image)
+                    .scaledToFit()
                 #endif
-
             } else if let text = model.text {
                 Text(AttributedString(text))
                     .multilineTextAlignment(.center)
