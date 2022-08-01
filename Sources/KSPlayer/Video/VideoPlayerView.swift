@@ -511,7 +511,7 @@ extension VideoPlayerView {
         subtitleLabel.backingLayer?.shadowOpacity = 0.9
         subtitleLabel.backingLayer?.shadowRadius = 1.0
         subtitleLabel.backingLayer?.shouldRasterize = true
-//        subtitleBackView.backgroundColor = UIColor.black.withAlphaComponent(0.3)
+        subtitleBackView.tintColor = UIColor.clear
         subtitleBackView.cornerRadius = 2
         subtitleBackView.addSubview(subtitleLabel)
         subtitleBackView.isHidden = true

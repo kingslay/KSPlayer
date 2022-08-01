@@ -17,7 +17,7 @@ class SubtitleDecode: DecodeProtocol {
     private weak var delegate: DecodeResultDelegate?
     private let reg = AssParse.patternReg()
     private var codecContext: UnsafeMutablePointer<AVCodecContext>?
-    private let scale = VideoSwresample(dstFormat: AV_PIX_FMT_BGR0)
+    private let scale = VideoSwresample(dstFormat: AV_PIX_FMT_ARGB)
     private var subtitle = AVSubtitle()
     private var preSubtitleFrame: SubtitleFrame?
     required init(assetTrack: AssetTrack, options: KSOptions, delegate: DecodeResultDelegate) {
@@ -87,7 +87,7 @@ class SubtitleDecode: DecodeProtocol {
 
     private func text(subtitle: AVSubtitle) -> (NSMutableAttributedString, UIImage?) {
         let attributedString = NSMutableAttributedString()
-        var image: CGImage?
+        var image: UIImage?
         for i in 0 ..< Int(subtitle.num_rects) {
             guard let rect = subtitle.rects[i]?.pointee else {
                 continue
@@ -103,7 +103,7 @@ class SubtitleDecode: DecodeProtocol {
                 image = scale.transfer(format: AV_PIX_FMT_PAL8, width: rect.w, height: rect.h, data: Array(tuple: rect.data), linesize: Array(tuple: rect.linesize))?.image()
             }
         }
-        return (attributedString, image.map { UIImage(cgImage: $0) })
+        return (attributedString, image)
     }
 }
 
