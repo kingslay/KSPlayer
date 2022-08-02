@@ -39,7 +39,8 @@ struct AssetTrack: MediaPlayerTrack, CustomStringConvertible {
         colorPrimaries = stream.pointee.codecpar.pointee.color_primaries.colorPrimaries as String?
         transferFunction = stream.pointee.codecpar.pointee.color_trc.transferFunction as String?
         yCbCrMatrix = stream.pointee.codecpar.pointee.color_space.ycbcrMatrix as String?
-        codecType = stream.pointee.codecpar.pointee.codec_tag
+        // codec_tag byte order is LSB first
+        codecType = stream.pointee.codecpar.pointee.codec_tag.bigEndian
         if stream.pointee.codecpar.pointee.codec_type == AVMEDIA_TYPE_AUDIO {
             mediaType = .audio
         } else if stream.pointee.codecpar.pointee.codec_type == AVMEDIA_TYPE_VIDEO {
