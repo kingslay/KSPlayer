@@ -11,6 +11,7 @@ import MetalKit
 
 final class MetalPlayView: UIView {
     private let render = MetalRender()
+    private lazy var context = CIContext(options: nil)
     private let view = MTKView(frame: .zero, device: MetalRender.device)
     private var videoInfo: CMVideoFormatDescription?
     private var pixelBuffer: CVPixelBuffer?
@@ -95,7 +96,7 @@ final class MetalPlayView: UIView {
     }
     #endif
     func toImage() -> UIImage? {
-        pixelBuffer?.image()
+        pixelBuffer?.image(context: context)
     }
 
     func clear() {
