@@ -520,7 +520,7 @@ class BuildSRT: BaseBuild {
 }
 
 class BuildOpenSSL: BaseBuild {
-    private let sslFile = "openssl-3.0.3"
+    private let sslFile = "openssl-3.0.5"
     init() {
         super.init(library: "SSL")
     }

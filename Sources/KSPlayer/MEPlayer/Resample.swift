@@ -298,8 +298,8 @@ extension AVPixelFormat {
         case AV_PIX_FMT_RGBA: return kCVPixelFormatType_32RGBA
         case AV_PIX_FMT_BGR48BE: return kCVPixelFormatType_48RGB
         case AV_PIX_FMT_NV12: return kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange
-        case AV_PIX_FMT_P010LE: return kCVPixelFormatType_420YpCbCr10BiPlanarFullRange
-        case AV_PIX_FMT_YUV420P10LE: return kCVPixelFormatType_420YpCbCr10BiPlanarFullRange
+        case AV_PIX_FMT_P010LE: return kCVPixelFormatType_420YpCbCr10BiPlanarVideoRange
+        case AV_PIX_FMT_YUV420P10LE: return kCVPixelFormatType_420YpCbCr10BiPlanarVideoRange
         case AV_PIX_FMT_YUV420P: return kCVPixelFormatType_420YpCbCr8Planar
         case AV_PIX_FMT_UYVY422: return kCVPixelFormatType_422YpCbCr8
         case AV_PIX_FMT_YUYV422: return kCVPixelFormatType_422YpCbCr8_yuvs

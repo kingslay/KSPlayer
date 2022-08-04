@@ -79,27 +79,10 @@ public extension CVPixelBuffer {
     }
 
     func image() -> UIImage? {
-        var cgImage: CGImage?
-        cgImage = CIContext(options: nil).createCGImage(CIImage(cvImageBuffer: self), from: CGRect(origin: .zero, size: size))
-//        VTCreateCGImageFromCVPixelBuffer(self, options: nil, imageOut: &cgImage)
-        guard let cgImage = cgImage else {
+        guard let data = CIContext(options: nil).heifRepresentation(of: CIImage(cvImageBuffer: self), format: .ARGB8, colorSpace: CGColorSpace(name: CGColorSpace.sRGB)!) else {
             return nil
         }
-        #if os(macOS) || targetEnvironment(macCatalyst)
-        return UIImage(cgImage: cgImage)
-        #else
-        UIGraphicsBeginImageContextWithOptions(size, false, 0)
-        defer { UIGraphicsEndImageContext() }
-        guard let ctx = UIGraphicsGetCurrentContext() else {
-            return UIImage(cgImage: cgImage)
-        }
-        let rect = CGRect(origin: .zero, size: size)
-        ctx.setFillColor(UIColor.clear.cgColor)
-        ctx.fill(rect)
-        ctx.concatenate(CGAffineTransform(a: 1, b: 0, c: 0, d: -1, tx: 0, ty: size.height))
-        ctx.draw(cgImage, in: rect)
-        return UIGraphicsGetImageFromCurrentImageContext() ?? UIImage(cgImage: cgImage)
-        #endif
+        return UIImage(data: data)
     }
 
     func widthOfPlane(at planeIndex: Int) -> Int {
