@@ -78,8 +78,8 @@ public extension CVPixelBuffer {
         }
     }
 
-    func image() -> UIImage? {
-        guard let data = CIContext(options: nil).heifRepresentation(of: CIImage(cvImageBuffer: self), format: .ARGB8, colorSpace: CGColorSpace(name: CGColorSpace.sRGB)!) else {
+    func image(context: CIContext) -> UIImage? {
+        guard let data = context.heifRepresentation(of: CIImage(cvImageBuffer: self), format: .ARGB8, colorSpace: CGColorSpace(name: CGColorSpace.sRGB)!) else {
             return nil
         }
         return UIImage(data: data)
