@@ -99,7 +99,40 @@ public protocol MediaPlayerTrack {
     var colorPrimaries: String? { get }
     var transferFunction: String? { get }
     var yCbCrMatrix: String? { get }
+    var dovi: DOVIDecoderConfigurationRecord? { get }
     func setIsEnabled(_ isEnabled: Bool)
+}
+
+extension MediaPlayerTrack {
+    var dynamicRange: DynamicRange {
+        if dovi != nil || codecType.string == "dvhe" || codecType.string == "dvh1" {
+            return .DV
+        } else if let colorPrimaries = colorPrimaries, /// HDR
+                  colorPrimaries.contains("2020") {
+            return .HDR
+        } else {
+            return .SDR
+        }
+    }
+}
+
+public enum DynamicRange: Int32 {
+    case SDR = 0
+    case HDR = 2
+    // swiftlint:disable identifier_name
+    case DV = 5
+    // swiftlint:enable identifier_name
+}
+
+public struct DOVIDecoderConfigurationRecord {
+    let dv_version_major: UInt8
+    let dv_version_minor: UInt8
+    let dv_profile: UInt8
+    let dv_level: UInt8
+    let rpu_present_flag: UInt8
+    let el_present_flag: UInt8
+    let bl_present_flag: UInt8
+    let dv_bl_signal_compatibility_id: UInt8
 }
 
 public extension FourCharCode {

@@ -357,13 +357,6 @@ extension KSPlayerLayer: MediaPlayerDelegate {
 
 extension KSPlayerLayer {
     #if os(tvOS)
-    private enum DynamicRange: Int32 {
-        case SDR = 0
-        case HDR = 2
-        // swiftlint:disable identifier_name
-        case DV = 5
-        // swiftlint:enable identifier_name
-    }
 
     private func setDisplayCriteria(track: MediaPlayerTrack) {
         guard let displayManager = UIApplication.shared.keyWindow?.avDisplayManager,
@@ -371,17 +364,7 @@ extension KSPlayerLayer {
               !displayManager.isDisplayModeSwitchInProgress else {
             return
         }
-        let dynamicRange: DynamicRange
-        let fps = track.nominalFrameRate
-        if track.codecType.string == "dvhe" || track.codecType.string == "dvh1" {
-            dynamicRange = .DV
-        } else if let colorPrimaries = track.colorPrimaries, /// HDR
-                  colorPrimaries.contains("2020") {
-            dynamicRange = .HDR
-        } else {
-            dynamicRange = .SDR
-        }
-        if let criteria = options?.preferredDisplayCriteria(refreshRate: fps, videoDynamicRange: dynamicRange.rawValue) {
+        if let criteria = options?.preferredDisplayCriteria(refreshRate: track.nominalFrameRate, videoDynamicRange: track.dynamicRange.rawValue) {
             displayManager.preferredDisplayCriteria = criteria
         }
     }

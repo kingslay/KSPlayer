@@ -499,7 +499,7 @@ struct AVMediaPlayerTrack: MediaPlayerTrack {
     let colorPrimaries: String?
     let transferFunction: String?
     let yCbCrMatrix: String?
-
+    var dovi: DOVIDecoderConfigurationRecord?
     var isEnabled: Bool {
         get {
             track.isEnabled
