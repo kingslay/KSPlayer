@@ -42,8 +42,8 @@ struct AssetTrack: MediaPlayerTrack, CustomStringConvertible {
         yCbCrMatrix = stream.pointee.codecpar.pointee.color_space.ycbcrMatrix as String?
         // codec_tag byte order is LSB first
         codecType = stream.pointee.codecpar.pointee.codec_tag.bigEndian
-        if stream.pointee.side_data.pointee.type == AV_PKT_DATA_DOVI_CONF {
-            dovi = stream.pointee.side_data.pointee.data.withMemoryRebound(to: DOVIDecoderConfigurationRecord.self, capacity: 1) { $0 }.pointee
+        if stream.pointee.side_data?.pointee.type == AV_PKT_DATA_DOVI_CONF {
+            dovi = stream.pointee.side_data?.pointee.data.withMemoryRebound(to: DOVIDecoderConfigurationRecord.self, capacity: 1) { $0 }.pointee
         }
         if stream.pointee.codecpar.pointee.codec_type == AVMEDIA_TYPE_AUDIO {
             mediaType = .audio
