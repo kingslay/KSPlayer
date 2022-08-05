@@ -106,9 +106,11 @@ public protocol MediaPlayerTrack {
 extension MediaPlayerTrack {
     var dynamicRange: DynamicRange {
         if dovi != nil || codecType.string == "dvhe" || codecType.string == "dvh1" {
-            return .DV
-        } else if colorPrimaries == kCVImageBufferColorPrimaries_ITU_R_2020 as String { /// HDR
+            return .DoVi
+        } else if transferFunction == kCVImageBufferTransferFunction_SMPTE_ST_2084_PQ as String { /// HDR
             return .HDR
+        } else if transferFunction == kCVImageBufferTransferFunction_ITU_R_2100_HLG as String { /// HDR
+            return .HLG
         } else {
             return .SDR
         }
@@ -118,8 +120,9 @@ extension MediaPlayerTrack {
 public enum DynamicRange: Int32 {
     case SDR = 0
     case HDR = 2
+    case HLG = 3
     // swiftlint:disable identifier_name
-    case DV = 5
+    case DoVi = 5
     // swiftlint:enable identifier_name
 }
 
