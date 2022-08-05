@@ -107,8 +107,7 @@ extension MediaPlayerTrack {
     var dynamicRange: DynamicRange {
         if dovi != nil || codecType.string == "dvhe" || codecType.string == "dvh1" {
             return .DV
-        } else if let colorPrimaries = colorPrimaries, /// HDR
-                  colorPrimaries.contains("2020") {
+        } else if colorPrimaries == kCVImageBufferColorPrimaries_ITU_R_2020 as String { /// HDR
             return .HDR
         } else {
             return .SDR
