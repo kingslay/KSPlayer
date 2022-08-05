@@ -401,6 +401,7 @@ class BuildFFMPEG: BaseBuild {
         "--enable-videotoolbox", "--enable-audiotoolbox",
         // Individual component options:
         // ,"--disable-everything"
+        // 用所有的encoders的，那avcodec就会达到40MB了，指定的话，那就只要20MB。
         "--disable-encoders",
         // ./configure --list-decoders
         "--disable-decoders",

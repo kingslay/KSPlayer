@@ -78,11 +78,16 @@ public extension CVPixelBuffer {
         }
     }
 
-    func image(context: CIContext) -> UIImage? {
-        guard let data = context.heifRepresentation(of: CIImage(cvImageBuffer: self), format: .ARGB8, colorSpace: CGColorSpace(name: CGColorSpace.sRGB)!) else {
+    func image(quality: CGFloat) -> UIImage? {
+        var cgImage: CGImage?
+        VTCreateCGImageFromCVPixelBuffer(self, options: nil, imageOut: &cgImage)
+        guard let cgImage = cgImage, let mutableData = CFDataCreateMutable(nil, 0),
+              let destination = CGImageDestinationCreateWithData(mutableData, "public.heic" as CFString, 1, nil) else {
             return nil
         }
-        return UIImage(data: data)
+        CGImageDestinationAddImage(destination, cgImage, [kCGImageDestinationLossyCompressionQuality: quality] as CFDictionary)
+        guard CGImageDestinationFinalize(destination) else { return nil }
+        return UIImage(data: mutableData as Data)
     }
 
     func widthOfPlane(at planeIndex: Int) -> Int {
