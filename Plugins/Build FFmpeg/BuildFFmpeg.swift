@@ -413,7 +413,7 @@ class BuildFFMPEG: BaseBuild {
         "--enable-decoder=vp7", "--enable-decoder=vp8", "--enable-decoder=vp9",
         // 音频
         "--enable-decoder=aac*", "--enable-decoder=ac3*", "--enable-decoder=alac*",
-        "--enable-decoder=amr*", "--enable-decoder=ape", "--enable-decoder=cook",
+        "--enable-decoder=amr*", "--enable-decoder=ape", "--enable-decoder=caf", "--enable-decoder=cook",
         "--enable-decoder=dca", "--enable-decoder=dolby_e", "--enable-decoder=eac3*", "--enable-decoder=flac",
         "--enable-decoder=mp1*", "--enable-decoder=mp2*", "--enable-decoder=mp3*", "--enable-decoder=opus", "--enable-decoder=pcm*",
         "--enable-decoder=truehd", "--enable-decoder=vorbis", "--enable-decoder=wma*",
