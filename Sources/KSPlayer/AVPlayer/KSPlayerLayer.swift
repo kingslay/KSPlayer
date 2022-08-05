@@ -373,7 +373,7 @@ extension KSPlayerLayer {
         }
         let dynamicRange: DynamicRange
         let fps = track.nominalFrameRate
-        if track.codecType.string == "dvhe" {
+        if track.codecType.string == "dvhe" || track.codecType.string == "dvh1" {
             dynamicRange = .DV
         } else if let colorPrimaries = track.colorPrimaries, /// HDR
                   colorPrimaries.contains("2020") {
