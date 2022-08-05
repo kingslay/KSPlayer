@@ -20,7 +20,6 @@ class SubtitleDecode: DecodeProtocol {
     private let scale = VideoSwresample(dstFormat: AV_PIX_FMT_ARGB)
     private var subtitle = AVSubtitle()
     private var preSubtitleFrame: SubtitleFrame?
-    private lazy var context = CIContext(options: [.useSoftwareRenderer: true])
     required init(assetTrack: AssetTrack, options: KSOptions, delegate: DecodeResultDelegate) {
         self.delegate = delegate
         assetTrack.setIsEnabled(!assetTrack.isImageSubtitle)
@@ -101,7 +100,7 @@ class SubtitleDecode: DecodeProtocol {
                     attributedString.append(group.text)
                 }
             } else if rect.type == SUBTITLE_BITMAP {
-                image = scale.transfer(format: AV_PIX_FMT_PAL8, width: rect.w, height: rect.h, data: Array(tuple: rect.data), linesize: Array(tuple: rect.linesize))?.image(context: context)
+                image = scale.transfer(format: AV_PIX_FMT_PAL8, width: rect.w, height: rect.h, data: Array(tuple: rect.data), linesize: Array(tuple: rect.linesize))?.image(quality: 0.2)
             }
         }
         return (attributedString, image)
