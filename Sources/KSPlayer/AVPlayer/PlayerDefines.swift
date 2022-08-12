@@ -106,7 +106,7 @@ public protocol MediaPlayerTrack {
 extension MediaPlayerTrack {
     var dynamicRange: DynamicRange {
         if dovi != nil || codecType.string == "dvhe" || codecType.string == "dvh1" {
-            return .DoVi
+            return .DOVI
         } else if transferFunction == kCVImageBufferTransferFunction_SMPTE_ST_2084_PQ as String { /// HDR
             return .HDR
         } else if transferFunction == kCVImageBufferTransferFunction_ITU_R_2100_HLG as String { /// HDR
@@ -121,12 +121,11 @@ public enum DynamicRange: Int32 {
     case SDR = 0
     case HDR = 2
     case HLG = 3
-    // swiftlint:disable identifier_name
-    case DoVi = 5
-    // swiftlint:enable identifier_name
+    case DOVI = 5
 }
 
 public struct DOVIDecoderConfigurationRecord {
+    // swiftlint:disable identifier_name
     let dv_version_major: UInt8
     let dv_version_minor: UInt8
     let dv_profile: UInt8
@@ -135,6 +134,7 @@ public struct DOVIDecoderConfigurationRecord {
     let el_present_flag: UInt8
     let bl_present_flag: UInt8
     let dv_bl_signal_compatibility_id: UInt8
+    // swiftlint:enable identifier_name
 }
 
 public extension FourCharCode {
