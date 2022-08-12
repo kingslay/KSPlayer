@@ -51,10 +51,12 @@ class SubtitleDecode: DecodeProtocol {
             let position = max(packet.corePacket.pointee.pts == Int64.min ? packet.corePacket.pointee.dts : packet.corePacket.pointee.pts, 0)
             let seconds = packet.assetTrack.timebase.cmtime(for: position).seconds
             var end = seconds
-            if subtitle.end_display_time > 0 {
+            if subtitle.end_display_time > 0 &&  subtitle.end_display_time != UInt32.max {
                 end += TimeInterval(subtitle.end_display_time) / 1000.0
             } else if packet.corePacket.pointee.duration > 0 {
                 end += packet.assetTrack.timebase.cmtime(for: packet.corePacket.pointee.duration).seconds
+            } else {
+                end += 2
             }
             let part = SubtitlePart(seconds + TimeInterval(subtitle.start_display_time) / 1000.0, end, attributedString.string)
             part.image = image
