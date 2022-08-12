@@ -10,22 +10,27 @@ import Libavfilter
 import Libavutil
 class MEFilter {
     private var graph: UnsafeMutablePointer<AVFilterGraph>?
-    private var bufferContext: UnsafeMutablePointer<AVFilterContext>?
-    private var bufferSinkContext: UnsafeMutablePointer<AVFilterContext>?
+    var bufferContext: UnsafeMutablePointer<AVFilterContext>?
+    var bufferSinkContext: UnsafeMutablePointer<AVFilterContext>?
     private var outputFrame = av_frame_alloc()
+    private let filters: String
+    private let timebase: Timebase
+    private let isAudio: Bool
+    private var args: String?
+
     deinit {
         avfilter_graph_free(&graph)
         av_frame_free(&outputFrame)
     }
 
-    public init?(filters: String, args: String, isAudio: Bool) {
+    public init(filters: String, timebase: Timebase, isAudio: Bool) {
         graph = avfilter_graph_alloc()
-        if !setup(filters: filters, args: args, isAudio: isAudio) {
-            return nil
-        }
+        self.filters = filters
+        self.timebase = timebase
+        self.isAudio = isAudio
     }
 
-    private func setup(filters: String, args: String, isAudio: Bool) -> Bool {
+    private func setup(args: String) -> Bool {
         var inputs = avfilter_inout_alloc()
         var outputs = avfilter_inout_alloc()
         defer {
@@ -76,12 +81,27 @@ class MEFilter {
         return true
     }
 
-    public func filter(inputFrame: UnsafeMutablePointer<AVFrame>) -> UnsafeMutablePointer<AVFrame>? {
+    public func filter(inputFrame: UnsafeMutablePointer<AVFrame>) -> UnsafeMutablePointer<AVFrame> {
+        let args: String
+        if isAudio {
+            let fmt = String(describing: av_get_sample_fmt_name(AVSampleFormat(rawValue: inputFrame.pointee.format)))
+            args = "sample_rate=\(inputFrame.pointee.sample_rate):sample_fmt=\(fmt):time_base=\(timebase.num)/\(timebase.den):channels=\(inputFrame.pointee.ch_layout.nb_channels):channel_layout=\(inputFrame.pointee.ch_layout)"
+        } else {
+            let ratio = inputFrame.pointee.sample_aspect_ratio
+            args = "video_size=\(inputFrame.pointee.width)x\(inputFrame.pointee.height):pix_fmt=\(inputFrame.pointee.format):time_base=\(timebase.num)/\(timebase.den):pixel_aspect=\(ratio.num)/\(ratio.den)"
+        }
+        if self.args != args {
+            if setup(args: args) {
+                self.args = args
+            } else {
+                return inputFrame
+            }
+        }
         var ret = av_buffersrc_add_frame_flags(bufferContext, inputFrame, Int32(AV_BUFFERSRC_FLAG_KEEP_REF))
-        guard ret == 0 else { return nil }
+        guard ret == 0 else { return inputFrame }
         av_frame_unref(outputFrame)
         ret = av_buffersink_get_frame(bufferSinkContext, outputFrame)
-        guard ret == 0 else { return nil }
-        return outputFrame
+        guard ret == 0 else { return inputFrame }
+        return outputFrame ?? inputFrame
     }
 }
