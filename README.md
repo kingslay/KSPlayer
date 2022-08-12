@@ -247,7 +247,8 @@ swift run build-FFmpeg enable-openssl
 
 ```bash
 swift run build-FFmpeg enable-debug
-dwarfdump -F --debug-info ../Sources/libavformat.xcframework/macos-arm64_x86_64/Libavformat.framework/Libavformat | head -n 20
+dwarfdump -F --debug-info Sources/libavformat.xcframework/macos-arm64_x86_64/Libavformat.framework/Libavformat | head -n 20
+dwarfdump -F --debug-info Sources/Libavcodec.xcframework/macos-arm64_x86_64/Libavcodec.framework/Libavcodec | head -n 20
 ```
 
 run demo-macOS

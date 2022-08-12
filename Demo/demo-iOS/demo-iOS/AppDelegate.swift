@@ -59,10 +59,14 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UISplitViewControllerDele
 var objects: [KSPlayerResource] = {
     var objects = [KSPlayerResource]()
     if let path = Bundle.main.path(forResource: "567082ac3ae39699f68de4fd2b7444b1e045515a", ofType: "mp4") {
-        objects.append(KSPlayerResource(url: URL(fileURLWithPath: path), name: "本地视频"))
+        let options = KSOptions()
+//        options.videoFilters = "hflip,vflip"
+        objects.append(KSPlayerResource(url: URL(fileURLWithPath: path), options: options, name: "本地视频"))
     }
     if let path = Bundle.main.path(forResource: "tos", ofType: "mkv") {
-        objects.append(KSPlayerResource(url: URL(fileURLWithPath: path), name: "本地mkv"))
+        let options = KSOptions()
+        options.videoFilters = "hflip,vflip"
+        objects.append(KSPlayerResource(url: URL(fileURLWithPath: path), options: options, name: "本地mkv"))
     }
 
     if let path = Bundle.main.path(forResource: "google-help-vr", ofType: "mp4") {

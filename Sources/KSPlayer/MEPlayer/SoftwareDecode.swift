@@ -30,19 +30,15 @@ class SoftwareDecode: DecodeProtocol {
         }
         codecContext?.pointee.time_base = assetTrack.timebase.rational
         if assetTrack.mediaType == .video {
-            filter = options.videoFilters.flatMap { str -> MEFilter? in
-                let ratio = codecpar.sample_aspect_ratio
-                let timebase = assetTrack.timebase
-                let args = "video_size=\(codecpar.width)x\(codecpar.height):pix_fmt=\(codecpar.format):time_base=\(timebase.num)/\(timebase.den):pixel_aspect=\(ratio.num)/\(ratio.den)"
-                return MEFilter(filters: str, args: args, isAudio: false)
+            filter = options.videoFilters.flatMap { str -> MEFilter in
+                MEFilter(filters: str, timebase: assetTrack.timebase, isAudio: false)
             }
+            filter?.bufferContext?.pointee.hw_device_ctx = codecContext?.pointee.hw_device_ctx
+            filter?.bufferSinkContext?.pointee.hw_device_ctx = codecContext?.pointee.hw_device_ctx
             swresample = VideoSwresample()
         } else {
-            filter = options.audioFilters.flatMap { str -> MEFilter? in
-                let fmt = String(describing: av_get_sample_fmt_name(AVSampleFormat(rawValue: codecpar.format)))
-                let timebase = assetTrack.timebase
-                let args = "sample_rate=\(codecpar.sample_rate):sample_fmt=\(fmt):time_base=\(timebase.num)/\(timebase.den):channels=\(codecpar.ch_layout.nb_channels):channel_layout=\(codecpar.ch_layout)"
-                return MEFilter(filters: str, args: args, isAudio: true)
+            filter = options.audioFilters.flatMap { str -> MEFilter in
+                MEFilter(filters: str, timebase: assetTrack.timebase, isAudio: true)
             }
             swresample = AudioSwresample(codecpar: codecpar)
         }
@@ -58,6 +54,7 @@ class SoftwareDecode: DecodeProtocol {
             if result == 0, let avframe = coreFrame {
                 var frame = try swresample.transfer(avframe: filter?.filter(inputFrame: avframe) ?? avframe)
                 frame.timebase = packet.assetTrack.timebase
+//                frame.timebase = Timebase(avframe.pointee.time_base)
                 frame.duration = avframe.pointee.pkt_duration
                 frame.size = Int64(avframe.pointee.pkt_size)
                 if packet.assetTrack.mediaType == .audio {
@@ -122,8 +119,13 @@ extension AVCodecParameters {
             avcodec_free_context(&codecContextOption)
             throw NSError(errorCode: .codecContextSetParam, ffmpegErrnum: result)
         }
-        if options.enableHardwareDecode() {
-            codecContext.getFormat()
+        if codec_type == AVMEDIA_TYPE_VIDEO, options.enableHardwareDecode() {
+            var hwDeviceCtx: UnsafeMutablePointer<AVBufferRef>?
+            let ret = av_hwdevice_ctx_create(&hwDeviceCtx, AV_HWDEVICE_TYPE_VIDEOTOOLBOX, nil, nil, 0)
+            if ret == 0 {
+                codecContext.pointee.hw_device_ctx = hwDeviceCtx
+//                codecContext.pointee.hw_device_ctx = av_buffer_ref(hwDeviceCtx)
+            }
         }
         guard let codec = avcodec_find_decoder(codecContext.pointee.codec_id) else {
             avcodec_free_context(&codecContextOption)

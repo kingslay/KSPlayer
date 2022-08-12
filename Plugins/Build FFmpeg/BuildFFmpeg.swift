@@ -443,7 +443,7 @@ private class BuildFFMPEG: BaseBuild {
         "--disable-filters",
         "--enable-filter=aformat", "--enable-filter=amix", "--enable-filter=anull", "--enable-filter=aresample",
         "--enable-filter=areverse", "--enable-filter=asetrate", "--enable-filter=atempo", "--enable-filter=atrim",
-        "--enable-filter=format", "--enable-filter=fps", "--enable-filter=hflip", "--enable-filter=null",
+        "--enable-filter=format", "--enable-filter=fps", "--enable-filter=hflip", "--enable-filter=hwdownload", "--enable-filter=hwmap", "--enable-filter=hwupload", "--enable-filter=null",
         "--enable-filter=overlay", "--enable-filter=palettegen", "--enable-filter=paletteuse", "--enable-filter=pan",
         "--enable-filter=rotate", "--enable-filter=scale", "--enable-filter=setpts", "--enable-filter=transpose",
         "--enable-filter=trim", "--enable-filter=vflip", "--enable-filter=volume", "--enable-filter=yadif",
