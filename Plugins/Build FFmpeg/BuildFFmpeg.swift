@@ -40,7 +40,7 @@ import Foundation
     }
 }
 
-class BaseBuild {
+private class BaseBuild {
     fileprivate let platforms = PlatformType.allCases
 //     fileprivate let platforms = [PlatformType.ios]
     private let library: String
@@ -180,7 +180,7 @@ class BaseBuild {
     }
 }
 
-class BuildFFMPEG: BaseBuild {
+private class BuildFFMPEG: BaseBuild {
     private let ffmpegFile = "ffmpeg-5.1"
     private let isDebug: Bool
     private let isFFplay: Bool
@@ -259,7 +259,6 @@ class BuildFFMPEG: BaseBuild {
                     "--extra-ldflags='\(ldflags)'",
                     "--prefix=\(prefix.path)"]
         args.append(contentsOf: ffmpegcflags)
-        print(args.joined(separator: " "))
         Utility.shell(args.joined(separator: " "), currentDirectoryURL: buildDir)
         Utility.shell("make -j8 install\(arch == .x86_64 ? "" : " GASPP_FIX_XCODE5=1") >>\(buildDir.path).log", currentDirectoryURL: buildDir)
         if isFFplay, platform == .macos, arch.executable() {
@@ -374,18 +373,17 @@ class BuildFFMPEG: BaseBuild {
     private let ffmpegConfiguers = [
         // Configuration options:
         "--disable-armv5te", "--disable-armv6", "--disable-armv6t2", "--disable-bsfs",
-        "--disable-bzlib", "--disable-devices", "--disable-gray", "--disable-iconv", "--disable-indevs",
-        "--disable-linux-perf", "--disable-outdevs", "--disable-xlib", "--disable-shared",
-        "--disable-swscale-alpha", "--disable-symver", "--disable-small",
-        "--enable-gpl", "--enable-version3", "--enable-nonfree", "--enable-static",
-        "--enable-runtime-cpudetect", "--enable-optimizations",
-        "--enable-cross-compile", "--enable-stripping", "--enable-libxml2", "--enable-thumb",
-        "--pkg-config-flags=--static",
+        "--disable-bzlib", "--disable-gray", "--disable-iconv", "--disable-linux-perf",
+        "--disable-xlib", "--disable-shared", "--disable-swscale-alpha", "--disable-symver",
+        "--disable-small",
+        "--enable-cross-compile", "--enable-gpl", "--enable-libxml2", "--enable-nonfree",
+        "--enable-optimizations", "--enable-runtime-cpudetect", "--enable-stripping", "--enable-thumb",
+        "--enable-version3", "--enable-static", "--pkg-config-flags=--static",
         // Documentation options:
         "--disable-doc", "--disable-htmlpages", "--disable-manpages", "--disable-podpages", "--disable-txtpages",
         // Component options:
-        "--enable-avcodec", "--enable-avformat", "--enable-avutil",
-        "--enable-swresample", "--enable-swscale", "--disable-postproc", "--enable-network",
+        "--enable-avcodec", "--enable-avformat", "--enable-avutil", "--enable-network", "--enable-swresample", "--enable-swscale",
+        "--disable-devices", "--disable-outdevs", "--disable-indevs", "--disable-postproc",
         // ,"--disable-pthreads"
         // ,"--disable-w32threads"
         // ,"--disable-os2threads"
@@ -401,10 +399,11 @@ class BuildFFMPEG: BaseBuild {
         "--enable-videotoolbox", "--enable-audiotoolbox",
         // Individual component options:
         // ,"--disable-everything"
-        // 用所有的encoders的，那avcodec就会达到40MB了，指定的话，那就只要20MB。
+        // 用所有的encoders的话，那avcodec就会达到40MB了，指定的话，那就只要20MB。
         "--disable-encoders",
         // ./configure --list-decoders
         "--disable-decoders",
+        // 视频
         "--enable-decoder=av1", "--enable-decoder=dca", "--enable-decoder=flv", "--enable-decoder=h263",
         "--enable-decoder=h263i", "--enable-decoder=h263p", "--enable-decoder=h264", "--enable-decoder=hevc",
         "--enable-decoder=mjpeg", "--enable-decoder=mjpegb", "--enable-decoder=mpeg1video", "--enable-decoder=mpeg2video",
@@ -416,44 +415,43 @@ class BuildFFMPEG: BaseBuild {
         "--enable-decoder=aac*", "--enable-decoder=ac3*", "--enable-decoder=alac*",
         "--enable-decoder=amr*", "--enable-decoder=ape", "--enable-decoder=caf", "--enable-decoder=cook",
         "--enable-decoder=dca", "--enable-decoder=dolby_e", "--enable-decoder=eac3*", "--enable-decoder=flac",
-        "--enable-decoder=mp1*", "--enable-decoder=mp2*", "--enable-decoder=mp3*", "--enable-decoder=opus", "--enable-decoder=pcm*",
-        "--enable-decoder=truehd", "--enable-decoder=vorbis", "--enable-decoder=wma*",
+        "--enable-decoder=mp1*", "--enable-decoder=mp2*", "--enable-decoder=mp3*", "--enable-decoder=opus",
+        "--enable-decoder=pcm*", "--enable-decoder=truehd", "--enable-decoder=vorbis", "--enable-decoder=wma*",
         // 字幕
         "--enable-decoder=ass", "--enable-decoder=dvbsub", "--enable-decoder=dvdsub", "--enable-decoder=movtext",
-        "--enable-decoder=pgssub", "--enable-decoder=srt", "--enable-decoder=ssa", "--enable-decoder=subrip", "--enable-decoder=webvtt",
+        "--enable-decoder=pgssub", "--enable-decoder=srt", "--enable-decoder=ssa", "--enable-decoder=subrip",
+        "--enable-decoder=webvtt",
         // ./configure --list-muxers
         "--disable-muxers",
         // ./configure --list-demuxers
+        // 用所有的demuxers的话，那avformat就会达到8MB了，指定的话，那就只要4MB。
         "--disable-demuxers",
         "--enable-demuxer=aac", "--enable-demuxer=ac3", "--enable-demuxer=aiff", "--enable-demuxer=amr",
         "--enable-demuxer=ape", "--enable-demuxer=asf", "--enable-demuxer=ass", "--enable-demuxer=avi",
         "--enable-demuxer=concat", "--enable-demuxer=dash", "--enable-demuxer=data", "--enable-demuxer=eac3",
-        "--enable-demuxer=flac", "--enable-demuxer=flv", "--enable-demuxer=h264", "--enable-demuxer=hevc", "--enable-demuxer=hls",
-        "--enable-demuxer=live_flv", "--enable-demuxer=loas",
-        "--enable-demuxer=m4v", "--enable-demuxer=matroska", "--enable-demuxer=mov", "--enable-demuxer=mp3", "--enable-demuxer=mpeg*",
+        "--enable-demuxer=flac", "--enable-demuxer=flv", "--enable-demuxer=h264", "--enable-demuxer=hevc",
+        "--enable-demuxer=hls", "--enable-demuxer=live_flv", "--enable-demuxer=loas", "--enable-demuxer=m4v",
+        "--enable-demuxer=matroska", "--enable-demuxer=mov", "--enable-demuxer=mp3", "--enable-demuxer=mpeg*",
         "--enable-demuxer=ogg", "--enable-demuxer=rm", "--enable-demuxer=rtsp", "--enable-demuxer=srt",
         "--enable-demuxer=vc1", "--enable-demuxer=wav", "--enable-demuxer=webm_dash_manifest",
         // ./configure --list-protocols
         "--enable-protocols",
-        "--disable-protocol=bluray", "--disable-protocol=ffrtmpcrypt", "--disable-protocol=gopher",
-        "--disable-protocol=icecast", "--disable-protocol=librtmp*", "--disable-protocol=libssh",
-        "--disable-protocol=md5", "--disable-protocol=mmsh", "--disable-protocol=mmst", "--disable-protocol=sctp",
-        "--disable-protocol=subfile", "--disable-protocol=unix",
-
+        "--disable-protocol=bluray", "--disable-protocol=ffrtmpcrypt", "--disable-protocol=gopher", "--disable-protocol=icecast",
+        "--disable-protocol=librtmp*", "--disable-protocol=libssh", "--disable-protocol=md5", "--disable-protocol=mmsh",
+        "--disable-protocol=mmst", "--disable-protocol=sctp", "--disable-protocol=subfile", "--disable-protocol=unix",
         // filters
         "--disable-filters",
-        "--enable-filter=amix", "--enable-filter=anull", "--enable-filter=aformat", "--enable-filter=aresample",
+        "--enable-filter=aformat", "--enable-filter=amix", "--enable-filter=anull", "--enable-filter=aresample",
         "--enable-filter=areverse", "--enable-filter=asetrate", "--enable-filter=atempo", "--enable-filter=atrim",
         "--enable-filter=format", "--enable-filter=fps", "--enable-filter=hflip", "--enable-filter=null",
         "--enable-filter=overlay", "--enable-filter=palettegen", "--enable-filter=paletteuse", "--enable-filter=pan",
-        "--enable-filter=rotate", "--enable-filter=setpts", "--enable-filter=scale",
-        "--enable-filter=trim", "--enable-filter=transpose", "--enable-filter=vflip", "--enable-filter=volume",
-        "--enable-filter=yadif",
+        "--enable-filter=rotate", "--enable-filter=scale", "--enable-filter=setpts", "--enable-filter=transpose",
+        "--enable-filter=trim", "--enable-filter=vflip", "--enable-filter=volume", "--enable-filter=yadif",
 //        "--enable-filter=yadif_videotoolbox",
     ]
 }
 
-class BuildSRT: BaseBuild {
+private class BuildSRT: BaseBuild {
     private let srtVersion = "v1.4.4"
     private let srtFile = "srt-1.4.4"
 
@@ -497,7 +495,6 @@ class BuildSRT: BaseBuild {
         try? FileManager.default.createDirectory(at: directoryURL + "/\(platform)-\(arch)", withIntermediateDirectories: true, attributes: nil)
 
         let command = "cmake .. -DCMAKE_PREFIX_PATH=\(thinDir(platform: platform, arch: arch).path) -DCMAKE_INSTALL_PREFIX=\(thinDir(platform: platform, arch: arch).path) -DUSE_OPENSSL_PC=OFF -DCMAKE_TOOLCHAIN_FILE=scripts/iOS.cmake -DIOS_ARCH=\(arch) -DIOS_PLATFORM=\(srtPlatform)  -DCMAKE_IOS_DEVELOPER_ROOT=\(platform.crossTop()) -D_CMAKE_IOS_SDK_ROOT=\(platform.crossSDK()) -DOPENSSL_ROOT_DIR=\(opensslPath.path) -DOPENSSL_CRYPTO_LIBRARY=\(opensslPath.path)/lib/libcrypto.a -DOPENSSL_SSL_LIBRARY=\(opensslPath.path)/lib/libssl.a -DOPENSSL_INCLUDE_DIR=\(opensslPath.path)/include"
-        print(command)
         Utility.shell(command, currentDirectoryURL: cmakeDir)
         Utility.shell("make >>\(buildDir.path).log && make install >>\(buildDir.path).log ", currentDirectoryURL: cmakeDir)
     }
@@ -520,7 +517,7 @@ class BuildSRT: BaseBuild {
     }
 }
 
-class BuildOpenSSL: BaseBuild {
+private class BuildOpenSSL: BaseBuild {
     private let sslFile = "openssl-3.0.5"
     init() {
         super.init(library: "SSL")
@@ -566,7 +563,7 @@ class BuildOpenSSL: BaseBuild {
     }
 }
 
-class BuildBoringSSL: BaseBuild {
+private class BuildBoringSSL: BaseBuild {
     private let sslFile = "boringssl"
     init() {
         super.init(library: "SSL")
@@ -599,7 +596,7 @@ class BuildBoringSSL: BaseBuild {
     }
 }
 
-enum PlatformType: String, CaseIterable {
+private enum PlatformType: String, CaseIterable {
     private static let xcodePath = Utility.shell("xcode-select -p", isOutput: true) ?? ""
     case ios, isimulator, tvos, tvsimulator, macos, maccatalyst
     var minVersion: String {
@@ -627,34 +624,6 @@ enum PlatformType: String, CaseIterable {
             return [.arm64, .x86_64]
         case .maccatalyst:
             return [.arm64, .x86_64]
-        }
-    }
-
-    func frameworkFileName() -> String {
-        switch self {
-        case .ios:
-            return "ios-" + architectures().map(\.rawValue).joined(separator: "_")
-        case .isimulator:
-            return "ios-" + architectures().map(\.rawValue).joined(separator: "_") + "-simulator"
-        case .tvos:
-            return "tvos-" + architectures().map(\.rawValue).joined(separator: "_")
-        case .tvsimulator:
-            return "tvos-" + architectures().map(\.rawValue).joined(separator: "_") + "-simulator"
-        case .macos:
-            return "macos-" + architectures().map(\.rawValue).joined(separator: "_")
-        case .maccatalyst:
-            return "ios-" + architectures().map(\.rawValue).joined(separator: "_") + "-maccatalyst"
-        }
-    }
-
-    func os() -> String {
-        switch self {
-        case .isimulator:
-            return "ios"
-        case .tvsimulator:
-            return "tvos"
-        default:
-            return rawValue
         }
     }
 
