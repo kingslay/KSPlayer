@@ -90,6 +90,15 @@ public extension CVPixelBuffer {
         return UIImage(data: mutableData as Data)
     }
 
+    func image() -> UIImage? {
+        var cgImage: CGImage?
+        VTCreateCGImageFromCVPixelBuffer(self, options: nil, imageOut: &cgImage)
+        guard let cgImage = cgImage else {
+            return nil
+        }
+        return UIImage(cgImage: cgImage)
+    }
+
     func widthOfPlane(at planeIndex: Int) -> Int {
         CVPixelBufferGetWidthOfPlane(self, planeIndex)
     }
