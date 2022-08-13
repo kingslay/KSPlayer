@@ -95,7 +95,7 @@ final class MetalPlayView: UIView {
     }
     #endif
     func toImage() -> UIImage? {
-        pixelBuffer?.image(quality: 0.8)
+        pixelBuffer?.image()
     }
 
     func clear() {

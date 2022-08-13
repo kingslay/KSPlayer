@@ -60,7 +60,7 @@ var objects: [KSPlayerResource] = {
     var objects = [KSPlayerResource]()
     if let path = Bundle.main.path(forResource: "567082ac3ae39699f68de4fd2b7444b1e045515a", ofType: "mp4") {
         let options = KSOptions()
-//        options.videoFilters = "hflip,vflip"
+        options.videoFilters = "zscale=t=linear:npl=100,format=gbrpf32le,zscale=p=bt709,tonemap=tonemap=hable:desat=0,zscale=t=bt709:m=bt709:r=tv,format=yuv420p -pix_fmt yuv420p -color_range tv -colorspace bt709 -color_trc bt709 -color_primaries bt709"
         objects.append(KSPlayerResource(url: URL(fileURLWithPath: path), options: options, name: "本地视频"))
     }
     if let path = Bundle.main.path(forResource: "tos", ofType: "mkv") {
