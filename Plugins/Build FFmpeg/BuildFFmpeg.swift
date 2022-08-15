@@ -687,7 +687,7 @@ private enum PlatformType: String, CaseIterable {
             return "--cpu=armv8 --enable-neon --enable-asm"
         case .x86_64:
             // aacpsdsp.o), building for Mac Catalyst, but linking in object file built for
-            // x86_64 binaries are built without ASM support, since ASM for x86_64 is actually x86 and that confuses `xcodebuild -create-xcframework`
+            // x86_64 binaries are built without ASM support, since ASM for x86_64 is actually x86 and that confuses `xcodebuild -create-xcframework` https://stackoverflow.com/questions/58796267/building-for-macos-but-linking-in-object-file-built-for-free-standing/59103419#59103419
             return self == .maccatalyst ? "--cpu=x86_64 --disable-neon --disable-asm" : "--cpu=x86_64 --enable-neon --enable-asm"
         case .arm64e:
             return "--cpu=armv8.3-a --enable-neon --enable-asm"
