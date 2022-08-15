@@ -17,31 +17,25 @@ RSYNC_PROTECT_TMP_FILES=(--filter "P .*.??????")
 variant_for_slice()
 {
   case "$1" in
-  "Libssl.xcframework/ios-arm64_arm64e")
-    echo ""
-    ;;
-  "Libssl.xcframework/ios-arm64_x86_64-maccatalyst")
-    echo "maccatalyst"
-    ;;
-  "Libssl.xcframework/tvos-arm64_x86_64-simulator")
-    echo "simulator"
-    ;;
-  "Libssl.xcframework/macos-arm64_x86_64")
-    echo ""
-    ;;
   "Libssl.xcframework/ios-arm64_x86_64-simulator")
     echo "simulator"
     ;;
   "Libssl.xcframework/tvos-arm64")
     echo ""
     ;;
+  "Libssl.xcframework/ios-arm64_arm64e")
+    echo ""
+    ;;
+  "Libssl.xcframework/tvos-arm64_x86_64-simulator")
+    echo "simulator"
+    ;;
+  "Libssl.xcframework/ios-arm64_x86_64-maccatalyst")
+    echo "maccatalyst"
+    ;;
+  "Libssl.xcframework/macos-arm64_x86_64")
+    echo ""
+    ;;
   "Libcrypto.xcframework/ios-arm64_arm64e")
-    echo ""
-    ;;
-  "Libcrypto.xcframework/macos-arm64_x86_64")
-    echo ""
-    ;;
-  "Libcrypto.xcframework/tvos-arm64")
     echo ""
     ;;
   "Libcrypto.xcframework/ios-arm64_x86_64-simulator")
@@ -49,6 +43,12 @@ variant_for_slice()
     ;;
   "Libcrypto.xcframework/tvos-arm64_x86_64-simulator")
     echo "simulator"
+    ;;
+  "Libcrypto.xcframework/tvos-arm64")
+    echo ""
+    ;;
+  "Libcrypto.xcframework/macos-arm64_x86_64")
+    echo ""
     ;;
   "Libcrypto.xcframework/ios-arm64_x86_64-maccatalyst")
     echo "maccatalyst"
@@ -59,37 +59,37 @@ variant_for_slice()
 archs_for_slice()
 {
   case "$1" in
-  "Libssl.xcframework/ios-arm64_arm64e")
-    echo "arm64 arm64e"
-    ;;
-  "Libssl.xcframework/ios-arm64_x86_64-maccatalyst")
-    echo "arm64 x86_64"
-    ;;
-  "Libssl.xcframework/tvos-arm64_x86_64-simulator")
-    echo "arm64 x86_64"
-    ;;
-  "Libssl.xcframework/macos-arm64_x86_64")
-    echo "arm64 x86_64"
-    ;;
   "Libssl.xcframework/ios-arm64_x86_64-simulator")
     echo "arm64 x86_64"
     ;;
   "Libssl.xcframework/tvos-arm64")
     echo "arm64"
     ;;
-  "Libcrypto.xcframework/ios-arm64_arm64e")
+  "Libssl.xcframework/ios-arm64_arm64e")
     echo "arm64 arm64e"
     ;;
-  "Libcrypto.xcframework/macos-arm64_x86_64")
+  "Libssl.xcframework/tvos-arm64_x86_64-simulator")
     echo "arm64 x86_64"
     ;;
-  "Libcrypto.xcframework/tvos-arm64")
-    echo "arm64"
+  "Libssl.xcframework/ios-arm64_x86_64-maccatalyst")
+    echo "arm64 x86_64"
+    ;;
+  "Libssl.xcframework/macos-arm64_x86_64")
+    echo "arm64 x86_64"
+    ;;
+  "Libcrypto.xcframework/ios-arm64_arm64e")
+    echo "arm64 arm64e"
     ;;
   "Libcrypto.xcframework/ios-arm64_x86_64-simulator")
     echo "arm64 x86_64"
     ;;
   "Libcrypto.xcframework/tvos-arm64_x86_64-simulator")
+    echo "arm64 x86_64"
+    ;;
+  "Libcrypto.xcframework/tvos-arm64")
+    echo "arm64"
+    ;;
+  "Libcrypto.xcframework/macos-arm64_x86_64")
     echo "arm64 x86_64"
     ;;
   "Libcrypto.xcframework/ios-arm64_x86_64-maccatalyst")

@@ -16,7 +16,7 @@ import Foundation
 public class SubtitlePart: CustomStringConvertible, NSMutableCopying {
     public let start: TimeInterval
     public let end: TimeInterval
-    public let text: NSMutableAttributedString
+    public let text: NSMutableAttributedString?
     public var image: UIImage?
     public var description: String {
         "Subtile Group ==========\nstart: \(start)\nend:\(end)\ntext:\(text)"
@@ -29,7 +29,7 @@ public class SubtitlePart: CustomStringConvertible, NSMutableCopying {
         self.init(start, end, attributedString: NSMutableAttributedString(string: text))
     }
 
-    public init(_ start: TimeInterval, _ end: TimeInterval, attributedString: NSMutableAttributedString) {
+    public init(_ start: TimeInterval, _ end: TimeInterval, attributedString: NSMutableAttributedString?) {
         self.start = start
         self.end = end
         text = attributedString
@@ -37,7 +37,7 @@ public class SubtitlePart: CustomStringConvertible, NSMutableCopying {
 
     public func mutableCopy(with _: NSZone? = nil) -> Any {
         // swiftlint:disable force_cast
-        SubtitlePart(start, end, attributedString: text.mutableCopy() as! NSMutableAttributedString)
+        SubtitlePart(start, end, attributedString: text?.mutableCopy() as? NSMutableAttributedString)
         // swiftlint:enable force_cast
     }
 }
@@ -75,7 +75,7 @@ public protocol KSSubtitleProtocol {
     func search(for time: TimeInterval) -> SubtitlePart?
 }
 
-public protocol SubtitleInfo {
+public protocol SubtitleInfo: AnyObject {
     var subtitleID: String { get }
     var name: String { get }
     //    var userInfo: NSMutableDictionary? { get set }
@@ -177,8 +177,10 @@ extension KSSubtitle: KSSubtitleProtocol {
                 let text = copy.text
                 index = currentIndex + 1
                 while index < parts.count, parts[index] == time {
-                    text.append(NSAttributedString(string: "\n"))
-                    text.append(parts[index].text)
+                    if let otherText = parts[index].text {
+                        text?.append(NSAttributedString(string: "\n"))
+                        text?.append(otherText)
+                    }
                     index += 1
                 }
                 return copy
@@ -220,7 +222,7 @@ extension KSSubtitle: KSSubtitleProtocol {
     public func searchIndex(filter: (SubtitlePart, Int) -> Bool) -> NSRange? {
         var length = 0
         for (index, group) in parts.enumerated() {
-            let count = group.text.length
+            let count = group.text?.length ?? 0
             if filter(group, length + count) {
                 if currentIndex != index {
                     currentIndex = index

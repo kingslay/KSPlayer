@@ -1,7 +1,7 @@
 PODS:
-  - FFmpeg (5.0):
-    - FFmpeg/FFmpeg (= 5.0)
-  - FFmpeg/FFmpeg (5.0):
+  - FFmpeg (5.1):
+    - FFmpeg/FFmpeg (= 5.1)
+  - FFmpeg/FFmpeg (5.1):
     - OpenSSL
   - KSPlayer (1.0):
     - KSPlayer/Audio (= 1.0)
@@ -55,7 +55,7 @@ EXTERNAL SOURCES:
     :path: "../"
 
 SPEC CHECKSUMS:
-  FFmpeg: dc2a6f08270ac927d9450e36adb9ec17f9fa843d
+  FFmpeg: afdcf31638c1a6a0253eaf9505983e21a3a5d2c1
   KSPlayer: d0ee11093f3230cc235a3f555f5c4aee9052265e
   OpenSSL: 9637184330c49c5862fc0bb383005bd55e5a2335
   SwiftLint: 22ccbbe3b8008684be5955693bab135e0ed6a447

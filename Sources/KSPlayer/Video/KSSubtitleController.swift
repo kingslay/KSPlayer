@@ -55,6 +55,9 @@ public class KSSubtitleController {
                 self.infos.removeAll { other in
                     other.subtitleID == info.subtitleID
                 }
+                if info.subtitleID == self.view.selectedInfo?.subtitleID {
+                    self.view.selectedInfo = nil
+                }
             }
             self.srtListCount = self.infos.count
             self.view.setupDatas(infos: self.infos)

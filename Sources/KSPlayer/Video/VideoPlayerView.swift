@@ -298,15 +298,14 @@ open class VideoPlayerView: PlayerView {
             if state == .playedToTheEnd {
                 replayButton.isSelected = true
             }
-        default:
-            break
+        case .notSetURL:
+            embedSubtitleDataSouce = nil
         }
     }
 
     override open func resetPlayer() {
         super.resetPlayer()
         delayItem = nil
-        resource = nil
         toolBar.reset()
         isMaskShow = false
         hideLoader()

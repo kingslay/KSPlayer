@@ -58,26 +58,30 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UISplitViewControllerDele
 
 var objects: [KSPlayerResource] = {
     var objects = [KSPlayerResource]()
-    if let path = Bundle.main.path(forResource: "567082ac3ae39699f68de4fd2b7444b1e045515a", ofType: "mp4") {
+    if let path = Bundle.main.path(forResource: "h264", ofType: "mp4") {
         let options = KSOptions()
         options.videoFilters = "zscale=t=linear:npl=100,format=gbrpf32le,zscale=p=bt709,tonemap=tonemap=hable:desat=0,zscale=t=bt709:m=bt709:r=tv,format=yuv420p -pix_fmt yuv420p -color_range tv -colorspace bt709 -color_trc bt709 -color_primaries bt709"
         objects.append(KSPlayerResource(url: URL(fileURLWithPath: path), options: options, name: "本地视频"))
     }
-    if let path = Bundle.main.path(forResource: "tos", ofType: "mkv") {
+    if let path = Bundle.main.path(forResource: "subrip", ofType: "mkv") {
         let options = KSOptions()
         options.videoFilters = "hflip,vflip"
-        objects.append(KSPlayerResource(url: URL(fileURLWithPath: path), options: options, name: "本地mkv"))
+        objects.append(KSPlayerResource(url: URL(fileURLWithPath: path), options: options, name: "文字字幕"))
     }
-
-    if let path = Bundle.main.path(forResource: "google-help-vr", ofType: "mp4") {
+    if let path = Bundle.main.path(forResource: "dvd_subtitle", ofType: "mkv") {
+        let options = KSOptions()
+        options.videoFilters = "hflip,vflip"
+        objects.append(KSPlayerResource(url: URL(fileURLWithPath: path), options: options, name: "图片字幕"))
+    }
+    if let path = Bundle.main.path(forResource: "vr", ofType: "mp4") {
         let options = KSOptions()
         options.display = .vr
         objects.append(KSPlayerResource(url: URL(fileURLWithPath: path), options: options, name: "本地全景视频"))
     }
-    if let path = Bundle.main.path(forResource: "Polonaise", ofType: "flac") {
+    if let path = Bundle.main.path(forResource: "mjpeg", ofType: "flac") {
         objects.append(KSPlayerResource(url: URL(fileURLWithPath: path), name: "本地音频"))
     }
-    if let path = Bundle.main.path(forResource: "video-h265", ofType: "mkv") {
+    if let path = Bundle.main.path(forResource: "hevc", ofType: "mkv") {
         objects.append(KSPlayerResource(url: URL(fileURLWithPath: path), name: "h265视频"))
     }
     if let url = URL(string: "http://clips.vorwaerts-gmbh.de/big_buck_bunny.mp4") {

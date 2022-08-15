@@ -17,15 +17,15 @@ public class KSSubtitleView: UIControl {
     private let tableView = UITableView()
     private let tableWidth = CGFloat(360)
     private var tableViewTrailingConstraint: NSLayoutConstraint!
-    public var selectedInfo: SubtitleInfo {
+    public weak var selectedInfo: SubtitleInfo? {
         didSet {
             DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 0.2) { [weak self] in
                 guard let self = self else { return }
                 self.isHidden = true
             }
-            oldValue.disableSubtitle()
+            oldValue?.disableSubtitle()
             if let selectWithFilePath = selectWithFilePath {
-                selectedInfo.enableSubtitle(completion: selectWithFilePath)
+                selectedInfo?.enableSubtitle(completion: selectWithFilePath)
             }
         }
     }
@@ -132,7 +132,7 @@ extension KSSubtitleView: UITableViewDataSource {
             srtCell.localIconViewWidth.constant = 0
             srtCell.localIconView.isHidden = true
 //            }
-            srtCell.checked(info.subtitleID == selectedInfo.subtitleID)
+            srtCell.checked(info.subtitleID == selectedInfo?.subtitleID)
         }
         return cell
     }

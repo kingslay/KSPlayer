@@ -2,7 +2,7 @@
 import XCTest
 class KSMEPlayerTest: XCTestCase {
     func testPlaying() {
-        if let path = Bundle(for: type(of: self)).path(forResource: "567082ac3ae39699f68de4fd2b7444b1e045515a", ofType: "mp4") {
+        if let path = Bundle(for: type(of: self)).path(forResource: "h264", ofType: "mp4") {
             let options = KSOptions()
             let player = KSMEPlayer(url: URL(fileURLWithPath: path), options: options)
             options.isAutoPlay = false
@@ -16,7 +16,7 @@ class KSMEPlayerTest: XCTestCase {
     }
 
     func testAutoPlay() {
-        if let path = Bundle(for: type(of: self)).path(forResource: "567082ac3ae39699f68de4fd2b7444b1e045515a", ofType: "mp4") {
+        if let path = Bundle(for: type(of: self)).path(forResource: "h264", ofType: "mp4") {
             let options = KSOptions()
             let player = KSMEPlayer(url: URL(fileURLWithPath: path), options: options)
             options.isAutoPlay = true

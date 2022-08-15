@@ -206,8 +206,7 @@ extension MEPlayerItem {
         assetTracks = (0 ..< Int(formatCtx.pointee.nb_streams)).compactMap { i in
             if let coreStream = formatCtx.pointee.streams[i] {
                 coreStream.pointee.discard = AVDISCARD_ALL
-                let assetTrack = AssetTrack(stream: coreStream)
-                if var assetTrack = assetTrack {
+                if let assetTrack = AssetTrack(stream: coreStream) {
                     if !options.subtitleDisable, assetTrack.mediaType == .subtitle {
                         let subtitle = FFPlayerItemTrack<SubtitleFrame>(assetTrack: assetTrack, options: options)
                         assetTrack.subtitle = subtitle
