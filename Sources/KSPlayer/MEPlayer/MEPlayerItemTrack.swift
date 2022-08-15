@@ -8,7 +8,7 @@ import AVFoundation
 import CoreMedia
 import Libavformat
 
-struct AssetTrack: MediaPlayerTrack, CustomStringConvertible {
+class AssetTrack: MediaPlayerTrack, CustomStringConvertible {
     let trackID: Int32
     let name: String
     let language: String?
@@ -93,7 +93,7 @@ struct AssetTrack: MediaPlayerTrack, CustomStringConvertible {
     }
 
     var isImageSubtitle: Bool {
-        [AV_CODEC_ID_DVD_SUBTITLE, AV_CODEC_ID_DVB_SUBTITLE, AV_CODEC_ID_DVB_TELETEXT, AV_CODEC_ID_HDMV_PGS_SUBTITLE].contains(stream.pointee.codecpar.pointee.codec_id)
+        [AV_CODEC_ID_DVD_SUBTITLE, AV_CODEC_ID_DVB_SUBTITLE, AV_CODEC_ID_DVB_TELETEXT, AV_CODEC_ID_HDMV_PGS_SUBTITLE].contains(stream.pointee.codecpar?.pointee.codec_id)
     }
 
     func setIsEnabled(_ isEnabled: Bool) {

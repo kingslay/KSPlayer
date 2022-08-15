@@ -58,13 +58,15 @@ class SubtitleDecode: DecodeProtocol {
             } else {
                 end += 2
             }
-            let part = SubtitlePart(seconds + TimeInterval(subtitle.start_display_time) / 1000.0, end, attributedString.string)
+            let part = SubtitlePart(seconds + TimeInterval(subtitle.start_display_time) / 1000.0, end, attributedString: attributedString)
             part.image = image
             let frame = SubtitleFrame(part: part, timebase: packet.assetTrack.timebase)
             frame.position = position
             if let preSubtitleFrame = preSubtitleFrame, preSubtitleFrame.part == part {
-                preSubtitleFrame.part.text.append(NSAttributedString(string: "\n"))
-                preSubtitleFrame.part.text.append(attributedString)
+                if let attributedString = attributedString {
+                    preSubtitleFrame.part.text?.append(NSAttributedString(string: "\n"))
+                    preSubtitleFrame.part.text?.append(attributedString)
+                }
             } else {
                 preSubtitleFrame = frame
                 delegate?.decodeResult(frame: frame)
@@ -87,19 +89,25 @@ class SubtitleDecode: DecodeProtocol {
         }
     }
 
-    private func text(subtitle: AVSubtitle) -> (NSMutableAttributedString, UIImage?) {
-        let attributedString = NSMutableAttributedString()
+    private func text(subtitle: AVSubtitle) -> (NSMutableAttributedString?, UIImage?) {
+        var attributedString: NSMutableAttributedString?
         var image: UIImage?
         for i in 0 ..< Int(subtitle.num_rects) {
             guard let rect = subtitle.rects[i]?.pointee else {
                 continue
             }
             if let text = rect.text {
-                attributedString.append(NSAttributedString(string: String(cString: text)))
+                if attributedString == nil {
+                    attributedString = NSMutableAttributedString()
+                }
+                attributedString?.append(NSAttributedString(string: String(cString: text)))
             } else if let ass = rect.ass {
                 let scanner = Scanner(string: String(cString: ass))
-                if let group = AssParse.parse(scanner: scanner, reg: reg) {
-                    attributedString.append(group.text)
+                if let group = AssParse.parse(scanner: scanner, reg: reg), let text = group.text {
+                    if attributedString == nil {
+                        attributedString = NSMutableAttributedString()
+                    }
+                    attributedString?.append(text)
                 }
             } else if rect.type == SUBTITLE_BITMAP {
                 image = scale.transfer(format: AV_PIX_FMT_PAL8, width: rect.w, height: rect.h, data: Array(tuple: rect.data), linesize: Array(tuple: rect.linesize))?.image(quality: 0.2)

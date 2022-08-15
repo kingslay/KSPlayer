@@ -9,16 +9,16 @@ class KSPlayerLayerTest: XCTestCase {
     }
 
     func testPlayerLayer() {
-        if let path = Bundle(for: type(of: self)).path(forResource: "567082ac3ae39699f68de4fd2b7444b1e045515a", ofType: "MP4") {
+        if let path = Bundle(for: type(of: self)).path(forResource: "h264", ofType: "MP4") {
             set(path: path)
         }
 //        if let path = Bundle(for: type(of: self)).path(forResource: "google-help-vr", ofType: "mp4") {
 //            set(path: path)
 //        }
-        if let path = Bundle(for: type(of: self)).path(forResource: "Polonaise", ofType: "flac") {
+        if let path = Bundle(for: type(of: self)).path(forResource: "mjpeg", ofType: "flac") {
             set(path: path)
         }
-        if let path = Bundle(for: type(of: self)).path(forResource: "video-h265", ofType: "mkv") {
+        if let path = Bundle(for: type(of: self)).path(forResource: "hevc", ofType: "mkv") {
             set(path: path)
         }
     }

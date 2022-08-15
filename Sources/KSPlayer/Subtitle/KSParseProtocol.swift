@@ -97,8 +97,10 @@ public class AssParse: KSParseProtocol {
             for i in 1 ..< groups.count {
                 let group = groups[i]
                 if preGroup == group {
-                    preGroup.text.append(NSAttributedString(string: "\n"))
-                    preGroup.text.append(group.text)
+                    if let text = group.text {
+                        preGroup.text?.append(NSAttributedString(string: "\n"))
+                        preGroup.text?.append(text)
+                    }
                 } else {
                     newGroups.append(preGroup)
                     preGroup = group
