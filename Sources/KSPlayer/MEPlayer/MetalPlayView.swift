@@ -9,11 +9,11 @@ import AVFoundation
 import CoreMedia
 import MetalKit
 
-final class MetalPlayView: UIView {
+public final class MetalPlayView: UIView {
     private let render = MetalRender()
     private let view = MTKView(frame: .zero, device: MetalRender.device)
     private var videoInfo: CMVideoFormatDescription?
-    private var pixelBuffer: CVPixelBuffer?
+    public var pixelBuffer: CVPixelBuffer?
 //    private lazy var displayLink: CADisplayLink = .init(target: self, selector: #selector(drawView))
     private let timer = DispatchSource.makeTimerSource(queue: DispatchQueue.main)
     var options: KSOptions
@@ -69,7 +69,7 @@ final class MetalPlayView: UIView {
         fatalError("init(coder:) has not been implemented")
     }
 
-    override var contentMode: UIViewContentMode {
+    public override var contentMode: UIViewContentMode {
         didSet {
             view.contentMode = contentMode
             switch contentMode {
@@ -86,7 +86,7 @@ final class MetalPlayView: UIView {
     }
 
     #if canImport(UIKit)
-    override func touchesMoved(_ touches: Set<UITouch>, with: UIEvent?) {
+    public override func touchesMoved(_ touches: Set<UITouch>, with: UIEvent?) {
         if options.display == .plane {
             super.touchesMoved(touches, with: with)
         } else {

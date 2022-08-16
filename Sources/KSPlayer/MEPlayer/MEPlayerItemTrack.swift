@@ -9,6 +9,7 @@ import CoreMedia
 import Libavformat
 
 class AssetTrack: MediaPlayerTrack, CustomStringConvertible {
+    let startTime: TimeInterval
     let trackID: Int32
     let name: String
     let language: String?
@@ -59,6 +60,11 @@ class AssetTrack: MediaPlayerTrack, CustomStringConvertible {
             timebase = Timebase(num: 1, den: mediaType == .audio ? KSPlayerManager.audioPlayerSampleRate : 25000)
         }
         self.timebase = timebase
+        if stream.pointee.start_time != Int64.min {
+            startTime = TimeInterval(Int32(stream.pointee.start_time) * timebase.num / timebase.den)
+        } else {
+            startTime = 0
+        }
         rotation = stream.rotation
         let sar = stream.pointee.codecpar.pointee.sample_aspect_ratio.size
         naturalSize = CGSize(width: Int(stream.pointee.codecpar.pointee.width), height: Int(CGFloat(stream.pointee.codecpar.pointee.height) * sar.height / sar.width))
