@@ -15,9 +15,9 @@ import AppKit
 
 public class KSMEPlayer: NSObject {
     private var loopCount = 1
-    private let audioOutput = AudioEnginePlayer()
     private var playerItem: MEPlayerItem
-    private let videoOutput: MetalPlayView
+    public let audioOutput = AudioEnginePlayer()
+    public let videoOutput: MetalPlayView
     private var options: KSOptions
     private var bufferingCountDownTimer: Timer?
     public private(set) var bufferingProgress = 0 {

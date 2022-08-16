@@ -70,7 +70,7 @@ var objects: [KSPlayerResource] = {
     }
     if let path = Bundle.main.path(forResource: "dvd_subtitle", ofType: "mkv") {
         let options = KSOptions()
-        options.videoFilters = "hflip,vflip"
+//        options.videoFilters = "hflip,vflip"
         objects.append(KSPlayerResource(url: URL(fileURLWithPath: path), options: options, name: "图片字幕"))
     }
     if let path = Bundle.main.path(forResource: "vr", ofType: "mp4") {

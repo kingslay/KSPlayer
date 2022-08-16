@@ -183,7 +183,13 @@ extension MEPlayerItem {
         }
         options.findTime = CACurrentMediaTime()
         options.formatName = String(cString: formatCtx.pointee.iformat.pointee.name)
+        if formatCtx.pointee.start_time != Int64.min {
+            startTime = TimeInterval(formatCtx.pointee.start_time / Int64(AV_TIME_BASE))
+        }
         duration = TimeInterval(max(formatCtx.pointee.duration, 0) / Int64(AV_TIME_BASE))
+        if duration > startTime {
+            duration -= startTime
+        }
         createCodec(formatCtx: formatCtx)
         if videoTrack == nil, audioTrack == nil {
             state = .failed
@@ -200,9 +206,6 @@ extension MEPlayerItem {
         videoAdaptation = nil
         videoTrack = nil
         audioTrack = nil
-        if formatCtx.pointee.start_time != Int64.min {
-            startTime = TimeInterval(formatCtx.pointee.start_time / 1_000_000)
-        }
         assetTracks = (0 ..< Int(formatCtx.pointee.nb_streams)).compactMap { i in
             if let coreStream = formatCtx.pointee.streams[i] {
                 coreStream.pointee.discard = AVDISCARD_ALL
