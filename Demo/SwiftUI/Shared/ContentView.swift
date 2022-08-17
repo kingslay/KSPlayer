@@ -71,7 +71,7 @@ struct ContentView: View {
                     return
                 }
                 resources.removeAll()
-                if let path = Bundle.main.path(forResource: "tos", ofType: "mkv") {
+                if let path = Bundle.main.path(forResource: "dvd_subtitle", ofType: "mkv") {
                     resources.append(KSPlayerResource(url: URL(fileURLWithPath: path), name: "本地视频"))
                 }
                 resources.append(contentsOf: parsem3u8(string: string))

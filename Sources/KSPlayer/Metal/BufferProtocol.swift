@@ -78,25 +78,10 @@ public extension CVPixelBuffer {
         }
     }
 
-    func image(quality: CGFloat) -> UIImage? {
+    func cgImage() -> CGImage? {
         var cgImage: CGImage?
         VTCreateCGImageFromCVPixelBuffer(self, options: nil, imageOut: &cgImage)
-        guard let cgImage = cgImage, let mutableData = CFDataCreateMutable(nil, 0),
-              let destination = CGImageDestinationCreateWithData(mutableData, "public.heic" as CFString, 1, nil) else {
-            return nil
-        }
-        CGImageDestinationAddImage(destination, cgImage, [kCGImageDestinationLossyCompressionQuality: quality] as CFDictionary)
-        guard CGImageDestinationFinalize(destination) else { return nil }
-        return UIImage(data: mutableData as Data)
-    }
-
-    func image() -> UIImage? {
-        var cgImage: CGImage?
-        VTCreateCGImageFromCVPixelBuffer(self, options: nil, imageOut: &cgImage)
-        guard let cgImage = cgImage else {
-            return nil
-        }
-        return UIImage(cgImage: cgImage)
+        return cgImage
     }
 
     func widthOfPlane(at planeIndex: Int) -> Int {
@@ -124,6 +109,22 @@ extension CGSize {
         } else {
             return nil
         }
+    }
+}
+
+extension CGImage {
+    func image() -> UIImage? {
+        UIImage(cgImage: self)
+    }
+
+    func image(quality: CGFloat) -> UIImage? {
+        guard let mutableData = CFDataCreateMutable(nil, 0),
+              let destination = CGImageDestinationCreateWithData(mutableData, "public.heic" as CFString, 1, nil) else {
+            return nil
+        }
+        CGImageDestinationAddImage(destination, self, [kCGImageDestinationLossyCompressionQuality: quality] as CFDictionary)
+        guard CGImageDestinationFinalize(destination) else { return nil }
+        return UIImage(data: mutableData as Data)
     }
 }
 
