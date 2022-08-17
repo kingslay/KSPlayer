@@ -46,6 +46,8 @@ class SubtitleDecode: DecodeProtocol {
                 error = .init(errorCode: .codecSubtitleSendPacket, ffmpegErrnum: len)
                 KSLog(error!)
                 break
+            } else if len == 0 {
+                break
             }
             let (attributedString, image) = text(subtitle: subtitle)
             let position = max(packet.corePacket.pointee.pts == Int64.min ? packet.corePacket.pointee.dts : packet.corePacket.pointee.pts, 0)
@@ -71,9 +73,6 @@ class SubtitleDecode: DecodeProtocol {
                 preSubtitleFrame = frame
                 delegate?.decodeResult(frame: frame)
             }
-            if len == 0 {
-                break
-            }
             pktSize -= len
         }
     }
@@ -91,7 +90,7 @@ class SubtitleDecode: DecodeProtocol {
 
     private func text(subtitle: AVSubtitle) -> (NSMutableAttributedString?, UIImage?) {
         var attributedString: NSMutableAttributedString?
-        var image: UIImage?
+        var images = [(CGRect, CGImage)]()
         for i in 0 ..< Int(subtitle.num_rects) {
             guard let rect = subtitle.rects[i]?.pointee else {
                 continue
@@ -110,10 +109,12 @@ class SubtitleDecode: DecodeProtocol {
                     attributedString?.append(text)
                 }
             } else if rect.type == SUBTITLE_BITMAP {
-                image = scale.transfer(format: AV_PIX_FMT_PAL8, width: rect.w, height: rect.h, data: Array(tuple: rect.data), linesize: Array(tuple: rect.linesize))?.image(quality: 0.2)
+                if let image = scale.transfer(format: AV_PIX_FMT_PAL8, width: rect.w, height: rect.h, data: Array(tuple: rect.data), linesize: Array(tuple: rect.linesize))?.cgImage() {
+                    images.append((CGRect(x: Int(rect.x), y: Int(rect.y), width: Int(rect.w), height: Int(rect.h)), image))
+                }
             }
         }
-        return (attributedString, image)
+        return (attributedString, CGImage.combine(images: images)?.image())
     }
 }
 

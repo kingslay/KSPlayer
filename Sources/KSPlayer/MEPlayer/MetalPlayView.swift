@@ -13,7 +13,7 @@ public final class MetalPlayView: UIView {
     private let render = MetalRender()
     private let view = MTKView(frame: .zero, device: MetalRender.device)
     private var videoInfo: CMVideoFormatDescription?
-    public var pixelBuffer: CVPixelBuffer?
+    public private(set) var pixelBuffer: CVPixelBuffer?
 //    private lazy var displayLink: CADisplayLink = .init(target: self, selector: #selector(drawView))
     private let timer = DispatchSource.makeTimerSource(queue: DispatchQueue.main)
     var options: KSOptions
@@ -69,7 +69,7 @@ public final class MetalPlayView: UIView {
         fatalError("init(coder:) has not been implemented")
     }
 
-    public override var contentMode: UIViewContentMode {
+    override public var contentMode: UIViewContentMode {
         didSet {
             view.contentMode = contentMode
             switch contentMode {
@@ -86,7 +86,7 @@ public final class MetalPlayView: UIView {
     }
 
     #if canImport(UIKit)
-    public override func touchesMoved(_ touches: Set<UITouch>, with: UIEvent?) {
+    override public func touchesMoved(_ touches: Set<UITouch>, with: UIEvent?) {
         if options.display == .plane {
             super.touchesMoved(touches, with: with)
         } else {
@@ -94,9 +94,6 @@ public final class MetalPlayView: UIView {
         }
     }
     #endif
-    func toImage() -> UIImage? {
-        pixelBuffer?.image()
-    }
 
     func clear() {
         if view.isHidden {

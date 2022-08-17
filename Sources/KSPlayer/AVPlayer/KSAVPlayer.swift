@@ -7,6 +7,7 @@ import AppKit
 public typealias UIImage = NSImage
 #endif
 import Combine
+import CoreGraphics
 public final class KSAVPlayerView: UIView {
     public let player = AVQueuePlayer()
     override public init(frame: CGRect) {
@@ -561,5 +562,33 @@ public extension AVAsset {
                 handler(nil)
             }
         }
+    }
+}
+
+extension CGImage {
+    static func combine(images: [(CGRect, CGImage)]) -> CGImage? {
+        if images.isEmpty {
+            return nil
+        }
+        if images.count == 1 {
+            return images[0].1
+        }
+        var width = 0
+        var height = 0
+        for (rect, _) in images {
+            width = max(width, Int(rect.maxX))
+            height = max(height, Int(rect.maxY))
+        }
+        let bitsPerComponent = 8
+        // RGBA(的bytes) * bitsPerComponent *width
+        let bytesPerRow = 4 * 8 * bitsPerComponent * width
+        let context = CGContext(data: nil, width: width, height: height, bitsPerComponent: bitsPerComponent, bytesPerRow: bytesPerRow, space: CGColorSpaceCreateDeviceRGB(), bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue)
+        guard let context = context else {
+            return nil
+        }
+        for (rect, cgImage) in images {
+            context.draw(cgImage, in: CGRect(x: rect.origin.x, y: CGFloat(height) - rect.origin.y, width: rect.width, height: rect.height))
+        }
+        return context.makeImage()
     }
 }
