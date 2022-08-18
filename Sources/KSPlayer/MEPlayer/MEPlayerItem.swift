@@ -220,6 +220,9 @@ extension MEPlayerItem {
             }
             return nil
         }
+        if options.autoSelectEmbedSubtitle {
+            assetTracks.first { $0.mediaType == .subtitle }?.setIsEnabled(true)
+        }
         var videoIndex: Int32 = -1
         if !options.videoDisable {
             let videos = assetTracks.filter { $0.mediaType == .video }

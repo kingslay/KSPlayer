@@ -23,7 +23,7 @@ English | [简体中文](./README_CN.md)
 - Multiple audio/video tracks.
 - H.264/H.265 hardware accelerator.
 - 4k/HDR
-- subtitle/dvb_subtitle
+- text subtitle/image subtitle(dvbsub/dvdsub/pgssub)
 - Picture in Picture
 
 ## Requirements

@@ -37,43 +37,40 @@ class SubtitleDecode: DecodeProtocol {
             delegate?.decodeResult(frame: nil)
             return
         }
-        var pktSize = packet.corePacket.pointee.size
-        var error: NSError?
-        while pktSize > 0 {
-            var gotsubtitle = Int32(0)
-            let len = avcodec_decode_subtitle2(codecContext, &subtitle, &gotsubtitle, packet.corePacket)
-            if len < 0 {
-                error = .init(errorCode: .codecSubtitleSendPacket, ffmpegErrnum: len)
-                KSLog(error!)
-                break
-            } else if len == 0 {
-                break
+        var gotsubtitle = Int32(0)
+        let len = avcodec_decode_subtitle2(codecContext, &subtitle, &gotsubtitle, packet.corePacket)
+        if len < 0 {
+            KSLog(NSError(errorCode: .codecSubtitleSendPacket, ffmpegErrnum: len))
+            return
+        } else if len == 0 {
+            return
+        }
+        let (attributedString, image) = text(subtitle: subtitle)
+        let position = max(packet.corePacket.pointee.pts == Int64.min ? packet.corePacket.pointee.dts : packet.corePacket.pointee.pts, 0)
+        let seconds = packet.assetTrack.timebase.cmtime(for: position).seconds - packet.assetTrack.startTime
+        var end = seconds
+        if subtitle.end_display_time == UInt32.max {
+            end = Double(UInt32.max)
+        } else if subtitle.end_display_time > 0 {
+            end += TimeInterval(subtitle.end_display_time) / 1000.0
+        } else if packet.corePacket.pointee.duration > 0 {
+            end += packet.assetTrack.timebase.cmtime(for: packet.corePacket.pointee.duration).seconds
+        }
+        let part = SubtitlePart(seconds + TimeInterval(subtitle.start_display_time) / 1000.0, end, attributedString: attributedString)
+        part.image = image
+        let frame = SubtitleFrame(part: part, timebase: packet.assetTrack.timebase)
+        frame.position = position
+        if let preSubtitleFrame = preSubtitleFrame, preSubtitleFrame.part.end == Double(UInt32.max) {
+            preSubtitleFrame.part.end = frame.part.start
+        }
+        if let preSubtitleFrame = preSubtitleFrame, preSubtitleFrame.part == part {
+            if let attributedString = attributedString {
+                preSubtitleFrame.part.text?.append(NSAttributedString(string: "\n"))
+                preSubtitleFrame.part.text?.append(attributedString)
             }
-            let (attributedString, image) = text(subtitle: subtitle)
-            let position = max(packet.corePacket.pointee.pts == Int64.min ? packet.corePacket.pointee.dts : packet.corePacket.pointee.pts, 0)
-            let seconds = packet.assetTrack.timebase.cmtime(for: position).seconds
-            var end = seconds
-            if subtitle.end_display_time > 0, subtitle.end_display_time != UInt32.max {
-                end += TimeInterval(subtitle.end_display_time) / 1000.0
-            } else if packet.corePacket.pointee.duration > 0 {
-                end += packet.assetTrack.timebase.cmtime(for: packet.corePacket.pointee.duration).seconds
-            } else {
-                end += 2
-            }
-            let part = SubtitlePart(seconds + TimeInterval(subtitle.start_display_time) / 1000.0, end, attributedString: attributedString)
-            part.image = image
-            let frame = SubtitleFrame(part: part, timebase: packet.assetTrack.timebase)
-            frame.position = position
-            if let preSubtitleFrame = preSubtitleFrame, preSubtitleFrame.part == part {
-                if let attributedString = attributedString {
-                    preSubtitleFrame.part.text?.append(NSAttributedString(string: "\n"))
-                    preSubtitleFrame.part.text?.append(attributedString)
-                }
-            } else {
-                preSubtitleFrame = frame
-                delegate?.decodeResult(frame: frame)
-            }
-            pktSize -= len
+        } else {
+            preSubtitleFrame = frame
+            delegate?.decodeResult(frame: frame)
         }
     }
 
