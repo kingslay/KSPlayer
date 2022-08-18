@@ -106,7 +106,7 @@ open class KSPlayerLayer: UIView {
 
     private var urls = [URL]()
     private var isAutoPlay = false
-    private lazy var timer: Timer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: true) { [weak self] _ in
+    private lazy var timer: Timer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { [weak self] _ in
         guard let self = self, let player = self.player, player.isPreparedToPlay else {
             return
         }

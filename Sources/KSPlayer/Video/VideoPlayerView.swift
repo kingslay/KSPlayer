@@ -422,11 +422,8 @@ open class VideoPlayerView: PlayerView {
         let time = time + (resource?.definitions[currentDefinition].options.subtitleDelay ?? 0.0)
         if let part = subtitle.search(for: time) {
             subtitleEndTime = part.end
-            if let image = part.image {
-                subtitleBackView.image = image
-            } else {
-                subtitleLabel.attributedText = part.text
-            }
+            subtitleBackView.image = part.image
+            subtitleLabel.attributedText = part.text
         } else {
             if time > subtitleEndTime {
                 subtitleBackView.image = nil

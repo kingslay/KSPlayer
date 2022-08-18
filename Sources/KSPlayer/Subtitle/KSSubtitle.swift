@@ -15,7 +15,7 @@ import CoreGraphics
 import Foundation
 public class SubtitlePart: CustomStringConvertible, NSMutableCopying {
     public let start: TimeInterval
-    public let end: TimeInterval
+    public var end: TimeInterval
     public let text: NSMutableAttributedString?
     public var image: UIImage?
     public var description: String {
