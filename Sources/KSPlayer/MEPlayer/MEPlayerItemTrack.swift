@@ -61,7 +61,7 @@ class AssetTrack: MediaPlayerTrack, CustomStringConvertible {
         }
         self.timebase = timebase
         if stream.pointee.start_time != Int64.min {
-            startTime = TimeInterval(Int32(stream.pointee.start_time) * timebase.num / timebase.den)
+            startTime = TimeInterval(stream.pointee.start_time) * TimeInterval(timebase.num) / TimeInterval(timebase.den)
         } else {
             startTime = 0
         }
