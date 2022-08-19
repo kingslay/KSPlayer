@@ -389,9 +389,7 @@ extension KSVideoPlayer: UIViewRepresentable {
         updateView(uiView, context: context)
     }
 
-    public static func dismantleUIView(_ uiView: UIViewType, coordinator _: Coordinator) {
-        uiView.pause()
-    }
+    public static func dismantleUIView(_: UIViewType, coordinator _: Coordinator) {}
     #else
     public typealias NSViewType = KSPlayerLayer
     public func makeNSView(context: Context) -> NSViewType {
@@ -402,9 +400,7 @@ extension KSVideoPlayer: UIViewRepresentable {
         updateView(uiView, context: context)
     }
 
-    public static func dismantleNSView(_ uiView: NSViewType, coordinator _: Coordinator) {
-        uiView.pause()
-    }
+    public static func dismantleNSView(_: NSViewType, coordinator _: Coordinator) {}
     #endif
     private func makeView(context: Context) -> KSPlayerLayer {
         let playerLayer = KSPlayerLayer()
