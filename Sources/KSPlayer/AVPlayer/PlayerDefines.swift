@@ -89,21 +89,27 @@ public protocol MediaPlayerTrack {
     var name: String { get }
     var language: String? { get }
     var mediaType: AVFoundation.AVMediaType { get }
-    var codecType: FourCharCode { get }
+    var mediaSubType: CMFormatDescription.MediaSubType { get }
     var nominalFrameRate: Float { get }
     var rotation: Double { get }
     var bitRate: Int64 { get }
     var naturalSize: CGSize { get }
     var isEnabled: Bool { get set }
-    var bitDepth: Int32 { get }
+    var depth: Int32 { get }
+    var fullRangeVideo: Bool { get }
     var colorPrimaries: String? { get }
     var transferFunction: String? { get }
     var yCbCrMatrix: String? { get }
+    var audioStreamBasicDescription: AudioStreamBasicDescription? { get }
     var dovi: DOVIDecoderConfigurationRecord? { get }
     func setIsEnabled(_ isEnabled: Bool)
 }
 
 extension MediaPlayerTrack {
+    var codecType: FourCharCode {
+        mediaSubType.rawValue
+    }
+
     var dynamicRange: DynamicRange {
         if dovi != nil || codecType.string == "dvhe" || codecType.string == "dvh1" {
             return .DOVI
