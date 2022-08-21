@@ -222,6 +222,43 @@ extension AVCodecID {
             return kCMVideoCodecType_H264
         }
     }
+
+    var audioFormat: AudioFormatID {
+        switch self {
+        case AV_CODEC_ID_AAC:
+            return kAudioFormatMPEG4AAC
+        case AV_CODEC_ID_AC3:
+            return kAudioFormatAC3
+        case AV_CODEC_ID_ADPCM_IMA_QT:
+            return kAudioFormatAppleIMA4
+        case AV_CODEC_ID_ALAC:
+            return kAudioFormatAppleLossless
+        case AV_CODEC_ID_AMR_NB:
+            return kAudioFormatAMR
+        case AV_CODEC_ID_EAC3:
+            return kAudioFormatEnhancedAC3
+        case AV_CODEC_ID_GSM_MS:
+            return kAudioFormatMicrosoftGSM
+        case AV_CODEC_ID_ILBC:
+            return kAudioFormatiLBC
+        case AV_CODEC_ID_MP1:
+            return kAudioFormatMPEGLayer1
+        case AV_CODEC_ID_MP2:
+            return kAudioFormatMPEGLayer2
+        case AV_CODEC_ID_MP3:
+            return kAudioFormatMPEGLayer3
+        case AV_CODEC_ID_PCM_ALAW:
+            return kAudioFormatALaw
+        case AV_CODEC_ID_PCM_MULAW:
+            return kAudioFormatULaw
+        case AV_CODEC_ID_QDMC:
+            return kAudioFormatQDesign
+        case AV_CODEC_ID_QDM2:
+            return kAudioFormatQDesign2
+        default:
+            return 0
+        }
+    }
 }
 
 extension CMVideoCodecType {

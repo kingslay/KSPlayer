@@ -489,18 +489,20 @@ struct AVMediaPlayerTrack: MediaPlayerTrack {
     private let track: AVPlayerItemTrack
     let nominalFrameRate: Float
     let trackID: Int32
-    let codecType: FourCharCode
+    let mediaSubType: CMFormatDescription.MediaSubType
     let rotation: Double = 0
     let bitRate: Int64
     let naturalSize: CGSize
     let name: String
     let language: String?
     let mediaType: AVMediaType
-    let bitDepth: Int32
+    let depth: Int32
+    let fullRangeVideo: Bool
     let colorPrimaries: String?
     let transferFunction: String?
     let yCbCrMatrix: String?
     var dovi: DOVIDecoderConfigurationRecord?
+    var audioStreamBasicDescription: AudioStreamBasicDescription?
     var isEnabled: Bool {
         get {
             track.isEnabled
@@ -523,18 +525,21 @@ struct AVMediaPlayerTrack: MediaPlayerTrack {
             // swiftlint:disable force_cast
             let desc = formatDescription as! CMFormatDescription
             // swiftlint:enable force_cast
-            codecType = CMFormatDescriptionGetMediaSubType(desc)
+            mediaSubType = desc.mediaSubType
+            audioStreamBasicDescription = desc.audioStreamBasicDescription
             let dictionary = CMFormatDescriptionGetExtensions(desc) as NSDictionary?
-            bitDepth = dictionary?["BitsPerComponent"] as? Int32 ?? 8
             colorPrimaries = dictionary?[kCVImageBufferColorPrimariesKey] as? String
             transferFunction = dictionary?[kCVImageBufferTransferFunctionKey] as? String
             yCbCrMatrix = dictionary?[kCVImageBufferYCbCrMatrixKey] as? String
+            fullRangeVideo = (dictionary?[kCMFormatDescriptionExtension_FullRangeVideo] as? Int32 ?? 0) == 1
+            depth = dictionary?[kCMFormatDescriptionExtension_Depth] as? Int32 ?? 24
         } else {
-            bitDepth = 8
+            depth = 24
             colorPrimaries = nil
             transferFunction = nil
             yCbCrMatrix = nil
-            codecType = 0
+            mediaSubType = CMFormatDescription.MediaSubType(string: "")
+            fullRangeVideo = false
         }
     }
 

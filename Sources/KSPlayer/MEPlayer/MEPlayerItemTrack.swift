@@ -20,38 +20,51 @@ class AssetTrack: MediaPlayerTrack, CustomStringConvertible {
     let bitRate: Int64
     let rotation: Double
     let naturalSize: CGSize
-    let bitDepth: Int32
+    let depth: Int32
+    let fullRangeVideo: Bool
     let colorPrimaries: String?
     let transferFunction: String?
     let yCbCrMatrix: String?
-    let codecType: FourCharCode
+    let mediaSubType: CMFormatDescription.MediaSubType
     var subtitle: FFPlayerItemTrack<SubtitleFrame>?
     var dovi: DOVIDecoderConfigurationRecord?
+    let audioStreamBasicDescription: AudioStreamBasicDescription?
     init?(stream: UnsafeMutablePointer<AVStream>) {
         self.stream = stream
         trackID = stream.pointee.index
+        let codecpar = stream.pointee.codecpar.pointee
         if let bitrateEntry = av_dict_get(stream.pointee.metadata, "variant_bitrate", nil, 0) ?? av_dict_get(stream.pointee.metadata, "BPS", nil, 0),
            let bitRate = Int64(String(cString: bitrateEntry.pointee.value)) {
             self.bitRate = bitRate
         } else {
-            bitRate = stream.pointee.codecpar.pointee.bit_rate
+            bitRate = codecpar.bit_rate
         }
-        let format = AVPixelFormat(rawValue: stream.pointee.codecpar.pointee.format)
-        bitDepth = format.bitDepth()
-        colorPrimaries = stream.pointee.codecpar.pointee.color_primaries.colorPrimaries as String?
-        transferFunction = stream.pointee.codecpar.pointee.color_trc.transferFunction as String?
-        yCbCrMatrix = stream.pointee.codecpar.pointee.color_space.ycbcrMatrix as String?
+        let format = AVPixelFormat(rawValue: codecpar.format)
+        depth = format.bitDepth() * Int32(format.planeCount())
+        fullRangeVideo = codecpar.color_range == AVCOL_RANGE_JPEG
+        colorPrimaries = codecpar.color_primaries.colorPrimaries as String?
+        transferFunction = codecpar.color_trc.transferFunction as String?
+        yCbCrMatrix = codecpar.color_space.ycbcrMatrix as String?
+
         // codec_tag byte order is LSB first
-        codecType = stream.pointee.codecpar.pointee.codec_tag.bigEndian
+        mediaSubType = CMFormatDescription.MediaSubType(rawValue: codecpar.codec_tag.bigEndian)
         if stream.pointee.side_data?.pointee.type == AV_PKT_DATA_DOVI_CONF {
             dovi = stream.pointee.side_data?.pointee.data.withMemoryRebound(to: DOVIDecoderConfigurationRecord.self, capacity: 1) { $0 }.pointee
         }
-        if stream.pointee.codecpar.pointee.codec_type == AVMEDIA_TYPE_AUDIO {
+        if codecpar.codec_type == AVMEDIA_TYPE_AUDIO {
             mediaType = .audio
-        } else if stream.pointee.codecpar.pointee.codec_type == AVMEDIA_TYPE_VIDEO {
+            let layout = codecpar.ch_layout
+            let channelsPerFrame = UInt32(layout.nb_channels)
+            let sampleFormat = AVSampleFormat(codecpar.format)
+            let bytesPerSample = UInt32(av_get_bytes_per_sample(sampleFormat))
+            let formatFlags = ((sampleFormat == AV_SAMPLE_FMT_FLT || sampleFormat == AV_SAMPLE_FMT_DBL) ? kAudioFormatFlagIsFloat : sampleFormat == AV_SAMPLE_FMT_U8 ? 0 : kAudioFormatFlagIsSignedInteger) | kAudioFormatFlagIsPacked
+            audioStreamBasicDescription = AudioStreamBasicDescription(mSampleRate: Float64(codecpar.sample_rate), mFormatID: codecpar.codec_id.audioFormat, mFormatFlags: formatFlags, mBytesPerPacket: bytesPerSample * channelsPerFrame, mFramesPerPacket: 1, mBytesPerFrame: bytesPerSample * channelsPerFrame, mChannelsPerFrame: channelsPerFrame, mBitsPerChannel: bytesPerSample * 8, mReserved: 0)
+        } else if codecpar.codec_type == AVMEDIA_TYPE_VIDEO {
             mediaType = .video
-        } else if stream.pointee.codecpar.pointee.codec_type == AVMEDIA_TYPE_SUBTITLE {
+            audioStreamBasicDescription = nil
+        } else if codecpar.codec_type == AVMEDIA_TYPE_SUBTITLE {
             mediaType = .subtitle
+            audioStreamBasicDescription = nil
         } else {
             return nil
         }
@@ -66,8 +79,8 @@ class AssetTrack: MediaPlayerTrack, CustomStringConvertible {
             startTime = 0
         }
         rotation = stream.rotation
-        let sar = stream.pointee.codecpar.pointee.sample_aspect_ratio.size
-        naturalSize = CGSize(width: Int(stream.pointee.codecpar.pointee.width), height: Int(CGFloat(stream.pointee.codecpar.pointee.height) * sar.height / sar.width))
+        let sar = codecpar.sample_aspect_ratio.size
+        naturalSize = CGSize(width: Int(codecpar.width), height: Int(CGFloat(codecpar.height) * sar.height / sar.width))
         let frameRate = av_guess_frame_rate(nil, stream, nil)
         if stream.pointee.duration > 0, stream.pointee.nb_frames > 0, stream.pointee.nb_frames != stream.pointee.duration {
             nominalFrameRate = Float(stream.pointee.nb_frames) * Float(timebase.den) / Float(stream.pointee.duration) * Float(timebase.num)
