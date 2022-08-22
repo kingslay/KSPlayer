@@ -526,9 +526,9 @@ extension MEPlayerItem: OutputRenderSourceDelegate {
         if state == .seeking {
             return
         }
-        if isAudioStalled {
+        videoMediaTime = CACurrentMediaTime()
+        if isAudioStalled || options.audioDisable {
             currentPlaybackTime = time.seconds - options.audioDelay - startTime
-            videoMediaTime = CACurrentMediaTime()
         }
     }
 
@@ -542,11 +542,14 @@ extension MEPlayerItem: OutputRenderSourceDelegate {
     }
 
     func getVideoOutputRender() -> VideoVTBFrame? {
+        if options.videoDisable {
+            return nil
+        }
         var desire = currentPlaybackTime + options.audioDelay + startTime
         let predicate: (VideoVTBFrame) -> Bool = { [weak self] frame -> Bool in
             guard let self = self else { return true }
             desire = self.currentPlaybackTime + self.options.audioDelay + self.startTime
-            if self.isAudioStalled {
+            if self.isAudioStalled || self.options.audioDisable {
                 desire += max(CACurrentMediaTime() - self.videoMediaTime, 0) + self.videoClockDelay
             }
             return frame.seconds <= desire
@@ -562,7 +565,11 @@ extension MEPlayerItem: OutputRenderSourceDelegate {
     }
 
     func getAudioOutputRender() -> AudioFrame? {
-        audioTrack?.getOutputRender(where: nil)
+        if options.audioDisable {
+            return nil
+        } else {
+            return audioTrack?.getOutputRender(where: nil)
+        }
     }
 }
 

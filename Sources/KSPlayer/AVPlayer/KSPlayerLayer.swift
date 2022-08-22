@@ -65,7 +65,7 @@ open class KSPlayerLayer: UIView {
     @Published
     public var loopCount: Int = 0
     private var isWirelessRouteActive = false
-    private var options: KSOptions?
+    public private(set) var options: KSOptions?
     private var bufferedCount = 0
     private var shouldSeekTo: TimeInterval = 0
     private var startTime: TimeInterval = 0
@@ -357,7 +357,6 @@ extension KSPlayerLayer: MediaPlayerDelegate {
 
 extension KSPlayerLayer {
     #if os(tvOS)
-
     private func setDisplayCriteria(track: MediaPlayerTrack) {
         guard let displayManager = UIApplication.shared.keyWindow?.avDisplayManager,
               displayManager.isDisplayCriteriaMatchingEnabled,

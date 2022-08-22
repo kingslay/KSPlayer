@@ -84,8 +84,10 @@ class MEFilter {
     public func filter(inputFrame: UnsafeMutablePointer<AVFrame>) -> UnsafeMutablePointer<AVFrame> {
         let args: String
         if isAudio {
-            let fmt = String(describing: av_get_sample_fmt_name(AVSampleFormat(rawValue: inputFrame.pointee.format)))
-            args = "sample_rate=\(inputFrame.pointee.sample_rate):sample_fmt=\(fmt):time_base=\(timebase.num)/\(timebase.den):channels=\(inputFrame.pointee.ch_layout.nb_channels):channel_layout=\(inputFrame.pointee.ch_layout)"
+            let fmt = String(cString: av_get_sample_fmt_name(AVSampleFormat(rawValue: inputFrame.pointee.format)))
+            var str = [Int8](repeating: 0, count: 64)
+            _ = av_channel_layout_describe(&inputFrame.pointee.ch_layout, &str, str.count)
+            args = "sample_rate=\(inputFrame.pointee.sample_rate):sample_fmt=\(fmt):time_base=\(timebase.num)/\(timebase.den):channels=\(inputFrame.pointee.ch_layout.nb_channels):channel_layout=\(String(cString: str))"
         } else {
             let ratio = inputFrame.pointee.sample_aspect_ratio
             args = "video_size=\(inputFrame.pointee.width)x\(inputFrame.pointee.height):pix_fmt=\(inputFrame.pointee.format):time_base=\(timebase.num)/\(timebase.den):pixel_aspect=\(ratio.num)/\(ratio.den)"

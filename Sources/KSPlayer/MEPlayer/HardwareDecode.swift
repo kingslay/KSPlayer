@@ -117,7 +117,7 @@ class DecompressionSession {
             isConvertNALSize = false
         }
         let isFullRangeVideo = codecpar.color_range == AVCOL_RANGE_JPEG
-        let videoCodecType = codecpar.codec_id.videoCodecType
+        let videoCodecType = codecpar.codec_id.mediaSubType.rawValue
         let dic: NSMutableDictionary = [
             kCVImageBufferChromaLocationBottomFieldKey: kCVImageBufferChromaLocation_Left,
             kCVImageBufferChromaLocationTopFieldKey: kCVImageBufferChromaLocation_Left,
@@ -204,59 +204,54 @@ extension CMFormatDescription {
 }
 
 extension AVCodecID {
-    var videoCodecType: CMVideoCodecType {
+    var mediaSubType: CMFormatDescription.MediaSubType {
         switch self {
         case AV_CODEC_ID_H263:
-            return kCMVideoCodecType_H263
+            return .h263
         case AV_CODEC_ID_H264:
-            return kCMVideoCodecType_H264
+            return .h264
         case AV_CODEC_ID_HEVC:
-            return kCMVideoCodecType_HEVC
+            return .hevc
         case AV_CODEC_ID_MPEG1VIDEO:
-            return kCMVideoCodecType_MPEG1Video
+            return .mpeg1Video
         case AV_CODEC_ID_MPEG2VIDEO:
-            return kCMVideoCodecType_MPEG2Video
+            return .mpeg2Video
         case AV_CODEC_ID_MPEG4:
-            return kCMVideoCodecType_MPEG4Video
-        default:
-            return kCMVideoCodecType_H264
-        }
-    }
-
-    var audioFormat: AudioFormatID {
-        switch self {
+            return .mpeg4Video
+        case AV_CODEC_ID_VP9:
+            return CMFormatDescription.MediaSubType(rawValue: kCMVideoCodecType_VP9)
         case AV_CODEC_ID_AAC:
-            return kAudioFormatMPEG4AAC
+            return .mpeg4AAC
         case AV_CODEC_ID_AC3:
-            return kAudioFormatAC3
+            return .ac3
         case AV_CODEC_ID_ADPCM_IMA_QT:
-            return kAudioFormatAppleIMA4
+            return .appleIMA4
         case AV_CODEC_ID_ALAC:
-            return kAudioFormatAppleLossless
+            return .appleLossless
         case AV_CODEC_ID_AMR_NB:
-            return kAudioFormatAMR
+            return .amr
         case AV_CODEC_ID_EAC3:
-            return kAudioFormatEnhancedAC3
+            return .enhancedAC3
         case AV_CODEC_ID_GSM_MS:
-            return kAudioFormatMicrosoftGSM
+            return .microsoftGSM
         case AV_CODEC_ID_ILBC:
-            return kAudioFormatiLBC
+            return .iLBC
         case AV_CODEC_ID_MP1:
-            return kAudioFormatMPEGLayer1
+            return .mpegLayer1
         case AV_CODEC_ID_MP2:
-            return kAudioFormatMPEGLayer2
+            return .mpegLayer2
         case AV_CODEC_ID_MP3:
-            return kAudioFormatMPEGLayer3
+            return .mpegLayer3
         case AV_CODEC_ID_PCM_ALAW:
-            return kAudioFormatALaw
+            return .aLaw
         case AV_CODEC_ID_PCM_MULAW:
-            return kAudioFormatULaw
+            return .uLaw
         case AV_CODEC_ID_QDMC:
-            return kAudioFormatQDesign
+            return .qDesign
         case AV_CODEC_ID_QDM2:
-            return kAudioFormatQDesign2
+            return .qDesign2
         default:
-            return 0
+            return CMFormatDescription.MediaSubType(rawValue: 0)
         }
     }
 }

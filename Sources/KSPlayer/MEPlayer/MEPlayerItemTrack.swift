@@ -8,7 +8,7 @@ import AVFoundation
 import CoreMedia
 import Libavformat
 
-class AssetTrack: MediaPlayerTrack, CustomStringConvertible {
+class AssetTrack: MediaPlayerTrack {
     let startTime: TimeInterval
     let trackID: Int32
     let name: String
@@ -22,6 +22,7 @@ class AssetTrack: MediaPlayerTrack, CustomStringConvertible {
     let naturalSize: CGSize
     let depth: Int32
     let fullRangeVideo: Bool
+    let colorSpace: String?
     let colorPrimaries: String?
     let transferFunction: String?
     let yCbCrMatrix: String?
@@ -29,10 +30,11 @@ class AssetTrack: MediaPlayerTrack, CustomStringConvertible {
     var subtitle: FFPlayerItemTrack<SubtitleFrame>?
     var dovi: DOVIDecoderConfigurationRecord?
     let audioStreamBasicDescription: AudioStreamBasicDescription?
+    let description: String
     init?(stream: UnsafeMutablePointer<AVStream>) {
         self.stream = stream
         trackID = stream.pointee.index
-        let codecpar = stream.pointee.codecpar.pointee
+        var codecpar = stream.pointee.codecpar.pointee
         if let bitrateEntry = av_dict_get(stream.pointee.metadata, "variant_bitrate", nil, 0) ?? av_dict_get(stream.pointee.metadata, "BPS", nil, 0),
            let bitRate = Int64(String(cString: bitrateEntry.pointee.value)) {
             self.bitRate = bitRate
@@ -42,14 +44,20 @@ class AssetTrack: MediaPlayerTrack, CustomStringConvertible {
         let format = AVPixelFormat(rawValue: codecpar.format)
         depth = format.bitDepth() * Int32(format.planeCount())
         fullRangeVideo = codecpar.color_range == AVCOL_RANGE_JPEG
+        colorSpace = codecpar.color_space.colorSpace as? String
         colorPrimaries = codecpar.color_primaries.colorPrimaries as String?
         transferFunction = codecpar.color_trc.transferFunction as String?
         yCbCrMatrix = codecpar.color_space.ycbcrMatrix as String?
 
         // codec_tag byte order is LSB first
-        mediaSubType = CMFormatDescription.MediaSubType(rawValue: codecpar.codec_tag.bigEndian)
+        mediaSubType = codecpar.codec_tag == 0 ? codecpar.codec_id.mediaSubType : CMFormatDescription.MediaSubType(rawValue: codecpar.codec_tag.bigEndian)
         if stream.pointee.side_data?.pointee.type == AV_PKT_DATA_DOVI_CONF {
             dovi = stream.pointee.side_data?.pointee.data.withMemoryRebound(to: DOVIDecoderConfigurationRecord.self, capacity: 1) { $0 }.pointee
+        }
+        let descriptor = avcodec_descriptor_get(codecpar.codec_id).pointee
+        var description = String(cString: descriptor.name)
+        if let profile = descriptor.profiles {
+            description += " (\(String(cString: profile.pointee.name)))"
         }
         if codecpar.codec_type == AVMEDIA_TYPE_AUDIO {
             mediaType = .audio
@@ -58,10 +66,18 @@ class AssetTrack: MediaPlayerTrack, CustomStringConvertible {
             let sampleFormat = AVSampleFormat(codecpar.format)
             let bytesPerSample = UInt32(av_get_bytes_per_sample(sampleFormat))
             let formatFlags = ((sampleFormat == AV_SAMPLE_FMT_FLT || sampleFormat == AV_SAMPLE_FMT_DBL) ? kAudioFormatFlagIsFloat : sampleFormat == AV_SAMPLE_FMT_U8 ? 0 : kAudioFormatFlagIsSignedInteger) | kAudioFormatFlagIsPacked
-            audioStreamBasicDescription = AudioStreamBasicDescription(mSampleRate: Float64(codecpar.sample_rate), mFormatID: codecpar.codec_id.audioFormat, mFormatFlags: formatFlags, mBytesPerPacket: bytesPerSample * channelsPerFrame, mFramesPerPacket: 1, mBytesPerFrame: bytesPerSample * channelsPerFrame, mChannelsPerFrame: channelsPerFrame, mBitsPerChannel: bytesPerSample * 8, mReserved: 0)
+            audioStreamBasicDescription = AudioStreamBasicDescription(mSampleRate: Float64(codecpar.sample_rate), mFormatID: codecpar.codec_id.mediaSubType.rawValue, mFormatFlags: formatFlags, mBytesPerPacket: bytesPerSample * channelsPerFrame, mFramesPerPacket: 1, mBytesPerFrame: bytesPerSample * channelsPerFrame, mChannelsPerFrame: channelsPerFrame, mBitsPerChannel: bytesPerSample * 8, mReserved: 0)
+            description += ", \(codecpar.sample_rate)Hz"
+            var str = [Int8](repeating: 0, count: 64)
+            _ = av_channel_layout_describe(&codecpar.ch_layout, &str, str.count)
+            description += ", \(String(cString: str))"
+            let fmt = String(cString: av_get_sample_fmt_name(AVSampleFormat(rawValue: codecpar.format)))
+            description += ", \(fmt)"
+            description += ", \(codecpar.bit_rate)"
         } else if codecpar.codec_type == AVMEDIA_TYPE_VIDEO {
             mediaType = .video
             audioStreamBasicDescription = nil
+            description += ", \(String(cString: av_get_pix_fmt_name(AVPixelFormat(rawValue: codecpar.format))))"
         } else if codecpar.codec_type == AVMEDIA_TYPE_SUBTITLE {
             mediaType = .subtitle
             audioStreamBasicDescription = nil
@@ -99,9 +115,11 @@ class AssetTrack: MediaPlayerTrack, CustomStringConvertible {
         } else {
             name = language ?? mediaType.rawValue
         }
+//        var buf = [Int8](repeating: 0, count: 256)
+//        avcodec_string(&buf, buf.count, codecpar, 0)
+        self.description = description
     }
 
-    var description: String { name }
     var isEnabled: Bool {
         get {
             stream.pointee.discard == AVDISCARD_DEFAULT
