@@ -486,6 +486,7 @@ extension AVMediaType {
 }
 
 struct AVMediaPlayerTrack: MediaPlayerTrack {
+    let description: String
     private let track: AVPlayerItemTrack
     let nominalFrameRate: Float
     let trackID: Int32
@@ -498,6 +499,7 @@ struct AVMediaPlayerTrack: MediaPlayerTrack {
     let mediaType: AVMediaType
     let depth: Int32
     let fullRangeVideo: Bool
+    let colorSpace: String?
     let colorPrimaries: String?
     let transferFunction: String?
     let yCbCrMatrix: String?
@@ -528,18 +530,22 @@ struct AVMediaPlayerTrack: MediaPlayerTrack {
             mediaSubType = desc.mediaSubType
             audioStreamBasicDescription = desc.audioStreamBasicDescription
             let dictionary = CMFormatDescriptionGetExtensions(desc) as NSDictionary?
+            colorSpace = dictionary?[kCVImageBufferCGColorSpaceKey] as? String
             colorPrimaries = dictionary?[kCVImageBufferColorPrimariesKey] as? String
             transferFunction = dictionary?[kCVImageBufferTransferFunctionKey] as? String
             yCbCrMatrix = dictionary?[kCVImageBufferYCbCrMatrixKey] as? String
             fullRangeVideo = (dictionary?[kCMFormatDescriptionExtension_FullRangeVideo] as? Int32 ?? 0) == 1
             depth = dictionary?[kCMFormatDescriptionExtension_Depth] as? Int32 ?? 24
+            description = mediaSubType.rawValue.string
         } else {
             depth = 24
             colorPrimaries = nil
             transferFunction = nil
             yCbCrMatrix = nil
+            colorSpace = nil
             mediaSubType = CMFormatDescription.MediaSubType(string: "")
             fullRangeVideo = false
+            description = ""
         }
     }
 

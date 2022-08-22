@@ -303,7 +303,7 @@ struct VideoSettingView: View {
             })) {
                 Text("None").tag(nil as Int32?)
                 ForEach(config.audioTracks, id: \.trackID) { track in
-                    Text(track.name).tag(track.trackID as Int32?)
+                    Text(track.description).tag(track.trackID as Int32?)
                 }
             }
             .pickerStyle(.inline)
@@ -333,7 +333,7 @@ struct VideoSettingView: View {
             })) {
                 Text("None").tag(nil as Int32?)
                 ForEach(config.videoTracks, id: \.trackID) { track in
-                    Text(track.name).tag(track.trackID as Int32?)
+                    Text(track.description).tag(track.trackID as Int32?)
                 }
             }
             .pickerStyle(.inline)
@@ -459,7 +459,9 @@ extension KSVideoPlayer: UIViewRepresentable {
             didSet {
                 if let track = selectedAudioTrack {
                     playerLayer?.player?.select(track: track)
+                    playerLayer?.options?.audioDisable = false
                 } else {
+                    playerLayer?.options?.audioDisable = true
                     oldValue?.setIsEnabled(false)
                 }
             }
@@ -479,8 +481,10 @@ extension KSVideoPlayer: UIViewRepresentable {
             didSet {
                 if let track = selectedVideoTrack {
                     playerLayer?.player?.select(track: track)
+                    playerLayer?.options?.videoDisable = false
                 } else {
                     oldValue?.setIsEnabled(false)
+                    playerLayer?.options?.videoDisable = true
                 }
             }
         }

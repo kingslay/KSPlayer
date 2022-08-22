@@ -84,7 +84,7 @@ public protocol MediaPlayerDelegate: AnyObject {
     func finish(player: MediaPlayerProtocol, error: Error?)
 }
 
-public protocol MediaPlayerTrack {
+public protocol MediaPlayerTrack: CustomStringConvertible {
     var trackID: Int32 { get }
     var name: String { get }
     var language: String? { get }
@@ -97,6 +97,7 @@ public protocol MediaPlayerTrack {
     var isEnabled: Bool { get set }
     var depth: Int32 { get }
     var fullRangeVideo: Bool { get }
+    var colorSpace: String? { get }
     var colorPrimaries: String? { get }
     var transferFunction: String? { get }
     var yCbCrMatrix: String? { get }
@@ -111,7 +112,7 @@ extension MediaPlayerTrack {
     }
 
     var dynamicRange: DynamicRange {
-        if dovi != nil || codecType.string == "dvhe" || codecType.string == "dvh1" {
+        if dovi != nil || codecType.string == "dvhe" || codecType == kCMVideoCodecType_DolbyVisionHEVC {
             return .DOVI
         } else if transferFunction == kCVImageBufferTransferFunction_SMPTE_ST_2084_PQ as String { /// HDR
             return .HDR
