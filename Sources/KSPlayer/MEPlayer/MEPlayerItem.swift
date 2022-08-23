@@ -496,7 +496,10 @@ extension MEPlayerItem: CodecCapacityDelegate {
     }
 
     private func adaptableVideo(loadingState: LoadingState) {
-        guard videoAdaptation != nil, let track = videoTrack, !loadingState.isEndOfFile, !loadingState.isSeek, state != .seeking else {
+        if options.videoDisable || videoAdaptation == nil || loadingState.isEndOfFile || loadingState.isSeek || state == .seeking {
+            return
+        }
+        guard let track = videoTrack else {
             return
         }
         videoAdaptation?.loadedCount = track.packetCount + track.frameCount
