@@ -97,7 +97,7 @@ final class MEPlayerItem {
     }
 
     func select(track: MediaPlayerTrack) {
-        guard !track.isEnabled else {
+        if track.isEnabled {
             return
         }
         assetTracks.filter { $0.mediaType == track.mediaType }.forEach {
