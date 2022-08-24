@@ -69,7 +69,7 @@ open class KSPlayerLayer: UIView {
     private var bufferedCount = 0
     private var shouldSeekTo: TimeInterval = 0
     private var startTime: TimeInterval = 0
-    private var url: URL? {
+    public private(set) var url: URL? {
         didSet {
             guard let url = url, let options = options else {
                 player = nil
