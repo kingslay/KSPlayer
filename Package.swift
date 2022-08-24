@@ -11,6 +11,14 @@ let package = Package(
             name: "KSPlayer",
             targets: ["KSPlayer", "FFmpeg"]
         ),
+        .library(name: "Libavcodec", targets: ["Libavcodec"]),
+        .library(name: "Libavfilter", targets: ["Libavfilter"]),
+        .library(name: "Libavformat", targets: ["Libavformat"]),
+        .library(name: "Libavutil", targets: ["Libavutil"]),
+        .library(name: "Libswresample", targets: ["Libswresample"]),
+        .library(name: "Libswscale", targets: ["Libswscale"]),
+        .library(name: "Libssl", targets: ["Libssl"]),
+        .library(name: "Libcrypto", targets: ["Libcrypto"])
     ],
     dependencies: [
         // Dependencies declare other packages that this package depends on.
