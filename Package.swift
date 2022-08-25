@@ -18,7 +18,7 @@ let package = Package(
         .library(name: "Libswresample", targets: ["Libswresample"]),
         .library(name: "Libswscale", targets: ["Libswscale"]),
         .library(name: "Libssl", targets: ["Libssl"]),
-        .library(name: "Libcrypto", targets: ["Libcrypto"])
+        .library(name: "Libcrypto", targets: ["Libcrypto"]),
     ],
     dependencies: [
         // Dependencies declare other packages that this package depends on.
