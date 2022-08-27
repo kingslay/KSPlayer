@@ -18,7 +18,7 @@ class SoftwareDecode: DecodeProtocol {
     private var codecContext: UnsafeMutablePointer<AVCodecContext>?
     private var bestEffortTimestamp = Int64(0)
     private let swresample: Swresample
-    private let filter: MEFilter?
+    private let filter: MEFilter
     required init(assetTrack: AssetTrack, options: KSOptions, delegate: DecodeResultDelegate) {
         self.delegate = delegate
         self.options = options
@@ -29,17 +29,10 @@ class SoftwareDecode: DecodeProtocol {
             KSLog(error as CustomStringConvertible)
         }
         codecContext?.pointee.time_base = assetTrack.timebase.rational
+        filter = MEFilter(timebase: assetTrack.timebase, isAudio: assetTrack.mediaType == .audio)
         if assetTrack.mediaType == .video {
-            filter = options.videoFilters.flatMap { str -> MEFilter in
-                MEFilter(filters: str, timebase: assetTrack.timebase, isAudio: false)
-            }
-            filter?.bufferContext?.pointee.hw_device_ctx = codecContext?.pointee.hw_device_ctx
-            filter?.bufferSinkContext?.pointee.hw_device_ctx = codecContext?.pointee.hw_device_ctx
             swresample = VideoSwresample()
         } else {
-            filter = options.audioFilters.flatMap { str -> MEFilter in
-                MEFilter(filters: str, timebase: assetTrack.timebase, isAudio: true)
-            }
             swresample = AudioSwresample(codecpar: codecpar)
         }
     }
@@ -52,7 +45,8 @@ class SoftwareDecode: DecodeProtocol {
         while true {
             let result = avcodec_receive_frame(codecContext, coreFrame)
             if result == 0, let avframe = coreFrame {
-                var frame = try swresample.transfer(avframe: filter?.filter(inputFrame: avframe) ?? avframe)
+                let isAudio = packet.assetTrack.mediaType == .audio
+                var frame = try swresample.transfer(avframe: filter.filter(filters: isAudio ? options.audioFilters : options.videoFilters, inputFrame: avframe))
                 frame.timebase = packet.assetTrack.timebase
 //                frame.timebase = Timebase(avframe.pointee.time_base)
                 frame.duration = avframe.pointee.pkt_duration
