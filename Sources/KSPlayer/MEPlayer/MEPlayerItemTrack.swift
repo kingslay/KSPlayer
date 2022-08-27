@@ -77,7 +77,9 @@ class AssetTrack: MediaPlayerTrack {
         } else if codecpar.codec_type == AVMEDIA_TYPE_VIDEO {
             mediaType = .video
             audioStreamBasicDescription = nil
-            description += ", \(String(cString: av_get_pix_fmt_name(AVPixelFormat(rawValue: codecpar.format))))"
+            if let name = av_get_pix_fmt_name(AVPixelFormat(rawValue: codecpar.format)) {
+                description += ", \(String(cString: name))"
+            }
         } else if codecpar.codec_type == AVMEDIA_TYPE_SUBTITLE {
             mediaType = .subtitle
             audioStreamBasicDescription = nil
