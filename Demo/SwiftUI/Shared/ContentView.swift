@@ -74,6 +74,9 @@ struct ContentView: View {
                 if let path = Bundle.main.path(forResource: "dvd_subtitle", ofType: "mkv") {
                     resources.append(KSPlayerResource(url: URL(fileURLWithPath: path), options: MEOptions(), name: "本地视频"))
                 }
+                if let url = URL(string: "http://devimages.apple.com/iphone/samples/bipbop/bipbopall.m3u8") {
+                    resources.append(KSPlayerResource(url: url, options: MEOptions(), name: "m3u8视频"))
+                }
                 resources.append(contentsOf: parsem3u8(string: string))
             } catch {}
         }

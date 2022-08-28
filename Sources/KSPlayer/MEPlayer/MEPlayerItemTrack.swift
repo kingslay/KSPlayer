@@ -59,6 +59,9 @@ class AssetTrack: MediaPlayerTrack {
         if let profile = descriptor.profiles {
             description += " (\(String(cString: profile.pointee.name)))"
         }
+        description += ", \(bitRate)BPS"
+        let sar = codecpar.sample_aspect_ratio.size
+        naturalSize = CGSize(width: Int(codecpar.width), height: Int(CGFloat(codecpar.height) * sar.height / sar.width))
         if codecpar.codec_type == AVMEDIA_TYPE_AUDIO {
             mediaType = .audio
             let layout = codecpar.ch_layout
@@ -73,13 +76,13 @@ class AssetTrack: MediaPlayerTrack {
             description += ", \(String(cString: str))"
             let fmt = String(cString: av_get_sample_fmt_name(AVSampleFormat(rawValue: codecpar.format)))
             description += ", \(fmt)"
-            description += ", \(codecpar.bit_rate)"
         } else if codecpar.codec_type == AVMEDIA_TYPE_VIDEO {
             mediaType = .video
             audioStreamBasicDescription = nil
             if let name = av_get_pix_fmt_name(AVPixelFormat(rawValue: codecpar.format)) {
                 description += ", \(String(cString: name))"
             }
+            description += ", \(Int(naturalSize.width))x\(Int(naturalSize.height))"
         } else if codecpar.codec_type == AVMEDIA_TYPE_SUBTITLE {
             mediaType = .subtitle
             audioStreamBasicDescription = nil
@@ -97,8 +100,6 @@ class AssetTrack: MediaPlayerTrack {
             startTime = 0
         }
         rotation = stream.rotation
-        let sar = codecpar.sample_aspect_ratio.size
-        naturalSize = CGSize(width: Int(codecpar.width), height: Int(CGFloat(codecpar.height) * sar.height / sar.width))
         let frameRate = av_guess_frame_rate(nil, stream, nil)
         if stream.pointee.duration > 0, stream.pointee.nb_frames > 0, stream.pointee.nb_frames != stream.pointee.duration {
             nominalFrameRate = Float(stream.pointee.nb_frames) * Float(timebase.den) / Float(stream.pointee.duration) * Float(timebase.num)
