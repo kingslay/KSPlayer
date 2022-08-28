@@ -43,7 +43,7 @@ struct DemoApp: App {
             }
         }
         if let urlString = filenames.first {
-            newPlayerView(KSVideoPlayerView(url: URL(fileURLWithPath: urlString), options: KSOptions()))
+            newPlayerView(KSVideoPlayerView(url: URL(fileURLWithPath: urlString), options: MEOptions()))
         }
     }
 
@@ -51,7 +51,7 @@ struct DemoApp: App {
         WindowGroup {
             ContentView()
                 .onOpenURL { url in
-                    newPlayerView(KSVideoPlayerView(url: url, options: KSOptions()))
+                    newPlayerView(KSVideoPlayerView(url: url, options: MEOptions()))
                 }
             #if !os(tvOS)
                 .fileImporter(isPresented: $isImporting, allowedContentTypes: [.movie, .audio, .data]) { result in
@@ -62,7 +62,7 @@ struct DemoApp: App {
                     NSDocumentController.shared.noteNewRecentDocumentURL(url)
                     #endif
                     if url.isAudio || url.isMovie {
-                        newPlayerView(KSVideoPlayerView(url: url, options: KSOptions()))
+                        newPlayerView(KSVideoPlayerView(url: url, options: MEOptions()))
                     } else {
                         let controllers = UIApplication.shared.windows.reversed().compactMap {
                             #if os(macOS)
@@ -129,3 +129,10 @@ struct DemoApp: App {
 //        playerVC.player = AVPlayer(url: URL(string: "https://bitmovin-a.akamaihd.net/content/dataset/multi-codec/hevc/stream_fmp4.m3u8")!)
 //    }
 // }
+class MEOptions: KSOptions {
+    #if os(tvOS)
+    override open func preferredDisplayCriteria(refreshRate: Float, videoDynamicRange: Int32) -> AVDisplayCriteria? {
+        AVDisplayCriteria(refreshRate: refreshRate, videoDynamicRange: videoDynamicRange)
+    }
+    #endif
+}

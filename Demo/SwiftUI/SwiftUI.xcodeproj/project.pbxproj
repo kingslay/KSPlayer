@@ -48,6 +48,8 @@
 		6DA56DBB7D572623E48AEB27 /* Pods-demo-SPM (iOS).release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-demo-SPM (iOS).release.xcconfig"; path = "Target Support Files/Pods-demo-SPM (iOS)/Pods-demo-SPM (iOS).release.xcconfig"; sourceTree = "<group>"; };
 		7765B42EA1A94905C991FB83 /* Pods_iOS.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_iOS.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		7F970568F1C4865B93BF283D /* Pods-iOS.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-iOS.release.xcconfig"; path = "Target Support Files/Pods-iOS/Pods-iOS.release.xcconfig"; sourceTree = "<group>"; };
+		AC3CAD6228BB88A200AA1C2C /* AVDisplayCriteriaKS.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AVDisplayCriteriaKS.h; sourceTree = "<group>"; };
+		AC3CAD6328BB893500AA1C2C /* Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Bridging-Header.h"; sourceTree = "<group>"; };
 		AC77DFB026402327001351AE /* DemoApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoApp.swift; sourceTree = "<group>"; };
 		AC77DFB126402327001351AE /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		AC77DFB226402329001351AE /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -64,7 +66,7 @@
 		AC84D8DC28ABBD0D00344154 /* hevc.mkv */ = {isa = PBXFileReference; lastKnownFileType = file; path = hevc.mkv; sourceTree = "<group>"; };
 		AC84D8DD28ABBD0D00344154 /* raw.h264 */ = {isa = PBXFileReference; lastKnownFileType = file; path = raw.h264; sourceTree = "<group>"; };
 		ACAD6F7427E39B75006D960B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		ACB8C9FC278AE3A6008B6582 /* .app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; name = .app; path = TracyPlayer.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		ACB8C9FC278AE3A6008B6582 /* TracyPlayer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TracyPlayer.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		ACD2F747275F6E860006D16F /* KSPlayer */ = {isa = PBXFileReference; lastKnownFileType = folder; name = KSPlayer; path = ../..; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -139,7 +141,7 @@
 			children = (
 				AC77DFB726402329001351AE /* .app */,
 				AC77DFBF26402329001351AE /* .app */,
-				ACB8C9FC278AE3A6008B6582 /* .app */,
+				ACB8C9FC278AE3A6008B6582 /* TracyPlayer.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -164,7 +166,9 @@
 		ACB8C9FD278AE3A6008B6582 /* tvOS */ = {
 			isa = PBXGroup;
 			children = (
+				AC3CAD6228BB88A200AA1C2C /* AVDisplayCriteriaKS.h */,
 				ACAD6F7427E39B75006D960B /* Info.plist */,
+				AC3CAD6328BB893500AA1C2C /* Bridging-Header.h */,
 			);
 			path = tvOS;
 			sourceTree = "<group>";
@@ -261,7 +265,7 @@
 				ACB8CA0C278AE4A0008B6582 /* KSPlayer */,
 			);
 			productName = "demo-SPM (tvOS)";
-			productReference = ACB8C9FC278AE3A6008B6582 /* .app */;
+			productReference = ACB8C9FC278AE3A6008B6582 /* TracyPlayer.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -644,6 +648,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = "kintan.demo-SPM--tvOS-";
 				SDKROOT = appletvos;
 				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OBJC_BRIDGING_HEADER = "tvOS/Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 3;
 				TVOS_DEPLOYMENT_TARGET = 15.0;
@@ -671,6 +676,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = "kintan.demo-SPM--tvOS-";
 				SDKROOT = appletvos;
 				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OBJC_BRIDGING_HEADER = "tvOS/Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 3;
 				TVOS_DEPLOYMENT_TARGET = 15.0;

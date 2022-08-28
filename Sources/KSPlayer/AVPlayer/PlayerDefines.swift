@@ -382,7 +382,7 @@ open class KSOptions {
 
     #if os(tvOS)
     open func preferredDisplayCriteria(refreshRate _: Float, videoDynamicRange _: Int32) -> AVDisplayCriteria? {
-//        AVDisplayCriteria(refreshRate: fps, videoDynamicRange: dynamicRange.rawValue)
+//        AVDisplayCriteria(refreshRate: refreshRate, videoDynamicRange: videoDynamicRange)
         nil
     }
     #endif

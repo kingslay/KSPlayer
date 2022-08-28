@@ -45,7 +45,7 @@ struct ContentView: View {
                 TextField("play list", text: $playList)
                 Button("Done") {
                     if let url = URL(string: playURL.trimmingCharacters(in: NSMutableCharacterSet.whitespacesAndNewlines)) {
-                        self.resources.insert(KSPlayerResource(url: url, options: KSOptions(), name: "new add"), at: 0)
+                        self.resources.insert(KSPlayerResource(url: url, options: MEOptions(), name: "new add"), at: 0)
                     } else if !playList.isEmpty {
                         self.updatem3u8(playList.trimmingCharacters(in: NSMutableCharacterSet.whitespacesAndNewlines))
                     }
@@ -72,7 +72,7 @@ struct ContentView: View {
                 }
                 resources.removeAll()
                 if let path = Bundle.main.path(forResource: "dvd_subtitle", ofType: "mkv") {
-                    resources.append(KSPlayerResource(url: URL(fileURLWithPath: path), name: "本地视频"))
+                    resources.append(KSPlayerResource(url: URL(fileURLWithPath: path), options: MEOptions(), name: "本地视频"))
                 }
                 resources.append(contentsOf: parsem3u8(string: string))
             } catch {}
@@ -102,7 +102,7 @@ struct ContentView: View {
             guard let name = array[0].split(separator: ",").last else {
                 return nil
             }
-            return KSPlayerResource(url: url, options: KSOptions(), name: String(name))
+            return KSPlayerResource(url: url, options: MEOptions(), name: String(name))
         }
     }
 
