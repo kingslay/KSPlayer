@@ -460,9 +460,9 @@ extension KSVideoPlayer: UIViewRepresentable {
             didSet {
                 if let track = selectedAudioTrack {
                     playerLayer?.player?.select(track: track)
-                    playerLayer?.options?.audioDisable = false
+                    playerLayer?.player?.isMuted = false
                 } else {
-                    playerLayer?.options?.audioDisable = true
+                    playerLayer?.player?.isMuted = true
                     oldValue?.setIsEnabled(false)
                 }
             }

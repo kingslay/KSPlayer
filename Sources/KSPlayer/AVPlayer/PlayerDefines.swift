@@ -227,7 +227,6 @@ open class KSOptions {
     public var audioDelay = 0.0 // s
     public var subtitleDelay = 0.0 // s
     public var videoDisable = false
-    public var audioDisable = false
     public var audioFilters: String?
     public var videoFilters: String?
     public var subtitleDisable = false

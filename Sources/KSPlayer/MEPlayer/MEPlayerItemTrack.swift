@@ -108,6 +108,9 @@ class AssetTrack: MediaPlayerTrack {
         } else {
             nominalFrameRate = mediaType == .audio ? 44 : 24
         }
+        if codecpar.codec_type == AVMEDIA_TYPE_VIDEO {
+            description += ", \(nominalFrameRate) fps"
+        }
         if let entry = av_dict_get(stream.pointee.metadata, "language", nil, 0), let title = entry.pointee.value {
             language = NSLocalizedString(String(cString: title), comment: "")
         } else {
