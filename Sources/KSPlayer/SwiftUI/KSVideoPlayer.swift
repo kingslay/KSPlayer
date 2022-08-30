@@ -294,7 +294,7 @@ struct VideoSettingView: View {
     @EnvironmentObject private var subtitleModel: SubtitleModel
     @EnvironmentObject private var config: KSVideoPlayer.Coordinator
     var body: some View {
-        config.selectedAudioTrack = config.audioTracks.first { $0.isEnabled }
+        config.selectedAudioTrack = (config.playerLayer?.player?.isMuted ?? false) ? nil : config.audioTracks.first { $0.isEnabled }
         config.selectedVideoTrack = config.videoTracks.first { $0.isEnabled }
         return TabView {
             Picker("audio tracks", selection: Binding(get: {
@@ -458,12 +458,13 @@ extension KSVideoPlayer: UIViewRepresentable {
         #endif
         fileprivate var selectedAudioTrack: MediaPlayerTrack? {
             didSet {
-                if let track = selectedAudioTrack {
-                    playerLayer?.player?.select(track: track)
-                    playerLayer?.player?.isMuted = false
-                } else {
-                    playerLayer?.player?.isMuted = true
-                    oldValue?.setIsEnabled(false)
+                if oldValue?.trackID != selectedAudioTrack?.trackID {
+                    if let track = selectedAudioTrack {
+                        playerLayer?.player?.select(track: track)
+                        playerLayer?.player?.isMuted = false
+                    } else {
+                        playerLayer?.player?.isMuted = true
+                    }
                 }
             }
         }
@@ -480,12 +481,14 @@ extension KSVideoPlayer: UIViewRepresentable {
 
         fileprivate var selectedVideoTrack: MediaPlayerTrack? {
             didSet {
-                if let track = selectedVideoTrack {
-                    playerLayer?.player?.select(track: track)
-                    playerLayer?.options?.videoDisable = false
-                } else {
-                    oldValue?.setIsEnabled(false)
-                    playerLayer?.options?.videoDisable = true
+                if oldValue?.trackID != selectedVideoTrack?.trackID {
+                    if let track = selectedVideoTrack {
+                        playerLayer?.player?.select(track: track)
+                        playerLayer?.options?.videoDisable = false
+                    } else {
+                        oldValue?.setIsEnabled(false)
+                        playerLayer?.options?.videoDisable = true
+                    }
                 }
             }
         }

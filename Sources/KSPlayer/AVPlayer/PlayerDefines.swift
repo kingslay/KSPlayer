@@ -106,6 +106,12 @@ public protocol MediaPlayerTrack: CustomStringConvertible {
     func setIsEnabled(_ isEnabled: Bool)
 }
 
+// extension MediaPlayerTrack {
+//    static func == (lhs: Self, rhs: Self) -> Bool {
+//        lhs.trackID == rhs.trackID
+//    }
+// }
+
 extension MediaPlayerTrack {
     var codecType: FourCharCode {
         mediaSubType.rawValue
