@@ -263,7 +263,7 @@ open class KSOptions {
         // There is total different meaning for 'listen_timeout' option in rtmp
         // set 'listen_timeout' = -1 for rtmp、rtsp
 //        formatContextOptions["listen_timeout"] = 3
-        formatContextOptions["rw_timeout"] = 3_000_000
+        formatContextOptions["rw_timeout"] = 10_000_000
         formatContextOptions["user_agent"] = "ksplayer"
         decoderOptions["threads"] = "auto"
         decoderOptions["refcounted_frames"] = "1"
