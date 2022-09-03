@@ -260,6 +260,9 @@ open class KSOptions {
         formatContextOptions["auto_convert"] = 0
         formatContextOptions["fps_probe_size"] = 3
         formatContextOptions["reconnect"] = 1
+        formatContextOptions["reconnect_at_eof"] = 1
+        formatContextOptions["reconnect_on_network_error"] = 1
+
         // There is total different meaning for 'listen_timeout' option in rtmp
         // set 'listen_timeout' = -1 for rtmp、rtsp
 //        formatContextOptions["listen_timeout"] = 3

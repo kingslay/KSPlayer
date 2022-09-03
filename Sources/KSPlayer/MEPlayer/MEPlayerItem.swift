@@ -333,6 +333,9 @@ extension MEPlayerItem {
             return
         }
         if readResult == 0 {
+            if formatCtx?.pointee.pb.pointee.eof_reached == 1 {
+                // reconnect
+            }
             if packet.corePacket.pointee.size <= 0 {
                 return
             }
@@ -355,7 +358,7 @@ extension MEPlayerItem {
                 }
             }
         } else {
-            if readResult == AVError.eof.code || avio_feof(formatCtx?.pointee.pb) != 0 {
+            if readResult == AVError.eof.code || formatCtx?.pointee.pb.pointee.eof_reached == 1 {
                 if options.isLoopPlay, allTracks.allSatisfy({ !$0.isLoopModel }) {
                     allTracks.forEach { $0.isLoopModel = true }
                     _ = av_seek_frame(formatCtx, -1, 0, AVSEEK_FLAG_BACKWARD)
