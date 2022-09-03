@@ -54,10 +54,12 @@ class AssetTrack: MediaPlayerTrack {
         if stream.pointee.side_data?.pointee.type == AV_PKT_DATA_DOVI_CONF {
             dovi = stream.pointee.side_data?.pointee.data.withMemoryRebound(to: DOVIDecoderConfigurationRecord.self, capacity: 1) { $0 }.pointee
         }
-        let descriptor = avcodec_descriptor_get(codecpar.codec_id).pointee
-        var description = String(cString: descriptor.name)
-        if let profile = descriptor.profiles {
-            description += " (\(String(cString: profile.pointee.name)))"
+        var description = ""
+        if let descriptor = avcodec_descriptor_get(codecpar.codec_id) {
+            description += String(cString: descriptor.pointee.name)
+            if let profile = descriptor.pointee.profiles {
+                description += " (\(String(cString: profile.pointee.name)))"
+            }
         }
         description += ", \(bitRate)BPS"
         let sar = codecpar.sample_aspect_ratio.size

@@ -261,6 +261,7 @@ open class KSOptions {
         formatContextOptions["fps_probe_size"] = 3
         formatContextOptions["reconnect"] = 1
         formatContextOptions["reconnect_at_eof"] = 1
+        formatContextOptions["reconnect_streamed"] = 1
         formatContextOptions["reconnect_on_network_error"] = 1
 
         // There is total different meaning for 'listen_timeout' option in rtmp

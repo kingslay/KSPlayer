@@ -334,7 +334,7 @@ extension MEPlayerItem {
         }
         if readResult == 0 {
             if formatCtx?.pointee.pb.pointee.eof_reached == 1 {
-                // reconnect
+                // todo need reconnect
             }
             if packet.corePacket.pointee.size <= 0 {
                 return
