@@ -273,17 +273,31 @@ open class KSOptions {
         decoderOptions["refcounted_frames"] = "1"
     }
 
+    /**
+     you can add http-header or other options which mentions in https://developer.apple.com/reference/avfoundation/avurlasset/initialization_options
+
+     to add http-header init options like this
+     ```
+     options.appendHeader(["Referer":"https:www.xxx.com"])
+     ```
+     */
+    public func appendHeader(_ header: [String: String]) {
+        var oldValue = avOptions["AVURLAssetHTTPHeaderFieldsKey"] as? [String: String] ?? [
+            String: String
+        ]()
+        oldValue.merge(header) { _, new in new }
+        avOptions["AVURLAssetHTTPHeaderFieldsKey"] = oldValue
+        var str = formatContextOptions["headers"] as? String ?? ""
+        for (key, value) in header {
+            str.append("\(key):\(value)\r\n")
+        }
+        formatContextOptions["headers"] = str
+    }
+
     public func setCookie(_ cookies: [HTTPCookie]) {
-        if #available(OSX 10.15, *) {
-            avOptions[AVURLAssetHTTPCookiesKey] = cookies
-        }
-        var cookieStr = "Cookie: "
-        for cookie in cookies {
-            cookieStr.append("\(cookie.name)=\(cookie.value); ")
-        }
-        cookieStr = String(cookieStr.dropLast(2))
-        cookieStr.append("\r\n")
-        formatContextOptions["headers"] = cookieStr
+        avOptions[AVURLAssetHTTPCookiesKey] = cookies
+        let cookieStr = cookies.map { cookie in "\(cookie.name)=\(cookie.value)" }.joined(separator: "; ")
+        appendHeader(["Cookie": cookieStr])
     }
 
     // 缓冲算法函数
