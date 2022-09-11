@@ -76,8 +76,10 @@ class AssetTrack: MediaPlayerTrack {
             var str = [Int8](repeating: 0, count: 64)
             _ = av_channel_layout_describe(&codecpar.ch_layout, &str, str.count)
             description += ", \(String(cString: str))"
-            let fmt = String(cString: av_get_sample_fmt_name(AVSampleFormat(rawValue: codecpar.format)))
-            description += ", \(fmt)"
+            if let name = av_get_sample_fmt_name(AVSampleFormat(rawValue: codecpar.format)) {
+                let fmt = String(cString: name)
+                description += ", \(fmt)"
+            }
         } else if codecpar.codec_type == AVMEDIA_TYPE_VIDEO {
             mediaType = .video
             audioStreamBasicDescription = nil

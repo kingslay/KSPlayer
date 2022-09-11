@@ -522,8 +522,8 @@ extension MEPlayerItem: CodecCapacityDelegate {
               let newAssetTrack = assetTracks.first(where: { $0.mediaType == .video && $0.bitRate == newBitrate }) else {
             return
         }
-        assetTracks.first { $0.mediaType == .video && $0.bitRate == oldBitRate }?.stream.pointee.discard = AVDISCARD_ALL
-        newAssetTrack.stream.pointee.discard = AVDISCARD_DEFAULT
+        assetTracks.first { $0.mediaType == .video && $0.bitRate == oldBitRate }?.isEnabled = false
+        newAssetTrack.isEnabled = true
         findBestAudio(videoTrack: newAssetTrack)
         let bitRateState = VideoAdaptationState.BitRateState(bitRate: newBitrate, time: CACurrentMediaTime())
         videoAdaptation?.bitRateStates.append(bitRateState)
@@ -536,8 +536,8 @@ extension MEPlayerItem: CodecCapacityDelegate {
         }
         let index = av_find_best_stream(formatCtx, AVMEDIA_TYPE_AUDIO, -1, videoTrack.trackID, nil, 0)
         if index != first.trackID {
-            first.stream.pointee.discard = AVDISCARD_ALL
-            assetTracks.first { $0.mediaType == .audio && $0.trackID == index }?.stream.pointee.discard = AVDISCARD_DEFAULT
+            first.isEnabled = true
+            assetTracks.first { $0.mediaType == .audio && $0.trackID == index }?.isEnabled = false
         }
     }
 }
