@@ -28,6 +28,15 @@ public final class MetalPlayView: UIView {
         // swiftlint:enable force_cast
     }
 
+    var isPaused: Bool = true {
+        willSet {
+            if isPaused != newValue {
+                view.isPaused = newValue
+                newValue ? timer.suspend() : timer.resume()
+            }
+        }
+    }
+
     init(options: KSOptions) {
         self.options = options
         super.init(frame: .zero)
@@ -45,6 +54,8 @@ public final class MetalPlayView: UIView {
         (view.layer as? CAMetalLayer)?.wantsExtendedDynamicRangeContent = true
         #endif
         view.framebufferOnly = true
+        view.isPaused = true
+        timer.suspend()
         addSubview(view)
         view.isHidden = true
         view.translatesAutoresizingMaskIntoConstraints = false
@@ -54,7 +65,6 @@ public final class MetalPlayView: UIView {
             trailingAnchor.constraint(equalTo: view.trailingAnchor),
             bottomAnchor.constraint(equalTo: view.bottomAnchor),
         ])
-        isPaused = true
         var controlTimebase: CMTimebase?
         CMTimebaseCreateWithSourceClock(allocator: kCFAllocatorDefault, sourceClock: CMClockGetHostTimeClock(), timebaseOut: &controlTimebase)
         if let controlTimebase = controlTimebase {
@@ -197,18 +207,6 @@ extension MetalPlayView {
 }
 
 extension MetalPlayView: FrameOutput {
-    var isPaused: Bool {
-        get {
-            view.isPaused
-        }
-        set {
-            if isPaused != newValue {
-                view.isPaused = newValue
-                newValue ? timer.suspend() : timer.resume()
-            }
-        }
-    }
-
     var drawableSize: CGSize {
         get {
             view.drawableSize
