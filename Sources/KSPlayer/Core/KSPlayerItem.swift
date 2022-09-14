@@ -108,7 +108,8 @@ public struct KSNowPlayableMetadata {
     }
 
     init(mediaType: MPNowPlayingInfoMediaType? = nil, isLiveStream: Bool? = nil, title: String, artist: String? = nil,
-         artwork: MPMediaItemArtwork? = nil, albumArtist: String? = nil, albumTitle: String? = nil) {
+         artwork: MPMediaItemArtwork? = nil, albumArtist: String? = nil, albumTitle: String? = nil)
+    {
         self.mediaType = mediaType
         self.isLiveStream = isLiveStream
         self.title = title

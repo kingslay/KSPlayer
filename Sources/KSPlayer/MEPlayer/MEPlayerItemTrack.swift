@@ -36,7 +36,8 @@ class AssetTrack: MediaPlayerTrack {
         trackID = stream.pointee.index
         var codecpar = stream.pointee.codecpar.pointee
         if let bitrateEntry = av_dict_get(stream.pointee.metadata, "variant_bitrate", nil, 0) ?? av_dict_get(stream.pointee.metadata, "BPS", nil, 0),
-           let bitRate = Int64(String(cString: bitrateEntry.pointee.value)) {
+           let bitRate = Int64(String(cString: bitrateEntry.pointee.value))
+        {
             self.bitRate = bitRate
         } else {
             bitRate = codecpar.bit_rate
@@ -425,7 +426,8 @@ extension AssetTrack {
                 return SubtitleDecode(assetTrack: self, options: options, delegate: delegate)
             } else {
                 if mediaType == .video, options.asynchronousDecompression, options.enableHardwareDecode(),
-                   let session = DecompressionSession(codecpar: stream.pointee.codecpar.pointee, options: options) {
+                   let session = DecompressionSession(codecpar: stream.pointee.codecpar.pointee, options: options)
+                {
                     return VideoHardwareDecode(assetTrack: self, options: options, session: session, delegate: delegate)
                 } else {
                     return SoftwareDecode(assetTrack: self, options: options, delegate: delegate)

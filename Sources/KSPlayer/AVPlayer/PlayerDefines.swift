@@ -646,7 +646,8 @@ extension UIView {
             constraint.firstItem === self
         } ?? [NSLayoutConstraint]()
         for constraint in constraints where
-            constraint.isMember(of: NSLayoutConstraint.self) && constraint.firstItem === self && (constraint.firstAttribute == .width || constraint.firstAttribute == .height) {
+            constraint.isMember(of: NSLayoutConstraint.self) && constraint.firstItem === self && (constraint.firstAttribute == .width || constraint.firstAttribute == .height)
+        {
             frameConstraint.append(constraint)
         }
         return frameConstraint

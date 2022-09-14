@@ -519,7 +519,8 @@ extension MEPlayerItem: CodecCapacityDelegate {
         videoAdaptation?.currentPlaybackTime = currentPlaybackTime
         videoAdaptation?.isPlayable = loadingState.isPlayable
         guard let (oldBitRate, newBitrate) = options.adaptable(state: videoAdaptation), oldBitRate != newBitrate,
-              let newAssetTrack = assetTracks.first(where: { $0.mediaType == .video && $0.bitRate == newBitrate }) else {
+              let newAssetTrack = assetTracks.first(where: { $0.mediaType == .video && $0.bitRate == newBitrate })
+        else {
             return
         }
         assetTracks.first { $0.mediaType == .video && $0.bitRate == oldBitRate }?.isEnabled = false

@@ -360,7 +360,8 @@ extension KSPlayerLayer {
     private func setDisplayCriteria(track: MediaPlayerTrack) {
         guard let displayManager = UIApplication.shared.keyWindow?.avDisplayManager,
               displayManager.isDisplayCriteriaMatchingEnabled,
-              !displayManager.isDisplayModeSwitchInProgress else {
+              !displayManager.isDisplayModeSwitchInProgress
+        else {
             return
         }
         if let criteria = options?.preferredDisplayCriteria(refreshRate: track.nominalFrameRate, videoDynamicRange: track.dynamicRange.rawValue) {
@@ -520,7 +521,8 @@ extension KSPlayerLayer {
             }
             let selectLang = event.languageOption
             if selectLang.languageOptionType == .audible,
-               let trackToSelect = self.player?.tracks(mediaType: .audio).first(where: { $0.name == selectLang.displayName }) {
+               let trackToSelect = self.player?.tracks(mediaType: .audio).first(where: { $0.name == selectLang.displayName })
+            {
                 self.player?.select(track: trackToSelect)
             }
             return .success
