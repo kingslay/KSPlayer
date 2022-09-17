@@ -529,9 +529,11 @@ extension KSVideoPlayer: UIViewRepresentable {
         public func player(layer _: KSPlayerLayer, bufferedCount: Int, consumeTime: TimeInterval) {
             onBufferChanged?(bufferedCount, consumeTime)
         }
-        public func player(layer: KSPlayerLayer, isPipActive: Bool) {
+
+        public func player(layer _: KSPlayerLayer, isPipActive: Bool) {
             self.isPipActive = isPipActive
         }
+
         #if canImport(UIKit)
         @objc fileprivate func swipeGestureAction(_ recognizer: UISwipeGestureRecognizer) {
             onSwipe?(recognizer.direction)

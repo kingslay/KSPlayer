@@ -276,7 +276,9 @@ extension KSPlayerLayer: MediaPlayerDelegate {
     public func preparedToPlay(player: MediaPlayerProtocol) {
         updateNowPlayingInfo()
         state = .readyToPlay
-        player.pipController?.delegate = self
+        if #available(tvOS 14.0, *) {
+            player.pipController?.delegate = self
+        }
         for track in player.tracks(mediaType: .video) where track.isEnabled {
             #if os(tvOS)
             setDisplayCriteria(track: track)
@@ -355,14 +357,16 @@ extension KSPlayerLayer: MediaPlayerDelegate {
         }
     }
 }
+
+@available(tvOS 14.0, *)
 extension KSPlayerLayer: AVPictureInPictureControllerDelegate {
-    public func pictureInPictureControllerDidStopPictureInPicture(_ pictureInPictureController: AVPictureInPictureController) {
+    public func pictureInPictureControllerDidStopPictureInPicture(_: AVPictureInPictureController) {
         delegate?.player(layer: self, isPipActive: false)
     }
- 
-    public func pictureInPictureControllerDidStartPictureInPicture(_ pictureInPictureController: AVPictureInPictureController) {
-        pictureInPictureController.startPictureInPicture()
 
+    public func pictureInPictureControllerDidStartPictureInPicture(_ pictureInPictureController: AVPictureInPictureController) {
+        delegate?.player(layer: self, isPipActive: true)
+        pictureInPictureController.startPictureInPicture()
     }
 }
 
