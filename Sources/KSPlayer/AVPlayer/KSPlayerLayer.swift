@@ -358,16 +358,14 @@ extension KSPlayerLayer: MediaPlayerDelegate {
     }
 }
 
+// MARK: - AVPictureInPictureControllerDelegate
+
 @available(tvOS 14.0, *)
 extension KSPlayerLayer: AVPictureInPictureControllerDelegate {
     public func pictureInPictureControllerDidStopPictureInPicture(_: AVPictureInPictureController) {
         delegate?.player(layer: self, isPipActive: false)
     }
 
-    public func pictureInPictureControllerDidStartPictureInPicture(_ pictureInPictureController: AVPictureInPictureController) {
-        delegate?.player(layer: self, isPipActive: true)
-        pictureInPictureController.startPictureInPicture()
-    }
 }
 
 // MARK: - private functions
