@@ -143,7 +143,7 @@ struct VideoControllerView: View {
                         dismiss()
                         #endif
                     } label: {
-                        Image(systemName: "xmark")
+                        Image(systemName: "xmark").imageScale(.large)
                     }
                     Button {
                         config.isPipActive.toggle()
@@ -198,6 +198,7 @@ struct VideoControllerView: View {
                 #endif
                 Spacer()
             }
+            .imageScale(.large)
             Spacer()
             HStack {
                 Spacer()
@@ -207,7 +208,7 @@ struct VideoControllerView: View {
                 Button {
                     model.isShowSetting.toggle()
                 } label: {
-                    Image(systemName: "ellipsis")
+                    Image(systemName: "ellipsis").frame(minWidth: 20, minHeight: 20)
                 }
             }
             Slider(value: $model.currentTime, in: 0 ... model.totalTime) { onEditingChanged in
@@ -528,7 +529,9 @@ extension KSVideoPlayer: UIViewRepresentable {
         public func player(layer _: KSPlayerLayer, bufferedCount: Int, consumeTime: TimeInterval) {
             onBufferChanged?(bufferedCount, consumeTime)
         }
-
+        public func player(layer: KSPlayerLayer, isPipActive: Bool) {
+            self.isPipActive = isPipActive
+        }
         #if canImport(UIKit)
         @objc fileprivate func swipeGestureAction(_ recognizer: UISwipeGestureRecognizer) {
             onSwipe?(recognizer.direction)

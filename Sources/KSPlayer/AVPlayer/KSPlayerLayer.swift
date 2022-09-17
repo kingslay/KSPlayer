@@ -6,6 +6,7 @@
 //
 //
 import AVFoundation
+import AVKit
 import MediaPlayer
 #if canImport(UIKit)
 import UIKit
@@ -56,6 +57,7 @@ public protocol KSPlayerLayerDelegate: AnyObject {
     func player(layer: KSPlayerLayer, currentTime: TimeInterval, totalTime: TimeInterval)
     func player(layer: KSPlayerLayer, finish error: Error?)
     func player(layer: KSPlayerLayer, bufferedCount: Int, consumeTime: TimeInterval)
+    func player(layer: KSPlayerLayer, isPipActive: Bool)
 }
 
 open class KSPlayerLayer: UIView {
@@ -274,6 +276,7 @@ extension KSPlayerLayer: MediaPlayerDelegate {
     public func preparedToPlay(player: MediaPlayerProtocol) {
         updateNowPlayingInfo()
         state = .readyToPlay
+        player.pipController?.delegate = self
         for track in player.tracks(mediaType: .video) where track.isEnabled {
             #if os(tvOS)
             setDisplayCriteria(track: track)
@@ -350,6 +353,16 @@ extension KSPlayerLayer: MediaPlayerDelegate {
         if error == nil {
             nextPlayer()
         }
+    }
+}
+extension KSPlayerLayer: AVPictureInPictureControllerDelegate {
+    public func pictureInPictureControllerDidStopPictureInPicture(_ pictureInPictureController: AVPictureInPictureController) {
+        delegate?.player(layer: self, isPipActive: false)
+    }
+ 
+    public func pictureInPictureControllerDidStartPictureInPicture(_ pictureInPictureController: AVPictureInPictureController) {
+        pictureInPictureController.startPictureInPicture()
+
     }
 }
 

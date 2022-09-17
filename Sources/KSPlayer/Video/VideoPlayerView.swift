@@ -151,10 +151,8 @@ open class VideoPlayerView: PlayerView {
                 }
                 if pipController.isPictureInPictureActive {
                     pipController.stopPictureInPicture()
-                    button.isSelected = false
                 } else {
                     pipController.startPictureInPicture()
-                    button.isSelected = true
                 }
             }
         } else if type == .audioSwitch || type == .videoSwitch {

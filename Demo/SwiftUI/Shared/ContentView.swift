@@ -71,7 +71,7 @@ struct ContentView: View {
                     return
                 }
                 resources.removeAll()
-                if let path = Bundle.main.path(forResource: "dvd_subtitle", ofType: "mkv") {
+                if let path = Bundle.main.path(forResource: "h264", ofType: "mp4") {
                     resources.append(KSPlayerResource(url: URL(fileURLWithPath: path), options: MEOptions(), name: "本地视频"))
                 }
                 if let url = URL(string: "http://devimages.apple.com/iphone/samples/bipbop/bipbopall.m3u8") {
