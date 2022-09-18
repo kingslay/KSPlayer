@@ -15,6 +15,9 @@ public extension KSParseProtocol {
         try? NSRegularExpression(pattern: "\\{[^}]+\\}", options: .caseInsensitive)
     }
 
+    /// 把字符串时间转为对应的秒
+    /// - Parameter fromStr: srt 00:02:52,184 ass0:30:11.56
+    /// - Returns: 秒
     static func parseDuration(_ fromStr: String) -> TimeInterval {
         let scanner = Scanner(string: fromStr)
         let hour = scanner.scanDouble() ?? 0.0
@@ -22,7 +25,7 @@ public extension KSParseProtocol {
         let min = scanner.scanDouble() ?? 0.0
         _ = scanner.scanString(":")
         let sec = scanner.scanDouble() ?? 0.0
-        if scanner.scanString(",") != nil {
+        if scanner.scanString(",") == nil {
             _ = scanner.scanString(".")
         }
         let millisecond = scanner.scanDouble() ?? 0.0
