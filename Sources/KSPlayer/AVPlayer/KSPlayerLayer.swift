@@ -126,7 +126,7 @@ open class KSPlayerLayer: UIView {
 
     public var player: MediaPlayerProtocol? {
         didSet {
-            oldValue?.view.removeFromSuperview()
+            oldValue?.view?.removeFromSuperview()
             if let player = player {
                 KSLog("player is \(player)")
                 player.delegate = self
@@ -135,7 +135,9 @@ open class KSPlayerLayer: UIView {
                     player.playbackRate = oldValue.playbackRate
                     player.playbackVolume = oldValue.playbackVolume
                 }
-                addSubview(player.view)
+                if let view = player.view {
+                    addSubview(view)
+                }
                 prepareToPlay()
             }
         }

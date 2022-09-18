@@ -208,7 +208,7 @@ struct VideoControllerView: View {
                 Button {
                     model.isShowSetting.toggle()
                 } label: {
-                    Image(systemName: "ellipsis").frame(minWidth: 20, minHeight: 20)
+                    Image(systemName: "ellipsis.circle").frame(minWidth: 20, minHeight: 20)
                 }
             }
             Slider(value: $model.currentTime, in: 0 ... model.totalTime) { onEditingChanged in

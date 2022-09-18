@@ -308,7 +308,7 @@ extension KSAVPlayer {
 extension KSAVPlayer: MediaPlayerProtocol {
     public var subtitleDataSouce: SubtitleDataSouce? { nil }
     public var isPlaying: Bool { player.rate > 0 ? true : playbackState == .playing }
-    public var view: UIView { playerView }
+    public var view: UIView? { playerView }
     public var allowsExternalPlayback: Bool {
         get {
             player.allowsExternalPlayback
@@ -428,10 +428,10 @@ extension KSAVPlayer: MediaPlayerProtocol {
 
     public var contentMode: UIViewContentMode {
         get {
-            view.contentMode
+            playerView.contentMode
         }
         set {
-            view.contentMode = newValue
+            playerView.contentMode = newValue
         }
     }
 

@@ -17,7 +17,7 @@ public class KSMEPlayer: NSObject {
     private var loopCount = 1
     private var playerItem: MEPlayerItem
     public let audioOutput = AudioEnginePlayer()
-    public let videoOutput: MetalPlayView
+    public let videoOutput: MetalPlayView?
     private var options: KSOptions
     private var bufferingCountDownTimer: Timer?
     public private(set) var bufferingProgress = 0 {
@@ -28,8 +28,8 @@ public class KSMEPlayer: NSObject {
 
     @available(tvOS 14.0, *)
     public func pipController() -> AVPictureInPictureController? {
-        if #available(iOS 15.0, tvOS 15.0, macOS 12.0, *) {
-            let contentSource = AVPictureInPictureController.ContentSource(sampleBufferDisplayLayer: self.videoOutput.displayLayer, playbackDelegate: self)
+        if #available(iOS 15.0, tvOS 15.0, macOS 12.0, *), let videoOutput = videoOutput {
+            let contentSource = AVPictureInPictureController.ContentSource(sampleBufferDisplayLayer: videoOutput.displayLayer, playbackDelegate: self)
             return AVPictureInPictureController(contentSource: contentSource)
         } else {
             return nil
@@ -86,12 +86,16 @@ public class KSMEPlayer: NSObject {
 
     public required init(url: URL, options: KSOptions) {
         playerItem = MEPlayerItem(url: url, options: options)
-        videoOutput = MetalPlayView(options: options)
+        if options.videoDisable {
+            videoOutput = nil
+        } else {
+            videoOutput = MetalPlayView(options: options)
+        }
         self.options = options
         super.init()
         playerItem.delegate = self
         audioOutput.renderSource = playerItem
-        videoOutput.renderSource = playerItem
+        videoOutput?.renderSource = playerItem
     }
 
     deinit {
@@ -107,7 +111,7 @@ extension KSMEPlayer {
             guard let self = self else { return }
             let isPaused = !(self.playbackState == .playing && self.loadState == .playable)
             self.audioOutput.isPaused = isPaused
-            self.videoOutput.isPaused = isPaused
+            self.videoOutput?.isPaused = isPaused
             self.delegate?.changeLoadState(player: self)
         }
     }
@@ -118,9 +122,9 @@ extension KSMEPlayer: MEPlayerDelegate {
         isPreparedToPlay = true
         runInMainqueue { [weak self] in
             guard let self = self else { return }
-            self.videoOutput.drawableSize = self.naturalSize
-            self.view.centerRotate(byDegrees: self.playerItem.rotation)
-            self.videoOutput.isPaused = false
+            self.videoOutput?.drawableSize = self.naturalSize
+            self.view?.centerRotate(byDegrees: self.playerItem.rotation)
+            self.videoOutput?.isPaused = false
             self.delegate?.preparedToPlay(player: self)
         }
     }
@@ -140,13 +144,13 @@ extension KSMEPlayer: MEPlayerDelegate {
                     self.loopCount += 1
                     self.delegate?.playBack(player: self, loopCount: self.loopCount)
                     self.audioOutput.isPaused = false
-                    self.videoOutput.isPaused = false
+                    self.videoOutput?.isPaused = false
                 } else {
                     self.playbackState = .finished
                     if type == .audio {
                         self.audioOutput.isPaused = true
                     } else if type == .video {
-                        self.videoOutput.isPaused = true
+                        self.videoOutput?.isPaused = true
                     }
                 }
             }
@@ -253,7 +257,7 @@ extension KSMEPlayer: MediaPlayerProtocol {
 
     public var isExternalPlaybackActive: Bool { false }
 
-    public var view: UIView { videoOutput }
+    public var view: UIView? { videoOutput }
 
     public func replace(url: URL, options: KSOptions) {
         KSLog("replaceUrl \(self)")
@@ -263,10 +267,10 @@ extension KSMEPlayer: MediaPlayerProtocol {
         self.options = options
         playerItem.delegate = self
         audioOutput.renderSource = playerItem
-        videoOutput.renderSource = playerItem
-        videoOutput.options = options
+        videoOutput?.renderSource = playerItem
+        videoOutput?.options = options
         if KSOptions.isClearVideoWhereReplace {
-            videoOutput.clear()
+            videoOutput?.clear()
         }
     }
 
@@ -336,15 +340,15 @@ extension KSMEPlayer: MediaPlayerProtocol {
 
     public var contentMode: UIViewContentMode {
         get {
-            view.contentMode
+            view?.contentMode ?? .center
         }
         set {
-            view.contentMode = newValue
+            view?.contentMode = newValue
         }
     }
 
     public func thumbnailImageAtCurrentTime() async -> UIImage? {
-        await videoOutput.pixelBuffer?.cgImage()?.image()
+        await videoOutput?.pixelBuffer?.cgImage()?.image()
     }
 
     public func enterBackground() {}
