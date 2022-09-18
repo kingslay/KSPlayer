@@ -736,8 +736,8 @@ extension KSVideoPlayer: UIViewRepresentable {
 
     private func updateView(_: KSPlayerLayer, context _: Context) {}
 
-    public final class Coordinator: KSPlayerLayerDelegate, ObservableObject {
-        @Published var isPlay: Bool {
+    public final class Coordinator: ObservableObject {
+        @Published public var isPlay: Bool {
             didSet {
                 if isPlay != oldValue {
                     isPlay ? playerLayer?.play() : playerLayer?.pause()
@@ -745,19 +745,19 @@ extension KSVideoPlayer: UIViewRepresentable {
             }
         }
 
-        @Published var isMuted: Bool = false {
+        @Published public var isMuted: Bool = false {
             didSet {
                 playerLayer?.player?.isMuted = isMuted
             }
         }
 
-        @Published var isPipActive = false {
+        @Published public var isPipActive = false {
             didSet {
                 playerLayer?.isPipActive = isPipActive
             }
         }
 
-        @Published var isScaleAspectFill = false {
+        @Published public var isScaleAspectFill = false {
             didSet {
                 playerLayer?.player?.contentMode = isScaleAspectFill ? .scaleAspectFill : .scaleAspectFit
             }
@@ -810,53 +810,52 @@ extension KSVideoPlayer: UIViewRepresentable {
         fileprivate var onBufferChanged: ((Int, TimeInterval) -> Void)?
         #if canImport(UIKit)
         fileprivate var onSwipe: ((UISwipeGestureRecognizer.Direction) -> Void)?
+        @objc fileprivate func swipeGestureAction(_ recognizer: UISwipeGestureRecognizer) {
+            onSwipe?(recognizer.direction)
+        }
         #endif
         init(isPlay: Bool) {
             self.isPlay = isPlay
         }
 
-        func seek(time: TimeInterval) {
+        public func seek(time: TimeInterval) {
             Task {
                 await playerLayer?.seek(time: time, autoPlay: true)
             }
         }
-
-        public func player(layer: KSPlayerLayer, state: KSPlayerState) {
-            if state == .readyToPlay, let player = layer.player {
-                subtitleTracks = player.tracks(mediaType: .subtitle)
-                videoTracks = player.tracks(mediaType: .video)
-                audioTracks = player.tracks(mediaType: .audio)
-            } else {
-                isPlay = state.isPlaying
-            }
-            onStateChanged?(layer, state)
-        }
-
-        public func player(layer _: KSPlayerLayer, currentTime: TimeInterval, totalTime: TimeInterval) {
-            onPlay?(currentTime, totalTime)
-        }
-
-        public func player(layer: KSPlayerLayer, finish error: Error?) {
-            onFinish?(layer, error)
-        }
-
-        public func player(layer _: KSPlayerLayer, bufferedCount: Int, consumeTime: TimeInterval) {
-            onBufferChanged?(bufferedCount, consumeTime)
-        }
-
-        public func player(layer _: KSPlayerLayer, isPipActive: Bool) {
-            self.isPipActive = isPipActive
-        }
-
-        #if canImport(UIKit)
-        @objc fileprivate func swipeGestureAction(_ recognizer: UISwipeGestureRecognizer) {
-            onSwipe?(recognizer.direction)
-        }
-        #endif
     }
 }
 
-extension KSVideoPlayer {
+extension KSVideoPlayer.Coordinator: KSPlayerLayerDelegate {
+    public func player(layer: KSPlayerLayer, state: KSPlayerState) {
+        if state == .readyToPlay, let player = layer.player {
+            subtitleTracks = player.tracks(mediaType: .subtitle)
+            videoTracks = player.tracks(mediaType: .video)
+            audioTracks = player.tracks(mediaType: .audio)
+        } else {
+            isPlay = state.isPlaying
+        }
+        onStateChanged?(layer, state)
+    }
+
+    public func player(layer _: KSPlayerLayer, currentTime: TimeInterval, totalTime: TimeInterval) {
+        onPlay?(currentTime, totalTime)
+    }
+
+    public func player(layer: KSPlayerLayer, finish error: Error?) {
+        onFinish?(layer, error)
+    }
+
+    public func player(layer _: KSPlayerLayer, bufferedCount: Int, consumeTime: TimeInterval) {
+        onBufferChanged?(bufferedCount, consumeTime)
+    }
+
+    public func player(layer _: KSPlayerLayer, isPipActive: Bool) {
+        self.isPipActive = isPipActive
+    }
+}
+
+public extension KSVideoPlayer {
     func onBufferChanged(_ handler: @escaping (Int, TimeInterval) -> Void) -> Self {
         coordinator.onBufferChanged = handler
         return self
