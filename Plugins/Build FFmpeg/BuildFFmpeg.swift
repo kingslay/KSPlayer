@@ -181,7 +181,7 @@ private class BaseBuild {
 }
 
 private class BuildFFMPEG: BaseBuild {
-    private let ffmpegFile = "ffmpeg-5.1"
+    private let ffmpegFile = "ffmpeg-5.1.1"
     private let isDebug: Bool
     private let isFFplay: Bool
     init(arguments: [String]) {

@@ -19,7 +19,7 @@ public class SubtitlePart: CustomStringConvertible, NSMutableCopying {
     public let text: NSMutableAttributedString?
     public var image: UIImage?
     public var description: String {
-        "Subtile Group ==========\nstart: \(start)\nend:\(end)\ntext:\(text)"
+        "Subtile Group ==========\nstart: \(start)\nend:\(end)\ntext:\(String(describing: text))"
     }
 
     public convenience init(_ start: TimeInterval, _ end: TimeInterval, _ string: String) {
@@ -36,9 +36,7 @@ public class SubtitlePart: CustomStringConvertible, NSMutableCopying {
     }
 
     public func mutableCopy(with _: NSZone? = nil) -> Any {
-        // swiftlint:disable force_cast
         SubtitlePart(start, end, attributedString: text?.mutableCopy() as? NSMutableAttributedString)
-        // swiftlint:enable force_cast
     }
 }
 

@@ -55,7 +55,7 @@
 		AC77DFB226402329001351AE /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		AC77DFB726402329001351AE /* .app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; name = .app; path = TracyPlayer.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		AC77DFBA26402329001351AE /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		AC77DFBF26402329001351AE /* .app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; name = .app; path = TracyPlayer.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		AC77DFBF26402329001351AE /* TracyPlayer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TracyPlayer.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		AC77DFC126402329001351AE /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		AC77DFC226402329001351AE /* macOS.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = macOS.entitlements; sourceTree = "<group>"; };
 		AC84D8D728ABBD0D00344154 /* vr.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = vr.mp4; sourceTree = "<group>"; };
@@ -140,7 +140,7 @@
 			isa = PBXGroup;
 			children = (
 				AC77DFB726402329001351AE /* .app */,
-				AC77DFBF26402329001351AE /* .app */,
+				AC77DFBF26402329001351AE /* TracyPlayer.app */,
 				ACB8C9FC278AE3A6008B6582 /* TracyPlayer.app */,
 			);
 			name = Products;
@@ -245,7 +245,7 @@
 				ACD2F74D275F6EE60006D16F /* KSPlayer */,
 			);
 			productName = "demo-SPM (macOS)";
-			productReference = AC77DFBF26402329001351AE /* .app */;
+			productReference = AC77DFBF26402329001351AE /* TracyPlayer.app */;
 			productType = "com.apple.product-type.application";
 		};
 		ACB8C9FB278AE3A6008B6582 /* tvOS */ = {
@@ -275,7 +275,7 @@
 			isa = PBXProject;
 			attributes = {
 				LastSwiftUpdateCheck = 1310;
-				LastUpgradeCheck = 1310;
+				LastUpgradeCheck = 1400;
 				TargetAttributes = {
 					AC77DFB626402329001351AE = {
 						CreatedOnToolsVersion = 12.4;
@@ -445,6 +445,7 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
+				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
@@ -507,6 +508,7 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
+				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
@@ -592,6 +594,7 @@
 				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
+				DEAD_CODE_STRIPPING = YES;
 				ENABLE_PREVIEWS = YES;
 				INFOPLIST_FILE = macOS/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -614,6 +617,7 @@
 				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
+				DEAD_CODE_STRIPPING = YES;
 				ENABLE_PREVIEWS = YES;
 				INFOPLIST_FILE = macOS/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
