@@ -351,31 +351,30 @@ struct VideoSettingView: View {
     }
 }
 
-struct AirPlayView: UIViewRepresentable {
+public struct AirPlayView: UIViewRepresentable {
     #if canImport(UIKit)
     public typealias UIViewType = AVRoutePickerView
-    func makeUIView(context _: Context) -> UIViewType {
+    public func makeUIView(context _: Context) -> UIViewType {
         let routePickerView = AVRoutePickerView()
         routePickerView.tintColor = .white
         return routePickerView
     }
 
-    func updateUIView(_: UIViewType, context _: Context) {}
+    public func updateUIView(_: UIViewType, context _: Context) {}
     #else
     public typealias NSViewType = AVRoutePickerView
-    func makeNSView(context _: Context) -> NSViewType {
+    public func makeNSView(context _: Context) -> NSViewType {
         let routePickerView = AVRoutePickerView()
         return routePickerView
     }
 
-    func updateNSView(_: NSViewType, context _: Context) {}
+    public func updateNSView(_: NSViewType, context _: Context) {}
     #endif
 }
 
 #if os(tvOS)
 import Combine
-@available(tvOS 13.0, *)
-struct Slider: UIViewRepresentable {
+public struct Slider: UIViewRepresentable {
     private let process: Binding<Float>
     private let onEditingChanged: (Bool) -> Void
     init(value: Binding<Double>, in bounds: ClosedRange<Double> = 0 ... 1, onEditingChanged: @escaping (Bool) -> Void = { _ in }) {
@@ -387,23 +386,22 @@ struct Slider: UIViewRepresentable {
         self.onEditingChanged = onEditingChanged
     }
 
-    typealias UIViewType = TVSlide
-    func makeUIView(context _: Context) -> UIViewType {
+    public typealias UIViewType = TVSlide
+    public func makeUIView(context _: Context) -> UIViewType {
         TVSlide(process: process, onEditingChanged: onEditingChanged)
     }
 
-    func updateUIView(_ view: UIViewType, context _: Context) {
+    public func updateUIView(_ view: UIViewType, context _: Context) {
         view.process = process
     }
 }
 
-@available(tvOS 13.0, *)
-class TVSlide: UIControl {
+public class TVSlide: UIControl {
     private let processView = UIProgressView()
     private lazy var panGestureRecognizer = UIPanGestureRecognizer(target: self, action: #selector(actionPanGesture(sender:)))
     private var beganProgress = Float(0.0)
     private let onEditingChanged: (Bool) -> Void
-    var process: Binding<Float> {
+    fileprivate var process: Binding<Float> {
         willSet {
             if newValue.wrappedValue != processView.progress {
                 processView.progress = newValue.wrappedValue
@@ -411,7 +409,7 @@ class TVSlide: UIControl {
         }
     }
 
-    init(process: Binding<Float>, onEditingChanged: @escaping (Bool) -> Void) {
+    public init(process: Binding<Float>, onEditingChanged: @escaping (Bool) -> Void) {
         self.process = process
         self.onEditingChanged = onEditingChanged
         super.init(frame: .zero)
