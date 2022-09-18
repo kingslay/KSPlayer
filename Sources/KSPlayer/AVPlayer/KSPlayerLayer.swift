@@ -666,7 +666,6 @@ extension Bundle {
 }
 #endif
 
-
 public struct KSVideoPlayer {
     public let coordinator: Coordinator
     private let url: URL

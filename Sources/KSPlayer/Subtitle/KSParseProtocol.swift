@@ -16,17 +16,16 @@ public extension KSParseProtocol {
     }
 
     static func parseDuration(_ fromStr: String) -> TimeInterval {
-        var hour: TimeInterval = 0.0, min: TimeInterval = 0.0, sec: TimeInterval = 0.0, millisecond: TimeInterval = 0.0
         let scanner = Scanner(string: fromStr)
-        scanner.scanDouble(&hour)
-        scanner.scanString(":", into: nil)
-        scanner.scanDouble(&min)
-        scanner.scanString(":", into: nil)
-        scanner.scanDouble(&sec)
-        if !scanner.scanString(",", into: nil) {
-            scanner.scanString(".", into: nil)
+        let hour = scanner.scanDouble() ?? 0.0
+        _ = scanner.scanString(":")
+        let min = scanner.scanDouble() ?? 0.0
+        _ = scanner.scanString(":")
+        let sec = scanner.scanDouble() ?? 0.0
+        if scanner.scanString(",") != nil {
+            _ = scanner.scanString(".")
         }
-        scanner.scanDouble(&millisecond)
+        let millisecond = scanner.scanDouble() ?? 0.0
         return (hour * 3600.0) + (min * 60.0) + sec + (millisecond / 1000.0)
     }
 }
@@ -39,23 +38,21 @@ public class AssParse: KSParseProtocol {
     // Dialogue: 0,0:12:37.73,0:12:38.83,Aki Default,,0,0,0,,{\be8}原来如此
     // 875,,Default,NTP,0000,0000,0000,!Effect,- 你们两个别冲这么快\\N- 我会取消所有行程尽快赶过去
     public class func parse(scanner: Scanner, reg: NSRegularExpression?) -> SubtitlePart? {
-        let isDialogue = scanner.scanString("Dialogue:", into: nil)
+        let isDialogue = scanner.scanString("Dialogue") != nil
         let start: TimeInterval
         let end: TimeInterval
         if isDialogue {
-            scanner.scanUpTo(",", into: nil)
-            scanner.scanString(",", into: nil)
-            var startString: NSString?
-            scanner.scanUpTo(",", into: &startString)
-            scanner.scanString(",", into: nil)
-            var endString: NSString?
-            scanner.scanUpTo(",", into: &endString)
-            scanner.scanString(",", into: nil)
+            _ = scanner.scanUpToString(",")
+            _ = scanner.scanString(",")
+            let startString = scanner.scanUpToString(",")
+            _ = scanner.scanString(",")
+            let endString = scanner.scanUpToString(",")
+            _ = scanner.scanString(",")
             (0 ..< 6).forEach { _ in
-                scanner.scanUpTo(",", into: nil)
-                scanner.scanString(",", into: nil)
+                _ = scanner.scanUpToString(",")
+                _ = scanner.scanString(",")
             }
-            if let startString = startString as String?, let endString = endString as String? {
+            if let startString = startString, let endString = endString {
                 start = parseDuration(startString)
                 end = parseDuration(endString)
             } else {
@@ -65,13 +62,11 @@ public class AssParse: KSParseProtocol {
             start = 0
             end = 0
             (0 ..< 8).forEach { _ in
-                scanner.scanUpTo(",", into: nil)
-                scanner.scanString(",", into: nil)
+                _ = scanner.scanUpToString(",")
+                _ = scanner.scanString(",")
             }
         }
-        var textString: NSString?
-        scanner.scanUpToCharacters(from: .newlines, into: &textString)
-        guard var text = textString as String? else {
+        guard var text = scanner.scanUpToCharacters(from: .newlines) else {
             return nil
         }
         text = text.replacingOccurrences(of: "\\N", with: "\n")
@@ -124,16 +119,14 @@ public class SrtParse: KSParseProtocol {
      {\an4}慢慢来
      */
     public class func parse(scanner: Scanner, reg: NSRegularExpression?) -> SubtitlePart? {
-        scanner.scanUpToCharacters(from: .newlines, into: nil)
-        var startString: NSString?
-        scanner.scanUpTo(" --> ", into: &startString)
+        _ = scanner.scanUpToCharacters(from: .newlines)
+        let startString = scanner.scanUpToString(" --> ")
         // skip spaces and newlines by default.
-        scanner.scanString("-->", into: nil)
-        var endString: NSString?
-        scanner.scanUpToCharacters(from: .newlines, into: &endString)
-        var textString: NSString?
-        scanner.scanUpTo("\r\n\r\n", into: &textString)
-        if let startString = startString as String?, let endString = endString as String?, var text = textString as String? {
+        _ = scanner.scanString("-->")
+        if let startString = startString,
+           let endString = scanner.scanUpToCharacters(from: .newlines),
+           var text = scanner.scanUpToString("\r\n\r\n")
+        {
             if let reg = reg {
                 text = reg.stringByReplacingMatches(in: text, range: NSRange(location: 0, length: text.count), withTemplate: "")
             }
