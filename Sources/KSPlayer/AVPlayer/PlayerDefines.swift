@@ -11,7 +11,7 @@ import CoreMedia
 import CoreServices
 #if canImport(UIKit)
 import UIKit
-extension UIScreen {
+public extension UIScreen {
     static var size: CGSize {
         main.bounds.size
     }
@@ -20,7 +20,7 @@ extension UIScreen {
 import AppKit
 public typealias UIView = NSView
 public typealias UIScreen = NSScreen
-extension NSScreen {
+public extension NSScreen {
     static var size: CGSize {
         main?.frame.size ?? .zero
     }

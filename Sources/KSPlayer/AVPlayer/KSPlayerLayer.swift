@@ -685,7 +685,7 @@ public struct KSVideoPlayer {
 }
 
 #if !canImport(UIKit)
-typealias UIViewRepresentable = NSViewRepresentable
+public typealias UIViewRepresentable = NSViewRepresentable
 #endif
 
 extension KSVideoPlayer: UIViewRepresentable {
