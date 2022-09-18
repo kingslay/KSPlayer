@@ -203,6 +203,7 @@ open class KSOptions {
     public static var isSeekedAutoPlay = true
     public static var isClearVideoWhereReplace = true
     public static var enableMaxOutputChannels = true
+    public static var pipController: Any?
 
     //    public static let shared = KSOptions()
     /// 最低缓存视频时间

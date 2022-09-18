@@ -73,7 +73,6 @@ open class KSPlayerLayer: UIView {
     private var bufferedCount = 0
     private var shouldSeekTo: TimeInterval = 0
     private var startTime: TimeInterval = 0
-    private var pipController: Any?
     public private(set) var url: URL? {
         didSet {
             guard let url = url, let options = options else {
@@ -169,6 +168,7 @@ open class KSPlayerLayer: UIView {
 
     deinit {
         NotificationCenter.default.removeObserver(self)
+        MPNowPlayingInfoCenter.default().nowPlayingInfo = nil
     }
 
     public func set(url: URL, options: KSOptions) {
@@ -275,25 +275,32 @@ open class KSPlayerLayer: UIView {
     public var isPipActive: Bool {
         get {
             if #available(tvOS 14.0, *) {
-                return (pipController as? AVPictureInPictureController)?.isPictureInPictureActive ?? false
+                return (KSOptions.pipController as? AVPictureInPictureController)?.isPictureInPictureActive ?? false
             } else {
                 return false
             }
         }
         set {
             if #available(tvOS 14.0, *) {
-                if let pipController = (pipController as? AVPictureInPictureController) ?? player?.pipController(),
+                var pipController: AVPictureInPictureController?
+                if let controller = KSOptions.pipController as? AVPictureInPictureController, controller.delegate === self {
+                    pipController = controller
+                } else {
+                    KSOptions.pipController = nil
+                    pipController = player?.pipController()
+                }
+                if let pipController = pipController,
                    newValue != pipController.isPictureInPictureActive
                 {
                     if pipController.isPictureInPictureActive {
                         pipController.stopPictureInPicture()
                         pipController.delegate = nil
-                        self.pipController = nil
+                        KSOptions.pipController = nil
                     } else {
                         DispatchQueue.main.async {
                             pipController.startPictureInPicture()
                             pipController.delegate = self
-                            self.pipController = pipController
+                            KSOptions.pipController = pipController
                         }
                     }
                 }
@@ -578,7 +585,7 @@ extension KSPlayerLayer {
         }
 
         if #available(tvOS 14.0, *) {
-            if (pipController as? AVPictureInPictureController)?.isPictureInPictureActive ?? false {
+            if (KSOptions.pipController as? AVPictureInPictureController)?.isPictureInPictureActive ?? false {
                 return
             }
         }
