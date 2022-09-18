@@ -22,6 +22,11 @@
 	<string>1</string>
 	<key>LSMinimumSystemVersion</key>
 	<string>$(MACOSX_DEPLOYMENT_TARGET)</string>
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsArbitraryLoads</key>
+		<true/>
+	</dict>
 	<key>UTImportedTypeDeclarations</key>
 	<array>
 		<dict>
@@ -51,7 +56,7 @@
 				<string>public.audio</string>
 			</array>
 			<key>UTTypeDescription</key>
-			<string>Monkey&apos;s Audio Lossless Audio</string>
+			<string>Monkey's Audio Lossless Audio</string>
 			<key>UTTypeIdentifier</key>
 			<string>io.ks.ape</string>
 			<key>UTTypeTagSpecification</key>

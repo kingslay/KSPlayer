@@ -146,15 +146,8 @@ open class VideoPlayerView: PlayerView {
             viewController?.present(alertController, animated: true, completion: nil)
         } else if type == .pictureInPicture {
             if #available(tvOS 14.0, *) {
-                guard let pipController = playerLayer.player?.pipController else {
-                    return
-                }
-                if pipController.isPictureInPictureActive {
-                    pipController.stopPictureInPicture()
-                } else {
-                    pipController.startPictureInPicture()
-                    button.isSelected = true
-                }
+                button.isSelected.toggle()
+                playerLayer.isPipActive = button.isSelected
             }
         } else if type == .audioSwitch || type == .videoSwitch {
             guard let tracks = playerLayer.player?.tracks(mediaType: type == .audioSwitch ? .audio : .video) else {

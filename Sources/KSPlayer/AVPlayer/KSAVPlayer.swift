@@ -95,17 +95,13 @@ public class KSAVPlayer {
     }
 
     @available(tvOS 14.0, *)
-    public var pipController: AVPictureInPictureController? {
-        _pipController as? AVPictureInPictureController
-    }
-
-    private lazy var _pipController: Any? = {
+    public func pipController() -> AVPictureInPictureController? {
         if #available(tvOS 14.0, *) {
             return AVPictureInPictureController(playerLayer: self.playerView.playerLayer)
         } else {
             return nil
         }
-    }()
+    }
 
     @available(macOS 12.0, iOS 15.0, tvOS 15.0, *)
     public var playbackCoordinator: AVPlaybackCoordinator {

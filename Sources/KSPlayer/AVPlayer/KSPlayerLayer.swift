@@ -71,6 +71,7 @@ open class KSPlayerLayer: UIView {
     private var bufferedCount = 0
     private var shouldSeekTo: TimeInterval = 0
     private var startTime: TimeInterval = 0
+    private var pipController: Any?
     public private(set) var url: URL? {
         didSet {
             guard let url = url, let options = options else {
@@ -268,6 +269,35 @@ open class KSPlayerLayer: UIView {
             ])
         }
     }
+
+    public var isPipActive: Bool {
+        get {
+            if #available(tvOS 14.0, *) {
+                return (pipController as? AVPictureInPictureController)?.isPictureInPictureActive ?? false
+            } else {
+                return false
+            }
+        }
+        set {
+            if #available(tvOS 14.0, *) {
+                if let pipController = (pipController as? AVPictureInPictureController) ?? player?.pipController(),
+                   newValue != pipController.isPictureInPictureActive
+                {
+                    if pipController.isPictureInPictureActive {
+                        pipController.stopPictureInPicture()
+                        pipController.delegate = nil
+                        self.pipController = nil
+                    } else {
+                        DispatchQueue.main.async {
+                            pipController.startPictureInPicture()
+                            pipController.delegate = self
+                            self.pipController = pipController
+                        }
+                    }
+                }
+            }
+        }
+    }
 }
 
 // MARK: - MediaPlayerDelegate
@@ -276,9 +306,6 @@ extension KSPlayerLayer: MediaPlayerDelegate {
     public func preparedToPlay(player: MediaPlayerProtocol) {
         updateNowPlayingInfo()
         state = .readyToPlay
-        if #available(tvOS 14.0, *) {
-            player.pipController?.delegate = self
-        }
         for track in player.tracks(mediaType: .video) where track.isEnabled {
             #if os(tvOS)
             setDisplayCriteria(track: track)
@@ -365,7 +392,6 @@ extension KSPlayerLayer: AVPictureInPictureControllerDelegate {
     public func pictureInPictureControllerDidStopPictureInPicture(_: AVPictureInPictureController) {
         delegate?.player(layer: self, isPipActive: false)
     }
-
 }
 
 // MARK: - private functions
@@ -550,7 +576,7 @@ extension KSPlayerLayer {
         }
 
         if #available(tvOS 14.0, *) {
-            if player.pipController?.isPictureInPictureActive ?? false {
+            if (pipController as? AVPictureInPictureController)?.isPictureInPictureActive ?? false {
                 return
             }
         }
