@@ -59,7 +59,6 @@ public protocol KSPlayerLayerDelegate: AnyObject {
     func player(layer: KSPlayerLayer, currentTime: TimeInterval, totalTime: TimeInterval)
     func player(layer: KSPlayerLayer, finish error: Error?)
     func player(layer: KSPlayerLayer, bufferedCount: Int, consumeTime: TimeInterval)
-    func player(layer: KSPlayerLayer, isPipActive: Bool)
 }
 
 open class KSPlayerLayer: UIView {
@@ -73,6 +72,37 @@ open class KSPlayerLayer: UIView {
     private var bufferedCount = 0
     private var shouldSeekTo: TimeInterval = 0
     private var startTime: TimeInterval = 0
+    @Published
+    public var isPipActive = false {
+        didSet {
+            if #available(tvOS 14.0, *) {
+                var pipController: AVPictureInPictureController?
+                if let controller = KSOptions.pipController as? AVPictureInPictureController, controller.delegate === self {
+                    pipController = controller
+                } else {
+                    KSOptions.pipController = nil
+                    pipController = player?.pipController()
+                }
+                if let pipController = pipController,
+                   isPipActive != pipController.isPictureInPictureActive
+                {
+                    if pipController.isPictureInPictureActive {
+                        pipController.stopPictureInPicture()
+                        pipController.delegate = nil
+                        KSOptions.pipController = nil
+                    } else {
+                        DispatchQueue.main.async { [weak self] in
+                            guard let self = self else { return }
+                            pipController.startPictureInPicture()
+                            pipController.delegate = self
+                            KSOptions.pipController = pipController
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     public private(set) var url: URL? {
         didSet {
             guard let url = url, let options = options else {
@@ -273,42 +303,6 @@ open class KSPlayerLayer: UIView {
             ])
         }
     }
-
-    public var isPipActive: Bool {
-        get {
-            if #available(tvOS 14.0, *) {
-                return (KSOptions.pipController as? AVPictureInPictureController)?.isPictureInPictureActive ?? false
-            } else {
-                return false
-            }
-        }
-        set {
-            if #available(tvOS 14.0, *) {
-                var pipController: AVPictureInPictureController?
-                if let controller = KSOptions.pipController as? AVPictureInPictureController, controller.delegate === self {
-                    pipController = controller
-                } else {
-                    KSOptions.pipController = nil
-                    pipController = player?.pipController()
-                }
-                if let pipController = pipController,
-                   newValue != pipController.isPictureInPictureActive
-                {
-                    if pipController.isPictureInPictureActive {
-                        pipController.stopPictureInPicture()
-                        pipController.delegate = nil
-                        KSOptions.pipController = nil
-                    } else {
-                        DispatchQueue.main.async {
-                            pipController.startPictureInPicture()
-                            pipController.delegate = self
-                            KSOptions.pipController = pipController
-                        }
-                    }
-                }
-            }
-        }
-    }
 }
 
 // MARK: - MediaPlayerDelegate
@@ -401,7 +395,7 @@ extension KSPlayerLayer: MediaPlayerDelegate {
 @available(tvOS 14.0, *)
 extension KSPlayerLayer: AVPictureInPictureControllerDelegate {
     public func pictureInPictureControllerDidStopPictureInPicture(_: AVPictureInPictureController) {
-        delegate?.player(layer: self, isPipActive: false)
+        isPipActive = false
     }
 }
 
@@ -582,14 +576,8 @@ extension KSPlayerLayer {
     }
 
     @objc private func enterBackground() {
-        guard let player = player, state.isPlaying, !player.isExternalPlaybackActive else {
+        guard let player = player, state.isPlaying, !player.isExternalPlaybackActive, !isPipActive else {
             return
-        }
-
-        if #available(tvOS 14.0, *) {
-            if (KSOptions.pipController as? AVPictureInPictureController)?.isPictureInPictureActive ?? false {
-                return
-            }
         }
 
         if KSPlayerManager.canBackgroundPlay {
@@ -715,7 +703,12 @@ extension KSVideoPlayer: UIViewRepresentable {
         updateView(uiView, context: context)
     }
 
-    public static func dismantleUIView(_: UIViewType, coordinator _: Coordinator) {}
+    public static func dismantleUIView(_ uiView: UIViewType, coordinator: Coordinator) {
+        // 在iOS，第二次进入会先调用makeUIView。然后在调用之前的dismantleUIView.所以需要进行下判断
+        if coordinator.playerLayer == uiView {
+            coordinator.playerLayer = nil
+        }
+    }
     #else
     public typealias NSViewType = KSPlayerLayer
     public func makeNSView(context: Context) -> NSViewType {
@@ -726,7 +719,11 @@ extension KSVideoPlayer: UIViewRepresentable {
         updateView(uiView, context: context)
     }
 
-    public static func dismantleNSView(_: NSViewType, coordinator _: Coordinator) {}
+    public static func dismantleNSView(_ uiView: NSViewType, coordinator: Coordinator) {
+        if coordinator.playerLayer == uiView {
+            coordinator.playerLayer = nil
+        }
+    }
     #endif
     private func makeView(context: Context) -> KSPlayerLayer {
         let playerLayer = KSPlayerLayer()
@@ -753,29 +750,9 @@ extension KSVideoPlayer: UIViewRepresentable {
             }
         }
 
-        @Published public var isPipActive = false {
-            didSet {
-                playerLayer?.isPipActive = isPipActive
-            }
-        }
-
         @Published public var isScaleAspectFill = false {
             didSet {
                 playerLayer?.player?.contentMode = isScaleAspectFill ? .scaleAspectFill : .scaleAspectFit
-            }
-        }
-
-        public weak var playerLayer: KSPlayerLayer?
-        public var selectedAudioTrack: MediaPlayerTrack? {
-            didSet {
-                if oldValue?.trackID != selectedAudioTrack?.trackID {
-                    if let track = selectedAudioTrack {
-                        playerLayer?.player?.select(track: track)
-                        playerLayer?.player?.isMuted = false
-                    } else {
-                        playerLayer?.player?.isMuted = true
-                    }
-                }
             }
         }
 
@@ -785,6 +762,19 @@ extension KSVideoPlayer: UIViewRepresentable {
                     playerLayer?.player?.select(track: track)
                 } else {
                     oldValue?.setIsEnabled(false)
+                }
+            }
+        }
+
+        public var selectedAudioTrack: MediaPlayerTrack? {
+            didSet {
+                if oldValue?.trackID != selectedAudioTrack?.trackID {
+                    if let track = selectedAudioTrack {
+                        playerLayer?.player?.select(track: track)
+                        playerLayer?.player?.isMuted = false
+                    } else {
+                        playerLayer?.player?.isMuted = true
+                    }
                 }
             }
         }
@@ -803,6 +793,7 @@ extension KSVideoPlayer: UIViewRepresentable {
             }
         }
 
+        public var playerLayer: KSPlayerLayer?
         public var audioTracks = [MediaPlayerTrack]()
         public var subtitleTracks = [MediaPlayerTrack]()
         public var videoTracks = [MediaPlayerTrack]()
@@ -850,10 +841,6 @@ extension KSVideoPlayer.Coordinator: KSPlayerLayerDelegate {
 
     public func player(layer _: KSPlayerLayer, bufferedCount: Int, consumeTime: TimeInterval) {
         onBufferChanged?(bufferedCount, consumeTime)
-    }
-
-    public func player(layer _: KSPlayerLayer, isPipActive: Bool) {
-        self.isPipActive = isPipActive
     }
 }
 

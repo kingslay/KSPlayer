@@ -71,6 +71,4 @@ extension KSPlayerLayerTest: KSPlayerLayerDelegate {
             XCTFail()
         }
     }
-
-    func player(layer _: KSPlayerLayer, isPipActive _: Bool) {}
 }

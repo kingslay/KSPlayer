@@ -11,6 +11,7 @@ import UIKit
 #else
 import AppKit
 #endif
+import Combine
 import MediaPlayer
 
 /// internal enum to check the pan direction
@@ -43,6 +44,7 @@ open class VideoPlayerView: PlayerView {
     public let topMaskView = LayerContainerView()
     // 是否播放过
     private(set) var isPlayed = false
+    private var cancellable: AnyCancellable?
     private var embedSubtitleDataSouce: SubtitleDataSouce? {
         didSet {
             if oldValue !== embedSubtitleDataSouce {
@@ -119,6 +121,7 @@ open class VideoPlayerView: PlayerView {
     override public init(frame: CGRect) {
         super.init(frame: frame)
         setupUIComponents()
+        cancellable = playerLayer.$isPipActive.assign(to: \.isSelected, on: toolBar.pipButton)
     }
 
     // MARK: - Action Response
@@ -146,8 +149,7 @@ open class VideoPlayerView: PlayerView {
             viewController?.present(alertController, animated: true, completion: nil)
         } else if type == .pictureInPicture {
             if #available(tvOS 14.0, *) {
-                button.isSelected.toggle()
-                playerLayer.isPipActive = button.isSelected
+                playerLayer.isPipActive.toggle()
             }
         } else if type == .audioSwitch || type == .videoSwitch {
             guard let tracks = playerLayer.player?.tracks(mediaType: type == .audioSwitch ? .audio : .video) else {

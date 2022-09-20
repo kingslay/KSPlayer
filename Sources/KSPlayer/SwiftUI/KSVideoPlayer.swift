@@ -82,7 +82,11 @@ public struct KSVideoPlayerView: View {
                 }
                 .edgesIgnoringSafeArea(.all)
                 .onDisappear {
-                    player.coordinator.playerLayer?.pause()
+                    if let playerLayer = player.coordinator.playerLayer {
+                        if !playerLayer.isPipActive {
+                            player.coordinator.playerLayer?.pause()
+                        }
+                    }
                 }
             subtitleView
             VideoControllerView(model: $model).opacity(model.isMaskShow ? 1 : 0)
@@ -146,9 +150,9 @@ struct VideoControllerView: View {
                         Image(systemName: "xmark").imageScale(.large)
                     }
                     Button {
-                        config.isPipActive.toggle()
+                        config.playerLayer?.isPipActive.toggle()
                     } label: {
-                        Image(systemName: config.isPipActive ? "pip.exit" : "pip.enter")
+                        Image(systemName: config.playerLayer?.isPipActive ?? false ? "pip.exit" : "pip.enter")
                     }
                     Button {
                         config.isScaleAspectFill.toggle()
