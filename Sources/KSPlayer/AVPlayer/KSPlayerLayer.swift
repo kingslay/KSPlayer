@@ -703,12 +703,8 @@ extension KSVideoPlayer: UIViewRepresentable {
         updateView(uiView, context: context)
     }
 
-    public static func dismantleUIView(_ uiView: UIViewType, coordinator: Coordinator) {
-        // 在iOS，第二次进入会先调用makeUIView。然后在调用之前的dismantleUIView.所以需要进行下判断
-        if coordinator.playerLayer == uiView {
-            coordinator.playerLayer = nil
-        }
-    }
+    // 在iOS，第二次进入会先调用makeUIView。然后在调用之前的dismantleUIView. 所以用weak来做自动回收。
+    public static func dismantleUIView(_: UIViewType, coordinator _: Coordinator) {}
     #else
     public typealias NSViewType = KSPlayerLayer
     public func makeNSView(context: Context) -> NSViewType {
@@ -719,18 +715,20 @@ extension KSVideoPlayer: UIViewRepresentable {
         updateView(uiView, context: context)
     }
 
-    public static func dismantleNSView(_ uiView: NSViewType, coordinator: Coordinator) {
-        if coordinator.playerLayer == uiView {
-            coordinator.playerLayer = nil
-        }
-    }
+    public static func dismantleNSView(_: NSViewType, coordinator _: Coordinator) {}
     #endif
     private func makeView(context: Context) -> KSPlayerLayer {
-        let playerLayer = KSPlayerLayer()
-        playerLayer.set(url: url, options: options)
-        playerLayer.delegate = context.coordinator
-        context.coordinator.playerLayer = playerLayer
-        return playerLayer
+        if let playerLayer = context.coordinator.playerLayer {
+            playerLayer.set(url: url, options: options)
+            playerLayer.delegate = context.coordinator
+            return playerLayer
+        } else {
+            let playerLayer = KSPlayerLayer()
+            playerLayer.set(url: url, options: options)
+            playerLayer.delegate = context.coordinator
+            context.coordinator.playerLayer = playerLayer
+            return playerLayer
+        }
     }
 
     private func updateView(_: KSPlayerLayer, context _: Context) {}
@@ -793,7 +791,7 @@ extension KSVideoPlayer: UIViewRepresentable {
             }
         }
 
-        public var playerLayer: KSPlayerLayer?
+        public weak var playerLayer: KSPlayerLayer?
         public var audioTracks = [MediaPlayerTrack]()
         public var subtitleTracks = [MediaPlayerTrack]()
         public var videoTracks = [MediaPlayerTrack]()
