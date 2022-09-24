@@ -24,6 +24,18 @@ import Foundation
             try? FileManager.default.createDirectory(at: path, withIntermediateDirectories: false, attributes: nil)
         }
         FileManager.default.changeCurrentDirectoryPath(path.path)
+        BaseBuild.platforms = arguments.compactMap { argument in
+            if argument.hasPrefix("platform=") {
+                let value = String(argument.suffix(argument.count - "platform=".count))
+                return PlatformType(rawValue: value)
+            } else {
+                return nil
+            }
+        }
+        if BaseBuild.platforms.isEmpty {
+            BaseBuild.platforms = PlatformType.allCases
+        }
+        
         let enableOpenssl = arguments.firstIndex(of: "enable-openssl") != nil
         if enableOpenssl {
             BuildOpenSSL().buildALL()
@@ -41,8 +53,7 @@ import Foundation
 }
 
 private class BaseBuild {
-    fileprivate let platforms = PlatformType.allCases
-//     fileprivate let platforms = [PlatformType.ios]
+    static var platforms = PlatformType.allCases
     private let library: String
     init(library: String) {
         self.library = library
@@ -50,7 +61,7 @@ private class BaseBuild {
 
     func buildALL() {
         try? FileManager.default.removeItem(at: URL.currentDirectory + library)
-        for platform in platforms {
+        for platform in BaseBuild.platforms {
             for arch in platform.architectures() {
                 build(platform: platform, arch: arch)
             }
@@ -78,7 +89,7 @@ private class BaseBuild {
             if FileManager.default.fileExists(atPath: XCFrameworkFile.path) {
                 try? FileManager.default.removeItem(at: XCFrameworkFile)
             }
-            for platform in platforms {
+            for platform in BaseBuild.platforms {
                 arguments += " -framework \(createFramework(framework: framework, platform: platform))"
             }
             Utility.shell("xcodebuild -create-xcframework\(arguments) -output \(XCFrameworkFile.path)")
@@ -236,15 +247,14 @@ private class BuildFFMPEG: BaseBuild {
             ldflags = cflags
         }
         let opensslPath = URL.currentDirectory + ["SSL", platform.rawValue, "thin", arch.rawValue]
+        var pkgConfigPath = ""
         if FileManager.default.fileExists(atPath: opensslPath.path) {
-            cflags += " -I\(opensslPath.path)/include"
-            ldflags += " -L\(opensslPath.path)/lib"
+            pkgConfigPath += "\(opensslPath.path)/lib/pkgconfig:"
             ffmpegcflags.append("--enable-openssl")
         }
         let srtPath = URL.currentDirectory + ["SRT", platform.rawValue, "thin", arch.rawValue]
         if FileManager.default.fileExists(atPath: srtPath.path) {
-            cflags += " -I\(srtPath.path)/include"
-            ldflags += " -L\(srtPath.path)/lib"
+            pkgConfigPath += "\(srtPath.path)/lib/pkgconfig:"
             ffmpegcflags.append("--enable-libsrt")
             ffmpegcflags.append("--enable-protocol=libsrt")
         }
@@ -259,7 +269,8 @@ private class BuildFFMPEG: BaseBuild {
                     "--extra-ldflags='\(ldflags)'",
                     "--prefix=\(prefix.path)"]
         args.append(contentsOf: ffmpegcflags)
-        Utility.shell(args.joined(separator: " "), currentDirectoryURL: buildDir)
+        let environment = ["PKG_CONFIG_PATH": pkgConfigPath]
+        Utility.shell(args.joined(separator: " "), currentDirectoryURL: buildDir, environment: environment)
         Utility.shell("make -j8 install\(arch == .x86_64 ? "" : " GASPP_FIX_XCODE5=1") >>\(buildDir.path).log", currentDirectoryURL: buildDir)
         if isFFplay, platform == .macos, arch.executable() {
             try? FileManager.default.removeItem(at: URL(fileURLWithPath: "/usr/local/bin/ffmpeg"))
@@ -281,7 +292,7 @@ private class BuildFFMPEG: BaseBuild {
     }
 
     private func makeFFmpegSourece() {
-        guard let platform = platforms.first, let arch = platform.architectures().first else {
+        guard let platform = BaseBuild.platforms.first, let arch = platform.architectures().first else {
             return
         }
         let target = URL.currentDirectory + ["../Sources", "FFmpeg"]
@@ -455,9 +466,7 @@ private class BuildFFMPEG: BaseBuild {
 }
 
 private class BuildSRT: BaseBuild {
-    private let srtVersion = "v1.4.4"
-    private let srtFile = "srt-1.4.4"
-
+    private let version = "1.5.0"
     init() {
         super.init(library: "SRT")
     }
@@ -469,8 +478,8 @@ private class BuildSRT: BaseBuild {
         if Utility.shell("which wget") == nil {
             Utility.shell("brew install wget")
         }
-        if !FileManager.default.fileExists(atPath: (URL.currentDirectory + srtFile).path) {
-            Utility.shell("curl -L https://github.com/Haivision/srt/archive/refs/tags/\(srtVersion).tar.gz | tar xj")
+        if !FileManager.default.fileExists(atPath: (URL.currentDirectory + "srt-" + version).path) {
+            Utility.shell("curl -L https://github.com/Haivision/srt/archive/refs/tags/v\(version).tar.gz | tar xj")
         }
         super.buildALL()
     }
@@ -486,7 +495,7 @@ private class BuildSRT: BaseBuild {
 
     override func innerBuid(platform: PlatformType, arch: ArchType, cflags _: String, buildDir: URL) {
         let opensslPath = URL.currentDirectory + ["SSL", platform.rawValue, "thin", arch.rawValue]
-        let directoryURL = URL.currentDirectory + srtFile
+        let directoryURL = URL.currentDirectory + "srt-\(version)"
         let cmakeDir = directoryURL + "\(platform)-\(arch)"
 
         if !FileManager.default.fileExists(atPath: cmakeDir.path) {
