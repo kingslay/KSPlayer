@@ -35,7 +35,7 @@ import Foundation
         if BaseBuild.platforms.isEmpty {
             BaseBuild.platforms = PlatformType.allCases
         }
-        
+
         let enableOpenssl = arguments.firstIndex(of: "enable-openssl") != nil
         if enableOpenssl {
             BuildOpenSSL().buildALL()
