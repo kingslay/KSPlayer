@@ -505,9 +505,10 @@ private class BuildSRT: BaseBuild {
         let srtPlatform = toSRTPlatform(platform: platform)
 
         try? FileManager.default.createDirectory(at: directoryURL + "/\(platform)-\(arch)", withIntermediateDirectories: true, attributes: nil)
-
-        let command = "cmake .. -DCMAKE_PREFIX_PATH=\(thinDir(platform: platform, arch: arch).path) -DCMAKE_INSTALL_PREFIX=\(thinDir(platform: platform, arch: arch).path) -DUSE_OPENSSL_PC=OFF -DCMAKE_TOOLCHAIN_FILE=scripts/iOS.cmake -DIOS_ARCH=\(arch) -DIOS_PLATFORM=\(srtPlatform)  -DCMAKE_IOS_DEVELOPER_ROOT=\(platform.crossTop()) -D_CMAKE_IOS_SDK_ROOT=\(platform.crossSDK()) -DOPENSSL_ROOT_DIR=\(opensslPath.path) -DOPENSSL_CRYPTO_LIBRARY=\(opensslPath.path)/lib/libcrypto.a -DOPENSSL_SSL_LIBRARY=\(opensslPath.path)/lib/libssl.a -DOPENSSL_INCLUDE_DIR=\(opensslPath.path)/include"
-        Utility.shell(command, currentDirectoryURL: cmakeDir)
+        let pkgConfigPath = "\(opensslPath.path)/lib/pkgconfig:"
+        let environment = ["PKG_CONFIG_PATH": pkgConfigPath]
+        let command = "cmake .. -DCMAKE_PREFIX_PATH=\(thinDir(platform: platform, arch: arch).path) -DCMAKE_INSTALL_PREFIX=\(thinDir(platform: platform, arch: arch).path) -DUSE_OPENSSL_PC=OFF -DCMAKE_TOOLCHAIN_FILE=scripts/iOS.cmake -DIOS_ARCH=\(arch) -DIOS_PLATFORM=\(srtPlatform)  -DCMAKE_IOS_DEVELOPER_ROOT=\(platform.crossTop()) -D_CMAKE_IOS_SDK_ROOT=\(platform.crossSDK())"
+        Utility.shell(command, currentDirectoryURL: cmakeDir, environment: environment)
         Utility.shell("make >>\(buildDir.path).log && make install >>\(buildDir.path).log ", currentDirectoryURL: cmakeDir)
     }
 
