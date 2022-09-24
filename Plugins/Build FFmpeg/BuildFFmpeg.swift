@@ -478,7 +478,7 @@ private class BuildSRT: BaseBuild {
         if Utility.shell("which wget") == nil {
             Utility.shell("brew install wget")
         }
-        if !FileManager.default.fileExists(atPath: (URL.currentDirectory + "srt-" + version).path) {
+        if !FileManager.default.fileExists(atPath: (URL.currentDirectory + "srt-\(version)").path) {
             Utility.shell("curl -L https://github.com/Haivision/srt/archive/refs/tags/v\(version).tar.gz | tar xj")
         }
         super.buildALL()
@@ -504,10 +504,10 @@ private class BuildSRT: BaseBuild {
 
         let srtPlatform = toSRTPlatform(platform: platform)
 
-        try? FileManager.default.createDirectory(at: directoryURL + "/\(platform)-\(arch)", withIntermediateDirectories: true, attributes: nil)
         let pkgConfigPath = "\(opensslPath.path)/lib/pkgconfig:"
         let environment = ["PKG_CONFIG_PATH": pkgConfigPath]
-        let command = "cmake .. -DCMAKE_PREFIX_PATH=\(thinDir(platform: platform, arch: arch).path) -DCMAKE_INSTALL_PREFIX=\(thinDir(platform: platform, arch: arch).path) -DUSE_OPENSSL_PC=OFF -DCMAKE_TOOLCHAIN_FILE=scripts/iOS.cmake -DIOS_ARCH=\(arch) -DIOS_PLATFORM=\(srtPlatform)  -DCMAKE_IOS_DEVELOPER_ROOT=\(platform.crossTop()) -D_CMAKE_IOS_SDK_ROOT=\(platform.crossSDK())"
+        let thinDirPath = thinDir(platform: platform, arch: arch).path
+        let command = "cmake .. -DCMAKE_PREFIX_PATH=\(thinDirPath) -DCMAKE_INSTALL_PREFIX=\(thinDirPath) -DCMAKE_TOOLCHAIN_FILE=scripts/iOS.cmake -DIOS_ARCH=\(arch) -DIOS_PLATFORM=\(srtPlatform)  -DCMAKE_IOS_DEVELOPER_ROOT=\(platform.crossTop()) -D_CMAKE_IOS_SDK_ROOT=\(platform.crossSDK())"
         Utility.shell(command, currentDirectoryURL: cmakeDir, environment: environment)
         Utility.shell("make >>\(buildDir.path).log && make install >>\(buildDir.path).log ", currentDirectoryURL: cmakeDir)
     }
