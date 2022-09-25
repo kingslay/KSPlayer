@@ -250,9 +250,10 @@ open class KSOptions {
     public var asynchronousDecompression = false
     @Published var preferredFramesPerSecond = Float(60)
     public internal(set) var formatName = ""
-    public internal(set) var starTime = 0.0
+    public internal(set) var prepareTime = 0.0
     public internal(set) var openTime = 0.0
     public internal(set) var findTime = 0.0
+    public internal(set) var readyTime = 0.0
     public internal(set) var readAudioTime = 0.0
     public internal(set) var readVideoTime = 0.0
     public internal(set) var decodeAudioTime = 0.0

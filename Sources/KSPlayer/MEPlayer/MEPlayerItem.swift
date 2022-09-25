@@ -132,7 +132,6 @@ final class MEPlayerItem {
 
 extension MEPlayerItem {
     private func openThread() {
-        options.starTime = CACurrentMediaTime()
         avformat_close_input(&self.formatCtx)
         formatCtx = avformat_alloc_context()
         guard let formatCtx = formatCtx else {

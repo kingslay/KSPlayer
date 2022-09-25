@@ -120,6 +120,7 @@ extension KSMEPlayer {
 extension KSMEPlayer: MEPlayerDelegate {
     func sourceDidOpened() {
         isReadyToPlay = true
+        options.readyTime = CACurrentMediaTime()
         runInMainqueue { [weak self] in
             guard let self = self else { return }
             self.videoOutput?.drawableSize = self.naturalSize
@@ -308,6 +309,7 @@ extension KSMEPlayer: MediaPlayerProtocol {
 
     public func prepareToPlay() {
         KSLog("prepareToPlay \(self)")
+        options.prepareTime = CACurrentMediaTime()
         playerItem.prepareToPlay()
         bufferingProgress = 0
     }
@@ -329,9 +331,10 @@ extension KSMEPlayer: MediaPlayerProtocol {
         isReadyToPlay = false
         loopCount = 0
         playerItem.shutdown()
-        options.starTime = 0
+        options.prepareTime = 0
         options.openTime = 0
         options.findTime = 0
+        options.readyTime = 0
         options.readAudioTime = 0
         options.readVideoTime = 0
         options.decodeAudioTime = 0

@@ -135,7 +135,7 @@ open class KSPlayerLayer: UIView {
     }
 
     private var urls = [URL]()
-    private var isAutoPlay = false
+    private var isAutoPlay: Bool
     private lazy var timer: Timer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { [weak self] _ in
         guard let self = self, self.player.isReadyToPlay else {
             return
@@ -188,15 +188,15 @@ open class KSPlayerLayer: UIView {
             firstPlayerType = KSPlayerManager.firstPlayerType
         }
         player = firstPlayerType.init(url: url, options: options)
+        isAutoPlay = options.isAutoPlay
         super.init(frame: .zero)
         registerRemoteControllEvent()
         player.delegate = self
         player.contentMode = .scaleAspectFit
+        prepareToPlay()
         if let view = player.view {
             addSubview(view)
         }
-        isAutoPlay = options.isAutoPlay
-        prepareToPlay()
         #if canImport(UIKit)
         NotificationCenter.default.addObserver(self, selector: #selector(enterBackground), name: UIApplication.didEnterBackgroundNotification, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(enterForeground), name: UIApplication.willEnterForegroundNotification, object: nil)
@@ -237,7 +237,6 @@ open class KSPlayerLayer: UIView {
     open func play() {
         UIApplication.shared.isIdleTimerDisabled = true
         isAutoPlay = true
-
         if player.isReadyToPlay {
             if state == .playedToTheEnd {
                 Task {
@@ -256,7 +255,6 @@ open class KSPlayerLayer: UIView {
             }
         }
         state = player.loadState == .playable ? .bufferFinished : .buffering
-
         MPNowPlayingInfoCenter.default().playbackState = .playing
     }
 
@@ -348,15 +346,13 @@ extension KSPlayerLayer: MediaPlayerDelegate {
             delegate?.player(layer: self, bufferedCount: bufferedCount, consumeTime: diff)
             if bufferedCount == 0 {
                 var dic = ["firstTime": diff]
-
-                dic["prepareTime"] = options.starTime - startTime
-                dic["openTime"] = options.openTime - options.starTime
-                dic["findTime"] = options.findTime - options.starTime
-                dic["readVideoTime"] = options.readVideoTime - options.starTime
-                dic["readAudioTime"] = options.readAudioTime - options.starTime
-                dic["decodeVideoTime"] = options.decodeVideoTime - options.starTime
-                dic["decodeAudioTime"] = options.decodeAudioTime - options.starTime
-
+                dic["openTime"] = options.openTime - startTime
+                dic["findTime"] = options.findTime - options.openTime
+                dic["prepareTime"] = options.readyTime - options.findTime
+                dic["readVideoTime"] = options.readVideoTime - options.readyTime
+                dic["readAudioTime"] = options.readAudioTime - options.readyTime
+                dic["decodeVideoTime"] = options.decodeVideoTime - options.readVideoTime
+                dic["decodeAudioTime"] = options.decodeAudioTime - options.readAudioTime
                 KSLog(dic)
             }
             bufferedCount += 1

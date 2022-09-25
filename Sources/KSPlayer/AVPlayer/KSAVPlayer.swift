@@ -160,6 +160,7 @@ public class KSAVPlayer {
         didSet {
             if isReadyToPlay != oldValue {
                 if isReadyToPlay {
+                    options.readyTime = CACurrentMediaTime()
                     delegate?.readyToPlay(player: self)
                 }
             }
@@ -388,9 +389,9 @@ extension KSAVPlayer: MediaPlayerProtocol {
 
     public func prepareToPlay() {
         KSLog("prepareToPlay \(self)")
+        options.prepareTime = CACurrentMediaTime()
         runInMainqueue { [weak self] in
             guard let self = self else { return }
-            self.options.starTime = CACurrentMediaTime()
             self.bufferingProgress = 0
             let playerItem = AVPlayerItem(asset: self.urlAsset)
             self.options.openTime = CACurrentMediaTime()
