@@ -27,7 +27,7 @@ class KSPlayerLayerTest: XCTestCase {
         let options = KSOptions()
         let playerLayer = KSPlayerLayer(url: URL(fileURLWithPath: path), options: options)
         playerLayer.delegate = self
-        XCTAssertEqual(playerLayer.state, .notSetURL)
+        XCTAssertEqual(playerLayer.state, .prepareToPlay)
         readyToPlayExpectation = expectation(description: "openVideo")
         waitForExpectations(timeout: 2) { _ in
             XCTAssert(playerLayer.player.isReadyToPlay == true)
@@ -49,7 +49,7 @@ class KSPlayerLayerTest: XCTestCase {
                 playerLayer.finish(player: playerLayer.player, error: nil)
                 XCTAssertEqual(playerLayer.state, .playedToTheEnd)
                 playerLayer.resetPlayer()
-                XCTAssertEqual(playerLayer.state, .notSetURL)
+                XCTAssertEqual(playerLayer.state, .prepareToPlay)
             }
         }
     }

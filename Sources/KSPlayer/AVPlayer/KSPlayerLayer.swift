@@ -269,7 +269,7 @@ open class KSPlayerLayer: UIView {
         MPNowPlayingInfoCenter.default().playbackState = .paused
     }
 
-    private func resetPlayer() {
+    public func resetPlayer() {
         KSLog("resetPlayer")
         state = .prepareToPlay
         bufferedCount = 0
