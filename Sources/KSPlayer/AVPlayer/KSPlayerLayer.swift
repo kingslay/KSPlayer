@@ -68,7 +68,7 @@ open class KSPlayerLayer: UIView {
     @Published
     public var loopCount: Int = 0
     private var isWirelessRouteActive = false
-    public private(set) var options: KSOptions?
+    public private(set) var options: KSOptions
     private var bufferedCount = 0
     private var shouldSeekTo: TimeInterval = 0
     private var startTime: TimeInterval = 0
@@ -81,7 +81,7 @@ open class KSPlayerLayer: UIView {
                     pipController = controller
                 } else {
                     KSOptions.pipController = nil
-                    pipController = player?.pipController()
+                    pipController = player.pipController()
                 }
                 if let pipController = pipController,
                    isPipActive != pipController.isPictureInPictureActive
@@ -103,12 +103,8 @@ open class KSPlayerLayer: UIView {
         }
     }
 
-    public private(set) var url: URL? {
+    public private(set) var url: URL {
         didSet {
-            guard let url = url, let options = options else {
-                player = nil
-                return
-            }
             let firstPlayerType: MediaPlayerProtocol.Type
             if isWirelessRouteActive {
                 // airplay的话，默认使用KSAVPlayer
@@ -121,7 +117,7 @@ open class KSPlayerLayer: UIView {
             } else {
                 firstPlayerType = KSPlayerManager.firstPlayerType
             }
-            if let player = player, type(of: player) == firstPlayerType {
+            if type(of: player) == firstPlayerType {
                 if url == oldValue {
                     if options.isAutoPlay {
                         play()
@@ -141,35 +137,31 @@ open class KSPlayerLayer: UIView {
     private var urls = [URL]()
     private var isAutoPlay = false
     private lazy var timer: Timer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { [weak self] _ in
-        guard let self = self, let player = self.player, player.isPreparedToPlay else {
+        guard let self = self, self.player.isPreparedToPlay else {
             return
         }
-        self.delegate?.player(layer: self, currentTime: player.currentPlaybackTime, totalTime: player.duration)
-        if player.playbackState == .playing, player.loadState == .playable, self.state == .buffering {
+        self.delegate?.player(layer: self, currentTime: self.player.currentPlaybackTime, totalTime: self.player.duration)
+        if self.player.playbackState == .playing, self.player.loadState == .playable, self.state == .buffering {
             // 一个兜底保护，正常不能走到这里
             self.state = .bufferFinished
         }
-        if player.isPlaying {
-            MPNowPlayingInfoCenter.default().nowPlayingInfo?[MPNowPlayingInfoPropertyElapsedPlaybackTime] = player.currentPlaybackTime
+        if self.player.isPlaying {
+            MPNowPlayingInfoCenter.default().nowPlayingInfo?[MPNowPlayingInfoPropertyElapsedPlaybackTime] = self.player.currentPlaybackTime
         }
     }
 
-    public var player: MediaPlayerProtocol? {
+    public var player: MediaPlayerProtocol {
         didSet {
-            oldValue?.view?.removeFromSuperview()
-            if let player = player {
-                KSLog("player is \(player)")
-                player.delegate = self
-                player.contentMode = .scaleAspectFit
-                if let oldValue = oldValue {
-                    player.playbackRate = oldValue.playbackRate
-                    player.playbackVolume = oldValue.playbackVolume
-                }
-                if let view = player.view {
-                    addSubview(view)
-                }
-                prepareToPlay()
+            oldValue.view?.removeFromSuperview()
+            KSLog("player is \(player)")
+            player.playbackRate = oldValue.playbackRate
+            player.playbackVolume = oldValue.playbackVolume
+            player.delegate = self
+            player.contentMode = .scaleAspectFit
+            if let view = player.view {
+                addSubview(view)
             }
+            prepareToPlay()
         }
     }
 
@@ -183,9 +175,28 @@ open class KSPlayerLayer: UIView {
         }
     }
 
-    override public init(frame: CGRect) {
-        super.init(frame: frame)
+    public init(url: URL, options: KSOptions) {
+        self.url = url
+        self.options = options
+        let firstPlayerType: MediaPlayerProtocol.Type
+        if options.display != .plane {
+            // AR模式只能用KSMEPlayer
+            // swiftlint:disable force_cast
+            firstPlayerType = NSClassFromString("KSPlayer.KSMEPlayer") as! MediaPlayerProtocol.Type
+            // swiftlint:enable force_cast
+        } else {
+            firstPlayerType = KSPlayerManager.firstPlayerType
+        }
+        player = firstPlayerType.init(url: url, options: options)
+        super.init(frame: .zero)
         registerRemoteControllEvent()
+        player.delegate = self
+        player.contentMode = .scaleAspectFit
+        if let view = player.view {
+            addSubview(view)
+        }
+        isAutoPlay = options.isAutoPlay
+        prepareToPlay()
         #if canImport(UIKit)
         NotificationCenter.default.addObserver(self, selector: #selector(enterBackground), name: UIApplication.didEnterBackgroundNotification, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(enterForeground), name: UIApplication.willEnterForegroundNotification, object: nil)
@@ -216,40 +227,42 @@ open class KSPlayerLayer: UIView {
         self.options = options
         self.urls.removeAll()
         self.urls.append(contentsOf: urls)
-        url = urls.first
+        if let first = urls.first {
+            runInMainqueue {
+                self.url = first
+            }
+        }
     }
 
     open func play() {
         UIApplication.shared.isIdleTimerDisabled = true
         isAutoPlay = true
-        if let player = player {
-            if player.isPreparedToPlay {
-                if state == .playedToTheEnd {
-                    Task {
-                        let finished = await player.seek(time: 0)
-                        if finished {
-                            player.play()
-                        }
+
+        if player.isPreparedToPlay {
+            if state == .playedToTheEnd {
+                Task {
+                    let finished = await player.seek(time: 0)
+                    if finished {
+                        player.play()
                     }
-                } else {
-                    player.play()
                 }
-                timer.fireDate = Date.distantPast
             } else {
-                if state == .error {
-                    player.prepareToPlay()
-                }
+                player.play()
             }
-            state = player.loadState == .playable ? .bufferFinished : .buffering
+            timer.fireDate = Date.distantPast
         } else {
-            state = .buffering
+            if state == .error {
+                player.prepareToPlay()
+            }
         }
+        state = player.loadState == .playable ? .bufferFinished : .buffering
+
         MPNowPlayingInfoCenter.default().playbackState = .playing
     }
 
     open func pause() {
         isAutoPlay = false
-        player?.pause()
+        player.pause()
         timer.fireDate = Date.distantFuture
         state = .paused
         UIApplication.shared.isIdleTimerDisabled = false
@@ -261,8 +274,8 @@ open class KSPlayerLayer: UIView {
         state = .notSetURL
         bufferedCount = 0
         shouldSeekTo = 0
-        player?.playbackRate = 1
-        player?.playbackVolume = 1
+        player.playbackRate = 1
+        player.playbackVolume = 1
         UIApplication.shared.isIdleTimerDisabled = false
         MPNowPlayingInfoCenter.default().nowPlayingInfo = nil
         #if os(tvOS)
@@ -277,7 +290,7 @@ open class KSPlayerLayer: UIView {
         if autoPlay {
             state = .buffering
         }
-        if let player = player, player.isPreparedToPlay {
+        if player.isPreparedToPlay {
             let finished = await player.seek(time: time)
             if finished, autoPlay {
                 play()
@@ -292,7 +305,7 @@ open class KSPlayerLayer: UIView {
 
     override open func didAddSubview(_ subview: UIView) {
         super.didAddSubview(subview)
-        if subview == player?.view {
+        if subview == player.view {
             subview.frame = frame
             subview.translatesAutoresizingMaskIntoConstraints = false
             NSLayoutConstraint.activate([
@@ -335,15 +348,15 @@ extension KSPlayerLayer: MediaPlayerDelegate {
             delegate?.player(layer: self, bufferedCount: bufferedCount, consumeTime: diff)
             if bufferedCount == 0 {
                 var dic = ["firstTime": diff]
-                if let options = options {
-                    dic["prepareTime"] = options.starTime - startTime
-                    dic["openTime"] = options.openTime - options.starTime
-                    dic["findTime"] = options.findTime - options.starTime
-                    dic["readVideoTime"] = options.readVideoTime - options.starTime
-                    dic["readAudioTime"] = options.readAudioTime - options.starTime
-                    dic["decodeVideoTime"] = options.decodeVideoTime - options.starTime
-                    dic["decodeAudioTime"] = options.decodeAudioTime - options.starTime
-                }
+
+                dic["prepareTime"] = options.starTime - startTime
+                dic["openTime"] = options.openTime - options.starTime
+                dic["findTime"] = options.findTime - options.starTime
+                dic["readVideoTime"] = options.readVideoTime - options.starTime
+                dic["readAudioTime"] = options.readAudioTime - options.starTime
+                dic["decodeVideoTime"] = options.decodeVideoTime - options.starTime
+                dic["decodeAudioTime"] = options.decodeAudioTime - options.starTime
+
                 KSLog(dic)
             }
             bufferedCount += 1
@@ -370,7 +383,7 @@ extension KSPlayerLayer: MediaPlayerDelegate {
 
     public func finish(player: MediaPlayerProtocol, error: Error?) {
         if let error = error {
-            if type(of: player) != KSPlayerManager.secondPlayerType, let secondPlayerType = KSPlayerManager.secondPlayerType, let url = url, let options = options {
+            if type(of: player) != KSPlayerManager.secondPlayerType, let secondPlayerType = KSPlayerManager.secondPlayerType {
                 self.player = secondPlayerType.init(url: url, options: options)
                 return
             }
@@ -410,7 +423,7 @@ extension KSPlayerLayer {
         else {
             return
         }
-        if let criteria = options?.preferredDisplayCriteria(refreshRate: track.nominalFrameRate, videoDynamicRange: track.dynamicRange.rawValue) {
+        if let criteria = options.preferredDisplayCriteria(refreshRate: track.nominalFrameRate, videoDynamicRange: track.dynamicRange.rawValue) {
             displayManager.preferredDisplayCriteria = criteria
         }
     }
@@ -419,7 +432,7 @@ extension KSPlayerLayer {
     private func prepareToPlay() {
         startTime = CACurrentMediaTime()
         bufferedCount = 0
-        player?.prepareToPlay()
+        player.prepareToPlay()
         if isAutoPlay {
             state = .buffering
         } else {
@@ -428,7 +441,6 @@ extension KSPlayerLayer {
     }
 
     private func updateNowPlayingInfo() {
-        guard let player = player else { return }
         if MPNowPlayingInfoCenter.default().nowPlayingInfo == nil {
             MPNowPlayingInfoCenter.default().nowPlayingInfo = [MPMediaItemPropertyPlaybackDuration: player.duration]
         } else {
@@ -454,22 +466,22 @@ extension KSPlayerLayer {
     }
 
     private func nextPlayer() {
-        if urls.count > 1, let url = url, let index = urls.firstIndex(of: url), index < urls.count - 1 {
+        if urls.count > 1, let index = urls.firstIndex(of: url), index < urls.count - 1 {
             isAutoPlay = true
-            self.url = urls[index + 1]
+            url = urls[index + 1]
         }
     }
 
     private func previousPlayer() {
-        if urls.count > 1, let url = url, let index = urls.firstIndex(of: url), index > 0 {
+        if urls.count > 1, let index = urls.firstIndex(of: url), index > 0 {
             isAutoPlay = true
-            self.url = urls[index - 1]
+            url = urls[index - 1]
         }
     }
 
     private func seek(time: TimeInterval) {
         Task {
-            await self.seek(time: time, autoPlay: self.options?.isSeekedAutoPlay ?? false)
+            await self.seek(time: time, autoPlay: self.options.isSeekedAutoPlay ?? false)
         }
     }
 
@@ -504,7 +516,7 @@ extension KSPlayerLayer {
             guard let self = self else {
                 return .commandFailed
             }
-            self.player?.shutdown()
+            self.player.shutdown()
             return .success
         }
         remoteCommand.nextTrackCommand.addTarget { [weak self] _ in
@@ -525,7 +537,7 @@ extension KSPlayerLayer {
             guard let self = self, let event = event as? MPChangeRepeatModeCommandEvent else {
                 return .commandFailed
             }
-            self.options?.isLoopPlay = event.repeatType != .off
+            self.options.isLoopPlay = event.repeatType != .off
             return .success
         }
         remoteCommand.changeShuffleModeCommand.isEnabled = false
@@ -535,7 +547,7 @@ extension KSPlayerLayer {
             guard let self = self, let event = event as? MPChangePlaybackRateCommandEvent else {
                 return .commandFailed
             }
-            self.player?.playbackRate = event.playbackRate
+            self.player.playbackRate = event.playbackRate
             return .success
         }
         remoteCommand.skipForwardCommand.preferredIntervals = [15]
@@ -543,7 +555,7 @@ extension KSPlayerLayer {
             guard let self = self, let event = event as? MPSkipIntervalCommandEvent else {
                 return .commandFailed
             }
-            self.seek(time: self.player?.currentPlaybackTime ?? 0 + event.interval)
+            self.seek(time: self.player.currentPlaybackTime ?? 0 + event.interval)
             return .success
         }
         remoteCommand.skipBackwardCommand.preferredIntervals = [15]
@@ -551,7 +563,7 @@ extension KSPlayerLayer {
             guard let self = self, let event = event as? MPSkipIntervalCommandEvent else {
                 return .commandFailed
             }
-            self.seek(time: self.player?.currentPlaybackTime ?? 0 - event.interval)
+            self.seek(time: self.player.currentPlaybackTime ?? 0 - event.interval)
             return .success
         }
         remoteCommand.changePlaybackPositionCommand.addTarget { [weak self] event in
@@ -567,16 +579,16 @@ extension KSPlayerLayer {
             }
             let selectLang = event.languageOption
             if selectLang.languageOptionType == .audible,
-               let trackToSelect = self.player?.tracks(mediaType: .audio).first(where: { $0.name == selectLang.displayName })
+               let trackToSelect = self.player.tracks(mediaType: .audio).first(where: { $0.name == selectLang.displayName })
             {
-                self.player?.select(track: trackToSelect)
+                self.player.select(track: trackToSelect)
             }
             return .success
         }
     }
 
     @objc private func enterBackground() {
-        guard let player = player, state.isPlaying, !player.isExternalPlaybackActive, !isPipActive else {
+        guard state.isPlaying, !player.isExternalPlaybackActive, !isPipActive else {
             return
         }
 
@@ -589,7 +601,7 @@ extension KSPlayerLayer {
 
     @objc private func enterForeground() {
         if KSPlayerManager.canBackgroundPlay {
-            player?.enterForeground()
+            player.enterForeground()
         }
     }
 
@@ -597,10 +609,10 @@ extension KSPlayerLayer {
     @objc private func wirelessRouteActiveDidChange(notification: Notification) {
         guard let volumeView = notification.object as? MPVolumeView, isWirelessRouteActive != volumeView.isWirelessRouteActive else { return }
         if volumeView.isWirelessRouteActive {
-            if !(player?.allowsExternalPlayback ?? false) {
+            if !(player.allowsExternalPlayback ?? false) {
                 isWirelessRouteActive = true
             }
-            player?.usesExternalPlaybackWhileExternalScreenIsActive = true
+            player.usesExternalPlaybackWhileExternalScreenIsActive = true
         }
         isWirelessRouteActive = volumeView.isWirelessRouteActive
     }
@@ -723,8 +735,7 @@ extension KSVideoPlayer: UIViewRepresentable {
             playerLayer.delegate = context.coordinator
             return playerLayer
         } else {
-            let playerLayer = KSPlayerLayer()
-            playerLayer.set(url: url, options: options)
+            let playerLayer = KSPlayerLayer(url: url, options: options)
             playerLayer.delegate = context.coordinator
             context.coordinator.playerLayer = playerLayer
             return playerLayer
@@ -744,20 +755,20 @@ extension KSVideoPlayer: UIViewRepresentable {
 
         @Published public var isMuted: Bool = false {
             didSet {
-                playerLayer?.player?.isMuted = isMuted
+                playerLayer?.player.isMuted = isMuted
             }
         }
 
         @Published public var isScaleAspectFill = false {
             didSet {
-                playerLayer?.player?.contentMode = isScaleAspectFill ? .scaleAspectFill : .scaleAspectFit
+                playerLayer?.player.contentMode = isScaleAspectFill ? .scaleAspectFill : .scaleAspectFit
             }
         }
 
         @Published public var selectedSubtitleTrack: MediaPlayerTrack? {
             didSet {
                 if let track = selectedSubtitleTrack {
-                    playerLayer?.player?.select(track: track)
+                    playerLayer?.player.select(track: track)
                 } else {
                     oldValue?.setIsEnabled(false)
                 }
@@ -768,10 +779,10 @@ extension KSVideoPlayer: UIViewRepresentable {
             didSet {
                 if oldValue?.trackID != selectedAudioTrack?.trackID {
                     if let track = selectedAudioTrack {
-                        playerLayer?.player?.select(track: track)
-                        playerLayer?.player?.isMuted = false
+                        playerLayer?.player.select(track: track)
+                        playerLayer?.player.isMuted = false
                     } else {
-                        playerLayer?.player?.isMuted = true
+                        playerLayer?.player.isMuted = true
                     }
                 }
             }
@@ -781,11 +792,11 @@ extension KSVideoPlayer: UIViewRepresentable {
             didSet {
                 if oldValue?.trackID != selectedVideoTrack?.trackID {
                     if let track = selectedVideoTrack {
-                        playerLayer?.player?.select(track: track)
-                        playerLayer?.options?.videoDisable = false
+                        playerLayer?.player.select(track: track)
+                        playerLayer?.options.videoDisable = false
                     } else {
                         oldValue?.setIsEnabled(false)
-                        playerLayer?.options?.videoDisable = true
+                        playerLayer?.options.videoDisable = true
                     }
                 }
             }
@@ -819,10 +830,10 @@ extension KSVideoPlayer: UIViewRepresentable {
 
 extension KSVideoPlayer.Coordinator: KSPlayerLayerDelegate {
     public func player(layer: KSPlayerLayer, state: KSPlayerState) {
-        if state == .readyToPlay, let player = layer.player {
-            subtitleTracks = player.tracks(mediaType: .subtitle)
-            videoTracks = player.tracks(mediaType: .video)
-            audioTracks = player.tracks(mediaType: .audio)
+        if state == .readyToPlay {
+            subtitleTracks = layer.player.tracks(mediaType: .subtitle)
+            videoTracks = layer.player.tracks(mediaType: .video)
+            audioTracks = layer.player.tracks(mediaType: .audio)
         } else {
             isPlay = state.isPlaying
         }

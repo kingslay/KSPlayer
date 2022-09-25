@@ -118,10 +118,31 @@ open class VideoPlayerView: PlayerView {
         }
     }
 
+    override public var playerLayer: KSPlayerLayer? {
+        didSet {
+            oldValue?.removeFromSuperview()
+            if let playerLayer = playerLayer {
+                #if canImport(UIKit)
+                addSubview(playerLayer)
+                sendSubviewToBack(playerLayer)
+                #else
+                addSubview(playerLayer, positioned: .below, relativeTo: contentOverlayView)
+                #endif
+                playerLayer.translatesAutoresizingMaskIntoConstraints = false
+                NSLayoutConstraint.activate([
+                    playerLayer.topAnchor.constraint(equalTo: topAnchor),
+                    playerLayer.leadingAnchor.constraint(equalTo: leadingAnchor),
+                    playerLayer.bottomAnchor.constraint(equalTo: bottomAnchor),
+                    playerLayer.trailingAnchor.constraint(equalTo: trailingAnchor),
+                ])
+            }
+        }
+    }
+
     override public init(frame: CGRect) {
         super.init(frame: frame)
         setupUIComponents()
-        cancellable = playerLayer.$isPipActive.assign(to: \.isSelected, on: toolBar.pipButton)
+        cancellable = playerLayer?.$isPipActive.assign(to: \.isSelected, on: toolBar.pipButton)
     }
 
     // MARK: - Action Response
@@ -149,10 +170,10 @@ open class VideoPlayerView: PlayerView {
             viewController?.present(alertController, animated: true, completion: nil)
         } else if type == .pictureInPicture {
             if #available(tvOS 14.0, *) {
-                playerLayer.isPipActive.toggle()
+                playerLayer?.isPipActive.toggle()
             }
         } else if type == .audioSwitch || type == .videoSwitch {
-            guard let tracks = playerLayer.player?.tracks(mediaType: type == .audioSwitch ? .audio : .video) else {
+            guard let tracks = playerLayer?.player.tracks(mediaType: type == .audioSwitch ? .audio : .video) else {
                 return
             }
             let alertController = UIAlertController(title: NSLocalizedString(type == .audioSwitch ? "switch audio" : "switch video", comment: ""), message: nil, preferredStyle: preferredStyle())
@@ -164,7 +185,7 @@ open class VideoPlayerView: PlayerView {
                 }
                 let action = UIAlertAction(title: title, style: .default) { [weak self] _ in
                     guard let self = self, !isEnabled else { return }
-                    self.playerLayer.player?.select(track: track)
+                    self.playerLayer?.player.select(track: track)
                 }
                 action.setValue(isEnabled, forKey: "checked")
                 alertController.addAction(action)
@@ -181,7 +202,7 @@ open class VideoPlayerView: PlayerView {
             let action = UIAlertAction(title: title, style: .default) { [weak self] _ in
                 guard let self = self else { return }
                 button.setTitle(title, for: .normal)
-                self.playerLayer.player?.playbackRate = Float(rate)
+                self.playerLayer?.player.playbackRate = Float(rate)
             }
             action.setValue(title == button.title, forKey: "checked")
             alertController.addAction(action)
@@ -191,7 +212,6 @@ open class VideoPlayerView: PlayerView {
     }
 
     open func setupUIComponents() {
-        addSubview(playerLayer)
         backgroundColor = .black
         addSubview(contentOverlayView)
         addSubview(controllerView)
@@ -269,9 +289,9 @@ open class VideoPlayerView: PlayerView {
         switch state {
         case .readyToPlay:
             toolBar.timeSlider.isPlayable = true
-            embedSubtitleDataSouce = layer.player?.subtitleDataSouce
-            toolBar.videoSwitchButton.isHidden = layer.player?.tracks(mediaType: .video).count ?? 1 < 2
-            toolBar.audioSwitchButton.isHidden = layer.player?.tracks(mediaType: .audio).count ?? 1 < 2
+            embedSubtitleDataSouce = layer.player.subtitleDataSouce
+            toolBar.videoSwitchButton.isHidden = layer.player.tracks(mediaType: .video).count < 2
+            toolBar.audioSwitchButton.isHidden = layer.player.tracks(mediaType: .audio).count < 2
         case .buffering:
             isPlayed = true
             replayButton.isHidden = true
@@ -330,8 +350,8 @@ open class VideoPlayerView: PlayerView {
     open func change(definitionIndex: Int) {
         guard let resource = resource else { return }
         var shouldSeekTo = 0.0
-        if playerLayer.state != .playedToTheEnd, let currentTime = playerLayer.player?.currentPlaybackTime {
-            shouldSeekTo = currentTime
+        if let playerLayer = playerLayer, playerLayer.state != .playedToTheEnd {
+            shouldSeekTo = playerLayer.player.currentPlaybackTime
         }
         currentDefinition = definitionIndex >= resource.definitions.count ? resource.definitions.count - 1 : definitionIndex
         let asset = resource.definitions[currentDefinition]
@@ -433,7 +453,7 @@ open class VideoPlayerView: PlayerView {
         }
         switch presse.type {
         case .playPause:
-            if playerLayer.state.isPlaying {
+            if let playerLayer = playerLayer, playerLayer.state.isPlaying {
                 pause()
             } else {
                 play()
@@ -597,13 +617,8 @@ extension VideoPlayerView {
         loadingIndector.translatesAutoresizingMaskIntoConstraints = false
         seekToView.translatesAutoresizingMaskIntoConstraints = false
         replayButton.translatesAutoresizingMaskIntoConstraints = false
-        playerLayer.translatesAutoresizingMaskIntoConstraints = false
         lockButton.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
-            playerLayer.topAnchor.constraint(equalTo: topAnchor),
-            playerLayer.leadingAnchor.constraint(equalTo: leadingAnchor),
-            playerLayer.bottomAnchor.constraint(equalTo: bottomAnchor),
-            playerLayer.trailingAnchor.constraint(equalTo: trailingAnchor),
             contentOverlayView.topAnchor.constraint(equalTo: topAnchor),
             contentOverlayView.leadingAnchor.constraint(equalTo: leadingAnchor),
             contentOverlayView.bottomAnchor.constraint(equalTo: bottomAnchor),

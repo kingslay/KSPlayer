@@ -137,8 +137,8 @@ class CustomVideoPlayerView: VideoPlayerView {
 
     override open func player(layer: KSPlayerLayer, state: KSPlayerState) {
         super.player(layer: layer, state: state)
-        if state == .readyToPlay, let player = layer.player {
-            print(player.naturalSize)
+        if state == .readyToPlay {
+            print(layer.player.naturalSize)
             // list the all subtitles
             let subtitleInfos = srtControl.filterInfos { _ in true }
             subtitleInfos.forEach {
@@ -147,10 +147,10 @@ class CustomVideoPlayerView: VideoPlayerView {
             subtitleInfos.first?.enableSubtitle { result in
                 self.resource?.subtitle = try? result.get()
             }
-            for track in player.tracks(mediaType: .audio) {
+            for track in layer.player.tracks(mediaType: .audio) {
                 print("audio name: \(track.name) language: \(track.language ?? "")")
             }
-            for track in player.tracks(mediaType: .video) {
+            for track in layer.player.tracks(mediaType: .video) {
                 print("video name: \(track.name) bitRate: \(track.bitRate) fps: \(track.nominalFrameRate) depth: \(track.depth) colorPrimaries: \(track.colorPrimaries ?? "") colorPrimaries: \(track.transferFunction ?? "") yCbCrMatrix: \(track.yCbCrMatrix ?? "") codecType:  \(track.mediaSubType.rawValue.string)")
             }
         }

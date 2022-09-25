@@ -39,7 +39,12 @@ public protocol PlayerControllerDelegate: AnyObject {
 
 open class PlayerView: UIView, KSPlayerLayerDelegate, KSSliderDelegate {
     public typealias ControllerDelegate = PlayerControllerDelegate
-    public let playerLayer = KSPlayerLayer()
+    public var playerLayer: KSPlayerLayer? {
+        didSet {
+            playerLayer?.delegate = self
+        }
+    }
+
     public weak var delegate: ControllerDelegate?
     public let toolBar = PlayerToolBar()
     // Closure fired when play time changed
@@ -58,7 +63,6 @@ open class PlayerView: UIView, KSPlayerLayerDelegate, KSSliderDelegate {
         #if !os(macOS)
         NotificationCenter.default.addObserver(self, selector: #selector(audioInterrupted), name: AVAudioSession.interruptionNotification, object: nil)
         #endif
-        playerLayer.delegate = self
         toolBar.timeSlider.delegate = self
         toolBar.addTarget(self, action: #selector(onButtonPressed(_:)))
     }
@@ -93,26 +97,26 @@ open class PlayerView: UIView, KSPlayerLayerDelegate, KSSliderDelegate {
 
     open func play() {
         becomeFirstResponder()
-        playerLayer.play()
+        playerLayer?.play()
     }
 
     open func pause() {
-        playerLayer.pause()
+        playerLayer?.pause()
     }
 
     open func seek(time: TimeInterval) async -> Bool {
-        await playerLayer.seek(time: time, autoPlay: KSOptions.isSeekedAutoPlay)
+        await playerLayer?.seek(time: time, autoPlay: KSOptions.isSeekedAutoPlay) ?? false
     }
 
     open func resetPlayer() {
-        playerLayer.resetPlayer()
+        playerLayer?.resetPlayer()
         totalTime = 0.0
     }
 
     open func set(url: URL, options: KSOptions) {
         toolBar.currentTime = 0
         totalTime = 0
-        playerLayer.set(url: url, options: options)
+        playerLayer = KSPlayerLayer(url: url, options: options)
     }
 
     // MARK: - KSSliderDelegate
@@ -132,7 +136,7 @@ open class PlayerView: UIView, KSPlayerLayerDelegate, KSSliderDelegate {
     open func player(layer: KSPlayerLayer, state: KSPlayerState) {
         delegate?.playerController(state: state)
         if state == .readyToPlay {
-            totalTime = layer.player?.duration ?? totalTime
+            totalTime = layer.player.duration
         } else if state == .playedToTheEnd || state == .paused || state == .error {
             toolBar.playButton.isSelected = false
         } else if state.isPlaying {

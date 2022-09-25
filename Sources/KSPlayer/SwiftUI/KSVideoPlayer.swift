@@ -242,9 +242,9 @@ struct VideoControllerView: View {
                 case .right:
                     config.seek(time: model.currentTime + 15)
                 case .up:
-                    config.playerLayer?.player?.playbackVolume += 1
+                    config.playerLayer?.player.playbackVolume += 1
                 case .down:
-                    config.playerLayer?.player?.playbackVolume -= 1
+                    config.playerLayer?.player.playbackVolume -= 1
                 @unknown default:
                     break
                 }
@@ -299,7 +299,7 @@ struct VideoSettingView: View {
     @EnvironmentObject private var subtitleModel: SubtitleModel
     @EnvironmentObject private var config: KSVideoPlayer.Coordinator
     var body: some View {
-        config.selectedAudioTrack = (config.playerLayer?.player?.isMuted ?? false) ? nil : config.audioTracks.first { $0.isEnabled }
+        config.selectedAudioTrack = (config.playerLayer?.player.isMuted ?? false) ? nil : config.audioTracks.first { $0.isEnabled }
         config.selectedVideoTrack = config.videoTracks.first { $0.isEnabled }
         return TabView {
             Picker("audio tracks", selection: Binding(get: {

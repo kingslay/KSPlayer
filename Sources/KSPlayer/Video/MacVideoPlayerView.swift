@@ -35,9 +35,8 @@ open class MacVideoPlayerView: VideoPlayerView {
     override open func player(layer: KSPlayerLayer, state: KSPlayerState) {
         super.player(layer: layer, state: state)
         if state == .readyToPlay {
-            if let naturalSize = layer.player?.naturalSize {
-                window?.aspectRatio = naturalSize
-            }
+            let naturalSize = layer.player.naturalSize
+            window?.aspectRatio = naturalSize
         }
     }
 }
@@ -89,7 +88,7 @@ extension MacVideoPlayerView {
                 hideSeekToView()
             } else {
                 if KSPlayerManager.enableVolumeGestures {
-                    playerLayer.player?.playbackVolume = tmpPanValue
+                    playerLayer?.player.playbackVolume = tmpPanValue
                 }
             }
         }

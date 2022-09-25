@@ -110,7 +110,7 @@ open class IOSVideoPlayerView: VideoPlayerView {
     }
 
     open func isHorizonal() -> Bool {
-        playerLayer.player?.naturalSize.isHorizonal ?? true
+        playerLayer?.player.naturalSize.isHorizonal ?? true
     }
 
     open func updateUI(isFullScreen: Bool) {
@@ -207,7 +207,7 @@ open class IOSVideoPlayerView: VideoPlayerView {
     }
 
     override open func player(layer: KSPlayerLayer, currentTime: TimeInterval, totalTime: TimeInterval) {
-        airplayStatusView.isHidden = !(layer.player?.isExternalPlaybackActive ?? false)
+        airplayStatusView.isHidden = !layer.player.isExternalPlaybackActive
         super.player(layer: layer, currentTime: currentTime, totalTime: totalTime)
     }
 
@@ -218,7 +218,7 @@ open class IOSVideoPlayerView: VideoPlayerView {
 
     override open func change(definitionIndex: Int) {
         Task {
-            let image = await playerLayer.player?.thumbnailImageAtCurrentTime()
+            let image = await playerLayer?.player.thumbnailImageAtCurrentTime()
             if let image = image {
                 self.maskImageView.image = image
                 self.maskImageView.alpha = 1
@@ -282,14 +282,14 @@ extension IOSVideoPlayerView: CXCallObserverDelegate {
 
 extension IOSVideoPlayerView: UIViewControllerTransitioningDelegate {
     public func animationController(forPresented _: UIViewController, presenting _: UIViewController, source _: UIViewController) -> UIViewControllerAnimatedTransitioning? {
-        if let originalSuperView = originalSuperView, let animationView = playerLayer.player?.view {
+        if let originalSuperView = originalSuperView, let animationView = playerLayer?.player.view {
             return PlayerTransitionAnimator(containerView: originalSuperView, animationView: animationView)
         }
         return nil
     }
 
     public func animationController(forDismissed _: UIViewController) -> UIViewControllerAnimatedTransitioning? {
-        if let originalSuperView = originalSuperView, let animationView = playerLayer.player?.view {
+        if let originalSuperView = originalSuperView, let animationView = playerLayer?.player.view {
             return PlayerTransitionAnimator(containerView: originalSuperView, animationView: animationView, isDismiss: true)
         } else {
             return nil
