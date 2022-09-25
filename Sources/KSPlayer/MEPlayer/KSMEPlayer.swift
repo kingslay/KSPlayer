@@ -55,7 +55,7 @@ public class KSMEPlayer: NSObject {
 
     public private(set) var playableTime = TimeInterval(0)
     public weak var delegate: MediaPlayerDelegate?
-    public private(set) var isPreparedToPlay = false
+    public private(set) var isReadyToPlay = false
     public var allowsExternalPlayback: Bool = false
     public var usesExternalPlaybackWhileExternalScreenIsActive: Bool = false
 
@@ -119,13 +119,13 @@ extension KSMEPlayer {
 
 extension KSMEPlayer: MEPlayerDelegate {
     func sourceDidOpened() {
-        isPreparedToPlay = true
+        isReadyToPlay = true
         runInMainqueue { [weak self] in
             guard let self = self else { return }
             self.videoOutput?.drawableSize = self.naturalSize
             self.view?.centerRotate(byDegrees: self.playerItem.rotation)
             self.videoOutput?.isPaused = false
-            self.delegate?.preparedToPlay(player: self)
+            self.delegate?.readyToPlay(player: self)
         }
     }
 
@@ -326,7 +326,7 @@ extension KSMEPlayer: MediaPlayerProtocol {
         KSLog("shutdown \(self)")
         playbackState = .stopped
         loadState = .idle
-        isPreparedToPlay = false
+        isReadyToPlay = false
         loopCount = 0
         playerItem.shutdown()
         options.starTime = 0

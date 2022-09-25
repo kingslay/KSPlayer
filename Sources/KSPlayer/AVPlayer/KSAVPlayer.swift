@@ -156,11 +156,11 @@ public class KSAVPlayer {
         }
     }
 
-    public private(set) var isPreparedToPlay = false {
+    public private(set) var isReadyToPlay = false {
         didSet {
-            if isPreparedToPlay != oldValue {
-                if isPreparedToPlay {
-                    delegate?.preparedToPlay(player: self)
+            if isReadyToPlay != oldValue {
+                if isReadyToPlay {
+                    delegate?.readyToPlay(player: self)
                 }
             }
         }
@@ -211,7 +211,7 @@ extension KSAVPlayer {
             // 默认选择第一个声道
             item.tracks.filter { $0.assetTrack?.mediaType.rawValue == AVMediaType.audio.rawValue }.dropFirst().forEach { $0.isEnabled = false }
             duration = item.duration.seconds
-            isPreparedToPlay = true
+            isReadyToPlay = true
         } else if item.status == .failed {
             error = item.error
         }
@@ -345,7 +345,7 @@ extension KSAVPlayer: MediaPlayerProtocol {
                 return TimeInterval(shouldSeekTo)
             } else {
                 // 防止卡主
-                return isPreparedToPlay ? player.currentTime().seconds : 0
+                return isReadyToPlay ? player.currentTime().seconds : 0
             }
         }
         set {
@@ -363,7 +363,7 @@ extension KSAVPlayer: MediaPlayerProtocol {
     }
 
     public func thumbnailImageAtCurrentTime() async -> UIImage? {
-        guard let playerItem = player.currentItem, isPreparedToPlay else {
+        guard let playerItem = player.currentItem, isReadyToPlay else {
             return nil
         }
         return await withCheckedContinuation { continuation in
@@ -412,7 +412,7 @@ extension KSAVPlayer: MediaPlayerProtocol {
 
     public func shutdown() {
         KSLog("shutdown \(self)")
-        isPreparedToPlay = false
+        isReadyToPlay = false
         playbackState = .stopped
         loadState = .idle
         urlAsset.cancelLoading()

@@ -17,7 +17,7 @@ import SwiftUI
 
 /**
  Player status emun
- - notSetURL:      not set url yet
+ - setURL:      set url
  - readyToPlay:    player ready to play
  - buffering:      player buffering
  - bufferFinished: buffer finished
@@ -25,7 +25,7 @@ import SwiftUI
  - error:          error with playing
  */
 public enum KSPlayerState: CustomStringConvertible {
-    case notSetURL
+    case prepareToPlay
     case readyToPlay
     case buffering
     case bufferFinished
@@ -34,8 +34,8 @@ public enum KSPlayerState: CustomStringConvertible {
     case error
     public var description: String {
         switch self {
-        case .notSetURL:
-            return "notSetURL"
+        case .prepareToPlay:
+            return "prepareToPlay"
         case .readyToPlay:
             return "readyToPlay"
         case .buffering:
@@ -137,7 +137,7 @@ open class KSPlayerLayer: UIView {
     private var urls = [URL]()
     private var isAutoPlay = false
     private lazy var timer: Timer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { [weak self] _ in
-        guard let self = self, self.player.isPreparedToPlay else {
+        guard let self = self, self.player.isReadyToPlay else {
             return
         }
         self.delegate?.player(layer: self, currentTime: self.player.currentPlaybackTime, totalTime: self.player.duration)
@@ -166,7 +166,7 @@ open class KSPlayerLayer: UIView {
     }
 
     /// 播发器的几种状态
-    public private(set) var state = KSPlayerState.notSetURL {
+    public private(set) var state = KSPlayerState.prepareToPlay {
         didSet {
             if state != oldValue {
                 KSLog("playerStateDidChange - \(state)")
@@ -238,7 +238,7 @@ open class KSPlayerLayer: UIView {
         UIApplication.shared.isIdleTimerDisabled = true
         isAutoPlay = true
 
-        if player.isPreparedToPlay {
+        if player.isReadyToPlay {
             if state == .playedToTheEnd {
                 Task {
                     let finished = await player.seek(time: 0)
@@ -269,9 +269,9 @@ open class KSPlayerLayer: UIView {
         MPNowPlayingInfoCenter.default().playbackState = .paused
     }
 
-    open func resetPlayer() {
+    private func resetPlayer() {
         KSLog("resetPlayer")
-        state = .notSetURL
+        state = .prepareToPlay
         bufferedCount = 0
         shouldSeekTo = 0
         player.playbackRate = 1
@@ -290,7 +290,7 @@ open class KSPlayerLayer: UIView {
         if autoPlay {
             state = .buffering
         }
-        if player.isPreparedToPlay {
+        if player.isReadyToPlay {
             let finished = await player.seek(time: time)
             if finished, autoPlay {
                 play()
@@ -321,7 +321,7 @@ open class KSPlayerLayer: UIView {
 // MARK: - MediaPlayerDelegate
 
 extension KSPlayerLayer: MediaPlayerDelegate {
-    public func preparedToPlay(player: MediaPlayerProtocol) {
+    public func readyToPlay(player: MediaPlayerProtocol) {
         updateNowPlayingInfo()
         state = .readyToPlay
         for track in player.tracks(mediaType: .video) where track.isEnabled {
@@ -436,7 +436,7 @@ extension KSPlayerLayer {
         if isAutoPlay {
             state = .buffering
         } else {
-            state = .notSetURL
+            state = .prepareToPlay
         }
     }
 
@@ -481,7 +481,7 @@ extension KSPlayerLayer {
 
     private func seek(time: TimeInterval) {
         Task {
-            await self.seek(time: time, autoPlay: self.options.isSeekedAutoPlay ?? false)
+            await self.seek(time: time, autoPlay: self.options.isSeekedAutoPlay)
         }
     }
 
@@ -555,7 +555,7 @@ extension KSPlayerLayer {
             guard let self = self, let event = event as? MPSkipIntervalCommandEvent else {
                 return .commandFailed
             }
-            self.seek(time: self.player.currentPlaybackTime ?? 0 + event.interval)
+            self.seek(time: self.player.currentPlaybackTime + event.interval)
             return .success
         }
         remoteCommand.skipBackwardCommand.preferredIntervals = [15]
@@ -563,7 +563,7 @@ extension KSPlayerLayer {
             guard let self = self, let event = event as? MPSkipIntervalCommandEvent else {
                 return .commandFailed
             }
-            self.seek(time: self.player.currentPlaybackTime ?? 0 - event.interval)
+            self.seek(time: self.player.currentPlaybackTime - event.interval)
             return .success
         }
         remoteCommand.changePlaybackPositionCommand.addTarget { [weak self] event in
@@ -609,7 +609,7 @@ extension KSPlayerLayer {
     @objc private func wirelessRouteActiveDidChange(notification: Notification) {
         guard let volumeView = notification.object as? MPVolumeView, isWirelessRouteActive != volumeView.isWirelessRouteActive else { return }
         if volumeView.isWirelessRouteActive {
-            if !(player.allowsExternalPlayback ?? false) {
+            if !player.allowsExternalPlayback {
                 isWirelessRouteActive = true
             }
             player.usesExternalPlaybackWhileExternalScreenIsActive = true

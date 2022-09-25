@@ -31,7 +31,7 @@ class KSMEPlayerTest: XCTestCase {
 }
 
 extension KSMEPlayerTest: MediaPlayerDelegate {
-    func preparedToPlay(player _: MediaPlayerProtocol) {}
+    func readyToPlay(player _: MediaPlayerProtocol) {}
 
     func changeLoadState(player _: MediaPlayerProtocol) {}
 

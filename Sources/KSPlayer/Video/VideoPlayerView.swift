@@ -312,7 +312,7 @@ open class VideoPlayerView: PlayerView {
             if state == .playedToTheEnd {
                 replayButton.isSelected = true
             }
-        case .notSetURL:
+        case .prepareToPlay:
             embedSubtitleDataSouce = nil
         }
     }

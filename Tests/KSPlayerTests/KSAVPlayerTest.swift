@@ -23,7 +23,7 @@ class KSAVPlayerTest: XCTestCase {
         play.prepareToPlay()
         readyToPlayExpectation = expectation(description: "openVideo")
         waitForExpectations(timeout: 10) { _ in
-            if play.isPreparedToPlay {
+            if play.isReadyToPlay {
                 play.play()
             }
             play.shutdown()
@@ -32,7 +32,7 @@ class KSAVPlayerTest: XCTestCase {
 }
 
 extension KSAVPlayerTest: MediaPlayerDelegate {
-    func preparedToPlay(player _: MediaPlayerProtocol) {
+    func readyToPlay(player _: MediaPlayerProtocol) {
         readyToPlayExpectation?.fulfill()
     }
 

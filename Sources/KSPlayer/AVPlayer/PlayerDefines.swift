@@ -40,7 +40,7 @@ public protocol MediaPlayerProtocol: MediaPlayback {
     var delegate: MediaPlayerDelegate? { get set }
     var view: UIView? { get }
     var playableTime: TimeInterval { get }
-    var isPreparedToPlay: Bool { get }
+    var isReadyToPlay: Bool { get }
     var playbackState: MediaPlaybackState { get }
     var loadState: MediaLoadState { get }
     var isPlaying: Bool { get }
@@ -76,7 +76,7 @@ public extension MediaPlayerProtocol {
 }
 
 public protocol MediaPlayerDelegate: AnyObject {
-    func preparedToPlay(player: MediaPlayerProtocol)
+    func readyToPlay(player: MediaPlayerProtocol)
     func changeLoadState(player: MediaPlayerProtocol)
     // 缓冲加载进度，0-100
     func changeBuffering(player: MediaPlayerProtocol, progress: Int)

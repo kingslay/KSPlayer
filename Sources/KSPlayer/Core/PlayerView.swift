@@ -109,7 +109,7 @@ open class PlayerView: UIView, KSPlayerLayerDelegate, KSSliderDelegate {
     }
 
     open func resetPlayer() {
-        playerLayer?.resetPlayer()
+        pause()
         totalTime = 0.0
     }
 
