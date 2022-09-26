@@ -51,6 +51,12 @@ public struct KSVideoPlayerView: View {
                     if let track = player.coordinator.subtitleTracks.first, options.autoSelectEmbedSubtitle {
                         player.coordinator.selectedSubtitleTrack = track
                     }
+                } else if state == .bufferFinished {
+                    if model.isMaskShow {
+                        DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + KSPlayerManager.animateDelayTimeInterval) {
+                            model.isMaskShow = false
+                        }
+                    }
                 }
             }
             #if os(tvOS)
@@ -160,6 +166,8 @@ struct VideoControllerView: View {
                         Image(systemName: config.isScaleAspectFill ? "rectangle.arrowtriangle.2.inward" : "rectangle.arrowtriangle.2.outward")
                     }
                 }
+                Spacer()
+                ProgressView().opacity(config.isLoading ? 1 : 0)
                 Spacer()
                 Button {
                     config.isMuted.toggle()

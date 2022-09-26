@@ -771,6 +771,7 @@ extension KSVideoPlayer: UIViewRepresentable {
             }
         }
 
+        @Published public var isLoading = true
         public var selectedAudioTrack: MediaPlayerTrack? {
             didSet {
                 if oldValue?.trackID != selectedAudioTrack?.trackID {
@@ -831,6 +832,7 @@ extension KSVideoPlayer.Coordinator: KSPlayerLayerDelegate {
             videoTracks = layer.player.tracks(mediaType: .video)
             audioTracks = layer.player.tracks(mediaType: .audio)
         } else {
+            isLoading = state == .buffering
             isPlay = state.isPlaying
         }
         onStateChanged?(layer, state)
