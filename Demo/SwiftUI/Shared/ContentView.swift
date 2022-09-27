@@ -74,6 +74,9 @@ struct ContentView: View {
                 if let path = Bundle.main.path(forResource: "h264", ofType: "mp4") {
                     resources.append(KSPlayerResource(url: URL(fileURLWithPath: path), options: MEOptions(), name: "本地视频"))
                 }
+                if let url = URL(string: "http://clips.vorwaerts-gmbh.de/big_buck_bunny.mp4") {
+                    resources.append(KSPlayerResource(url: url, options: MEOptions(), name: "mp4视频"))
+                }
                 if let url = URL(string: "http://devimages.apple.com/iphone/samples/bipbop/bipbopall.m3u8") {
                     resources.append(KSPlayerResource(url: url, options: MEOptions(), name: "m3u8视频"))
                 }
