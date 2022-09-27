@@ -484,15 +484,6 @@ private class BuildSRT: BaseBuild {
         super.buildALL()
     }
 
-    override func architectures(_ platform: PlatformType) -> [ArchType] {
-        let archs = super.architectures(platform)
-        if platform == .ios, archs.contains(.arm64e) {
-            return archs.filter { $0 != .arm64 }
-        } else {
-            return archs
-        }
-    }
-
     override func innerBuid(platform: PlatformType, arch: ArchType, cflags _: String, buildDir: URL) {
         let opensslPath = URL.currentDirectory + ["SSL", platform.rawValue, "thin", arch.rawValue]
         let directoryURL = URL.currentDirectory + "srt-\(version)"
