@@ -43,7 +43,11 @@ let package = Package(
         ),
         .target(
             name: "FFmpeg",
-            dependencies: ["Libavcodec", "Libavfilter", "Libavformat", "Libavutil", "Libswresample", "Libswscale", "Libssl", "Libcrypto"],
+            dependencies: [
+                "Libavcodec", "Libavfilter", "Libavformat", "Libavutil", "Libswresample", "Libswscale",
+                "Libssl", "Libcrypto",
+//                "Libsrt",
+            ],
 //            dependencies: ["Libssl", "Libcrypto"],
 //            exclude: ["include", "compat"],
 //            cSettings: [
@@ -65,6 +69,7 @@ let package = Package(
                 .linkedLibrary("iconv"),
                 .linkedLibrary("xml2"),
                 .linkedLibrary("z"),
+                .linkedLibrary("c++"),
             ]
         ),
         .executableTarget(
@@ -120,5 +125,9 @@ let package = Package(
             name: "Libcrypto",
             path: "Sources/Libcrypto.xcframework"
         ),
+//        .binaryTarget(
+//            name: "Libsrt",
+//            path: "Sources/Libsrt.xcframework"
+//        ),
     ]
 )
