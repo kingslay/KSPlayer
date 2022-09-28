@@ -705,7 +705,7 @@ extension KSVideoPlayer: UIViewRepresentable {
         swipeRight.direction = .right
         let swipeUp = UISwipeGestureRecognizer(target: context.coordinator, action: #selector(Coordinator.swipeGestureAction(_:)))
         swipeUp.direction = .up
-        view.addGestureRecognizer(swipeRight)
+        view.addGestureRecognizer(swipeUp)
         return view
     }
 
