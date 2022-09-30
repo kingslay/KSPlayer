@@ -67,11 +67,6 @@ open class KSPlayerLayer: UIView {
     public var bufferingProgress: Int = 0
     @Published
     public var loopCount: Int = 0
-    private var isWirelessRouteActive = false
-    public private(set) var options: KSOptions
-    private var bufferedCount = 0
-    private var shouldSeekTo: TimeInterval = 0
-    private var startTime: TimeInterval = 0
     @Published
     public var isPipActive = false {
         didSet {
@@ -100,6 +95,22 @@ open class KSPlayerLayer: UIView {
                     }
                 }
             }
+        }
+    }
+
+    public private(set) var options: KSOptions
+    public var player: MediaPlayerProtocol {
+        didSet {
+            oldValue.view?.removeFromSuperview()
+            KSLog("player is \(player)")
+            player.playbackRate = oldValue.playbackRate
+            player.playbackVolume = oldValue.playbackVolume
+            player.delegate = self
+            player.contentMode = .scaleAspectFit
+            if let view = player.view {
+                addSubview(view)
+            }
+            prepareToPlay()
         }
     }
 
@@ -134,8 +145,16 @@ open class KSPlayerLayer: UIView {
         }
     }
 
-    private var urls = [URL]()
-    private var isAutoPlay: Bool
+    /// 播发器的几种状态
+    public private(set) var state = KSPlayerState.prepareToPlay {
+        didSet {
+            if state != oldValue {
+                KSLog("playerStateDidChange - \(state)")
+                delegate?.player(layer: self, state: state)
+            }
+        }
+    }
+
     private lazy var timer: Timer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { [weak self] _ in
         guard let self, self.player.isReadyToPlay else {
             return
@@ -150,31 +169,12 @@ open class KSPlayerLayer: UIView {
         }
     }
 
-    public var player: MediaPlayerProtocol {
-        didSet {
-            oldValue.view?.removeFromSuperview()
-            KSLog("player is \(player)")
-            player.playbackRate = oldValue.playbackRate
-            player.playbackVolume = oldValue.playbackVolume
-            player.delegate = self
-            player.contentMode = .scaleAspectFit
-            if let view = player.view {
-                addSubview(view)
-            }
-            prepareToPlay()
-        }
-    }
-
-    /// 播发器的几种状态
-    public private(set) var state = KSPlayerState.prepareToPlay {
-        didSet {
-            if state != oldValue {
-                KSLog("playerStateDidChange - \(state)")
-                delegate?.player(layer: self, state: state)
-            }
-        }
-    }
-
+    private var urls = [URL]()
+    private var isAutoPlay: Bool
+    private var isWirelessRouteActive = false
+    private var bufferedCount = 0
+    private var shouldSeekTo: TimeInterval = 0
+    private var startTime: TimeInterval = 0
     public init(url: URL, options: KSOptions) {
         self.url = url
         self.options = options
@@ -212,6 +212,9 @@ open class KSPlayerLayer: UIView {
     deinit {
         NotificationCenter.default.removeObserver(self)
         MPNowPlayingInfoCenter.default().nowPlayingInfo = nil
+        #if os(tvOS)
+        UIApplication.shared.keyWindow?.avDisplayManager.preferredDisplayCriteria = nil
+        #endif
     }
 
     public func set(url: URL, options: KSOptions) {
