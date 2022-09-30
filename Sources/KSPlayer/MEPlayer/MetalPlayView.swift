@@ -67,7 +67,7 @@ public final class MetalPlayView: UIView {
         ])
         var controlTimebase: CMTimebase?
         CMTimebaseCreateWithSourceClock(allocator: kCFAllocatorDefault, sourceClock: CMClockGetHostTimeClock(), timebaseOut: &controlTimebase)
-        if let controlTimebase = controlTimebase {
+        if let controlTimebase {
             displayLayer.controlTimebase = controlTimebase
             CMTimebaseSetTime(controlTimebase, time: .zero)
             CMTimebaseSetRate(controlTimebase, rate: 1.0)
@@ -131,14 +131,14 @@ extension MetalPlayView {
                 KSLog("Error at CMVideoFormatDescriptionCreateForImageBuffer \(err)")
             }
         }
-        guard let videoInfo = videoInfo else { return }
+        guard let videoInfo else { return }
         var timing = CMSampleTimingInfo(duration: .invalid, presentationTimeStamp: .invalid, decodeTimeStamp: .invalid)
 //        var timing = CMSampleTimingInfo(duration: .invalid, presentationTimeStamp: time, decodeTimeStamp: .invalid)
         var sampleBuffer: CMSampleBuffer?
         // swiftlint:disable line_length
         CMSampleBufferCreateForImageBuffer(allocator: kCFAllocatorDefault, imageBuffer: pixelBuffer, dataReady: true, makeDataReadyCallback: nil, refcon: nil, formatDescription: videoInfo, sampleTiming: &timing, sampleBufferOut: &sampleBuffer)
         // swiftlint:enable line_length
-        if let sampleBuffer = sampleBuffer {
+        if let sampleBuffer {
             if let attachmentsArray = CMSampleBufferGetSampleAttachmentsArray(sampleBuffer, createIfNecessary: true) as? [NSMutableDictionary], let dic = attachmentsArray.first {
                 dic[kCMSampleAttachmentKey_DisplayImmediately] = true
             }
@@ -162,7 +162,7 @@ extension MetalPlayView {
             return
         }
         pixelBuffer = frame.corePixelBuffer
-        guard let pixelBuffer = pixelBuffer else {
+        guard let pixelBuffer else {
             return
         }
         let cmtime = frame.cmtime
@@ -261,7 +261,7 @@ class CADisplayLink {
         CVDisplayLinkCreateWithCGDisplay(CGMainDisplayID(), &displayLink)
         self.displayLink = displayLink!
         CVDisplayLinkSetOutputCallback(self.displayLink, { (_, _, _, _, _, userData: UnsafeMutableRawPointer?) -> CVReturn in
-            guard let userData = userData else {
+            guard let userData else {
                 return kCVReturnError
             }
             let `self` = Unmanaged<CADisplayLink>.fromOpaque(userData).takeUnretainedValue()

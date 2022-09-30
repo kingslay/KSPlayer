@@ -31,7 +31,7 @@ public class KSPlayerResource: Hashable {
     public convenience init(url: URL, options: KSOptions = KSOptions(), name: String = "", cover: URL? = nil, subtitleURL: URL? = nil) {
         let definition = KSPlayerResourceDefinition(url: url, definition: "", options: options)
         var subtitle: KSSubtitleProtocol?
-        if let subtitleURL = subtitleURL {
+        if let subtitleURL {
             subtitle = KSURLSubtitle(url: subtitleURL)
         }
         self.init(name: name, definitions: [definition], cover: cover, subtitle: subtitle)

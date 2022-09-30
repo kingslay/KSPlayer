@@ -31,7 +31,7 @@ class ViewController: NSViewController {
     private let playerView = MacVideoPlayerView()
     var url: URL? {
         didSet {
-            if let url = url {
+            if let url {
                 let res0 = KSPlayerResourceDefinition(url: url, definition: "高清", options: KSOptions())
                 let asset = KSPlayerResource(name: url.lastPathComponent, definitions: [res0], cover: URL(string: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c5/Big_buck_bunny_poster_big.jpg/848px-Big_buck_bunny_poster_big.jpg"))
                 playerView.set(resource: asset)

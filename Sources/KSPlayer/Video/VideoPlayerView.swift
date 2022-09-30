@@ -48,10 +48,10 @@ open class VideoPlayerView: PlayerView {
     private var embedSubtitleDataSouce: SubtitleDataSouce? {
         didSet {
             if oldValue !== embedSubtitleDataSouce {
-                if let oldValue = oldValue {
+                if let oldValue {
                     srtControl.remove(dataSouce: oldValue)
                 }
-                if let embedSubtitleDataSouce = embedSubtitleDataSouce {
+                if let embedSubtitleDataSouce {
                     srtControl.add(dataSouce: embedSubtitleDataSouce)
                     if resource?.definitions[currentDefinition].options.autoSelectEmbedSubtitle ?? false, let first = embedSubtitleDataSouce.infos?.first {
                         srtControl.view.selectedInfo = first
@@ -63,7 +63,7 @@ open class VideoPlayerView: PlayerView {
 
     public private(set) var currentDefinition = 0 {
         didSet {
-            if let resource = resource {
+            if let resource {
                 toolBar.definitionButton.setTitle(resource.definitions[currentDefinition].definition, for: .normal)
             }
         }
@@ -71,7 +71,7 @@ open class VideoPlayerView: PlayerView {
 
     public private(set) var resource: KSPlayerResource? {
         didSet {
-            if let resource = resource, oldValue !== resource {
+            if let resource, oldValue !== resource {
                 srtControl.searchSubtitle(name: resource.name)
                 subtitleBackView.isHidden = true
                 subtitleBackView.image = nil
@@ -121,7 +121,7 @@ open class VideoPlayerView: PlayerView {
     override public var playerLayer: KSPlayerLayer? {
         didSet {
             oldValue?.removeFromSuperview()
-            if let playerLayer = playerLayer {
+            if let playerLayer {
                 #if canImport(UIKit)
                 addSubview(playerLayer)
                 sendSubviewToBack(playerLayer)
@@ -156,11 +156,11 @@ open class VideoPlayerView: PlayerView {
         } else if type == .rate {
             changePlaybackRate(button: button)
         } else if type == .definition {
-            guard let resource = resource, resource.definitions.count > 1 else { return }
+            guard let resource, resource.definitions.count > 1 else { return }
             let alertController = UIAlertController(title: NSLocalizedString("select video quality", comment: ""), message: nil, preferredStyle: preferredStyle())
             for (index, definition) in resource.definitions.enumerated() {
                 let action = UIAlertAction(title: definition.definition, style: .default) { [weak self] _ in
-                    guard let self = self, index != self.currentDefinition else { return }
+                    guard let self, index != self.currentDefinition else { return }
                     self.change(definitionIndex: index)
                 }
                 action.setValue(index == currentDefinition, forKey: "checked")
@@ -184,7 +184,7 @@ open class VideoPlayerView: PlayerView {
                     title += " \(track.naturalSize.width)x\(track.naturalSize.height)"
                 }
                 let action = UIAlertAction(title: title, style: .default) { [weak self] _ in
-                    guard let self = self, !isEnabled else { return }
+                    guard let self, !isEnabled else { return }
                     self.playerLayer?.player.select(track: track)
                 }
                 action.setValue(isEnabled, forKey: "checked")
@@ -200,7 +200,7 @@ open class VideoPlayerView: PlayerView {
         [0.75, 1.0, 1.25, 1.5, 2.0].forEach { rate in
             let title = "\(rate)X"
             let action = UIAlertAction(title: title, style: .default) { [weak self] _ in
-                guard let self = self else { return }
+                guard let self else { return }
                 button.setTitle(title, for: .normal)
                 self.playerLayer?.player.playbackRate = Float(rate)
             }
@@ -348,9 +348,9 @@ open class VideoPlayerView: PlayerView {
     }
 
     open func change(definitionIndex: Int) {
-        guard let resource = resource else { return }
+        guard let resource else { return }
         var shouldSeekTo = 0.0
-        if let playerLayer = playerLayer, playerLayer.state != .playedToTheEnd {
+        if let playerLayer, playerLayer.state != .playedToTheEnd {
             shouldSeekTo = playerLayer.player.currentPlaybackTime
         }
         currentDefinition = definitionIndex >= resource.definitions.count ? resource.definitions.count - 1 : definitionIndex
@@ -453,7 +453,7 @@ open class VideoPlayerView: PlayerView {
         }
         switch presse.type {
         case .playPause:
-            if let playerLayer = playerLayer, playerLayer.state.isPlaying {
+            if let playerLayer, playerLayer.state.isPlaying {
                 pause()
             } else {
                 play()
@@ -545,7 +545,7 @@ extension VideoPlayerView {
             srtControl.view.trailingAnchor.constraint(equalTo: trailingAnchor),
         ])
         srtControl.selectWithFilePath = { [weak self] result in
-            guard let self = self else { return }
+            guard let self else { return }
             if let subtitle = try? result.get() {
                 self.subtitleBackView.isHidden = false
                 self.resource?.subtitle = subtitle

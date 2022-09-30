@@ -33,7 +33,7 @@ class SubtitleDecode: DecodeProtocol {
     func decode() {}
 
     func doDecode(packet: Packet) throws {
-        guard let codecContext = codecContext else {
+        guard let codecContext else {
             delegate?.decodeResult(frame: nil)
             return
         }
@@ -60,11 +60,11 @@ class SubtitleDecode: DecodeProtocol {
         part.image = image
         let frame = SubtitleFrame(part: part, timebase: packet.assetTrack.timebase)
         frame.position = position
-        if let preSubtitleFrame = preSubtitleFrame, preSubtitleFrame.part.end == Double(UInt32.max) {
+        if let preSubtitleFrame, preSubtitleFrame.part.end == Double(UInt32.max) {
             preSubtitleFrame.part.end = frame.part.start
         }
-        if let preSubtitleFrame = preSubtitleFrame, preSubtitleFrame.part == part {
-            if let attributedString = attributedString {
+        if let preSubtitleFrame, preSubtitleFrame.part == part {
+            if let attributedString {
                 preSubtitleFrame.part.text?.append(NSAttributedString(string: "\n"))
                 preSubtitleFrame.part.text?.append(attributedString)
             }
@@ -79,7 +79,7 @@ class SubtitleDecode: DecodeProtocol {
     func shutdown() {
         scale.shutdown()
         avsubtitle_free(&subtitle)
-        if let codecContext = codecContext {
+        if let codecContext {
             avcodec_close(codecContext)
             avcodec_free_context(&self.codecContext)
         }
@@ -127,7 +127,7 @@ extension AVCodecContext {
                     let format = events[range]
                     let fields = format.components(separatedBy: ",")
                     let text = fields.last
-                    if let text = text, text.trimmingCharacters(in: .whitespacesAndNewlines) == "Text" {
+                    if let text, text.trimmingCharacters(in: .whitespacesAndNewlines) == "Text" {
                         subtitleASSEvents = fields.count
                     }
                 }

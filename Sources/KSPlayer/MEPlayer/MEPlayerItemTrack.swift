@@ -273,7 +273,7 @@ class FFPlayerItemTrack<Frame: MEFrame>: PlayerItemTrackProtocol, CustomStringCo
 
 extension FFPlayerItemTrack: DecodeResultDelegate {
     func decodeResult(frame: MEFrame?) {
-        guard let frame = frame else {
+        guard let frame else {
             return
         }
         if state == .flush || state == .closed {
@@ -306,7 +306,7 @@ final class AsyncPlayerItemTrack<Frame: MEFrame>: FFPlayerItemTrack<Frame> {
                 loopPacketQueue = CircularBuffer<Packet>()
                 isEndOfFile = true
             } else {
-                if let loopPacketQueue = loopPacketQueue {
+                if let loopPacketQueue {
                     packetQueue.shutdown()
                     packetQueue = loopPacketQueue
                     self.loopPacketQueue = nil
@@ -337,7 +337,7 @@ final class AsyncPlayerItemTrack<Frame: MEFrame>: FFPlayerItemTrack<Frame> {
         isEndOfFile = false
         guard operationQueue.operationCount == 0 else { return }
         decodeOperation = BlockOperation { [weak self] in
-            guard let self = self else { return }
+            guard let self else { return }
             Thread.current.name = self.operationQueue.name
             Thread.current.stackSize = KSPlayerManager.stackSize
             self.decodeThread()

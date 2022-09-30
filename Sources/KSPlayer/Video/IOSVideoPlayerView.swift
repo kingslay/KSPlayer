@@ -42,7 +42,7 @@ open class IOSVideoPlayerView: VideoPlayerView {
             subtitleLabel.font = .systemFont(ofSize: 14)
         }
         cancellable = srtControl.$srtListCount.sink { [weak self] count in
-            guard let self = self, count > 0 else {
+            guard let self, count > 0 else {
                 return
             }
             if self.landscapeButton.isSelected || UIDevice.current.userInterfaceIdiom == .pad {
@@ -114,7 +114,7 @@ open class IOSVideoPlayerView: VideoPlayerView {
     }
 
     open func updateUI(isFullScreen: Bool) {
-        guard let viewController = viewController else {
+        guard let viewController else {
             return
         }
         landscapeButton.isSelected = isFullScreen
@@ -219,7 +219,7 @@ open class IOSVideoPlayerView: VideoPlayerView {
     override open func change(definitionIndex: Int) {
         Task {
             let image = await playerLayer?.player.thumbnailImageAtCurrentTime()
-            if let image = image {
+            if let image {
                 self.maskImageView.image = image
                 self.maskImageView.alpha = 1
             }
@@ -282,14 +282,14 @@ extension IOSVideoPlayerView: CXCallObserverDelegate {
 
 extension IOSVideoPlayerView: UIViewControllerTransitioningDelegate {
     public func animationController(forPresented _: UIViewController, presenting _: UIViewController, source _: UIViewController) -> UIViewControllerAnimatedTransitioning? {
-        if let originalSuperView = originalSuperView, let animationView = playerLayer?.player.view {
+        if let originalSuperView, let animationView = playerLayer?.player.view {
             return PlayerTransitionAnimator(containerView: originalSuperView, animationView: animationView)
         }
         return nil
     }
 
     public func animationController(forDismissed _: UIViewController) -> UIViewControllerAnimatedTransitioning? {
-        if let originalSuperView = originalSuperView, let animationView = playerLayer?.player.view {
+        if let originalSuperView, let animationView = playerLayer?.player.view {
             return PlayerTransitionAnimator(containerView: originalSuperView, animationView: animationView, isDismiss: true)
         } else {
             return nil

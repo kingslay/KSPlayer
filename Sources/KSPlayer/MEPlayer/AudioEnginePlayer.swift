@@ -188,7 +188,7 @@ public final class AudioEnginePlayer: AudioPlayer, FrameOutput {
         var inputCallbackStruct = AURenderCallbackStruct()
         inputCallbackStruct.inputProcRefCon = Unmanaged.passUnretained(self).toOpaque()
         inputCallbackStruct.inputProc = { refCon, _, _, _, inNumberFrames, ioData in
-            guard let ioData = ioData else {
+            guard let ioData else {
                 return noErr
             }
             let `self` = Unmanaged<AudioEnginePlayer>.fromOpaque(refCon).takeUnretainedValue()
@@ -205,7 +205,7 @@ public final class AudioEnginePlayer: AudioPlayer, FrameOutput {
             if currentRender == nil {
                 currentRender = renderSource?.getAudioOutputRender()
             }
-            guard let currentRender = currentRender else {
+            guard let currentRender else {
                 break
             }
             let residueLinesize = currentRender.numberOfSamples - currentRenderReadOffset
@@ -233,7 +233,7 @@ public final class AudioEnginePlayer: AudioPlayer, FrameOutput {
     }
 
     private func audioPlayerDidRenderSample(sampleTimestamp _: AudioTimeStamp) {
-        if let currentRender = currentRender {
+        if let currentRender {
             let currentPreparePosition = currentRender.position + currentRender.duration * Int64(currentRenderReadOffset) / Int64(currentRender.numberOfSamples)
             if currentPreparePosition > 0 {
                 renderSource?.setAudio(time: currentRender.timebase.cmtime(for: currentPreparePosition))

@@ -103,7 +103,7 @@ class OpenURLWindowController: NSWindowController, NSTextFieldDelegate, NSContro
             return
         }
         let (url, hasScheme) = getURL()
-        if let url = url, let host = url.host {
+        if let url, let host = url.host {
             errorMessageLabel.isHidden = true
             urlField.textColor = .labelColor
             openButton.isEnabled = true
@@ -158,8 +158,8 @@ class KeychainAccess {
         if let _ = try? read(username: username, forService: serviceName, server: nil, port: nil) {
             // if password exists, try to update the password
             var query: [String: Any] = [kSecAttrService as String: serviceName.rawValue]
-            if let server = server { query[kSecAttrServer as String] = server }
-            if let port = port { query[kSecAttrPort as String] = port }
+            if let server { query[kSecAttrServer as String] = server }
+            if let port { query[kSecAttrPort as String] = port }
             query[kSecClass as String] = server == nil && port == nil ? kSecClassGenericPassword : kSecClassInternetPassword
 
             // create attributes for updating
@@ -175,8 +175,8 @@ class KeychainAccess {
                                         kSecAttrLabel as String: serviceName.rawValue,
                                         kSecAttrAccount as String: username,
                                         kSecValueData as String: password]
-            if let server = server { query[kSecAttrServer as String] = server }
-            if let port = port { query[kSecAttrPort as String] = port }
+            if let server { query[kSecAttrServer as String] = server }
+            if let port { query[kSecAttrPort as String] = port }
             query[kSecClass as String] = server == nil && port == nil ? kSecClassGenericPassword : kSecClassInternetPassword
 
             status = SecItemAdd(query as CFDictionary, nil)
@@ -195,9 +195,9 @@ class KeychainAccess {
                                     kSecMatchLimit as String: kSecMatchLimitOne,
                                     kSecReturnAttributes as String: true,
                                     kSecReturnData as String: true]
-        if let username = username { query[kSecAttrAccount as String] = username }
-        if let server = server { query[kSecAttrServer as String] = server }
-        if let port = port { query[kSecAttrPort as String] = port }
+        if let username { query[kSecAttrAccount as String] = username }
+        if let server { query[kSecAttrServer as String] = server }
+        if let port { query[kSecAttrPort as String] = port }
 
         query[kSecClass as String] = server == nil && port == nil ? kSecClassGenericPassword : kSecClassInternetPassword
 
@@ -250,7 +250,7 @@ enum Utility {
         }
 
         alert.alertStyle = style
-        if let sheetWindow = sheetWindow {
+        if let sheetWindow {
             alert.beginSheetModal(for: sheetWindow)
         } else {
             alert.runModal()

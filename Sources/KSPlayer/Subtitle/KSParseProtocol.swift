@@ -55,7 +55,7 @@ public class AssParse: KSParseProtocol {
                 _ = scanner.scanUpToString(",")
                 _ = scanner.scanString(",")
             }
-            if let startString = startString, let endString = endString {
+            if let startString, let endString {
                 start = parseDuration(startString)
                 end = parseDuration(endString)
             } else {
@@ -73,7 +73,7 @@ public class AssParse: KSParseProtocol {
             return nil
         }
         text = text.replacingOccurrences(of: "\\N", with: "\n")
-        if let reg = reg {
+        if let reg {
             text = reg.stringByReplacingMatches(in: text, range: NSRange(location: 0, length: text.count), withTemplate: "")
         }
         return SubtitlePart(start, end, text)
@@ -126,11 +126,11 @@ public class SrtParse: KSParseProtocol {
         let startString = scanner.scanUpToString(" --> ")
         // skip spaces and newlines by default.
         _ = scanner.scanString("-->")
-        if let startString = startString,
+        if let startString,
            let endString = scanner.scanUpToCharacters(from: .newlines),
            var text = scanner.scanUpToString("\r\n\r\n")
         {
-            if let reg = reg {
+            if let reg {
                 text = reg.stringByReplacingMatches(in: text, range: NSRange(location: 0, length: text.count), withTemplate: "")
             }
             return SubtitlePart(AssParse.parseDuration(startString), AssParse.parseDuration(endString), text)

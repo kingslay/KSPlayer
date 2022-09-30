@@ -95,7 +95,7 @@ public class CircularBuffer<Item: ObjectQueueItem> {
             assertionFailure("value is nil of index: \(index) headIndex: \(headIndex), tailIndex: \(tailIndex)")
             return nil
         }
-        if let predicate = predicate, !predicate(item) {
+        if let predicate, !predicate(item) {
             return nil
         } else {
             headIndex &+= 1

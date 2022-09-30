@@ -38,7 +38,7 @@ class SoftwareDecode: DecodeProtocol {
     }
 
     func doDecode(packet: Packet) throws {
-        guard let codecContext = codecContext, avcodec_send_packet(codecContext, packet.corePacket) == 0 else {
+        guard let codecContext, avcodec_send_packet(codecContext, packet.corePacket) == 0 else {
             delegate?.decodeResult(frame: nil)
             return
         }
@@ -148,7 +148,7 @@ extension AVCodecParameters {
 extension UnsafeMutablePointer where Pointee == AVCodecContext {
     func getFormat() {
         pointee.get_format = { ctx, fmt -> AVPixelFormat in
-            guard let fmt = fmt, let ctx = ctx else {
+            guard let fmt, let ctx else {
                 return AV_PIX_FMT_NONE
             }
             var i = 0
@@ -159,7 +159,7 @@ extension UnsafeMutablePointer where Pointee == AVCodecContext {
                         break
                     }
                     var framesCtx = av_hwframe_ctx_alloc(deviceCtx)
-                    if let framesCtx = framesCtx {
+                    if let framesCtx {
                         let framesCtxData = UnsafeMutableRawPointer(framesCtx.pointee.data)
                             .bindMemory(to: AVHWFramesContext.self, capacity: 1)
                         framesCtxData.pointee.format = AV_PIX_FMT_VIDEOTOOLBOX

@@ -64,7 +64,7 @@ class VideoSwresample: Swresample {
         let width = frame.width
         let height = frame.height
         let pbuf = transfer(format: format, width: width, height: height, data: Array(tuple: frame.data), linesize: Array(tuple: frame.linesize))
-        if let pbuf = pbuf {
+        if let pbuf {
             if let aspectRatio = frame.sample_aspect_ratio.size.aspectRatio {
                 CVBufferSetAttachment(pbuf, kCVImageBufferPixelAspectRatioKey, aspectRatio, .shouldPropagate)
             }
@@ -86,17 +86,17 @@ class VideoSwresample: Swresample {
 
     func transfer(format: AVPixelFormat, width: Int32, height: Int32, data: [UnsafeMutablePointer<UInt8>?], linesize: [Int32]) -> CVPixelBuffer? {
         setup(format: format, width: width, height: height, linesize: linesize[0])
-        guard let pool = pool else {
+        guard let pool else {
             return nil
         }
         var pbuf: CVPixelBuffer?
         let ret = CVPixelBufferPoolCreatePixelBuffer(kCFAllocatorDefault, pool, &pbuf)
-        guard let pbuf = pbuf, ret == kCVReturnSuccess else {
+        guard let pbuf, ret == kCVReturnSuccess else {
             return nil
         }
         CVPixelBufferLockBaseAddress(pbuf, CVPixelBufferLockFlags(rawValue: 0))
         let bufferPlaneCount = pbuf.planeCount
-        if let imgConvertCtx = imgConvertCtx {
+        if let imgConvertCtx {
             let bytesPerRow = (0 ..< bufferPlaneCount).map { i in
                 Int32(CVPixelBufferGetBytesPerRowOfPlane(pbuf, i))
             }

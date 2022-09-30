@@ -28,7 +28,7 @@ public class KSMEPlayer: NSObject {
 
     @available(tvOS 14.0, *)
     public func pipController() -> AVPictureInPictureController? {
-        if #available(iOS 15.0, tvOS 15.0, macOS 12.0, *), let videoOutput = videoOutput {
+        if #available(iOS 15.0, tvOS 15.0, macOS 12.0, *), let videoOutput {
             let contentSource = AVPictureInPictureController.ContentSource(sampleBufferDisplayLayer: videoOutput.displayLayer, playbackDelegate: self)
             return AVPictureInPictureController(contentSource: contentSource)
         } else {
@@ -108,7 +108,7 @@ public class KSMEPlayer: NSObject {
 extension KSMEPlayer {
     private func playOrPause() {
         runInMainqueue { [weak self] in
-            guard let self = self else { return }
+            guard let self else { return }
             let isPaused = !(self.playbackState == .playing && self.loadState == .playable)
             self.audioOutput.isPaused = isPaused
             self.videoOutput?.isPaused = isPaused
@@ -122,7 +122,7 @@ extension KSMEPlayer: MEPlayerDelegate {
         isReadyToPlay = true
         options.readyTime = CACurrentMediaTime()
         runInMainqueue { [weak self] in
-            guard let self = self else { return }
+            guard let self else { return }
             self.videoOutput?.drawableSize = self.naturalSize
             self.view?.centerRotate(byDegrees: self.playerItem.rotation)
             self.videoOutput?.isPaused = false
@@ -132,14 +132,14 @@ extension KSMEPlayer: MEPlayerDelegate {
 
     func sourceDidFailed(error: NSError?) {
         runInMainqueue { [weak self] in
-            guard let self = self else { return }
+            guard let self else { return }
             self.delegate?.finish(player: self, error: error)
         }
     }
 
     func sourceDidFinished(type: AVFoundation.AVMediaType, allSatisfy: Bool) {
         runInMainqueue { [weak self] in
-            guard let self = self else { return }
+            guard let self else { return }
             if allSatisfy {
                 if self.options.isLoopPlay {
                     self.loopCount += 1
@@ -408,7 +408,7 @@ extension KSMEPlayer: AVPlaybackCoordinatorPlaybackControlDelegate {
             return
         }
         DispatchQueue.main.async { [weak self] in
-            guard let self = self else {
+            guard let self else {
                 return
             }
             if self.playbackState != .playing {
@@ -424,7 +424,7 @@ extension KSMEPlayer: AVPlaybackCoordinatorPlaybackControlDelegate {
             return
         }
         DispatchQueue.main.async { [weak self] in
-            guard let self = self else {
+            guard let self else {
                 return
             }
             if self.playbackState != .paused {
@@ -451,7 +451,7 @@ extension KSMEPlayer: AVPlaybackCoordinatorPlaybackControlDelegate {
             return
         }
         DispatchQueue.main.async { [weak self] in
-            guard let self = self else {
+            guard let self else {
                 return
             }
             guard self.loadState != .playable, let countDown = bufferingCommand.completionDueDate?.timeIntervalSinceNow else {

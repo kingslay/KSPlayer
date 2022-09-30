@@ -31,12 +31,12 @@ public class URLSubtitleInfo: SubtitleInfo {
                 completion(.failure(error as NSError))
             }
         }
-        if let downloadURL = downloadURL {
+        if let downloadURL {
             block(downloadURL)
-        } else if let fetchSubtitleDetail = fetchSubtitleDetail {
+        } else if let fetchSubtitleDetail {
             fetchSubtitleDetail { [weak self] error in
-                guard let self = self else { return }
-                if let error = error {
+                guard let self else { return }
+                if let error {
                     completion(.failure(error))
                 } else {
                     if let downloadURL = self.downloadURL {

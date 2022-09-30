@@ -31,7 +31,7 @@ class VideoHardwareDecode: DecodeProtocol {
 
     func doDecode(packet: Packet) throws {
         let corePacket = packet.corePacket.pointee
-        guard let data = corePacket.data, let session = session else {
+        guard let data = corePacket.data, let session else {
             delegate?.decodeResult(frame: nil)
             return
         }
@@ -43,7 +43,7 @@ class VideoHardwareDecode: DecodeProtocol {
         let duration = corePacket.duration
         let size = Int64(corePacket.size)
         let status = VTDecompressionSessionDecodeFrame(session.decompressionSession, sampleBuffer: sampleBuffer, flags: flags, infoFlagsOut: &flagOut) { [weak self] status, infoFlags, imageBuffer, _, _ in
-            guard let self = self, !infoFlags.contains(.frameDropped) else {
+            guard let self, !infoFlags.contains(.frameDropped) else {
                 return
             }
             guard status == noErr else {
@@ -71,7 +71,7 @@ class VideoHardwareDecode: DecodeProtocol {
             self.lastPosition += frame.duration
             self.delegate?.decodeResult(frame: frame)
         }
-        if let error = error {
+        if let error {
             throw error
         }
         if status == kVTInvalidSessionErr || status == kVTVideoDecoderMalfunctionErr || status == kVTVideoDecoderBadDataErr {
@@ -194,7 +194,7 @@ extension CMFormatDescription {
         var status = CMBlockBufferCreateWithMemoryBlock(allocator: nil, memoryBlock: data, blockLength: size, blockAllocator: kCFAllocatorNull, customBlockSource: nil, offsetToData: 0, dataLength: size, flags: 0, blockBufferOut: &blockBuffer)
         if status == noErr {
             status = CMSampleBufferCreate(allocator: nil, dataBuffer: blockBuffer, dataReady: true, makeDataReadyCallback: nil, refcon: nil, formatDescription: self, sampleCount: 1, sampleTimingEntryCount: 0, sampleTimingArray: nil, sampleSizeEntryCount: 0, sampleSizeArray: nil, sampleBufferOut: &sampleBuffer)
-            if let sampleBuffer = sampleBuffer {
+            if let sampleBuffer {
                 return sampleBuffer
             }
         }

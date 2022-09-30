@@ -88,7 +88,7 @@ public class KSAVPlayer {
     private var loopStatusObservation: NSKeyValueObservation?
     private var error: Error? {
         didSet {
-            if let error = error {
+            if let error {
                 delegate?.finish(player: self, error: error)
             }
         }
@@ -172,7 +172,7 @@ public class KSAVPlayer {
         urlAsset = AVURLAsset(url: url, options: options.avOptions)
         self.options = options
         itemObservation = player.observe(\.currentItem) { [weak self] player, _ in
-            guard let self = self else { return }
+            guard let self else { return }
             self.observer(playerItem: player.currentItem)
         }
     }
@@ -220,7 +220,7 @@ extension KSAVPlayer {
 
     private func updatePlayableDuration(item: AVPlayerItem) {
         let first = item.loadedTimeRanges.first { CMTimeRangeContainsTime($0.timeRangeValue, time: item.currentTime()) }
-        if let first = first {
+        if let first {
             playableTime = first.timeRangeValue.end.seconds
             guard playableTime > 0 else { return }
             let loadedTime = playableTime - currentPlaybackTime
@@ -250,17 +250,17 @@ extension KSAVPlayer {
             loopCountObservation?.invalidate()
             loopStatusObservation?.invalidate()
             playerLooper?.disableLooping()
-            guard let playerItem = playerItem else {
+            guard let playerItem else {
                 playerLooper = nil
                 return
             }
             playerLooper = AVPlayerLooper(player: player, templateItem: playerItem)
             loopCountObservation = playerLooper?.observe(\.loopCount) { [weak self] playerLooper, _ in
-                guard let self = self else { return }
+                guard let self else { return }
                 self.delegate?.playBack(player: self, loopCount: playerLooper.loopCount)
             }
             loopStatusObservation = playerLooper?.observe(\.status) { [weak self] playerLooper, _ in
-                guard let self = self else { return }
+                guard let self else { return }
                 if playerLooper.status == .failed {
                     self.error = playerLooper.error
                 }
@@ -278,21 +278,21 @@ extension KSAVPlayer {
         bufferEmptyObservation?.invalidate()
         likelyToKeepUpObservation?.invalidate()
         bufferFullObservation?.invalidate()
-        guard let playerItem = playerItem else { return }
+        guard let playerItem else { return }
         NotificationCenter.default.addObserver(self, selector: #selector(moviePlayDidEnd), name: .AVPlayerItemDidPlayToEndTime, object: playerItem)
         NotificationCenter.default.addObserver(self, selector: #selector(playerItemFailedToPlayToEndTime), name: .AVPlayerItemFailedToPlayToEndTime, object: playerItem)
         statusObservation = playerItem.observe(\.status) { [weak self] item, _ in
-            guard let self = self else { return }
+            guard let self else { return }
             self.updateStatus(item: item)
         }
         loadedTimeRangesObservation = playerItem.observe(\.loadedTimeRanges) { [weak self] item, _ in
-            guard let self = self else { return }
+            guard let self else { return }
             // 计算缓冲进度
             self.updatePlayableDuration(item: item)
         }
 
         let changeHandler: (AVPlayerItem, NSKeyValueObservedChange<Bool>) -> Void = { [weak self] _, _ in
-            guard let self = self else { return }
+            guard let self else { return }
             // 在主线程更新进度
             if playerItem.isPlaybackBufferEmpty {
                 self.loadState = .loading
@@ -391,7 +391,7 @@ extension KSAVPlayer: MediaPlayerProtocol {
         KSLog("prepareToPlay \(self)")
         options.prepareTime = CACurrentMediaTime()
         runInMainqueue { [weak self] in
-            guard let self = self else { return }
+            guard let self else { return }
             self.bufferingProgress = 0
             let playerItem = AVPlayerItem(asset: self.urlAsset)
             self.options.openTime = CACurrentMediaTime()
@@ -564,7 +564,7 @@ public extension AVAsset {
         imageGenerator.requestedTimeToleranceBefore = .zero
         imageGenerator.requestedTimeToleranceAfter = .zero
         imageGenerator.generateCGImagesAsynchronously(forTimes: [NSValue(time: currentTime)]) { _, cgImage, _, _, _ in
-            if let cgImage = cgImage {
+            if let cgImage {
                 handler(UIImage(cgImage: cgImage))
             } else {
                 handler(nil)
@@ -591,7 +591,7 @@ extension CGImage {
         // RGBA(的bytes) * bitsPerComponent *width
         let bytesPerRow = 4 * 8 * bitsPerComponent * width
         let context = CGContext(data: nil, width: width, height: height, bitsPerComponent: bitsPerComponent, bytesPerRow: bytesPerRow, space: CGColorSpaceCreateDeviceRGB(), bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue)
-        guard let context = context else {
+        guard let context else {
             return nil
         }
         for (rect, cgImage) in images {

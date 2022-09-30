@@ -113,7 +113,7 @@ extension AVAsset {
         imageGenerator.generateCGImagesAsynchronously(forTimes: timesM) { _, imageRef, _, result, error in
             switch result {
             case .succeeded:
-                guard let imageRef = imageRef else { return }
+                guard let imageRef else { return }
                 i += 1
                 gifCreator.add(image: imageRef)
                 progress(Double(i) / Double(count))
@@ -125,7 +125,7 @@ extension AVAsset {
                     completion(error)
                 }
             case .failed:
-                if let error = error {
+                if let error {
                     completion(error)
                 }
             case .cancelled:
@@ -165,7 +165,7 @@ extension AVAsset {
         guard let exportSession = try ceateExportSession(beginTime: beginTime, endTime: endTime) else { return }
         exportSession.outputURL = outputURL
         exportSession.exportAsynchronously { [weak exportSession] in
-            guard let exportSession = exportSession else {
+            guard let exportSession else {
                 return
             }
             switch exportSession.status {
@@ -199,13 +199,13 @@ extension AVAsset {
 
 extension UIImageView {
     func image(url: URL?) {
-        guard let url = url else { return }
+        guard let url else { return }
         DispatchQueue.global().async { [weak self] in
-            guard let self = self else { return }
+            guard let self else { return }
             let data = try? Data(contentsOf: url)
             let image = data.flatMap { UIImage(data: $0) }
             DispatchQueue.main.async { [weak self] in
-                guard let self = self else { return }
+                guard let self else { return }
                 self.image = image
             }
         }

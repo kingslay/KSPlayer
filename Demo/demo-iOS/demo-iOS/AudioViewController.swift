@@ -12,7 +12,7 @@ class AudioViewController: UIViewController, DetailProtocol {
     var playerView = AudioPlayerView()
     var resource: KSPlayerResource? {
         didSet {
-            if let resource = resource {
+            if let resource {
                 playerView.set(url: resource.definitions[0].url, options: KSOptions())
             }
         }
@@ -31,7 +31,7 @@ class AudioViewController: UIViewController, DetailProtocol {
         ])
         view.layoutIfNeeded()
 
-        if let resource = resource {
+        if let resource {
             playerView.set(url: resource.definitions[0].url, options: KSOptions())
         }
     }

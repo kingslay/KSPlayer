@@ -113,7 +113,7 @@ public class KSURLSubtitle: KSSubtitle {
         self.init()
         self.url = url
         DispatchQueue.global().async { [weak self] in
-            guard let self = self else { return }
+            guard let self else { return }
             do {
                 try self.parse(url: url, encoding: encoding)
             } catch {
@@ -145,7 +145,7 @@ public class KSURLSubtitle: KSSubtitle {
                 throw NSError(errorCode: .subtitleUnEncoding, userInfo: ["url": url.absoluteString])
             }
             let parse = parses.first { $0.canParse(subtitle: subtitle) }
-            if let parse = parse {
+            if let parse {
                 parts = parse.parse(subtitle: subtitle)
                 if partsCount == 0 {
                     throw NSError(errorCode: .subtitleUnParse, userInfo: ["url": url.absoluteString])

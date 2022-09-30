@@ -81,7 +81,7 @@ class MEFilter {
     }
 
     public func filter(filters: String?, inputFrame: UnsafeMutablePointer<AVFrame>) -> UnsafeMutablePointer<AVFrame> {
-        guard let filters = filters else {
+        guard let filters else {
             return inputFrame
         }
         let args: String

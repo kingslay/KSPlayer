@@ -50,7 +50,7 @@ public class KSSubtitleController {
     public func remove(dataSouce: SubtitleDataSouce) {
         subtitleDataSouces.removeAll { $0 === dataSouce }
         runInMainqueue { [weak self] in
-            guard let self = self else { return }
+            guard let self else { return }
             dataSouce.infos?.forEach { info in
                 self.infos.removeAll { other in
                     other.subtitleID == info.subtitleID
@@ -69,7 +69,7 @@ public class KSSubtitleController {
         if let dataSouce = dataSouce as? SubtitletoCache {
             dataSouce.cache = cacheDataSouce
         }
-        if let subtitleName = subtitleName {
+        if let subtitleName {
             searchSubtitle(datasouce: dataSouce, name: subtitleName)
         }
     }
@@ -82,7 +82,7 @@ public class KSSubtitleController {
         datasouce.searchSubtitle(name: name) {
             guard let array = datasouce.infos else { return }
             runInMainqueue { [weak self] in
-                guard let self = self else { return }
+                guard let self else { return }
                 self.infos.append(contentsOf: array)
                 self.srtListCount = self.infos.count
                 self.view.setupDatas(infos: self.infos)

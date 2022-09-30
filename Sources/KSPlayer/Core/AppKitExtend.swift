@@ -101,7 +101,7 @@ public extension NSView {
 
     var backgroundColor: UIColor? {
         get {
-            if let layer = layer, let cgColor = layer.backgroundColor {
+            if let layer, let cgColor = layer.backgroundColor {
                 return UIColor(cgColor: cgColor)
             } else {
                 return nil
@@ -114,7 +114,7 @@ public extension NSView {
 
     var clipsToBounds: Bool {
         get {
-            if let layer = layer {
+            if let layer {
                 return layer.masksToBounds
             } else {
                 return false

@@ -27,10 +27,10 @@ final class MEPlayerItem {
     private var allTracks = [PlayerItemTrackProtocol]()
     private var videoAudioTracks: [CapacityProtocol] {
         var tracks = [CapacityProtocol]()
-        if let audioTrack = audioTrack {
+        if let audioTrack {
             tracks.append(audioTrack)
         }
-        if !options.videoDisable, let videoTrack = videoTrack {
+        if !options.videoDisable, let videoTrack {
             tracks.append(videoTrack)
         }
         return tracks
@@ -89,12 +89,12 @@ final class MEPlayerItem {
         timer.fireDate = Date.distantFuture
         avformat_network_init()
         av_log_set_callback { _, level, format, args in
-            guard let format = format, level <= KSPlayerManager.logLevel.rawValue else {
+            guard let format, level <= KSPlayerManager.logLevel.rawValue else {
                 return
             }
             var log = String(cString: format)
             let arguments: CVaListPointer? = args
-            if let arguments = arguments {
+            if let arguments {
                 log = NSString(format: log, arguments: arguments) as String
             }
             // 找不到解码器
@@ -134,14 +134,14 @@ extension MEPlayerItem {
     private func openThread() {
         avformat_close_input(&self.formatCtx)
         formatCtx = avformat_alloc_context()
-        guard let formatCtx = formatCtx else {
+        guard let formatCtx else {
             error = NSError(errorCode: .formatCreate)
             return
         }
         var interruptCB = AVIOInterruptCB()
         interruptCB.opaque = Unmanaged.passUnretained(self).toOpaque()
         interruptCB.callback = { ctx -> Int32 in
-            guard let ctx = ctx else {
+            guard let ctx else {
                 return 0
             }
             let formatContext = Unmanaged<MEPlayerItem>.fromOpaque(ctx).takeUnretainedValue()
@@ -281,17 +281,17 @@ extension MEPlayerItem {
 
     private func read() {
         readOperation = BlockOperation { [weak self] in
-            guard let self = self else { return }
+            guard let self else { return }
             Thread.current.name = (self.operationQueue.name ?? "") + "_read"
             Thread.current.stackSize = KSPlayerManager.stackSize
             self.readThread()
         }
         readOperation?.queuePriority = .veryHigh
         readOperation?.qualityOfService = .userInteractive
-        if let openOperation = openOperation {
+        if let openOperation {
             readOperation?.addDependency(openOperation)
         }
-        if let readOperation = readOperation {
+        if let readOperation {
             operationQueue.addOperation(readOperation)
         }
     }
@@ -340,7 +340,7 @@ extension MEPlayerItem {
             }
             packet.fill()
             let first = assetTracks.first { $0.trackID == packet.corePacket.pointee.stream_index }
-            if let first = first, first.isEnabled {
+            if let first, first.isEnabled {
                 packet.assetTrack = first
                 if first.mediaType == .video {
                     if options.readVideoTime == 0 {
@@ -390,7 +390,7 @@ extension MEPlayerItem {
 
 extension MEPlayerItem: MediaPlayback {
     var seekable: Bool {
-        guard let formatCtx = formatCtx else {
+        guard let formatCtx else {
             return false
         }
         var seekable = true
@@ -403,14 +403,14 @@ extension MEPlayerItem: MediaPlayback {
     func prepareToPlay() {
         state = .opening
         openOperation = BlockOperation { [weak self] in
-            guard let self = self else { return }
+            guard let self else { return }
             Thread.current.name = (self.operationQueue.name ?? "") + "_open"
             Thread.current.stackSize = KSPlayerManager.stackSize
             self.openThread()
         }
         openOperation?.queuePriority = .veryHigh
         openOperation?.qualityOfService = .userInteractive
-        if let openOperation = openOperation {
+        if let openOperation {
             operationQueue.addOperation(openOperation)
         }
     }
@@ -433,10 +433,10 @@ extension MEPlayerItem: MediaPlayback {
         }
         closeOperation.queuePriority = .veryHigh
         closeOperation.qualityOfService = .userInteractive
-        if let readOperation = readOperation {
+        if let readOperation {
             readOperation.cancel()
             closeOperation.addDependency(readOperation)
-        } else if let openOperation = openOperation {
+        } else if let openOperation {
             openOperation.cancel()
             closeOperation.addDependency(openOperation)
         }
@@ -565,7 +565,7 @@ extension MEPlayerItem: OutputRenderSourceDelegate {
     func getVideoOutputRender() -> VideoVTBFrame? {
         var desire = currentPlaybackTime + options.audioDelay + startTime
         let predicate: (VideoVTBFrame) -> Bool = { [weak self] frame -> Bool in
-            guard let self = self else { return true }
+            guard let self else { return true }
             desire = self.currentPlaybackTime + self.options.audioDelay + self.startTime
             if self.isAudioStalled {
                 desire += max(CACurrentMediaTime() - self.videoMediaTime, 0) + self.videoClockDelay
@@ -573,7 +573,7 @@ extension MEPlayerItem: OutputRenderSourceDelegate {
             return frame.seconds <= desire
         }
         let frame = videoTrack?.getOutputRender(where: predicate)
-        if let frame = frame {
+        if let frame {
             videoClockDelay = desire - frame.seconds
             if frame.seconds + 0.4 < desire {
                 _ = videoTrack?.getOutputRender(where: nil)
@@ -591,9 +591,9 @@ extension UnsafeMutablePointer where Pointee == AVStream {
     var rotation: Double {
         let displaymatrix = av_stream_get_side_data(self, AV_PKT_DATA_DISPLAYMATRIX, nil)
         let rotateTag = av_dict_get(pointee.metadata, "rotate", nil, 0)
-        if let rotateTag = rotateTag, String(cString: rotateTag.pointee.value) == "0" {
+        if let rotateTag, String(cString: rotateTag.pointee.value) == "0" {
             return 0.0
-        } else if let displaymatrix = displaymatrix {
+        } else if let displaymatrix {
             let matrix = displaymatrix.withMemoryRebound(to: Int32.self, capacity: 1) { $0 }
             return -av_display_rotation_get(matrix)
         }

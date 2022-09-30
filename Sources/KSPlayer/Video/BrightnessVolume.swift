@@ -14,7 +14,7 @@ open class BrightnessVolume {
     init() {
         #if !os(tvOS)
         brightnessObservation = UIScreen.main.observe(\.brightness, options: .new) { [weak self] _, change in
-            if let self = self, let value = change.newValue {
+            if let self, let value = change.newValue {
                 self.appearView()
                 self.progressView.setProgress(Float(value), type: 0)
             }

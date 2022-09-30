@@ -152,7 +152,7 @@ extension RootViewController: UITableViewDelegate {
             }
             return false
         }
-        guard let index = index, let cell = tableView.cellForRow(at: index) as? TableViewCell else {
+        guard let index, let cell = tableView.cellForRow(at: index) as? TableViewCell else {
             return
         }
         if playerView.resource != objects[index.row] {

@@ -83,7 +83,7 @@ open class KSPlayerLayer: UIView {
                     KSOptions.pipController = nil
                     pipController = player.pipController()
                 }
-                if let pipController = pipController,
+                if let pipController,
                    isPipActive != pipController.isPictureInPictureActive
                 {
                     if pipController.isPictureInPictureActive {
@@ -92,7 +92,7 @@ open class KSPlayerLayer: UIView {
                         KSOptions.pipController = nil
                     } else {
                         DispatchQueue.main.async { [weak self] in
-                            guard let self = self else { return }
+                            guard let self else { return }
                             pipController.startPictureInPicture()
                             pipController.delegate = self
                             KSOptions.pipController = pipController
@@ -137,7 +137,7 @@ open class KSPlayerLayer: UIView {
     private var urls = [URL]()
     private var isAutoPlay: Bool
     private lazy var timer: Timer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { [weak self] _ in
-        guard let self = self, self.player.isReadyToPlay else {
+        guard let self, self.player.isReadyToPlay else {
             return
         }
         self.delegate?.player(layer: self, currentTime: self.player.currentPlaybackTime, totalTime: self.player.duration)
@@ -378,7 +378,7 @@ extension KSPlayerLayer: MediaPlayerDelegate {
     }
 
     public func finish(player: MediaPlayerProtocol, error: Error?) {
-        if let error = error {
+        if let error {
             if type(of: player) != KSPlayerManager.secondPlayerType, let secondPlayerType = KSPlayerManager.secondPlayerType {
                 self.player = secondPlayerType.init(url: url, options: options)
                 return
@@ -484,21 +484,21 @@ extension KSPlayerLayer {
     private func registerRemoteControllEvent() {
         let remoteCommand = MPRemoteCommandCenter.shared()
         remoteCommand.playCommand.addTarget { [weak self] _ in
-            guard let self = self else {
+            guard let self else {
                 return .commandFailed
             }
             self.play()
             return .success
         }
         remoteCommand.pauseCommand.addTarget { [weak self] _ in
-            guard let self = self else {
+            guard let self else {
                 return .commandFailed
             }
             self.pause()
             return .success
         }
         remoteCommand.togglePlayPauseCommand.addTarget { [weak self] _ in
-            guard let self = self else {
+            guard let self else {
                 return .commandFailed
             }
             if self.state.isPlaying {
@@ -509,28 +509,28 @@ extension KSPlayerLayer {
             return .success
         }
         remoteCommand.stopCommand.addTarget { [weak self] _ in
-            guard let self = self else {
+            guard let self else {
                 return .commandFailed
             }
             self.player.shutdown()
             return .success
         }
         remoteCommand.nextTrackCommand.addTarget { [weak self] _ in
-            guard let self = self else {
+            guard let self else {
                 return .commandFailed
             }
             self.nextPlayer()
             return .success
         }
         remoteCommand.previousTrackCommand.addTarget { [weak self] _ in
-            guard let self = self else {
+            guard let self else {
                 return .commandFailed
             }
             self.previousPlayer()
             return .success
         }
         remoteCommand.changeRepeatModeCommand.addTarget { [weak self] event in
-            guard let self = self, let event = event as? MPChangeRepeatModeCommandEvent else {
+            guard let self, let event = event as? MPChangeRepeatModeCommandEvent else {
                 return .commandFailed
             }
             self.options.isLoopPlay = event.repeatType != .off
@@ -540,7 +540,7 @@ extension KSPlayerLayer {
         // remoteCommand.changeShuffleModeCommand.addTarget {})
         remoteCommand.changePlaybackRateCommand.supportedPlaybackRates = [0.5, 1, 1.5, 2]
         remoteCommand.changePlaybackRateCommand.addTarget { [weak self] event in
-            guard let self = self, let event = event as? MPChangePlaybackRateCommandEvent else {
+            guard let self, let event = event as? MPChangePlaybackRateCommandEvent else {
                 return .commandFailed
             }
             self.player.playbackRate = event.playbackRate
@@ -548,7 +548,7 @@ extension KSPlayerLayer {
         }
         remoteCommand.skipForwardCommand.preferredIntervals = [15]
         remoteCommand.skipForwardCommand.addTarget { [weak self] event in
-            guard let self = self, let event = event as? MPSkipIntervalCommandEvent else {
+            guard let self, let event = event as? MPSkipIntervalCommandEvent else {
                 return .commandFailed
             }
             self.seek(time: self.player.currentPlaybackTime + event.interval)
@@ -556,21 +556,21 @@ extension KSPlayerLayer {
         }
         remoteCommand.skipBackwardCommand.preferredIntervals = [15]
         remoteCommand.skipBackwardCommand.addTarget { [weak self] event in
-            guard let self = self, let event = event as? MPSkipIntervalCommandEvent else {
+            guard let self, let event = event as? MPSkipIntervalCommandEvent else {
                 return .commandFailed
             }
             self.seek(time: self.player.currentPlaybackTime - event.interval)
             return .success
         }
         remoteCommand.changePlaybackPositionCommand.addTarget { [weak self] event in
-            guard let self = self, let event = event as? MPChangePlaybackPositionCommandEvent else {
+            guard let self, let event = event as? MPChangePlaybackPositionCommandEvent else {
                 return .commandFailed
             }
             self.seek(time: event.positionTime)
             return .success
         }
         remoteCommand.enableLanguageOptionCommand.addTarget { [weak self] event in
-            guard let self = self, let event = event as? MPChangeLanguageOptionCommandEvent else {
+            guard let self, let event = event as? MPChangeLanguageOptionCommandEvent else {
                 return .commandFailed
             }
             let selectLang = event.languageOption

@@ -29,7 +29,7 @@ class DetailViewController: UIViewController, DetailProtocol {
     #endif
     var resource: KSPlayerResource? {
         didSet {
-            if let resource = resource {
+            if let resource {
                 playerView.set(resource: resource)
             }
         }

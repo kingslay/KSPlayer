@@ -21,7 +21,7 @@ class ObjectPool {
         return object
     }
 
-    func comeback<P: Any>(item: P, key: String) {
+    func comeback(item: some Any, key: String) {
         semaphore.wait()
         defer { semaphore.signal() }
         var array = pool[key, default: ContiguousArray<Any>()]

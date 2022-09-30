@@ -20,11 +20,11 @@ public class KSSubtitleView: UIControl {
     public weak var selectedInfo: SubtitleInfo? {
         didSet {
             DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 0.2) { [weak self] in
-                guard let self = self else { return }
+                guard let self else { return }
                 self.isHidden = true
             }
             oldValue?.disableSubtitle()
-            if let selectWithFilePath = selectWithFilePath {
+            if let selectWithFilePath {
                 selectedInfo?.enableSubtitle(completion: selectWithFilePath)
             }
         }

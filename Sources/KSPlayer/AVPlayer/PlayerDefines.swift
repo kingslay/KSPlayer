@@ -340,7 +340,7 @@ open class KSOptions {
     }
 
     open func adaptable(state: VideoAdaptationState?) -> (Int64, Int64)? {
-        guard let state = state, let last = state.bitRateStates.last, CACurrentMediaTime() - last.time > maxBufferDuration / 2, let index = state.bitRates.firstIndex(of: last.bitRate) else {
+        guard let state, let last = state.bitRateStates.last, CACurrentMediaTime() - last.time > maxBufferDuration / 2, let index = state.bitRates.firstIndex(of: last.bitRate) else {
             return nil
         }
         let isUp = state.loadedCount > Int(Double(state.fps) * maxBufferDuration / 2)

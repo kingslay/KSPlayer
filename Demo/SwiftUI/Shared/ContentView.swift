@@ -90,7 +90,7 @@ struct ContentView: View {
             return
         }
         URLSession.shared.dataTask(with: url) { data, _, _ in
-            guard let data = data, let string = String(data: data, encoding: .utf8) else {
+            guard let data, let string = String(data: data, encoding: .utf8) else {
                 return
             }
             self.saveToDocument(data: data, filename: "cache.m3u8")
