@@ -76,12 +76,12 @@ public extension MediaPlayerProtocol {
 }
 
 public protocol MediaPlayerDelegate: AnyObject {
-    func readyToPlay(player: MediaPlayerProtocol)
-    func changeLoadState(player: MediaPlayerProtocol)
+    func readyToPlay(player: some MediaPlayerProtocol)
+    func changeLoadState(player: some MediaPlayerProtocol)
     // 缓冲加载进度，0-100
-    func changeBuffering(player: MediaPlayerProtocol, progress: Int)
-    func playBack(player: MediaPlayerProtocol, loopCount: Int)
-    func finish(player: MediaPlayerProtocol, error: Error?)
+    func changeBuffering(player: some MediaPlayerProtocol, progress: Int)
+    func playBack(player: some MediaPlayerProtocol, loopCount: Int)
+    func finish(player: some MediaPlayerProtocol, error: Error?)
 }
 
 public protocol MediaPlayerTrack: CustomStringConvertible {

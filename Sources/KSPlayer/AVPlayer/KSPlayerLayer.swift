@@ -322,7 +322,7 @@ open class KSPlayerLayer: UIView {
 // MARK: - MediaPlayerDelegate
 
 extension KSPlayerLayer: MediaPlayerDelegate {
-    public func readyToPlay(player: MediaPlayerProtocol) {
+    public func readyToPlay(player: some MediaPlayerProtocol) {
         updateNowPlayingInfo()
         state = .readyToPlay
         for track in player.tracks(mediaType: .video) where track.isEnabled {
@@ -342,7 +342,7 @@ extension KSPlayerLayer: MediaPlayerDelegate {
         }
     }
 
-    public func changeLoadState(player: MediaPlayerProtocol) {
+    public func changeLoadState(player: some MediaPlayerProtocol) {
         guard player.playbackState != .seeking else { return }
         if player.loadState == .playable, startTime > 0 {
             let diff = CACurrentMediaTime() - startTime
@@ -372,15 +372,15 @@ extension KSPlayerLayer: MediaPlayerDelegate {
         }
     }
 
-    public func changeBuffering(player _: MediaPlayerProtocol, progress: Int) {
+    public func changeBuffering(player _: some MediaPlayerProtocol, progress: Int) {
         bufferingProgress = progress
     }
 
-    public func playBack(player _: MediaPlayerProtocol, loopCount: Int) {
+    public func playBack(player _: some MediaPlayerProtocol, loopCount: Int) {
         self.loopCount = loopCount
     }
 
-    public func finish(player: MediaPlayerProtocol, error: Error?) {
+    public func finish(player: some MediaPlayerProtocol, error: Error?) {
         if let error {
             if type(of: player) != KSPlayerManager.secondPlayerType, let secondPlayerType = KSPlayerManager.secondPlayerType {
                 self.player = secondPlayerType.init(url: url, options: options)

@@ -31,13 +31,13 @@ class KSMEPlayerTest: XCTestCase {
 }
 
 extension KSMEPlayerTest: MediaPlayerDelegate {
-    func readyToPlay(player _: MediaPlayerProtocol) {}
+    func readyToPlay(player _: some KSPlayer.MediaPlayerProtocol) {}
 
-    func changeLoadState(player _: MediaPlayerProtocol) {}
+    func changeLoadState(player _: some KSPlayer.MediaPlayerProtocol) {}
 
-    func changeBuffering(player _: MediaPlayerProtocol, progress _: Int) {}
+    func changeBuffering(player _: some KSPlayer.MediaPlayerProtocol, progress _: Int) {}
 
-    func playBack(player _: MediaPlayerProtocol, loopCount _: Int) {}
+    func playBack(player _: some KSPlayer.MediaPlayerProtocol, loopCount _: Int) {}
 
-    func finish(player _: MediaPlayerProtocol, error _: Error?) {}
+    func finish(player _: some KSPlayer.MediaPlayerProtocol, error _: Error?) {}
 }

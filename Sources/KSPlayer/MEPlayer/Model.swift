@@ -43,7 +43,7 @@ protocol OutputRenderSourceDelegate: AnyObject {
 }
 
 protocol CodecCapacityDelegate: AnyObject {
-    func codecDidFinished(track: CapacityProtocol)
+    func codecDidFinished(track: some CapacityProtocol)
 }
 
 protocol MEPlayerDelegate: AnyObject {

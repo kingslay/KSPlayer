@@ -487,7 +487,7 @@ extension MEPlayerItem: CodecCapacityDelegate {
         }
     }
 
-    func codecDidFinished(track: CapacityProtocol) {
+    func codecDidFinished(track: some CapacityProtocol) {
         if track.mediaType == .audio {
             isAudioStalled = true
         }

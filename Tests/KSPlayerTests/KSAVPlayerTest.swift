@@ -32,17 +32,17 @@ class KSAVPlayerTest: XCTestCase {
 }
 
 extension KSAVPlayerTest: MediaPlayerDelegate {
-    func readyToPlay(player _: MediaPlayerProtocol) {
+    func readyToPlay(player _: some MediaPlayerProtocol) {
         readyToPlayExpectation?.fulfill()
     }
 
-    func changeLoadState(player _: MediaPlayerProtocol) {}
+    func changeLoadState(player _: some MediaPlayerProtocol) {}
 
-    func changeBuffering(player _: MediaPlayerProtocol, progress _: Int) {}
+    func changeBuffering(player _: some MediaPlayerProtocol, progress _: Int) {}
 
-    func playBack(player _: MediaPlayerProtocol, loopCount _: Int) {}
+    func playBack(player _: some MediaPlayerProtocol, loopCount _: Int) {}
 
-    func finish(player _: MediaPlayerProtocol, error: Error?) {
+    func finish(player _: some MediaPlayerProtocol, error: Error?) {
         if error != nil {
             readyToPlayExpectation?.fulfill()
         }
