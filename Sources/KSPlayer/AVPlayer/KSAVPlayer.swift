@@ -96,11 +96,7 @@ public class KSAVPlayer {
 
     @available(tvOS 14.0, *)
     public func pipController() -> AVPictureInPictureController? {
-        if #available(tvOS 14.0, *) {
-            return AVPictureInPictureController(playerLayer: self.playerView.playerLayer)
-        } else {
-            return nil
-        }
+        AVPictureInPictureController(playerLayer: playerView.playerLayer)
     }
 
     @available(macOS 12.0, iOS 15.0, tvOS 15.0, *)

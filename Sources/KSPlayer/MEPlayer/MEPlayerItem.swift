@@ -563,6 +563,9 @@ extension MEPlayerItem: OutputRenderSourceDelegate {
     }
 
     func getVideoOutputRender() -> VideoVTBFrame? {
+        guard let videoTrack else {
+            return nil
+        }
         var desire = currentPlaybackTime + options.audioDelay + startTime
         let predicate: (VideoVTBFrame) -> Bool = { [weak self] frame -> Bool in
             guard let self else { return true }
@@ -572,12 +575,15 @@ extension MEPlayerItem: OutputRenderSourceDelegate {
             }
             return frame.seconds <= desire
         }
-        let frame = videoTrack?.getOutputRender(where: predicate)
+        let frame = videoTrack.getOutputRender(where: predicate)
         if let frame {
             videoClockDelay = desire - frame.seconds
             if frame.seconds + 0.4 < desire {
-                _ = videoTrack?.getOutputRender(where: nil)
+                KSLog("dropped video frame frameCount: \(videoTrack.frameCount) frameMaxCount: \(videoTrack.frameMaxCount)")
+                _ = videoTrack.getOutputRender(where: nil)
             }
+        } else {
+            KSLog("not video frame frameCount: \(videoTrack.frameCount) frameMaxCount: \(videoTrack.frameMaxCount)")
         }
         return options.videoDisable ? nil : frame
     }

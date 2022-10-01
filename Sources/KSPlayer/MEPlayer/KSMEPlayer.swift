@@ -99,6 +99,7 @@ public class KSMEPlayer: NSObject {
     }
 
     deinit {
+        videoOutput?.invalidate()
         playerItem.shutdown()
     }
 }
