@@ -286,9 +286,11 @@ struct VideoSubtitleView: View {
             if let image = model.image {
                 #if os(macOS)
                 Image(nsImage: image)
+                    .resizable()
                     .scaledToFit()
                 #else
                 Image(uiImage: image)
+                    .resizable()
                     .scaledToFit()
                 #endif
             } else if let text = model.text {
