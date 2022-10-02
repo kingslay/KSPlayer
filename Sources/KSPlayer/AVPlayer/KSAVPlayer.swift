@@ -591,7 +591,7 @@ extension CGImage {
             return nil
         }
         for (rect, cgImage) in images {
-            context.draw(cgImage, in: CGRect(x: rect.origin.x, y: CGFloat(height) - rect.origin.y, width: rect.width, height: rect.height))
+            context.draw(cgImage, in: CGRect(x: rect.origin.x, y: CGFloat(height) - rect.maxY, width: rect.width, height: rect.height))
         }
         return context.makeImage()
     }

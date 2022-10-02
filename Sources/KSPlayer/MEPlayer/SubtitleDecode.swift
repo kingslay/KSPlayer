@@ -111,7 +111,7 @@ class SubtitleDecode: DecodeProtocol {
                 }
             }
         }
-        return (attributedString, CGImage.combine(images: images)?.image())
+        return (attributedString, CGImage.combine(images: images)?.image(quality: 0.2))
     }
 }
 
