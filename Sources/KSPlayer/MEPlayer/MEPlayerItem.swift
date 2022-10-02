@@ -104,7 +104,7 @@ final class MEPlayerItem {
                 let context = ptr.assumingMemoryBound(to: UnsafePointer<AVClass>.self).pointee
                 if context == avfilter_get_class() {
                     let filterContext = ptr.assumingMemoryBound(to: AVFilterContext.self).pointee
-                    if let opaque = filterContext.graph.pointee.opaque {
+                    if let opaque = filterContext.graph?.pointee.opaque {
                         let options = Unmanaged<KSOptions>.fromOpaque(opaque).takeUnretainedValue()
                         options.filter(log: log)
                     }

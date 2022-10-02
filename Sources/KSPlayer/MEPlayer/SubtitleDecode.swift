@@ -39,10 +39,7 @@ class SubtitleDecode: DecodeProtocol {
         }
         var gotsubtitle = Int32(0)
         let len = avcodec_decode_subtitle2(codecContext, &subtitle, &gotsubtitle, packet.corePacket)
-        if len < 0 {
-            KSLog(NSError(errorCode: .codecSubtitleSendPacket, ffmpegErrnum: len))
-            return
-        } else if len == 0 {
+        if len <= 0 {
             return
         }
         let (attributedString, image) = text(subtitle: subtitle)
