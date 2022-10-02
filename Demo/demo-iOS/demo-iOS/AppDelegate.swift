@@ -86,6 +86,7 @@ var objects: [KSPlayerResource] = {
     }
     if let url = URL(string: "http://clips.vorwaerts-gmbh.de/big_buck_bunny.mp4") {
         let options = KSOptions()
+        options.autoDeInterlace = true
         options.videoFilters = "hflip,vflip"
         let res0 = KSPlayerResourceDefinition(url: url, definition: "标准", options: options)
         let res1 = KSPlayerResourceDefinition(url: url, definition: "颠倒", options: options)

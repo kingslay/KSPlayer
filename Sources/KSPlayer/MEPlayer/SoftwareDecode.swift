@@ -29,7 +29,7 @@ class SoftwareDecode: DecodeProtocol {
             KSLog(error as CustomStringConvertible)
         }
         codecContext?.pointee.time_base = assetTrack.timebase.rational
-        filter = MEFilter(timebase: assetTrack.timebase, isAudio: assetTrack.mediaType == .audio)
+        filter = MEFilter(timebase: assetTrack.timebase, isAudio: assetTrack.mediaType == .audio, options: options)
         if assetTrack.mediaType == .video {
             swresample = VideoSwresample()
         } else {
@@ -45,8 +45,7 @@ class SoftwareDecode: DecodeProtocol {
         while true {
             let result = avcodec_receive_frame(codecContext, coreFrame)
             if result == 0, let avframe = coreFrame {
-                let isAudio = packet.assetTrack.mediaType == .audio
-                var frame = try swresample.transfer(avframe: filter.filter(filters: isAudio ? options.audioFilters : options.videoFilters, inputFrame: avframe))
+                var frame = try swresample.transfer(avframe: filter.filter(options: options, inputFrame: avframe))
                 frame.timebase = packet.assetTrack.timebase
 //                frame.timebase = Timebase(avframe.pointee.time_base)
                 frame.duration = avframe.pointee.pkt_duration

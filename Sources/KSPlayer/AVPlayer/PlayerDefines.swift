@@ -207,8 +207,7 @@ open class KSOptions {
 
     //    public static let shared = KSOptions()
     /// 最低缓存视频时间
-    @Published
-    public var preferredForwardBufferDuration = KSOptions.preferredForwardBufferDuration
+    @Published public var preferredForwardBufferDuration = KSOptions.preferredForwardBufferDuration
     /// 最大缓存视频时间
     public var maxBufferDuration = KSOptions.maxBufferDuration
     /// 是否开启秒开
@@ -248,6 +247,7 @@ open class KSOptions {
     public var lowres = UInt8(0)
     public var autoSelectEmbedSubtitle = true
     public var asynchronousDecompression = false
+    public var autoDeInterlace = false
     @Published var preferredFramesPerSecond = Float(60)
     public internal(set) var formatName = ""
     public internal(set) var prepareTime = 0.0
@@ -403,6 +403,43 @@ open class KSOptions {
 
     open func enableHardwareDecode() -> Bool {
         videoFilters == nil
+    }
+
+    private var idetTypeMap = [VideoInterlacingType: Int]()
+    @Published public var videoInterlacingType: VideoInterlacingType?
+    public enum VideoInterlacingType: String {
+        case tff
+        case bff
+        case progressive
+        case undetermined
+    }
+
+    open func filter(log: String) {
+        if log.starts(with: "Repeated Field:") {
+            log.split(separator: ",").forEach { str in
+                let map = str.split(separator: ":")
+                if map.count >= 2 {
+                    if String(map[0].trimmingCharacters(in: .whitespaces)) == "Multi frame" {
+                        if let type = VideoInterlacingType(rawValue: map[1].trimmingCharacters(in: .whitespacesAndNewlines)) {
+                            idetTypeMap[type] = (idetTypeMap[type] ?? 0) + 1
+                            let tff = idetTypeMap[.tff] ?? 0
+                            let bff = idetTypeMap[.bff] ?? 0
+                            let progressive = idetTypeMap[.progressive] ?? 0
+                            if progressive - tff - bff > 100 {
+                                videoInterlacingType = .progressive
+                                autoDeInterlace = false
+                            } else if bff - progressive > 100 {
+                                videoInterlacingType = .bff
+                                autoDeInterlace = false
+                            } else if tff - progressive > 100 {
+                                videoInterlacingType = .tff
+                                autoDeInterlace = false
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 
     #if os(tvOS)

@@ -6,6 +6,7 @@
 //
 
 import AVFoundation
+import Libavfilter
 import Libavformat
 import VideoToolbox
 
@@ -88,7 +89,7 @@ final class MEPlayerItem {
         self.options = options
         timer.fireDate = Date.distantFuture
         avformat_network_init()
-        av_log_set_callback { _, level, format, args in
+        av_log_set_callback { ptr, level, format, args in
             guard let format, level <= KSPlayerManager.logLevel.rawValue else {
                 return
             }
@@ -99,6 +100,16 @@ final class MEPlayerItem {
             }
             // 找不到解码器
             if log.hasPrefix("parser not found for codec") {}
+            if let ptr {
+                let context = ptr.assumingMemoryBound(to: UnsafePointer<AVClass>.self).pointee
+                if context == avfilter_get_class() {
+                    let filterContext = ptr.assumingMemoryBound(to: AVFilterContext.self).pointee
+                    if let opaque = filterContext.graph.pointee.opaque {
+                        let options = Unmanaged<KSOptions>.fromOpaque(opaque).takeUnretainedValue()
+                        options.filter(log: log)
+                    }
+                }
+            }
             KSLog(log)
         }
         operationQueue.name = "KSPlayer_" + String(describing: self).components(separatedBy: ".").last!

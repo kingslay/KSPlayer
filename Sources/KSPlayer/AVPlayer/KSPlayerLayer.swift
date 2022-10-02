@@ -63,12 +63,9 @@ public protocol KSPlayerLayerDelegate: AnyObject {
 
 open class KSPlayerLayer: UIView {
     public weak var delegate: KSPlayerLayerDelegate?
-    @Published
-    public var bufferingProgress: Int = 0
-    @Published
-    public var loopCount: Int = 0
-    @Published
-    public var isPipActive = false {
+    @Published public var bufferingProgress: Int = 0
+    @Published public var loopCount: Int = 0
+    @Published public var isPipActive = false {
         didSet {
             if #available(tvOS 14.0, *) {
                 var pipController: AVPictureInPictureController?

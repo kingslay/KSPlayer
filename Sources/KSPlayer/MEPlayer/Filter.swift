@@ -23,8 +23,9 @@ class MEFilter {
         av_frame_free(&outputFrame)
     }
 
-    public init(timebase: Timebase, isAudio: Bool) {
+    public init(timebase: Timebase, isAudio: Bool, options: KSOptions) {
         graph = avfilter_graph_alloc()
+        graph?.pointee.opaque = Unmanaged.passUnretained(options).toOpaque()
         self.timebase = timebase
         self.isAudio = isAudio
     }
@@ -80,7 +81,16 @@ class MEFilter {
         return true
     }
 
-    public func filter(filters: String?, inputFrame: UnsafeMutablePointer<AVFrame>) -> UnsafeMutablePointer<AVFrame> {
+    public func filter(options: KSOptions, inputFrame: UnsafeMutablePointer<AVFrame>) -> UnsafeMutablePointer<AVFrame> {
+        var filters: String?
+        if isAudio {
+            filters = options.audioFilters
+        } else {
+            filters = options.videoFilters
+            if options.autoDeInterlace {
+                filters = "idet," + (filters ?? "")
+            }
+        }
         guard let filters else {
             return inputFrame
         }

@@ -25,8 +25,7 @@ public class KSSubtitleController {
         }
     }
 
-    @Published
-    public var srtListCount: Int = 0
+    @Published public var srtListCount: Int = 0
     public init(customControlView: KSSubtitleView? = nil) {
         if let customView = customControlView {
             view = customView
