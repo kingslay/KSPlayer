@@ -123,7 +123,7 @@ var objects: [KSPlayerResource] = {
         objects.append(KSPlayerResource(url: URL(fileURLWithPath: path), name: "raw h264"))
     }
 
-    if let path = Bundle.main.path(forResource: "Polonaise", ofType: "flac") {
+    if let path = Bundle.main.path(forResource: "mjpeg", ofType: "flac") {
         objects.append(KSPlayerResource(url: URL(fileURLWithPath: path), name: "音乐播放器界面"))
     }
     return objects

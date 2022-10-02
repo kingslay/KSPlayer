@@ -58,7 +58,15 @@ class SoftwareDecode: DecodeProtocol {
                     }
                     bestEffortTimestamp += frame.duration
                 } else {
-                    frame.position = avframe.pointee.best_effort_timestamp
+                    var position = avframe.pointee.best_effort_timestamp
+                    if position < 0 {
+                        position = avframe.pointee.pkt_dts
+                    }
+                    if position < 0 {
+                        position = bestEffortTimestamp
+                    }
+                    frame.position = position
+                    bestEffortTimestamp += frame.duration
                 }
                 delegate?.decodeResult(frame: frame)
             } else {
