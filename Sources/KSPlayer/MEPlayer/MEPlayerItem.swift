@@ -90,7 +90,7 @@ final class MEPlayerItem {
         timer.fireDate = Date.distantFuture
         avformat_network_init()
         av_log_set_callback { ptr, level, format, args in
-            guard let format, level <= KSPlayerManager.logLevel.rawValue else {
+            guard let format else {
                 return
             }
             var log = String(cString: format)
@@ -98,8 +98,6 @@ final class MEPlayerItem {
             if let arguments {
                 log = NSString(format: log, arguments: arguments) as String
             }
-            // 找不到解码器
-            if log.hasPrefix("parser not found for codec") {}
             if let ptr {
                 let context = ptr.assumingMemoryBound(to: UnsafePointer<AVClass>.self).pointee
                 if context == avfilter_get_class() {
@@ -110,7 +108,13 @@ final class MEPlayerItem {
                     }
                 }
             }
-            KSLog(log)
+            // 找不到解码器
+            if log.hasPrefix("parser not found for codec") {
+                KSLog(log)
+            }
+            if level <= KSPlayerManager.logLevel.rawValue {
+                KSLog(log)
+            }
         }
         operationQueue.name = "KSPlayer_" + String(describing: self).components(separatedBy: ".").last!
         operationQueue.maxConcurrentOperationCount = 1
