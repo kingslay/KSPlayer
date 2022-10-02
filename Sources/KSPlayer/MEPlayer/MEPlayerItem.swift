@@ -222,6 +222,9 @@ extension MEPlayerItem {
             if let coreStream = formatCtx.pointee.streams[i] {
                 coreStream.pointee.discard = AVDISCARD_ALL
                 if let assetTrack = AssetTrack(stream: coreStream) {
+                    if assetTrack.startTime == 0, startTime != 0 {
+                        assetTrack.startTime = startTime
+                    }
                     if !options.subtitleDisable, assetTrack.mediaType == .subtitle {
                         let subtitle = FFPlayerItemTrack<SubtitleFrame>(assetTrack: assetTrack, options: options)
                         assetTrack.subtitle = subtitle
@@ -582,8 +585,6 @@ extension MEPlayerItem: OutputRenderSourceDelegate {
                 KSLog("dropped video frame frameCount: \(videoTrack.frameCount) frameMaxCount: \(videoTrack.frameMaxCount)")
                 _ = videoTrack.getOutputRender(where: nil)
             }
-        } else {
-            KSLog("not video frame frameCount: \(videoTrack.frameCount) frameMaxCount: \(videoTrack.frameMaxCount)")
         }
         return options.videoDisable ? nil : frame
     }

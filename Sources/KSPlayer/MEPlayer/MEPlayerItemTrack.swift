@@ -9,7 +9,7 @@ import CoreMedia
 import Libavformat
 
 class AssetTrack: MediaPlayerTrack {
-    let startTime: TimeInterval
+    var startTime: TimeInterval
     let trackID: Int32
     let name: String
     let language: String?
