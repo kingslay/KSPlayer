@@ -303,26 +303,29 @@ struct VideoSubtitleView: View {
     }
 }
 
-@available(iOS 14, tvOS 14, macOS 11, *)
+@available(iOS 15, tvOS 15, macOS 12, *)
 struct VideoSettingView: View {
     @Binding fileprivate var showingModal: Bool
+    @State private var presentSubtileDelayAlert = false
+    @State private var presentSubtileDelay = ""
     @EnvironmentObject private var subtitleModel: SubtitleModel
     @EnvironmentObject private var config: KSVideoPlayer.Coordinator
     var body: some View {
         config.selectedAudioTrack = (config.playerLayer?.player.isMuted ?? false) ? nil : config.audioTracks.first { $0.isEnabled }
         config.selectedVideoTrack = config.videoTracks.first { $0.isEnabled }
         return TabView {
-            Picker("audio tracks", selection: Binding(get: {
-                config.selectedAudioTrack?.trackID
-            }, set: { value in
-                config.selectedAudioTrack = config.audioTracks.first { $0.trackID == value }
-            })) {
-                Text("None").tag(nil as Int32?)
-                ForEach(config.audioTracks, id: \.trackID) { track in
-                    Text(track.description).tag(track.trackID as Int32?)
+            List {
+                Picker("audio tracks", selection: Binding(get: {
+                    config.selectedAudioTrack?.trackID
+                }, set: { value in
+                    config.selectedAudioTrack = config.audioTracks.first { $0.trackID == value }
+                })) {
+                    Text("None").tag(nil as Int32?)
+                    ForEach(config.audioTracks, id: \.trackID) { track in
+                        Text(track.description).tag(track.trackID as Int32?)
+                    }
                 }
             }
-            .pickerStyle(.inline)
             .tabItem {
                 Text("audio")
             }
@@ -337,22 +340,34 @@ struct VideoSettingView: View {
                         Text(track.name).tag(track.trackID as Int32?)
                     }
                 }
-                .pickerStyle(.inline)
+                Button("subtile delay") {
+                    presentSubtileDelayAlert = true
+                }
+                .alert("subtile delay", isPresented: $presentSubtileDelayAlert, actions: {
+                    TextField("delay second", text: $presentSubtileDelay)
+                        .keyboardType(.numberPad)
+                        .foregroundColor(.black)
+                    Button("OK", action: {
+                        config.playerLayer?.options.subtitleDelay = Double(presentSubtileDelay) ?? 0
+                    })
+                    Button("Cancel", role: .cancel, action: {})
+                })
             }
             .tabItem {
                 Text("subtitle")
             }
-            Picker("video tracks", selection: Binding(get: {
-                config.selectedVideoTrack?.trackID
-            }, set: { value in
-                config.selectedVideoTrack = config.videoTracks.first { $0.trackID == value }
-            })) {
-                Text("None").tag(nil as Int32?)
-                ForEach(config.videoTracks, id: \.trackID) { track in
-                    Text(track.description).tag(track.trackID as Int32?)
+            List {
+                Picker("video tracks", selection: Binding(get: {
+                    config.selectedVideoTrack?.trackID
+                }, set: { value in
+                    config.selectedVideoTrack = config.videoTracks.first { $0.trackID == value }
+                })) {
+                    Text("None").tag(nil as Int32?)
+                    ForEach(config.videoTracks, id: \.trackID) { track in
+                        Text(track.description).tag(track.trackID as Int32?)
+                    }
                 }
             }
-            .pickerStyle(.inline)
             .tabItem {
                 Text("video")
             }
@@ -361,7 +376,8 @@ struct VideoSettingView: View {
             Button("Done") {
                 showingModal.toggle()
             }
-        }.frame(width: UIScreen.size.width / 2, height: UIScreen.size.height / 2)
+        }
+//        .frame(width: UIScreen.size.width / 2, height: UIScreen.size.height / 2)
     }
 }
 
