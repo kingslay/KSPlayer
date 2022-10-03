@@ -203,8 +203,21 @@ private class BuildFFMPEG: BaseBuild {
 
     override func innerBuid(platform: PlatformType, arch: ArchType, cflags: String, buildDir: URL) {
         var ffmpegcflags = ffmpegConfiguers
-        if !isDebug {
+        if isDebug {
+            ffmpegcflags.append("--enable-debug")
+            ffmpegcflags.append("--disable-stripping")
+            ffmpegcflags.append("--disable-optimizations")
+        } else {
             ffmpegcflags.append("--disable-debug")
+            ffmpegcflags.append("--enable-stripping")
+            ffmpegcflags.append("--enable-optimizations")
+        }
+        if platform == .maccatalyst || arch == .x86_64 {
+            ffmpegcflags.append("--disable-neon")
+            ffmpegcflags.append("--disable-asm")
+        } else {
+            ffmpegcflags.append("--enable-neon")
+            ffmpegcflags.append("--enable-asm")
         }
         if isFFplay, platform == .macos, arch.executable() {
             if isFFplay, Utility.shell("which sdl2-config") == nil {
@@ -385,11 +398,10 @@ private class BuildFFMPEG: BaseBuild {
         // Configuration options:
         "--disable-armv5te", "--disable-armv6", "--disable-armv6t2", "--disable-bsfs",
         "--disable-bzlib", "--disable-gray", "--disable-iconv", "--disable-linux-perf",
-        "--disable-xlib", "--disable-shared", "--disable-swscale-alpha", "--disable-symver",
-        "--disable-small",
+        "--disable-xlib", "--disable-shared", "--disable-swscale-alpha", "--disable-symver", "--disable-small",
         "--enable-cross-compile", "--enable-gpl", "--enable-libxml2", "--enable-nonfree",
-        "--enable-optimizations", "--enable-runtime-cpudetect", "--enable-stripping", "--enable-thumb",
-        "--enable-version3", "--enable-static", "--pkg-config-flags=--static",
+        "--enable-runtime-cpudetect", "--enable-thumb", "--enable-version3", "--enable-static",
+        "--pkg-config-flags=--static",
         // Documentation options:
         "--disable-doc", "--disable-htmlpages", "--disable-manpages", "--disable-podpages", "--disable-txtpages",
         // Component options:
@@ -688,13 +700,11 @@ private enum PlatformType: String, CaseIterable {
     func cpu(arch: ArchType) -> String {
         switch arch {
         case .arm64:
-            return "--cpu=armv8 --enable-neon --enable-asm"
+            return "--cpu=armv8"
         case .x86_64:
-            // aacpsdsp.o), building for Mac Catalyst, but linking in object file built for
-            // x86_64 binaries are built without ASM support, since ASM for x86_64 is actually x86 and that confuses `xcodebuild -create-xcframework` https://stackoverflow.com/questions/58796267/building-for-macos-but-linking-in-object-file-built-for-free-standing/59103419#59103419
-            return self == .maccatalyst ? "--cpu=x86_64 --disable-neon --disable-asm" : "--cpu=x86_64 --enable-neon --enable-asm"
+            return "--cpu=x86_64"
         case .arm64e:
-            return "--cpu=armv8.3-a --enable-neon --enable-asm"
+            return "--cpu=armv8.3-a"
         }
     }
 

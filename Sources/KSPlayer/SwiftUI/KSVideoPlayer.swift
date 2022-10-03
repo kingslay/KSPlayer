@@ -345,8 +345,10 @@ struct VideoSettingView: View {
                 }
                 .alert("subtile delay", isPresented: $presentSubtileDelayAlert, actions: {
                     TextField("delay second", text: $presentSubtileDelay)
-                        .keyboardType(.numberPad)
                         .foregroundColor(.black)
+                    #if !os(macOS)
+                        .keyboardType(.numberPad)
+                    #endif
                     Button("OK", action: {
                         config.playerLayer?.options.subtitleDelay = Double(presentSubtileDelay) ?? 0
                     })
