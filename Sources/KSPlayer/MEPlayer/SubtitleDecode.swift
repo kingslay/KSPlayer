@@ -71,7 +71,9 @@ class SubtitleDecode: DecodeProtocol {
         }
     }
 
-    func doFlushCodec() {}
+    func doFlushCodec() {
+        preSubtitleFrame = nil
+    }
 
     func shutdown() {
         scale.shutdown()
