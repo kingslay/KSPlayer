@@ -272,6 +272,9 @@ extension EventModifiers {
 
 public class SubtitleModel: ObservableObject {
     public var selectedSubtitle: KSSubtitleProtocol?
+    @Published public var textFont: Font = .largeTitle
+    @Published public var textColor: Color = .white
+    @Published public var textPositionFromBottom = 0
     fileprivate var endTime = TimeInterval(0)
     @Published fileprivate var text: NSMutableAttributedString?
     @Published fileprivate var image: UIImage?
@@ -296,8 +299,9 @@ struct VideoSubtitleView: View {
             } else if let text = model.text {
                 Text(AttributedString(text))
                     .multilineTextAlignment(.center)
-                    .font(.largeTitle)
-                    .foregroundColor(.white).shadow(color: .black.opacity(0.9), radius: 1, x: 1, y: 1)
+                    .font(model.textFont)
+                    .foregroundColor(model.textColor).shadow(color: .black.opacity(0.9), radius: 1, x: 1, y: 1)
+                    .padding(.bottom, CGFloat(model.textPositionFromBottom))
             }
         }
     }
@@ -354,6 +358,11 @@ struct VideoSettingView: View {
                     })
                     Button("Cancel", role: .cancel, action: {})
                 })
+                Picker("subtitle text color", selection: $subtitleModel.textColor) {
+                    ForEach([Color.red, Color.white, Color.orange], id: \.description) { color in
+                        Text(color.description).tag(color)
+                    }
+                }
             }
             .tabItem {
                 Text("subtitle")
