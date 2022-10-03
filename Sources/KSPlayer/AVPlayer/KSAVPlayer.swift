@@ -371,7 +371,7 @@ extension KSAVPlayer: MediaPlayerProtocol {
     }
 
     public func seek(time: TimeInterval) async -> Bool {
-        guard time >= 0 else { return false }
+        let time = max(time, 0)
         shouldSeekTo = time
         playbackState = .seeking
         runInMainqueue { [weak self] in
