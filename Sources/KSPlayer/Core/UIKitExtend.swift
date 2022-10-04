@@ -91,9 +91,7 @@ public class KSSlider: UXSlider {
     }
 }
 
-#if !os(tvOS)
-public typealias UXSlider = UISlider
-#else
+#if os(tvOS)
 public class UXSlider: UIProgressView {
     @IBInspectable public var value: Float {
         get {
@@ -162,7 +160,10 @@ public class UXSlider: UIProgressView {
         bounds
     }
 }
+#else
+public typealias UXSlider = UISlider
 #endif
+
 public typealias UIViewContentMode = UIView.ContentMode
 internal extension UIButton {
     var titleFont: UIFont? {

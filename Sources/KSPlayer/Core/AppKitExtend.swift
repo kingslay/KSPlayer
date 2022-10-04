@@ -4,6 +4,8 @@
 //
 //  Created by kintan on 2018/3/9.
 //
+
+/// 'NSWindow' is unavailable in Mac Catalyst
 #if !canImport(UIKit)
 import AppKit
 import CoreMedia
