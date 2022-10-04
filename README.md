@@ -16,15 +16,14 @@ English | [简体中文](./README_CN.md)
 ## Features
 
 - iOS, tvOS, macOS,Mac Catalyst, Apple Silicon M1, SwiftUI.
-- 360° panorama video.
-- Background playback.
-- RTMP/RTSP/Dash/HLS streaming.
-- Setting playback speed.
 - Multiple audio/video tracks.
 - H.264/H.265 hardware accelerator.
 - 4k/HDR
 - text subtitle/image subtitle(dvbsub/dvdsub/pgssub)
 - Picture in Picture
+- Record video
+- De-interlace auto detect
+- 360° panorama video.
 
 ## Requirements
 

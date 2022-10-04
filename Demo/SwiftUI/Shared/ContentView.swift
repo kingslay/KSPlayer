@@ -72,16 +72,22 @@ struct ContentView: View {
                 }
                 resources.removeAll()
                 if let path = Bundle.main.path(forResource: "h264", ofType: "mp4") {
-                    resources.append(KSPlayerResource(url: URL(fileURLWithPath: path), options: MEOptions(), name: "本地视频"))
+                    let options = MEOptions()
+                    options.outputURL = URL(fileURLWithPath: "/Users/kintan/Desktop/recording.mov")
+                    resources.append(KSPlayerResource(url: URL(fileURLWithPath: path), options: options, name: "本地视频"))
                 }
                 if let path = Bundle.main.path(forResource: "subrip", ofType: "mkv") {
                     resources.append(KSPlayerResource(url: URL(fileURLWithPath: path), options: MEOptions(), name: "文字视频"))
                 }
                 if let url = URL(string: "http://clips.vorwaerts-gmbh.de/big_buck_bunny.mp4") {
-                    resources.append(KSPlayerResource(url: url, options: MEOptions(), name: "mp4视频"))
+                    let options = MEOptions()
+                    options.outputURL = URL(fileURLWithPath: "/Users/kintan/Desktop/recording.mp4")
+                    resources.append(KSPlayerResource(url: url, options: options, name: "mp4视频"))
                 }
                 if let url = URL(string: "http://devimages.apple.com/iphone/samples/bipbop/bipbopall.m3u8") {
-                    resources.append(KSPlayerResource(url: url, options: MEOptions(), name: "m3u8视频"))
+                    let options = MEOptions()
+                    options.outputURL = URL(fileURLWithPath: "/Users/kintan/Desktop/recording.mp4")
+                    resources.append(KSPlayerResource(url: url, options: options, name: "m3u8视频"))
                 }
                 resources.append(contentsOf: parsem3u8(string: string))
             } catch {}

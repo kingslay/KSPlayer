@@ -192,7 +192,7 @@ private class BaseBuild {
 }
 
 private class BuildFFMPEG: BaseBuild {
-    private let ffmpegFile = "ffmpeg-5.1.1"
+    private let ffmpegFile = "ffmpeg-5.1.2"
     private let isDebug: Bool
     private let isFFplay: Bool
     init(arguments: [String]) {
@@ -230,12 +230,6 @@ private class BuildFFMPEG: BaseBuild {
             ffmpegcflags.append("--enable-encoder=aac")
             ffmpegcflags.append("--enable-encoder=movtext")
             ffmpegcflags.append("--enable-encoder=mpeg4")
-            ffmpegcflags.append("--enable-muxer=dash")
-            ffmpegcflags.append("--enable-muxer=m4v")
-            ffmpegcflags.append("--enable-muxer=mov")
-            ffmpegcflags.append("--enable-muxer=mp4")
-            ffmpegcflags.append("--enable-muxer=mpegts")
-            ffmpegcflags.append("--enable-muxer=webm*")
             ffmpegcflags.append("--enable-decoder=rawvideo")
             ffmpegcflags.append("--enable-indev=lavfi")
             ffmpegcflags.append("--enable-filter=color")
@@ -446,6 +440,8 @@ private class BuildFFMPEG: BaseBuild {
         "--enable-decoder=webvtt",
         // ./configure --list-muxers
         "--disable-muxers",
+        "--enable-muxer=dash", "--enable-muxer=hevc", "--enable-muxer=mp4", "--enable-muxer=m4v", "--enable-muxer=mov",
+        "--enable-muxer=mpegts", "--enable-muxer=webm*",
         // ./configure --list-demuxers
         // 用所有的demuxers的话，那avformat就会达到8MB了，指定的话，那就只要4MB。
         "--disable-demuxers",

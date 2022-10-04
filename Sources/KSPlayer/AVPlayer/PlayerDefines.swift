@@ -229,6 +229,7 @@ open class KSOptions {
     public var seekFlags = Int32(1)
 //    ffmpeg only cache http
     public var cache = false
+    public var outputURL: URL?
     public var display = DisplayEnum.plane
     public var audioDelay = 0.0 // s
     public var subtitleDelay = 0.0 // s
@@ -523,6 +524,8 @@ public enum KSPlayerErrorCode: Int {
     case unknown
     case formatCreate
     case formatOpenInput
+    case formatOutputCreate
+    case formatWriteHeader
     case formatFindStreamInfo
     case readFrame
     case codecContextCreate
@@ -549,6 +552,10 @@ extension KSPlayerErrorCode: CustomStringConvertible {
             return "avformat_alloc_context return nil"
         case .formatOpenInput:
             return "avformat can't open input"
+        case .formatOutputCreate:
+            return "avformat_alloc_output_context2 fail"
+        case .formatWriteHeader:
+            return "avformat_write_header fail"
         case .formatFindStreamInfo:
             return "avformat_find_stream_info return nil"
         case .codecContextCreate:

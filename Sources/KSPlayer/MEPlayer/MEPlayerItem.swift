@@ -16,6 +16,9 @@ final class MEPlayerItem {
     private let operationQueue = OperationQueue()
     private let condition = NSCondition()
     private var formatCtx: UnsafeMutablePointer<AVFormatContext>?
+    private var outputFormatCtx: UnsafeMutablePointer<AVFormatContext>?
+    private var outputPacket: UnsafeMutablePointer<AVPacket>?
+    private var streamMapping = [Int: Int]()
     private var openOperation: BlockOperation?
     private var readOperation: BlockOperation?
     private var closeOperation: BlockOperation?
@@ -218,6 +221,9 @@ extension MEPlayerItem {
             duration -= startTime
         }
         createCodec(formatCtx: formatCtx)
+        if let outputURL = options.outputURL {
+            openOutput(url: outputURL)
+        }
         if videoTrack == nil, audioTrack == nil {
             state = .failed
         } else {
@@ -225,6 +231,37 @@ extension MEPlayerItem {
             state = .reading
             read()
         }
+    }
+
+    private func openOutput(url: URL) {
+        let filename = url.isFileURL ? url.path : url.absoluteString
+        var ret = avformat_alloc_output_context2(&outputFormatCtx, nil, nil, filename)
+        guard let outputFormatCtx, let formatCtx else {
+            KSLog(NSError(errorCode: .formatOutputCreate, ffmpegErrnum: ret))
+            return
+        }
+        var index = 0
+        (0 ..< Int(formatCtx.pointee.nb_streams)).forEach { i in
+            if let inputStream = formatCtx.pointee.streams[i] {
+                let codecType = inputStream.pointee.codecpar.pointee.codec_type
+                if [AVMEDIA_TYPE_AUDIO, AVMEDIA_TYPE_VIDEO, AVMEDIA_TYPE_SUBTITLE].contains(codecType) {
+                    if let outStream = avformat_new_stream(outputFormatCtx, nil) {
+                        streamMapping[i] = index
+                        index += 1
+                        avcodec_parameters_copy(outStream.pointee.codecpar, inputStream.pointee.codecpar)
+                        outStream.pointee.codecpar.pointee.codec_tag = 0
+                    }
+                }
+            }
+        }
+        avio_open(&(outputFormatCtx.pointee.pb), filename, AVIO_FLAG_WRITE)
+        ret = avformat_write_header(outputFormatCtx, nil)
+        guard ret >= 0 else {
+            KSLog(NSError(errorCode: .formatWriteHeader, ffmpegErrnum: ret))
+            avformat_close_input(&self.outputFormatCtx)
+            return
+        }
+        outputPacket = av_packet_alloc()
     }
 
     private func createCodec(formatCtx: UnsafeMutablePointer<AVFormatContext>) {
@@ -350,6 +387,18 @@ extension MEPlayerItem {
             return
         }
         if readResult == 0 {
+            if let outputFormatCtx, let formatCtx {
+                let index = Int(packet.corePacket.pointee.stream_index)
+                if let outputIndex = streamMapping[index],
+                   let inputTb = formatCtx.pointee.streams[index]?.pointee.time_base,
+                   let outputTb = outputFormatCtx.pointee.streams[outputIndex]?.pointee.time_base
+                {
+                    av_packet_ref(outputPacket, packet.corePacket)
+                    av_packet_rescale_ts(outputPacket, inputTb, outputTb)
+                    outputPacket?.pointee.pos = -1
+                    av_interleaved_write_frame(outputFormatCtx, outputPacket)
+                }
+            }
             if formatCtx?.pointee.pb.pointee.eof_reached == 1 {
                 // todo need reconnect
             }
@@ -436,6 +485,10 @@ extension MEPlayerItem: MediaPlayback {
     func shutdown() {
         guard state != .closed else { return }
         state = .closed
+        av_packet_free(&outputPacket)
+        if let outputFormatCtx {
+            av_write_trailer(outputFormatCtx)
+        }
         condition.signal()
         // 故意循环引用。等结束了。才释放
         let closeOperation = BlockOperation {
@@ -444,6 +497,7 @@ extension MEPlayerItem: MediaPlayback {
             ObjectPool.share.removeAll()
             KSLog("清空formatCtx")
             avformat_close_input(&self.formatCtx)
+            avformat_close_input(&self.outputFormatCtx)
             self.duration = 0
             self.closeOperation = nil
             self.operationQueue.cancelAllOperations()
