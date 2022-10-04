@@ -31,30 +31,36 @@ class MEFilter {
     }
 
     private func setup(filters: String, args: String) -> Bool {
+        let buffer = avfilter_get_by_name(isAudio ? "abuffer" : "buffer")
+        /// create buffer filter necessary parameter
+        var ret = avfilter_graph_create_filter(&bufferContext, buffer, "in", args, nil, graph)
+        guard ret >= 0, bufferContext != nil else { return false }
+        let bufferSink = avfilter_get_by_name(isAudio ? "abuffersink" : "buffersink")
+        ret = avfilter_graph_create_filter(&bufferSinkContext, bufferSink, "out", nil, nil, graph)
+        guard ret >= 0, bufferSinkContext != nil else { return false }
+//        ret = av_opt_set_int_list(bufferSinkContext, "pix_fmts", pix_fmts, AV_PIX_FMT_NONE, AV_OPT_SEARCH_CHILDREN)
+//        ret = av_opt_set_int_list(bufferSinkContext, "sample_fmts", out_sample_fmts, -1,
+//                                  AV_OPT_SEARCH_CHILDREN);
+//        ret = av_opt_set(bufferSinkContext, "ch_layouts", "mono",
+//                                  AV_OPT_SEARCH_CHILDREN);
+//        ret = av_opt_set_int_list(bufferSinkContext, "sample_rates", out_sample_rates, -1,
+//                                  AV_OPT_SEARCH_CHILDREN);
         var inputs = avfilter_inout_alloc()
         var outputs = avfilter_inout_alloc()
         defer {
             avfilter_inout_free(&inputs)
             avfilter_inout_free(&outputs)
         }
-        let buffer = avfilter_get_by_name(isAudio ? "abuffer" : "buffer")
-        /// create buffer filter necessary parameter
-        var ret = avfilter_graph_create_filter(&bufferContext, buffer, buffer?.pointee.name, args, nil, graph)
-        guard ret >= 0, bufferContext != nil else { return false }
-        let bufferSink = avfilter_get_by_name(isAudio ? "abuffersink" : "buffersink")
-        ret = avfilter_graph_create_filter(&bufferSinkContext, bufferSink, buffer?.pointee.name, nil, nil, graph)
-        guard ret >= 0, bufferSinkContext != nil else { return false }
-        inputs?.pointee.name = av_strdup("in")
-        inputs?.pointee.filter_ctx = bufferContext
-        inputs?.pointee.pad_idx = 0
-
-        outputs?.pointee.name = av_strdup("out")
-        outputs?.pointee.filter_ctx = bufferSinkContext
+        outputs?.pointee.name = av_strdup("in")
+        outputs?.pointee.filter_ctx = bufferContext
         outputs?.pointee.pad_idx = 0
         outputs?.pointee.next = nil
+        
+        inputs?.pointee.name = av_strdup("out")
+        inputs?.pointee.filter_ctx = bufferSinkContext
+        inputs?.pointee.pad_idx = 0
         inputs?.pointee.next = nil
-
-        ret = avfilter_graph_parse_ptr(graph, filters, &outputs, &inputs, nil)
+        ret = avfilter_graph_parse_ptr(graph, filters, &inputs, &outputs, nil)
         guard ret >= 0 else { return false }
 //        let filterContexts = filters.map { str -> UnsafeMutablePointer<AVFilterContext>? in
 //            let name: String
