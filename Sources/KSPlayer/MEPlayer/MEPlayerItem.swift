@@ -241,6 +241,7 @@ extension MEPlayerItem {
             return
         }
         var index = 0
+        let formatName = outputFormatCtx.pointee.oformat.pointee.name.flatMap { String(cString: $0) }
         (0 ..< Int(formatCtx.pointee.nb_streams)).forEach { i in
             if let inputStream = formatCtx.pointee.streams[i] {
                 let codecType = inputStream.pointee.codecpar.pointee.codec_type
@@ -249,7 +250,14 @@ extension MEPlayerItem {
                         streamMapping[i] = index
                         index += 1
                         avcodec_parameters_copy(outStream.pointee.codecpar, inputStream.pointee.codecpar)
-                        outStream.pointee.codecpar.pointee.codec_tag = 0
+                        if codecType == AVMEDIA_TYPE_SUBTITLE, formatName == "mp4" || formatName == "mov" {
+                            outStream.pointee.codecpar.pointee.codec_id = AV_CODEC_ID_MOV_TEXT
+                        }
+                        if inputStream.pointee.codecpar.pointee.codec_id == AV_CODEC_ID_HEVC {
+                            outStream.pointee.codecpar.pointee.codec_tag = CMFormatDescription.MediaSubType.hevc.rawValue.bigEndian
+                        } else {
+                            outStream.pointee.codecpar.pointee.codec_tag = 0
+                        }
                     }
                 }
             }
