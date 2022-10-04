@@ -135,7 +135,7 @@ final class MEPlayerItem {
         if track.mediaType == .video, let assetTrack = track as? AssetTrack {
             findBestAudio(videoTrack: assetTrack)
         }
-        if track.mediaType == .subtitle, !((track as? AssetTrack)?.isImageSubtitle ?? false) {
+        if track.mediaType == .subtitle {
             return
         }
         seek(time: currentPlaybackTime) { _ in
