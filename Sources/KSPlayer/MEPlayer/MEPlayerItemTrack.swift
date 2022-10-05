@@ -426,7 +426,7 @@ extension AssetTrack {
             if mediaType == .subtitle {
                 return SubtitleDecode(assetTrack: self, options: options, delegate: delegate)
             } else {
-                if mediaType == .video, options.asynchronousDecompression, options.enableHardwareDecode(),
+                if mediaType == .video, options.asynchronousDecompression, options.hardwareDecode,
                    let session = DecompressionSession(codecpar: stream.pointee.codecpar.pointee, options: options)
                 {
                     return VideoHardwareDecode(assetTrack: self, options: options, session: session, delegate: delegate)

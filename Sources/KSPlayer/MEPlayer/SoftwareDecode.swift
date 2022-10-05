@@ -120,7 +120,7 @@ extension AVCodecParameters {
             avcodec_free_context(&codecContextOption)
             throw NSError(errorCode: .codecContextSetParam, ffmpegErrnum: result)
         }
-        if codec_type == AVMEDIA_TYPE_VIDEO, options.enableHardwareDecode() {
+        if codec_type == AVMEDIA_TYPE_VIDEO, options.hardwareDecode {
             var hwDeviceCtx: UnsafeMutablePointer<AVBufferRef>?
             let ret = av_hwdevice_ctx_create(&hwDeviceCtx, AV_HWDEVICE_TYPE_VIDEOTOOLBOX, nil, nil, 0)
             if ret == 0 {

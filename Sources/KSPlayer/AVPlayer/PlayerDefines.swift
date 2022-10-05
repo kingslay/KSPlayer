@@ -242,6 +242,7 @@ open class KSOptions {
     public var syncDecodeVideo = false
     public var avOptions = [String: Any]()
     public var formatContextOptions = [String: Any]()
+    public var hardwareDecode = true
     public var decoderOptions = [String: Any]()
     public var probesize: Int64?
     public var maxAnalyzeDuration: Int64?
@@ -400,10 +401,6 @@ open class KSOptions {
 
     open func isUseDisplayLayer() -> Bool {
         display == .plane
-    }
-
-    open func enableHardwareDecode() -> Bool {
-        videoFilters == nil
     }
 
     private var idetTypeMap = [VideoInterlacingType: Int]()

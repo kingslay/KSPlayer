@@ -74,6 +74,7 @@ struct ContentView: View {
                 if let path = Bundle.main.path(forResource: "h264", ofType: "mp4") {
                     let options = MEOptions()
                     options.videoFilters = "hflip,vflip"
+                    options.hardwareDecode = false
                     #if os(macOS)
                     options.outputURL = URL(fileURLWithPath: "/Users/kintan/Desktop/recording.mov")
                     #endif
