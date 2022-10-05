@@ -57,7 +57,7 @@
 		3DD4BF1EC1DCB5384CF8132D5E547F2C /* Model.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4804DDDEA8BD4F474FB8EDCA930E2DB4 /* Model.swift */; };
 		3E346CF7B9E538C8509ABDFC251B5A79 /* PlayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5374BD9D833FFB8D460AEA52437A7167 /* PlayerView.swift */; };
 		3E477DA67793DEAD6BA2142652FC80D5 /* KSSubtitle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61DE741FC52D0370361D271109B0B0AC /* KSSubtitle.swift */; };
-		3F198328104896524C341EAD4714BA4B /* SoftwareDecode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1215A9FA2F015E55180FA66929183D7D /* SoftwareDecode.swift */; };
+		3F198328104896524C341EAD4714BA4B /* FFmpegDecode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1215A9FA2F015E55180FA66929183D7D /* FFmpegDecode.swift */; };
 		40DF1604C726626B1446F8041D46A1DB /* PlayerFullScreenViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7EFA688C46DC9274A5EF0B14A249038B /* PlayerFullScreenViewController.swift */; };
 		41197B4E6639F0336C00715D7BC53871 /* AppKitExtend.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4EFFDE69D1237E3A01E2AD850E6BC73 /* AppKitExtend.swift */; };
 		42CDD5DC3D459020FB11DE5C43DEB6C3 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3D5666A1F2562F7E390EE414025DAE37 /* Foundation.framework */; };
@@ -88,7 +88,7 @@
 		6C2B8BD0545619FCC7E8456162B6E5F0 /* SubtitleDecode.swift in Sources */ = {isa = PBXBuildFile; fileRef = F46E4202CDF183BAD7536A551CB12D0F /* SubtitleDecode.swift */; };
 		6C5F719F4FA52544C37F6A639A6AED3F /* PlayerTransitionAnimator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 581C90E277C3D34503AEE97C4F2F2AA5 /* PlayerTransitionAnimator.swift */; };
 		6DEE2A338B5D8C014BE001CFBE75F689 /* BufferProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 284F8A75912DB312A2A49B1046A4E87D /* BufferProtocol.swift */; };
-		6EEB54DE2744E416019899FB22D76827 /* SoftwareDecode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1215A9FA2F015E55180FA66929183D7D /* SoftwareDecode.swift */; };
+		6EEB54DE2744E416019899FB22D76827 /* FFmpegDecode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1215A9FA2F015E55180FA66929183D7D /* FFmpegDecode.swift */; };
 		6F4F6F9D862731671B465CDBD33254B6 /* AudioEnginePlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4959CFF960C1C28D1FD913EEA2700317 /* AudioEnginePlayer.swift */; };
 		6F5087492D5E3CF43DEFB27AB7543740 /* EmbedDataSouce.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F9EFC85348198307BEA08CFE9824030 /* EmbedDataSouce.swift */; };
 		70B40D5D59045598686C78A59E9FAD58 /* VideoPlayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8667FB49134A6148A3973230E6A388BA /* VideoPlayerView.swift */; };
@@ -132,7 +132,7 @@
 		A0C40A8B77C602C4D78B53020270B0FA /* VideoPlayerViewTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2455087529C61194DFA3F813155DE67 /* VideoPlayerViewTest.swift */; };
 		A0E0EC9426715FE0EAE163BE88FD05AD /* dvd_subtitle.mkv in Resources */ = {isa = PBXBuildFile; fileRef = 10CCB9568690C5C70EB279A3C4DA1B6A /* dvd_subtitle.mkv */; };
 		A17DD5F5F81AD76E1D7771E3EDA02F2D /* h264.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = 03ECEB3BCBC187FA09307DB2ACA23BBD /* h264.mp4 */; };
-		A18D8D3E9D2AF9C57F22BFB424F21382 /* SoftwareDecode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1215A9FA2F015E55180FA66929183D7D /* SoftwareDecode.swift */; };
+		A18D8D3E9D2AF9C57F22BFB424F21382 /* FFmpegDecode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1215A9FA2F015E55180FA66929183D7D /* FFmpegDecode.swift */; };
 		A237AF86C1629CD4E25509AA23557478 /* hevc.mkv in Resources */ = {isa = PBXBuildFile; fileRef = 4007C2EA15BF7F420E56C6E2BD1815BB /* hevc.mkv */; };
 		A5072CAA942FBFECA56902F2E5933890 /* subrip.mkv in Resources */ = {isa = PBXBuildFile; fileRef = 9EC42D4BE979D392160F210AE8138FB7 /* subrip.mkv */; };
 		A68F876A2AF653D0641208E9D63E0F7A /* UIKitExtend.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1EE65699AE261C14FAB9C15926CD17D /* UIKitExtend.swift */; };
@@ -306,7 +306,7 @@
 		10CCB9568690C5C70EB279A3C4DA1B6A /* dvd_subtitle.mkv */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = file; name = dvd_subtitle.mkv; path = Tests/KSPlayerTests/Resources/dvd_subtitle.mkv; sourceTree = "<group>"; };
 		11197ED836749D02E80DB5665E10F31C /* mjpeg.flac */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = file; name = mjpeg.flac; path = Tests/KSPlayerTests/Resources/mjpeg.flac; sourceTree = "<group>"; };
 		11C91C6D12FB7FE7D555FB887802244F /* Transforms.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = Transforms.swift; path = Sources/KSPlayer/Metal/Transforms.swift; sourceTree = "<group>"; };
-		1215A9FA2F015E55180FA66929183D7D /* SoftwareDecode.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = SoftwareDecode.swift; path = Sources/KSPlayer/MEPlayer/SoftwareDecode.swift; sourceTree = "<group>"; };
+		1215A9FA2F015E55180FA66929183D7D /* FFmpegDecode.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = FFmpegDecode.swift; path = Sources/KSPlayer/MEPlayer/FFmpegDecode.swift; sourceTree = "<group>"; };
 		123A2E275C86E211A1DB770770BDD9B4 /* SubtitleDataSouce.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = SubtitleDataSouce.swift; path = Sources/KSPlayer/Subtitle/SubtitleDataSouce.swift; sourceTree = "<group>"; };
 		14FAD681D1700397D708134A25DCB243 /* KSPlayer.xcassets */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = folder.assetcatalog; path = KSPlayer.xcassets; sourceTree = "<group>"; };
 		157DB52B95ABF5AD71C59BF4522C3AA2 /* KSPlayer-tvOS-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = "KSPlayer-tvOS-dummy.m"; path = "../KSPlayer-tvOS/KSPlayer-tvOS-dummy.m"; sourceTree = "<group>"; };
@@ -524,7 +524,7 @@
 				4804DDDEA8BD4F474FB8EDCA930E2DB4 /* Model.swift */,
 				9B13A8C963858D90165E0C65067E4A99 /* ObjectPool.swift */,
 				D3972C3BB26B2C54498860C9B895E8F0 /* Resample.swift */,
-				1215A9FA2F015E55180FA66929183D7D /* SoftwareDecode.swift */,
+				1215A9FA2F015E55180FA66929183D7D /* FFmpegDecode.swift */,
 				F46E4202CDF183BAD7536A551CB12D0F /* SubtitleDecode.swift */,
 			);
 			name = MEPlayer;
@@ -1331,7 +1331,7 @@
 				4A64F3F6F3F5FC7C72083798B5907EA2 /* Resample.swift in Sources */,
 				1F15784435ED97A4F4E750D1A5A00C2B /* SeekView.swift in Sources */,
 				DB6749F62EFD4E7817F2251F7E2F481A /* Shaders.metal in Sources */,
-				6EEB54DE2744E416019899FB22D76827 /* SoftwareDecode.swift in Sources */,
+				6EEB54DE2744E416019899FB22D76827 /* FFmpegDecode.swift in Sources */,
 				F4FE79F6D1CE1C0F996DD57B02F8C59D /* SubtitleDataSouce.swift in Sources */,
 				A69039B3895716C1AF528B8A7F44C29B /* SubtitleDecode.swift in Sources */,
 				064DAD96090BFB5ACC7B303B3C9C41BB /* Transforms.swift in Sources */,
@@ -1383,7 +1383,7 @@
 				F6975F1D7E1BF19A5E10892A727C23CD /* Resample.swift in Sources */,
 				01E78C91D88EE80D14080FDAD4F952FA /* SeekView.swift in Sources */,
 				7412EF127EC50C9AFB0CE1976684DFA9 /* Shaders.metal in Sources */,
-				3F198328104896524C341EAD4714BA4B /* SoftwareDecode.swift in Sources */,
+				3F198328104896524C341EAD4714BA4B /* FFmpegDecode.swift in Sources */,
 				727929F639B16F1B3C4F7EC7599BBDE3 /* SubtitleDataSouce.swift in Sources */,
 				368E9E02F4AEBD7F2C6F0E7202858664 /* SubtitleDecode.swift in Sources */,
 				6777A12D90C1529839C66C4EEFD1D180 /* Transforms.swift in Sources */,
@@ -1450,7 +1450,7 @@
 				7A563B88E1AAA7C18F73DB67DD221CAA /* Resample.swift in Sources */,
 				CA36D97C2F9F6EA538CF04253A5FF0E3 /* SeekView.swift in Sources */,
 				05C1A655FBB40E9592933EF8C4F91DDE /* Shaders.metal in Sources */,
-				A18D8D3E9D2AF9C57F22BFB424F21382 /* SoftwareDecode.swift in Sources */,
+				A18D8D3E9D2AF9C57F22BFB424F21382 /* FFmpegDecode.swift in Sources */,
 				34293856D8EAECE17A256AA71F173A1A /* SubtitleDataSouce.swift in Sources */,
 				6C2B8BD0545619FCC7E8456162B6E5F0 /* SubtitleDecode.swift in Sources */,
 				090ECA8FF34A6DEA308AB5DFBBD975C9 /* Transforms.swift in Sources */,

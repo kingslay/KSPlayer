@@ -9,7 +9,7 @@ import AVFoundation
 import Foundation
 import Libavcodec
 
-class SoftwareDecode: DecodeProtocol {
+class FFmpegDecode: DecodeProtocol {
     private weak var delegate: DecodeResultDelegate?
     private let options: KSOptions
     // 第一次seek不要调用avcodec_flush_buffers。否则seek完之后可能会因为不是关键帧而导致蓝屏
@@ -45,7 +45,7 @@ class SoftwareDecode: DecodeProtocol {
         while true {
             let result = avcodec_receive_frame(codecContext, coreFrame)
             if result == 0, let avframe = coreFrame {
-                var frame = try swresample.transfer(avframe: filter.filter(options: options, inputFrame: avframe))
+                var frame = try swresample.transfer(avframe: filter.filter(options: options, inputFrame: avframe, hwDeviceCtx: codecContext.pointee.hw_device_ctx))
                 frame.timebase = packet.assetTrack.timebase
 //                frame.timebase = Timebase(avframe.pointee.time_base)
                 frame.duration = avframe.pointee.pkt_duration

@@ -8,7 +8,7 @@
 import Libavformat
 import VideoToolbox
 
-class VideoHardwareDecode: DecodeProtocol {
+class VideoToolboxDecode: DecodeProtocol {
     private weak var delegate: DecodeResultDelegate?
     private var session: DecompressionSession?
     private let codecpar: AVCodecParameters

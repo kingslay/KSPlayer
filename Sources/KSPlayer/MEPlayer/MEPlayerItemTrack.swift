@@ -27,7 +27,7 @@ class AssetTrack: MediaPlayerTrack {
     let transferFunction: String?
     let yCbCrMatrix: String?
     let mediaSubType: CMFormatDescription.MediaSubType
-    var subtitle: FFPlayerItemTrack<SubtitleFrame>?
+    var subtitle: SyncPlayerItemTrack<SubtitleFrame>?
     var dovi: DOVIDecoderConfigurationRecord?
     let audioStreamBasicDescription: AudioStreamBasicDescription?
     let description: String
@@ -163,7 +163,7 @@ protocol PlayerItemTrackProtocol: CapacityProtocol, AnyObject {
     func shutdown()
 }
 
-class FFPlayerItemTrack<Frame: MEFrame>: PlayerItemTrackProtocol, CustomStringConvertible {
+class SyncPlayerItemTrack<Frame: MEFrame>: PlayerItemTrackProtocol, CustomStringConvertible {
     private let options: KSOptions
     private var seekTime = 0.0
     fileprivate var decoderMap = [Int32: DecodeProtocol]()
@@ -260,9 +260,9 @@ class FFPlayerItemTrack<Frame: MEFrame>: PlayerItemTrackProtocol, CustomStringCo
             }
         } catch {
             KSLog("Decoder did Failed : \(error)")
-            if decoder is VideoHardwareDecode {
+            if decoder is VideoToolboxDecode {
                 decoder.shutdown()
-                decoderMap[packet.assetTrack.trackID] = SoftwareDecode(assetTrack: packet.assetTrack, options: options, delegate: self)
+                decoderMap[packet.assetTrack.trackID] = FFmpegDecode(assetTrack: packet.assetTrack, options: options, delegate: self)
                 KSLog("VideoCodec switch to software decompression")
                 doDecode(packet: packet)
             } else {
@@ -272,7 +272,7 @@ class FFPlayerItemTrack<Frame: MEFrame>: PlayerItemTrackProtocol, CustomStringCo
     }
 }
 
-extension FFPlayerItemTrack: DecodeResultDelegate {
+extension SyncPlayerItemTrack: DecodeResultDelegate {
     func decodeResult(frame: MEFrame?) {
         guard let frame else {
             return
@@ -294,7 +294,7 @@ extension FFPlayerItemTrack: DecodeResultDelegate {
     }
 }
 
-final class AsyncPlayerItemTrack<Frame: MEFrame>: FFPlayerItemTrack<Frame> {
+final class AsyncPlayerItemTrack<Frame: MEFrame>: SyncPlayerItemTrack<Frame> {
     private let operationQueue = OperationQueue()
     private var decodeOperation: BlockOperation!
     // 无缝播放使用的PacketQueue
@@ -429,9 +429,9 @@ extension AssetTrack {
                 if mediaType == .video, options.asynchronousDecompression, options.hardwareDecode,
                    let session = DecompressionSession(codecpar: stream.pointee.codecpar.pointee, options: options)
                 {
-                    return VideoHardwareDecode(assetTrack: self, options: options, session: session, delegate: delegate)
+                    return VideoToolboxDecode(assetTrack: self, options: options, session: session, delegate: delegate)
                 } else {
-                    return SoftwareDecode(assetTrack: self, options: options, delegate: delegate)
+                    return FFmpegDecode(assetTrack: self, options: options, delegate: delegate)
                 }
             }
         }

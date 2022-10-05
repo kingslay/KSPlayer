@@ -21,13 +21,11 @@ KSPlayerLayer 是播放内核的封装，主要工作是根据配置参数切换
 
 ### MediaPlayerProtocol
 
-MediaPlayerProtocol是播放器内核接口。只要遵守MediaPlayerProtocol协议的播放器内核就可以在KSPlayer使用。默认提供了三种播放器内核：KSAVPlayer、KSMEPlayer、KSVRPlayer 。
+MediaPlayerProtocol是播放器内核接口。只要遵守MediaPlayerProtocol协议的播放器内核就可以在KSPlayer使用。默认提供了两种播放器内核：KSAVPlayer、KSMEPlayer
 
-1、KSAVPlayer 是基于 AVPlayer 封装而成，支持H.264、MPEG-4格式。
+1、KSAVPlayer 是基于 AVPlayer 封装而成，支持H.264、H.265、MPEG-4格式。
 
 2、KSMEPlayer是自研播放器内核，支持所有的主流视频格式。支持硬解和软解。 
-
-3、KSVRPlayer是KSMEPlayer的子类，专门用来处理全景视频。
 
 ### 小结
 
@@ -36,9 +34,9 @@ MediaPlayerProtocol是播放器内核接口。只要遵守MediaPlayerProtocol协
 - PlayerView 收到播放请求。
 - 由 KSPlayerLayer 根据配置参数分发给 KSAVPlayer 或 KSMEPlayer 进行播放。
 - 如果使用 KSAVPlayer 播放，将视频画面输出给 KSAVPlayerView 中的 AVPlayerLayer 。
-- 如果使用 KSMEPlayer 播放，将视频画面输出给 PixelRenderView，音频输出至 AudioPlayer。
+- 如果使用 KSMEPlayer 播放，将视频画面输出给 MetalPlayView，音频输出至 AudioEnginePlayer。
 
-通过抽象的 MediaPlayerProtocol  将真正负责播放的 KSAVPlayer 、 KSMEPlayer、KSVRPlayer 屏蔽起来，这样可以保证无论资源是何种类型，对外仅暴露一套统一的接口和回调，将播放内核间的差异内部消化，尽可能降低使用成本。如果需要接入别的的播放器内核的话，如ijkplayer。那只要为ijkplayer实现MediaPlayerProtocol接口即可。
+通过抽象的 MediaPlayerProtocol  将真正负责播放的 KSAVPlayer 、 KSMEPlayer 屏蔽起来，这样可以保证无论资源是何种类型，对外仅暴露一套统一的接口和回调，将播放内核间的差异内部消化，尽可能降低使用成本。如果需要接入别的的播放器内核的话，如ijkplayer。那只要为ijkplayer实现MediaPlayerProtocol接口即可。
 
 ## 二、KSMEPlayer组织结构
 
@@ -52,28 +50,15 @@ MediaPlayerProtocol是播放器内核接口。只要遵守MediaPlayerProtocol协
 
 ### PlayerItemTrackProtocol 
 
-解码器接口，负责把数据包解码成数据帧。支持硬解，软解。使用VideoToolbox进行视频硬解，FFmpeg进行视频软解、音频软解、字幕软解
+解码处理，负责把数据包解码成数据帧。支持硬解，软解。使用VideoToolbox进行视频硬解，FFmpeg进行视频软硬解、音频软解、字幕软解
 
-### FrameOutput
+### AudioEnginePlayer
 
- 音视频输出接口，视频画面输出至VideoOutput ，再由PixelRenderView进行渲染 。音频则输出至 AudioOutput ，再由 AudioPlayer 进行播放。
+AudioEnginePlayer 负责声音的播放和音频事件的处理。内部使用 AVAudioEngine 做了一层混音，通过混音可以设置声音的输出音量大小和播放倍数
 
-### AudioPlayer
+### MetalPlayView
 
-AudioPlayer 负责声音的播放和音频事件的处理。内部使用 AUGraph 做了一层混音，通过混音可以设置声音的输出音量大小和播放倍数
-
-### PixelRenderView
-
- PixelRenderView是视频画面绘制接口，具体的绘制的是接口实现类SampleBufferPlayerView，OpenGLPlayView ，MetalPlayView ，PanoramaView，OpenGLVRPlayView。因为Metal只能在64位的真机上使用，32位设备和模拟器都不能使用。所以提供了SampleBufferPlayerView给模拟器使用，OpenGLPlayView给32位设备使用。PanoramaView，OpenGLVRPlayView是用于全景视频。选择规则如下表所示
-
-|          | 平面视频               | 全景视频         |
-| -------- | ---------------------- | ---------------- |
-| 模拟器   | SampleBufferPlayerView | OpenGLVRPlayView |
-| 32位设备 | OpenGLPlayView         | OpenGLVRPlayView |
-| 64位设备 | MetalPlayView          | PanoramaView     |
-
-SampleBufferPlayerView不在真机使用，是因为它有一个问题，如果切换后台，然后在回到前台的话，屏幕会变成黑屏，点播放的话，就可以不会黑屏了。这个是系统API的bug。
-
+ MetalPlayView是视频画面绘制实现类，里面会更加参数参数来决定是使用AVSampleBufferDisplayLayer还是Metal来进行绘制。Metal支持全景视频，AVSampleBufferDisplayLayer支持HDR。
 
 ## 三、KSMEPlayer 运作流程
 
@@ -95,14 +80,12 @@ KSMEPlayer 中共有5个线程。与图中5个蓝色圆圈对应。
 
 ### PlayerItemTrackProtocol
 
-解码器接口，目前一共有四个解码器
+解码处理，目前一共有两个实现类
+| 类名                    | 同步/异步 | 备注 |
+| ----------------------- | -------- | ---- |
+| SyncPlayerItemTrack     |   同步      |主要用于字幕，如果是纯音频的话，也是可以用同步 |
+| AsyncPlayerItemTrack     | 异步      |  |
 
-| 类名                    | 解码类型 | 同步/异步 | 备注 |
-| ----------------------- | -------- | --------- | ---- |
-| VTBPlayerItemTrack      | 视频     | 异步      | 硬解 |
-| VideoPlayerItemTrack    | 视频     | 异步      | 软解 |
-| AudioPlayerItemTrack    | 音频     | 异步      | 软解 |
-| SubtitlePlayerItemTrack | 字幕     | 同步      | 软解 |
 
 #### 备注：
 
@@ -114,21 +97,29 @@ KSMEPlayer 中共有5个线程。与图中5个蓝色圆圈对应。
 
 4、优先使用视频硬解，当视频无法软解或硬解失败的话，就自动切换到软解
 
-### ObjectQueue 数据队列
+### DecodeProtocol 
 
-- PacketQueue 是包队列，用于管理解码前的数据包（Packet ）。
-- AudioFrameQueue 是帧队列，用于管理解码后的帧（AudioFrame  ）。
-- VideoFrameQueue是帧队列，用于管理解码后的帧（ VideoVTBFrame ）。
+解码器接口，目前一共有三个实现类
 
-数据队列提供`putObjectSync` 、`getObjectSync` 、`getObjectAsync` 三个方法
+| 类名                    | 解码类型 | 同步/异步 | 备注 |
+| ----------------------- | -------- | --------- | ---- |
+| FFmpegDecode     | 音视频     | 同步      | 软硬解 |
+| VideoToolboxDecode    | 视频     | 异步      | 硬解 |
+| SubtitleDecode | 字幕     | 同步      | 软解 |
+
+### CircularBuffer 数据队列
+
+ CircularBuffer是环形队列
+数据队列提供`push` 、`pop(wait, where)` `search(where)` 三个方法
+
 
 | 操作             | 行为                                                         |
 | ---------------- | ------------------------------------------------------------ |
-| `putObjectSync`  | 队列满了阻塞当前线程，直到队列只剩下1/2的数据，线程才会通过`NSCondition`被唤醒。避免频繁的进行锁操作 |
-| `getObjectSync`  | 当队列中没有数据时，会阻塞当前线程，直到向队列中添加新元素时，线程才会通过`NSCondition`被唤醒 |
-| `getObjectAsync` | 当队列中没有数据的话，就直接返回空                           |
+| `put`  | 队列满了，有两个处理方式：1.没有现在队列长度，那会双倍扩展队列长度，如果限制了，那会阻塞当前线程，直到队列只剩下1/2的数据，线程才会通过`NSCondition`被唤醒。避免频繁的进行锁操作 |
+| `pop(wait, where)`  | 如果参数wait为true，那当队列中没有数据时，会阻塞当前线程，直到向队列中添加新元素时，线程才会通过`NSCondition`被唤醒，如果wait为false，那就会直接返回空 |
+| `search(where)` | 只是访问队列里面的数据，不会对队列的游标产生影响 ，一般是用于文字字幕                          |
 
-ObjectQueue还支持排序，因为视频有可能不是按顺序解码。所以一定要排序下，不然画面会来回抖动
+CircularBuffer还支持排序，因为视频有可能不是按顺序解码。所以一定要排序下，不然画面会来回抖动
 
 ### 音视频同步
 

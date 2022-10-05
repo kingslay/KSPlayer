@@ -40,8 +40,8 @@ final class MEPlayerItem {
         return tracks
     }
 
-    private var videoTrack: FFPlayerItemTrack<VideoVTBFrame>?
-    private var audioTrack: FFPlayerItemTrack<AudioFrame>? {
+    private var videoTrack: SyncPlayerItemTrack<VideoVTBFrame>?
+    private var audioTrack: SyncPlayerItemTrack<AudioFrame>? {
         didSet {
             audioTrack?.delegate = self
         }
@@ -286,7 +286,7 @@ extension MEPlayerItem {
                         assetTrack.startTime = startTime
                     }
                     if !options.subtitleDisable, assetTrack.mediaType == .subtitle {
-                        let subtitle = FFPlayerItemTrack<SubtitleFrame>(assetTrack: assetTrack, options: options)
+                        let subtitle = SyncPlayerItemTrack<SubtitleFrame>(assetTrack: assetTrack, options: options)
                         assetTrack.subtitle = subtitle
                         allTracks.append(subtitle)
                     }
@@ -313,7 +313,7 @@ extension MEPlayerItem {
                 first.stream.pointee.discard = AVDISCARD_DEFAULT
                 rotation = first.rotation
                 naturalSize = first.naturalSize
-                let track = options.syncDecodeVideo ? FFPlayerItemTrack<VideoVTBFrame>(assetTrack: first, options: options) : AsyncPlayerItemTrack<VideoVTBFrame>(assetTrack: first, options: options)
+                let track = options.syncDecodeVideo ? SyncPlayerItemTrack<VideoVTBFrame>(assetTrack: first, options: options) : AsyncPlayerItemTrack<VideoVTBFrame>(assetTrack: first, options: options)
                 track.delegate = self
                 allTracks.append(track)
                 videoTrack = track
@@ -334,7 +334,7 @@ extension MEPlayerItem {
         let index = av_find_best_stream(formatCtx, AVMEDIA_TYPE_AUDIO, wantedStreamNb, videoIndex, nil, 0)
         if let first = assetTracks.first(where: { $0.mediaType == .audio && $0.trackID == index }) {
             first.stream.pointee.discard = AVDISCARD_DEFAULT
-            let track = options.syncDecodeAudio ? FFPlayerItemTrack<AudioFrame>(assetTrack: first, options: options) : AsyncPlayerItemTrack<AudioFrame>(assetTrack: first, options: options)
+            let track = options.syncDecodeAudio ? SyncPlayerItemTrack<AudioFrame>(assetTrack: first, options: options) : AsyncPlayerItemTrack<AudioFrame>(assetTrack: first, options: options)
             track.delegate = self
             allTracks.append(track)
             audioTrack = track

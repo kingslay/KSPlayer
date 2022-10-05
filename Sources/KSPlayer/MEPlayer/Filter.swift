@@ -10,8 +10,8 @@ import Libavfilter
 import Libavutil
 class MEFilter {
     private var graph: UnsafeMutablePointer<AVFilterGraph>?
-    var bufferContext: UnsafeMutablePointer<AVFilterContext>?
-    var bufferSinkContext: UnsafeMutablePointer<AVFilterContext>?
+    private var bufferContext: UnsafeMutablePointer<AVFilterContext>?
+    private var bufferSinkContext: UnsafeMutablePointer<AVFilterContext>?
     private var outputFrame = av_frame_alloc()
     private var filters: String?
     private let timebase: Timebase
@@ -30,7 +30,7 @@ class MEFilter {
         self.isAudio = isAudio
     }
 
-    private func setup(filters: String, args: String) -> Bool {
+    private func setup(filters: String, args: String, hwDeviceCtx: UnsafeMutablePointer<AVBufferRef>?) -> Bool {
         let buffer = avfilter_get_by_name(isAudio ? "abuffer" : "buffer")
         /// create buffer filter necessary parameter
         var ret = avfilter_graph_create_filter(&bufferContext, buffer, "in", args, nil, graph)
@@ -38,6 +38,8 @@ class MEFilter {
         let bufferSink = avfilter_get_by_name(isAudio ? "abuffersink" : "buffersink")
         ret = avfilter_graph_create_filter(&bufferSinkContext, bufferSink, "out", nil, nil, graph)
         guard ret >= 0, bufferSinkContext != nil else { return false }
+        bufferContext?.pointee.hw_device_ctx = hwDeviceCtx
+        bufferSinkContext?.pointee.hw_device_ctx = hwDeviceCtx
 //        ret = av_opt_set_int_list(bufferSinkContext, "pix_fmts", pix_fmts, AV_PIX_FMT_NONE, AV_OPT_SEARCH_CHILDREN)
 //        ret = av_opt_set_int_list(bufferSinkContext, "sample_fmts", out_sample_fmts, -1,
 //                                  AV_OPT_SEARCH_CHILDREN);
@@ -87,7 +89,7 @@ class MEFilter {
         return true
     }
 
-    public func filter(options: KSOptions, inputFrame: UnsafeMutablePointer<AVFrame>) -> UnsafeMutablePointer<AVFrame> {
+    public func filter(options: KSOptions, inputFrame: UnsafeMutablePointer<AVFrame>, hwDeviceCtx: UnsafeMutablePointer<AVBufferRef>?) -> UnsafeMutablePointer<AVFrame> {
         var filters: String?
         if isAudio {
             filters = options.audioFilters
@@ -111,7 +113,7 @@ class MEFilter {
             args = "video_size=\(inputFrame.pointee.width)x\(inputFrame.pointee.height):pix_fmt=\(inputFrame.pointee.format):time_base=\(timebase.num)/\(timebase.den):pixel_aspect=\(ratio.num)/\(ratio.den)"
         }
         if self.args != args || self.filters != filters {
-            if setup(filters: filters, args: args) {
+            if setup(filters: filters, args: args, hwDeviceCtx: hwDeviceCtx) {
                 self.args = args
                 self.filters = filters
             } else {
