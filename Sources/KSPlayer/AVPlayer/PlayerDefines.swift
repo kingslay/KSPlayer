@@ -325,7 +325,7 @@ open class KSOptions {
                 return true
             }
             if isFirst || isSeek {
-                // 让音频能更快的打开
+                // 让纯音频能更快的打开
                 if capacity.mediaType == .audio || isSecondOpen {
                     if isFirst {
                         return true
@@ -477,7 +477,7 @@ public enum KSPlayerManager {
 
     static func setAudioSession() {
         #if os(macOS)
-        //        try? AVAudioSession.sharedInstance().setRouteSharingPolicy(.longFormAudio)
+//        try? AVAudioSession.sharedInstance().setRouteSharingPolicy(.longFormAudio)
         #else
         let category = AVAudioSession.sharedInstance().category
         if category != .playback, category != .playAndRecord {

@@ -59,7 +59,7 @@ public struct KSVideoPlayerView: View {
                     }
                 }
             }
-            #if os(tvOS)
+            #if canImport(UIKit)
             .onSwipe { direction in
                 if direction == .down {
                     model.isMaskShow.toggle()
@@ -69,31 +69,32 @@ public struct KSVideoPlayerView: View {
                     player.coordinator.seek(time: model.currentTime + 15)
                 }
             }
-            #else
-                .onTapGesture {
-                    model.isMaskShow.toggle()
-                    #if os(macOS)
-                    model.isMaskShow ? NSCursor.unhide() : NSCursor.hide()
-                    #endif
-                }
             #endif
-                .onReceive(player.coordinator.$selectedSubtitleTrack) { track in
-                    guard let subtitle = track as? SubtitleInfo else {
-                        subtitleModel.selectedSubtitle = nil
-                        return
-                    }
-                    subtitle.enableSubtitle { result in
-                        subtitleModel.selectedSubtitle = try? result.get()
+            #if !os(tvOS)
+            .onTapGesture {
+                model.isMaskShow.toggle()
+                #if os(macOS)
+                model.isMaskShow ? NSCursor.unhide() : NSCursor.hide()
+                #endif
+            }
+            #endif
+            .onReceive(player.coordinator.$selectedSubtitleTrack) { track in
+                guard let subtitle = track as? SubtitleInfo else {
+                    subtitleModel.selectedSubtitle = nil
+                    return
+                }
+                subtitle.enableSubtitle { result in
+                    subtitleModel.selectedSubtitle = try? result.get()
+                }
+            }
+            .edgesIgnoringSafeArea(.all)
+            .onDisappear {
+                if let playerLayer = player.coordinator.playerLayer {
+                    if !playerLayer.isPipActive {
+                        player.coordinator.playerLayer?.pause()
                     }
                 }
-                .edgesIgnoringSafeArea(.all)
-                .onDisappear {
-                    if let playerLayer = player.coordinator.playerLayer {
-                        if !playerLayer.isPipActive {
-                            player.coordinator.playerLayer?.pause()
-                        }
-                    }
-                }
+            }
             subtitleView
             VideoControllerView(model: $model).opacity(model.isMaskShow ? 1 : 0)
         }
@@ -275,9 +276,9 @@ public class SubtitleModel: ObservableObject {
     @Published public var textFont: Font = .largeTitle
     @Published public var textColor: Color = .white
     @Published public var textPositionFromBottom = 0
-    fileprivate var endTime = TimeInterval(0)
     @Published fileprivate var text: NSMutableAttributedString?
     @Published fileprivate var image: UIImage?
+    fileprivate var endTime = TimeInterval(0)
 }
 
 @available(iOS 15, tvOS 15, macOS 12, *)
