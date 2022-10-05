@@ -76,7 +76,8 @@ struct ContentView: View {
                     options.videoFilters = "hflip,vflip"
                     options.hardwareDecode = false
                     #if os(macOS)
-                    options.outputURL = URL(fileURLWithPath: "/Users/kintan/Desktop/recording.mov")
+                    let moviesDirectory = try? FileManager.default.url(for: .moviesDirectory, in: .userDomainMask, appropriateFor: nil, create: false)
+                    options.outputURL = moviesDirectory?.appendingPathComponent("recording.mov")
                     #endif
                     resources.append(KSPlayerResource(url: URL(fileURLWithPath: path), options: options, name: "本地视频"))
                 }
@@ -90,7 +91,8 @@ struct ContentView: View {
                 if let url = URL(string: "http://devimages.apple.com/iphone/samples/bipbop/bipbopall.m3u8") {
                     let options = MEOptions()
                     #if os(macOS)
-                    options.outputURL = URL(fileURLWithPath: "/Users/kintan/Desktop/recording.mp4")
+                    let moviesDirectory = try? FileManager.default.url(for: .moviesDirectory, in: .userDomainMask, appropriateFor: nil, create: false)
+                    options.outputURL = moviesDirectory?.appendingPathComponent("recording.mp4")
                     #endif
                     resources.append(KSPlayerResource(url: url, options: options, name: "m3u8视频"))
                 }
