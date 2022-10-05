@@ -113,20 +113,24 @@ public struct KSVideoPlayerView: View {
         .onDrop(of: ["public.file-url"], isTargeted: nil) { providers -> Bool in
             providers.first?.loadDataRepresentation(forTypeIdentifier: "public.file-url") { data, _ in
                 if let data, let path = NSString(data: data, encoding: 4), let url = URL(string: path as String) {
-                    if url.isAudio || url.isMovie {
-                        player.coordinator.playerLayer?.set(url: url, options: options)
-                    } else {
-                        let info = URLSubtitleInfo(subtitleID: url.path, name: url.lastPathComponent)
-                        info.downloadURL = url
-                        info.enableSubtitle {
-                            subtitleModel.selectedSubtitle = try? $0.get()
-                        }
-                    }
+                    openURL(url)
                 }
             }
             return true
         }
         #endif
+    }
+
+    public func openURL(_ url: URL) {
+        if url.isAudio || url.isMovie {
+            player.coordinator.playerLayer?.set(url: url, options: options)
+        } else {
+            let info = URLSubtitleInfo(subtitleID: url.path, name: url.lastPathComponent)
+            info.downloadURL = url
+            info.enableSubtitle {
+                subtitleModel.selectedSubtitle = try? $0.get()
+            }
+        }
     }
 }
 
@@ -389,7 +393,9 @@ struct VideoSettingView: View {
                 showingModal.toggle()
             }
         }
-//        .frame(width: UIScreen.size.width / 2, height: UIScreen.size.height / 2)
+        #if os(macOS)
+        .frame(width: UIScreen.size.width / 4, height: UIScreen.size.height / 4)
+        #endif
     }
 }
 
