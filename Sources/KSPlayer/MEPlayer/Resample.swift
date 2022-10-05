@@ -76,9 +76,13 @@ class VideoSwresample: Swresample {
             }
             if let transferFunction = frame.color_trc.transferFunction {
                 CVBufferSetAttachment(pbuf, kCVImageBufferTransferFunctionKey, transferFunction, .shouldPropagate)
+                if transferFunction == kCVImageBufferTransferFunction_UseGamma {
+                    let gamma = NSNumber(value: frame.color_trc == AVCOL_TRC_GAMMA22 ? 2.2 : 2.8)
+                    CVBufferSetAttachment(pbuf, kCVImageBufferGammaLevelKey, gamma, .shouldPropagate)
+                }
             }
-            if let colorSpace = frame.colorspace.colorSpace {
-                CVBufferSetAttachment(pbuf, kCVImageBufferCGColorSpaceKey, colorSpace, .shouldPropagate)
+            if let chroma = frame.chroma_location.chroma {
+                CVBufferSetAttachment(pbuf, kCVImageBufferChromaLocationTopFieldKey, chroma, .shouldPropagate)
             }
         }
         return pbuf
@@ -239,6 +243,27 @@ extension AVColorSpace {
             return CGColorSpace(name: CGColorSpace.sRGB)
         case AVCOL_SPC_BT2020_CL, AVCOL_SPC_BT2020_NCL:
             return CGColorSpace(name: CGColorSpace.itur_2020)
+        default:
+            return nil
+        }
+    }
+}
+
+extension AVChromaLocation {
+    var chroma: CFString? {
+        switch self {
+        case AVCHROMA_LOC_LEFT:
+            return kCVImageBufferChromaLocation_Left
+        case AVCHROMA_LOC_CENTER:
+            return kCVImageBufferChromaLocation_Center
+        case AVCHROMA_LOC_TOP:
+            return kCVImageBufferChromaLocation_Top
+        case AVCHROMA_LOC_BOTTOM:
+            return kCVImageBufferChromaLocation_Bottom
+        case AVCHROMA_LOC_TOPLEFT:
+            return kCVImageBufferChromaLocation_TopLeft
+        case AVCHROMA_LOC_BOTTOMLEFT:
+            return kCVImageBufferChromaLocation_BottomLeft
         default:
             return nil
         }
