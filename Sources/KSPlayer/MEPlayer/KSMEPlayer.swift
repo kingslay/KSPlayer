@@ -176,6 +176,11 @@ extension KSMEPlayer: MEPlayerDelegate {
                 }
             }
         } else {
+            if loadingState.isFirst {
+                if videoOutput?.pixelBuffer == nil {
+                    videoOutput?.readNextFrame()
+                }
+            }
             var progress = 100
             if loadingState.isPlayable {
                 loadState = .playable

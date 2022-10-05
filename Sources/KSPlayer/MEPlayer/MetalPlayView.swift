@@ -118,11 +118,19 @@ public final class MetalPlayView: UIView {
     func invalidate() {
         displayLink.invalidate()
     }
+
+    public func readNextFrame() {
+        draw(force: true)
+    }
 }
 
 extension MetalPlayView {
     @objc private func draw(in _: Any) {
-        guard let frame = renderSource?.getVideoOutputRender() else {
+        draw(force: false)
+    }
+
+    private func draw(force: Bool) {
+        guard let frame = renderSource?.getVideoOutputRender(force: force) else {
             return
         }
         pixelBuffer = frame.corePixelBuffer

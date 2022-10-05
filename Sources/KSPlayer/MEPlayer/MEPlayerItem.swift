@@ -642,12 +642,12 @@ extension MEPlayerItem: OutputRenderSourceDelegate {
         }
     }
 
-    func getVideoOutputRender() -> VideoVTBFrame? {
+    func getVideoOutputRender(force: Bool) -> VideoVTBFrame? {
         guard let videoTrack else {
             return nil
         }
         var desire = currentPlaybackTime + options.audioDelay + startTime
-        let predicate: (VideoVTBFrame) -> Bool = { [weak self] frame -> Bool in
+        let predicate: ((VideoVTBFrame) -> Bool)? = force ? nil : { [weak self] frame -> Bool in
             guard let self else { return true }
             desire = self.currentPlaybackTime + self.options.audioDelay + self.startTime
             if self.isAudioStalled {

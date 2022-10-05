@@ -55,7 +55,7 @@ class MEFilter {
         outputs?.pointee.filter_ctx = bufferContext
         outputs?.pointee.pad_idx = 0
         outputs?.pointee.next = nil
-        
+
         inputs?.pointee.name = av_strdup("out")
         inputs?.pointee.filter_ctx = bufferSinkContext
         inputs?.pointee.pad_idx = 0
