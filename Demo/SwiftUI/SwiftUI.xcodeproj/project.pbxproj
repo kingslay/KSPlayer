@@ -34,6 +34,7 @@
 		AC84D8DB28ABBD0D00344154 /* mjpeg.flac */ = {isa = PBXFileReference; lastKnownFileType = file; path = mjpeg.flac; sourceTree = "<group>"; };
 		AC84D8DC28ABBD0D00344154 /* hevc.mkv */ = {isa = PBXFileReference; lastKnownFileType = file; path = hevc.mkv; sourceTree = "<group>"; };
 		AC84D8DD28ABBD0D00344154 /* raw.h264 */ = {isa = PBXFileReference; lastKnownFileType = file; path = raw.h264; sourceTree = "<group>"; };
+		ACADA07528EDC067001B76D1 /* TracyPlayer.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = TracyPlayer.entitlements; sourceTree = "<group>"; };
 		ACD2F747275F6E860006D16F /* KSPlayer */ = {isa = PBXFileReference; lastKnownFileType = folder; name = KSPlayer; path = ../..; sourceTree = "<group>"; };
 		ACE3619328EB689F00F234EB /* TracyPlayer-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = "TracyPlayer-Info.plist"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -53,6 +54,7 @@
 		AC77DFAA26402327001351AE = {
 			isa = PBXGroup;
 			children = (
+				ACADA07528EDC067001B76D1 /* TracyPlayer.entitlements */,
 				ACE3619328EB689F00F234EB /* TracyPlayer-Info.plist */,
 				ACD2F743275F6D7A0006D16F /* Packages */,
 				AC77DFAF26402327001351AE /* Shared */,
@@ -327,11 +329,13 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
+				CODE_SIGN_ENTITLEMENTS = TracyPlayer.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 10500;
 				DEVELOPMENT_TEAM = 3RVHT92X9D;
+				"ENABLE_HARDENED_RUNTIME[sdk=macosx*]" = YES;
 				ENABLE_PREVIEWS = YES;
 				INFOPLIST_FILE = "TracyPlayer-Info.plist";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.video";
@@ -363,11 +367,13 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
+				CODE_SIGN_ENTITLEMENTS = TracyPlayer.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 10500;
 				DEVELOPMENT_TEAM = 3RVHT92X9D;
+				"ENABLE_HARDENED_RUNTIME[sdk=macosx*]" = YES;
 				ENABLE_PREVIEWS = YES;
 				INFOPLIST_FILE = "TracyPlayer-Info.plist";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.video";

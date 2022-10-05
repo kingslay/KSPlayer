@@ -51,31 +51,28 @@ struct DemoApp: App {
         WindowGroup {
             ContentView()
                 .onOpenURL { url in
-                    newPlayerView(KSVideoPlayerView(url: url, options: MEOptions()))
+                    open(url: url)
                 }
             #if !os(tvOS)
+                .onDrop(of: ["public.url", "public.file-url"], isTargeted: nil) { items -> Bool in
+                    guard let item = items.first, let identifier = item.registeredTypeIdentifiers.first else {
+                        return false
+                    }
+                    item.loadItem(forTypeIdentifier: identifier, options: nil) { urlData, _ in
+                        if let urlData = urlData as? Data {
+                            let url = NSURL(absoluteURLWithDataRepresentation: urlData, relativeTo: nil) as URL
+                            DispatchQueue.main.async {
+                                open(url: url)
+                            }
+                        }
+                    }
+                    return true
+                }
                 .fileImporter(isPresented: $isImporting, allowedContentTypes: [.movie, .audio, .data]) { result in
                     guard let url = try? result.get() else {
                         return
                     }
-                    #if os(macOS)
-                    NSDocumentController.shared.noteNewRecentDocumentURL(url)
-                    #endif
-                    if url.isAudio || url.isMovie {
-                        newPlayerView(KSVideoPlayerView(url: url, options: MEOptions()))
-                    } else {
-                        let controllers = UIApplication.shared.windows.reversed().compactMap {
-                            #if os(macOS)
-                            $0.contentViewController as? UIHostingController<KSVideoPlayerView>
-                            #else
-                            $0.rootViewController as? UIHostingController<KSVideoPlayerView>
-                            #endif
-                        }
-                        if let hostingController = controllers.first {
-                            hostingController.becomeFirstResponder()
-                            hostingController.rootView.subtitleModel.selectedSubtitle = KSURLSubtitle(url: url)
-                        }
-                    }
+                    open(url: url)
                 }
             #endif
 //
@@ -109,6 +106,27 @@ struct DemoApp: App {
         win.rootViewController = controller
         win.makeKey()
         #endif
+    }
+
+    private func open(url: URL) {
+        #if os(macOS)
+        NSDocumentController.shared.noteNewRecentDocumentURL(url)
+        #endif
+        if url.isAudio || url.isMovie {
+            newPlayerView(KSVideoPlayerView(url: url, options: MEOptions()))
+        } else {
+            let controllers = UIApplication.shared.windows.reversed().compactMap {
+                #if os(macOS)
+                $0.contentViewController as? UIHostingController<KSVideoPlayerView>
+                #else
+                $0.rootViewController as? UIHostingController<KSVideoPlayerView>
+                #endif
+            }
+            if let hostingController = controllers.first {
+                hostingController.becomeFirstResponder()
+                hostingController.rootView.subtitleModel.selectedSubtitle = KSURLSubtitle(url: url)
+            }
+        }
     }
 }
 

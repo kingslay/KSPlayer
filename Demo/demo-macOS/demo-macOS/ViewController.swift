@@ -21,10 +21,6 @@ class MeOptions: KSOptions {
         }
         return nil
     }
-
-    override func enableHardwareDecode() -> Bool {
-        false
-    }
 }
 
 class ViewController: NSViewController {
