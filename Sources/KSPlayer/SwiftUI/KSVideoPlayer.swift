@@ -24,8 +24,8 @@ public struct KSVideoPlayerView: View {
     public var body: some View {
         ZStack {
             player.onPlay { current, total in
-                model.currentTime = current
-                model.totalTime = max(max(0, total), current)
+                model.currentTime = Int(current)
+                model.totalTime = Int(max(max(0, total), current))
                 if let subtile = subtitleModel.selectedSubtitle {
                     let time = current + options.subtitleDelay
                     if let part = subtile.search(for: time) {
@@ -135,10 +135,10 @@ public struct KSVideoPlayerView: View {
 }
 
 struct ControllerViewModel {
-    var currentTime = TimeInterval(0)
-    var totalTime = TimeInterval(1)
+    // 改成int才不会频繁更新
+    var currentTime = 0
+    var totalTime = 1
     var isMaskShow = true
-    var isShowSetting = false
 }
 
 @available(iOS 15, tvOS 15, macOS 12, *)
@@ -146,7 +146,7 @@ struct VideoControllerView: View {
     @EnvironmentObject fileprivate var config: KSVideoPlayer.Coordinator
     @Binding fileprivate var model: ControllerViewModel
     @Environment(\.dismiss) private var dismiss
-
+    @State private var isShowSetting = false
     public var body: some View {
         VStack {
             HStack {
@@ -188,7 +188,7 @@ struct VideoControllerView: View {
             HStack {
                 Spacer()
                 Button {
-                    config.seek(time: model.currentTime - 15)
+                    config.seek(relativeCurrentTime: -15)
                 } label: {
                     Image(systemName: "gobackward.15")
                 }
@@ -206,7 +206,7 @@ struct VideoControllerView: View {
                 #endif
                 Spacer()
                 Button {
-                    config.seek(time: model.currentTime + 15)
+                    config.seek(relativeCurrentTime: 15)
                 } label: {
                     Image(systemName: "goforward.15")
                 }
@@ -223,16 +223,20 @@ struct VideoControllerView: View {
                 AirPlayView().fixedSize()
                 #endif
                 Button {
-                    model.isShowSetting.toggle()
+                    isShowSetting.toggle()
                 } label: {
                     Image(systemName: "ellipsis.circle").frame(minWidth: 20, minHeight: 20)
                 }
             }
-            Slider(value: $model.currentTime, in: 0 ... model.totalTime) { onEditingChanged in
+            Slider(value: Binding {
+                Double(model.currentTime)
+            } set: { newValue, _ in
+                model.currentTime = Int(newValue)
+            }, in: 0 ... Double(model.totalTime)) { onEditingChanged in
                 if onEditingChanged {
                     config.isPlay = false
                 } else {
-                    config.seek(time: model.currentTime)
+                    config.seek(time: TimeInterval(model.currentTime))
                 }
             }
             .frame(maxHeight: 20)
@@ -243,17 +247,17 @@ struct VideoControllerView: View {
             }
         }
         .padding()
-        .sheet(isPresented: $model.isShowSetting) {
-            VideoSettingView(showingModal: $model.isShowSetting)
+        .sheet(isPresented: $isShowSetting) {
+            VideoSettingView()
         }
         .foregroundColor(.white)
         #if !os(iOS)
             .onMoveCommand { direction in
                 switch direction {
                 case .left:
-                    config.seek(time: model.currentTime - 15)
+                    config.seek(relativeCurrentTime: -15)
                 case .right:
-                    config.seek(time: model.currentTime + 15)
+                    config.seek(relativeCurrentTime: 15)
                 case .up:
                     config.playerLayer?.player.playbackVolume += 1
                 case .down:
@@ -314,7 +318,7 @@ struct VideoSubtitleView: View {
 
 @available(iOS 15, tvOS 15, macOS 12, *)
 struct VideoSettingView: View {
-    @Binding fileprivate var showingModal: Bool
+    @Environment(\.dismiss) private var dismiss
     @State private var presentSubtileDelayAlert = false
     @State private var presentSubtileDelay = ""
     @EnvironmentObject private var subtitleModel: SubtitleModel
@@ -390,7 +394,7 @@ struct VideoSettingView: View {
         }
         .toolbar {
             Button("Done") {
-                showingModal.toggle()
+                dismiss()
             }
         }
         #if os(macOS)

@@ -624,18 +624,24 @@ public enum TimeType {
 
 public extension TimeInterval {
     func toString(for type: TimeType) -> String {
-        var second = ceil(self)
-        var min = floor(second / 60)
+        Int(ceil(self)).toString(for: type)
+    }
+}
+
+public extension Int {
+    func toString(for type: TimeType) -> String {
+        var second = self
+        var min = second / 60
         second -= min * 60
         switch type {
         case .min:
             return String(format: "%02.0f:%02.0f", min, second)
         case .hour:
-            let hour = floor(min / 60)
+            let hour = min / 60
             min -= hour * 60
             return String(format: "%.0f:%02.0f:%02.0f", hour, min, second)
         case .minOrHour:
-            let hour = floor(min / 60)
+            let hour = min / 60
             if hour > 0 {
                 min -= hour * 60
                 return String(format: "%.0f:%02.0f:%02.0f", hour, min, second)
@@ -820,9 +826,15 @@ extension KSVideoPlayer: UIViewRepresentable {
             self.isPlay = isPlay
         }
 
+        public func seek(relativeCurrentTime: Int) {
+            if let playerLayer {
+                seek(time: playerLayer.player.currentPlaybackTime + TimeInterval(relativeCurrentTime))
+            }
+        }
+
         public func seek(time: TimeInterval) {
             Task {
-                await playerLayer?.seek(time: time, autoPlay: true)
+                await playerLayer?.seek(time: TimeInterval(time), autoPlay: true)
             }
         }
     }
