@@ -30,7 +30,7 @@ class MEFilter {
         self.isAudio = isAudio
     }
 
-    private func setup(filters: String, args: String, hwDeviceCtx: UnsafeMutablePointer<AVBufferRef>?) -> Bool {
+    private func setup(filters: String, args: String, hwDeviceCtx _: UnsafeMutablePointer<AVBufferRef>?) -> Bool {
         let buffer = avfilter_get_by_name(isAudio ? "abuffer" : "buffer")
         /// create buffer filter necessary parameter
         var ret = avfilter_graph_create_filter(&bufferContext, buffer, "in", args, nil, graph)
@@ -38,8 +38,9 @@ class MEFilter {
         let bufferSink = avfilter_get_by_name(isAudio ? "abuffersink" : "buffersink")
         ret = avfilter_graph_create_filter(&bufferSinkContext, bufferSink, "out", nil, nil, graph)
         guard ret >= 0, bufferSinkContext != nil else { return false }
-        bufferContext?.pointee.hw_device_ctx = hwDeviceCtx
-        bufferSinkContext?.pointee.hw_device_ctx = hwDeviceCtx
+        // can not add hw_device_ctx
+//        bufferContext?.pointee.hw_device_ctx = hwDeviceCtx
+//        bufferSinkContext?.pointee.hw_device_ctx = hwDeviceCtx
 //        ret = av_opt_set_int_list(bufferSinkContext, "pix_fmts", pix_fmts, AV_PIX_FMT_NONE, AV_OPT_SEARCH_CHILDREN)
 //        ret = av_opt_set_int_list(bufferSinkContext, "sample_fmts", out_sample_fmts, -1,
 //                                  AV_OPT_SEARCH_CHILDREN);
@@ -96,7 +97,11 @@ class MEFilter {
         } else {
             filters = options.videoFilters
             if options.autoDeInterlace {
-                filters = "idet," + (filters ?? "")
+                if var filters {
+                    filters = "idet," + filters
+                } else {
+                    filters = "idet"
+                }
             }
         }
         guard let filters else {
