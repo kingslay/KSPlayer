@@ -50,6 +50,7 @@ struct DemoApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView()
+                .background(Color.black)
                 .onOpenURL { url in
                     open(url: url)
                 }
@@ -106,6 +107,7 @@ struct DemoApp: App {
         win.rootViewController = controller
         win.makeKey()
         #endif
+        win.backgroundColor = .black
     }
 
     private func open(url: URL) {
