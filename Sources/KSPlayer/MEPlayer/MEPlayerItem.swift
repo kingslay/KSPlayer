@@ -241,11 +241,28 @@ extension MEPlayerItem {
             return
         }
         var index = 0
+        var audioIndex: Int?
+        var videoIndex: Int?
         let formatName = outputFormatCtx.pointee.oformat.pointee.name.flatMap { String(cString: $0) }
         (0 ..< Int(formatCtx.pointee.nb_streams)).forEach { i in
             if let inputStream = formatCtx.pointee.streams[i] {
                 let codecType = inputStream.pointee.codecpar.pointee.codec_type
                 if [AVMEDIA_TYPE_AUDIO, AVMEDIA_TYPE_VIDEO, AVMEDIA_TYPE_SUBTITLE].contains(codecType) {
+                    if codecType == AVMEDIA_TYPE_AUDIO {
+                        if let audioIndex {
+                            streamMapping[i] = audioIndex
+                            return
+                        } else {
+                            audioIndex = index
+                        }
+                    } else if codecType == AVMEDIA_TYPE_VIDEO {
+                        if let videoIndex {
+                            streamMapping[i] = videoIndex
+                            return
+                        } else {
+                            videoIndex = index
+                        }
+                    }
                     if let outStream = avformat_new_stream(outputFormatCtx, nil) {
                         streamMapping[i] = index
                         index += 1
@@ -402,9 +419,13 @@ extension MEPlayerItem {
                    let outputTb = outputFormatCtx.pointee.streams[outputIndex]?.pointee.time_base
                 {
                     av_packet_ref(outputPacket, packet.corePacket)
+                    outputPacket?.pointee.stream_index = Int32(outputIndex)
                     av_packet_rescale_ts(outputPacket, inputTb, outputTb)
                     outputPacket?.pointee.pos = -1
-                    av_interleaved_write_frame(outputFormatCtx, outputPacket)
+                    let ret = av_interleaved_write_frame(outputFormatCtx, outputPacket)
+                    if ret < 0 {
+                        KSLog("can not av_interleaved_write_frame")
+                    }
                 }
             }
             if formatCtx?.pointee.pb.pointee.eof_reached == 1 {
@@ -616,8 +637,8 @@ extension MEPlayerItem: CodecCapacityDelegate {
         }
         let index = av_find_best_stream(formatCtx, AVMEDIA_TYPE_AUDIO, -1, videoTrack.trackID, nil, 0)
         if index != first.trackID {
-            first.isEnabled = true
-            assetTracks.first { $0.mediaType == .audio && $0.trackID == index }?.isEnabled = false
+            first.isEnabled = false
+            assetTracks.first { $0.mediaType == .audio && $0.trackID == index }?.isEnabled = true
         }
     }
 }
