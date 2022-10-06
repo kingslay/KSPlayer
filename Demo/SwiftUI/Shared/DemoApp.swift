@@ -18,7 +18,9 @@ struct DemoApp: App {
     @State private var isImporting: Bool = false
     init() {
         KSPlayerManager.canBackgroundPlay = true
+        #if DEBUG
         KSPlayerManager.logLevel = .debug
+        #endif
         KSPlayerManager.firstPlayerType = KSMEPlayer.self
         KSPlayerManager.secondPlayerType = KSMEPlayer.self
         KSOptions.isAutoPlay = true
