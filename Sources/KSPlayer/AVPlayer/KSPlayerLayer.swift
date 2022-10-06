@@ -635,21 +635,21 @@ public extension Int {
         second -= min * 60
         switch type {
         case .min:
-            return String(format: "%02.0f:%02.0f", min, second)
+            return String(format: "%02d:%02d", min, second)
         case .hour:
             let hour = min / 60
             min -= hour * 60
-            return String(format: "%.0f:%02.0f:%02.0f", hour, min, second)
+            return String(format: "%d:%02d:%02d", hour, min, second)
         case .minOrHour:
             let hour = min / 60
             if hour > 0 {
                 min -= hour * 60
-                return String(format: "%.0f:%02.0f:%02.0f", hour, min, second)
+                return String(format: "%d:%02d:%02d", hour, min, second)
             } else {
-                return String(format: "%02.0f:%02.0f", min, second)
+                return String(format: "%02d:%02d", min, second)
             }
         case .millisecond:
-            var time = Int(self * 100)
+            var time = self * 100
             let millisecond = time % 100
             time /= 100
             let sec = time % 60
@@ -826,9 +826,9 @@ extension KSVideoPlayer: UIViewRepresentable {
             self.isPlay = isPlay
         }
 
-        public func seek(relativeCurrentTime: Int) {
+        public func skip(interval: Int) {
             if let playerLayer {
-                seek(time: playerLayer.player.currentPlaybackTime + TimeInterval(relativeCurrentTime))
+                seek(time: playerLayer.player.currentPlaybackTime + TimeInterval(interval))
             }
         }
 

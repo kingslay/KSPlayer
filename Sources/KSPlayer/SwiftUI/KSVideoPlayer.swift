@@ -10,11 +10,12 @@ import SwiftUI
 @available(iOS 15, tvOS 15, macOS 12, *)
 public struct KSVideoPlayerView: View {
     @ObservedObject public var subtitleModel = SubtitleModel()
-    @State private var model = ControllerViewModel()
+    @State private var model = ControllerTimeModel()
     public let url: URL
     public let options: KSOptions
     private let player: KSVideoPlayer
     private let subtitleView = VideoSubtitleView()
+    @State var isMaskShow = true
     public init(url: URL, options: KSOptions) {
         self.options = options
         self.url = url
@@ -52,9 +53,9 @@ public struct KSVideoPlayerView: View {
                         player.coordinator.selectedSubtitleTrack = track
                     }
                 } else if state == .bufferFinished {
-                    if model.isMaskShow {
+                    if isMaskShow {
                         DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + KSPlayerManager.animateDelayTimeInterval) {
-                            model.isMaskShow = false
+                            isMaskShow = false
                         }
                     }
                 }
@@ -62,19 +63,19 @@ public struct KSVideoPlayerView: View {
             #if canImport(UIKit)
             .onSwipe { direction in
                 if direction == .down {
-                    model.isMaskShow.toggle()
+                    isMaskShow.toggle()
                 } else if direction == .left {
-                    player.coordinator.seek(time: model.currentTime - 15)
+                    player.coordinator.skip(interval: -15)
                 } else if direction == .right {
-                    player.coordinator.seek(time: model.currentTime + 15)
+                    player.coordinator.skip(interval: 15)
                 }
             }
             #endif
             #if !os(tvOS)
             .onTapGesture {
-                model.isMaskShow.toggle()
+                isMaskShow.toggle()
                 #if os(macOS)
-                model.isMaskShow ? NSCursor.unhide() : NSCursor.hide()
+                isMaskShow ? NSCursor.unhide() : NSCursor.hide()
                 #endif
             }
             #endif
@@ -96,7 +97,11 @@ public struct KSVideoPlayerView: View {
                 }
             }
             subtitleView
-            VideoControllerView(model: $model).opacity(model.isMaskShow ? 1 : 0)
+            VideoControllerView().opacity(isMaskShow ? 1 : 0)
+            // 设置opacity为0，还是会去更新View。所以只能这样了
+            if isMaskShow {
+                VideoTimeShowView(model: $model)
+            }
         }
         .preferredColorScheme(.dark)
         .environmentObject(subtitleModel)
@@ -134,17 +139,16 @@ public struct KSVideoPlayerView: View {
     }
 }
 
-struct ControllerViewModel {
+/// 这是一个频繁变化的model。View要少用这个
+struct ControllerTimeModel {
     // 改成int才不会频繁更新
     var currentTime = 0
     var totalTime = 1
-    var isMaskShow = true
 }
 
 @available(iOS 15, tvOS 15, macOS 12, *)
 struct VideoControllerView: View {
     @EnvironmentObject fileprivate var config: KSVideoPlayer.Coordinator
-    @Binding fileprivate var model: ControllerViewModel
     @Environment(\.dismiss) private var dismiss
     @State private var isShowSetting = false
     public var body: some View {
@@ -152,11 +156,7 @@ struct VideoControllerView: View {
             HStack {
                 HStack {
                     Button {
-                        #if os(tvOS)
-                        model.isMaskShow = false
-                        #else
                         dismiss()
-                        #endif
                     } label: {
                         Image(systemName: "xmark").imageScale(.large)
                     }
@@ -174,10 +174,20 @@ struct VideoControllerView: View {
                 Spacer()
                 ProgressView().opacity(config.isLoading ? 1 : 0)
                 Spacer()
-                Button {
-                    config.isMuted.toggle()
-                } label: {
-                    Image(systemName: config.isMuted ? "speaker.slash.fill" : "speaker.wave.2.fill")
+                HStack {
+                    Button {
+                        config.isMuted.toggle()
+                    } label: {
+                        Image(systemName: config.isMuted ? "speaker.slash.fill" : "speaker.wave.2.fill")
+                    }
+                    #if !os(tvOS)
+                    AirPlayView().fixedSize()
+                    #endif
+                    Button {
+                        isShowSetting.toggle()
+                    } label: {
+                        Image(systemName: "ellipsis.circle").frame(minWidth: 20, minHeight: 20)
+                    }
                 }
             }
 //            #if os(tvOS)
@@ -188,7 +198,7 @@ struct VideoControllerView: View {
             HStack {
                 Spacer()
                 Button {
-                    config.seek(relativeCurrentTime: -15)
+                    config.skip(interval: -15)
                 } label: {
                     Image(systemName: "gobackward.15")
                 }
@@ -206,7 +216,7 @@ struct VideoControllerView: View {
                 #endif
                 Spacer()
                 Button {
-                    config.seek(relativeCurrentTime: 15)
+                    config.skip(interval: 15)
                 } label: {
                     Image(systemName: "goforward.15")
                 }
@@ -217,17 +227,43 @@ struct VideoControllerView: View {
             }
             .imageScale(.large)
             Spacer()
-            HStack {
-                Spacer()
-                #if !os(tvOS)
-                AirPlayView().fixedSize()
-                #endif
-                Button {
-                    isShowSetting.toggle()
-                } label: {
-                    Image(systemName: "ellipsis.circle").frame(minWidth: 20, minHeight: 20)
+        }
+        .padding()
+        .sheet(isPresented: $isShowSetting) {
+            VideoSettingView()
+        }
+        .foregroundColor(.white)
+        #if !os(iOS)
+            .onMoveCommand { direction in
+                switch direction {
+                case .left:
+                    config.skip(interval: -15)
+                case .right:
+                    config.skip(interval: 15)
+                case .up:
+                    config.playerLayer?.player.playbackVolume += 1
+                case .down:
+                    config.playerLayer?.player.playbackVolume -= 1
+                @unknown default:
+                    break
                 }
             }
+        #endif
+        #if os(tvOS)
+        .onPlayPauseCommand {
+            config.isPlay.toggle()
+        }
+        #endif
+    }
+}
+
+@available(iOS 15, tvOS 15, macOS 12, *)
+struct VideoTimeShowView: View {
+    @EnvironmentObject fileprivate var config: KSVideoPlayer.Coordinator
+    @Binding fileprivate var model: ControllerTimeModel
+    public var body: some View {
+        VStack {
+            Spacer()
             Slider(value: Binding {
                 Double(model.currentTime)
             } set: { newValue, _ in
@@ -247,31 +283,7 @@ struct VideoControllerView: View {
             }
         }
         .padding()
-        .sheet(isPresented: $isShowSetting) {
-            VideoSettingView()
-        }
         .foregroundColor(.white)
-        #if !os(iOS)
-            .onMoveCommand { direction in
-                switch direction {
-                case .left:
-                    config.seek(relativeCurrentTime: -15)
-                case .right:
-                    config.seek(relativeCurrentTime: 15)
-                case .up:
-                    config.playerLayer?.player.playbackVolume += 1
-                case .down:
-                    config.playerLayer?.player.playbackVolume -= 1
-                @unknown default:
-                    break
-                }
-            }
-        #endif
-        #if os(tvOS)
-        .onPlayPauseCommand {
-            config.isPlay.toggle()
-        }
-        #endif
     }
 }
 
