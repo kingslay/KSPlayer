@@ -679,9 +679,12 @@ extension MEPlayerItem: OutputRenderSourceDelegate {
         let frame = videoTrack.getOutputRender(where: predicate)
         if let frame {
             videoClockDelay = desire - frame.seconds
-            if frame.seconds + 0.4 < desire, videoTrack.frameCount > 0 {
-                KSLog("dropped video frame frameCount: \(videoTrack.frameCount) frameMaxCount: \(videoTrack.frameMaxCount)")
-                _ = videoTrack.getOutputRender(where: nil)
+            if frame.seconds + 0.4 < desire {
+                let frameCount = videoTrack.frameCount
+                if frameCount > 0 {
+                    KSLog("dropped video frame frameCount: \(videoTrack.frameCount) frameMaxCount: \(videoTrack.frameMaxCount)")
+                    _ = videoTrack.getOutputRender(where: nil)
+                }
             }
         }
         return options.videoDisable ? nil : frame
