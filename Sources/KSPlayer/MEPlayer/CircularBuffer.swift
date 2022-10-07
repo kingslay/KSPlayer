@@ -17,7 +17,7 @@ public class CircularBuffer<Item: ObjectQueueItem> {
     private let sorted: Bool
     private var destoryed = false
     @inline(__always) private var _count: Int { Int(tailIndex &- headIndex) }
-    public var count: Int {
+    @inline(__always) public var count: Int {
         condition.lock()
         defer { condition.unlock() }
         return _count
@@ -131,8 +131,10 @@ public class CircularBuffer<Item: ObjectQueueItem> {
         defer { condition.unlock() }
         headIndex = 0
         tailIndex = 0
-        _buffer.removeAll(keepingCapacity: true)
-        _buffer.append(contentsOf: ContiguousArray<Item?>(repeating: nil, count: maxCount))
+        if destoryed {
+            _buffer.removeAll(keepingCapacity: true)
+            _buffer.append(contentsOf: ContiguousArray<Item?>(repeating: nil, count: maxCount))
+        }
         condition.broadcast()
     }
 
