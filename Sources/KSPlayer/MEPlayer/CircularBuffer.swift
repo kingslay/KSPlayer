@@ -15,7 +15,7 @@ public class CircularBuffer<Item: ObjectQueueItem> {
     private var tailIndex = UInt(0)
     private let expanding: Bool
     private let sorted: Bool
-    private var destoryed = false
+    private var destroyed = false
     @inline(__always) private var _count: Int { Int(tailIndex &- headIndex) }
     @inline(__always) public var count: Int {
         condition.lock()
@@ -39,7 +39,7 @@ public class CircularBuffer<Item: ObjectQueueItem> {
     public func push(_ value: Item) {
         condition.lock()
         defer { condition.unlock() }
-        if destoryed {
+        if destroyed {
             return
         }
         _buffer[Int(tailIndex & mask)] = value
@@ -77,13 +77,13 @@ public class CircularBuffer<Item: ObjectQueueItem> {
     public func pop(wait: Bool = false, where predicate: ((Item) -> Bool)? = nil) -> Item? {
         condition.lock()
         defer { condition.unlock() }
-        if destoryed {
+        if destroyed {
             return nil
         }
         if headIndex == tailIndex {
             if wait {
                 condition.wait()
-                if destoryed || headIndex == tailIndex {
+                if destroyed || headIndex == tailIndex {
                     return nil
                 }
             } else {
@@ -131,7 +131,7 @@ public class CircularBuffer<Item: ObjectQueueItem> {
         defer { condition.unlock() }
         headIndex = 0
         tailIndex = 0
-        if destoryed {
+        if destroyed {
             _buffer.removeAll(keepingCapacity: true)
             _buffer.append(contentsOf: ContiguousArray<Item?>(repeating: nil, count: maxCount))
         }
@@ -139,7 +139,7 @@ public class CircularBuffer<Item: ObjectQueueItem> {
     }
 
     public func shutdown() {
-        destoryed = true
+        destroyed = true
         flush()
     }
 
