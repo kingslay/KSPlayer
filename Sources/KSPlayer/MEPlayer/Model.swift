@@ -157,7 +157,6 @@ final class Packet: ObjectQueueItem {
     }
 
     deinit {
-        av_packet_unref(corePacket)
         ObjectPool.share.comeback(item: packetWrap, key: "AVPacketWrap")
     }
 }
