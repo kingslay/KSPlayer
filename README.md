@@ -258,10 +258,20 @@ run demo-macOS
 
 Any contributing and pull requests are warmly welcome. However, before you plan to implement some features or try to fix an uncertain issue, it is recommended to open a discussion first. It would be appreciated if your pull requests could build and with all tests green. :)
 
+
+## Backers & Sponsors
+
+Open-source projects cannot live long without your help. If you find KSPlayer to be useful, please consider supporting this 
+project by becoming a sponsor. 
+
+Become a sponsor through [GitHub Sponsors](https://github.com/sponsors/kingslay/). :heart:
+
+Your user icon or company logo shows up this with a link to your home page. 
+
+[UnknownCoder807](https://github.com/UnknownCoder807)
+
+[skrew](https://github.com/skrew)
+
 ## Communication
 
 - Email : kingslay@icloud.com
-
-## Reference
-
-This item references the  [ZFPlayer](https://github.com/renzifeng/ZFPlayer)、**[SGPlayer](https://github.com/libobjc/SGPlayer)**
