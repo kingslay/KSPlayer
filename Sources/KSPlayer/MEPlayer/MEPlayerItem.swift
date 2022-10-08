@@ -115,7 +115,7 @@ final class MEPlayerItem {
             if log.hasPrefix("parser not found for codec") {
                 KSLog(log)
             }
-            if level <= KSPlayerManager.logLevel.rawValue {
+            if level <= KSOptions.logLevel.rawValue {
                 KSLog(log)
             }
         }
@@ -363,7 +363,7 @@ extension MEPlayerItem {
         readOperation = BlockOperation { [weak self] in
             guard let self else { return }
             Thread.current.name = (self.operationQueue.name ?? "") + "_read"
-            Thread.current.stackSize = KSPlayerManager.stackSize
+            Thread.current.stackSize = KSOptions.stackSize
             self.readThread()
         }
         readOperation?.queuePriority = .veryHigh
@@ -508,7 +508,7 @@ extension MEPlayerItem: MediaPlayback {
         openOperation = BlockOperation { [weak self] in
             guard let self else { return }
             Thread.current.name = (self.operationQueue.name ?? "") + "_open"
-            Thread.current.stackSize = KSPlayerManager.stackSize
+            Thread.current.stackSize = KSOptions.stackSize
             self.openThread()
         }
         openOperation?.queuePriority = .veryHigh

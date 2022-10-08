@@ -17,12 +17,12 @@ typealias UIApplication = NSApplication
 struct DemoApp: App {
     @State private var isImporting: Bool = false
     init() {
-        KSPlayerManager.canBackgroundPlay = true
+        KSOptions.canBackgroundPlay = true
         #if DEBUG
-        KSPlayerManager.logLevel = .debug
+        KSOptions.logLevel = .debug
         #endif
-        KSPlayerManager.firstPlayerType = KSMEPlayer.self
-        KSPlayerManager.secondPlayerType = KSMEPlayer.self
+        KSOptions.firstPlayerType = KSMEPlayer.self
+        KSOptions.secondPlayerType = KSMEPlayer.self
         KSOptions.isAutoPlay = true
         KSOptions.isSecondOpen = true
         KSOptions.isAccurateSeek = true

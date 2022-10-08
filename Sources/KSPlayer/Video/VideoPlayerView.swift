@@ -241,14 +241,14 @@ open class VideoPlayerView: PlayerView {
         replayButton.cornerRadius = 32
         replayButton.titleFont = .systemFont(ofSize: 16)
         replayButton.backgroundColor = UIColor.black.withAlphaComponent(0.5)
-        replayButton.setImage(KSPlayerManager.image(named: "KSPlayer_play"), for: .normal)
-        replayButton.setImage(KSPlayerManager.image(named: "KSPlayer_replay"), for: .selected)
+        replayButton.setImage(KSOptions.image(named: "KSPlayer_play"), for: .normal)
+        replayButton.setImage(KSOptions.image(named: "KSPlayer_replay"), for: .selected)
         replayButton.addTarget(self, action: #selector(onButtonPressed(_:)), for: .primaryActionTriggered)
         replayButton.tag = PlayerButtonType.replay.rawValue
         lockButton.backgroundColor = UIColor.black.withAlphaComponent(0.5)
         lockButton.cornerRadius = 32
-        lockButton.setImage(KSPlayerManager.image(named: "KSPlayer_unlocking"), for: .normal)
-        lockButton.setImage(KSPlayerManager.image(named: "KSPlayer_autoRotationLock"), for: .selected)
+        lockButton.setImage(KSOptions.image(named: "KSPlayer_unlocking"), for: .normal)
+        lockButton.setImage(KSOptions.image(named: "KSPlayer_autoRotationLock"), for: .selected)
         lockButton.tag = PlayerButtonType.lock.rawValue
         lockButton.addTarget(self, action: #selector(onButtonPressed(_:)), for: .primaryActionTriggered)
         lockButton.isHidden = true
@@ -400,7 +400,7 @@ open class VideoPlayerView: PlayerView {
 
     open func panGestureChanged(velocity point: CGPoint, direction: KSPanDirection) {
         if direction == .horizontal {
-            if !KSPlayerManager.enablePlaytimeGestures {
+            if !KSOptions.enablePlaytimeGestures {
                 return
             }
             isSliderSliding = true
@@ -424,7 +424,7 @@ open class VideoPlayerView: PlayerView {
     open func panGestureEnded() {
         // 移动结束也需要判断垂直或者平移
         // 比如水平移动结束时，要快进到指定位置，如果这里没有判断，当我们调节音量完之后，会出现屏幕跳动的bug
-        if scrollDirection == .horizontal, KSPlayerManager.enablePlaytimeGestures {
+        if scrollDirection == .horizontal, KSOptions.enablePlaytimeGestures {
             hideSeekToView()
             isSliderSliding = false
             slider(value: Double(tmpPanValue), event: .touchUpInside)
@@ -566,7 +566,7 @@ extension VideoPlayerView {
         delayItem = DispatchWorkItem { [weak self] in
             self?.isMaskShow = false
         }
-        DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + KSPlayerManager.animateDelayTimeInterval,
+        DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + KSOptions.animateDelayTimeInterval,
                                       execute: delayItem!)
     }
 
@@ -584,8 +584,8 @@ extension VideoPlayerView {
         toolBar.playButton.tintColor = .white
         toolBar.playbackRateButton.tintColor = .white
         toolBar.definitionButton.tintColor = .white
-        toolBar.timeSlider.setThumbImage(KSPlayerManager.image(named: "KSPlayer_slider_thumb"), for: .normal)
-        toolBar.timeSlider.setThumbImage(KSPlayerManager.image(named: "KSPlayer_slider_thumb_pressed"), for: .highlighted)
+        toolBar.timeSlider.setThumbImage(KSOptions.image(named: "KSPlayer_slider_thumb"), for: .normal)
+        toolBar.timeSlider.setThumbImage(KSOptions.image(named: "KSPlayer_slider_thumb_pressed"), for: .highlighted)
         bottomMaskView.addSubview(toolBar.timeSlider)
         toolBar.spacing = 10
         toolBar.addArrangedSubview(toolBar.playButton)
@@ -677,7 +677,7 @@ public enum KSPlayerTopBarShowCase {
     case none
 }
 
-public extension KSPlayerManager {
+public extension KSOptions {
     /// 顶部返回、标题、AirPlay按钮 显示选项，默认.Always，可选.HorizantalOnly、.None
     static var topBarShowInCase = KSPlayerTopBarShowCase.always
     /// 自动隐藏操作栏的时间间隔 默认5秒

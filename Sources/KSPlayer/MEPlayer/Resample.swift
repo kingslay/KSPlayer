@@ -416,7 +416,7 @@ class AudioSwresample: Swresample {
     private let channels: Int32
     init(codecpar: AVCodecParameters) {
         descriptor = AudioDescriptor(codecpar: codecpar)
-        channels = Int32(max(min(KSPlayerManager.channelLayout.channelCount, descriptor.inputNumberOfChannels), 2))
+        channels = Int32(max(min(KSOptions.channelLayout.channelCount, descriptor.inputNumberOfChannels), 2))
         _ = setup(descriptor: descriptor)
     }
 
@@ -425,7 +425,7 @@ class AudioSwresample: Swresample {
         var inChannel = AVChannelLayout()
         av_channel_layout_default(&outChannel, channels)
         av_channel_layout_default(&inChannel, Int32(descriptor.inputNumberOfChannels))
-        _ = swr_alloc_set_opts2(&swrContext, &outChannel, AV_SAMPLE_FMT_FLTP, KSPlayerManager.audioPlayerSampleRate, &inChannel, descriptor.inputFormat, descriptor.inputSampleRate, 0, nil)
+        _ = swr_alloc_set_opts2(&swrContext, &outChannel, AV_SAMPLE_FMT_FLTP, KSOptions.audioPlayerSampleRate, &inChannel, descriptor.inputFormat, descriptor.inputSampleRate, 0, nil)
         let result = swr_init(swrContext)
         if result < 0 {
             shutdown()
@@ -467,14 +467,14 @@ private class AudioDescriptor: Equatable {
     init(codecpar: AVCodecParameters) {
         inputNumberOfChannels = max(UInt32(codecpar.ch_layout.nb_channels), 1)
         let sampleRate = codecpar.sample_rate
-        inputSampleRate = sampleRate == 0 ? KSPlayerManager.audioPlayerSampleRate : sampleRate
+        inputSampleRate = sampleRate == 0 ? KSOptions.audioPlayerSampleRate : sampleRate
         inputFormat = AVSampleFormat(rawValue: codecpar.format)
     }
 
     init(frame: UnsafeMutablePointer<AVFrame>) {
         inputNumberOfChannels = max(UInt32(frame.pointee.ch_layout.nb_channels), 1)
         let sampleRate = frame.pointee.sample_rate
-        inputSampleRate = sampleRate == 0 ? KSPlayerManager.audioPlayerSampleRate : sampleRate
+        inputSampleRate = sampleRate == 0 ? KSOptions.audioPlayerSampleRate : sampleRate
         inputFormat = AVSampleFormat(rawValue: frame.pointee.format)
     }
 

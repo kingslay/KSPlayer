@@ -26,7 +26,7 @@ class PlayerFullScreenViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        KSPlayerManager.supportedInterfaceOrientations = isHorizonal ? .landscapeRight : .portrait
+        KSOptions.supportedInterfaceOrientations = isHorizonal ? .landscapeRight : .portrait
     }
 
     override func viewWillAppear(_ animated: Bool) {
@@ -36,7 +36,7 @@ class PlayerFullScreenViewController: UIViewController {
     }
 
     override var shouldAutorotate: Bool {
-        KSPlayerManager.supportedInterfaceOrientations == .all
+        KSOptions.supportedInterfaceOrientations == .all
     }
 
     override var supportedInterfaceOrientations: UIInterfaceOrientationMask {

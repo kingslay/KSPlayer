@@ -77,7 +77,7 @@ extension MacVideoPlayerView {
                 tmpPanValue += Float(delta / 10000) * Float(totalTime)
                 showSeekToView(second: Double(tmpPanValue), isAdd: delta > 0)
             } else {
-                if KSPlayerManager.enableVolumeGestures {
+                if KSOptions.enableVolumeGestures {
                     tmpPanValue -= Float(delta / 1000)
                     tmpPanValue = max(min(tmpPanValue, 1), 0)
                 }
@@ -87,7 +87,7 @@ extension MacVideoPlayerView {
                 slider(value: Double(tmpPanValue), event: .touchUpInside)
                 hideSeekToView()
             } else {
-                if KSPlayerManager.enableVolumeGestures {
+                if KSOptions.enableVolumeGestures {
                     playerLayer?.player.playbackVolume = tmpPanValue
                 }
             }
@@ -156,7 +156,7 @@ class UIActivityIndicatorView: UIView {
         loadingView.wantsLayer = true
         addSubview(loadingView)
         let imageView = NSImageView()
-        imageView.image = KSPlayerManager.image(named: "loading")
+        imageView.image = KSOptions.image(named: "loading")
         loadingView.addSubview(imageView)
         imageView.imageScaling = .scaleAxesIndependently
         imageView.translatesAutoresizingMaskIntoConstraints = false

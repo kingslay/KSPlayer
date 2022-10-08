@@ -187,24 +187,6 @@ public struct VideoAdaptationState {
 }
 
 open class KSOptions {
-    /// 最低缓存视频时间
-    public static var preferredForwardBufferDuration = 3.0
-    /// 最大缓存视频时间
-    public static var maxBufferDuration = 30.0
-    /// 是否开启秒开
-    public static var isSecondOpen = false
-    /// 开启精确seek
-    public static var isAccurateSeek = true
-    /// Applies to short videos only
-    public static var isLoopPlay = false
-    /// 是否自动播放，默认false
-    public static var isAutoPlay = false
-    /// seek完是否自动播放
-    public static var isSeekedAutoPlay = true
-    public static var isClearVideoWhereReplace = true
-    public static var enableMaxOutputChannels = true
-    public static var pipController: Any?
-
     //    public static let shared = KSOptions()
     /// 最低缓存视频时间
     @Published public var preferredForwardBufferDuration = KSOptions.preferredForwardBufferDuration
@@ -227,7 +209,7 @@ open class KSOptions {
      AVSEEK_FLAG_FRAME: 8
      */
     public var seekFlags = Int32(1)
-//    ffmpeg only cache http
+    // ffmpeg only cache http
     public var cache = false
     public var outputURL: URL?
     public var display = DisplayEnum.plane
@@ -392,13 +374,6 @@ open class KSOptions {
         nil
     }
 
-    private class func deviceCpuCount() -> Int {
-        var ncpu = UInt(0)
-        var len: size_t = MemoryLayout.size(ofValue: ncpu)
-        sysctlbyname("hw.ncpu", &ncpu, &len, nil, 0)
-        return Int(ncpu)
-    }
-
     open func isUseDisplayLayer() -> Bool {
         display == .plane
     }
@@ -469,13 +444,37 @@ public struct LoadingState {
     public let isSeek: Bool
 }
 
-public enum KSPlayerManager {
+public extension KSOptions {
+    /// 最低缓存视频时间
+    static var preferredForwardBufferDuration = 3.0
+    /// 最大缓存视频时间
+    static var maxBufferDuration = 30.0
+    /// 是否开启秒开
+    static var isSecondOpen = false
+    /// 开启精确seek
+    static var isAccurateSeek = true
+    /// Applies to short videos only
+    static var isLoopPlay = false
+    /// 是否自动播放，默认false
+    static var isAutoPlay = false
+    /// seek完是否自动播放
+    static var isSeekedAutoPlay = true
+    static var isClearVideoWhereReplace = true
+    static var enableMaxOutputChannels = true
+    static var pipController: Any?
     /// 日志输出方式
-    public static var logFunctionPoint: (String) -> Void = {
+    static var logFunctionPoint: (String) -> Void = {
         print($0)
     }
 
-    static func setAudioSession() {
+    internal static func deviceCpuCount() -> Int {
+        var ncpu = UInt(0)
+        var len: size_t = MemoryLayout.size(ofValue: ncpu)
+        sysctlbyname("hw.ncpu", &ncpu, &len, nil, 0)
+        return Int(ncpu)
+    }
+
+    internal static func setAudioSession() {
         #if os(macOS)
 //        try? AVAudioSession.sharedInstance().setRouteSharingPolicy(.longFormAudio)
         #else
@@ -512,7 +511,7 @@ public enum MediaLoadState: Int {
 
 @inline(__always) func KSLog(_ message: CustomStringConvertible, file: String = #file, function: String = #function, line: Int = #line) {
     let fileName = (file as NSString).lastPathComponent
-    KSPlayerManager.logFunctionPoint("KSPlayer: \(fileName):\(line) \(function) | \(message)")
+    KSOptions.logFunctionPoint("KSPlayer: \(fileName):\(line) \(function) | \(message)")
 }
 
 public let KSPlayerErrorDomain = "KSPlayerErrorDomain"

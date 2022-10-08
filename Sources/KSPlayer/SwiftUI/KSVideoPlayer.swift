@@ -54,7 +54,7 @@ public struct KSVideoPlayerView: View {
                     }
                 } else if state == .bufferFinished {
                     if isMaskShow {
-                        DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + KSPlayerManager.animateDelayTimeInterval) {
+                        DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + KSOptions.animateDelayTimeInterval) {
                             isMaskShow = false
                         }
                     }

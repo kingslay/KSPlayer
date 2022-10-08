@@ -27,13 +27,11 @@ KSPlayer是一款基于 AVPlayer, FFmpeg  纯Swift的音视频播放器，支持
 
 ## 三、要求
 - iOS 13 +,  macOS 10.15 +, tvOS 13 +
-- Xcode 13
-- Swift 5.5
 
 ## 四、安装
 ### CocoaPods
 
-确保使用最新版本 **cocoapods 1.10.1, 可以使用命令 ` brew install cocoapods` 来安装
+确保使用最新版本 **cocoapods 1.10.1+, 可以使用命令 ` brew install cocoapods` 来安装
 
 ```ruby
 target 'ProjectName' do
@@ -61,7 +59,7 @@ dependencies: [
 ### 初始化
 
 ```swift
-KSPlayerManager.secondPlayerType = KSMEPlayer.self
+KSOptions.secondPlayerType = KSMEPlayer.self
 playerView = IOSVideoPlayerView()
 view.addSubview(playerView)
 playerView.translatesAutoresizingMaskIntoConstraints = false
@@ -140,55 +138,57 @@ public protocol PlayerControllerDelegate: class {
 ## 六、进阶用法
 - 继承 PlayerView 自定义播放逻辑和UI。
 
-- 设置KSPlayerManager 、KSOptions里面的属性
+- 设置KSOptions 里面的属性
 
   ```swift
-  public struct KSPlayerManager {
-       /// 顶部返回、标题、AirPlay按钮 显示选项，默认.Always，可选.HorizantalOnly、.None
-      public static var topBarShowInCase = KSPlayerTopBarShowCase.always
-      /// 自动隐藏操作栏的时间间隔 默认5秒
-      public static var animateDelayTimeInterval = TimeInterval(5)
-      /// 开启亮度手势 默认true
-      public static var enableBrightnessGestures = true
-      /// 开启音量手势 默认true
-      public static var enableVolumeGestures = true
-      /// 开启进度滑动手势 默认true
-      public static var enablePlaytimeGestures = true
-      /// 播放内核选择策略 先使用firstPlayer，失败了自动切换到secondPlayer，播放内核有KSAVPlayer、KSMEPlayer两个选项
-      public static var firstPlayerType: MediaPlayerProtocol.Type = KSAVPlayer.self
-      public static var secondPlayerType: MediaPlayerProtocol.Type?
-      /// 是否能后台播放视频
-      public static var canBackgroundPlay = false
-      /// 日志输出方式
-      public static var logFunctionPoint: (String) -> Void = {
-          print($0)
-      }
-      /// 开启VR模式的陀飞轮
-      public static var enableSensor = true
-      /// 日志级别
-      public static var logLevel = LogLevel.warning
-      public static var stackSize = 16384
-      public static var audioPlayerMaximumFramesPerSlice = AVAudioFrameCount(4096)
+  open class KSOptions {
+    //    public static let shared = KSOptions()
+    /// 最低缓存视频时间
+    @Published public var preferredForwardBufferDuration = KSOptions.preferredForwardBufferDuration
+    /// 最大缓存视频时间
+    public var maxBufferDuration = KSOptions.maxBufferDuration
+    /// 是否开启秒开
+    public var isSecondOpen = KSOptions.isSecondOpen
+    /// 开启精确seek
+    public var isAccurateSeek = KSOptions.isAccurateSeek
+    /// Applies to short videos only
+    public var isLoopPlay = KSOptions.isLoopPlay
+    /// 是否自动播放，默认false
+    public var isAutoPlay = KSOptions.isAutoPlay
+    /// seek完是否自动播放
+    public var isSeekedAutoPlay = KSOptions.isSeekedAutoPlay
+    /*
+     AVSEEK_FLAG_BACKWARD: 1
+     AVSEEK_FLAG_BYTE: 2
+     AVSEEK_FLAG_ANY: 4
+     AVSEEK_FLAG_FRAME: 8
+     */
+    public var seekFlags = Int32(1)
+    // ffmpeg only cache http
+    public var cache = false
+    public var outputURL: URL?
+    public var display = DisplayEnum.plane
+    public var audioDelay = 0.0 // s
+    public var subtitleDelay = 0.0 // s
+    public var videoDisable = false
+    public var audioFilters: String?
+    public var videoFilters: String?
+    public var subtitleDisable = false
+    public var videoAdaptable = true
+    public var syncDecodeAudio = false
+    public var syncDecodeVideo = false
+    public var avOptions = [String: Any]()
+    public var formatContextOptions = [String: Any]()
+    public var hardwareDecode = true
+    public var decoderOptions = [String: Any]()
+    public var probesize: Int64?
+    public var maxAnalyzeDuration: Int64?
+    public var lowres = UInt8(0)
+    public var autoSelectEmbedSubtitle = true
+    public var asynchronousDecompression = false
+    public var autoDeInterlace = false
+    @Published var preferredFramesPerSecond = Float(60)
   }
-  public class KSOptions {
-      /// 视频颜色编码方式 支持kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange kCVPixelFormatType_420YpCbCr8BiPlanarFullRange kCVPixelFormatType_32BGRA kCVPixelFormatType_420YpCbCr8Planar
-      public static var bufferPixelFormatType = kCVPixelFormatType_420YpCbCr8BiPlanarFullRange
-      /// 最低缓存视频时间
-      public static var preferredForwardBufferDuration = 3.0
-      /// 最大缓存视频时间
-      public static var maxBufferDuration = 30.0
-      /// 是否开启秒开
-      public static var isSecondOpen = false
-      /// 开启精确seek
-      public static var isAccurateSeek = true
-      /// 开启无缝循环播放
-      public static var isLoopPlay = false
-      /// 是否自动播放，默认false
-      public static var isAutoPlay = false
-      /// seek完是否自动播放
-      public static var isSeekedAutoPlay = true
-  }
-  
   ```
 
 

@@ -73,7 +73,7 @@ class RootViewController: UIViewController {
     }
 
     override var supportedInterfaceOrientations: UIInterfaceOrientationMask {
-        KSPlayerManager.supportedInterfaceOrientations
+        KSOptions.supportedInterfaceOrientations
     }
 
     private let playerView = IOSVideoPlayerView()

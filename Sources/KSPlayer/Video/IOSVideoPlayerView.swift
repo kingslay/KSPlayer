@@ -53,11 +53,11 @@ open class IOSVideoPlayerView: VideoPlayerView {
         maskImageView.contentMode = .scaleAspectFit
         toolBar.addArrangedSubview(landscapeButton)
         landscapeButton.tag = PlayerButtonType.landscape.rawValue
-        landscapeButton.setImage(KSPlayerManager.image(named: "KSPlayer_fullscreen"), for: .normal)
-        landscapeButton.setImage(KSPlayerManager.image(named: "KSPlayer_portialscreen"), for: .selected)
+        landscapeButton.setImage(KSOptions.image(named: "KSPlayer_fullscreen"), for: .normal)
+        landscapeButton.setImage(KSOptions.image(named: "KSPlayer_portialscreen"), for: .selected)
         landscapeButton.addTarget(self, action: #selector(onButtonPressed(_:)), for: .touchUpInside)
         backButton.tag = PlayerButtonType.back.rawValue
-        backButton.setImage(KSPlayerManager.image(named: "KSPlayer_back"), for: .normal)
+        backButton.setImage(KSOptions.image(named: "KSPlayer_back"), for: .normal)
         backButton.addTarget(self, action: #selector(onButtonPressed(_:)), for: .touchUpInside)
         navigationBar.insertArrangedSubview(backButton, at: 0)
         routeButton.isHidden = true
@@ -142,14 +142,14 @@ open class IOSVideoPlayerView: VideoPlayerView {
             fullVC.modalPresentationCapturesStatusBarAppearance = true
             fullVC.transitioningDelegate = self
             viewController.present(fullVC, animated: true) {
-                KSPlayerManager.supportedInterfaceOrientations = fullVC.supportedInterfaceOrientations
+                KSOptions.supportedInterfaceOrientations = fullVC.supportedInterfaceOrientations
             }
         } else {
             guard viewController is PlayerFullScreenViewController else {
                 return
             }
             let presentingVC = viewController.presentingViewController ?? viewController
-            KSPlayerManager.supportedInterfaceOrientations = .portrait
+            KSOptions.supportedInterfaceOrientations = .portrait
             presentingVC.dismiss(animated: true) {
                 self.originalSuperView?.addSubview(self)
                 if let constraints = self.originalframeConstraints, constraints.count > 0 {
@@ -159,7 +159,7 @@ open class IOSVideoPlayerView: VideoPlayerView {
                     self.frame = self.originalFrame
                 }
                 if let originalOrientations = self.originalOrientations {
-                    KSPlayerManager.supportedInterfaceOrientations = originalOrientations
+                    KSOptions.supportedInterfaceOrientations = originalOrientations
                 }
             }
         }
@@ -169,9 +169,9 @@ open class IOSVideoPlayerView: VideoPlayerView {
 
     open func updateUI(isLandscape: Bool) {
         if isLandscape {
-            topMaskView.isHidden = KSPlayerManager.topBarShowInCase == .none
+            topMaskView.isHidden = KSOptions.topBarShowInCase == .none
         } else {
-            topMaskView.isHidden = KSPlayerManager.topBarShowInCase != .always
+            topMaskView.isHidden = KSOptions.topBarShowInCase != .always
         }
         toolBar.playbackRateButton.isHidden = false
         toolBar.srtButton.isHidden = srtControl.srtListCount == 0
@@ -243,12 +243,12 @@ open class IOSVideoPlayerView: VideoPlayerView {
     override open func panGestureChanged(velocity point: CGPoint, direction: KSPanDirection) {
         if direction == .vertical {
             if isVolume {
-                if KSPlayerManager.enableVolumeGestures {
+                if KSOptions.enableVolumeGestures {
                     tmpPanValue += panValue(velocity: point, direction: direction, currentTime: Float(toolBar.currentTime), totalTime: Float(totalTime))
                     tmpPanValue = max(min(tmpPanValue, 1), 0)
                     volumeViewSlider.value = tmpPanValue
                 }
-            } else if KSPlayerManager.enableBrightnessGestures {
+            } else if KSOptions.enableBrightnessGestures {
                 UIScreen.main.brightness += CGFloat(panValue(velocity: point, direction: direction, currentTime: Float(toolBar.currentTime), totalTime: Float(totalTime)))
             }
         } else {
@@ -321,7 +321,7 @@ extension IOSVideoPlayerView {
 public class AirplayStatusView: UIView {
     override public init(frame: CGRect) {
         super.init(frame: frame)
-        let airplayicon = UIImageView(image: KSPlayerManager.image(named: "airplayicon_play"))
+        let airplayicon = UIImageView(image: KSOptions.image(named: "airplayicon_play"))
         addSubview(airplayicon)
         let airplaymessage = UILabel()
         airplaymessage.backgroundColor = .clear
@@ -354,7 +354,7 @@ public class AirplayStatusView: UIView {
     }
 }
 
-public extension KSPlayerManager {
+public extension KSOptions {
     /// func application(_ application: UIApplication, supportedInterfaceOrientationsFor window: UIWindow?) -> UIInterfaceOrientationMask
     static var supportedInterfaceOrientations = UIInterfaceOrientationMask.portrait
 }

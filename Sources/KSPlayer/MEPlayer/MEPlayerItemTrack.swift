@@ -96,7 +96,7 @@ class AssetTrack: MediaPlayerTrack {
         }
         var timebase = Timebase(stream.pointee.time_base)
         if timebase.num <= 0 || timebase.den <= 0 {
-            timebase = Timebase(num: 1, den: mediaType == .audio ? KSPlayerManager.audioPlayerSampleRate : 25000)
+            timebase = Timebase(num: 1, den: mediaType == .audio ? KSOptions.audioPlayerSampleRate : 25000)
         }
         self.timebase = timebase
         if stream.pointee.start_time != Int64.min {
@@ -340,7 +340,7 @@ final class AsyncPlayerItemTrack<Frame: MEFrame>: SyncPlayerItemTrack<Frame> {
         decodeOperation = BlockOperation { [weak self] in
             guard let self else { return }
             Thread.current.name = self.operationQueue.name
-            Thread.current.stackSize = KSPlayerManager.stackSize
+            Thread.current.stackSize = KSOptions.stackSize
             self.decodeThread()
         }
         decodeOperation.queuePriority = .veryHigh

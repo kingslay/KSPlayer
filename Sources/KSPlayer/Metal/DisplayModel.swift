@@ -145,7 +145,7 @@ private class SphereDisplayModel {
         posBuffer = device.makeBuffer(bytes: positions, length: MemoryLayout<simd_float4>.size * positions.count)
         uvBuffer = device.makeBuffer(bytes: uvs, length: MemoryLayout<simd_float2>.size * uvs.count)
         #if canImport(UIKit) && canImport(CoreMotion)
-        if KSPlayerManager.enableSensor {
+        if KSOptions.enableSensor {
             MotionSensor.shared.start()
         }
         #endif
@@ -156,7 +156,7 @@ private class SphereDisplayModel {
         encoder.setVertexBuffer(posBuffer, offset: 0, index: 0)
         encoder.setVertexBuffer(uvBuffer, offset: 0, index: 1)
         #if canImport(UIKit) && canImport(CoreMotion)
-        if KSPlayerManager.enableSensor, let matrix = MotionSensor.shared.matrix() {
+        if KSOptions.enableSensor, let matrix = MotionSensor.shared.matrix() {
             modelViewMatrix = matrix
         }
         #endif

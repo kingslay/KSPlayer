@@ -123,7 +123,7 @@ open class KSPlayerLayer: UIView {
                 firstPlayerType = NSClassFromString("KSPlayer.KSMEPlayer") as! MediaPlayerProtocol.Type
                 // swiftlint:enable force_cast
             } else {
-                firstPlayerType = KSPlayerManager.firstPlayerType
+                firstPlayerType = KSOptions.firstPlayerType
             }
             if type(of: player) == firstPlayerType {
                 if url == oldValue {
@@ -182,7 +182,7 @@ open class KSPlayerLayer: UIView {
             firstPlayerType = NSClassFromString("KSPlayer.KSMEPlayer") as! MediaPlayerProtocol.Type
             // swiftlint:enable force_cast
         } else {
-            firstPlayerType = KSPlayerManager.firstPlayerType
+            firstPlayerType = KSOptions.firstPlayerType
         }
         player = firstPlayerType.init(url: url, options: options)
         isAutoPlay = options.isAutoPlay
@@ -379,7 +379,7 @@ extension KSPlayerLayer: MediaPlayerDelegate {
 
     public func finish(player: some MediaPlayerProtocol, error: Error?) {
         if let error {
-            if type(of: player) != KSPlayerManager.secondPlayerType, let secondPlayerType = KSPlayerManager.secondPlayerType {
+            if type(of: player) != KSOptions.secondPlayerType, let secondPlayerType = KSOptions.secondPlayerType {
                 self.player = secondPlayerType.init(url: url, options: options)
                 return
             }
@@ -588,7 +588,7 @@ extension KSPlayerLayer {
             return
         }
 
-        if KSPlayerManager.canBackgroundPlay {
+        if KSOptions.canBackgroundPlay {
             player.enterBackground()
             return
         }
@@ -596,7 +596,7 @@ extension KSPlayerLayer {
     }
 
     @objc private func enterForeground() {
-        if KSPlayerManager.canBackgroundPlay {
+        if KSOptions.canBackgroundPlay {
             player.enterForeground()
         }
     }
@@ -666,7 +666,7 @@ public extension Int {
     }
 }
 
-public extension KSPlayerManager {
+public extension KSOptions {
     static var firstPlayerType: MediaPlayerProtocol.Type = KSAVPlayer.self
     static var secondPlayerType: MediaPlayerProtocol.Type?
 }

@@ -89,7 +89,7 @@ public enum LogLevel: Int32 {
     case trace = 56
 }
 
-public extension KSPlayerManager {
+public extension KSOptions {
     /// 开启VR模式的陀飞轮
     static var enableSensor = true
     /// 日志级别

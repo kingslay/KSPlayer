@@ -70,8 +70,8 @@ private final class SystemView: UIVisualEffectView {
     private let stackView = UIStackView()
     private let imageView = UIImageView()
     private let titleLabel = UILabel()
-    private lazy var brightnessImage = KSPlayerManager.image(named: "KSPlayer_brightness")
-    private lazy var volumeImage = KSPlayerManager.image(named: "KSPlayer_volume")
+    private lazy var brightnessImage = KSOptions.image(named: "KSPlayer_brightness")
+    private lazy var volumeImage = KSOptions.image(named: "KSPlayer_volume")
     private convenience init() {
         self.init(effect: UIBlurEffect(style: .extraLight))
         clipsToBounds = true
@@ -162,10 +162,10 @@ extension SystemView: BrightnessVolumeViewProtocol {
 }
 
 private final class ProgressView: UIView {
-    private lazy var brightnessImage = KSPlayerManager.image(named: "ic_light")
-    private lazy var volumeImage = KSPlayerManager.image(named: "ic_voice")
-    private lazy var brightnessOffImage = KSPlayerManager.image(named: "ic_light_off")
-    private lazy var volumeOffImage = KSPlayerManager.image(named: "ic_voice_off")
+    private lazy var brightnessImage = KSOptions.image(named: "ic_light")
+    private lazy var volumeImage = KSOptions.image(named: "ic_voice")
+    private lazy var brightnessOffImage = KSOptions.image(named: "ic_light_off")
+    private lazy var volumeOffImage = KSOptions.image(named: "ic_voice_off")
     private let progressView = UIProgressView()
     private let imageView = UIImageView()
 

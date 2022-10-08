@@ -3,7 +3,7 @@ import XCTest
 class KSPlayerLayerTest: XCTestCase {
     private var readyToPlayExpectation: XCTestExpectation?
     override func setUp() {
-        KSPlayerManager.secondPlayerType = KSMEPlayer.self
+        KSOptions.secondPlayerType = KSMEPlayer.self
         KSOptions.isSecondOpen = true
         KSOptions.isAccurateSeek = true
     }

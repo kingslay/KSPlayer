@@ -14,11 +14,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UISplitViewControllerDele
     var window: UIWindow?
     func application(_: UIApplication, didFinishLaunchingWithOptions _: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         let window = UIWindow()
-        KSPlayerManager.canBackgroundPlay = true
-        KSPlayerManager.logLevel = .debug
-        KSPlayerManager.firstPlayerType = KSMEPlayer.self
-        KSPlayerManager.secondPlayerType = KSMEPlayer.self
-//        KSPlayerManager.supportedInterfaceOrientations = .all
+        KSOptions.canBackgroundPlay = true
+        KSOptions.logLevel = .debug
+        KSOptions.firstPlayerType = KSMEPlayer.self
+        KSOptions.secondPlayerType = KSMEPlayer.self
+//        KSOptions.supportedInterfaceOrientations = .all
         KSOptions.isAutoPlay = true
         KSOptions.isSecondOpen = true
         KSOptions.isAccurateSeek = true
@@ -44,7 +44,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UISplitViewControllerDele
 
     #if os(iOS)
     func application(_: UIApplication, supportedInterfaceOrientationsFor _: UIWindow?) -> UIInterfaceOrientationMask {
-        KSPlayerManager.supportedInterfaceOrientations
+        KSOptions.supportedInterfaceOrientations
     }
 
     private var menuController: MenuController!

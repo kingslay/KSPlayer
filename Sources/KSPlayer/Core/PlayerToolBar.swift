@@ -92,8 +92,8 @@ public class PlayerToolBar: UIStackView {
         timeSlider.maximumTrackTintColor = UIColor.white.withAlphaComponent(0.3)
         timeSlider.minimumTrackTintColor = UIColor(red: 0.0, green: 164 / 255.0, blue: 1.0, alpha: 1.0)
         playButton.tag = PlayerButtonType.play.rawValue
-        playButton.setImage(KSPlayerManager.image(named: "toolbar_ic_play"), for: .normal)
-        playButton.setImage(KSPlayerManager.image(named: "toolbar_ic_pause"), for: .selected)
+        playButton.setImage(KSOptions.image(named: "toolbar_ic_play"), for: .normal)
+        playButton.setImage(KSOptions.image(named: "toolbar_ic_pause"), for: .selected)
         playbackRateButton.tag = PlayerButtonType.rate.rawValue
         playbackRateButton.titleFont = .systemFont(ofSize: 14, weight: .medium)
         playbackRateButton.setTitle(NSLocalizedString("speed", comment: ""), for: .normal)
@@ -151,7 +151,7 @@ public class PlayerToolBar: UIStackView {
     }
 }
 
-extension KSPlayerManager {
+extension KSOptions {
     static func image(named: String) -> UIImage? {
         #if canImport(UIKit)
         return UIImage(named: named, in: .module, compatibleWith: nil)
