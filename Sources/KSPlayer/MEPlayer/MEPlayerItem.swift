@@ -392,7 +392,7 @@ extension MEPlayerItem {
                 // When seeking before the beginning of the file, and seeking fails,
                 // try again without the backwards flag to make it seek to the
                 // beginning.
-                if result < 0, (options.seekFlags & AVSEEK_FLAG_BACKWARD) == 1 {
+                if result < 0, options.seekFlags & AVSEEK_FLAG_BACKWARD > 0 {
                     options.seekFlags &= ~AVSEEK_FLAG_BACKWARD
                     av_seek_frame(formatCtx, -1, timeStamp, options.seekFlags)
                 }
