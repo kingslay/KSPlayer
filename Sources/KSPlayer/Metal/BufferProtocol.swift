@@ -43,7 +43,7 @@ public extension CVPixelBuffer {
     var planeCount: Int { isPlanar ? CVPixelBufferGetPlaneCount(self) : 1 }
 
     var isFullRangeVideo: Bool {
-        CVBufferGetAttachment(self, kCMFormatDescriptionExtension_FullRangeVideo, nil)?.takeUnretainedValue() as? Bool ?? true
+        CVBufferGetAttachment(self, kCMFormatDescriptionExtension_FullRangeVideo, nil)?.takeUnretainedValue() as? Bool ?? false
     }
 
     var attachmentsDic: CFDictionary? {
@@ -133,13 +133,7 @@ extension CGImage {
 extension KSOptions {
     static func colorPixelFormat(bitDepth: Int32) -> MTLPixelFormat {
         if bitDepth == 10 {
-            #if os(macOS) || targetEnvironment(macCatalyst)
             return .bgr10a2Unorm
-            #elseif targetEnvironment(simulator)
-            return .bgra8Unorm
-            #else
-            return .bgr10_xr_srgb
-            #endif
         } else {
             return .bgra8Unorm
         }

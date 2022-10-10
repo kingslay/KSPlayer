@@ -167,7 +167,7 @@ extension MetalPlayView {
                 } else {
                     view.drawableSize = UIScreen.size
                 }
-                view.colorPixelFormat = KSOptions.colorPixelFormat(bitDepth: pixelBuffer.bitDepth)
+                (view.layer as? CAMetalLayer)?.pixelFormat = KSOptions.colorPixelFormat(bitDepth: pixelBuffer.bitDepth)
                 (view.layer as? CAMetalLayer)?.colorspace = pixelBuffer.colorspace
                 guard let drawable = view.currentDrawable else {
                     return

@@ -36,6 +36,10 @@ class VideoSwresample: Swresample {
         } else {
             frame.corePixelBuffer = transfer(frame: avframe.pointee)
         }
+        if let pixelBuffer = frame.corePixelBuffer, let colorSpace = avframe.pointee.colorspace.colorSpace {
+            CVBufferSetAttachment(pixelBuffer, kCVImageBufferCGColorSpaceKey, colorSpace, .shouldPropagate)
+        }
+
         return frame
     }
 

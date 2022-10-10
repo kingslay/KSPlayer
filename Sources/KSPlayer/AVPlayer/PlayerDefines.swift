@@ -106,6 +106,7 @@ public protocol MediaPlayerTrack: CustomStringConvertible {
     var fieldOrder: FFmpegFieldOrder { get }
     func setIsEnabled(_ isEnabled: Bool)
 }
+
 // swiftlint:disable identifier_name
 public enum FFmpegFieldOrder: UInt8 {
     case unknown = 0
@@ -115,6 +116,7 @@ public enum FFmpegFieldOrder: UInt8 {
     case tb // < Top coded first, bottom displayed first
     case bt // < Bottom coded first, top displayed first
 }
+
 // swiftlint:enable identifier_name
 
 // extension MediaPlayerTrack {

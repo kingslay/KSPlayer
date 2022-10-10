@@ -131,6 +131,7 @@ class DecompressionSession {
         dic[kCVImageBufferColorPrimariesKey] = codecpar.color_primaries.colorPrimaries
         dic[kCVImageBufferTransferFunctionKey] = codecpar.color_trc.transferFunction
         dic[kCVImageBufferYCbCrMatrixKey] = codecpar.color_space.ycbcrMatrix
+        dic[kCVImageBufferCGColorSpaceKey] = codecpar.color_space.colorSpace
         // swiftlint:disable line_length
         var description: CMFormatDescription?
         var status = CMVideoFormatDescriptionCreate(allocator: kCFAllocatorDefault, codecType: videoCodecType, width: codecpar.width, height: codecpar.height, extensions: dic, formatDescriptionOut: &description)
