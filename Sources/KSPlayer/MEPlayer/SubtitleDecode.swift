@@ -20,7 +20,7 @@ class SubtitleDecode: DecodeProtocol {
     private let scale = VideoSwresample(dstFormat: AV_PIX_FMT_ARGB)
     private var subtitle = AVSubtitle()
     private var preSubtitleFrame: SubtitleFrame?
-    required init(assetTrack: AssetTrack, options: KSOptions, delegate: DecodeResultDelegate) {
+    required init(assetTrack: FFmpegAssetTrack, options: KSOptions, delegate: DecodeResultDelegate) {
         self.delegate = delegate
         assetTrack.setIsEnabled(!assetTrack.isImageSubtitle)
         do {

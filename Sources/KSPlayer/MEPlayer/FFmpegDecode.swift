@@ -19,7 +19,7 @@ class FFmpegDecode: DecodeProtocol {
     private var bestEffortTimestamp = Int64(0)
     private let swresample: Swresample
     private let filter: MEFilter
-    required init(assetTrack: AssetTrack, options: KSOptions, delegate: DecodeResultDelegate) {
+    required init(assetTrack: FFmpegAssetTrack, options: KSOptions, delegate: DecodeResultDelegate) {
         self.delegate = delegate
         self.options = options
         var codecpar = assetTrack.stream.pointee.codecpar.pointee

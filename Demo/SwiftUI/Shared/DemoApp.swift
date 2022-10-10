@@ -152,6 +152,15 @@ struct DemoApp: App {
 //    }
 // }
 class MEOptions: KSOptions {
+    override func process(assetTrack: MediaPlayerTrack) {
+        if assetTrack.mediaType == .video {
+            if assetTrack.fieldOrder == .bb || assetTrack.fieldOrder == .tt {
+                videoFilters = "yadif=mode=0:parity=auto:deint=0"
+                hardwareDecode = false
+            }
+        }
+    }
+
     #if os(tvOS)
     override open func preferredDisplayCriteria(refreshRate: Float, videoDynamicRange: Int32) -> AVDisplayCriteria? {
         AVDisplayCriteria(refreshRate: refreshRate, videoDynamicRange: videoDynamicRange)

@@ -17,11 +17,11 @@ class VideoToolboxDecode: DecodeProtocol {
     private var startTime = Int64(0)
     private var lastPosition = Int64(0)
     private var error: NSError?
-    required convenience init(assetTrack: AssetTrack, options: KSOptions, delegate: DecodeResultDelegate) {
+    required convenience init(assetTrack: FFmpegAssetTrack, options: KSOptions, delegate: DecodeResultDelegate) {
         self.init(assetTrack: assetTrack, options: options, session: DecompressionSession(codecpar: assetTrack.stream.pointee.codecpar.pointee, options: options), delegate: delegate)
     }
 
-    init(assetTrack: AssetTrack, options: KSOptions, session: DecompressionSession?, delegate: DecodeResultDelegate) {
+    init(assetTrack: FFmpegAssetTrack, options: KSOptions, session: DecompressionSession?, delegate: DecodeResultDelegate) {
         timebase = assetTrack.timebase
         codecpar = assetTrack.stream.pointee.codecpar.pointee
         self.options = options

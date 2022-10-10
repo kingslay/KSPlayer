@@ -147,7 +147,7 @@ final class Packet: ObjectQueueItem {
     var duration: Int64 = 0
     var size: Int64 = 0
     var position: Int64 = 0
-    var assetTrack: AssetTrack!
+    var assetTrack: FFmpegAssetTrack!
     var corePacket: UnsafeMutablePointer<AVPacket> { packetWrap.corePacket! }
     private let packetWrap = ObjectPool.share.object(class: AVPacketWrap.self, key: "AVPacketWrap") { AVPacketWrap() }
     func fill() {

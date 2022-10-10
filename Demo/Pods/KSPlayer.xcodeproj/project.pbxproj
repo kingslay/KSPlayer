@@ -36,7 +36,7 @@
 		214B249F3EB449126C1E3C14A71CF394 /* KSPlayerItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FBFF885D28586E6E0C5984A59D00303 /* KSPlayerItem.swift */; };
 		214D6C2E1AAFBB42C6E77CF7028587FC /* AudioPlayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A5DE76F67E80BB47EE539EFD284C247 /* AudioPlayerView.swift */; };
 		229B66097BCFFD4B3569AAB437824E27 /* IOSVideoPlayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 799F9751FF8C65B581C1B90085D2A13C /* IOSVideoPlayerView.swift */; };
-		23DBF2A37447EDFF057B185E1D82F908 /* HardwareDecode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71D96F32EBE0A43AA8DD4DD4FDF0C3CC /* HardwareDecode.swift */; };
+		23DBF2A37447EDFF057B185E1D82F908 /* VideoToolboxDecode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71D96F32EBE0A43AA8DD4DD4FDF0C3CC /* VideoToolboxDecode.swift */; };
 		25D5FCC4ACCF31021717C32044B38FC7 /* Filter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B1FF242EAAA19961B4942AACB759155 /* Filter.swift */; };
 		271C46B052A7B24FC57CDD9A9BF0D3D3 /* MEPlayerItemTrack.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4218124447BAC532D6E1CBBF274E5F4 /* MEPlayerItemTrack.swift */; };
 		2874A2F2F981E63FAA801E3CFE135B98 /* mjpeg.flac in Resources */ = {isa = PBXBuildFile; fileRef = 11197ED836749D02E80DB5665E10F31C /* mjpeg.flac */; };
@@ -147,7 +147,7 @@
 		AEA1BEE3EE5CFFB018F7872EE396F89D /* Shaders.metal in Resources */ = {isa = PBXBuildFile; fileRef = B988C131C8EE39BD1550206702FC0269 /* Shaders.metal */; };
 		AF9EB18ED4293C36A1E53DA9EB999CB6 /* VideoPlayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8667FB49134A6148A3973230E6A388BA /* VideoPlayerView.swift */; };
 		AFEBC726FA27B81C0100B52B68D335A3 /* MacVideoPlayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD0CCA8F0B3F7912DC6627C245BC78F2 /* MacVideoPlayerView.swift */; };
-		B0F5AD9DC6FAE3664AFC5D3E9A2328C3 /* HardwareDecode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71D96F32EBE0A43AA8DD4DD4FDF0C3CC /* HardwareDecode.swift */; };
+		B0F5AD9DC6FAE3664AFC5D3E9A2328C3 /* VideoToolboxDecode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71D96F32EBE0A43AA8DD4DD4FDF0C3CC /* VideoToolboxDecode.swift */; };
 		B1CF83853C09EBBB89A04AF4F5CAC45D /* subrip.mkv in Resources */ = {isa = PBXBuildFile; fileRef = 9EC42D4BE979D392160F210AE8138FB7 /* subrip.mkv */; };
 		B2846D36182DEE8566BEC707B6B62AC2 /* KSPlayer.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 14FAD681D1700397D708134A25DCB243 /* KSPlayer.xcassets */; };
 		B2B6BCEDFBDCC25D973C9FD3FBD3AD10 /* KSMEPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFCC0275C91A55C80FEDEBFE5F7C961B /* KSMEPlayer.swift */; };
@@ -178,7 +178,7 @@
 		D6518585C5B84D0B535F272D220CAC32 /* KSSubtitleController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80E58D4D93061B35E22AB878DACCB295 /* KSSubtitleController.swift */; };
 		D678ED5FE86BFC0C05A6A27E29C89762 /* CircularBuffer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34FA0C954A4D6F7C4443738F05273A61 /* CircularBuffer.swift */; };
 		D72EE412A26463E211EC6836BF0799DD /* MEPlayerItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 054F129900B74AF87488BBA4EE873890 /* MEPlayerItem.swift */; };
-		D811FA7E8BB92A8579342618B321DA49 /* HardwareDecode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71D96F32EBE0A43AA8DD4DD4FDF0C3CC /* HardwareDecode.swift */; };
+		D811FA7E8BB92A8579342618B321DA49 /* VideoToolboxDecode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71D96F32EBE0A43AA8DD4DD4FDF0C3CC /* VideoToolboxDecode.swift */; };
 		D95FA99D4032B21FF63E1CBDEB078A0D /* AudioPlayerViewTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 088770E6D3B6CC5B9438D165811B1E2F /* AudioPlayerViewTest.swift */; };
 		DA60B6290728DD05935506926E5D4B48 /* Shaders.metal in Resources */ = {isa = PBXBuildFile; fileRef = B988C131C8EE39BD1550206702FC0269 /* Shaders.metal */; };
 		DAF65C8C8DED73B34341313C6D994C70 /* AudioPlayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A5DE76F67E80BB47EE539EFD284C247 /* AudioPlayerView.swift */; };
@@ -346,7 +346,7 @@
 		6BE0E7F06A0AFEFCC4EC46862B1D2B09 /* KSPlayer-macOS-Unit-Tests-prefix.pch */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = "KSPlayer-macOS-Unit-Tests-prefix.pch"; path = "../KSPlayer-macOS/KSPlayer-macOS-Unit-Tests-prefix.pch"; sourceTree = "<group>"; };
 		6C9CF6A6D671EAD236397AD24EC2CD68 /* VideoPlayerControllerTest.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = VideoPlayerControllerTest.swift; path = Tests/KSPlayerTests/VideoPlayerControllerTest.swift; sourceTree = "<group>"; };
 		6D37E6E87103D84B51E109A412D01889 /* KSVideoPlayer.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = KSVideoPlayer.swift; path = Sources/KSPlayer/SwiftUI/KSVideoPlayer.swift; sourceTree = "<group>"; };
-		71D96F32EBE0A43AA8DD4DD4FDF0C3CC /* HardwareDecode.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = HardwareDecode.swift; path = Sources/KSPlayer/MEPlayer/HardwareDecode.swift; sourceTree = "<group>"; };
+		71D96F32EBE0A43AA8DD4DD4FDF0C3CC /* VideoToolboxDecode.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = VideoToolboxDecode.swift; path = Sources/KSPlayer/MEPlayer/VideoToolboxDecode.swift; sourceTree = "<group>"; };
 		720849E0C1E64E82791DC66AE1A04E64 /* KSPlayer-macOS-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = "KSPlayer-macOS-dummy.m"; path = "../KSPlayer-macOS/KSPlayer-macOS-dummy.m"; sourceTree = "<group>"; };
 		743081211E6128169EB9C39BEABF63D6 /* KSPlayer-iOS-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "KSPlayer-iOS-dummy.m"; sourceTree = "<group>"; };
 		799F9751FF8C65B581C1B90085D2A13C /* IOSVideoPlayerView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = IOSVideoPlayerView.swift; path = Sources/KSPlayer/Video/IOSVideoPlayerView.swift; sourceTree = "<group>"; };
@@ -516,7 +516,7 @@
 				34FA0C954A4D6F7C4443738F05273A61 /* CircularBuffer.swift */,
 				0F9EFC85348198307BEA08CFE9824030 /* EmbedDataSouce.swift */,
 				4B1FF242EAAA19961B4942AACB759155 /* Filter.swift */,
-				71D96F32EBE0A43AA8DD4DD4FDF0C3CC /* HardwareDecode.swift */,
+				71D96F32EBE0A43AA8DD4DD4FDF0C3CC /* VideoToolboxDecode.swift */,
 				AFCC0275C91A55C80FEDEBFE5F7C961B /* KSMEPlayer.swift */,
 				054F129900B74AF87488BBA4EE873890 /* MEPlayerItem.swift */,
 				F4218124447BAC532D6E1CBBF274E5F4 /* MEPlayerItemTrack.swift */,
@@ -1303,7 +1303,7 @@
 				7D4F3329D5A6DDD40E7AF1647928B39A /* DisplayModel.swift in Sources */,
 				FE99EF5FEE67C75FB28DCFC424D1BDBA /* EmbedDataSouce.swift in Sources */,
 				0302B6EF6DFFF9F3179A1CFA8DABDBBC /* Filter.swift in Sources */,
-				23DBF2A37447EDFF057B185E1D82F908 /* HardwareDecode.swift in Sources */,
+				23DBF2A37447EDFF057B185E1D82F908 /* VideoToolboxDecode.swift in Sources */,
 				9A0BC2C8F29B8DCBBF5306F014103858 /* IOSVideoPlayerView.swift in Sources */,
 				F59B41EEC4C86088D1539BA8CC9FF6B0 /* KSAVPlayer.swift in Sources */,
 				B2B6BCEDFBDCC25D973C9FD3FBD3AD10 /* KSMEPlayer.swift in Sources */,
@@ -1355,7 +1355,7 @@
 				BD5DF2F8534F79294CA74723C04B8059 /* DisplayModel.swift in Sources */,
 				6F5087492D5E3CF43DEFB27AB7543740 /* EmbedDataSouce.swift in Sources */,
 				ED8CA535C7307617408F0C5C7F780051 /* Filter.swift in Sources */,
-				B0F5AD9DC6FAE3664AFC5D3E9A2328C3 /* HardwareDecode.swift in Sources */,
+				B0F5AD9DC6FAE3664AFC5D3E9A2328C3 /* VideoToolboxDecode.swift in Sources */,
 				229B66097BCFFD4B3569AAB437824E27 /* IOSVideoPlayerView.swift in Sources */,
 				4E94F478A4A91B608D367402E04B567C /* KSAVPlayer.swift in Sources */,
 				0F75AE5AD50315FD661D81CD0E123724 /* KSMEPlayer.swift in Sources */,
@@ -1422,7 +1422,7 @@
 				8B20C7F2179D13ED69169B27B7519F85 /* DisplayModel.swift in Sources */,
 				C95EB9D98031526E2608BC0E994B6F6B /* EmbedDataSouce.swift in Sources */,
 				25D5FCC4ACCF31021717C32044B38FC7 /* Filter.swift in Sources */,
-				D811FA7E8BB92A8579342618B321DA49 /* HardwareDecode.swift in Sources */,
+				D811FA7E8BB92A8579342618B321DA49 /* VideoToolboxDecode.swift in Sources */,
 				503205EF027DB65A5352FB3F25774154 /* IOSVideoPlayerView.swift in Sources */,
 				DC3C948F03BD8C669AED32F366E6D94E /* KSAVPlayer.swift in Sources */,
 				CA7D56D8A45465416BC68D7481840D6A /* KSMEPlayer.swift in Sources */,

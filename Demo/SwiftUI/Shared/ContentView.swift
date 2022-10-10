@@ -83,8 +83,6 @@ struct ContentView: View {
                 }
                 if let path = Bundle.main.path(forResource: "subrip", ofType: "mkv") {
                     let options = MEOptions()
-                    options.videoFilters = "yadif=mode=0:parity=auto:deint=0"
-                    options.hardwareDecode = false
                     resources.append(KSPlayerResource(url: URL(fileURLWithPath: path), options: options, name: "文字视频"))
                 }
                 if let url = URL(string: "http://clips.vorwaerts-gmbh.de/big_buck_bunny.mp4") {

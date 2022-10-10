@@ -8,8 +8,8 @@ import Foundation
 import Libavcodec
 import Libavutil
 
-extension AssetTrack: SubtitleInfo {
-    var subtitleID: String {
+extension FFmpegAssetTrack: SubtitleInfo {
+    public var subtitleID: String {
         String(trackID)
     }
 
@@ -25,7 +25,7 @@ extension AssetTrack: SubtitleInfo {
     }
 }
 
-extension AssetTrack: KSSubtitleProtocol {
+extension FFmpegAssetTrack: KSSubtitleProtocol {
     public func search(for time: TimeInterval) -> SubtitlePart? {
         if isImageSubtitle {
             return subtitle?.outputRenderQueue.pop { item -> Bool in

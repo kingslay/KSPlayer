@@ -103,7 +103,17 @@ public protocol MediaPlayerTrack: CustomStringConvertible {
     var yCbCrMatrix: String? { get }
     var audioStreamBasicDescription: AudioStreamBasicDescription? { get }
     var dovi: DOVIDecoderConfigurationRecord? { get }
+    var fieldOrder: FFmpegFieldOrder { get }
     func setIsEnabled(_ isEnabled: Bool)
+}
+
+public enum FFmpegFieldOrder: UInt8 {
+    case unknown = 0
+    case progressive
+    case tt // < Top coded_first, top displayed first
+    case bb // < Bottom coded first, bottom displayed first
+    case tb // < Top coded first, bottom displayed first
+    case bt // < Bottom coded first, top displayed first
 }
 
 // extension MediaPlayerTrack {
@@ -398,6 +408,7 @@ open class KSOptions {
                             let tff = idetTypeMap[.tff] ?? 0
                             let bff = idetTypeMap[.bff] ?? 0
                             let progressive = idetTypeMap[.progressive] ?? 0
+                            let undetermined = idetTypeMap[.undetermined] ?? 0
                             if progressive - tff - bff > 100 {
                                 videoInterlacingType = .progressive
                                 autoDeInterlace = false
@@ -407,6 +418,9 @@ open class KSOptions {
                             } else if tff - progressive > 100 {
                                 videoInterlacingType = .tff
                                 autoDeInterlace = false
+                            } else if undetermined - progressive - tff - bff > 100 {
+                                videoInterlacingType = .undetermined
+                                autoDeInterlace = false
                             }
                         }
                     }
@@ -414,6 +428,11 @@ open class KSOptions {
             }
         }
     }
+
+    /**
+            在创建解码器之前可以对KSOptions做一些处理。例如判断fieldOrder为tt或bb的话，那就自动加videofilters
+     */
+    open func process(assetTrack _: MediaPlayerTrack) {}
 
     #if os(tvOS)
     open func preferredDisplayCriteria(refreshRate _: Float, videoDynamicRange _: Int32) -> AVDisplayCriteria? {

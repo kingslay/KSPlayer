@@ -498,6 +498,7 @@ struct AVMediaPlayerTrack: MediaPlayerTrack {
     let yCbCrMatrix: String?
     var dovi: DOVIDecoderConfigurationRecord?
     var audioStreamBasicDescription: AudioStreamBasicDescription?
+    let fieldOrder: FFmpegFieldOrder = .unknown
     var isEnabled: Bool {
         get {
             track.isEnabled

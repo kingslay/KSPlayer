@@ -8,29 +8,30 @@ import AVFoundation
 import CoreMedia
 import Libavformat
 
-class AssetTrack: MediaPlayerTrack {
+public class FFmpegAssetTrack: MediaPlayerTrack {
     var startTime: TimeInterval
-    let trackID: Int32
-    let name: String
-    let language: String?
+    public let trackID: Int32
+    public let name: String
+    public let language: String?
     let stream: UnsafeMutablePointer<AVStream>
-    let mediaType: AVFoundation.AVMediaType
+    public let mediaType: AVFoundation.AVMediaType
     let timebase: Timebase
-    let nominalFrameRate: Float
-    let bitRate: Int64
-    let rotation: Double
-    let naturalSize: CGSize
-    let depth: Int32
-    let fullRangeVideo: Bool
-    let colorSpace: String?
-    let colorPrimaries: String?
-    let transferFunction: String?
-    let yCbCrMatrix: String?
-    let mediaSubType: CMFormatDescription.MediaSubType
+    public let nominalFrameRate: Float
+    public let bitRate: Int64
+    public let rotation: Double
+    public let naturalSize: CGSize
+    public let depth: Int32
+    public let fullRangeVideo: Bool
+    public let colorSpace: String?
+    public let colorPrimaries: String?
+    public let transferFunction: String?
+    public let yCbCrMatrix: String?
+    public let mediaSubType: CMFormatDescription.MediaSubType
     var subtitle: SyncPlayerItemTrack<SubtitleFrame>?
-    var dovi: DOVIDecoderConfigurationRecord?
-    let audioStreamBasicDescription: AudioStreamBasicDescription?
-    let description: String
+    public var dovi: DOVIDecoderConfigurationRecord?
+    public let audioStreamBasicDescription: AudioStreamBasicDescription?
+    public let fieldOrder: FFmpegFieldOrder
+    public let description: String
     init?(stream: UnsafeMutablePointer<AVStream>) {
         self.stream = stream
         trackID = stream.pointee.index
@@ -65,6 +66,7 @@ class AssetTrack: MediaPlayerTrack {
         description += ", \(bitRate)BPS"
         let sar = codecpar.sample_aspect_ratio.size
         naturalSize = CGSize(width: Int(codecpar.width), height: Int(CGFloat(codecpar.height) * sar.height / sar.width))
+        fieldOrder = FFmpegFieldOrder(rawValue: UInt8(codecpar.field_order.rawValue)) ?? .unknown
         if codecpar.codec_type == AVMEDIA_TYPE_AUDIO {
             mediaType = .audio
             let layout = codecpar.ch_layout
@@ -132,7 +134,7 @@ class AssetTrack: MediaPlayerTrack {
         self.description = description
     }
 
-    var isEnabled: Bool {
+    public var isEnabled: Bool {
         get {
             stream.pointee.discard == AVDISCARD_DEFAULT
         }
@@ -145,13 +147,13 @@ class AssetTrack: MediaPlayerTrack {
         [AV_CODEC_ID_DVD_SUBTITLE, AV_CODEC_ID_DVB_SUBTITLE, AV_CODEC_ID_DVB_TELETEXT, AV_CODEC_ID_HDMV_PGS_SUBTITLE].contains(stream.pointee.codecpar?.pointee.codec_id)
     }
 
-    func setIsEnabled(_ isEnabled: Bool) {
+    public func setIsEnabled(_ isEnabled: Bool) {
         stream.pointee.discard = isEnabled ? AVDISCARD_DEFAULT : AVDISCARD_ALL
     }
 }
 
 protocol PlayerItemTrackProtocol: CapacityProtocol, AnyObject {
-    init(assetTrack: AssetTrack, options: KSOptions)
+    init(assetTrack: FFmpegAssetTrack, options: KSOptions)
     // 是否无缝循环
     var isLoopModel: Bool { get set }
     var isEndOfFile: Bool { get set }
@@ -186,8 +188,9 @@ class SyncPlayerItemTrack<Frame: MEFrame>: PlayerItemTrackProtocol, CustomString
     let outputRenderQueue: CircularBuffer<Frame>
     var isLoopModel = false
 
-    required init(assetTrack: AssetTrack, options: KSOptions) {
+    required init(assetTrack: FFmpegAssetTrack, options: KSOptions) {
         self.options = options
+        options.process(assetTrack: assetTrack)
         mediaType = assetTrack.mediaType
         description = mediaType.rawValue
         fps = assetTrack.nominalFrameRate
@@ -319,7 +322,7 @@ final class AsyncPlayerItemTrack<Frame: MEFrame>: SyncPlayerItemTrack<Frame> {
         }
     }
 
-    required init(assetTrack: AssetTrack, options: KSOptions) {
+    required init(assetTrack: FFmpegAssetTrack, options: KSOptions) {
         super.init(assetTrack: assetTrack, options: options)
         operationQueue.name = "KSPlayer_" + description
         operationQueue.maxConcurrentOperationCount = 1
@@ -409,7 +412,7 @@ public extension Dictionary {
 }
 
 protocol DecodeProtocol {
-    init(assetTrack: AssetTrack, options: KSOptions, delegate: DecodeResultDelegate)
+    init(assetTrack: FFmpegAssetTrack, options: KSOptions, delegate: DecodeResultDelegate)
     func decode()
     func doDecode(packet: Packet) throws
     func doFlushCodec()
@@ -420,7 +423,7 @@ protocol DecodeResultDelegate: AnyObject {
     func decodeResult(frame: MEFrame?)
 }
 
-extension AssetTrack {
+extension FFmpegAssetTrack {
     func makeDecode(options: KSOptions, delegate: DecodeResultDelegate) -> DecodeProtocol {
         autoreleasepool {
             if mediaType == .subtitle {
