@@ -223,7 +223,9 @@ extension MEPlayerItem {
             state = .failed
         } else {
             state = .opened
-            state = .reading
+            if let startPlayTime = options.startPlayTime {
+                currentPlaybackTime = startPlayTime
+            }
             read()
         }
     }
@@ -372,6 +374,11 @@ extension MEPlayerItem {
     }
 
     private func readThread() {
+        if currentPlaybackTime > 0 {
+            state = .seeking
+        } else {
+            state = .reading
+        }
         allPlayerItemTracks.forEach { $0.decode() }
         while [MESourceState.paused, .seeking, .reading].contains(state) {
             if state == .paused {
@@ -562,7 +569,6 @@ extension MEPlayerItem: MediaPlayback {
             seekingCompletionHandler = completion
             condition.broadcast()
         } else if state == .finished {
-            state = .seeking
             currentPlaybackTime = time
             seekingCompletionHandler = completion
             read()
@@ -603,7 +609,7 @@ extension MEPlayerItem: CodecCapacityDelegate {
                 audioTrack?.isLoopModel = false
                 videoTrack?.isLoopModel = false
                 if state == .finished {
-                    state = .reading
+                    currentPlaybackTime = 0
                     read()
                 }
             }

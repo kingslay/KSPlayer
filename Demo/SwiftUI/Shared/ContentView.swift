@@ -75,6 +75,7 @@ struct ContentView: View {
                     let options = MEOptions()
                     options.videoFilters = "hflip,vflip"
                     options.hardwareDecode = false
+                    options.startPlayTime = 30
                     #if os(macOS)
                     let moviesDirectory = try? FileManager.default.url(for: .moviesDirectory, in: .userDomainMask, appropriateFor: nil, create: false)
                     options.outputURL = moviesDirectory?.appendingPathComponent("recording.mov")
@@ -87,6 +88,7 @@ struct ContentView: View {
                 }
                 if let url = URL(string: "http://clips.vorwaerts-gmbh.de/big_buck_bunny.mp4") {
                     let options = MEOptions()
+                    options.startPlayTime = 25
                     resources.append(KSPlayerResource(url: url, options: options, name: "mp4视频"))
                 }
                 if let url = URL(string: "http://devimages.apple.com/iphone/samples/bipbop/bipbopall.m3u8") {

@@ -245,6 +245,7 @@ open class KSOptions {
     public var autoSelectEmbedSubtitle = true
     public var asynchronousDecompression = false
     public var autoDeInterlace = false
+    public var startPlayTime: TimeInterval?
     @Published var preferredFramesPerSecond = Float(60)
     public internal(set) var formatName = ""
     public internal(set) var prepareTime = 0.0
