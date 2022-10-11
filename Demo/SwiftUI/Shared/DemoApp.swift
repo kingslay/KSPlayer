@@ -154,7 +154,7 @@ struct DemoApp: App {
 class MEOptions: KSOptions {
     override func process(assetTrack: MediaPlayerTrack) {
         if assetTrack.mediaType == .video {
-            if [FFmpegFieldOrder.bb, .bt, .tt, .tb].contains(assetTrack.fieldOrder){
+            if [FFmpegFieldOrder.bb, .bt, .tt, .tb].contains(assetTrack.fieldOrder) {
                 videoFilters = "yadif=mode=0:parity=auto:deint=0"
                 hardwareDecode = false
             }

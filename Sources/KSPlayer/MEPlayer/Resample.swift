@@ -36,7 +36,7 @@ class VideoSwresample: Swresample {
         } else {
             frame.corePixelBuffer = transfer(frame: avframe.pointee)
         }
-        if let pixelBuffer = frame.corePixelBuffer, let colorSpace = avframe.pointee.colorspace.colorSpace {
+        if let pixelBuffer = frame.corePixelBuffer, let colorSpace = KSOptions.colorSpace(ycbcrMatrix: pixelBuffer.colorPrimaries, transferFunction: pixelBuffer.transferFunction) {
             CVBufferSetAttachment(pixelBuffer, kCVImageBufferCGColorSpaceKey, colorSpace, .shouldPropagate)
         }
 
@@ -236,19 +236,6 @@ extension AVColorSpace {
             return kCVImageBufferYCbCrMatrix_ITU_R_2020
         default:
             return CVYCbCrMatrixGetStringForIntegerCodePoint(Int32(rawValue))?.takeUnretainedValue()
-        }
-    }
-
-    var colorSpace: CGColorSpace? {
-        switch self {
-        case AVCOL_SPC_BT709:
-            return CGColorSpace(name: CGColorSpace.itur_709)
-        case AVCOL_SPC_BT470BG, AVCOL_SPC_SMPTE170M:
-            return CGColorSpace(name: CGColorSpace.sRGB)
-        case AVCOL_SPC_BT2020_CL, AVCOL_SPC_BT2020_NCL:
-            return CGColorSpace(name: CGColorSpace.itur_2020)
-        default:
-            return nil
         }
     }
 }

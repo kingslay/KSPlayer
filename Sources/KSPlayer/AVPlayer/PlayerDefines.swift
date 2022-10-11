@@ -97,7 +97,6 @@ public protocol MediaPlayerTrack: CustomStringConvertible {
     var isEnabled: Bool { get set }
     var depth: Int32 { get }
     var fullRangeVideo: Bool { get }
-    var colorSpace: String? { get }
     var colorPrimaries: String? { get }
     var transferFunction: String? { get }
     var yCbCrMatrix: String? { get }
@@ -125,7 +124,7 @@ public enum FFmpegFieldOrder: UInt8 {
 //    }
 // }
 
-extension MediaPlayerTrack {
+public extension MediaPlayerTrack {
     var codecType: FourCharCode {
         mediaSubType.rawValue
     }
@@ -140,6 +139,10 @@ extension MediaPlayerTrack {
         } else {
             return .SDR
         }
+    }
+
+    var colorSpace: CGColorSpace? {
+        KSOptions.colorSpace(ycbcrMatrix: yCbCrMatrix as CFString?, transferFunction: transferFunction as CFString?)
     }
 }
 
@@ -444,6 +447,34 @@ open class KSOptions {
         nil
     }
     #endif
+
+    static func colorSpace(ycbcrMatrix: CFString?, transferFunction: CFString?) -> CGColorSpace? {
+        switch ycbcrMatrix {
+        case kCVImageBufferYCbCrMatrix_ITU_R_709_2:
+            return CGColorSpace(name: CGColorSpace.itur_709)
+        case kCVImageBufferYCbCrMatrix_ITU_R_601_4:
+            return CGColorSpace(name: CGColorSpace.sRGB)
+        case kCVImageBufferYCbCrMatrix_ITU_R_2020:
+            if transferFunction == kCVImageBufferTransferFunction_SMPTE_ST_2084_PQ {
+                if #available(macOS 11.0, iOS 14.0, tvOS 14.0, *) {
+                    return CGColorSpace(name: CGColorSpace.itur_2100_PQ)
+                } else {
+                    return CGColorSpace(name: CGColorSpace.itur_2020)
+                }
+            } else if transferFunction == kCVImageBufferTransferFunction_ITU_R_2100_HLG {
+                if #available(macOS 11.0, iOS 14.0, tvOS 14.0, *) {
+                    return CGColorSpace(name: CGColorSpace.itur_2100_HLG)
+                } else {
+                    return CGColorSpace(name: CGColorSpace.itur_2020)
+                }
+            } else {
+                return CGColorSpace(name: CGColorSpace.itur_2020)
+            }
+
+        default:
+            return nil
+        }
+    }
 }
 
 // 缓冲情况

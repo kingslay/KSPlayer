@@ -22,7 +22,6 @@ public class FFmpegAssetTrack: MediaPlayerTrack {
     public let naturalSize: CGSize
     public let depth: Int32
     public let fullRangeVideo: Bool
-    public let colorSpace: String?
     public let colorPrimaries: String?
     public let transferFunction: String?
     public let yCbCrMatrix: String?
@@ -46,7 +45,6 @@ public class FFmpegAssetTrack: MediaPlayerTrack {
         let format = AVPixelFormat(rawValue: codecpar.format)
         depth = format.bitDepth() * Int32(format.planeCount())
         fullRangeVideo = codecpar.color_range == AVCOL_RANGE_JPEG
-        colorSpace = codecpar.color_space.colorSpace as? String
         colorPrimaries = codecpar.color_primaries.colorPrimaries as String?
         transferFunction = codecpar.color_trc.transferFunction as String?
         yCbCrMatrix = codecpar.color_space.ycbcrMatrix as String?

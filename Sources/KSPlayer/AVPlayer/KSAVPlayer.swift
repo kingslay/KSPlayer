@@ -492,7 +492,6 @@ struct AVMediaPlayerTrack: MediaPlayerTrack {
     let mediaType: AVMediaType
     let depth: Int32
     let fullRangeVideo: Bool
-    let colorSpace: String?
     let colorPrimaries: String?
     let transferFunction: String?
     let yCbCrMatrix: String?
@@ -524,7 +523,6 @@ struct AVMediaPlayerTrack: MediaPlayerTrack {
             mediaSubType = desc.mediaSubType
             audioStreamBasicDescription = desc.audioStreamBasicDescription
             let dictionary = CMFormatDescriptionGetExtensions(desc) as NSDictionary?
-            colorSpace = dictionary?[kCVImageBufferCGColorSpaceKey] as? String
             colorPrimaries = dictionary?[kCVImageBufferColorPrimariesKey] as? String
             transferFunction = dictionary?[kCVImageBufferTransferFunctionKey] as? String
             yCbCrMatrix = dictionary?[kCVImageBufferYCbCrMatrixKey] as? String
@@ -536,7 +534,6 @@ struct AVMediaPlayerTrack: MediaPlayerTrack {
             colorPrimaries = nil
             transferFunction = nil
             yCbCrMatrix = nil
-            colorSpace = nil
             mediaSubType = CMFormatDescription.MediaSubType(string: "")
             fullRangeVideo = false
             description = ""
