@@ -584,13 +584,16 @@ extension CGImage {
         let bitsPerComponent = 8
         // RGBA(的bytes) * bitsPerComponent *width
         let bytesPerRow = 4 * 8 * bitsPerComponent * width
-        let context = CGContext(data: nil, width: width, height: height, bitsPerComponent: bitsPerComponent, bytesPerRow: bytesPerRow, space: CGColorSpaceCreateDeviceRGB(), bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue)
-        guard let context else {
-            return nil
+        return autoreleasepool {
+            let context = CGContext(data: nil, width: width, height: height, bitsPerComponent: bitsPerComponent, bytesPerRow: bytesPerRow, space: CGColorSpaceCreateDeviceRGB(), bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue)
+            guard let context else {
+                return nil
+            }
+            for (rect, cgImage) in images {
+                context.draw(cgImage, in: CGRect(x: rect.origin.x, y: CGFloat(height) - rect.maxY, width: rect.width, height: rect.height))
+            }
+            let cgImage = context.makeImage()
+            return cgImage
         }
-        for (rect, cgImage) in images {
-            context.draw(cgImage, in: CGRect(x: rect.origin.x, y: CGFloat(height) - rect.maxY, width: rect.width, height: rect.height))
-        }
-        return context.makeImage()
     }
 }

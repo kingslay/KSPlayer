@@ -97,56 +97,58 @@ class VideoSwresample: Swresample {
         guard let pool else {
             return nil
         }
-        var pbuf: CVPixelBuffer?
-        let ret = CVPixelBufferPoolCreatePixelBuffer(kCFAllocatorDefault, pool, &pbuf)
-        guard let pbuf, ret == kCVReturnSuccess else {
-            return nil
-        }
-        CVPixelBufferLockBaseAddress(pbuf, CVPixelBufferLockFlags(rawValue: 0))
-        let bufferPlaneCount = pbuf.planeCount
-        if let imgConvertCtx {
-            let bytesPerRow = (0 ..< bufferPlaneCount).map { i in
-                Int32(CVPixelBufferGetBytesPerRowOfPlane(pbuf, i))
+        return autoreleasepool {
+            var pbuf: CVPixelBuffer?
+            let ret = CVPixelBufferPoolCreatePixelBuffer(kCFAllocatorDefault, pool, &pbuf)
+            guard let pbuf, ret == kCVReturnSuccess else {
+                return nil
             }
-            let contents = (0 ..< bufferPlaneCount).map { i in
-                pbuf.baseAddressOfPlane(at: i)?.assumingMemoryBound(to: UInt8.self)
-            }
-            _ = sws_scale(imgConvertCtx, data.map { UnsafePointer($0) }, linesize, 0, height, contents, bytesPerRow)
-        } else {
-            let planeCount = format.planeCount()
-            for i in 0 ..< bufferPlaneCount {
-                let height = pbuf.heightOfPlane(at: i)
-                let size = Int(linesize[i])
-                let bytesPerRow = CVPixelBufferGetBytesPerRowOfPlane(pbuf, i)
-                var contents = pbuf.baseAddressOfPlane(at: i)
-                var source = data[i]!
-                if bufferPlaneCount < planeCount, i + 2 == planeCount {
-                    var sourceU = data[i]!
-                    var sourceV = data[i + 1]!
-                    for _ in 0 ..< height {
-                        var j = 0
-                        while j < size {
-                            contents?.advanced(by: 2 * j).copyMemory(from: sourceU.advanced(by: j), byteCount: 1)
-                            contents?.advanced(by: 2 * j + 1).copyMemory(from: sourceV.advanced(by: j), byteCount: 1)
-                            j += 1
+            CVPixelBufferLockBaseAddress(pbuf, CVPixelBufferLockFlags(rawValue: 0))
+            let bufferPlaneCount = pbuf.planeCount
+            if let imgConvertCtx {
+                let bytesPerRow = (0 ..< bufferPlaneCount).map { i in
+                    Int32(CVPixelBufferGetBytesPerRowOfPlane(pbuf, i))
+                }
+                let contents = (0 ..< bufferPlaneCount).map { i in
+                    pbuf.baseAddressOfPlane(at: i)?.assumingMemoryBound(to: UInt8.self)
+                }
+                _ = sws_scale(imgConvertCtx, data.map { UnsafePointer($0) }, linesize, 0, height, contents, bytesPerRow)
+            } else {
+                let planeCount = format.planeCount()
+                for i in 0 ..< bufferPlaneCount {
+                    let height = pbuf.heightOfPlane(at: i)
+                    let size = Int(linesize[i])
+                    let bytesPerRow = CVPixelBufferGetBytesPerRowOfPlane(pbuf, i)
+                    var contents = pbuf.baseAddressOfPlane(at: i)
+                    var source = data[i]!
+                    if bufferPlaneCount < planeCount, i + 2 == planeCount {
+                        var sourceU = data[i]!
+                        var sourceV = data[i + 1]!
+                        for _ in 0 ..< height {
+                            var j = 0
+                            while j < size {
+                                contents?.advanced(by: 2 * j).copyMemory(from: sourceU.advanced(by: j), byteCount: 1)
+                                contents?.advanced(by: 2 * j + 1).copyMemory(from: sourceV.advanced(by: j), byteCount: 1)
+                                j += 1
+                            }
+                            contents = contents?.advanced(by: bytesPerRow)
+                            sourceU = sourceU.advanced(by: size)
+                            sourceV = sourceV.advanced(by: size)
                         }
-                        contents = contents?.advanced(by: bytesPerRow)
-                        sourceU = sourceU.advanced(by: size)
-                        sourceV = sourceV.advanced(by: size)
-                    }
-                } else if bytesPerRow == size {
-                    contents?.copyMemory(from: source, byteCount: height * size)
-                } else {
-                    for _ in 0 ..< height {
-                        contents?.copyMemory(from: source, byteCount: size)
-                        contents = contents?.advanced(by: bytesPerRow)
-                        source = source.advanced(by: size)
+                    } else if bytesPerRow == size {
+                        contents?.copyMemory(from: source, byteCount: height * size)
+                    } else {
+                        for _ in 0 ..< height {
+                            contents?.copyMemory(from: source, byteCount: size)
+                            contents = contents?.advanced(by: bytesPerRow)
+                            source = source.advanced(by: size)
+                        }
                     }
                 }
             }
+            CVPixelBufferUnlockBaseAddress(pbuf, CVPixelBufferLockFlags(rawValue: 0))
+            return pbuf
         }
-        CVPixelBufferUnlockBaseAddress(pbuf, CVPixelBufferLockFlags(rawValue: 0))
-        return pbuf
     }
 
     func shutdown() {

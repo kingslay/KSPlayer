@@ -5,12 +5,14 @@
 //  Created by wangjinbian on 2019/12/31.
 //
 
+import AVFoundation
 import CoreImage
 import CoreVideo
 import Foundation
 import Metal
 import simd
 import VideoToolbox
+
 #if canImport(UIKit)
 import UIKit
 #endif
@@ -119,14 +121,18 @@ extension CGImage {
     }
 
     func image(quality: CGFloat) -> UIImage? {
-        guard let mutableData = CFDataCreateMutable(nil, 0),
-              let destination = CGImageDestinationCreateWithData(mutableData, "public.heic" as CFString, 1, nil)
-        else {
-            return nil
+        autoreleasepool {
+            guard let mutableData = CFDataCreateMutable(nil, 0),
+                  let destination = CGImageDestinationCreateWithData(mutableData, AVFileType.heic.rawValue as CFString, 1, nil)
+            else {
+                return nil
+            }
+            CGImageDestinationAddImage(destination, self, [kCGImageDestinationLossyCompressionQuality: quality] as CFDictionary)
+            guard CGImageDestinationFinalize(destination) else {
+                return nil
+            }
+            return UIImage(data: mutableData as Data)
         }
-        CGImageDestinationAddImage(destination, self, [kCGImageDestinationLossyCompressionQuality: quality] as CFDictionary)
-        guard CGImageDestinationFinalize(destination) else { return nil }
-        return UIImage(data: mutableData as Data)
     }
 }
 

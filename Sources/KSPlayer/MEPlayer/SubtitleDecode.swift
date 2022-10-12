@@ -69,6 +69,9 @@ class SubtitleDecode: DecodeProtocol {
             preSubtitleFrame = frame
             delegate?.decodeResult(frame: frame)
         }
+        if gotsubtitle > 0 {
+            avsubtitle_free(&subtitle)
+        }
     }
 
     func doFlushCodec() {
