@@ -71,34 +71,7 @@ struct ContentView: View {
                     return
                 }
                 resources.removeAll()
-                if let path = Bundle.main.path(forResource: "h264", ofType: "mp4") {
-                    let options = MEOptions()
-                    options.videoFilters = "hflip,vflip"
-                    options.hardwareDecode = false
-                    options.startPlayTime = 30
-                    #if os(macOS)
-                    let moviesDirectory = try? FileManager.default.url(for: .moviesDirectory, in: .userDomainMask, appropriateFor: nil, create: false)
-                    options.outputURL = moviesDirectory?.appendingPathComponent("recording.mov")
-                    #endif
-                    resources.append(KSPlayerResource(url: URL(fileURLWithPath: path), options: options, name: "本地视频"))
-                }
-                if let path = Bundle.main.path(forResource: "subrip", ofType: "mkv") {
-                    let options = MEOptions()
-                    resources.append(KSPlayerResource(url: URL(fileURLWithPath: path), options: options, name: "文字视频"))
-                }
-                if let url = URL(string: "http://clips.vorwaerts-gmbh.de/big_buck_bunny.mp4") {
-                    let options = MEOptions()
-                    options.startPlayTime = 25
-                    resources.append(KSPlayerResource(url: url, options: options, name: "mp4视频"))
-                }
-                if let url = URL(string: "http://devimages.apple.com/iphone/samples/bipbop/bipbopall.m3u8") {
-                    let options = MEOptions()
-                    #if os(macOS)
-                    let moviesDirectory = try? FileManager.default.url(for: .moviesDirectory, in: .userDomainMask, appropriateFor: nil, create: false)
-                    options.outputURL = moviesDirectory?.appendingPathComponent("recording.mp4")
-                    #endif
-                    resources.append(KSPlayerResource(url: url, options: options, name: "m3u8视频"))
-                }
+                resources.append(contentsOf: objects)
                 resources.append(contentsOf: parsem3u8(string: string))
             } catch {}
         }

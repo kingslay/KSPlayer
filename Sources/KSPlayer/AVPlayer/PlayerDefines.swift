@@ -9,6 +9,8 @@ import AVFoundation
 import AVKit
 import CoreMedia
 import CoreServices
+import Libavformat
+
 #if canImport(UIKit)
 import UIKit
 public extension UIScreen {
@@ -246,7 +248,7 @@ open class KSOptions {
     public var maxAnalyzeDuration: Int64?
     public var lowres = UInt8(0)
     public var autoSelectEmbedSubtitle = true
-    public var asynchronousDecompression = false
+    public var asynchronousDecompression = true
     public var autoDeInterlace = false
     public var startPlayTime: TimeInterval?
     @Published var preferredFramesPerSecond = Float(60)
@@ -259,6 +261,7 @@ open class KSOptions {
     public internal(set) var readVideoTime = 0.0
     public internal(set) var decodeAudioTime = 0.0
     public internal(set) var decodeVideoTime = 0.0
+    var formatCtx: UnsafeMutablePointer<AVFormatContext>?
     public init() {
         formatContextOptions["auto_convert"] = 0
         formatContextOptions["fps_probe_size"] = 3

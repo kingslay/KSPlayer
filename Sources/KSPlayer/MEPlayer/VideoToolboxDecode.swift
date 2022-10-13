@@ -5,25 +5,25 @@
 //  Created by kintan on 2018/3/10.
 //
 
+import FFmpeg
 import Libavformat
 import VideoToolbox
-
 class VideoToolboxDecode: DecodeProtocol {
     private weak var delegate: DecodeResultDelegate?
     private var session: DecompressionSession?
-    private let codecpar: AVCodecParameters
+    private let codecparPtr: UnsafeMutablePointer<AVCodecParameters>
     private let timebase: Timebase
     private let options: KSOptions
     private var startTime = Int64(0)
     private var lastPosition = Int64(0)
     private var error: NSError?
     required convenience init(assetTrack: FFmpegAssetTrack, options: KSOptions, delegate: DecodeResultDelegate) {
-        self.init(assetTrack: assetTrack, options: options, session: DecompressionSession(codecpar: assetTrack.stream.pointee.codecpar.pointee, options: options), delegate: delegate)
+        self.init(assetTrack: assetTrack, options: options, session: DecompressionSession(codecparPtr: assetTrack.stream.pointee.codecpar, options: options), delegate: delegate)
     }
 
     init(assetTrack: FFmpegAssetTrack, options: KSOptions, session: DecompressionSession?, delegate: DecodeResultDelegate) {
         timebase = assetTrack.timebase
-        codecpar = assetTrack.stream.pointee.codecpar.pointee
+        codecparPtr = assetTrack.stream.pointee.codecpar
         self.options = options
         self.session = session
         self.delegate = delegate
@@ -85,7 +85,7 @@ class VideoToolboxDecode: DecodeProtocol {
     }
 
     func doFlushCodec() {
-        session = DecompressionSession(codecpar: codecpar, options: options)
+        session = DecompressionSession(codecparPtr: codecparPtr, options: options)
         lastPosition = 0
         startTime = 0
     }
@@ -104,29 +104,63 @@ class DecompressionSession {
     fileprivate let isConvertNALSize: Bool
     fileprivate let formatDescription: CMFormatDescription
     fileprivate let decompressionSession: VTDecompressionSession
-    init?(codecpar: AVCodecParameters, options _: KSOptions) {
+    init?(codecparPtr: UnsafeMutablePointer<AVCodecParameters>, options: KSOptions) {
+        let codecpar = codecparPtr.pointee
         let format = AVPixelFormat(codecpar.format)
-        guard let pixelFormatType = format.osType(), let extradata = codecpar.extradata else {
+        guard let pixelFormatType = format.osType() else {
             return nil
         }
-        let extradataSize = codecpar.extradata_size
-        if extradataSize >= 5, extradata[4] == 0xFE {
-            extradata[4] = 0xFF
-            isConvertNALSize = true
+        let videoCodecType = codecpar.codec_id.mediaSubType.rawValue
+        #if os(macOS)
+        VTRegisterProfessionalVideoWorkflowVideoDecoders()
+        if #available(macOS 11.0, *) {
+            VTRegisterSupplementalVideoDecoderIfAvailable(videoCodecType)
+        }
+        #endif
+        let isFullRangeVideo = codecpar.color_range == AVCOL_RANGE_JPEG
+        var extradataSize = Int32(0)
+        var extradata = codecpar.extradata
+        let atomsData: Data?
+        if let extradata {
+            extradataSize = codecpar.extradata_size
+            if extradataSize >= 5, extradata[4] == 0xFE {
+                extradata[4] = 0xFF
+                isConvertNALSize = true
+            } else {
+                isConvertNALSize = false
+            }
+            atomsData = Data(bytes: extradata, count: Int(extradataSize))
         } else {
+            if videoCodecType == kCMVideoCodecType_VP9 {
+                // ff_videotoolbox_vpcc_extradata_create
+                var ioContext: UnsafeMutablePointer<AVIOContext>?
+                guard avio_open_dyn_buf(&ioContext) == 0 else {
+                    return nil
+                }
+                ff_isom_write_vpcc(options.formatCtx, ioContext, codecparPtr)
+                extradataSize = avio_close_dyn_buf(ioContext, &extradata)
+                guard let extradata else {
+                    return nil
+                }
+                var data = Data()
+                var array: [UInt8] = [1, 0, 0, 0]
+                data.append(&array, count: 4)
+                data.append(extradata, count: Int(extradataSize))
+                atomsData = data
+            } else {
+                atomsData = nil
+            }
             isConvertNALSize = false
         }
-        let isFullRangeVideo = codecpar.color_range == AVCOL_RANGE_JPEG
-        let videoCodecType = codecpar.codec_id.mediaSubType.rawValue
         let dic: NSMutableDictionary = [
             kCVImageBufferChromaLocationBottomFieldKey: kCVImageBufferChromaLocation_Left,
             kCVImageBufferChromaLocationTopFieldKey: kCVImageBufferChromaLocation_Left,
             kCMFormatDescriptionExtension_FullRangeVideo: isFullRangeVideo,
             videoCodecType == kCMVideoCodecType_HEVC ? "EnableHardwareAcceleratedVideoDecoder" : "RequireHardwareAcceleratedVideoDecoder": true,
-            kCMFormatDescriptionExtension_SampleDescriptionExtensionAtoms: [
-                videoCodecType.avc: NSData(bytes: extradata, length: Int(extradataSize)),
-            ],
         ]
+        if let atomsData {
+            dic[kCMFormatDescriptionExtension_SampleDescriptionExtensionAtoms] = [videoCodecType.avc: atomsData]
+        }
         dic[kCVImageBufferPixelAspectRatioKey] = codecpar.sample_aspect_ratio.size.aspectRatio
         dic[kCVImageBufferColorPrimariesKey] = codecpar.color_primaries.colorPrimaries
         dic[kCVImageBufferTransferFunctionKey] = codecpar.color_trc.transferFunction
@@ -143,10 +177,13 @@ class DecompressionSession {
         let attributes: NSMutableDictionary = [
             kCVPixelBufferPixelFormatTypeKey: pixelFormatType,
             kCVPixelBufferMetalCompatibilityKey: true,
+//            kCVPixelBufferWidthKey: codecpar.width,
+//            kCVPixelBufferHeightKey: codecpar.height,
+//            kCVPixelBufferIOSurfacePropertiesKey: NSDictionary(),
         ]
         var session: VTDecompressionSession?
         // swiftlint:disable line_length
-        status = VTDecompressionSessionCreate(allocator: kCFAllocatorDefault, formatDescription: formatDescription, decoderSpecification: nil, imageBufferAttributes: attributes, outputCallback: nil, decompressionSessionOut: &session)
+        status = VTDecompressionSessionCreate(allocator: kCFAllocatorDefault, formatDescription: formatDescription, decoderSpecification: dic, imageBufferAttributes: attributes, outputCallback: nil, decompressionSessionOut: &session)
         // swiftlint:enable line_length
         guard status == noErr, let decompressionSession = session else {
             return nil

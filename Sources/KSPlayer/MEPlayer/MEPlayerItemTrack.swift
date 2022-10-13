@@ -428,7 +428,7 @@ extension FFmpegAssetTrack {
                 return SubtitleDecode(assetTrack: self, options: options, delegate: delegate)
             } else {
                 if mediaType == .video, options.asynchronousDecompression, options.hardwareDecode,
-                   let session = DecompressionSession(codecpar: stream.pointee.codecpar.pointee, options: options)
+                   let session = DecompressionSession(codecparPtr: stream.pointee.codecpar, options: options)
                 {
                     return VideoToolboxDecode(assetTrack: self, options: options, session: session, delegate: delegate)
                 } else {

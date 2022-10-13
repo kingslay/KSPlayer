@@ -56,6 +56,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UISplitViewControllerDele
     #endif
 }
 
+class MEOptions: KSOptions {}
+
 var objects: [KSPlayerResource] = {
     var objects = [KSPlayerResource]()
     if let path = Bundle.main.path(forResource: "h264", ofType: "mp4") {
