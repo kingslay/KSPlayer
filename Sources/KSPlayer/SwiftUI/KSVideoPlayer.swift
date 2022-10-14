@@ -75,7 +75,7 @@ public struct KSVideoPlayerView: View {
             .onTapGesture {
                 isMaskShow.toggle()
                 #if os(macOS)
-                isMaskShow ? NSCursor.unhide() : NSCursor.hide()
+                isMaskShow ? NSCursor.unhide() : NSCursor.setHiddenUntilMouseMoves(true)
                 #endif
             }
             #endif
