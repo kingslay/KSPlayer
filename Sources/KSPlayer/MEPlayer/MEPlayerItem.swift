@@ -6,6 +6,7 @@
 //
 
 import AVFoundation
+import FFmpeg
 import Libavfilter
 import Libavformat
 import VideoToolbox
@@ -102,10 +103,17 @@ final class MEPlayerItem {
                 log = NSString(format: log, arguments: arguments) as String
             }
             if let ptr {
-                let context = ptr.assumingMemoryBound(to: UnsafePointer<AVClass>.self).pointee
-                if context == avfilter_get_class() {
-                    let filterContext = ptr.assumingMemoryBound(to: AVFilterContext.self).pointee
-                    if let opaque = filterContext.graph?.pointee.opaque {
+                let avclass = ptr.assumingMemoryBound(to: UnsafePointer<AVClass>.self).pointee
+                if avclass == &ffurl_context_class {
+                    let context = ptr.assumingMemoryBound(to: URLContext.self).pointee
+                    if let opaque = context.interrupt_callback.opaque {
+                        let formatContext = Unmanaged<MEPlayerItem>.fromOpaque(opaque).takeUnretainedValue()
+                        formatContext.options.io(log: log)
+                    }
+
+                } else if avclass == avfilter_get_class() {
+                    let context = ptr.assumingMemoryBound(to: AVFilterContext.self).pointee
+                    if let opaque = context.graph?.pointee.opaque {
                         let options = Unmanaged<KSOptions>.fromOpaque(opaque).takeUnretainedValue()
                         options.filter(log: log)
                     }
@@ -196,9 +204,9 @@ extension MEPlayerItem {
             avformat_close_input(&self.formatCtx)
             return
         }
+        options.openTime = CACurrentMediaTime()
         formatCtx.pointee.flags |= AVFMT_FLAG_GENPTS
         av_format_inject_global_side_data(formatCtx)
-        options.openTime = CACurrentMediaTime()
         if let probesize = options.probesize {
             formatCtx.pointee.probesize = probesize
         }

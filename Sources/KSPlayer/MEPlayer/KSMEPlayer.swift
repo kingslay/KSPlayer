@@ -336,6 +336,9 @@ extension KSMEPlayer: MediaPlayerProtocol {
         loopCount = 0
         playerItem.shutdown()
         options.prepareTime = 0
+        options.dnsStartTime = 0
+        options.tcpStartTime = 0
+        options.tcpConnectedTime = 0
         options.openTime = 0
         options.findTime = 0
         options.readyTime = 0

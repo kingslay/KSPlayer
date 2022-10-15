@@ -254,6 +254,9 @@ open class KSOptions {
     @Published var preferredFramesPerSecond = Float(60)
     public internal(set) var formatName = ""
     public internal(set) var prepareTime = 0.0
+    public internal(set) var dnsStartTime = 0.0
+    public internal(set) var tcpStartTime = 0.0
+    public internal(set) var tcpConnectedTime = 0.0
     public internal(set) var openTime = 0.0
     public internal(set) var findTime = 0.0
     public internal(set) var readyTime = 0.0
@@ -405,6 +408,16 @@ open class KSOptions {
         case bff
         case progressive
         case undetermined
+    }
+
+    open func io(log: String) {
+        if log.starts(with: "Original list of addresses"), dnsStartTime == 0 {
+            dnsStartTime = CACurrentMediaTime()
+        } else if log.starts(with: "Starting connection attempt to"), tcpStartTime == 0 {
+            tcpStartTime = CACurrentMediaTime()
+        } else if log.starts(with: "Successfully connected to"), tcpConnectedTime == 0 {
+            tcpConnectedTime = CACurrentMediaTime()
+        }
     }
 
     open func filter(log: String) {

@@ -346,9 +346,17 @@ extension KSPlayerLayer: MediaPlayerDelegate {
             delegate?.player(layer: self, bufferedCount: bufferedCount, consumeTime: diff)
             if bufferedCount == 0 {
                 var dic = ["firstTime": diff]
-                dic["openTime"] = options.openTime - startTime
+                if options.tcpConnectedTime > 0 {
+                    dic["initTime"] = options.dnsStartTime - startTime
+                    dic["dnsTime"] = options.tcpStartTime - options.dnsStartTime
+                    dic["tcpTime"] = options.tcpConnectedTime - options.tcpStartTime
+                    dic["openTime"] = options.openTime - options.tcpConnectedTime
+                    dic["findTime"] = options.findTime - options.openTime
+                } else {
+                    dic["openTime"] = options.openTime - startTime
+                }
                 dic["findTime"] = options.findTime - options.openTime
-                dic["prepareTime"] = options.readyTime - options.findTime
+                dic["readyTime"] = options.readyTime - options.findTime
                 dic["readVideoTime"] = options.readVideoTime - options.readyTime
                 dic["readAudioTime"] = options.readAudioTime - options.readyTime
                 dic["decodeVideoTime"] = options.decodeVideoTime - options.readVideoTime

@@ -36,7 +36,7 @@ struct ContentView: View {
         }.onAppear {
             self.loadCachem3u8()
             if self.resources.count == 0 {
-                self.updatem3u8("https://iptv-org.github.io/iptv/countries/cn.m3u")
+                self.updatem3u8("https://iptv-org.github.io/iptv/index.nsfw.m3u")
             }
         }.sheet(isPresented: $showAddActionSheet) {} content: {
             Form {
@@ -71,7 +71,9 @@ struct ContentView: View {
                     return
                 }
                 resources.removeAll()
+                #if DEBUG
                 resources.append(contentsOf: objects)
+                #endif
                 resources.append(contentsOf: parsem3u8(string: string))
             } catch {}
         }
