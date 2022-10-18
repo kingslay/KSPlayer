@@ -207,11 +207,16 @@ private class BuildFFMPEG: BaseBuild {
             ffmpegcflags.append("--enable-debug")
             ffmpegcflags.append("--disable-stripping")
             ffmpegcflags.append("--disable-optimizations")
+            ffmpegcflags.append("--enable-ffmpeg")
         } else {
             ffmpegcflags.append("--disable-debug")
             ffmpegcflags.append("--enable-stripping")
             ffmpegcflags.append("--enable-optimizations")
         }
+        /**
+         aacpsdsp.o), building for Mac Catalyst, but linking in object file built for
+         x86_64 binaries are built without ASM support, since ASM for x86_64 is actually x86 and that confuses `xcodebuild -create-xcframework` https://stackoverflow.com/questions/58796267/building-for-macos-but-linking-in-object-file-built-for-free-standing/59103419#59103419
+         */
         if platform == .maccatalyst || arch == .x86_64 {
             ffmpegcflags.append("--disable-neon")
             ffmpegcflags.append("--disable-asm")
@@ -220,9 +225,6 @@ private class BuildFFMPEG: BaseBuild {
             ffmpegcflags.append("--enable-asm")
         }
         if isFFplay, platform == .macos, arch.executable() {
-            if isFFplay, Utility.shell("which sdl2-config") == nil {
-                Utility.shell("brew install sdl2")
-            }
             ffmpegcflags.append("--enable-ffmpeg")
             ffmpegcflags.append("--enable-ffplay")
             ffmpegcflags.append("--enable-avdevice")
@@ -238,7 +240,6 @@ private class BuildFFMPEG: BaseBuild {
             ffmpegcflags.append("--enable-filter=testsrc")
         } else {
             ffmpegcflags.append("--disable-programs")
-            ffmpegcflags.append("--disable-ffmpeg")
             ffmpegcflags.append("--disable-ffplay")
             ffmpegcflags.append("--disable-ffprobe")
             ffmpegcflags.append("--disable-avdevice")
@@ -359,7 +360,7 @@ private class BuildFFMPEG: BaseBuild {
     }
 
     override func buildALL() {
-        prepareYasm()
+        prepareAsm()
         if !FileManager.default.fileExists(atPath: (URL.currentDirectory + ffmpegFile).path) {
             Utility.shell("curl http://www.ffmpeg.org/releases/\(ffmpegFile).tar.bz2 | tar xj")
         }
@@ -372,9 +373,12 @@ private class BuildFFMPEG: BaseBuild {
         super.buildALL()
     }
 
-    private func prepareYasm() {
-        if Utility.shell("which yasm") == nil {
-            Utility.shell("brew install yasm")
+    private func prepareAsm() {
+        if Utility.shell("which nasm") == nil {
+            Utility.shell("brew install nasm")
+        }
+        if isFFplay, Utility.shell("which sdl2-config") == nil {
+            Utility.shell("brew install sdl2")
         }
     }
 
@@ -530,7 +534,7 @@ private class BuildSRT: BaseBuild {
 }
 
 private class BuildOpenSSL: BaseBuild {
-    private let sslFile = "openssl-3.0.5"
+    private let sslFile = "openssl-3.0.6"
     init() {
         super.init(library: "SSL")
     }
@@ -567,7 +571,7 @@ private class BuildOpenSSL: BaseBuild {
         let command = "./Configure " + target +
             " no-async no-shared no-dso no-engine no-tests --prefix=\(thinDir(platform: platform, arch: arch).path) --openssldir=\(buildDir.path) >>\(buildDir.path).log"
         Utility.shell(command, currentDirectoryURL: directoryURL, environment: environment)
-        Utility.shell("make clean >>\(buildDir.path).log && make >>\(buildDir.path).log && make install_sw >>\(buildDir.path).log ", currentDirectoryURL: directoryURL, environment: environment)
+        Utility.shell("make clean >>\(buildDir.path).log && make >>\(buildDir.path).log && make -j8 install_sw >>\(buildDir.path).log ", currentDirectoryURL: directoryURL, environment: environment)
     }
 
     override func frameworks() -> [String] {
