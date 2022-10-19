@@ -105,7 +105,7 @@ public class FFmpegAssetTrack: MediaPlayerTrack {
             startTime = 0
         }
         rotation = stream.rotation
-        let frameRate = av_guess_frame_rate(nil, stream, nil)
+        let frameRate = stream.pointee.avg_frame_rate
         if stream.pointee.duration > 0, stream.pointee.nb_frames > 0, stream.pointee.nb_frames != stream.pointee.duration {
             nominalFrameRate = Float(stream.pointee.nb_frames) * Float(timebase.den) / Float(stream.pointee.duration) * Float(timebase.num)
         } else if frameRate.den > 0, frameRate.num > 0 {

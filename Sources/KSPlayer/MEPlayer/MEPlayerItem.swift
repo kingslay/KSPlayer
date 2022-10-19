@@ -450,7 +450,7 @@ extension MEPlayerItem {
                     }
                 }
             }
-            if formatCtx?.pointee.pb.pointee.eof_reached == 1 {
+            if formatCtx?.pointee.pb?.pointee.eof_reached == 1 {
                 // todo need reconnect
             }
             if packet.corePacket.pointee.size <= 0 {
@@ -475,7 +475,7 @@ extension MEPlayerItem {
                 }
             }
         } else {
-            if readResult == AVError.eof.code || formatCtx?.pointee.pb.pointee.eof_reached == 1 {
+            if readResult == AVError.eof.code || formatCtx?.pointee.pb?.pointee.eof_reached == 1 {
                 if options.isLoopPlay, allPlayerItemTracks.allSatisfy({ !$0.isLoopModel }) {
                     allPlayerItemTracks.forEach { $0.isLoopModel = true }
                     _ = av_seek_frame(formatCtx, -1, 0, AVSEEK_FLAG_BACKWARD)
