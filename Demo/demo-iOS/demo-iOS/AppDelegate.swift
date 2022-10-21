@@ -56,7 +56,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UISplitViewControllerDele
     #endif
 }
 
-class MEOptions: KSOptions {}
+class MEOptions: KSOptions {
+    #if os(tvOS)
+    override open func preferredDisplayCriteria(refreshRate: Float, videoDynamicRange: Int32) -> AVDisplayCriteria? {
+//         AVDisplayCriteria(refreshRate: refreshRate, videoDynamicRange: videoDynamicRange)
+    }
+    #endif
+}
 
 var objects: [KSPlayerResource] = {
     var objects = [KSPlayerResource]()
@@ -74,6 +80,9 @@ var objects: [KSPlayerResource] = {
         let options = KSOptions()
 //        options.videoFilters = "hflip,vflip"
         objects.append(KSPlayerResource(url: URL(fileURLWithPath: path), options: options, name: "图片字幕"))
+    }
+    if let url = URL(string: "https://github.com/qiudaomao/MPVColorIssue/raw/master/MPVColorIssue/resources/captain.marvel.2019.2160p.uhd.bluray.x265-terminal.sample.mkv") {
+        objects.append(KSPlayerResource(url: url, options: MEOptions(), name: "HDR MKV"))
     }
     if let path = Bundle.main.path(forResource: "vr", ofType: "mp4") {
         let options = KSOptions()
