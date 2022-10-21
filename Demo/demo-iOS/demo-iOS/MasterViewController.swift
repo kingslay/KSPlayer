@@ -62,17 +62,24 @@ extension MasterViewController: UITableViewDataSource {
     // MARK: - Table View
 
     func numberOfSections(in _: UITableView) -> Int {
-        1
+        2
     }
 
-    func tableView(_: UITableView, numberOfRowsInSection _: Int) -> Int {
-        objects.count
+    func tableView(_: UITableView, numberOfRowsInSection section: Int) -> Int {
+        if section == 1 {
+            return objects.count
+        }
+        return 1
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath)
         if let cell = cell as? TableViewCell {
-            cell.nameLabel.text = objects[indexPath.row].name
+            if indexPath.section == 1 {
+                cell.nameLabel.text = objects[indexPath.row].name
+            } else {
+                cell.nameLabel.text = "Enter self URL"
+            }
         }
         return cell
     }
@@ -81,8 +88,50 @@ extension MasterViewController: UITableViewDataSource {
 extension MasterViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
+        
+        if indexPath.section == 1 {
+            play(from: indexPath)
+        } else {
+            showAlertForEnterURL()
+        }
+    }
+}
+
+// MARK: - Actions
+extension MasterViewController {
+    internal func showAlertForEnterURL(_ message: String? = nil) {
+        let alert = UIAlertController(title: "Enter movie URL", message: message, preferredStyle: .alert)
+        
+        alert.addTextField(configurationHandler: { testField in
+            testField.placeholder = "URL"
+            testField.text = "https://"
+        })
+        
+        alert.addAction(UIAlertAction(title: "Play", style: .default, handler: { [weak self] _ in
+            guard let textFieldText = alert.textFields?.first?.text,
+                  let mURL = URL(string: textFieldText)
+            else {
+                self?.showAlertForEnterURL("Please enter valid URL")
+                return
+            }
+            
+            let resource = KSPlayerResource(url: mURL)
+            self?.play(from: IndexPath(row: 0, section: 0), or: resource)
+        }))
+        
+        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
+        
+        present(alert, animated: true)
+    }
+    
+    
+    internal func play(from indexPath: IndexPath, or resource:KSPlayerResource? = nil) {
         if let split = splitViewController, let nav = split.viewControllers.last as? UINavigationController, let detail = nav.topViewController as? DetailProtocol {
-            detail.resource = objects[indexPath.row]
+            if let resource = resource {
+                detail.resource = resource
+            } else {
+                detail.resource = objects[indexPath.row]
+            }
             #if os(iOS)
             detail.navigationItem.leftBarButtonItem = split.displayModeButtonItem
             detail.navigationItem.leftItemsSupplementBackButton = true
@@ -91,7 +140,7 @@ extension MasterViewController: UITableViewDelegate {
             return
         }
         let controller: DetailProtocol
-        if indexPath.row == objects.count - 1 {
+        if indexPath.row == objects.count - 1 && resource == nil {
             controller = AudioViewController()
         } else {
             controller = DetailViewController()
