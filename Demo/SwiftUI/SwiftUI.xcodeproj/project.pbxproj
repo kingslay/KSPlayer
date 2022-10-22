@@ -116,6 +116,46 @@
 		};
 /* End PBXGroup section */
 
+/* Begin PBXLegacyTarget section */
+		AC611E1B2902A0DF00553022 /* FFmpegMake */ = {
+			isa = PBXLegacyTarget;
+			buildArgumentsString = "$(ACTION)";
+			buildConfigurationList = AC611E1E2902A0DF00553022 /* Build configuration list for PBXLegacyTarget "FFmpegMake" */;
+			buildPhases = (
+			);
+			buildToolPath = /usr/bin/make;
+			buildWorkingDirectory = "$(SRCROOT)/../../Script/FFmpeg/macos/scratch/x86_64";
+			dependencies = (
+			);
+			name = FFmpegMake;
+			passBuildSettingsInEnvironment = 1;
+			productName = FFmpegMake;
+			productSettingsXML = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
+<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">
+<plist version=\"1.0\">
+<dict>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>$(DEVELOPMENT_LANGUAGE)</string>
+	<key>CFBundleExecutable</key>
+	<string>$(EXECUTABLE_NAME)</string>
+	<key>CFBundleIdentifier</key>
+	<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundleName</key>
+	<string>$(PRODUCT_NAME)</string>
+	<key>CFBundlePackageType</key>
+	<string>$(PRODUCT_BUNDLE_PACKAGE_TYPE)</string>
+	<key>CFBundleShortVersionString</key>
+	<string>$(MARKETING_VERSION)</string>
+	<key>CFBundleVersion</key>
+	<string>$(CURRENT_PROJECT_VERSION)</string>
+</dict>
+</plist>
+";
+		};
+/* End PBXLegacyTarget section */
+
 /* Begin PBXNativeTarget section */
 		AC77DFB626402329001351AE /* TracyPlayer */ = {
 			isa = PBXNativeTarget;
@@ -146,6 +186,9 @@
 				LastSwiftUpdateCheck = 1310;
 				LastUpgradeCheck = 1400;
 				TargetAttributes = {
+					AC611E1B2902A0DF00553022 = {
+						CreatedOnToolsVersion = 14.0.1;
+					};
 					AC77DFB626402329001351AE = {
 						CreatedOnToolsVersion = 12.4;
 					};
@@ -165,6 +208,7 @@
 			projectRoot = "";
 			targets = (
 				AC77DFB626402329001351AE /* TracyPlayer */,
+				AC611E1B2902A0DF00553022 /* FFmpegMake */,
 			);
 		};
 /* End PBXProject section */
@@ -200,6 +244,33 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin XCBuildConfiguration section */
+		AC611E1C2902A0DF00553022 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CODE_SIGN_STYLE = Automatic;
+				DEBUGGING_SYMBOLS = YES;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				OTHER_CFLAGS = "";
+				OTHER_LDFLAGS = "";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		AC611E1D2902A0DF00553022 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CODE_SIGN_STYLE = Automatic;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				OTHER_CFLAGS = "";
+				OTHER_LDFLAGS = "";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
 		AC77DFC926402329001351AE /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -403,6 +474,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		AC611E1E2902A0DF00553022 /* Build configuration list for PBXLegacyTarget "FFmpegMake" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				AC611E1C2902A0DF00553022 /* Debug */,
+				AC611E1D2902A0DF00553022 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		AC77DFAE26402327001351AE /* Build configuration list for PBXProject "SwiftUI" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (

@@ -45,7 +45,7 @@ class FFmpegDecode: DecodeProtocol {
         while true {
             let result = avcodec_receive_frame(codecContext, coreFrame)
             if result == 0, let avframe = coreFrame {
-                var frame = try swresample.transfer(avframe: filter.filter(options: options, inputFrame: avframe, hwDeviceCtx: codecContext.pointee.hw_device_ctx))
+                var frame = try swresample.transfer(avframe: filter.filter(options: options, inputFrame: avframe))
                 frame.timebase = packet.assetTrack.timebase
 //                frame.timebase = Timebase(avframe.pointee.time_base)
                 frame.duration = avframe.pointee.pkt_duration
@@ -121,12 +121,7 @@ extension AVCodecParameters {
             throw NSError(errorCode: .codecContextSetParam, ffmpegErrnum: result)
         }
         if codec_type == AVMEDIA_TYPE_VIDEO, options.hardwareDecode {
-            var hwDeviceCtx: UnsafeMutablePointer<AVBufferRef>?
-            let ret = av_hwdevice_ctx_create(&hwDeviceCtx, AV_HWDEVICE_TYPE_VIDEOTOOLBOX, nil, nil, 0)
-            if ret == 0 {
-                codecContext.pointee.hw_device_ctx = hwDeviceCtx
-//                codecContext.pointee.hw_device_ctx = av_buffer_ref(hwDeviceCtx)
-            }
+            codecContext.getFormat()
         }
         guard let codec = avcodec_find_decoder(codecContext.pointee.codec_id) else {
             avcodec_free_context(&codecContextOption)

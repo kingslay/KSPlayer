@@ -245,11 +245,10 @@ swift run build-FFmpeg enable-openssl
 
 ```bash
 swift run build-FFmpeg enable-debug
-dwarfdump -F --debug-info Sources/libavformat.xcframework/macos-arm64_x86_64/Libavformat.framework/Libavformat | head -n 20
 ```
-然后把DW_AT_comp_dir对应的路径拖到工程里面。选择Create groups.  Add to targets不用选择
 
-run demo-macOS
+run target TracyPlayer  
+
 
 ![6](./Documents/6.png?raw=true)
 

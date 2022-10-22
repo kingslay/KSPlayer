@@ -194,10 +194,8 @@ private class BaseBuild {
 private class BuildFFMPEG: BaseBuild {
     private let ffmpegFile = "ffmpeg-5.1.2"
     private let isDebug: Bool
-    private let isFFplay: Bool
     init(arguments: [String]) {
         isDebug = arguments.firstIndex(of: "enable-debug") != nil
-        isFFplay = arguments.firstIndex(of: "enable-ffplay") != nil
         super.init(library: "FFmpeg")
     }
 
@@ -207,7 +205,6 @@ private class BuildFFMPEG: BaseBuild {
             ffmpegcflags.append("--enable-debug")
             ffmpegcflags.append("--disable-stripping")
             ffmpegcflags.append("--disable-optimizations")
-            ffmpegcflags.append("--enable-ffmpeg")
         } else {
             ffmpegcflags.append("--disable-debug")
             ffmpegcflags.append("--enable-stripping")
@@ -224,8 +221,7 @@ private class BuildFFMPEG: BaseBuild {
             ffmpegcflags.append("--enable-neon")
             ffmpegcflags.append("--enable-asm")
         }
-        if isFFplay, platform == .macos, arch.executable() {
-            ffmpegcflags.append("--enable-ffmpeg")
+        if platform == .macos, arch.executable() {
             ffmpegcflags.append("--enable-ffplay")
             ffmpegcflags.append("--enable-avdevice")
             ffmpegcflags.append("--enable-sdl2")
@@ -239,10 +235,8 @@ private class BuildFFMPEG: BaseBuild {
             ffmpegcflags.append("--enable-filter=negate")
             ffmpegcflags.append("--enable-filter=testsrc")
         } else {
-            ffmpegcflags.append("--disable-programs")
-            ffmpegcflags.append("--disable-ffplay")
-            ffmpegcflags.append("--disable-ffprobe")
             ffmpegcflags.append("--disable-avdevice")
+            ffmpegcflags.append("--disable-programs")
         }
 //        if platform == .isimulator || platform == .tvsimulator {
 //            ffmpegcflags.append("--assert-level=1")
@@ -280,13 +274,22 @@ private class BuildFFMPEG: BaseBuild {
         let environment = ["PKG_CONFIG_PATH": pkgConfigPath]
         Utility.shell(args.joined(separator: " "), currentDirectoryURL: buildDir, environment: environment)
         Utility.shell("make -j8 install\(arch == .x86_64 ? "" : " GASPP_FIX_XCODE5=1") >>\(buildDir.path).log", currentDirectoryURL: buildDir)
-        if isFFplay, platform == .macos, arch.executable() {
-            try? FileManager.default.removeItem(at: URL(fileURLWithPath: "/usr/local/bin/ffmpeg"))
-            try? FileManager.default.removeItem(at: URL(fileURLWithPath: "/usr/local/bin/ffplay"))
-            try? FileManager.default.removeItem(at: URL(fileURLWithPath: "/usr/local/bin/ffprobe"))
-            try? FileManager.default.copyItem(at: prefix + ["bin", "ffmpeg"], to: URL(fileURLWithPath: "/usr/local/bin/ffmpeg"))
-            try? FileManager.default.copyItem(at: prefix + ["bin", "ffplay"], to: URL(fileURLWithPath: "/usr/local/bin/ffplay"))
-            try? FileManager.default.copyItem(at: prefix + ["bin", "ffprobe"], to: URL(fileURLWithPath: "/usr/local/bin/ffprobe"))
+        let lldbFile = URL.currentDirectory + "LLDBInitFile"
+        if let data = FileManager.default.contents(atPath: lldbFile.path), var str = String(data: data, encoding: .utf8) {
+            str.append("settings \(str.count == 0 ? "set" : "append") target.source-map \((buildDir + "src").path) \((URL.currentDirectory + ffmpegFile).path)\n")
+            try? str.write(toFile: lldbFile.path, atomically: true, encoding: .utf8)
+        }
+        if platform == .macos, arch.executable() {
+            replaceBin(prefix: prefix, item: "ffmpeg")
+            replaceBin(prefix: prefix, item: "ffplay")
+            replaceBin(prefix: prefix, item: "ffprobe")
+        }
+    }
+
+    private func replaceBin(prefix: URL, item: String) {
+        if FileManager.default.fileExists(atPath: (prefix + ["bin", item]).path) {
+            try? FileManager.default.removeItem(at: URL(fileURLWithPath: "/usr/local/bin/\(item)"))
+            try? FileManager.default.copyItem(at: prefix + ["bin", item], to: URL(fileURLWithPath: "/usr/local/bin/\(item)"))
         }
     }
 
@@ -364,6 +367,9 @@ private class BuildFFMPEG: BaseBuild {
         if !FileManager.default.fileExists(atPath: (URL.currentDirectory + ffmpegFile).path) {
             Utility.shell("curl http://www.ffmpeg.org/releases/\(ffmpegFile).tar.bz2 | tar xj")
         }
+        let lldbFile = URL.currentDirectory + "LLDBInitFile"
+        try? FileManager.default.removeItem(at: lldbFile)
+        FileManager.default.createFile(atPath: lldbFile.path, contents: nil, attributes: nil)
         let path = URL.currentDirectory + ffmpegFile + "libavcodec/videotoolbox.c"
         if let data = FileManager.default.contents(atPath: path.path), var str = String(data: data, encoding: .utf8) {
             str = str.replacingOccurrences(of: "kCVPixelBufferOpenGLESCompatibilityKey", with: "kCVPixelBufferMetalCompatibilityKey")
@@ -377,7 +383,7 @@ private class BuildFFMPEG: BaseBuild {
         if Utility.shell("which nasm") == nil {
             Utility.shell("brew install nasm")
         }
-        if isFFplay, Utility.shell("which sdl2-config") == nil {
+        if Utility.shell("which sdl2-config") == nil {
             Utility.shell("brew install sdl2")
         }
     }
@@ -472,8 +478,7 @@ private class BuildFFMPEG: BaseBuild {
         "--enable-filter=overlay", "--enable-filter=palettegen", "--enable-filter=paletteuse", "--enable-filter=pan",
         "--enable-filter=rotate", "--enable-filter=scale", "--enable-filter=setpts", "--enable-filter=transpose",
         "--enable-filter=trim", "--enable-filter=vflip", "--enable-filter=volume", "--enable-filter=w3fdif",
-        "--enable-filter=yadif",
-//        "--enable-filter=yadif_videotoolbox",
+        "--enable-filter=yadif", "--enable-filter=yadif_videotoolbox",
     ]
 }
 
