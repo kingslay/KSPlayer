@@ -37,15 +37,6 @@ class MEFilter {
             avfilter_inout_free(&inputs)
             avfilter_inout_free(&outputs)
         }
-//        outputs?.pointee.name = av_strdup("in")
-//        outputs?.pointee.filter_ctx = bufferContext
-//        outputs?.pointee.pad_idx = 0
-//        outputs?.pointee.next = nil
-//
-//        inputs?.pointee.name = av_strdup("out")
-//        inputs?.pointee.filter_ctx = bufferSinkContext
-//        inputs?.pointee.pad_idx = 0
-//        inputs?.pointee.next = nil
         var ret = avfilter_graph_parse2(graph, filters, &inputs, &outputs)
         guard ret >= 0, let graph, let inputs, let outputs else {
             return false

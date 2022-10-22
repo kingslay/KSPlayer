@@ -429,18 +429,21 @@ extension MEPlayerItem {
 
     private func reading() {
         let packet = Packet()
-        let readResult = av_read_frame(formatCtx, packet.corePacket)
+        guard let corePacket = packet.corePacket else {
+            return
+        }
+        let readResult = av_read_frame(formatCtx, corePacket)
         if state == .closed {
             return
         }
         if readResult == 0 {
             if let outputFormatCtx, let formatCtx {
-                let index = Int(packet.corePacket.pointee.stream_index)
+                let index = Int(corePacket.pointee.stream_index)
                 if let outputIndex = streamMapping[index],
                    let inputTb = formatCtx.pointee.streams[index]?.pointee.time_base,
                    let outputTb = outputFormatCtx.pointee.streams[outputIndex]?.pointee.time_base
                 {
-                    av_packet_ref(outputPacket, packet.corePacket)
+                    av_packet_ref(outputPacket, corePacket)
                     outputPacket?.pointee.stream_index = Int32(outputIndex)
                     av_packet_rescale_ts(outputPacket, inputTb, outputTb)
                     outputPacket?.pointee.pos = -1
@@ -453,11 +456,11 @@ extension MEPlayerItem {
             if formatCtx?.pointee.pb?.pointee.eof_reached == 1 {
                 // todo need reconnect
             }
-            if packet.corePacket.pointee.size <= 0 {
+            if corePacket.pointee.size <= 0 {
                 return
             }
             packet.fill()
-            let first = assetTracks.first { $0.trackID == packet.corePacket.pointee.stream_index }
+            let first = assetTracks.first { $0.trackID == corePacket.pointee.stream_index }
             if let first, first.isEnabled {
                 packet.assetTrack = first
                 if first.mediaType == .video {
@@ -545,14 +548,12 @@ extension MEPlayerItem: MediaPlayback {
         let closeOperation = BlockOperation {
             Thread.current.name = (self.operationQueue.name ?? "") + "_close"
             self.allPlayerItemTracks.forEach { $0.shutdown() }
-            ObjectPool.share.removeAll()
             KSLog("清空formatCtx")
             avformat_close_input(&self.formatCtx)
             avformat_close_input(&self.outputFormatCtx)
             self.duration = 0
             self.closeOperation = nil
             self.operationQueue.cancelAllOperations()
-            ObjectPool.share.removeAll()
         }
         closeOperation.queuePriority = .veryHigh
         closeOperation.qualityOfService = .userInteractive

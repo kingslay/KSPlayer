@@ -216,8 +216,8 @@ public final class AudioEnginePlayer: AudioPlayer, FrameOutput {
             let framesToCopy = min(numberOfSamples, residueLinesize)
             let bytesToCopy = framesToCopy * MemoryLayout<Float>.size
             let offset = currentRenderReadOffset * MemoryLayout<Float>.size
-            for i in 0 ..< min(ioData.count, currentRender.dataWrap.data.count) {
-                (ioData[i].mData! + ioDataWriteOffset).copyMemory(from: currentRender.dataWrap.data[i]! + offset, byteCount: bytesToCopy)
+            for i in 0 ..< min(ioData.count, currentRender.data.count) {
+                (ioData[i].mData! + ioDataWriteOffset).copyMemory(from: currentRender.data[i]! + offset, byteCount: bytesToCopy)
             }
             numberOfSamples -= framesToCopy
             ioDataWriteOffset += bytesToCopy
@@ -255,12 +255,12 @@ extension AVAudioEngine {
 
 extension AVAudioFormat {
     func toPCMBuffer(frame: AudioFrame) -> AVAudioPCMBuffer? {
-        guard let pcmBuffer = AVAudioPCMBuffer(pcmFormat: self, frameCapacity: UInt32(frame.dataWrap.size[0]) / streamDescription.pointee.mBytesPerFrame) else {
+        guard let pcmBuffer = AVAudioPCMBuffer(pcmFormat: self, frameCapacity: UInt32(frame.dataSize[0]) / streamDescription.pointee.mBytesPerFrame) else {
             return nil
         }
         pcmBuffer.frameLength = pcmBuffer.frameCapacity
-        for i in 0 ..< min(Int(pcmBuffer.format.channelCount), frame.dataWrap.size.count) {
-            frame.dataWrap.data[i]?.withMemoryRebound(to: Float.self, capacity: Int(pcmBuffer.frameCapacity)) { srcFloatsForChannel in
+        for i in 0 ..< min(Int(pcmBuffer.format.channelCount), frame.data.count) {
+            frame.data[i]?.withMemoryRebound(to: Float.self, capacity: Int(pcmBuffer.frameCapacity)) { srcFloatsForChannel in
                 pcmBuffer.floatChannelData?[i].assign(from: srcFloatsForChannel, count: Int(pcmBuffer.frameCapacity))
             }
         }

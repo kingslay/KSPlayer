@@ -409,7 +409,7 @@ class AudioSwresample: Swresample {
     private let channels: Int32
     init(codecpar: AVCodecParameters) {
         descriptor = AudioDescriptor(codecpar: codecpar)
-        channels = Int32(max(min(KSOptions.channelLayout.channelCount, descriptor.inputNumberOfChannels), 2))
+        channels = Int32(max(min(KSOptions.channelLayout.channelCount, descriptor.inputNumberOfChannels), 1))
         _ = setup(descriptor: descriptor)
     }
 
@@ -443,7 +443,7 @@ class AudioSwresample: Swresample {
         var bufferSize = Int32(0)
         _ = av_samples_get_buffer_size(&bufferSize, channels, nbSamples, AV_SAMPLE_FMT_FLTP, 1)
         let frame = AudioFrame(bufferSize: bufferSize, channels: channels)
-        numberOfSamples = swr_convert(swrContext, &frame.dataWrap.data, nbSamples, &frameBuffer, numberOfSamples)
+        numberOfSamples = swr_convert(swrContext, &frame.data, nbSamples, &frameBuffer, numberOfSamples)
         frame.numberOfSamples = Int(numberOfSamples)
         return frame
     }

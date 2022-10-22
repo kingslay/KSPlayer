@@ -30,8 +30,7 @@ class VideoToolboxDecode: DecodeProtocol {
     }
 
     func doDecode(packet: Packet) throws {
-        let corePacket = packet.corePacket.pointee
-        guard let data = corePacket.data, let session else {
+        guard let corePacket = packet.corePacket?.pointee, let data = corePacket.data, let session else {
             delegate?.decodeResult(frame: nil)
             return
         }
@@ -177,9 +176,9 @@ class DecompressionSession {
         let attributes: NSMutableDictionary = [
             kCVPixelBufferPixelFormatTypeKey: pixelFormatType,
             kCVPixelBufferMetalCompatibilityKey: true,
-//            kCVPixelBufferWidthKey: codecpar.width,
-//            kCVPixelBufferHeightKey: codecpar.height,
-//            kCVPixelBufferIOSurfacePropertiesKey: NSDictionary(),
+            kCVPixelBufferWidthKey: codecpar.width,
+            kCVPixelBufferHeightKey: codecpar.height,
+            kCVPixelBufferIOSurfacePropertiesKey: NSDictionary(),
         ]
         var session: VTDecompressionSession?
         // swiftlint:disable line_length

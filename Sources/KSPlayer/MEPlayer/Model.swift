@@ -137,20 +137,15 @@ extension AVRational {
 }
 
 final class Packet: ObjectQueueItem {
-    final class AVPacketWrap {
-        fileprivate var corePacket = av_packet_alloc()
-        deinit {
-            av_packet_free(&corePacket)
-        }
-    }
-
     var duration: Int64 = 0
     var size: Int64 = 0
     var position: Int64 = 0
     var assetTrack: FFmpegAssetTrack!
-    var corePacket: UnsafeMutablePointer<AVPacket> { packetWrap.corePacket! }
-    private let packetWrap = ObjectPool.share.object(class: AVPacketWrap.self, key: "AVPacketWrap") { AVPacketWrap() }
+    private(set) var corePacket = av_packet_alloc()
     func fill() {
+        guard let corePacket else {
+            return
+        }
         position = corePacket.pointee.pts == Int64.min ? corePacket.pointee.dts : corePacket.pointee.pts
         duration = corePacket.pointee.duration
         size = Int64(corePacket.pointee.size)
@@ -158,7 +153,7 @@ final class Packet: ObjectQueueItem {
 
     deinit {
         av_packet_unref(corePacket)
-        ObjectPool.share.comeback(item: packetWrap, key: "AVPacketWrap")
+        av_packet_free(&corePacket)
     }
 }
 
@@ -174,56 +169,25 @@ final class SubtitleFrame: MEFrame {
     }
 }
 
-final class ByteDataWrap {
-    var data: [UnsafeMutablePointer<UInt8>?]
-    var size: [Int] = [0] {
-        didSet {
-            if size.description != oldValue.description {
-                for i in 0 ..< data.count {
-                    let count = oldValue[i]
-                    if count > 0 {
-                        data[i]?.deinitialize(count: oldValue[i])
-                        data[i]?.deallocate()
-                    }
-                }
-                data.removeAll()
-                for i in 0 ..< size.count {
-                    data.append(UnsafeMutablePointer<UInt8>.allocate(capacity: Int(size[i])))
-                }
-            }
-        }
-    }
-
-    public init() {
-        data = Array(repeating: nil, count: 1)
-    }
-
-    deinit {
-        for i in 0 ..< data.count {
-            data[i]?.deinitialize(count: size[i])
-            data[i]?.deallocate()
-        }
-        data.removeAll()
-    }
-}
-
 final class AudioFrame: MEFrame {
     var timebase = Timebase.defaultValue
     var duration: Int64 = 0
     var size: Int64 = 0
     var position: Int64 = 0
     var numberOfSamples = 0
-    let dataWrap: ByteDataWrap
-
+    var data: [UnsafeMutablePointer<UInt8>?]
+    let dataSize: [Int]
     public init(bufferSize: Int32, channels: Int32) {
-        dataWrap = ObjectPool.share.object(class: ByteDataWrap.self, key: "AudioData_\(channels)") { ByteDataWrap() }
-        if dataWrap.size[0] < bufferSize {
-            dataWrap.size = Array(repeating: Int(bufferSize), count: Int(channels))
-        }
+        dataSize = Array(repeating: Int(bufferSize), count: Int(channels))
+        data = Array(repeating: UnsafeMutablePointer<UInt8>.allocate(capacity: Int(bufferSize)), count: Int(channels))
     }
 
     deinit {
-        ObjectPool.share.comeback(item: dataWrap, key: "AudioData_\(dataWrap.data.count)")
+        for i in 0 ..< data.count {
+            data[i]?.deinitialize(count: dataSize[i])
+            data[i]?.deallocate()
+        }
+        data.removeAll()
     }
 }
 
