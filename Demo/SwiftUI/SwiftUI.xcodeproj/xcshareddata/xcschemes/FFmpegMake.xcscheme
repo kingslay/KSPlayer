@@ -42,11 +42,11 @@
       allowLocationSimulation = "YES">
       <PathRunnable
          runnableDebuggingMode = "0"
-         FilePath = "$(SRCROOT)/../../Script/FFmpeg/macos/scratch/x86_64/ffprobe_g">
+         FilePath = "/Users/kintan/Documents/Github/KSPlayer/Script/FFmpeg/macos/scratch/x86_64/ffplay_g">
       </PathRunnable>
       <CommandLineArguments>
          <CommandLineArgument
-            argument = ""
+            argument = "-i /Users/kintan/Documents/Github/KSPlayer/Tests/KSPlayerTests/Resources/h264.mp4"
             isEnabled = "YES">
          </CommandLineArgument>
       </CommandLineArguments>
