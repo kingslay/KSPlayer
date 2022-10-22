@@ -179,7 +179,9 @@ final class AudioFrame: MEFrame {
     let dataSize: [Int]
     public init(bufferSize: Int32, channels: Int32) {
         dataSize = Array(repeating: Int(bufferSize), count: Int(channels))
-        data = Array(repeating: UnsafeMutablePointer<UInt8>.allocate(capacity: Int(bufferSize)), count: Int(channels))
+        data = (0 ..< channels).map { _ in
+            UnsafeMutablePointer<UInt8>.allocate(capacity: Int(bufferSize))
+        }
     }
 
     deinit {
