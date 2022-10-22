@@ -130,34 +130,34 @@ extension MetalPlayView {
     }
 
     private func draw(force: Bool) {
-        guard let frame = renderSource?.getVideoOutputRender(force: force) else {
-            return
-        }
-        pixelBuffer = frame.corePixelBuffer
-        guard let pixelBuffer else {
-            return
-        }
-        let cmtime = frame.cmtime
-        renderSource?.setVideo(time: cmtime)
-        let par = pixelBuffer.size
-        let sar = pixelBuffer.aspectRatio
-        if options.isUseDisplayLayer() {
-            if !view.isHidden {
-                view.isHidden = true
-                if let drawable = view.currentDrawable, let renderPassDescriptor = view.currentRenderPassDescriptor {
-                    render.clear(drawable: drawable, renderPassDescriptor: renderPassDescriptor)
+        autoreleasepool {
+            guard let frame = renderSource?.getVideoOutputRender(force: force) else {
+                return
+            }
+            pixelBuffer = frame.corePixelBuffer
+            guard let pixelBuffer else {
+                return
+            }
+            let cmtime = frame.cmtime
+            renderSource?.setVideo(time: cmtime)
+            let par = pixelBuffer.size
+            let sar = pixelBuffer.aspectRatio
+            if options.isUseDisplayLayer() {
+                if !view.isHidden {
+                    view.isHidden = true
+                    if let drawable = view.currentDrawable, let renderPassDescriptor = view.currentRenderPassDescriptor {
+                        render.clear(drawable: drawable, renderPassDescriptor: renderPassDescriptor)
+                    }
                 }
-            }
-            if let dar = options.customizeDar(sar: sar, par: par) {
-                pixelBuffer.aspectRatio = CGSize(width: dar.width, height: dar.height * par.width / par.height)
-            }
-            set(pixelBuffer: pixelBuffer, time: cmtime)
-        } else {
-            if view.isHidden {
-                view.isHidden = false
-                displayLayer.flushAndRemoveImage()
-            }
-            autoreleasepool {
+                if let dar = options.customizeDar(sar: sar, par: par) {
+                    pixelBuffer.aspectRatio = CGSize(width: dar.width, height: dar.height * par.width / par.height)
+                }
+                set(pixelBuffer: pixelBuffer, time: cmtime)
+            } else {
+                if view.isHidden {
+                    view.isHidden = false
+                    displayLayer.flushAndRemoveImage()
+                }
                 if options.display == .plane {
                     if let dar = options.customizeDar(sar: sar, par: par) {
                         view.drawableSize = CGSize(width: par.width, height: par.width * dar.height / dar.width)
