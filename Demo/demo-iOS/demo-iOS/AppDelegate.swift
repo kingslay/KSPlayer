@@ -58,7 +58,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UISplitViewControllerDele
 
 class MEOptions: KSOptions {
     #if os(tvOS)
-    override open func preferredDisplayCriteria(refreshRate: Float, videoDynamicRange: Int32) -> AVDisplayCriteria? {
+    override open func preferredDisplayCriteria(refreshRate _: Float, videoDynamicRange _: Int32) -> AVDisplayCriteria? {
 //         AVDisplayCriteria(refreshRate: refreshRate, videoDynamicRange: videoDynamicRange)
     }
     #endif

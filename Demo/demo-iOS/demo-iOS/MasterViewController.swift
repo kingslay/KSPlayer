@@ -88,7 +88,7 @@ extension MasterViewController: UITableViewDataSource {
 extension MasterViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
-        
+
         if indexPath.section == 1 {
             play(from: indexPath)
         } else {
@@ -98,15 +98,16 @@ extension MasterViewController: UITableViewDelegate {
 }
 
 // MARK: - Actions
+
 extension MasterViewController {
-    internal func showAlertForEnterURL(_ message: String? = nil) {
+    func showAlertForEnterURL(_ message: String? = nil) {
         let alert = UIAlertController(title: "Enter movie URL", message: message, preferredStyle: .alert)
-        
+
         alert.addTextField(configurationHandler: { testField in
             testField.placeholder = "URL"
             testField.text = "https://"
         })
-        
+
         alert.addAction(UIAlertAction(title: "Play", style: .default, handler: { [weak self] _ in
             guard let textFieldText = alert.textFields?.first?.text,
                   let mURL = URL(string: textFieldText)
@@ -114,20 +115,19 @@ extension MasterViewController {
                 self?.showAlertForEnterURL("Please enter valid URL")
                 return
             }
-            
+
             let resource = KSPlayerResource(url: mURL)
             self?.play(from: IndexPath(row: 0, section: 0), or: resource)
         }))
-        
+
         alert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
-        
+
         present(alert, animated: true)
     }
-    
-    
-    internal func play(from indexPath: IndexPath, or resource:KSPlayerResource? = nil) {
+
+    func play(from indexPath: IndexPath, or resource: KSPlayerResource? = nil) {
         if let split = splitViewController, let nav = split.viewControllers.last as? UINavigationController, let detail = nav.topViewController as? DetailProtocol {
-            if let resource = resource {
+            if let resource {
                 detail.resource = resource
             } else {
                 detail.resource = objects[indexPath.row]
@@ -140,7 +140,7 @@ extension MasterViewController {
             return
         }
         let controller: DetailProtocol
-        if indexPath.row == objects.count - 1 && resource == nil {
+        if indexPath.row == objects.count - 1, resource == nil {
             controller = AudioViewController()
         } else {
             controller = DetailViewController()
