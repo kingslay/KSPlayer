@@ -181,7 +181,10 @@ var objects: [KSPlayerResource] = {
         objects.append(KSPlayerResource(url: URL(fileURLWithPath: path), options: options, name: "本地全景视频"))
     }
     if let path = Bundle.main.path(forResource: "mjpeg", ofType: "flac") {
-        objects.append(KSPlayerResource(url: URL(fileURLWithPath: path), name: "本地音频"))
+        let options = MEOptions()
+        options.videoDisable = true
+        options.syncDecodeAudio = true
+        objects.append(KSPlayerResource(url: URL(fileURLWithPath: path), options: options, name: "本地音频"))
     }
     if let path = Bundle.main.path(forResource: "hevc", ofType: "mkv") {
         objects.append(KSPlayerResource(url: URL(fileURLWithPath: path), name: "h265视频"))

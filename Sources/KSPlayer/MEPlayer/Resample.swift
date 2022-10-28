@@ -36,8 +36,9 @@ class VideoSwresample: Swresample {
         } else {
             frame.corePixelBuffer = transfer(frame: avframe.pointee)
         }
-        if let pixelBuffer = frame.corePixelBuffer, let colorSpace = KSOptions.colorSpace(ycbcrMatrix: pixelBuffer.colorPrimaries, transferFunction: pixelBuffer.transferFunction) {
-            CVBufferSetAttachment(pixelBuffer, kCVImageBufferCGColorSpaceKey, colorSpace, .shouldPropagate)
+
+        if let pixelBuffer = frame.corePixelBuffer {
+            pixelBuffer.colorspace = KSOptions.colorSpace(ycbcrMatrix: pixelBuffer.yCbCrMatrix, transferFunction: pixelBuffer.transferFunction)
         }
 
         return frame
@@ -69,17 +70,11 @@ class VideoSwresample: Swresample {
         let height = frame.height
         let pbuf = transfer(format: format, width: width, height: height, data: Array(tuple: frame.data), linesize: Array(tuple: frame.linesize))
         if let pbuf {
-            if let aspectRatio = frame.sample_aspect_ratio.size.aspectRatio {
-                CVBufferSetAttachment(pbuf, kCVImageBufferPixelAspectRatioKey, aspectRatio, .shouldPropagate)
-            }
-            if let ycbcrMatrix = frame.colorspace.ycbcrMatrix {
-                CVBufferSetAttachment(pbuf, kCVImageBufferYCbCrMatrixKey, ycbcrMatrix, .shouldPropagate)
-            }
-            if let colorPrimaries = frame.color_primaries.colorPrimaries {
-                CVBufferSetAttachment(pbuf, kCVImageBufferColorPrimariesKey, colorPrimaries, .shouldPropagate)
-            }
+            pbuf.aspectRatio = frame.sample_aspect_ratio.size
+            pbuf.yCbCrMatrix = frame.colorspace.ycbcrMatrix
+            pbuf.colorPrimaries = frame.color_primaries.colorPrimaries
             if let transferFunction = frame.color_trc.transferFunction {
-                CVBufferSetAttachment(pbuf, kCVImageBufferTransferFunctionKey, transferFunction, .shouldPropagate)
+                pbuf.transferFunction = transferFunction
                 if transferFunction == kCVImageBufferTransferFunction_UseGamma {
                     let gamma = NSNumber(value: frame.color_trc == AVCOL_TRC_GAMMA22 ? 2.2 : 2.8)
                     CVBufferSetAttachment(pbuf, kCVImageBufferGammaLevelKey, gamma, .shouldPropagate)

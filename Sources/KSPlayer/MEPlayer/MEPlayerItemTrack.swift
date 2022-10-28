@@ -225,9 +225,7 @@ class SyncPlayerItemTrack<Frame: MEFrame>: PlayerItemTrackProtocol, CustomString
             state = .decoding
         }
         if state == .decoding {
-            autoreleasepool {
-                doDecode(packet: packet)
-            }
+            doDecode(packet: packet)
         }
     }
 

@@ -30,7 +30,7 @@ class MEFilter {
         self.isAudio = isAudio
     }
 
-    private func setup(filters: String, params: AVBufferSrcParameters) -> Bool {
+    private func setup(filters: String) -> Bool {
         var inputs = avfilter_inout_alloc()
         var outputs = avfilter_inout_alloc()
         defer {
@@ -49,7 +49,6 @@ class MEFilter {
         let buffer = avfilter_get_by_name(isAudio ? "abuffer" : "buffer")
         bufferContext = avfilter_graph_alloc_filter(graph, buffer, "in")
         guard bufferContext != nil else { return false }
-        var params = params
         av_buffersrc_parameters_set(bufferContext, &params)
         ret = avfilter_init_str(bufferContext, nil)
         guard ret >= 0 else { return false }
@@ -95,17 +94,19 @@ class MEFilter {
         params.sample_rate = inputFrame.pointee.sample_rate
         params.ch_layout = inputFrame.pointee.ch_layout
         if self.params != params || self.filters != filters {
-            if setup(filters: filters, params: params) {
-                self.params = params
-                self.filters = filters
-            } else {
+            self.params = params
+            self.filters = filters
+            if !setup(filters: filters) {
                 return inputFrame
             }
+        }
+        if graph?.pointee.sink_links_count == 0 {
+            return inputFrame
         }
         var ret = av_buffersrc_add_frame_flags(bufferContext, inputFrame, Int32(AV_BUFFERSRC_FLAG_KEEP_REF))
         guard ret == 0 else { return inputFrame }
         av_frame_unref(outputFrame)
-        ret = av_buffersink_get_frame(bufferSinkContext, outputFrame)
+        ret = av_buffersink_get_frame_flags(bufferSinkContext, outputFrame, 0)
         guard ret == 0 else { return inputFrame }
         return outputFrame ?? inputFrame
     }
