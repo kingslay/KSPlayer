@@ -167,7 +167,7 @@ var objects: [KSPlayerResource] = {
     if let path = Bundle.main.path(forResource: "subrip", ofType: "mkv") {
         let options = KSOptions()
         options.asynchronousDecompression = false
-        options.videoFilters = "yadif_videotoolbox=mode=0:parity=auto:deint=0"
+        options.videoFilters = "yadif_videotoolbox=mode=0:parity=auto:deint=1"
         objects.append(KSPlayerResource(url: URL(fileURLWithPath: path), options: options, name: "文字字幕"))
     }
     if let path = Bundle.main.path(forResource: "dvd_subtitle", ofType: "mkv") {

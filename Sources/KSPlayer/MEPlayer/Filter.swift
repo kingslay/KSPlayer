@@ -66,7 +66,7 @@ class MEFilter {
         return true
     }
 
-    public func filter(options: KSOptions, inputFrame: UnsafeMutablePointer<AVFrame>) -> UnsafeMutablePointer<AVFrame> {
+    public func filter(options: KSOptions, inputFrame: UnsafeMutablePointer<AVFrame>, hwFramesCtx: UnsafeMutablePointer<AVBufferRef>?) -> UnsafeMutablePointer<AVFrame> {
         var filters: String?
         if isAudio {
             filters = options.audioFilters
@@ -89,8 +89,8 @@ class MEFilter {
         params.width = inputFrame.pointee.width
         params.height = inputFrame.pointee.height
         params.sample_aspect_ratio = inputFrame.pointee.sample_aspect_ratio
-//        params.frame_rate = inputFrame.pointee
-//        params.hw_frames_ctx = inputFrame.pointee.hw_frames_ctx
+        params.frame_rate = AVRational(num: 1, den: Int32(options.preferredFramesPerSecond))
+        params.hw_frames_ctx = hwFramesCtx
         params.sample_rate = inputFrame.pointee.sample_rate
         params.ch_layout = inputFrame.pointee.ch_layout
         if self.params != params || self.filters != filters {
