@@ -111,35 +111,3 @@ class MEFilter {
         return outputFrame ?? inputFrame
     }
 }
-
-extension AVBufferSrcParameters: Equatable {
-    public static func == (lhs: AVBufferSrcParameters, rhs: AVBufferSrcParameters) -> Bool {
-        lhs.format == rhs.format && lhs.time_base == rhs.time_base &&
-            lhs.width == rhs.width && lhs.height == rhs.height && lhs.sample_aspect_ratio == rhs.sample_aspect_ratio &&
-            lhs.sample_rate == rhs.sample_rate && lhs.ch_layout == rhs.ch_layout
-    }
-
-    var arg: String {
-        if sample_rate > 0 {
-            let fmt = String(cString: av_get_sample_fmt_name(AVSampleFormat(rawValue: format)))
-            var str = [Int8](repeating: 0, count: 64)
-            var chLayout = ch_layout
-            _ = av_channel_layout_describe(&chLayout, &str, str.count)
-            return "sample_rate=\(sample_rate):sample_fmt=\(fmt):time_base=\(time_base.num)/\(time_base.den):channels=\(ch_layout.nb_channels):channel_layout=\(String(cString: str))"
-        } else {
-            return "video_size=\(width)x\(height):pix_fmt=\(format):time_base=\(time_base.num)/\(time_base.den):pixel_aspect=\(sample_aspect_ratio.num)/\(sample_aspect_ratio.den)"
-        }
-    }
-}
-
-extension AVChannelLayout: Equatable {
-    public static func == (lhs: AVChannelLayout, rhs: AVChannelLayout) -> Bool {
-        lhs.nb_channels == rhs.nb_channels && lhs.order == rhs.order
-    }
-}
-
-extension AVRational: Equatable {
-    public static func == (lhs: AVRational, rhs: AVRational) -> Bool {
-        lhs.num == rhs.num && rhs.den == rhs.den
-    }
-}

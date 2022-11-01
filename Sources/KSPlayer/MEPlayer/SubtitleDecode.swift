@@ -116,25 +116,3 @@ class SubtitleDecode: DecodeProtocol {
         return (attributedString, CGImage.combine(images: images)?.image(quality: 0.2))
     }
 }
-
-extension AVCodecContext {
-    func parseASSEvents() -> Int {
-        var subtitleASSEvents = 10
-        if subtitle_header_size > 0, let events = String(data: Data(bytes: subtitle_header, count: Int(subtitle_header_size)), encoding: .ascii), let eventsRange = events.range(of: "[Events]") {
-            var range = eventsRange.upperBound ..< events.endIndex
-            if let eventsRange = events.range(of: "Format:", options: String.CompareOptions(rawValue: 0), range: range, locale: nil) {
-                range = eventsRange.upperBound ..< events.endIndex
-                if let eventsRange = events.rangeOfCharacter(from: CharacterSet.newlines, options: String.CompareOptions(rawValue: 0), range: range) {
-                    range = range.lowerBound ..< eventsRange.upperBound
-                    let format = events[range]
-                    let fields = format.components(separatedBy: ",")
-                    let text = fields.last
-                    if let text, text.trimmingCharacters(in: .whitespacesAndNewlines) == "Text" {
-                        subtitleASSEvents = fields.count
-                    }
-                }
-            }
-        }
-        return subtitleASSEvents
-    }
-}

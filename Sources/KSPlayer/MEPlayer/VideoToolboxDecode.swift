@@ -239,59 +239,6 @@ extension CMFormatDescription {
     }
 }
 
-extension AVCodecID {
-    var mediaSubType: CMFormatDescription.MediaSubType {
-        switch self {
-        case AV_CODEC_ID_H263:
-            return .h263
-        case AV_CODEC_ID_H264:
-            return .h264
-        case AV_CODEC_ID_HEVC:
-            return .hevc
-        case AV_CODEC_ID_MPEG1VIDEO:
-            return .mpeg1Video
-        case AV_CODEC_ID_MPEG2VIDEO:
-            return .mpeg2Video
-        case AV_CODEC_ID_MPEG4:
-            return .mpeg4Video
-        case AV_CODEC_ID_VP9:
-            return CMFormatDescription.MediaSubType(rawValue: kCMVideoCodecType_VP9)
-        case AV_CODEC_ID_AAC:
-            return .mpeg4AAC
-        case AV_CODEC_ID_AC3:
-            return .ac3
-        case AV_CODEC_ID_ADPCM_IMA_QT:
-            return .appleIMA4
-        case AV_CODEC_ID_ALAC:
-            return .appleLossless
-        case AV_CODEC_ID_AMR_NB:
-            return .amr
-        case AV_CODEC_ID_EAC3:
-            return .enhancedAC3
-        case AV_CODEC_ID_GSM_MS:
-            return .microsoftGSM
-        case AV_CODEC_ID_ILBC:
-            return .iLBC
-        case AV_CODEC_ID_MP1:
-            return .mpegLayer1
-        case AV_CODEC_ID_MP2:
-            return .mpegLayer2
-        case AV_CODEC_ID_MP3:
-            return .mpegLayer3
-        case AV_CODEC_ID_PCM_ALAW:
-            return .aLaw
-        case AV_CODEC_ID_PCM_MULAW:
-            return .uLaw
-        case AV_CODEC_ID_QDMC:
-            return .qDesign
-        case AV_CODEC_ID_QDM2:
-            return .qDesign2
-        default:
-            return CMFormatDescription.MediaSubType(rawValue: 0)
-        }
-    }
-}
-
 extension CMVideoCodecType {
     var avc: String {
         switch self {

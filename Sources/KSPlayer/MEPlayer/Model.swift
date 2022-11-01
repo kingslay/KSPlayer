@@ -7,7 +7,6 @@
 
 import AVFoundation
 import CoreMedia
-import FFmpeg
 import Libavcodec
 
 // MARK: enum
@@ -130,12 +129,6 @@ extension Timebase {
     }
 }
 
-extension AVRational {
-    var size: CGSize {
-        num > 0 && den > 0 ? CGSize(width: Int(num), height: Int(den)) : CGSize(width: 1, height: 1)
-    }
-}
-
 final class Packet: ObjectQueueItem {
     var duration: Int64 = 0
     var size: Int64 = 0
@@ -237,11 +230,6 @@ extension String {
         defer { buf.deallocate() }
         self = String(cString: av_make_error_string(buf, Int(AV_ERROR_MAX_STRING_SIZE), code))
     }
-}
-
-public extension AVError {
-    static let tryAgain = AVError(code: swift_AVERROR(EAGAIN))
-    static let eof = AVError(code: swift_AVERROR_EOF)
 }
 
 extension Array {
