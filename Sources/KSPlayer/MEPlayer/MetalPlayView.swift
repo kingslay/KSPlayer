@@ -58,7 +58,7 @@ public final class MetalPlayView: UIView {
         addSubview(view)
         view.isHidden = true
         view.translatesAutoresizingMaskIntoConstraints = false
-        displayLink.add(to: RunLoop.main, forMode: .common)
+        displayLink.add(to: .main, forMode: .common)
         NSLayoutConstraint.activate([
             topAnchor.constraint(equalTo: view.topAnchor),
             leadingAnchor.constraint(equalTo: view.leadingAnchor),

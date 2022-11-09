@@ -760,9 +760,7 @@ extension KSVideoPlayer: UIViewRepresentable {
     public final class Coordinator: ObservableObject {
         @Published public var isPlay: Bool {
             didSet {
-                if isPlay != oldValue {
-                    isPlay ? playerLayer?.play() : playerLayer?.pause()
-                }
+                isPlay ? playerLayer?.play() : playerLayer?.pause()
             }
         }
 
