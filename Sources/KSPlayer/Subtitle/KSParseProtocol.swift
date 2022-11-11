@@ -128,7 +128,7 @@ public class SrtParse: KSParseProtocol {
         _ = scanner.scanString("-->")
         if let startString,
            let endString = scanner.scanUpToCharacters(from: .newlines),
-           var text = scanner.scanUpToString("\r\n\r\n")
+           var text = scanner.scanUpToString("\n\n")
         {
             if let reg {
                 text = reg.stringByReplacingMatches(in: text, range: NSRange(location: 0, length: text.count), withTemplate: "")
@@ -141,6 +141,7 @@ public class SrtParse: KSParseProtocol {
     public func parse(subtitle: String) -> [SubtitlePart] {
         let reg = AssParse.patternReg()
         var groups = [SubtitlePart]()
+        let subtitle = subtitle.replacingOccurrences(of: "\r\n\r\n", with: "\n\n")
         let scanner = Scanner(string: subtitle)
         while !scanner.isAtEnd {
             if let group = SrtParse.parse(scanner: scanner, reg: reg) {
