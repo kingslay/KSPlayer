@@ -199,6 +199,9 @@ open class KSPlayerLayer: UIView {
         NotificationCenter.default.addObserver(self, selector: #selector(enterForeground), name: UIApplication.willEnterForegroundNotification, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(wirelessRouteActiveDidChange(notification:)), name: .MPVolumeViewWirelessRouteActiveDidChange, object: nil)
         #endif
+        #if !os(macOS)
+        NotificationCenter.default.addObserver(self, selector: #selector(audioInterrupted), name: AVAudioSession.interruptionNotification, object: nil)
+        #endif
     }
 
     @available(*, unavailable)
@@ -619,6 +622,31 @@ extension KSPlayerLayer {
             player.usesExternalPlaybackWhileExternalScreenIsActive = true
         }
         isWirelessRouteActive = volumeView.isWirelessRouteActive
+    }
+    #endif
+    #if !os(macOS)
+    @objc private func audioInterrupted(notification: Notification) {
+        guard let userInfo = notification.userInfo,
+              let typeValue = userInfo[AVAudioSessionInterruptionTypeKey] as? UInt,
+              let type = AVAudioSession.InterruptionType(rawValue: typeValue)
+        else {
+            return
+        }
+        switch type {
+        case .began:
+            pause()
+        case .ended:
+            // An interruption ended. Resume playback, if appropriate.
+
+            guard let optionsValue = userInfo[AVAudioSessionInterruptionOptionKey] as? UInt else { return }
+            let options = AVAudioSession.InterruptionOptions(rawValue: optionsValue)
+            if options.contains(.shouldResume) {
+                play()
+            }
+
+        default:
+            break
+        }
     }
     #endif
 }

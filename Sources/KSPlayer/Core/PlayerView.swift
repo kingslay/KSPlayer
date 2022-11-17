@@ -60,9 +60,6 @@ open class PlayerView: UIView, KSPlayerLayerDelegate, KSSliderDelegate {
 
     override public init(frame: CGRect) {
         super.init(frame: frame)
-        #if !os(macOS)
-        NotificationCenter.default.addObserver(self, selector: #selector(audioInterrupted), name: AVAudioSession.interruptionNotification, object: nil)
-        #endif
         toolBar.timeSlider.delegate = self
         toolBar.addTarget(self, action: #selector(onButtonPressed(_:)))
     }
@@ -160,21 +157,13 @@ open class PlayerView: UIView, KSPlayerLayerDelegate, KSSliderDelegate {
     }
 }
 
-extension PlayerView {
-    public var totalTime: TimeInterval {
+public extension PlayerView {
+    var totalTime: TimeInterval {
         get {
             toolBar.totalTime
         }
         set {
             toolBar.totalTime = newValue
-        }
-    }
-
-    @objc private func audioInterrupted(notification: Notification) {
-        if let callBegin = notification.userInfo?[AVAudioSessionInterruptionTypeKey] as? Bool {
-            if callBegin {
-                pause()
-            }
         }
     }
 }
