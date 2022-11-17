@@ -105,8 +105,9 @@ class DecompressionSession {
     fileprivate let decompressionSession: VTDecompressionSession
     init?(codecparPtr: UnsafeMutablePointer<AVCodecParameters>, options: KSOptions) {
         let codecpar = codecparPtr.pointee
+        let isFullRangeVideo = codecpar.color_range == AVCOL_RANGE_JPEG
         let format = AVPixelFormat(codecpar.format)
-        guard let pixelFormatType = format.osType() else {
+        guard let pixelFormatType = format.osType(fullRange: isFullRangeVideo) else {
             return nil
         }
         let videoCodecType = codecpar.codec_id.mediaSubType.rawValue
@@ -116,7 +117,6 @@ class DecompressionSession {
             VTRegisterSupplementalVideoDecoderIfAvailable(videoCodecType)
         }
         #endif
-        let isFullRangeVideo = codecpar.color_range == AVCOL_RANGE_JPEG
         var extradataSize = Int32(0)
         var extradata = codecpar.extradata
         let atomsData: Data?

@@ -76,7 +76,7 @@ private class BaseBuild {
     private func build(platform: PlatformType, arch: ArchType) {
         let url = scratch(platform: platform, arch: arch)
         try? FileManager.default.createDirectory(at: url, withIntermediateDirectories: true, attributes: nil)
-        let cflags = "-arch " + arch.rawValue + " -fembed-bitcode " + platform.deploymentTarget(arch)
+        let cflags = "-arch " + arch.rawValue + platform.deploymentTarget(arch)
         innerBuid(platform: platform, arch: arch, cflags: cflags, buildDir: url)
     }
 
@@ -539,7 +539,7 @@ private class BuildSRT: BaseBuild {
 }
 
 private class BuildOpenSSL: BaseBuild {
-    private let sslFile = "openssl-3.0.6"
+    private let sslFile = "openssl-3.0.7"
     init() {
         super.init(library: "SSL")
     }
