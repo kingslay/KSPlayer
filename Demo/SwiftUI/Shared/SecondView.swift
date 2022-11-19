@@ -19,17 +19,22 @@ struct SecondView: View {
         VStack {
             Text("Pretend this is the movie information screen")
                 .padding(.bottom, 50)
-            ThirdView()
-                .padding(.bottom, 50)
+            NavigationLink(destination: KSVideoPlayerView(url: URL(fileURLWithPath: Bundle.main.path(forResource: "h264", ofType: "mp4")!), options: KSOptions())) {
+                Text("Play Movie")
+            }
+            .padding(.bottom, 50)
             Button {
                 playVideo = true
             } label: {
                 Text("Play Movie Via .fullScreenCover")
             }
             .padding(.bottom, 50)
-        }.fullScreenCover(isPresented: $playVideo) {
+        }
+        #if !os(macOS)
+        .fullScreenCover(isPresented: $playVideo) {
             KSVideoPlayerView(url: URL(fileURLWithPath: Bundle.main.path(forResource: "h264", ofType: "mp4")!), options: KSOptions())
         }
+        #endif
     }
 }
 

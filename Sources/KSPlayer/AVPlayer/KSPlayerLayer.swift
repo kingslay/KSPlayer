@@ -899,6 +899,18 @@ extension KSVideoPlayer.Coordinator: KSPlayerLayerDelegate {
     }
 }
 
+extension KSVideoPlayer.Coordinator: Equatable {
+    public static func == (lhs: KSVideoPlayer.Coordinator, rhs: KSVideoPlayer.Coordinator) -> Bool {
+        lhs.url == rhs.url
+    }
+}
+
+extension KSVideoPlayer: Equatable {
+    public static func == (lhs: KSVideoPlayer, rhs: KSVideoPlayer) -> Bool {
+        lhs.coordinator == rhs.coordinator
+    }
+}
+
 public extension KSVideoPlayer {
     func onBufferChanged(_ handler: @escaping (Int, TimeInterval) -> Void) -> Self {
         coordinator.onBufferChanged = handler

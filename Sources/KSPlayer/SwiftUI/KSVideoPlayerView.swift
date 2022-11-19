@@ -160,6 +160,13 @@ public struct KSVideoPlayerView: View {
     }
 }
 
+@available(iOS 15, tvOS 15, macOS 12, *)
+extension KSVideoPlayerView: Equatable {
+    public static func == (lhs: KSVideoPlayerView, rhs: KSVideoPlayerView) -> Bool {
+        lhs.playerCoordinator == rhs.playerCoordinator
+    }
+}
+
 /// 这是一个频繁变化的model。View要少用这个
 struct ControllerTimeModel {
     // 改成int才不会频繁更新
