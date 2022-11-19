@@ -11,24 +11,19 @@ import SwiftUI
 public struct KSVideoPlayerView: View {
     @ObservedObject public var subtitleModel = SubtitleModel()
     @State private var model = ControllerTimeModel()
-    public let url: URL
-    public let options: KSOptions
-    private let player: KSVideoPlayer
-    private let subtitleView = VideoSubtitleView()
+    private let playerCoordinator: KSVideoPlayer.Coordinator
     @State var isMaskShow = true
     public init(url: URL, options: KSOptions) {
-        self.options = options
-        self.url = url
-        player = KSVideoPlayer(url: url, options: options)
+        playerCoordinator = KSVideoPlayer.Coordinator(url: url, options: options)
     }
 
     public var body: some View {
         ZStack {
-            player.onPlay { current, total in
+            KSVideoPlayer(coordinator: playerCoordinator).onPlay { current, total in
                 model.currentTime = Int(current)
                 model.totalTime = Int(max(max(0, total), current))
                 if let subtile = subtitleModel.selectedSubtitle {
-                    let time = current + options.subtitleDelay
+                    let time = current + playerCoordinator.options.subtitleDelay
                     if let part = subtile.search(for: time) {
                         subtitleModel.endTime = part.end
                         if let image = part.image {
@@ -49,8 +44,8 @@ public struct KSVideoPlayerView: View {
             }
             .onStateChanged { playerLayer, state in
                 if state == .readyToPlay {
-                    if let track = player.coordinator.subtitleTracks.first, options.autoSelectEmbedSubtitle {
-                        player.coordinator.selectedSubtitleTrack = track
+                    if let track = playerCoordinator.subtitleTracks.first, playerCoordinator.options.autoSelectEmbedSubtitle {
+                        playerCoordinator.selectedSubtitleTrack = track
                     }
                 } else if state == .bufferFinished {
                     if isMaskShow {
@@ -67,9 +62,9 @@ public struct KSVideoPlayerView: View {
                 if direction == .down {
                     isMaskShow.toggle()
                 } else if direction == .left {
-                    player.coordinator.skip(interval: -15)
+                    playerCoordinator.skip(interval: -15)
                 } else if direction == .right {
-                    player.coordinator.skip(interval: 15)
+                    playerCoordinator.skip(interval: 15)
                 }
             }
             #endif
@@ -81,7 +76,7 @@ public struct KSVideoPlayerView: View {
                 #endif
             }
             #endif
-            .onReceive(player.coordinator.$selectedSubtitleTrack) { track in
+            .onReceive(playerCoordinator.$selectedSubtitleTrack) { track in
                 guard let subtitle = track as? SubtitleInfo else {
                     subtitleModel.selectedSubtitle = nil
                     return
@@ -91,15 +86,15 @@ public struct KSVideoPlayerView: View {
                 }
             }
             .onDisappear {
-                if let playerLayer = player.coordinator.playerLayer {
+                if let playerLayer = playerCoordinator.playerLayer {
                     if !playerLayer.isPipActive {
-                        player.coordinator.playerLayer?.pause()
-                        player.coordinator.playerLayer = nil
+                        playerCoordinator.playerLayer?.pause()
+                        playerCoordinator.playerLayer = nil
                     }
                 }
             }
             .edgesIgnoringSafeArea(.all)
-            subtitleView
+            VideoSubtitleView()
             VideoControllerView()
             #if os(macOS)
                 .onMoveCommand { direction in
@@ -126,7 +121,7 @@ public struct KSVideoPlayerView: View {
         }
         .preferredColorScheme(.dark)
         .environmentObject(subtitleModel)
-        .environmentObject(player.coordinator)
+        .environmentObject(playerCoordinator)
         #if os(macOS)
             .navigationTitle(url.lastPathComponent)
             .onTapGesture(count: 2) {
@@ -149,7 +144,7 @@ public struct KSVideoPlayerView: View {
 
     public func openURL(_ url: URL) {
         if url.isAudio || url.isMovie {
-            player.coordinator.playerLayer?.set(url: url, options: options)
+            playerCoordinator.playerLayer?.set(url: url, options: playerCoordinator.options)
         } else {
             let info = URLSubtitleInfo(subtitleID: url.path, name: url.lastPathComponent)
             info.downloadURL = url
@@ -458,22 +453,16 @@ public struct Slider: View {
     }
 
     public var body: some View {
-        TVOSSlide(value: process, isFocused: _isFocused, onEditingChanged: onEditingChanged)
+        TVOSSlide(process: process, isFocused: _isFocused, onEditingChanged: onEditingChanged)
             .focused($isFocused)
     }
 }
 
 @available(tvOS 15.0, *)
 public struct TVOSSlide: UIViewRepresentable {
-    private let process: Binding<Float>
-    private let onEditingChanged: (Bool) -> Void
-    @FocusState private var isFocused: Bool
-    init(value: Binding<Float>, isFocused: FocusState<Bool>, onEditingChanged: @escaping (Bool) -> Void = { _ in }) {
-        process = value
-        self.onEditingChanged = onEditingChanged
-        _isFocused = isFocused
-    }
-
+    let process: Binding<Float>
+    @FocusState var isFocused: Bool
+    let onEditingChanged: (Bool) -> Void
     public typealias UIViewType = TVSlide
     public func makeUIView(context _: Context) -> UIViewType {
         TVSlide(process: process, onEditingChanged: onEditingChanged)

@@ -715,13 +715,6 @@ extension Bundle {
 
 public struct KSVideoPlayer {
     public let coordinator: Coordinator
-    private let url: URL
-    public let options: KSOptions
-    public init(url: URL, options: KSOptions) {
-        self.options = options
-        self.url = url
-        coordinator = Coordinator(isPlay: options.isAutoPlay)
-    }
 }
 
 #if !canImport(UIKit)
@@ -736,7 +729,7 @@ extension KSVideoPlayer: UIViewRepresentable {
     #if canImport(UIKit)
     public typealias UIViewType = KSPlayerLayer
     public func makeUIView(context: Context) -> UIViewType {
-        let view = makeView(context: context)
+        let view = context.coordinator.makeView()
         let swipeDown = UISwipeGestureRecognizer(target: context.coordinator, action: #selector(Coordinator.swipeGestureAction(_:)))
         swipeDown.direction = .down
         view.addGestureRecognizer(swipeDown)
@@ -760,7 +753,7 @@ extension KSVideoPlayer: UIViewRepresentable {
     #else
     public typealias NSViewType = KSPlayerLayer
     public func makeNSView(context: Context) -> NSViewType {
-        makeView(context: context)
+        context.coordinator.makeView()
     }
 
     public func updateNSView(_ uiView: NSViewType, context: Context) {
@@ -769,22 +762,12 @@ extension KSVideoPlayer: UIViewRepresentable {
 
     public static func dismantleNSView(_: NSViewType, coordinator _: Coordinator) {}
     #endif
-    private func makeView(context: Context) -> KSPlayerLayer {
-        if let playerLayer = context.coordinator.playerLayer {
-            playerLayer.set(url: url, options: options)
-            playerLayer.delegate = context.coordinator
-            return playerLayer
-        } else {
-            let playerLayer = KSPlayerLayer(url: url, options: options)
-            playerLayer.delegate = context.coordinator
-            context.coordinator.playerLayer = playerLayer
-            return playerLayer
-        }
-    }
 
     private func updateView(_: KSPlayerLayer, context _: Context) {}
 
     public final class Coordinator: ObservableObject {
+        public var url: URL
+        public var options: KSOptions
         @Published public var isPlay: Bool {
             didSet {
                 isPlay ? playerLayer?.play() : playerLayer?.pause()
@@ -856,8 +839,24 @@ extension KSVideoPlayer: UIViewRepresentable {
             onSwipe?(recognizer.direction)
         }
         #endif
-        init(isPlay: Bool) {
-            self.isPlay = isPlay
+
+        init(url: URL, options: KSOptions) {
+            self.url = url
+            self.options = options
+            isPlay = options.isAutoPlay
+        }
+
+        public func makeView() -> KSPlayerLayer {
+            if let playerLayer {
+                playerLayer.set(url: url, options: options)
+                playerLayer.delegate = self
+                return playerLayer
+            } else {
+                let playerLayer = KSPlayerLayer(url: url, options: options)
+                playerLayer.delegate = self
+                self.playerLayer = playerLayer
+                return playerLayer
+            }
         }
 
         public func skip(interval: Int) {

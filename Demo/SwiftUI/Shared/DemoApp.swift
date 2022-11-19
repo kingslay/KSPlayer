@@ -51,6 +51,7 @@ struct DemoApp: App {
 
     var body: some Scene {
         WindowGroup {
+//            FirstView()
             ContentView()
                 .background(Color.black)
                 .onOpenURL { url in
