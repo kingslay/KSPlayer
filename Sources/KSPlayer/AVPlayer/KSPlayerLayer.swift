@@ -715,6 +715,9 @@ extension Bundle {
 
 public struct KSVideoPlayer {
     public let coordinator: Coordinator
+    public init(coordinator: Coordinator) {
+        self.coordinator = coordinator
+    }
 }
 
 #if !canImport(UIKit)
