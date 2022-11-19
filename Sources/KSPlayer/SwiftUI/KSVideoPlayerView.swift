@@ -13,6 +13,11 @@ public struct KSVideoPlayerView: View {
     @State private var model = ControllerTimeModel()
     public let playerCoordinator: KSVideoPlayer.Coordinator
     @State var isMaskShow = true
+
+    public init(playerCoordinator: KSVideoPlayer.Coordinator) {
+        self.playerCoordinator = playerCoordinator
+    }
+
     public init(url: URL, options: KSOptions) {
         playerCoordinator = KSVideoPlayer.Coordinator(url: url, options: options)
     }
@@ -44,7 +49,7 @@ public struct KSVideoPlayerView: View {
             }
             .onStateChanged { playerLayer, state in
                 if state == .readyToPlay {
-                    if let track = playerCoordinator.subtitleTracks.first, playerCoordinator.options.autoSelectEmbedSubtitle {
+                    if let track = playerCoordinator.subtitleTracks.first, playerLayer.options.autoSelectEmbedSubtitle {
                         playerCoordinator.selectedSubtitleTrack = track
                     }
                 } else if state == .bufferFinished {

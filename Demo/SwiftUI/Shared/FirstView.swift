@@ -1,7 +1,7 @@
 import KSPlayer
 import SwiftUI
 struct FirstView: View {
-//    @Environment(\.dismiss) var dismiss
+    @Environment(\.dismiss) var dismiss
 
     @State private var showSecondView = false
     var body: some View {

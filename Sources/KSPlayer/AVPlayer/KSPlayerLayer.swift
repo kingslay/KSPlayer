@@ -840,7 +840,7 @@ extension KSVideoPlayer: UIViewRepresentable {
         }
         #endif
 
-        init(url: URL, options: KSOptions) {
+        public init(url: URL, options: KSOptions) {
             self.url = url
             self.options = options
             isPlay = options.isAutoPlay

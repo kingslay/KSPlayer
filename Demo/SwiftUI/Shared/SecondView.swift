@@ -7,7 +7,7 @@ struct SecondView: View {
     @Environment(\.dismiss) var dismiss
 
     // I need the dismiss option because I have a sheet that apears asking the user to enter their parental control passcode
-
+    @State var playVideo = false
     let myOptions = KSOptions()
     init() {
         myOptions.isAutoPlay = true
@@ -16,14 +16,27 @@ struct SecondView: View {
     }
 
     var body: some View {
-        NavigationView {
-            VStack {
-                Text("Pretend this is the movie information screen")
-                    .padding(.bottom, 50)
-                NavigationLink(destination: KSVideoPlayerView(url: URL(fileURLWithPath: Bundle.main.path(forResource: "h264", ofType: "mp4")!), options: myOptions)) {
-                    Text("Play Movie")
-                }
+        VStack {
+            Text("Pretend this is the movie information screen")
+                .padding(.bottom, 50)
+            ThirdView()
+                .padding(.bottom, 50)
+            Button {
+                playVideo = true
+            } label: {
+                Text("Play Movie Via .fullScreenCover")
             }
+            .padding(.bottom, 50)
+        }.fullScreenCover(isPresented: $playVideo) {
+            KSVideoPlayerView(url: URL(fileURLWithPath: Bundle.main.path(forResource: "h264", ofType: "mp4")!), options: KSOptions())
+        }
+    }
+}
+
+struct ThirdView: View {
+    var body: some View {
+        NavigationLink(destination: KSVideoPlayerView(url: URL(fileURLWithPath: Bundle.main.path(forResource: "h264", ofType: "mp4")!), options: KSOptions())) {
+            Text("Play Movie")
         }
     }
 }
