@@ -4,7 +4,7 @@ import SwiftUI
 
 struct SecondView: View {
 //    // the fact this line is in here, means that it interferes with KSPlayer
-//    @Environment(\.dismiss) var dismiss
+    @Environment(\.dismiss) var dismiss
 
     // I need the dismiss option because I have a sheet that apears asking the user to enter their parental control passcode
 

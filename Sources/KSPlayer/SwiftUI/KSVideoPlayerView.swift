@@ -11,7 +11,7 @@ import SwiftUI
 public struct KSVideoPlayerView: View {
     @ObservedObject public var subtitleModel = SubtitleModel()
     @State private var model = ControllerTimeModel()
-    private let playerCoordinator: KSVideoPlayer.Coordinator
+    public let playerCoordinator: KSVideoPlayer.Coordinator
     @State var isMaskShow = true
     public init(url: URL, options: KSOptions) {
         playerCoordinator = KSVideoPlayer.Coordinator(url: url, options: options)
@@ -101,13 +101,13 @@ public struct KSVideoPlayerView: View {
                     isMaskShow = true
                     switch direction {
                     case .left:
-                        player.coordinator.skip(interval: -15)
+                        playerCoordinator.skip(interval: -15)
                     case .right:
-                        player.coordinator.skip(interval: 15)
+                        playerCoordinator.skip(interval: 15)
                     case .up:
-                        player.coordinator.playerLayer?.player.playbackVolume += 1
+                        playerCoordinator.playerLayer?.player.playbackVolume += 1
                     case .down:
-                        player.coordinator.playerLayer?.player.playbackVolume -= 1
+                        playerCoordinator.playerLayer?.player.playbackVolume -= 1
                     @unknown default:
                         break
                     }
@@ -123,7 +123,7 @@ public struct KSVideoPlayerView: View {
         .environmentObject(subtitleModel)
         .environmentObject(playerCoordinator)
         #if os(macOS)
-            .navigationTitle(url.lastPathComponent)
+            .navigationTitle(playerCoordinator.url.lastPathComponent)
             .onTapGesture(count: 2) {
                 NSApplication.shared.keyWindow?.toggleFullScreen(self)
             }
