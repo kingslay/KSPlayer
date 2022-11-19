@@ -756,7 +756,6 @@ extension KSVideoPlayer: UIViewRepresentable {
         updateView(uiView, context: context)
     }
 
-    // 在iOS，第二次进入会先调用makeUIView。然后在调用之前的dismantleUIView. 所以用weak来做自动回收。
     public static func dismantleUIView(_: UIViewType, coordinator _: Coordinator) {}
     #else
     public typealias NSViewType = KSPlayerLayer
@@ -842,7 +841,8 @@ extension KSVideoPlayer: UIViewRepresentable {
             }
         }
 
-        public weak var playerLayer: KSPlayerLayer?
+        // 在SplitView模式下，第二次进入会先调用makeUIView。然后在调用之前的dismantleUIView.所以如果进入的是同一个View的话，就会导致playerLayer被清空了。最准确的方式是在onDisappear清空playerLayer
+        public var playerLayer: KSPlayerLayer?
         public var audioTracks = [MediaPlayerTrack]()
         public var subtitleTracks = [MediaPlayerTrack]()
         public var videoTracks = [MediaPlayerTrack]()

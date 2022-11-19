@@ -90,14 +90,15 @@ public struct KSVideoPlayerView: View {
                     subtitleModel.selectedSubtitle = try? result.get()
                 }
             }
-            .edgesIgnoringSafeArea(.all)
             .onDisappear {
                 if let playerLayer = player.coordinator.playerLayer {
                     if !playerLayer.isPipActive {
                         player.coordinator.playerLayer?.pause()
+                        player.coordinator.playerLayer = nil
                     }
                 }
             }
+            .edgesIgnoringSafeArea(.all)
             subtitleView
             VideoControllerView()
             #if os(macOS)

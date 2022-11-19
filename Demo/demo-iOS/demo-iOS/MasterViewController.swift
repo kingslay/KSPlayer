@@ -90,7 +90,7 @@ extension MasterViewController: UITableViewDelegate {
         tableView.deselectRow(at: indexPath, animated: true)
 
         if indexPath.section == 1 {
-            play(from: indexPath)
+            play(resource: objects[indexPath.row])
         } else {
             showAlertForEnterURL()
         }
@@ -117,7 +117,7 @@ extension MasterViewController {
             }
 
             let resource = KSPlayerResource(url: mURL)
-            self?.play(from: IndexPath(row: 0, section: 0), or: resource)
+            self?.play(resource: resource)
         }))
 
         alert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
@@ -125,13 +125,9 @@ extension MasterViewController {
         present(alert, animated: true)
     }
 
-    func play(from indexPath: IndexPath, or resource: KSPlayerResource? = nil) {
+    func play(resource: KSPlayerResource?) {
         if let split = splitViewController, let nav = split.viewControllers.last as? UINavigationController, let detail = nav.topViewController as? DetailProtocol {
-            if let resource {
-                detail.resource = resource
-            } else {
-                detail.resource = objects[indexPath.row]
-            }
+            detail.resource = resource
             #if os(iOS)
             detail.navigationItem.leftBarButtonItem = split.displayModeButtonItem
             detail.navigationItem.leftItemsSupplementBackButton = true
@@ -139,13 +135,8 @@ extension MasterViewController {
             split.preferredDisplayMode = .primaryHidden
             return
         }
-        let controller: DetailProtocol
-        if indexPath.row == objects.count - 1, resource == nil {
-            controller = AudioViewController()
-        } else {
-            controller = DetailViewController()
-        }
-        controller.resource = objects[indexPath.row]
+        let controller = DetailViewController()
+        controller.resource = resource
         navigationController?.pushViewController(controller, animated: true)
     }
 }

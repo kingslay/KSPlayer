@@ -6,7 +6,6 @@
 //
 #if canImport(UIKit) && canImport(CallKit)
 import AVKit
-import CallKit
 import Combine
 import CoreServices
 import MediaPlayer
@@ -17,8 +16,6 @@ open class IOSVideoPlayerView: VideoPlayerView {
     private var originalFrame = CGRect.zero
     private var originalOrientations: UIInterfaceOrientationMask?
     private weak var fullScreenDelegate: PlayerViewFullScreenDelegate?
-    private var isPlayingForCall = false
-    private let callCenter = CXCallObserver()
     private var isVolume = false
     private let volumeView = BrightnessVolume()
     private var cancellable: AnyCancellable?
@@ -265,21 +262,6 @@ open class IOSVideoPlayerView: VideoPlayerView {
     }
 }
 
-extension IOSVideoPlayerView: CXCallObserverDelegate {
-    public func callObserver(_: CXCallObserver, callChanged call: CXCall) {
-        if call.hasConnected || call.isOutgoing {
-            isPlayingForCall = toolBar.playButton.isSelected
-            if isPlayingForCall {
-                pause()
-            }
-        } else if call.hasEnded {
-            if isPlayingForCall {
-                play()
-            }
-        }
-    }
-}
-
 extension IOSVideoPlayerView: UIViewControllerTransitioningDelegate {
     public func animationController(forPresented _: UIViewController, presenting _: UIViewController, source _: UIViewController) -> UIViewControllerAnimatedTransitioning? {
         if let originalSuperView, let animationView = playerLayer?.player.view {
@@ -303,7 +285,6 @@ extension IOSVideoPlayerView {
     private func addNotification() {
 //        NotificationCenter.default.addObserver(self, selector: #selector(orientationChanged), name: UIApplication.didChangeStatusBarOrientationNotification, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(routesAvailableDidChange), name: .AVRouteDetectorMultipleRoutesDetectedDidChange, object: nil)
-        callCenter.setDelegate(self, queue: DispatchQueue.main)
     }
 
     @objc private func routesAvailableDidChange(notification _: Notification) {

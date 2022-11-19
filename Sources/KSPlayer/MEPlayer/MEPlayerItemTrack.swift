@@ -130,6 +130,7 @@ public class FFmpegAssetTrack: MediaPlayerTrack {
 //        var buf = [Int8](repeating: 0, count: 256)
 //        avcodec_string(&buf, buf.count, codecpar, 0)
         self.description = description
+        isImageSubtitle = [AV_CODEC_ID_DVD_SUBTITLE, AV_CODEC_ID_DVB_SUBTITLE, AV_CODEC_ID_DVB_TELETEXT, AV_CODEC_ID_HDMV_PGS_SUBTITLE].contains(stream.pointee.codecpar?.pointee.codec_id)
     }
 
     public var isEnabled: Bool {
@@ -141,9 +142,7 @@ public class FFmpegAssetTrack: MediaPlayerTrack {
         }
     }
 
-    var isImageSubtitle: Bool {
-        [AV_CODEC_ID_DVD_SUBTITLE, AV_CODEC_ID_DVB_SUBTITLE, AV_CODEC_ID_DVB_TELETEXT, AV_CODEC_ID_HDMV_PGS_SUBTITLE].contains(stream.pointee.codecpar?.pointee.codec_id)
-    }
+    let isImageSubtitle: Bool
 
     public func setIsEnabled(_ isEnabled: Bool) {
         stream.pointee.discard = isEnabled ? AVDISCARD_DEFAULT : AVDISCARD_ALL

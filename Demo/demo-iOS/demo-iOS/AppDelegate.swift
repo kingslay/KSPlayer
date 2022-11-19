@@ -6,6 +6,7 @@
 //  Copyright © 2018年 kintan. All rights reserved.
 //
 
+import AVFoundation
 import KSPlayer
 import UIKit
 
@@ -23,7 +24,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UISplitViewControllerDele
         KSOptions.isSecondOpen = true
         KSOptions.isAccurateSeek = true
 //        KSOptions.isLoopPlay = true
-        if UIDevice.current.userInterfaceIdiom == .phone {
+        if UIDevice.current.userInterfaceIdiom == .phone || UIDevice.current.userInterfaceIdiom == .tv {
             window.rootViewController = UINavigationController(rootViewController: MasterViewController())
         } else {
             let splitViewController = UISplitViewController()
@@ -60,6 +61,7 @@ class MEOptions: KSOptions {
     #if os(tvOS)
     override open func preferredDisplayCriteria(refreshRate _: Float, videoDynamicRange _: Int32) -> AVDisplayCriteria? {
 //         AVDisplayCriteria(refreshRate: refreshRate, videoDynamicRange: videoDynamicRange)
+        nil
     }
     #endif
 }
