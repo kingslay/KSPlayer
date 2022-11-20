@@ -102,9 +102,10 @@ public struct KSVideoPlayerView: View {
             .edgesIgnoringSafeArea(.all)
             VideoSubtitleView()
             VideoControllerView()
-            #if os(macOS)
+            #if !os(iOS)
                 .onMoveCommand { direction in
                     isMaskShow = true
+                    #if os(macOS)
                     switch direction {
                     case .left:
                         playerCoordinator.skip(interval: -15)
@@ -117,6 +118,7 @@ public struct KSVideoPlayerView: View {
                     @unknown default:
                         break
                     }
+                    #endif
                 }
             #endif
                 .opacity(isMaskShow ? 1 : 0)
@@ -219,10 +221,10 @@ struct VideoControllerView: View {
                     }
                 }
             }
-//            #if os(tvOS)
-            // can not add focusSection
-//            .focusSection()
-//            #endif
+            #if os(tvOS)
+//             can not add focusSection
+            .focusSection()
+            #endif
             Spacer()
             HStack {
                 Spacer()
