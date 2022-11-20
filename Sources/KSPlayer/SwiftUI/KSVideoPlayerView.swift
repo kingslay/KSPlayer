@@ -64,9 +64,8 @@ public struct KSVideoPlayerView: View {
             }
             #if canImport(UIKit)
             .onSwipe { direction in
-                if direction == .down {
-                    isMaskShow.toggle()
-                } else if direction == .left {
+                isMaskShow = true
+                if direction == .left {
                     playerCoordinator.skip(interval: -15)
                 } else if direction == .right {
                     playerCoordinator.skip(interval: 15)
@@ -94,7 +93,9 @@ public struct KSVideoPlayerView: View {
                 if let playerLayer = playerCoordinator.playerLayer {
                     if !playerLayer.isPipActive {
                         playerCoordinator.playerLayer?.pause()
+                        #if !os(tvOS)
                         playerCoordinator.playerLayer = nil
+                        #endif
                     }
                 }
             }
@@ -481,7 +482,13 @@ public struct TVOSSlide: UIViewRepresentable {
     }
 
     public func updateUIView(_ view: UIViewType, context _: Context) {
-        view.processView.tintColor = isFocused ? .red : .white
+        if isFocused {
+            if view.processView.tintColor == .white {
+                view.processView.tintColor = .red
+            }
+        } else {
+            view.processView.tintColor = .white
+        }
         view.process = process
     }
 }
