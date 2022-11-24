@@ -251,6 +251,8 @@ open class KSOptions {
     public var asynchronousDecompression = true
     public var autoDeInterlace = false
     public var startPlayTime: TimeInterval?
+    public var isHDRToSDR = false
+    public var isSDRToHDR = false
     @Published var preferredFramesPerSecond = Float(60)
     public internal(set) var formatName = ""
     public internal(set) var prepareTime = 0.0

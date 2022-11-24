@@ -187,6 +187,25 @@ class DecompressionSession {
         guard status == noErr, let decompressionSession = session else {
             return nil
         }
+        if #available(iOS 14.0, tvOS 14.0, macOS 11.0, *) {
+            VTSessionSetProperty(decompressionSession, key: kVTDecompressionPropertyKey_PropagatePerFrameHDRDisplayMetadata,
+                                 value: kCFBooleanTrue)
+        }
+        if options.isHDRToSDR {
+            let pixelTransferProperties = [kVTPixelTransferPropertyKey_DestinationColorPrimaries: kCVImageBufferColorPrimaries_ITU_R_709_2,
+                                           kVTPixelTransferPropertyKey_DestinationTransferFunction: kCVImageBufferTransferFunction_ITU_R_709_2,
+                                           kVTPixelTransferPropertyKey_DestinationYCbCrMatrix: kCVImageBufferYCbCrMatrix_ITU_R_709_2]
+            VTSessionSetProperty(decompressionSession,
+                                 key: kVTDecompressionPropertyKey_PixelTransferProperties,
+                                 value: pixelTransferProperties as CFDictionary)
+        } else if options.isSDRToHDR {
+            let pixelTransferProperties = [kVTPixelTransferPropertyKey_DestinationColorPrimaries: kCVImageBufferColorPrimaries_ITU_R_2020,
+                                           kVTPixelTransferPropertyKey_DestinationTransferFunction: kCVImageBufferTransferFunction_SMPTE_ST_2084_PQ,
+                                           kVTPixelTransferPropertyKey_DestinationYCbCrMatrix: kCVImageBufferYCbCrMatrix_ITU_R_2020]
+            VTSessionSetProperty(decompressionSession,
+                                 key: kVTDecompressionPropertyKey_PixelTransferProperties,
+                                 value: pixelTransferProperties as CFDictionary)
+        }
         self.decompressionSession = decompressionSession
     }
 
