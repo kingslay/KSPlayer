@@ -270,6 +270,8 @@ Your user icon or company logo shows up this with a link to your home page.
 
 [skrew](https://github.com/skrew)
 
+[mrpajzl](https://github.com/mrpajzl)
+
 ## Communication
 
 - Email : kingslay@icloud.com
