@@ -155,6 +155,37 @@ public enum DynamicRange: Int32 {
     case DOVI = 5
 }
 
+extension DynamicRange {
+    var colorPrimaries: CFString {
+        switch self {
+        case .SDR:
+            return kCVImageBufferColorPrimaries_ITU_R_709_2
+        case .HDR, .HLG, .DOVI:
+            return kCVImageBufferColorPrimaries_ITU_R_2020
+        }
+    }
+
+    var transferFunction: CFString {
+        switch self {
+        case .SDR:
+            return kCVImageBufferTransferFunction_ITU_R_709_2
+        case .HDR:
+            return kCVImageBufferTransferFunction_SMPTE_ST_2084_PQ
+        case .HLG, .DOVI:
+            return kCVImageBufferTransferFunction_ITU_R_2100_HLG
+        }
+    }
+
+    var yCbCrMatrix: CFString {
+        switch self {
+        case .SDR:
+            return kCVImageBufferYCbCrMatrix_ITU_R_709_2
+        case .HDR, .HLG, .DOVI:
+            return kCVImageBufferYCbCrMatrix_ITU_R_2020
+        }
+    }
+}
+
 public struct DOVIDecoderConfigurationRecord {
     // swiftlint:disable identifier_name
     let dv_version_major: UInt8
@@ -252,7 +283,7 @@ open class KSOptions {
     public var autoDeInterlace = false
     public var startPlayTime: TimeInterval?
     public var isHDRToSDR = false
-    public var isSDRToHDR = false
+    public var destinationDynamicRange: DynamicRange?
     @Published var preferredFramesPerSecond = Float(60)
     public internal(set) var formatName = ""
     public internal(set) var prepareTime = 0.0

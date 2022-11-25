@@ -191,17 +191,10 @@ class DecompressionSession {
             VTSessionSetProperty(decompressionSession, key: kVTDecompressionPropertyKey_PropagatePerFrameHDRDisplayMetadata,
                                  value: kCFBooleanTrue)
         }
-        if options.isHDRToSDR {
-            let pixelTransferProperties = [kVTPixelTransferPropertyKey_DestinationColorPrimaries: kCVImageBufferColorPrimaries_ITU_R_709_2,
-                                           kVTPixelTransferPropertyKey_DestinationTransferFunction: kCVImageBufferTransferFunction_ITU_R_709_2,
-                                           kVTPixelTransferPropertyKey_DestinationYCbCrMatrix: kCVImageBufferYCbCrMatrix_ITU_R_709_2]
-            VTSessionSetProperty(decompressionSession,
-                                 key: kVTDecompressionPropertyKey_PixelTransferProperties,
-                                 value: pixelTransferProperties as CFDictionary)
-        } else if options.isSDRToHDR {
-            let pixelTransferProperties = [kVTPixelTransferPropertyKey_DestinationColorPrimaries: kCVImageBufferColorPrimaries_ITU_R_2020,
-                                           kVTPixelTransferPropertyKey_DestinationTransferFunction: kCVImageBufferTransferFunction_SMPTE_ST_2084_PQ,
-                                           kVTPixelTransferPropertyKey_DestinationYCbCrMatrix: kCVImageBufferYCbCrMatrix_ITU_R_2020]
+        if let destinationDynamicRange = options.destinationDynamicRange {
+            let pixelTransferProperties = [kVTPixelTransferPropertyKey_DestinationColorPrimaries: destinationDynamicRange.colorPrimaries,
+                                           kVTPixelTransferPropertyKey_DestinationTransferFunction: destinationDynamicRange.transferFunction,
+                                           kVTPixelTransferPropertyKey_DestinationYCbCrMatrix: destinationDynamicRange.yCbCrMatrix]
             VTSessionSetProperty(decompressionSession,
                                  key: kVTDecompressionPropertyKey_PixelTransferProperties,
                                  value: pixelTransferProperties as CFDictionary)
