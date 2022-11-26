@@ -317,7 +317,7 @@ public class SubtitleModel: ObservableObject {
 
 @available(iOS 15, tvOS 15, macOS 12, *)
 struct VideoSubtitleView: View {
-    @State fileprivate var model: SubtitleModel
+    @StateObject fileprivate var model: SubtitleModel
     var body: some View {
         VStack {
             Spacer()
