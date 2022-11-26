@@ -13,7 +13,7 @@ public struct KSVideoPlayerView: View {
     @State private var model = ControllerTimeModel()
     @StateObject public var playerCoordinator: KSVideoPlayer.Coordinator
     @State var isMaskShow = true
-    private let url: URL
+    public let url: URL
     public init(playerCoordinator: KSVideoPlayer.Coordinator) {
         url = playerCoordinator.url
         _playerCoordinator = StateObject(wrappedValue: playerCoordinator)
