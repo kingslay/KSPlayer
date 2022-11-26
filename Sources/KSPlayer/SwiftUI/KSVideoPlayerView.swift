@@ -9,17 +9,18 @@ import AVKit
 import SwiftUI
 @available(iOS 15, tvOS 15, macOS 12, *)
 public struct KSVideoPlayerView: View {
-    @ObservedObject public var subtitleModel = SubtitleModel()
+    @StateObject public var subtitleModel = SubtitleModel()
     @State private var model = ControllerTimeModel()
-    public let playerCoordinator: KSVideoPlayer.Coordinator
+    @StateObject public var playerCoordinator: KSVideoPlayer.Coordinator
     @State var isMaskShow = true
-
+    private let url: URL
     public init(playerCoordinator: KSVideoPlayer.Coordinator) {
-        self.playerCoordinator = playerCoordinator
+        url = playerCoordinator.url
+        _playerCoordinator = StateObject(wrappedValue: playerCoordinator)
     }
 
     public init(url: URL, options: KSOptions) {
-        playerCoordinator = KSVideoPlayer.Coordinator(url: url, options: options)
+        self.init(playerCoordinator: KSVideoPlayer.Coordinator(url: url, options: options))
     }
 
     public var body: some View {
@@ -100,8 +101,8 @@ public struct KSVideoPlayerView: View {
                 }
             }
             .edgesIgnoringSafeArea(.all)
-            VideoSubtitleView()
-            VideoControllerView()
+            VideoSubtitleView(model: subtitleModel)
+            VideoControllerView(config: playerCoordinator)
             #if !os(iOS)
                 .onMoveCommand { direction in
                     isMaskShow = true
@@ -124,12 +125,10 @@ public struct KSVideoPlayerView: View {
                 .opacity(isMaskShow ? 1 : 0)
             // 设置opacity为0，还是会去更新View。所以只能这样了
             if isMaskShow {
-                VideoTimeShowView(model: $model)
+                VideoTimeShowView(config: playerCoordinator, model: $model)
             }
         }
         .preferredColorScheme(.dark)
-        .environmentObject(subtitleModel)
-        .environmentObject(playerCoordinator)
         #if os(macOS)
             .navigationTitle(playerCoordinator.url.lastPathComponent)
             .onTapGesture(count: 2) {
@@ -166,7 +165,7 @@ public struct KSVideoPlayerView: View {
 @available(iOS 15, tvOS 15, macOS 12, *)
 extension KSVideoPlayerView: Equatable {
     public static func == (lhs: KSVideoPlayerView, rhs: KSVideoPlayerView) -> Bool {
-        lhs.playerCoordinator == rhs.playerCoordinator
+        lhs.url == rhs.url
     }
 }
 
@@ -179,7 +178,7 @@ struct ControllerTimeModel {
 
 @available(iOS 15, tvOS 15, macOS 12, *)
 struct VideoControllerView: View {
-    @EnvironmentObject fileprivate var config: KSVideoPlayer.Coordinator
+    @StateObject fileprivate var config: KSVideoPlayer.Coordinator
     @Environment(\.dismiss) private var dismiss
     @State private var isShowSetting = false
     public var body: some View {
@@ -261,7 +260,7 @@ struct VideoControllerView: View {
         }
         .padding()
         .sheet(isPresented: $isShowSetting) {
-            VideoSettingView()
+            VideoSettingView(config: config)
         }
         .foregroundColor(.white)
         #if os(tvOS)
@@ -274,7 +273,7 @@ struct VideoControllerView: View {
 
 @available(iOS 15, tvOS 15, macOS 12, *)
 struct VideoTimeShowView: View {
-    @EnvironmentObject fileprivate var config: KSVideoPlayer.Coordinator
+    @StateObject fileprivate var config: KSVideoPlayer.Coordinator
     @Binding fileprivate var model: ControllerTimeModel
     public var body: some View {
         VStack {
@@ -318,7 +317,7 @@ public class SubtitleModel: ObservableObject {
 
 @available(iOS 15, tvOS 15, macOS 12, *)
 struct VideoSubtitleView: View {
-    @EnvironmentObject fileprivate var model: SubtitleModel
+    @State fileprivate var model: SubtitleModel
     var body: some View {
         VStack {
             Spacer()
@@ -349,7 +348,7 @@ struct VideoSettingView: View {
     @State private var presentSubtileDelayAlert = false
     @State private var presentSubtileDelay = ""
     @EnvironmentObject private var subtitleModel: SubtitleModel
-    @EnvironmentObject private var config: KSVideoPlayer.Coordinator
+    @StateObject fileprivate var config: KSVideoPlayer.Coordinator
     var body: some View {
         config.selectedAudioTrack = (config.playerLayer?.player.isMuted ?? false) ? nil : config.audioTracks.first { $0.isEnabled }
         config.selectedVideoTrack = config.videoTracks.first { $0.isEnabled }
