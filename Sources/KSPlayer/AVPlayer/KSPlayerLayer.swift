@@ -715,8 +715,12 @@ extension Bundle {
 
 public struct KSVideoPlayer {
     public let coordinator: Coordinator
-    public init(coordinator: Coordinator) {
+    public let url: URL
+    public let options: KSOptions
+    public init(coordinator: Coordinator, url: URL, options: KSOptions) {
         self.coordinator = coordinator
+        self.url = url
+        self.options = options
     }
 }
 
@@ -732,7 +736,7 @@ extension KSVideoPlayer: UIViewRepresentable {
     #if canImport(UIKit)
     public typealias UIViewType = KSPlayerLayer
     public func makeUIView(context: Context) -> UIViewType {
-        let view = context.coordinator.makeView()
+        let view = context.coordinator.makeView(url: url, options: options)
         let swipeDown = UISwipeGestureRecognizer(target: context.coordinator, action: #selector(Coordinator.swipeGestureAction(_:)))
         swipeDown.direction = .down
         view.addGestureRecognizer(swipeDown)
@@ -773,9 +777,7 @@ extension KSVideoPlayer: UIViewRepresentable {
     private func updateView(_: KSPlayerLayer, context _: Context) {}
 
     public final class Coordinator: ObservableObject {
-        public var url: URL
-        public var options: KSOptions
-        @Published public var isPlay: Bool {
+        @Published public var isPlay: Bool = false {
             didSet {
                 isPlay ? playerLayer?.play() : playerLayer?.pause()
             }
@@ -847,13 +849,9 @@ extension KSVideoPlayer: UIViewRepresentable {
         }
         #endif
 
-        public init(url: URL, options: KSOptions) {
-            self.url = url
-            self.options = options
-            isPlay = options.isAutoPlay
-        }
+        public init() {}
 
-        public func makeView() -> KSPlayerLayer {
+        public func makeView(url: URL, options: KSOptions) -> KSPlayerLayer {
             if let playerLayer {
                 playerLayer.set(url: url, options: options)
                 playerLayer.delegate = self
@@ -906,15 +904,9 @@ extension KSVideoPlayer.Coordinator: KSPlayerLayerDelegate {
     }
 }
 
-extension KSVideoPlayer.Coordinator: Equatable {
-    public static func == (lhs: KSVideoPlayer.Coordinator, rhs: KSVideoPlayer.Coordinator) -> Bool {
-        lhs.url == rhs.url
-    }
-}
-
 extension KSVideoPlayer: Equatable {
     public static func == (lhs: KSVideoPlayer, rhs: KSVideoPlayer) -> Bool {
-        lhs.coordinator == rhs.coordinator
+        lhs.url == rhs.url
     }
 }
 

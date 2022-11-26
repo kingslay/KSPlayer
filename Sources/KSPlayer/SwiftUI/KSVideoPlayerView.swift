@@ -11,25 +11,22 @@ import SwiftUI
 public struct KSVideoPlayerView: View {
     @StateObject public var subtitleModel = SubtitleModel()
     @State private var model = ControllerTimeModel()
-    @StateObject public var playerCoordinator: KSVideoPlayer.Coordinator
+    @StateObject public var playerCoordinator = KSVideoPlayer.Coordinator()
     @State var isMaskShow = true
     public let url: URL
-    public init(playerCoordinator: KSVideoPlayer.Coordinator) {
-        url = playerCoordinator.url
-        _playerCoordinator = StateObject(wrappedValue: playerCoordinator)
-    }
-
+    public let options: KSOptions
     public init(url: URL, options: KSOptions) {
-        self.init(playerCoordinator: KSVideoPlayer.Coordinator(url: url, options: options))
+        self.url = url
+        self.options = options
     }
 
     public var body: some View {
         ZStack {
-            KSVideoPlayer(coordinator: playerCoordinator).onPlay { current, total in
+            KSVideoPlayer(coordinator: playerCoordinator, url: url, options: options).onPlay { current, total in
                 model.currentTime = Int(current)
                 model.totalTime = Int(max(max(0, total), current))
                 if let subtile = subtitleModel.selectedSubtitle {
-                    let time = current + playerCoordinator.options.subtitleDelay
+                    let time = current + options.subtitleDelay
                     if let part = subtile.search(for: time) {
                         subtitleModel.endTime = part.end
                         if let image = part.image {
@@ -151,7 +148,7 @@ public struct KSVideoPlayerView: View {
 
     public func openURL(_ url: URL) {
         if url.isAudio || url.isMovie {
-            playerCoordinator.playerLayer?.set(url: url, options: playerCoordinator.options)
+            playerCoordinator.playerLayer?.set(url: url, options: options)
         } else {
             let info = URLSubtitleInfo(subtitleID: url.path, name: url.lastPathComponent)
             info.downloadURL = url
