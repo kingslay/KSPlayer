@@ -218,21 +218,21 @@ open class KSPlayerLayer: UIView {
     }
 
     public func set(url: URL, options: KSOptions) {
-        isAutoPlay = options.isAutoPlay
         self.options = options
         runInMainqueue {
             self.url = url
+            self.isAutoPlay = options.isAutoPlay
         }
     }
 
     public func set(urls: [URL], options: KSOptions) {
-        isAutoPlay = options.isAutoPlay
         self.options = options
         self.urls.removeAll()
         self.urls.append(contentsOf: urls)
         if let first = urls.first {
             runInMainqueue {
                 self.url = first
+                self.isAutoPlay = options.isAutoPlay
             }
         }
     }
@@ -764,7 +764,7 @@ extension KSVideoPlayer: UIViewRepresentable {
     #else
     public typealias NSViewType = KSPlayerLayer
     public func makeNSView(context: Context) -> NSViewType {
-        context.coordinator.makeView()
+        context.coordinator.makeView(url: url, options: options)
     }
 
     public func updateNSView(_ uiView: NSViewType, context: Context) {

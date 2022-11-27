@@ -91,9 +91,7 @@ public struct KSVideoPlayerView: View {
                 if let playerLayer = playerCoordinator.playerLayer {
                     if !playerLayer.isPipActive {
                         playerCoordinator.playerLayer?.pause()
-                        #if !os(tvOS)
                         playerCoordinator.playerLayer = nil
-                        #endif
                     }
                 }
             }
@@ -127,7 +125,7 @@ public struct KSVideoPlayerView: View {
         }
         .preferredColorScheme(.dark)
         #if os(macOS)
-            .navigationTitle(playerCoordinator.url.lastPathComponent)
+            .navigationTitle(url.lastPathComponent)
             .onTapGesture(count: 2) {
                 NSApplication.shared.keyWindow?.toggleFullScreen(self)
             }
