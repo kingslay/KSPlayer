@@ -692,3 +692,91 @@ public extension KSOptions {
     /// 是否能后台播放视频
     static var canBackgroundPlay = false
 }
+
+extension UIView {
+    var widthConstraint: NSLayoutConstraint? {
+        // 防止返回NSContentSizeLayoutConstraint
+        constraints.first { $0.isMember(of: NSLayoutConstraint.self) && $0.firstAttribute == .width }
+    }
+
+    var heightConstraint: NSLayoutConstraint? {
+        // 防止返回NSContentSizeLayoutConstraint
+        constraints.first { $0.isMember(of: NSLayoutConstraint.self) && $0.firstAttribute == .height }
+    }
+
+    var trailingConstraint: NSLayoutConstraint? {
+        superview?.constraints.first { $0.firstItem === self && $0.firstAttribute == .trailing }
+    }
+
+    var leadingConstraint: NSLayoutConstraint? {
+        superview?.constraints.first { $0.firstItem === self && $0.firstAttribute == .leading }
+    }
+
+    var topConstraint: NSLayoutConstraint? {
+        superview?.constraints.first { $0.firstItem === self && $0.firstAttribute == .top }
+    }
+
+    var bottomConstraint: NSLayoutConstraint? {
+        superview?.constraints.first { $0.firstItem === self && $0.firstAttribute == .bottom }
+    }
+
+    var centerXConstraint: NSLayoutConstraint? {
+        superview?.constraints.first { $0.firstItem === self && $0.firstAttribute == .centerX }
+    }
+
+    var centerYConstraint: NSLayoutConstraint? {
+        superview?.constraints.first { $0.firstItem === self && $0.firstAttribute == .centerY }
+    }
+
+    var frameConstraints: [NSLayoutConstraint] {
+        var frameConstraint = superview?.constraints.filter { constraint in
+            constraint.firstItem === self
+        } ?? [NSLayoutConstraint]()
+        for constraint in constraints where
+            constraint.isMember(of: NSLayoutConstraint.self) && constraint.firstItem === self && (constraint.firstAttribute == .width || constraint.firstAttribute == .height)
+        {
+            frameConstraint.append(constraint)
+        }
+        return frameConstraint
+    }
+
+    var safeTopAnchor: NSLayoutYAxisAnchor {
+        if #available(macOS 11.0, *) {
+            return self.safeAreaLayoutGuide.topAnchor
+        } else {
+            return topAnchor
+        }
+    }
+
+    var readableTopAnchor: NSLayoutYAxisAnchor {
+        #if os(macOS)
+        topAnchor
+        #else
+        readableContentGuide.topAnchor
+        #endif
+    }
+
+    var safeLeadingAnchor: NSLayoutXAxisAnchor {
+        if #available(macOS 11.0, *) {
+            return self.safeAreaLayoutGuide.leadingAnchor
+        } else {
+            return leadingAnchor
+        }
+    }
+
+    var safeTrailingAnchor: NSLayoutXAxisAnchor {
+        if #available(macOS 11.0, *) {
+            return self.safeAreaLayoutGuide.trailingAnchor
+        } else {
+            return trailingAnchor
+        }
+    }
+
+    var safeBottomAnchor: NSLayoutYAxisAnchor {
+        if #available(macOS 11.0, *) {
+            return self.safeAreaLayoutGuide.bottomAnchor
+        } else {
+            return bottomAnchor
+        }
+    }
+}

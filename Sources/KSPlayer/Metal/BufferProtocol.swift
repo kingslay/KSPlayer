@@ -174,13 +174,3 @@ extension CGImage {
         // swiftlint:enable line_length
     }
 }
-
-extension KSOptions {
-    static func colorPixelFormat(bitDepth: Int32) -> MTLPixelFormat {
-        if bitDepth == 10 {
-            return .bgr10a2Unorm
-        } else {
-            return .bgra8Unorm
-        }
-    }
-}
