@@ -236,7 +236,7 @@ class AudioSwresample: Swresample {
     private let channels: Int32
     init(codecpar: AVCodecParameters) {
         descriptor = AudioDescriptor(codecpar: codecpar)
-        channels = Int32(max(min(KSOptions.channelLayout.channelCount, descriptor.inputNumberOfChannels), 1))
+        channels = Int32(max(KSOptions.channelLayout.channelCount, 1))
         _ = setup(descriptor: descriptor)
     }
 

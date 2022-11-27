@@ -146,7 +146,12 @@ public final class AudioEnginePlayer: AudioPlayer, FrameOutput {
         engine.attach(dynamicsProcessor)
         var format = engine.outputNode.outputFormat(forBus: 0)
         KSOptions.audioPlayerSampleRate = Int32(format.sampleRate)
-        if let channelLayout = format.channelLayout, KSOptions.channelLayout != channelLayout {
+        if let audioUnit = engine.outputNode.audioUnit {
+            if var layout = setupLayout(audioUnit: audioUnit) {
+                KSOptions.channelLayout = AVAudioChannelLayout(layout: &layout)
+            }
+        }
+        if KSOptions.channelLayout != format.channelLayout {
             format = AVAudioFormat(commonFormat: format.commonFormat, sampleRate: format.sampleRate, interleaved: format.isInterleaved, channelLayout: KSOptions.channelLayout)
         }
 //        engine.attach(nbandEQ)
@@ -166,6 +171,30 @@ public final class AudioEnginePlayer: AudioPlayer, FrameOutput {
         engine.prepare()
     }
 
+    private func setupLayout(audioUnit: AudioUnit) -> AudioChannelLayout? {
+        var layout: AudioChannelLayout?
+        var size = UInt32(0)
+        AudioUnitGetPropertyInfo(audioUnit, kAudioUnitProperty_AudioChannelLayout, kAudioUnitScope_Output, 0, &size, nil)
+        AudioUnitGetProperty(audioUnit, kAudioUnitProperty_AudioChannelLayout, kAudioUnitScope_Output, 0, &layout, &size)
+        guard var layout else {
+            return nil
+        }
+        var tag = layout.mChannelLayoutTag
+        guard tag != kAudioChannelLayoutTag_UseChannelBitmap else {
+            return layout
+        }
+        var newLayout: AudioChannelLayout?
+        if tag == kAudioChannelLayoutTag_UseChannelBitmap {
+            AudioFormatGetPropertyInfo(kAudioFormatProperty_ChannelLayoutForBitmap, UInt32(MemoryLayout<UInt32>.size), &(layout.mChannelBitmap), &size)
+            AudioFormatGetProperty(kAudioFormatProperty_ChannelLayoutForBitmap, UInt32(MemoryLayout<UInt32>.size), &(layout.mChannelBitmap), &size, &newLayout)
+        } else {
+            AudioFormatGetPropertyInfo(kAudioFormatProperty_ChannelLayoutForBitmap, UInt32(MemoryLayout<AudioChannelLayoutTag>.size), &tag, &size)
+            AudioFormatGetProperty(kAudioFormatProperty_ChannelLayoutForBitmap, UInt32(MemoryLayout<AudioChannelLayoutTag>.size), &tag, &size, &newLayout)
+        }
+        newLayout?.mChannelLayoutTag = kAudioChannelLayoutTag_UseChannelDescriptions
+        return newLayout
+    }
+
     private func addRenderNotify(audioUnit: AudioUnit) {
         AudioUnitAddRenderNotify(audioUnit, { refCon, ioActionFlags, inTimeStamp, _, _, _ in
             let `self` = Unmanaged<AudioEnginePlayer>.fromOpaque(refCon).takeUnretainedValue()
@@ -178,25 +207,25 @@ public final class AudioEnginePlayer: AudioPlayer, FrameOutput {
         }, Unmanaged.passUnretained(self).toOpaque())
     }
 
-    private func addRenderCallback(audioUnit: AudioUnit, streamDescription: UnsafePointer<AudioStreamBasicDescription>) {
-        _ = AudioUnitSetProperty(audioUnit,
-                                 kAudioUnitProperty_StreamFormat,
-                                 kAudioUnitScope_Input,
-                                 0,
-                                 streamDescription,
-                                 UInt32(MemoryLayout<AudioStreamBasicDescription>.size))
-        var inputCallbackStruct = AURenderCallbackStruct()
-        inputCallbackStruct.inputProcRefCon = Unmanaged.passUnretained(self).toOpaque()
-        inputCallbackStruct.inputProc = { refCon, _, _, _, inNumberFrames, ioData in
-            guard let ioData else {
-                return noErr
-            }
-            let `self` = Unmanaged<AudioEnginePlayer>.fromOpaque(refCon).takeUnretainedValue()
-            self.audioPlayerShouldInputData(ioData: UnsafeMutableAudioBufferListPointer(ioData), numberOfFrames: inNumberFrames)
-            return noErr
-        }
-        _ = AudioUnitSetProperty(audioUnit, kAudioUnitProperty_SetRenderCallback, kAudioUnitScope_Input, 0, &inputCallbackStruct, UInt32(MemoryLayout<AURenderCallbackStruct>.size))
-    }
+//    private func addRenderCallback(audioUnit: AudioUnit, streamDescription: UnsafePointer<AudioStreamBasicDescription>) {
+//        _ = AudioUnitSetProperty(audioUnit,
+//                                 kAudioUnitProperty_StreamFormat,
+//                                 kAudioUnitScope_Input,
+//                                 0,
+//                                 streamDescription,
+//                                 UInt32(MemoryLayout<AudioStreamBasicDescription>.size))
+//        var inputCallbackStruct = AURenderCallbackStruct()
+//        inputCallbackStruct.inputProcRefCon = Unmanaged.passUnretained(self).toOpaque()
+//        inputCallbackStruct.inputProc = { refCon, _, _, _, inNumberFrames, ioData in
+//            guard let ioData else {
+//                return noErr
+//            }
+//            let `self` = Unmanaged<AudioEnginePlayer>.fromOpaque(refCon).takeUnretainedValue()
+//            self.audioPlayerShouldInputData(ioData: UnsafeMutableAudioBufferListPointer(ioData), numberOfFrames: inNumberFrames)
+//            return noErr
+//        }
+//        _ = AudioUnitSetProperty(audioUnit, kAudioUnitProperty_SetRenderCallback, kAudioUnitScope_Input, 0, &inputCallbackStruct, UInt32(MemoryLayout<AURenderCallbackStruct>.size))
+//    }
 
     private func audioPlayerShouldInputData(ioData: UnsafeMutableAudioBufferListPointer, numberOfFrames: UInt32) {
         var ioDataWriteOffset = 0
