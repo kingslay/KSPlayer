@@ -702,11 +702,6 @@ public extension Int {
     }
 }
 
-public extension KSOptions {
-    static var firstPlayerType: MediaPlayerProtocol.Type = KSAVPlayer.self
-    static var secondPlayerType: MediaPlayerProtocol.Type?
-}
-
 #if !SWIFT_PACKAGE
 extension Bundle {
     static let module = Bundle(for: KSPlayerLayer.self).path(forResource: "KSPlayer_KSPlayer", ofType: "bundle").flatMap { Bundle(path: $0) } ?? Bundle.main

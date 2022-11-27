@@ -548,6 +548,8 @@ public struct LoadingState {
 }
 
 public extension KSOptions {
+    static var firstPlayerType: MediaPlayerProtocol.Type = KSAVPlayer.self
+    static var secondPlayerType: MediaPlayerProtocol.Type?
     /// 最低缓存视频时间
     static var preferredForwardBufferDuration = 3.0
     /// 最大缓存视频时间
@@ -562,7 +564,6 @@ public extension KSOptions {
     static var isAutoPlay = false
     /// seek完是否自动播放
     static var isSeekedAutoPlay = true
-    static var isClearVideoWhereReplace = true
     static var enableMaxOutputChannels = true
     static var pipController: Any?
     /// 日志输出方式

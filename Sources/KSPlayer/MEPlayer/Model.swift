@@ -88,12 +88,14 @@ public enum LogLevel: Int32 {
     case trace = 56
 }
 
+// for MEPlayer
 public extension KSOptions {
     /// 开启VR模式的陀飞轮
     static var enableSensor = true
     /// 日志级别
     static var logLevel = LogLevel.warning
     static var stackSize = 32768
+    static var isClearVideoWhereReplace = true
     internal static var channelLayout = AVAudioChannelLayout(layoutTag: kAudioChannelLayoutTag_Stereo)!
     #if os(macOS)
     internal static var audioPlayerSampleRate = Int32(44100)
