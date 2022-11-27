@@ -774,7 +774,11 @@ extension KSVideoPlayer: UIViewRepresentable {
     public static func dismantleNSView(_: NSViewType, coordinator _: Coordinator) {}
     #endif
 
-    private func updateView(_: KSPlayerLayer, context _: Context) {}
+    private func updateView(_ view: KSPlayerLayer, context _: Context) {
+        if view.url != url {
+            view.set(url: url, options: options)
+        }
+    }
 
     public final class Coordinator: ObservableObject {
         @Published public var isPlay: Bool = false {

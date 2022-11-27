@@ -13,10 +13,10 @@ public struct KSVideoPlayerView: View {
     @State private var model = ControllerTimeModel()
     @StateObject public var playerCoordinator = KSVideoPlayer.Coordinator()
     @State var isMaskShow = true
-    public let url: URL
+    @State public var url: URL
     public let options: KSOptions
     public init(url: URL, options: KSOptions) {
-        self.url = url
+        _url = .init(initialValue: url)
         self.options = options
     }
 
@@ -146,7 +146,7 @@ public struct KSVideoPlayerView: View {
 
     public func openURL(_ url: URL) {
         if url.isAudio || url.isMovie {
-            playerCoordinator.playerLayer?.set(url: url, options: options)
+            self.url = url
         } else {
             let info = URLSubtitleInfo(subtitleID: url.path, name: url.lastPathComponent)
             info.downloadURL = url
