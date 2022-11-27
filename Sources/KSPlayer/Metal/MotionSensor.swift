@@ -15,7 +15,7 @@ final class MotionSensor {
     private let manager = CMMotionManager()
     private let worldToInertialReferenceFrame = simd_float4x4(euler: -90, y: 0, z: 90)
     private var deviceToDisplay = simd_float4x4.identity
-    private let defalutRadiansY: Float
+    private let defaultRadiansY: Float
     private var orientation = UIInterfaceOrientation.unknown {
         didSet {
             if oldValue != orientation {
@@ -36,11 +36,11 @@ final class MotionSensor {
     private init() {
         switch UIApplication.shared.statusBarOrientation {
         case .landscapeRight:
-            defalutRadiansY = -.pi / 2
+            defaultRadiansY = -.pi / 2
         case .landscapeLeft:
-            defalutRadiansY = .pi / 2
+            defaultRadiansY = .pi / 2
         default:
-            defalutRadiansY = 0
+            defaultRadiansY = 0
         }
     }
 
@@ -65,7 +65,7 @@ final class MotionSensor {
             matrix *= worldToInertialReferenceFrame
             orientation = UIApplication.shared.statusBarOrientation
             matrix = deviceToDisplay * matrix
-            matrix = matrix.rotateY(radians: defalutRadiansY)
+            matrix = matrix.rotateY(radians: defaultRadiansY)
             return matrix
         }
         return nil

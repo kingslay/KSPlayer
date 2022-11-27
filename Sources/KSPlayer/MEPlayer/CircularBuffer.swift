@@ -59,7 +59,7 @@ public class CircularBuffer<Item: ObjectQueueItem> {
             }
         }
         tailIndex &+= 1
-        if _count == maxCount {
+        if _count >= maxCount {
             if expanding {
                 // No more room left for another append so grow the buffer now.
                 _doubleCapacity()

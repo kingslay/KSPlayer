@@ -712,16 +712,20 @@ extension KSVideoPlayer: UIViewRepresentable {
     public static func dismantleNSView(_: NSViewType, coordinator _: Coordinator) {}
     #endif
 
-    private func updateView(_ view: KSPlayerLayer, context _: Context) {
+    private func updateView(_ view: KSPlayerLayer, context: Context) {
         if view.url != url {
+            view.delegate = nil
             view.set(url: url, options: options)
+            view.delegate = context.coordinator
         }
     }
 
     public final class Coordinator: ObservableObject {
         @Published public var isPlay: Bool = false {
             didSet {
-                isPlay ? playerLayer?.play() : playerLayer?.pause()
+                if isPlay != oldValue {
+                    isPlay ? playerLayer?.play() : playerLayer?.pause()
+                }
             }
         }
 
@@ -797,11 +801,13 @@ extension KSVideoPlayer: UIViewRepresentable {
             if let playerLayer {
                 playerLayer.set(url: url, options: options)
                 playerLayer.delegate = self
+                isPlay = options.isAutoPlay
                 return playerLayer
             } else {
                 let playerLayer = KSPlayerLayer(url: url, options: options)
                 playerLayer.delegate = self
                 self.playerLayer = playerLayer
+                isPlay = options.isAutoPlay
                 return playerLayer
             }
         }
@@ -828,7 +834,9 @@ extension KSVideoPlayer.Coordinator: KSPlayerLayerDelegate {
             audioTracks = layer.player.tracks(mediaType: .audio)
         } else {
             isLoading = state == .buffering
-            isPlay = state.isPlaying
+            if state != .prepareToPlay {
+                isPlay = state.isPlaying
+            }
         }
         onStateChanged?(layer, state)
     }
