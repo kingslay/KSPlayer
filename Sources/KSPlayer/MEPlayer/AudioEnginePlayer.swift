@@ -174,7 +174,25 @@ public final class AudioEnginePlayer: AudioPlayer, FrameOutput {
         AudioUnitGetPropertyInfo(audioUnit, kAudioUnitProperty_AudioChannelLayout, kAudioUnitScope_Output, 0, &size, nil)
         let data = UnsafeMutableRawPointer.allocate(byteCount: Int(size), alignment: MemoryLayout<Int8>.alignment)
         AudioUnitGetProperty(audioUnit, kAudioUnitProperty_AudioChannelLayout, kAudioUnitScope_Output, 0, data, &size)
-        return data.bindMemory(to: AudioChannelLayout.self, capacity: 1)
+        let layout = data.bindMemory(to: AudioChannelLayout.self, capacity: 1)
+        let tag = layout.pointee.mChannelLayoutTag
+        guard tag != kAudioChannelLayoutTag_UseChannelDescriptions else {
+            return layout
+        }
+        let newLayout: UnsafeMutablePointer<AudioChannelLayout>
+        if tag == kAudioChannelLayoutTag_UseChannelBitmap {
+            AudioFormatGetPropertyInfo(kAudioFormatProperty_ChannelLayoutForBitmap, UInt32(MemoryLayout<AudioChannelBitmap>.size), &layout.pointee.mChannelBitmap, &size)
+            let data = UnsafeMutableRawPointer.allocate(byteCount: Int(size), alignment: MemoryLayout<Int8>.alignment)
+            AudioFormatGetProperty(kAudioFormatProperty_ChannelLayoutForBitmap, UInt32(MemoryLayout<AudioChannelBitmap>.size), &layout.pointee.mChannelBitmap, &size, data)
+            newLayout = data.bindMemory(to: AudioChannelLayout.self, capacity: 1)
+        } else {
+            AudioFormatGetPropertyInfo(kAudioFormatProperty_ChannelLayoutForTag, UInt32(MemoryLayout<AudioChannelLayoutTag>.size), &layout.pointee.mChannelLayoutTag, &size)
+            let data = UnsafeMutableRawPointer.allocate(byteCount: Int(size), alignment: MemoryLayout<Int8>.alignment)
+            AudioFormatGetProperty(kAudioFormatProperty_ChannelLayoutForTag, UInt32(MemoryLayout<AudioChannelLayoutTag>.size), &layout.pointee.mChannelLayoutTag, &size, data)
+            newLayout = data.bindMemory(to: AudioChannelLayout.self, capacity: 1)
+        }
+        newLayout.pointee.mChannelLayoutTag = kAudioChannelLayoutTag_UseChannelDescriptions
+        return newLayout
     }
 
     private func addRenderNotify(audioUnit: AudioUnit) {
