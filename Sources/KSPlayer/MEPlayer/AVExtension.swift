@@ -388,7 +388,9 @@ extension AVBufferSrcParameters: Equatable {
 
 extension AVChannelLayout: Equatable {
     public static func == (lhs: AVChannelLayout, rhs: AVChannelLayout) -> Bool {
-        lhs.nb_channels == rhs.nb_channels && lhs.order == rhs.order
+        var lhs = lhs
+        var rhs = rhs
+        return av_channel_layout_compare(&lhs, &rhs) == 0
     }
 }
 

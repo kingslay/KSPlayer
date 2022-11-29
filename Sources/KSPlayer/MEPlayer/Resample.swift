@@ -8,11 +8,11 @@
 import AVFoundation
 import CoreGraphics
 import CoreMedia
+import FFmpeg
 import Libavcodec
 import Libswresample
 import Libswscale
 import VideoToolbox
-
 protocol Swresample {
     func transfer(avframe: UnsafeMutablePointer<AVFrame>) throws -> MEFrame
     func shutdown()
@@ -233,20 +233,40 @@ typealias SwrContext = OpaquePointer
 class AudioSwresample: Swresample {
     private var swrContext: SwrContext?
     private var descriptor: AudioDescriptor
-    private let channels: Int32
+    private var outChannel: AVChannelLayout
     init(codecpar: AVCodecParameters) {
         descriptor = AudioDescriptor(codecpar: codecpar)
-        channels = Int32(max(KSOptions.channelLayout.channelCount, 1))
+        outChannel = AVChannelLayout()
+        av_channel_layout_default(&outChannel, Int32(max(KSOptions.channelLayout.channelCount, 1)))
         _ = setup(descriptor: descriptor)
     }
 
     private func setup(descriptor: AudioDescriptor) -> Bool {
-        var outChannel = AVChannelLayout()
-        var inChannel = AVChannelLayout()
-        av_channel_layout_default(&outChannel, channels)
-        av_channel_layout_default(&inChannel, Int32(descriptor.inputNumberOfChannels))
-        _ = swr_alloc_set_opts2(&swrContext, &outChannel, AV_SAMPLE_FMT_FLTP, KSOptions.audioPlayerSampleRate, &inChannel, descriptor.inputFormat, descriptor.inputSampleRate, 0, nil)
+        if KSOptions.channelLayout.channelCount > 2 {
+            var layout = KSOptions.channelLayout.layout.pointee
+            let n = Int(layout.mNumberChannelDescriptions)
+            let buffers = UnsafeBufferPointer<AudioChannelDescription>(start: &layout.mChannelDescriptions, count: n)
+            var array = (0 ..< n).map { i in
+                var custom = AVChannelCustom()
+                custom.id = buffers[i].mChannelLabel.avChannel
+                return custom
+            }
+            outChannel = AVChannelLayout(order: AV_CHANNEL_ORDER_CUSTOM, nb_channels: Int32(n), u: AVChannelLayout.__Unnamed_union_u(map: &array), opaque: nil)
+        }
+        _ = swr_alloc_set_opts2(&swrContext, &outChannel, AV_SAMPLE_FMT_FLTP, KSOptions.audioPlayerSampleRate, &descriptor.inChannel, descriptor.inputFormat, descriptor.inputSampleRate, 0, nil)
         let result = swr_init(swrContext)
+//        if KSOptions.channelLayout.channelCount > 2 {
+//            var layout = KSOptions.channelLayout.layout.pointee
+//            let n = Int(layout.mNumberChannelDescriptions)
+//            var channelMap = Array(repeating: Int32(-1), count: n)
+//            let buffers = UnsafeBufferPointer<AudioChannelDescription>(start: &layout.mChannelDescriptions, count: n)
+//            for i in 0 ..< n {
+//                let channel = buffers[i].mChannelLabel.avChannel
+//                channelMap[i] = av_channel_layout_index_from_channel(&outChannel, channel)
+//            }
+//
+//            swr_set_channel_mapping(swrContext, channelMap)
+//        }
         if result < 0 {
             shutdown()
             return false
@@ -261,15 +281,15 @@ class AudioSwresample: Swresample {
             if setup(descriptor: descriptor) {
                 self.descriptor = descriptor
             } else {
-                throw NSError(errorCode: .auidoSwrInit, userInfo: ["outChannel": channels, "inChannel": descriptor.inputNumberOfChannels])
+                throw NSError(errorCode: .auidoSwrInit, userInfo: ["outChannel": outChannel, "inChannel": descriptor.inChannel])
             }
         }
         var numberOfSamples = avframe.pointee.nb_samples
         let nbSamples = swr_get_out_samples(swrContext, numberOfSamples)
         var frameBuffer = Array(tuple: avframe.pointee.data).map { UnsafePointer<UInt8>($0) }
         var bufferSize = Int32(0)
-        _ = av_samples_get_buffer_size(&bufferSize, channels, nbSamples, AV_SAMPLE_FMT_FLTP, 1)
-        let frame = AudioFrame(bufferSize: bufferSize, channels: channels)
+        _ = av_samples_get_buffer_size(&bufferSize, outChannel.nb_channels, nbSamples, AV_SAMPLE_FMT_FLTP, 1)
+        let frame = AudioFrame(bufferSize: bufferSize, channels: outChannel.nb_channels)
         numberOfSamples = swr_convert(swrContext, &frame.data, nbSamples, &frameBuffer, numberOfSamples)
         frame.numberOfSamples = Int(numberOfSamples)
         return frame
@@ -280,29 +300,65 @@ class AudioSwresample: Swresample {
     }
 }
 
+extension AudioChannelLabel {
+    var avChannel: AVChannel {
+        if self == 0 {
+            return AVChannel(-1)
+        } else if self <= kAudioChannelLabel_LFEScreen {
+            return AVChannel(Int32(self) - 1)
+        } else if self <= kAudioChannelLabel_RightSurround {
+            return AVChannel(Int32(self) + 4)
+
+        } else if self <= kAudioChannelLabel_CenterSurround {
+            return AVChannel(Int32(self) + 1)
+
+        } else if self <= kAudioChannelLabel_RightSurroundDirect {
+            return AVChannel(Int32(self) + 23)
+
+        } else if self <= kAudioChannelLabel_TopBackRight {
+            return AVChannel(Int32(self) - 1)
+
+        } else if self < kAudioChannelLabel_RearSurroundLeft {
+            return AVChannel(-1)
+
+        } else if self <= kAudioChannelLabel_RearSurroundRight {
+            return AVChannel(Int32(self) - 29)
+
+        } else if self <= kAudioChannelLabel_RightWide {
+            return AVChannel(Int32(self) - 4)
+        } else if self == kAudioChannelLabel_LFE2 {
+            return AVChannel(swift_ctzll(Int64(swift_AV_CH_LOW_FREQUENCY_2)))
+        } else if self == kAudioChannelLabel_Mono {
+            return AVChannel(swift_ctzll(Int64(swift_AV_CH_FRONT_CENTER)))
+        } else {
+            return AVChannel(-1)
+        }
+    }
+}
+
 private class AudioDescriptor: Equatable {
-    fileprivate let inputNumberOfChannels: AVAudioChannelCount
     fileprivate let inputSampleRate: Int32
     fileprivate let inputFormat: AVSampleFormat
+    fileprivate var inChannel: AVChannelLayout
     init(codecpar: AVCodecParameters) {
-        inputNumberOfChannels = max(UInt32(codecpar.ch_layout.nb_channels), 1)
+        inChannel = codecpar.ch_layout
         let sampleRate = codecpar.sample_rate
         inputSampleRate = sampleRate == 0 ? KSOptions.audioPlayerSampleRate : sampleRate
         inputFormat = AVSampleFormat(rawValue: codecpar.format)
     }
 
     init(frame: UnsafeMutablePointer<AVFrame>) {
-        inputNumberOfChannels = max(UInt32(frame.pointee.ch_layout.nb_channels), 1)
+        inChannel = frame.pointee.ch_layout
         let sampleRate = frame.pointee.sample_rate
         inputSampleRate = sampleRate == 0 ? KSOptions.audioPlayerSampleRate : sampleRate
         inputFormat = AVSampleFormat(rawValue: frame.pointee.format)
     }
 
     static func == (lhs: AudioDescriptor, rhs: AudioDescriptor) -> Bool {
-        lhs.inputFormat == rhs.inputFormat && lhs.inputSampleRate == rhs.inputSampleRate && lhs.inputNumberOfChannels == rhs.inputNumberOfChannels
+        lhs.inputFormat == rhs.inputFormat && lhs.inputSampleRate == rhs.inputSampleRate && lhs.inChannel == rhs.inChannel
     }
 
     static func == (lhs: AudioDescriptor, rhs: AVFrame) -> Bool {
-        lhs.inputFormat.rawValue == rhs.format && lhs.inputSampleRate == rhs.sample_rate && lhs.inputNumberOfChannels == rhs.ch_layout.nb_channels
+        lhs.inputFormat.rawValue == rhs.format && lhs.inputSampleRate == rhs.sample_rate && lhs.inChannel == rhs.ch_layout
     }
 }
