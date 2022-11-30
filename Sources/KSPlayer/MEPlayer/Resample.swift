@@ -236,23 +236,27 @@ class AudioSwresample: Swresample {
     private var outChannel: AVChannelLayout
     init(codecpar: AVCodecParameters) {
         descriptor = AudioDescriptor(codecpar: codecpar)
-        outChannel = AVChannelLayout()
-        av_channel_layout_default(&outChannel, Int32(max(KSOptions.channelLayout.channelCount, 1)))
-        _ = setup(descriptor: descriptor)
-    }
-
-    private func setup(descriptor: AudioDescriptor) -> Bool {
-        if KSOptions.channelLayout.channelCount > 2 {
-            var layout = KSOptions.channelLayout.layout.pointee
-            let n = Int(layout.mNumberChannelDescriptions)
+        var layout = KSOptions.channelLayout.layout.pointee
+        KSLog("KSOptions channelLayout: \(layout)")
+        let n = Int(layout.mNumberChannelDescriptions)
+        if n > 2 {
             let buffers = UnsafeBufferPointer<AudioChannelDescription>(start: &layout.mChannelDescriptions, count: n)
             var array = (0 ..< n).map { i in
                 var custom = AVChannelCustom()
                 custom.id = buffers[i].mChannelLabel.avChannel
                 return custom
             }
+            KSLog("channelLayout map: \(array)")
             outChannel = AVChannelLayout(order: AV_CHANNEL_ORDER_CUSTOM, nb_channels: Int32(n), u: AVChannelLayout.__Unnamed_union_u(map: &array), opaque: nil)
+        } else {
+            outChannel = AVChannelLayout()
+            av_channel_layout_default(&outChannel, Int32(max(n, 1)))
         }
+        KSLog("out channelLayout: \(outChannel)")
+        _ = setup(descriptor: descriptor)
+    }
+
+    private func setup(descriptor: AudioDescriptor) -> Bool {
         _ = swr_alloc_set_opts2(&swrContext, &outChannel, AV_SAMPLE_FMT_FLTP, KSOptions.audioPlayerSampleRate, &descriptor.inChannel, descriptor.inputFormat, descriptor.inputSampleRate, 0, nil)
         let result = swr_init(swrContext)
 //        if KSOptions.channelLayout.channelCount > 2 {
