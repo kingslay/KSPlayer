@@ -331,35 +331,23 @@ extension AVChannelLayout {
 extension AudioChannelLabel {
     var avChannel: AVChannel {
         if self == 0 {
-            return AVChannel(-1)
-        } else if self <= kAudioChannelLabel_LFEScreen {
-            return AVChannel(Int32(self) - 1)
-        } else if self <= kAudioChannelLabel_RightSurround {
-            return AVChannel(Int32(self) + 4)
-
-        } else if self <= kAudioChannelLabel_CenterSurround {
-            return AVChannel(Int32(self) + 1)
-
-        } else if self <= kAudioChannelLabel_RightSurroundDirect {
-            return AVChannel(Int32(self) + 23)
-
+            return AV_CHAN_NONE
         } else if self <= kAudioChannelLabel_TopBackRight {
             return AVChannel(Int32(self) - 1)
-
-        } else if self < kAudioChannelLabel_RearSurroundLeft {
-            return AVChannel(-1)
-
-        } else if self <= kAudioChannelLabel_RearSurroundRight {
-            return AVChannel(Int32(self) - 29)
-
-        } else if self <= kAudioChannelLabel_RightWide {
-            return AVChannel(Int32(self) - 4)
+        } else if self == kAudioChannelLabel_RearSurroundLeft || self == kAudioChannelLabel_RearSurroundRight {
+            return AVChannel(Int32(self))
+        } else if self == kAudioChannelLabel_LeftWide {
+            return AV_CHAN_WIDE_LEFT
+        } else if self == kAudioChannelLabel_RightWide {
+            return AV_CHAN_WIDE_RIGHT
         } else if self == kAudioChannelLabel_LFE2 {
-            return AVChannel(swift_ctzll(Int64(swift_AV_CH_LOW_FREQUENCY_2)))
-        } else if self == kAudioChannelLabel_Mono {
-            return AVChannel(swift_ctzll(Int64(swift_AV_CH_FRONT_CENTER)))
+            return AV_CHAN_LOW_FREQUENCY_2
+        } else if self == kAudioChannelLabel_HeadphonesLeft {
+            return AV_CHAN_STEREO_LEFT
+        } else if self == kAudioChannelLabel_HeadphonesRight {
+            return AV_CHAN_STEREO_RIGHT
         } else {
-            return AVChannel(-1)
+            return AV_CHAN_NONE
         }
     }
 }

@@ -41,12 +41,6 @@ static const uint64_t swift_AV_CH_LAYOUT_STEREO_DOWNMIX    = AV_CH_LAYOUT_STEREO
 static const uint64_t swift_AV_OPT_SEARCH_CHILDREN         = AV_OPT_SEARCH_CHILDREN;
 static const uint64_t swift_AV_CH_LOW_FREQUENCY_2         = AV_CH_LOW_FREQUENCY_2;
 static const uint64_t swift_AV_CH_FRONT_CENTER         = AV_CH_FRONT_CENTER;
-
-static inline int swift_ctzll(long long v)
-{
-    return __builtin_ctzll(v);
-}
-
 /* error handling */
 static inline int swift_AVERROR(int errnum) {
   return AVERROR(errnum);
