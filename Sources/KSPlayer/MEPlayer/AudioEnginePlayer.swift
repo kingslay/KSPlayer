@@ -176,6 +176,7 @@ public final class AudioEnginePlayer: AudioPlayer, FrameOutput {
         AudioUnitGetProperty(audioUnit, kAudioUnitProperty_AudioChannelLayout, kAudioUnitScope_Output, 0, data, &size)
         let layout = data.bindMemory(to: AudioChannelLayout.self, capacity: 1)
         let tag = layout.pointee.mChannelLayoutTag
+        KSLog("audio unit channelLayout tag: \(tag)")
         guard tag != kAudioChannelLayoutTag_UseChannelDescriptions else {
             return layout
         }
