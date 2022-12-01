@@ -19,6 +19,7 @@
 		AC84D8EA28ABBD0E00344154 /* mjpeg.flac in Resources */ = {isa = PBXBuildFile; fileRef = AC84D8DB28ABBD0D00344154 /* mjpeg.flac */; };
 		AC84D8ED28ABBD0E00344154 /* hevc.mkv in Resources */ = {isa = PBXBuildFile; fileRef = AC84D8DC28ABBD0D00344154 /* hevc.mkv */; };
 		AC84D8F028ABBD0E00344154 /* raw.h264 in Resources */ = {isa = PBXBuildFile; fileRef = AC84D8DD28ABBD0D00344154 /* raw.h264 */; };
+		ACA237132938B78B008916E3 /* dolby-digital-plus-channel.mkv in Resources */ = {isa = PBXBuildFile; fileRef = ACA237122938B78A008916E3 /* dolby-digital-plus-channel.mkv */; };
 		ACD2F772275F735C0006D16F /* KSPlayer in Frameworks */ = {isa = PBXBuildFile; productRef = ACD2F771275F735C0006D16F /* KSPlayer */; };
 /* End PBXBuildFile section */
 
@@ -38,6 +39,7 @@
 		AC84D8DB28ABBD0D00344154 /* mjpeg.flac */ = {isa = PBXFileReference; lastKnownFileType = file; path = mjpeg.flac; sourceTree = "<group>"; };
 		AC84D8DC28ABBD0D00344154 /* hevc.mkv */ = {isa = PBXFileReference; lastKnownFileType = file; path = hevc.mkv; sourceTree = "<group>"; };
 		AC84D8DD28ABBD0D00344154 /* raw.h264 */ = {isa = PBXFileReference; lastKnownFileType = file; path = raw.h264; sourceTree = "<group>"; };
+		ACA237122938B78A008916E3 /* dolby-digital-plus-channel.mkv */ = {isa = PBXFileReference; lastKnownFileType = file; path = "dolby-digital-plus-channel.mkv"; sourceTree = "<group>"; };
 		ACADA07528EDC067001B76D1 /* TracyPlayer.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = TracyPlayer.entitlements; sourceTree = "<group>"; };
 		ACD2F747275F6E860006D16F /* KSPlayer */ = {isa = PBXFileReference; lastKnownFileType = folder; name = KSPlayer; path = ../..; sourceTree = "<group>"; };
 		ACE3619328EB689F00F234EB /* TracyPlayer-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = "TracyPlayer-Info.plist"; sourceTree = "<group>"; };
@@ -108,6 +110,7 @@
 		ACD2F77F275F9BEE0006D16F /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				ACA237122938B78A008916E3 /* dolby-digital-plus-channel.mkv */,
 				AC84D8D928ABBD0D00344154 /* dvd_subtitle.mkv */,
 				AC84D8DA28ABBD0D00344154 /* h264.mp4 */,
 				AC84D8DC28ABBD0D00344154 /* hevc.mkv */,
@@ -232,6 +235,7 @@
 				AC84D8E728ABBD0E00344154 /* h264.mp4 in Resources */,
 				AC84D8F028ABBD0E00344154 /* raw.h264 in Resources */,
 				AC84D8E428ABBD0E00344154 /* dvd_subtitle.mkv in Resources */,
+				ACA237132938B78B008916E3 /* dolby-digital-plus-channel.mkv in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

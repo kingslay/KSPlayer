@@ -176,6 +176,10 @@ var objects: [KSPlayerResource] = {
 //        options.videoFilters = "hflip,vflip"
         objects.append(KSPlayerResource(url: URL(fileURLWithPath: path), options: options, name: "图片字幕"))
     }
+    if let path = Bundle.main.path(forResource: "dolby-digital-plus-channel", ofType: "mkv") {
+        let options = KSOptions()
+        objects.append(KSPlayerResource(url: URL(fileURLWithPath: path), options: options, name: "dolby-digital-plus"))
+    }
     if let path = Bundle.main.path(forResource: "vr", ofType: "mp4") {
         let options = KSOptions()
         options.display = .vr
