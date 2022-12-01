@@ -236,41 +236,29 @@ class AudioSwresample: Swresample {
     private var outChannel: AVChannelLayout
     init(codecpar: AVCodecParameters) {
         descriptor = AudioDescriptor(codecpar: codecpar)
-        var layout = KSOptions.channelLayout.layout.pointee
-        KSLog("KSOptions channelLayout: \(layout)")
-        let n = Int(layout.mNumberChannelDescriptions)
-        if n > 2 {
-            let buffers = UnsafeBufferPointer<AudioChannelDescription>(start: &layout.mChannelDescriptions, count: n)
-            var array = (0 ..< n).map { i in
-                var custom = AVChannelCustom()
-                custom.id = buffers[i].mChannelLabel.avChannel
-                return custom
-            }
-            KSLog("channelLayout map: \(array)")
-            outChannel = AVChannelLayout(order: AV_CHANNEL_ORDER_CUSTOM, nb_channels: Int32(n), u: AVChannelLayout.__Unnamed_union_u(map: &array), opaque: nil)
-        } else {
-            outChannel = AVChannelLayout()
-            av_channel_layout_default(&outChannel, Int32(max(n, 1)))
-        }
-        KSLog("out channelLayout: \(outChannel)")
+        outChannel = AVChannelLayout()
         _ = setup(descriptor: descriptor)
     }
 
     private func setup(descriptor: AudioDescriptor) -> Bool {
+        let layout = UnsafeMutablePointer(mutating: KSOptions.channelLayout.layout)
+        KSLog("KSOptions channelLayout: \(layout.pointee)")
+        let n = Int(layout.pointee.mNumberChannelDescriptions)
+        // 不能用AV_CHANNEL_ORDER_CUSTOM
+        av_channel_layout_default(&outChannel, Int32(max(n, 1)))
         _ = swr_alloc_set_opts2(&swrContext, &outChannel, AV_SAMPLE_FMT_FLTP, KSOptions.audioPlayerSampleRate, &descriptor.inChannel, descriptor.inputFormat, descriptor.inputSampleRate, 0, nil)
         let result = swr_init(swrContext)
-//        if KSOptions.channelLayout.channelCount > 2 {
-//            var layout = KSOptions.channelLayout.layout.pointee
-//            let n = Int(layout.mNumberChannelDescriptions)
-//            var channelMap = Array(repeating: Int32(-1), count: n)
-//            let buffers = UnsafeBufferPointer<AudioChannelDescription>(start: &layout.mChannelDescriptions, count: n)
-//            for i in 0 ..< n {
-//                let channel = buffers[i].mChannelLabel.avChannel
-//                channelMap[i] = av_channel_layout_index_from_channel(&outChannel, channel)
-//            }
-//
-//            swr_set_channel_mapping(swrContext, channelMap)
-//        }
+        KSLog("out channelLayout: \(outChannel)")
+        if n > 2 {
+            var channelMap = Array(repeating: Int32(-1), count: n)
+            let buffers = UnsafeBufferPointer<AudioChannelDescription>(start: &layout.pointee.mChannelDescriptions, count: n)
+            for i in 0 ..< n {
+                let channel = buffers[i].mChannelLabel.avChannel
+                channelMap[i] = av_channel_layout_index_from_channel(&outChannel, channel)
+            }
+            swr_set_channel_mapping(swrContext, channelMap)
+            KSLog("channelLayout mapping: \(channelMap)")
+        }
         if result < 0 {
             shutdown()
             return false
