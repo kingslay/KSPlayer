@@ -223,17 +223,18 @@ private class BuildFFMPEG: BaseBuild {
         }
         if platform == .macos, arch.executable() {
             ffmpegcflags.append("--enable-ffplay")
-            ffmpegcflags.append("--enable-avdevice")
             ffmpegcflags.append("--enable-sdl2")
             ffmpegcflags.append("--enable-encoder=aac")
             ffmpegcflags.append("--enable-encoder=movtext")
             ffmpegcflags.append("--enable-encoder=mpeg4")
             ffmpegcflags.append("--enable-decoder=rawvideo")
-            ffmpegcflags.append("--enable-indev=lavfi")
             ffmpegcflags.append("--enable-filter=color")
             ffmpegcflags.append("--enable-filter=lut")
             ffmpegcflags.append("--enable-filter=negate")
             ffmpegcflags.append("--enable-filter=testsrc")
+            ffmpegcflags.append("--disable-avdevice")
+//            ffmpegcflags.append("--enable-avdevice")
+//            ffmpegcflags.append("--enable-indev=lavfi")
         } else {
             ffmpegcflags.append("--disable-avdevice")
             ffmpegcflags.append("--disable-programs")

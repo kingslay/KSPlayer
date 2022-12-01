@@ -236,29 +236,14 @@ class AudioSwresample: Swresample {
     private var outChannel: AVChannelLayout
     init(codecpar: AVCodecParameters) {
         descriptor = AudioDescriptor(codecpar: codecpar)
-        outChannel = AVChannelLayout()
+        outChannel = KSOptions.channelLayout.channel
+        KSLog("out channelLayout: \(outChannel)")
         _ = setup(descriptor: descriptor)
     }
 
     private func setup(descriptor: AudioDescriptor) -> Bool {
-        let layout = UnsafeMutablePointer(mutating: KSOptions.channelLayout.layout)
-        KSLog("KSOptions channelLayout: \(layout.pointee)")
-        let n = Int(layout.pointee.mNumberChannelDescriptions)
-        // 不能用AV_CHANNEL_ORDER_CUSTOM
-        av_channel_layout_default(&outChannel, Int32(max(n, 1)))
         _ = swr_alloc_set_opts2(&swrContext, &outChannel, AV_SAMPLE_FMT_FLTP, KSOptions.audioPlayerSampleRate, &descriptor.inChannel, descriptor.inputFormat, descriptor.inputSampleRate, 0, nil)
         let result = swr_init(swrContext)
-        KSLog("out channelLayout: \(outChannel)")
-        if n > 2 {
-            var channelMap = Array(repeating: Int32(-1), count: n)
-            let buffers = UnsafeBufferPointer<AudioChannelDescription>(start: &layout.pointee.mChannelDescriptions, count: n)
-            for i in 0 ..< n {
-                let channel = buffers[i].mChannelLabel.avChannel
-                channelMap[i] = av_channel_layout_index_from_channel(&outChannel, channel)
-            }
-            swr_set_channel_mapping(swrContext, channelMap)
-            KSLog("channelLayout mapping: \(channelMap)")
-        }
         if result < 0 {
             shutdown()
             return false
@@ -289,6 +274,32 @@ class AudioSwresample: Swresample {
 
     func shutdown() {
         swr_free(&swrContext)
+    }
+}
+
+extension AVAudioChannelLayout {
+    var channel: AVChannelLayout {
+        let mutableLayout = UnsafeMutablePointer(mutating: layout)
+        KSLog("KSOptions channelLayout: \(mutableLayout.pointee)")
+        let n = Int(mutableLayout.pointee.mNumberChannelDescriptions)
+        if n > 1 {
+            let buffers = UnsafeBufferPointer<AudioChannelDescription>(start: &mutableLayout.pointee.mChannelDescriptions, count: n)
+            var mask = UInt64(0)
+            for i in 0 ..< n {
+                let channel = buffers[i].mChannelLabel.avChannel.rawValue
+                if channel >= 0 {
+                    mask |= 1 << channel
+                }
+            }
+            var outChannel = AVChannelLayout()
+            // 不能用AV_CHANNEL_ORDER_CUSTOM
+            av_channel_layout_from_mask(&outChannel, mask)
+            return outChannel
+        } else {
+            var outChannel = AVChannelLayout()
+            av_channel_layout_default(&outChannel, Int32(max(n, 1)))
+            return outChannel
+        }
     }
 }
 
