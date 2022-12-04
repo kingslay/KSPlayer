@@ -18,6 +18,7 @@ protocol AudioPlayer: AnyObject {
     var threshold: Float { get set }
     var expansionRatio: Float { get set }
     var overallGain: Float { get set }
+    func prepare(channels: UInt32)
 }
 
 public final class AudioEnginePlayer: AudioPlayer, FrameOutput {
@@ -144,6 +145,11 @@ public final class AudioEnginePlayer: AudioPlayer, FrameOutput {
     init() {
         KSOptions.setAudioSession()
         engine.attach(dynamicsProcessor)
+    }
+
+    func prepare(channels: UInt32) {
+        let maxOut = max(AVAudioSession.sharedInstance().maximumOutputNumberOfChannels, Int(channels))
+        try? AVAudioSession.sharedInstance().setPreferredOutputNumberOfChannels(maxOut)
         var format = engine.outputNode.outputFormat(forBus: 0)
         KSOptions.audioPlayerSampleRate = Int32(format.sampleRate)
         if let audioUnit = engine.outputNode.audioUnit {
@@ -152,9 +158,9 @@ public final class AudioEnginePlayer: AudioPlayer, FrameOutput {
         if KSOptions.channelLayout != format.channelLayout {
             format = AVAudioFormat(commonFormat: format.commonFormat, sampleRate: format.sampleRate, interleaved: format.isInterleaved, channelLayout: KSOptions.channelLayout)
         }
-//        engine.attach(nbandEQ)
-//        engine.attach(distortion)
-//        engine.attach(delay)
+        //        engine.attach(nbandEQ)
+        //        engine.attach(distortion)
+        //        engine.attach(delay)
         let sourceNode = AVAudioSourceNode(format: format) { [weak self] _, _, frameCount, audioBufferList in
             self?.audioPlayerShouldInputData(ioData: UnsafeMutableAudioBufferListPointer(audioBufferList), numberOfFrames: frameCount)
             return noErr

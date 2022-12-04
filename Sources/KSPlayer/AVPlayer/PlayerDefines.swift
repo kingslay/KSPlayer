@@ -536,7 +536,6 @@ public extension KSOptions {
     static var isAutoPlay = false
     /// seek完是否自动播放
     static var isSeekedAutoPlay = true
-    static var enableMaxOutputChannels = true
     static var pipController: Any?
     /// 日志输出方式
     static var logFunctionPoint: (String) -> Void = {
@@ -559,10 +558,6 @@ public extension KSOptions {
             try? AVAudioSession.sharedInstance().setCategory(.playback, mode: .default, policy: .longFormAudio)
         }
         try? AVAudioSession.sharedInstance().setActive(true)
-        if KSOptions.enableMaxOutputChannels {
-            let maxOut = AVAudioSession.sharedInstance().maximumOutputNumberOfChannels
-            try? AVAudioSession.sharedInstance().setPreferredOutputNumberOfChannels(maxOut)
-        }
         if #available(tvOS 15.0, iOS 15.0, *) {
             try? AVAudioSession.sharedInstance().setSupportsMultichannelContent(true)
         }

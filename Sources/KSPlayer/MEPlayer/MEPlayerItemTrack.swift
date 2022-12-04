@@ -202,7 +202,6 @@ class SyncPlayerItemTrack<Frame: MEFrame>: PlayerItemTrackProtocol, CustomString
             outputRenderQueue = CircularBuffer()
         }
         frameMaxCount = outputRenderQueue.maxCount
-        decoderMap[assetTrack.trackID] = assetTrack.makeDecode(options: options, delegate: self)
     }
 
     func decode() {

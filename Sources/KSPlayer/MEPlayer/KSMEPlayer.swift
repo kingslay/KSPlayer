@@ -122,6 +122,10 @@ extension KSMEPlayer: MEPlayerDelegate {
     func sourceDidOpened() {
         isReadyToPlay = true
         options.readyTime = CACurrentMediaTime()
+        let channels = tracks(mediaType: .audio).map {
+            $0.audioStreamBasicDescription?.mChannelsPerFrame ?? 2
+        }.max() ?? 2
+        audioOutput.prepare(channels: channels)
         runInMainqueue { [weak self] in
             guard let self else { return }
             self.videoOutput?.drawableSize = self.naturalSize

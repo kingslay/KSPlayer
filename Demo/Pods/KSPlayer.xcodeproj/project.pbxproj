@@ -143,6 +143,9 @@
 		AA48D47F5EF4EB14F137B1EAED306C88 /* PlayerControllerTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = A123E3CEC7FF111D96FB3C31629ADBA0 /* PlayerControllerTest.swift */; };
 		ABDB5B34A1E6C54812149457D2B9BFF6 /* Utility.swift in Sources */ = {isa = PBXBuildFile; fileRef = 434F6AE533E64EE95B7D640A8F57BEA0 /* Utility.swift */; };
 		AC95EE28D69EABAB1D957C457DBAB87B /* AudioEnginePlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4959CFF960C1C28D1FD913EEA2700317 /* AudioEnginePlayer.swift */; };
+		ACA24084293A4928008916E3 /* AudioRendererPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACA24083293A4928008916E3 /* AudioRendererPlayer.swift */; };
+		ACA24085293A4928008916E3 /* AudioRendererPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACA24083293A4928008916E3 /* AudioRendererPlayer.swift */; };
+		ACA24086293A4928008916E3 /* AudioRendererPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACA24083293A4928008916E3 /* AudioRendererPlayer.swift */; };
 		AD3B59883FBCAB501B5E66EBBE9767FD /* KSAVPlayerTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = F575D87689C8ECBD95B0B820E428E0DD /* KSAVPlayerTest.swift */; };
 		AEA1BEE3EE5CFFB018F7872EE396F89D /* Shaders.metal in Resources */ = {isa = PBXBuildFile; fileRef = B988C131C8EE39BD1550206702FC0269 /* Shaders.metal */; };
 		AF9EB18ED4293C36A1E53DA9EB999CB6 /* VideoPlayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8667FB49134A6148A3973230E6A388BA /* VideoPlayerView.swift */; };
@@ -372,6 +375,7 @@
 		A32886C0889A18553BA381915747EA5A /* ResourceBundle-KSPlayer_KSPlayer-KSPlayer-tvOS-Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; name = "ResourceBundle-KSPlayer_KSPlayer-KSPlayer-tvOS-Info.plist"; path = "../KSPlayer-tvOS/ResourceBundle-KSPlayer_KSPlayer-KSPlayer-tvOS-Info.plist"; sourceTree = "<group>"; };
 		A8BC1FD17DD6BDAF14D5E728555C5474 /* KSPlayer-macOS.unit-tests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "KSPlayer-macOS.unit-tests.debug.xcconfig"; path = "../KSPlayer-macOS/KSPlayer-macOS.unit-tests.debug.xcconfig"; sourceTree = "<group>"; };
 		AA354D5449F7D4512178A653F4086BEC /* KSParseProtocol.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = KSParseProtocol.swift; path = Sources/KSPlayer/Subtitle/KSParseProtocol.swift; sourceTree = "<group>"; };
+		ACA24083293A4928008916E3 /* AudioRendererPlayer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = AudioRendererPlayer.swift; path = Sources/KSPlayer/MEPlayer/AudioRendererPlayer.swift; sourceTree = "<group>"; };
 		AFCC0275C91A55C80FEDEBFE5F7C961B /* KSMEPlayer.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = KSMEPlayer.swift; path = Sources/KSPlayer/MEPlayer/KSMEPlayer.swift; sourceTree = "<group>"; };
 		B4EFFDE69D1237E3A01E2AD850E6BC73 /* AppKitExtend.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = AppKitExtend.swift; path = Sources/KSPlayer/Core/AppKitExtend.swift; sourceTree = "<group>"; };
 		B5B58E74DE3A3E95C77D43E62E53441D /* SeekView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = SeekView.swift; path = Sources/KSPlayer/Video/SeekView.swift; sourceTree = "<group>"; };
@@ -513,6 +517,7 @@
 			isa = PBXGroup;
 			children = (
 				4959CFF960C1C28D1FD913EEA2700317 /* AudioEnginePlayer.swift */,
+				ACA24083293A4928008916E3 /* AudioRendererPlayer.swift */,
 				34FA0C954A4D6F7C4443738F05273A61 /* CircularBuffer.swift */,
 				0F9EFC85348198307BEA08CFE9824030 /* EmbedDataSouce.swift */,
 				4B1FF242EAAA19961B4942AACB759155 /* Filter.swift */,
@@ -1304,6 +1309,7 @@
 				FE99EF5FEE67C75FB28DCFC424D1BDBA /* EmbedDataSouce.swift in Sources */,
 				0302B6EF6DFFF9F3179A1CFA8DABDBBC /* Filter.swift in Sources */,
 				23DBF2A37447EDFF057B185E1D82F908 /* VideoToolboxDecode.swift in Sources */,
+				ACA24086293A4928008916E3 /* AudioRendererPlayer.swift in Sources */,
 				9A0BC2C8F29B8DCBBF5306F014103858 /* IOSVideoPlayerView.swift in Sources */,
 				F59B41EEC4C86088D1539BA8CC9FF6B0 /* KSAVPlayer.swift in Sources */,
 				B2B6BCEDFBDCC25D973C9FD3FBD3AD10 /* KSMEPlayer.swift in Sources */,
@@ -1356,6 +1362,7 @@
 				6F5087492D5E3CF43DEFB27AB7543740 /* EmbedDataSouce.swift in Sources */,
 				ED8CA535C7307617408F0C5C7F780051 /* Filter.swift in Sources */,
 				B0F5AD9DC6FAE3664AFC5D3E9A2328C3 /* VideoToolboxDecode.swift in Sources */,
+				ACA24085293A4928008916E3 /* AudioRendererPlayer.swift in Sources */,
 				229B66097BCFFD4B3569AAB437824E27 /* IOSVideoPlayerView.swift in Sources */,
 				4E94F478A4A91B608D367402E04B567C /* KSAVPlayer.swift in Sources */,
 				0F75AE5AD50315FD661D81CD0E123724 /* KSMEPlayer.swift in Sources */,
@@ -1423,6 +1430,7 @@
 				C95EB9D98031526E2608BC0E994B6F6B /* EmbedDataSouce.swift in Sources */,
 				25D5FCC4ACCF31021717C32044B38FC7 /* Filter.swift in Sources */,
 				D811FA7E8BB92A8579342618B321DA49 /* VideoToolboxDecode.swift in Sources */,
+				ACA24084293A4928008916E3 /* AudioRendererPlayer.swift in Sources */,
 				503205EF027DB65A5352FB3F25774154 /* IOSVideoPlayerView.swift in Sources */,
 				DC3C948F03BD8C669AED32F366E6D94E /* KSAVPlayer.swift in Sources */,
 				CA7D56D8A45465416BC68D7481840D6A /* KSMEPlayer.swift in Sources */,
