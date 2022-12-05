@@ -149,8 +149,8 @@ public final class AudioEnginePlayer: AudioPlayer, FrameOutput {
 
     func prepare(channels: UInt32) {
         #if !os(macOS)
-        let maxOut = max(AVAudioSession.sharedInstance().maximumOutputNumberOfChannels, Int(channels))
-        try? AVAudioSession.sharedInstance().setPreferredOutputNumberOfChannels(maxOut)
+        let channels = min(AVAudioSession.sharedInstance().maximumOutputNumberOfChannels, Int(channels))
+        try? AVAudioSession.sharedInstance().setPreferredOutputNumberOfChannels(channels)
         #endif
         var format = engine.outputNode.outputFormat(forBus: 0)
         KSOptions.audioPlayerSampleRate = Int32(format.sampleRate)
