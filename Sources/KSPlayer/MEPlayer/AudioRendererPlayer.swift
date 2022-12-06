@@ -47,6 +47,9 @@ public class AudioRendererPlayer: AudioPlayer, FrameOutput {
 
     weak var renderSource: OutputRenderSourceDelegate?
     private var periodicTimeObserver: Any?
+    private let renderer = AVSampleBufferAudioRenderer()
+    private var desc: CMAudioFormatDescription?
+    private let synchronizer = AVSampleBufferRenderSynchronizer()
     var isPaused: Bool {
         get {
             synchronizer.rate == 0
@@ -74,9 +77,6 @@ public class AudioRendererPlayer: AudioPlayer, FrameOutput {
         }
     }
 
-    private let renderer = AVSampleBufferAudioRenderer()
-    private var desc: CMAudioFormatDescription?
-    private let synchronizer = AVSampleBufferRenderSynchronizer()
     init() {
         synchronizer.addRenderer(renderer)
     }
@@ -86,33 +86,36 @@ public class AudioRendererPlayer: AudioPlayer, FrameOutput {
         let channels = min(UInt32(AVAudioSession.sharedInstance().maximumOutputNumberOfChannels), channels)
         try? AVAudioSession.sharedInstance().setPreferredOutputNumberOfChannels(Int(channels))
         #endif
-        var descriptionForOutput = AudioComponentDescription()
-        descriptionForOutput.componentType = kAudioUnitType_Output
-        descriptionForOutput.componentManufacturer = kAudioUnitManufacturer_Apple
-        #if os(macOS)
-        descriptionForOutput.componentSubType = kAudioUnitSubType_DefaultOutput
-        #else
-        descriptionForOutput.componentSubType = kAudioUnitSubType_RemoteIO
-        #endif
-        if let comp = AudioComponentFindNext(nil, &descriptionForOutput) {
-            var audioUnit: AudioUnit?
-            AudioComponentInstanceNew(comp, &audioUnit)
-            if let audioUnit {
-                AudioUnitInitialize(audioUnit)
-                KSOptions.channelLayout = AVAudioChannelLayout(layout: audioUnit.channelLayout)
-            }
-        }
+//        var descriptionForOutput = AudioComponentDescription()
+//        descriptionForOutput.componentType = kAudioUnitType_Output
+//        descriptionForOutput.componentManufacturer = kAudioUnitManufacturer_Apple
+//        #if os(macOS)
+//        descriptionForOutput.componentSubType = kAudioUnitSubType_DefaultOutput
+//        #else
+//        descriptionForOutput.componentSubType = kAudioUnitSubType_RemoteIO
+//        #endif
+//        if let comp = AudioComponentFindNext(nil, &descriptionForOutput) {
+//            var audioUnit: AudioUnit?
+//            AudioComponentInstanceNew(comp, &audioUnit)
+//            if let audioUnit {
+//                AudioUnitInitialize(audioUnit)
+//                KSOptions.channelLayout = AVAudioChannelLayout(layout: audioUnit.channelLayout)
+//            }
+//        }
         var audioStreamBasicDescription = AudioStreamBasicDescription()
         let floatByteSize = UInt32(MemoryLayout<Float>.size)
         audioStreamBasicDescription.mBitsPerChannel = 8 * floatByteSize
         audioStreamBasicDescription.mBytesPerFrame = floatByteSize
-        audioStreamBasicDescription.mChannelsPerFrame = KSOptions.channelLayout.channelCount
-        audioStreamBasicDescription.mFormatFlags = kAudioFormatFlagIsFloat | kAudioFormatFlagIsNonInterleaved
+        audioStreamBasicDescription.mChannelsPerFrame = channels
+        audioStreamBasicDescription.mFormatFlags = kAudioFormatFlagIsPacked | kAudioFormatFlagIsFloat | kAudioFormatFlagIsNonInterleaved
         audioStreamBasicDescription.mFormatID = kAudioFormatLinearPCM
         audioStreamBasicDescription.mFramesPerPacket = 1
         audioStreamBasicDescription.mBytesPerPacket = audioStreamBasicDescription.mFramesPerPacket * audioStreamBasicDescription.mBytesPerFrame
         audioStreamBasicDescription.mSampleRate = Float64(KSOptions.audioPlayerSampleRate)
         CMAudioFormatDescriptionCreate(allocator: kCFAllocatorDefault, asbd: &audioStreamBasicDescription, layoutSize: 0, layout: nil, magicCookieSize: 0, magicCookie: nil, extensions: nil, formatDescriptionOut: &desc)
+        if let tag = desc?.audioFormatList.first?.mChannelLayoutTag, let layout = AVAudioChannelLayout(layoutTag: tag) {
+            KSOptions.channelLayout = layout
+        }
     }
 
     private func request() {
@@ -129,7 +132,7 @@ public class AudioRendererPlayer: AudioPlayer, FrameOutput {
             guard let outBlockListBuffer else {
                 continue
             }
-            for i in 0 ..< render.data.count {
+            for i in 0 ..< min(render.data.count, Int(desc.audioFormatList[0].mASBD.mChannelsPerFrame)) {
                 var outBlockBuffer: CMBlockBuffer?
                 let dataByteSize = render.dataSize[i]
                 CMBlockBufferCreateWithMemoryBlock(

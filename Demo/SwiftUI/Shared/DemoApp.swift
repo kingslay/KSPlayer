@@ -158,7 +158,7 @@ var objects: [KSPlayerResource] = {
         let options = MEOptions()
         options.videoFilters = "hflip,vflip"
         options.hardwareDecode = false
-        options.startPlayTime = 30
+        options.startPlayTime = 3
         #if os(macOS)
         let moviesDirectory = try? FileManager.default.url(for: .moviesDirectory, in: .userDomainMask, appropriateFor: nil, create: false)
         options.outputURL = moviesDirectory?.appendingPathComponent("recording.mov")
