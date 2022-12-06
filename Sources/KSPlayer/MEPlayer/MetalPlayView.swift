@@ -13,7 +13,6 @@ public final class MetalPlayView: UIView {
     private let render = MetalRender()
     private let view = MTKView(frame: .zero, device: MetalRender.device)
     private var videoInfo: CMVideoFormatDescription?
-    private var cancellable: AnyCancellable?
     public private(set) var pixelBuffer: CVPixelBuffer?
     /// 用displayLink会导致锁屏无法draw，
     /// 用DispatchSourceTimer的话，在播放4k视频的时候repeat的时间会变长,
@@ -44,9 +43,6 @@ public final class MetalPlayView: UIView {
     init(options: KSOptions) {
         self.options = options
         super.init(frame: .zero)
-        cancellable = options.$preferredFramesPerSecond.sink { [weak self] value in
-            self?.displayLink.preferredFramesPerSecond = Int(ceil(value * 1.5))
-        }
         #if !canImport(UIKit)
         layer = AVSampleBufferDisplayLayer()
         #endif
@@ -72,6 +68,10 @@ public final class MetalPlayView: UIView {
             CMTimebaseSetTime(controlTimebase, time: .zero)
             CMTimebaseSetRate(controlTimebase, rate: 1.0)
         }
+    }
+
+    func prepare(fps: Float) {
+        displayLink.preferredFramesPerSecond = Int(ceil(fps * 2))
     }
 
     @available(*, unavailable)

@@ -197,7 +197,6 @@ class SyncPlayerItemTrack<Frame: MEFrame>: PlayerItemTrackProtocol, CustomString
             outputRenderQueue = CircularBuffer(initialCapacity: capacity, expanding: false)
         } else if mediaType == .video {
             outputRenderQueue = CircularBuffer(initialCapacity: options.videoFrameMaxCount(fps: fps), sorted: true, expanding: false)
-            options.preferredFramesPerSecond = fps
         } else {
             outputRenderQueue = CircularBuffer()
         }

@@ -17,17 +17,18 @@ class MEFilter {
     private let timebase: Timebase
     private let isAudio: Bool
     private var params = AVBufferSrcParameters()
-
+    private let nominalFrameRate: Float
     deinit {
         avfilter_graph_free(&graph)
         av_frame_free(&outputFrame)
     }
 
-    public init(timebase: Timebase, isAudio: Bool, options: KSOptions) {
+    public init(timebase: Timebase, isAudio: Bool, nominalFrameRate: Float, options: KSOptions) {
         graph = avfilter_graph_alloc()
         graph?.pointee.opaque = Unmanaged.passUnretained(options).toOpaque()
         self.timebase = timebase
         self.isAudio = isAudio
+        self.nominalFrameRate = nominalFrameRate
     }
 
     private func setup(filters: String) -> Bool {
@@ -89,7 +90,7 @@ class MEFilter {
         params.width = inputFrame.pointee.width
         params.height = inputFrame.pointee.height
         params.sample_aspect_ratio = inputFrame.pointee.sample_aspect_ratio
-        params.frame_rate = AVRational(num: 1, den: Int32(options.preferredFramesPerSecond))
+        params.frame_rate = AVRational(num: 1, den: Int32(nominalFrameRate))
         params.hw_frames_ctx = hwFramesCtx
         params.sample_rate = inputFrame.pointee.sample_rate
         params.ch_layout = inputFrame.pointee.ch_layout

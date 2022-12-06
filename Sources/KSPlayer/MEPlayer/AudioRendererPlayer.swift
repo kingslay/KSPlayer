@@ -9,12 +9,11 @@ import AVFoundation
 import Foundation
 
 public class AudioRendererPlayer: AudioPlayer, FrameOutput {
-    var playbackRate: Float  {
-        get {
-            synchronizer.rate
-        }
-        set {
-            synchronizer.rate = newValue
+    var playbackRate: Float = 1 {
+        didSet {
+            if !isPaused {
+                synchronizer.rate = playbackRate
+            }
         }
     }
 
@@ -47,12 +46,37 @@ public class AudioRendererPlayer: AudioPlayer, FrameOutput {
     var overallGain: Float = 0
 
     weak var renderSource: OutputRenderSourceDelegate?
-    var isPaused: Bool = true
+    private var periodicTimeObserver: Any?
+    var isPaused: Bool {
+        get {
+            synchronizer.rate == 0
+        }
+        set {
+            if newValue {
+                synchronizer.rate = 0
+                renderer.flush()
+                renderer.stopRequestingMediaData()
+                if let periodicTimeObserver {
+                    synchronizer.removeTimeObserver(periodicTimeObserver)
+                    self.periodicTimeObserver = nil
+                }
+            } else {
+                synchronizer.rate = 1
+                synchronizer.rate = playbackRate
+                renderer.requestMediaDataWhenReady(on: DispatchQueue(label: "ksasbd")) { [unowned self] in
+                    self.request()
+                }
+                periodicTimeObserver = synchronizer.addPeriodicTimeObserver(forInterval: CMTime(seconds: 0.1, preferredTimescale: 1000), queue: .main) { [unowned self] cmTime in
+//                    let time = self.synchronizer.currentTime()
+                    self.renderSource?.setAudio(time: cmTime)
+                }
+            }
+        }
+    }
+
     private let renderer = AVSampleBufferAudioRenderer()
     private var desc: CMAudioFormatDescription?
     private let synchronizer = AVSampleBufferRenderSynchronizer()
-    private var enqueued = Int64(0)
-    private let timer = DispatchSource.makeTimerSource(queue: DispatchQueue(label: "asbd"))
     init() {
         synchronizer.addRenderer(renderer)
     }
@@ -62,50 +86,86 @@ public class AudioRendererPlayer: AudioPlayer, FrameOutput {
         let channels = min(UInt32(AVAudioSession.sharedInstance().maximumOutputNumberOfChannels), channels)
         try? AVAudioSession.sharedInstance().setPreferredOutputNumberOfChannels(Int(channels))
         #endif
+        var descriptionForOutput = AudioComponentDescription()
+        descriptionForOutput.componentType = kAudioUnitType_Output
+        descriptionForOutput.componentManufacturer = kAudioUnitManufacturer_Apple
+        #if os(macOS)
+        descriptionForOutput.componentSubType = kAudioUnitSubType_DefaultOutput
+        #else
+        descriptionForOutput.componentSubType = kAudioUnitSubType_RemoteIO
+        #endif
+        if let comp = AudioComponentFindNext(nil, &descriptionForOutput) {
+            var audioUnit: AudioUnit?
+            AudioComponentInstanceNew(comp, &audioUnit)
+            if let audioUnit {
+                AudioUnitInitialize(audioUnit)
+                KSOptions.channelLayout = AVAudioChannelLayout(layout: audioUnit.channelLayout)
+            }
+        }
         var audioStreamBasicDescription = AudioStreamBasicDescription()
         let floatByteSize = UInt32(MemoryLayout<Float>.size)
         audioStreamBasicDescription.mBitsPerChannel = 8 * floatByteSize
         audioStreamBasicDescription.mBytesPerFrame = floatByteSize
-        audioStreamBasicDescription.mChannelsPerFrame = channels
+        audioStreamBasicDescription.mChannelsPerFrame = KSOptions.channelLayout.channelCount
         audioStreamBasicDescription.mFormatFlags = kAudioFormatFlagIsFloat | kAudioFormatFlagIsNonInterleaved
         audioStreamBasicDescription.mFormatID = kAudioFormatLinearPCM
         audioStreamBasicDescription.mFramesPerPacket = 1
         audioStreamBasicDescription.mBytesPerPacket = audioStreamBasicDescription.mFramesPerPacket * audioStreamBasicDescription.mBytesPerFrame
         audioStreamBasicDescription.mSampleRate = Float64(KSOptions.audioPlayerSampleRate)
-        CMAudioFormatDescriptionCreate(allocator: nil, asbd: &audioStreamBasicDescription, layoutSize: 0, layout: nil, magicCookieSize: 0, magicCookie: nil, extensions: nil, formatDescriptionOut: &desc)
-        timer.schedule(deadline: .now(), repeating: .milliseconds(10))
-        timer.setEventHandler { [weak self] in
-            self?.request()
-        }
-        timer.activate()
+        CMAudioFormatDescriptionCreate(allocator: kCFAllocatorDefault, asbd: &audioStreamBasicDescription, layoutSize: 0, layout: nil, magicCookieSize: 0, magicCookie: nil, extensions: nil, formatDescriptionOut: &desc)
     }
 
     private func request() {
-        guard let desc, let render = renderSource?.getAudioOutputRender() else {
+        guard let desc else {
             return
         }
-        var bBuffer: CMBlockBuffer?
-        let bufSize = render.dataSize.reduce(0, +)
-        let memoryBlock = UnsafeMutableRawPointer.allocate(byteCount: bufSize, alignment: MemoryLayout<Int8>.alignment)
-        var offer = 0
-        for i in 0 ..< render.data.count {
-            memoryBlock.advanced(by: offer).copyMemory(from: render.data[i]!, byteCount: render.dataSize[i])
-            offer += render.dataSize[i]
-        }
-        CMBlockBufferCreateWithMemoryBlock(allocator: nil, memoryBlock: memoryBlock, blockLength: bufSize, blockAllocator: kCFAllocatorDefault, customBlockSource: nil, offsetToData: 0, dataLength: bufSize, flags: 0, blockBufferOut: &bBuffer)
-        guard let bBuffer else {
-            return
-        }
-        var sampleBuffer: CMSampleBuffer?
-        let sampleCount = CMItemCount(render.numberOfSamples)
-        CMAudioSampleBufferCreateReadyWithPacketDescriptions(allocator: nil, dataBuffer: bBuffer, formatDescription: desc, sampleCount: sampleCount, presentationTimeStamp: CMTime(value: enqueued, timescale: CMTimeScale(KSOptions.audioPlayerSampleRate)), packetDescriptions: nil, sampleBufferOut: &sampleBuffer)
-        enqueued += Int64(sampleCount)
-        guard let sampleBuffer else {
-            return
-        }
-        if renderer.isReadyForMoreMediaData {
+
+        while renderer.isReadyForMoreMediaData, !isPaused {
+            guard let render = renderSource?.getAudioOutputRender() else {
+                continue
+            }
+            var outBlockListBuffer: CMBlockBuffer?
+            CMBlockBufferCreateEmpty(allocator: kCFAllocatorDefault, capacity: 0, flags: 0, blockBufferOut: &outBlockListBuffer)
+            guard let outBlockListBuffer else {
+                continue
+            }
+            for i in 0 ..< render.data.count {
+                var outBlockBuffer: CMBlockBuffer?
+                let dataByteSize = render.dataSize[i]
+                CMBlockBufferCreateWithMemoryBlock(
+                    allocator: kCFAllocatorDefault,
+                    memoryBlock: nil,
+                    blockLength: dataByteSize,
+                    blockAllocator: kCFAllocatorDefault,
+                    customBlockSource: nil,
+                    offsetToData: 0,
+                    dataLength: dataByteSize,
+                    flags: kCMBlockBufferAssureMemoryNowFlag,
+                    blockBufferOut: &outBlockBuffer
+                )
+                if let outBlockBuffer {
+                    CMBlockBufferReplaceDataBytes(
+                        with: render.data[i]!,
+                        blockBuffer: outBlockBuffer,
+                        offsetIntoDestination: 0,
+                        dataLength: dataByteSize
+                    )
+                    CMBlockBufferAppendBufferReference(
+                        outBlockListBuffer,
+                        targetBBuf: outBlockBuffer,
+                        offsetToData: 0,
+                        dataLength: CMBlockBufferGetDataLength(outBlockBuffer),
+                        flags: 0
+                    )
+                }
+            }
+            var sampleBuffer: CMSampleBuffer?
+            let sampleCount = CMItemCount(render.numberOfSamples)
+            CMAudioSampleBufferCreateReadyWithPacketDescriptions(allocator: kCFAllocatorDefault, dataBuffer: outBlockListBuffer, formatDescription: desc, sampleCount: sampleCount, presentationTimeStamp: render.cmtime, packetDescriptions: nil, sampleBufferOut: &sampleBuffer)
+            guard let sampleBuffer else {
+                continue
+            }
             renderer.enqueue(sampleBuffer)
         }
-        renderSource?.setAudio(time: render.cmtime)
     }
 }

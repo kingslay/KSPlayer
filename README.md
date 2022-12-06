@@ -225,7 +225,6 @@ public protocol PlayerControllerDelegate: class {
     public var autoSelectEmbedSubtitle = true
     public var asynchronousDecompression = false
     public var autoDeInterlace = false
-    @Published var preferredFramesPerSecond = Float(60)
   }
 
   ```

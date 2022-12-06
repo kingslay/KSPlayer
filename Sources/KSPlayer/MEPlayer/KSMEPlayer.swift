@@ -125,7 +125,9 @@ extension KSMEPlayer: MEPlayerDelegate {
         let channels = tracks(mediaType: .audio).map {
             $0.audioStreamBasicDescription?.mChannelsPerFrame ?? 2
         }.max() ?? 2
+        let fps = tracks(mediaType: .video).map(\.nominalFrameRate).max() ?? 24
         audioOutput.prepare(channels: channels)
+        videoOutput?.prepare(fps: fps)
         runInMainqueue { [weak self] in
             guard let self else { return }
             self.videoOutput?.drawableSize = self.naturalSize

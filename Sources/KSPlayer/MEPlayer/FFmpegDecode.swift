@@ -29,7 +29,7 @@ class FFmpegDecode: DecodeProtocol {
             KSLog(error as CustomStringConvertible)
         }
         codecContext?.pointee.time_base = assetTrack.timebase.rational
-        filter = MEFilter(timebase: assetTrack.timebase, isAudio: assetTrack.mediaType == .audio, options: options)
+        filter = MEFilter(timebase: assetTrack.timebase, isAudio: assetTrack.mediaType == .audio, nominalFrameRate: assetTrack.nominalFrameRate, options: options)
         if assetTrack.mediaType == .video {
             swresample = VideoSwresample()
         } else {
