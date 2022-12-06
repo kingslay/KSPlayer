@@ -76,7 +76,7 @@ public class AudioRendererPlayer: AudioPlayer, FrameOutput {
             }
         }
     }
-
+    // SSP::Render: CopySlice returned 1
     init() {
         synchronizer.addRenderer(renderer)
     }
@@ -107,10 +107,14 @@ public class AudioRendererPlayer: AudioPlayer, FrameOutput {
         audioStreamBasicDescription.mBitsPerChannel = 8 * floatByteSize
         audioStreamBasicDescription.mBytesPerFrame = floatByteSize
         audioStreamBasicDescription.mChannelsPerFrame = channels
-        audioStreamBasicDescription.mFormatFlags = kAudioFormatFlagIsPacked | kAudioFormatFlagIsFloat | kAudioFormatFlagIsNonInterleaved
+        audioStreamBasicDescription.mFormatFlags = kAudioFormatFlagIsPacked | kAudioFormatFlagIsFloat
+        let isPlanar = true
+        if isPlanar {
+            audioStreamBasicDescription.mFormatFlags |= kAudioFormatFlagIsNonInterleaved
+        }
         audioStreamBasicDescription.mFormatID = kAudioFormatLinearPCM
         audioStreamBasicDescription.mFramesPerPacket = 1
-        audioStreamBasicDescription.mBytesPerPacket = audioStreamBasicDescription.mFramesPerPacket * audioStreamBasicDescription.mBytesPerFrame
+        audioStreamBasicDescription.mBytesPerPacket = audioStreamBasicDescription.mFramesPerPacket * audioStreamBasicDescription.mBytesPerFrame * (isPlanar ? 1 : channels)
         audioStreamBasicDescription.mSampleRate = Float64(KSOptions.audioPlayerSampleRate)
         CMAudioFormatDescriptionCreate(allocator: kCFAllocatorDefault, asbd: &audioStreamBasicDescription, layoutSize: 0, layout: nil, magicCookieSize: 0, magicCookie: nil, extensions: nil, formatDescriptionOut: &desc)
         if let tag = desc?.audioFormatList.first?.mChannelLayoutTag, let layout = AVAudioChannelLayout(layoutTag: tag) {
@@ -164,7 +168,8 @@ public class AudioRendererPlayer: AudioPlayer, FrameOutput {
             }
             var sampleBuffer: CMSampleBuffer?
             let sampleCount = CMItemCount(render.numberOfSamples)
-            CMAudioSampleBufferCreateReadyWithPacketDescriptions(allocator: kCFAllocatorDefault, dataBuffer: outBlockListBuffer, formatDescription: desc, sampleCount: sampleCount, presentationTimeStamp: render.cmtime, packetDescriptions: nil, sampleBufferOut: &sampleBuffer)
+//            CMAudioSampleBufferCreateReadyWithPacketDescriptions(allocator: kCFAllocatorDefault, dataBuffer: outBlockListBuffer, formatDescription: desc, sampleCount: sampleCount, presentationTimeStamp: render.cmtime, packetDescriptions: nil, sampleBufferOut: &sampleBuffer)
+            CMAudioSampleBufferCreateWithPacketDescriptions(allocator: kCFAllocatorDefault, dataBuffer: outBlockListBuffer, dataReady: true, makeDataReadyCallback: nil, refcon: nil, formatDescription: desc, sampleCount: sampleCount, presentationTimeStamp: render.cmtime, packetDescriptions: nil, sampleBufferOut: &sampleBuffer)
             guard let sampleBuffer else {
                 continue
             }
