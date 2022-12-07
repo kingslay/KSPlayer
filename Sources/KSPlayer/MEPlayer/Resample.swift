@@ -234,7 +234,7 @@ class AudioSwresample: Swresample {
     private var swrContext: SwrContext?
     private var descriptor: AudioDescriptor
     private var outChannel: AVChannelLayout
-    private let outSampleFmt = AV_SAMPLE_FMT_FLTP
+    private let outSampleFmt = KSOptions.isAudioPlanar ? AV_SAMPLE_FMT_FLTP : AV_SAMPLE_FMT_FLT
     init(codecpar: AVCodecParameters) {
         descriptor = AudioDescriptor(codecpar: codecpar)
         outChannel = KSOptions.channelLayout.channel
@@ -262,14 +262,14 @@ class AudioSwresample: Swresample {
                 throw NSError(errorCode: .auidoSwrInit, userInfo: ["outChannel": outChannel, "inChannel": descriptor.inChannel])
             }
         }
-        var numberOfSamples = avframe.pointee.nb_samples
-        let nbSamples = swr_get_out_samples(swrContext, numberOfSamples)
+        let numberOfSamples = avframe.pointee.nb_samples
+        var outSamples = swr_get_out_samples(swrContext, numberOfSamples)
         var frameBuffer = Array(tuple: avframe.pointee.data).map { UnsafePointer<UInt8>($0) }
         var bufferSize = Int32(0)
-        _ = av_samples_get_buffer_size(&bufferSize, outChannel.nb_channels, nbSamples, outSampleFmt, 1)
-        let frame = AudioFrame(bufferSize: bufferSize, channels: outChannel.nb_channels)
-        numberOfSamples = swr_convert(swrContext, &frame.data, nbSamples, &frameBuffer, numberOfSamples)
-        frame.numberOfSamples = Int(numberOfSamples)
+        _ = av_samples_get_buffer_size(&bufferSize, outChannel.nb_channels, outSamples, outSampleFmt, 1)
+        let frame = AudioFrame(bufferSize: bufferSize, channels: KSOptions.isAudioPlanar ? outChannel.nb_channels : 1)
+        outSamples = swr_convert(swrContext, &frame.data, outSamples, &frameBuffer, numberOfSamples)
+        frame.numberOfSamples = Int(outSamples)
         return frame
     }
 
@@ -343,6 +343,8 @@ extension AudioChannelLabel {
             return AV_CHAN_WIDE_RIGHT
         } else if self == kAudioChannelLabel_LFE2 {
             return AV_CHAN_LOW_FREQUENCY_2
+        } else if self == kAudioChannelLabel_Mono {
+            return AV_CHAN_FRONT_CENTER
         } else if self == kAudioChannelLabel_HeadphonesLeft {
             return AV_CHAN_STEREO_LEFT
         } else if self == kAudioChannelLabel_HeadphonesRight {

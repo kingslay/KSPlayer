@@ -157,8 +157,8 @@ public final class AudioEnginePlayer: AudioPlayer, FrameOutput {
         if let audioUnit = engine.outputNode.audioUnit {
             KSOptions.channelLayout = AVAudioChannelLayout(layout: audioUnit.channelLayout)
         }
-        if KSOptions.channelLayout != format.channelLayout {
-            format = AVAudioFormat(commonFormat: format.commonFormat, sampleRate: format.sampleRate, interleaved: format.isInterleaved, channelLayout: KSOptions.channelLayout)
+        if KSOptions.channelLayout != format.channelLayout || KSOptions.isAudioPlanar == format.isInterleaved {
+            format = AVAudioFormat(commonFormat: format.commonFormat, sampleRate: format.sampleRate, interleaved: !KSOptions.isAudioPlanar, channelLayout: KSOptions.channelLayout)
         }
         //        engine.attach(nbandEQ)
         //        engine.attach(distortion)

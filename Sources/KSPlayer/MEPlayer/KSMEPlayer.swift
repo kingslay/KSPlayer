@@ -16,10 +16,10 @@ import AppKit
 public class KSMEPlayer: NSObject {
     private var loopCount = 1
     private var playerItem: MEPlayerItem
-    public let audioOutput = AudioEnginePlayer()
-    public let videoOutput: MetalPlayView?
+    private let audioOutput: AudioPlayer & FrameOutput = KSOptions.isUseAudioRenderer ? AudioRendererPlayer() : AudioEnginePlayer()
     private var options: KSOptions
     private var bufferingCountDownTimer: Timer?
+    public let videoOutput: MetalPlayView?
     public private(set) var bufferingProgress = 0 {
         didSet {
             delegate?.changeBuffering(player: self, progress: bufferingProgress)

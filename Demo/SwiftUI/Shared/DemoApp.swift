@@ -26,6 +26,7 @@ struct DemoApp: App {
         KSOptions.isAutoPlay = true
         KSOptions.isSecondOpen = true
         KSOptions.isAccurateSeek = true
+//        KSOptions.isUseAudioRenderer = true
 //        KSOptions.isLoopPlay = true
         let arguments = ProcessInfo.processInfo.arguments.dropFirst()
         var dropNextArg = false

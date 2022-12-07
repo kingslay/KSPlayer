@@ -96,6 +96,9 @@ public extension KSOptions {
     static var logLevel = LogLevel.warning
     static var stackSize = 32768
     static var isClearVideoWhereReplace = true
+    static var isUseAudioRenderer = false
+    static var isAudioPlanar = !isUseAudioRenderer
+
     internal static var channelLayout = AVAudioChannelLayout(layoutTag: kAudioChannelLayoutTag_Stereo)!
     #if os(macOS)
     internal static var audioPlayerSampleRate = Int32(44100)
