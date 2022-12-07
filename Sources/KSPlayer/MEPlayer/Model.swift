@@ -95,6 +95,7 @@ public extension KSOptions {
     static var logLevel = LogLevel.warning
     static var stackSize = 32768
     static var isClearVideoWhereReplace = true
+    /// true: AVSampleBufferAudioRenderer false: AVAudioEngine
     static var isUseAudioRenderer = false
     static var isAudioPlanar = !isUseAudioRenderer
 
