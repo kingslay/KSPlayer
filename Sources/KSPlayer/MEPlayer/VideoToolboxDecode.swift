@@ -40,7 +40,7 @@ class VideoToolboxDecode: DecodeProtocol {
         let pts = corePacket.pts
         let packetFlags = corePacket.flags
         let duration = corePacket.duration
-        let size = Int64(corePacket.size)
+        let size = corePacket.size
         let status = VTDecompressionSessionDecodeFrame(session.decompressionSession, sampleBuffer: sampleBuffer, flags: flags, infoFlagsOut: &flagOut) { [weak self] status, infoFlags, imageBuffer, _, _ in
             guard let self, !infoFlags.contains(.frameDropped) else {
                 return

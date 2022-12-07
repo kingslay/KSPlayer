@@ -57,8 +57,8 @@ protocol MEPlayerDelegate: AnyObject {
 
 public protocol ObjectQueueItem {
     var duration: Int64 { get set }
-    var size: Int64 { get set }
     var position: Int64 { get set }
+    var size: Int32 { get set }
 }
 
 protocol FrameOutput: AnyObject {
@@ -172,8 +172,8 @@ extension Timebase {
 
 final class Packet: ObjectQueueItem {
     var duration: Int64 = 0
-    var size: Int64 = 0
     var position: Int64 = 0
+    var size: Int32 = 0
     var assetTrack: FFmpegAssetTrack!
     private(set) var corePacket = av_packet_alloc()
     func fill() {
@@ -182,7 +182,7 @@ final class Packet: ObjectQueueItem {
         }
         position = corePacket.pointee.pts == Int64.min ? corePacket.pointee.dts : corePacket.pointee.pts
         duration = corePacket.pointee.duration
-        size = Int64(corePacket.pointee.size)
+        size = corePacket.pointee.size
     }
 
     deinit {
@@ -194,8 +194,8 @@ final class Packet: ObjectQueueItem {
 final class SubtitleFrame: MEFrame {
     var timebase: Timebase
     var duration: Int64 = 0
-    var size: Int64 = 0
     var position: Int64 = 0
+    var size: Int32 = 0
     let part: SubtitlePart
     init(part: SubtitlePart, timebase: Timebase) {
         self.part = part
@@ -206,9 +206,9 @@ final class SubtitleFrame: MEFrame {
 final class AudioFrame: MEFrame {
     var timebase = Timebase.defaultValue
     var duration: Int64 = 0
-    var size: Int64 = 0
     var position: Int64 = 0
-    var numberOfSamples = 0
+    var size: Int32 = 0
+    var numberOfSamples: UInt32 = 0
     var data: [UnsafeMutablePointer<UInt8>?]
     let dataSize: [Int]
     public init(bufferSize: Int32, channels: Int32) {
@@ -230,8 +230,8 @@ final class AudioFrame: MEFrame {
 final class VideoVTBFrame: MEFrame {
     var timebase = Timebase.defaultValue
     var duration: Int64 = 0
-    var size: Int64 = 0
     var position: Int64 = 0
+    var size: Int32 = 0
     var corePixelBuffer: CVPixelBuffer?
 }
 

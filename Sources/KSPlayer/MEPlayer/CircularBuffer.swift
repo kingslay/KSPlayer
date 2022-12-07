@@ -48,7 +48,7 @@ public class CircularBuffer<Item: ObjectQueueItem> {
             var index = tailIndex
             while index > headIndex {
                 guard let item = _buffer[Int((index - 1) & mask)] else {
-                    assertionFailure("value is nil of index: \((index - 1) & mask) headIndex: \(headIndex), tailIndex: \(tailIndex)")
+                    assertionFailure("value is nil of index: \((index - 1) & mask) headIndex: \(headIndex),tailIndex: \(tailIndex),mask: \(mask)")
                     break
                 }
                 if item.position <= _buffer[Int(index & mask)]!.position {

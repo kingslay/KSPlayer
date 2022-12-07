@@ -112,7 +112,7 @@ public class AudioRendererPlayer: AudioPlayer, FrameOutput {
             let n = KSOptions.isAudioPlanar ? min(render.data.count, Int(desc.audioFormatList[0].mASBD.mChannelsPerFrame)) : 1
             for i in 0 ..< n {
                 var outBlockBuffer: CMBlockBuffer?
-                let dataByteSize = render.numberOfSamples * Int(desc.audioFormatList[0].mASBD.mBytesPerPacket)
+                let dataByteSize = Int(render.numberOfSamples * desc.audioFormatList[0].mASBD.mBytesPerPacket)
 //                let dataByteSize = render.dataSize[i]
                 CMBlockBufferCreateWithMemoryBlock(
                     allocator: kCFAllocatorDefault,

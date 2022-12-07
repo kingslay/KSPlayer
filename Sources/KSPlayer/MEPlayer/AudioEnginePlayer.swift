@@ -92,7 +92,7 @@ public final class AudioEnginePlayer: AudioPlayer, FrameOutput {
                                   componentManufacturer: kAudioUnitManufacturer_Apple,
                                   componentFlags: 0,
                                   componentFlagsMask: 0))
-    private var currentRenderReadOffset = 0
+    private var currentRenderReadOffset = UInt32(0)
     weak var renderSource: OutputRenderSourceDelegate?
     private var currentRender: AudioFrame? {
         didSet {
@@ -212,7 +212,8 @@ public final class AudioEnginePlayer: AudioPlayer, FrameOutput {
 
     private func audioPlayerShouldInputData(ioData: UnsafeMutableAudioBufferListPointer, numberOfFrames: UInt32) {
         var ioDataWriteOffset = 0
-        var numberOfSamples = Int(numberOfFrames)
+        var numberOfSamples = numberOfFrames
+        let mBytesPerPacket = UInt32(MemoryLayout<Float>.size)
         while numberOfSamples > 0 {
             if currentRender == nil {
                 currentRender = renderSource?.getAudioOutputRender()
@@ -226,8 +227,8 @@ public final class AudioEnginePlayer: AudioPlayer, FrameOutput {
                 continue
             }
             let framesToCopy = min(numberOfSamples, residueLinesize)
-            let bytesToCopy = framesToCopy * MemoryLayout<Float>.size
-            let offset = currentRenderReadOffset * MemoryLayout<Float>.size
+            let bytesToCopy = Int(framesToCopy * mBytesPerPacket)
+            let offset = Int(currentRenderReadOffset * mBytesPerPacket)
             for i in 0 ..< min(ioData.count, currentRender.data.count) {
                 (ioData[i].mData! + ioDataWriteOffset).copyMemory(from: currentRender.data[i]! + offset, byteCount: bytesToCopy)
             }
@@ -235,11 +236,11 @@ public final class AudioEnginePlayer: AudioPlayer, FrameOutput {
             ioDataWriteOffset += bytesToCopy
             currentRenderReadOffset += framesToCopy
         }
-        let sizeCopied = (Int(numberOfFrames) - numberOfSamples) * MemoryLayout<Float>.size
+        let sizeCopied = (numberOfFrames - numberOfSamples) * mBytesPerPacket
         for i in 0 ..< ioData.count {
-            let sizeLeft = Int(ioData[i].mDataByteSize) - sizeCopied
+            let sizeLeft = Int(ioData[i].mDataByteSize - sizeCopied)
             if sizeLeft > 0 {
-                memset(ioData[i].mData! + sizeCopied, 0, sizeLeft)
+                memset(ioData[i].mData! + Int(sizeCopied), 0, sizeLeft)
             }
         }
     }

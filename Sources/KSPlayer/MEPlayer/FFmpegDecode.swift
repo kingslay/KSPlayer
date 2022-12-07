@@ -49,7 +49,7 @@ class FFmpegDecode: DecodeProtocol {
                 frame.timebase = packet.assetTrack.timebase
 //                frame.timebase = Timebase(avframe.pointee.time_base)
                 frame.duration = avframe.pointee.pkt_duration
-                frame.size = Int64(avframe.pointee.pkt_size)
+                frame.size = avframe.pointee.pkt_size
                 if packet.assetTrack.mediaType == .audio {
                     bestEffortTimestamp = max(bestEffortTimestamp, avframe.pointee.pts)
                     frame.position = bestEffortTimestamp

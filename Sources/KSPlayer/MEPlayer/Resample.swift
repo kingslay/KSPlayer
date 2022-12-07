@@ -268,8 +268,7 @@ class AudioSwresample: Swresample {
         var bufferSize = Int32(0)
         _ = av_samples_get_buffer_size(&bufferSize, outChannel.nb_channels, outSamples, outSampleFmt, 1)
         let frame = AudioFrame(bufferSize: bufferSize, channels: KSOptions.isAudioPlanar ? outChannel.nb_channels : 1)
-        outSamples = swr_convert(swrContext, &frame.data, outSamples, &frameBuffer, numberOfSamples)
-        frame.numberOfSamples = Int(outSamples)
+        frame.numberOfSamples = UInt32(swr_convert(swrContext, &frame.data, outSamples, &frameBuffer, numberOfSamples))
         return frame
     }
 
