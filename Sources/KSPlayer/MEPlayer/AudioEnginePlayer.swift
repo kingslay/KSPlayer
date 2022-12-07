@@ -12,13 +12,15 @@ protocol AudioPlayer: AnyObject {
     var playbackRate: Float { get set }
     var volume: Float { get set }
     var isMuted: Bool { get set }
-    var isPaused: Bool { get set }
+    var isPaused: Bool { get }
     var attackTime: Float { get set }
     var releaseTime: Float { get set }
     var threshold: Float { get set }
     var expansionRatio: Float { get set }
     var overallGain: Float { get set }
     func prepare(channels: UInt32)
+    func play(time: TimeInterval)
+    func pause()
 }
 
 public final class AudioEnginePlayer: AudioPlayer, FrameOutput {
@@ -101,18 +103,7 @@ public final class AudioEnginePlayer: AudioPlayer, FrameOutput {
     }
 
     var isPaused: Bool {
-        get {
-            engine.isRunning
-        }
-        set {
-            if newValue {
-                engine.pause()
-            } else {
-                if !engine.isRunning {
-                    try? engine.start()
-                }
-            }
-        }
+        engine.isRunning
     }
 
     var playbackRate: Float {
@@ -175,6 +166,16 @@ public final class AudioEnginePlayer: AudioPlayer, FrameOutput {
             addRenderNotify(audioUnit: audioUnit)
         }
         engine.prepare()
+    }
+
+    func play(time _: TimeInterval) {
+        if !engine.isRunning {
+            try? engine.start()
+        }
+    }
+
+    func pause() {
+        engine.pause()
     }
 
     private func addRenderNotify(audioUnit: AudioUnit) {

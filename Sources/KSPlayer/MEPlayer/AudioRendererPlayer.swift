@@ -51,30 +51,7 @@ public class AudioRendererPlayer: AudioPlayer, FrameOutput {
     private var desc: CMAudioFormatDescription?
     private let synchronizer = AVSampleBufferRenderSynchronizer()
     var isPaused: Bool {
-        get {
-            synchronizer.rate == 0
-        }
-        set {
-            if newValue {
-                synchronizer.rate = 0
-                renderer.flush()
-                renderer.stopRequestingMediaData()
-                if let periodicTimeObserver {
-                    synchronizer.removeTimeObserver(periodicTimeObserver)
-                    self.periodicTimeObserver = nil
-                }
-            } else {
-                synchronizer.rate = 1
-                synchronizer.rate = playbackRate
-                renderer.requestMediaDataWhenReady(on: DispatchQueue(label: "ksasbd")) { [unowned self] in
-                    self.request()
-                }
-                periodicTimeObserver = synchronizer.addPeriodicTimeObserver(forInterval: CMTime(seconds: 0.1, preferredTimescale: 1000), queue: .main) { [unowned self] cmTime in
-//                    let time = self.synchronizer.currentTime()
-                    self.renderSource?.setAudio(time: cmTime)
-                }
-            }
-        }
+        synchronizer.rate == 0
     }
 
     init() {
@@ -97,6 +74,27 @@ public class AudioRendererPlayer: AudioPlayer, FrameOutput {
         }
     }
 
+    func play(time: TimeInterval) {
+        synchronizer.setRate(playbackRate, time: CMTime(seconds: time))
+        renderer.requestMediaDataWhenReady(on: DispatchQueue(label: "ksasbd")) { [unowned self] in
+            self.request()
+        }
+        periodicTimeObserver = synchronizer.addPeriodicTimeObserver(forInterval: CMTime(seconds: 0.1, preferredTimescale: 1000), queue: .main) { [unowned self] cmTime in
+            //                    let time = self.synchronizer.currentTime()
+            self.renderSource?.setAudio(time: cmTime)
+        }
+    }
+
+    func pause() {
+        synchronizer.rate = 0
+        renderer.stopRequestingMediaData()
+        renderer.flush()
+        if let periodicTimeObserver {
+            synchronizer.removeTimeObserver(periodicTimeObserver)
+            self.periodicTimeObserver = nil
+        }
+    }
+
     private func request() {
         guard let desc else {
             return
@@ -114,7 +112,8 @@ public class AudioRendererPlayer: AudioPlayer, FrameOutput {
             let n = KSOptions.isAudioPlanar ? min(render.data.count, Int(desc.audioFormatList[0].mASBD.mChannelsPerFrame)) : 1
             for i in 0 ..< n {
                 var outBlockBuffer: CMBlockBuffer?
-                let dataByteSize = render.dataSize[i]
+                let dataByteSize = render.numberOfSamples * Int(desc.audioFormatList[0].mASBD.mBytesPerPacket)
+//                let dataByteSize = render.dataSize[i]
                 CMBlockBufferCreateWithMemoryBlock(
                     allocator: kCFAllocatorDefault,
                     memoryBlock: nil,
@@ -144,8 +143,7 @@ public class AudioRendererPlayer: AudioPlayer, FrameOutput {
             }
             var sampleBuffer: CMSampleBuffer?
             let sampleCount = CMItemCount(render.numberOfSamples)
-//            CMAudioSampleBufferCreateReadyWithPacketDescriptions(allocator: kCFAllocatorDefault, dataBuffer: outBlockListBuffer, formatDescription: desc, sampleCount: sampleCount, presentationTimeStamp: render.cmtime, packetDescriptions: nil, sampleBufferOut: &sampleBuffer)
-            CMAudioSampleBufferCreateWithPacketDescriptions(allocator: kCFAllocatorDefault, dataBuffer: outBlockListBuffer, dataReady: true, makeDataReadyCallback: nil, refcon: nil, formatDescription: desc, sampleCount: sampleCount, presentationTimeStamp: render.cmtime, packetDescriptions: nil, sampleBufferOut: &sampleBuffer)
+            CMAudioSampleBufferCreateReadyWithPacketDescriptions(allocator: kCFAllocatorDefault, dataBuffer: outBlockListBuffer, formatDescription: desc, sampleCount: sampleCount, presentationTimeStamp: render.cmtime, packetDescriptions: nil, sampleBufferOut: &sampleBuffer)
             guard let sampleBuffer else {
                 continue
             }

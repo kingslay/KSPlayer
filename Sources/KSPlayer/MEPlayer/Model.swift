@@ -63,7 +63,6 @@ public protocol ObjectQueueItem {
 
 protocol FrameOutput: AnyObject {
     var renderSource: OutputRenderSourceDelegate? { get set }
-    var isPaused: Bool { get set }
 }
 
 protocol MEFrame: ObjectQueueItem {

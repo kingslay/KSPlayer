@@ -288,9 +288,6 @@ open class KSPlayerLayer: UIView {
         if time.isInfinite || time.isNaN {
             return false
         }
-        if autoPlay {
-            state = .buffering
-        }
         if player.isReadyToPlay {
             let finished = await player.seek(time: time)
             if finished, autoPlay {
