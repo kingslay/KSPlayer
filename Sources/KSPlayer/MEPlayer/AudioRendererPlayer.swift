@@ -55,21 +55,39 @@ public class AudioRendererPlayer: AudioPlayer, FrameOutput {
     }
 
     init() {
+        KSOptions.setAudioSession()
         synchronizer.addRenderer(renderer)
     }
 
     func prepare(channels: UInt32) {
+        if channels > 2 {
+            renderer.audioTimePitchAlgorithm = .spectral
+        }
         #if os(macOS)
         let channels = min(2, channels)
         #else
         let channels = min(UInt32(AVAudioSession.sharedInstance().maximumOutputNumberOfChannels), channels)
         try? AVAudioSession.sharedInstance().setPreferredOutputNumberOfChannels(Int(channels))
         #endif
-        guard let format = AVAudioFormat(commonFormat: .pcmFormatFloat32, sampleRate: Double(KSOptions.audioPlayerSampleRate), channels: channels, interleaved: !KSOptions.isAudioPlanar) else {
-            return
+        if let format = AVAudioFormat(commonFormat: .pcmFormatFloat32, sampleRate: Double(KSOptions.audioPlayerSampleRate), channels: channels, interleaved: !KSOptions.isAudioPlanar) {
+            desc = format.formatDescription
+        } else {
+            var audioStreamBasicDescription = AudioStreamBasicDescription()
+            let floatByteSize = UInt32(MemoryLayout<Float>.size)
+            audioStreamBasicDescription.mBitsPerChannel = 8 * floatByteSize
+            audioStreamBasicDescription.mBytesPerFrame = floatByteSize
+            audioStreamBasicDescription.mChannelsPerFrame = channels
+            audioStreamBasicDescription.mFormatFlags = kAudioFormatFlagIsPacked | kAudioFormatFlagIsFloat
+            if KSOptions.isAudioPlanar {
+                audioStreamBasicDescription.mFormatFlags |= kAudioFormatFlagIsNonInterleaved
+            }
+            audioStreamBasicDescription.mFormatID = kAudioFormatLinearPCM
+            audioStreamBasicDescription.mFramesPerPacket = 1
+            audioStreamBasicDescription.mBytesPerPacket = audioStreamBasicDescription.mFramesPerPacket * audioStreamBasicDescription.mBytesPerFrame * (KSOptions.isAudioPlanar ? 1 : channels)
+            audioStreamBasicDescription.mSampleRate = Float64(KSOptions.audioPlayerSampleRate)
+            CMAudioFormatDescriptionCreate(allocator: kCFAllocatorDefault, asbd: &audioStreamBasicDescription, layoutSize: 0, layout: nil, magicCookieSize: 0, magicCookie: nil, extensions: nil, formatDescriptionOut: &desc)
         }
-        desc = format.formatDescription
-        if let tag = desc?.audioFormatList.first?.mChannelLayoutTag, let layout = AVAudioChannelLayout(layoutTag: tag) {
+        if let tag = desc?.audioFormatList.first?.mChannelLayoutTag, tag != kAudioChannelLayoutTag_Unknown, let layout = AVAudioChannelLayout(layoutTag: tag) {
             KSOptions.channelLayout = layout
         }
     }
@@ -79,9 +97,8 @@ public class AudioRendererPlayer: AudioPlayer, FrameOutput {
         renderer.requestMediaDataWhenReady(on: DispatchQueue(label: "ksasbd")) { [unowned self] in
             self.request()
         }
-        periodicTimeObserver = synchronizer.addPeriodicTimeObserver(forInterval: CMTime(seconds: 0.1, preferredTimescale: 1000), queue: .main) { [unowned self] cmTime in
-            //                    let time = self.synchronizer.currentTime()
-            self.renderSource?.setAudio(time: cmTime)
+        periodicTimeObserver = synchronizer.addPeriodicTimeObserver(forInterval: CMTime(seconds: 0.1, preferredTimescale: 1000), queue: .main) { [unowned self] _ in
+            self.renderSource?.setAudio(time: self.synchronizer.currentTime())
         }
     }
 
@@ -109,10 +126,10 @@ public class AudioRendererPlayer: AudioPlayer, FrameOutput {
             guard let outBlockListBuffer else {
                 continue
             }
-            let n = KSOptions.isAudioPlanar ? min(render.data.count, Int(desc.audioFormatList[0].mASBD.mChannelsPerFrame)) : 1
+            let n = render.data.count
             for i in 0 ..< n {
                 var outBlockBuffer: CMBlockBuffer?
-                let dataByteSize = Int(render.numberOfSamples * desc.audioFormatList[0].mASBD.mBytesPerPacket)
+                let dataByteSize = Int(render.numberOfSamples * UInt32(MemoryLayout<Float>.size) * render.channels) / n
 //                let dataByteSize = render.dataSize[i]
                 CMBlockBufferCreateWithMemoryBlock(
                     allocator: kCFAllocatorDefault,

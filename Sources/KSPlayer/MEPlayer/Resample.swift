@@ -263,11 +263,11 @@ class AudioSwresample: Swresample {
             }
         }
         let numberOfSamples = avframe.pointee.nb_samples
-        var outSamples = swr_get_out_samples(swrContext, numberOfSamples)
+        let outSamples = swr_get_out_samples(swrContext, numberOfSamples)
         var frameBuffer = Array(tuple: avframe.pointee.data).map { UnsafePointer<UInt8>($0) }
         var bufferSize = Int32(0)
         _ = av_samples_get_buffer_size(&bufferSize, outChannel.nb_channels, outSamples, outSampleFmt, 1)
-        let frame = AudioFrame(bufferSize: bufferSize, channels: KSOptions.isAudioPlanar ? outChannel.nb_channels : 1)
+        let frame = AudioFrame(bufferSize: bufferSize, channels: UInt32(outChannel.nb_channels))
         frame.numberOfSamples = UInt32(swr_convert(swrContext, &frame.data, outSamples, &frameBuffer, numberOfSamples))
         return frame
     }

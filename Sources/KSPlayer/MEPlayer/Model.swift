@@ -209,18 +209,21 @@ final class AudioFrame: MEFrame {
     var position: Int64 = 0
     var size: Int32 = 0
     var numberOfSamples: UInt32 = 0
+    let channels: UInt32
+    let dataSize: Int
     var data: [UnsafeMutablePointer<UInt8>?]
-    let dataSize: [Int]
-    public init(bufferSize: Int32, channels: Int32) {
-        dataSize = Array(repeating: Int(bufferSize), count: Int(channels))
-        data = (0 ..< channels).map { _ in
+    public init(bufferSize: Int32, channels: UInt32) {
+        self.channels = channels
+        let count = Int(KSOptions.isAudioPlanar ? channels : 1)
+        dataSize = Int(bufferSize)
+        data = (0 ..< count).map { _ in
             UnsafeMutablePointer<UInt8>.allocate(capacity: Int(bufferSize))
         }
     }
 
     deinit {
         for i in 0 ..< data.count {
-            data[i]?.deinitialize(count: dataSize[i])
+            data[i]?.deinitialize(count: dataSize)
             data[i]?.deallocate()
         }
         data.removeAll()
