@@ -44,7 +44,7 @@ class SubtitleDecode: DecodeProtocol {
         }
         let (attributedString, image) = text(subtitle: subtitle)
         let position = packet.position
-        let seconds = packet.assetTrack.timebase.cmtime(for: position).seconds - packet.assetTrack.startTime
+        let seconds = (packet.assetTrack.timebase.cmtime(for: position) - packet.assetTrack.startTime).seconds
         var end = seconds
         if subtitle.end_display_time == UInt32.max {
             end = Double(UInt32.max)

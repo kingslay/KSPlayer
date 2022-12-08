@@ -665,7 +665,7 @@ extension NSError {
 
 extension CMTime {
     init(seconds: TimeInterval) {
-        self.init(seconds: seconds, preferredTimescale: Int32(NSEC_PER_SEC))
+        self.init(seconds: seconds, preferredTimescale: Int32(USEC_PER_SEC))
     }
 }
 

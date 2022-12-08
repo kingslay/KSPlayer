@@ -9,7 +9,7 @@ import CoreMedia
 import Libavformat
 
 public class FFmpegAssetTrack: MediaPlayerTrack {
-    var startTime: TimeInterval
+    var startTime: CMTime
     public let trackID: Int32
     public let name: String
     public let language: String?
@@ -100,9 +100,9 @@ public class FFmpegAssetTrack: MediaPlayerTrack {
         }
         self.timebase = timebase
         if stream.pointee.start_time != Int64.min {
-            startTime = TimeInterval(stream.pointee.start_time) * TimeInterval(timebase.num) / TimeInterval(timebase.den)
+            startTime = CMTime(value: stream.pointee.start_time * Int64(timebase.num), timescale: timebase.den)
         } else {
-            startTime = 0
+            startTime = .zero
         }
         rotation = stream.rotation
         let frameRate = stream.pointee.avg_frame_rate

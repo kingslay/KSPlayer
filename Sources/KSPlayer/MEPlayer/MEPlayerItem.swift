@@ -51,7 +51,7 @@ final class MEPlayerItem {
     private(set) var assetTracks = [FFmpegAssetTrack]()
     private var videoAdaptation: VideoAdaptationState?
     private(set) var currentPlaybackTime = TimeInterval(0)
-    private var startTime = TimeInterval(0)
+    private var startTime = CMTime.zero
     private var videoClockDelay = TimeInterval(0)
     private(set) var rotation = 0.0
     private(set) var duration: TimeInterval = 0
@@ -222,12 +222,10 @@ extension MEPlayerItem {
         options.findTime = CACurrentMediaTime()
         options.formatName = String(cString: formatCtx.pointee.iformat.pointee.name)
         if formatCtx.pointee.start_time != Int64.min {
-            startTime = TimeInterval(formatCtx.pointee.start_time / Int64(AV_TIME_BASE))
+            startTime = CMTime(value: formatCtx.pointee.start_time, timescale: AV_TIME_BASE)
         }
+        currentPlaybackTime = startTime.seconds
         duration = TimeInterval(max(formatCtx.pointee.duration, 0) / Int64(AV_TIME_BASE))
-        if duration > startTime {
-            duration -= startTime
-        }
         createCodec(formatCtx: formatCtx)
         if let outputURL = options.outputURL {
             openOutput(url: outputURL)
@@ -309,7 +307,7 @@ extension MEPlayerItem {
             if let coreStream = formatCtx.pointee.streams[i] {
                 coreStream.pointee.discard = AVDISCARD_ALL
                 if let assetTrack = FFmpegAssetTrack(stream: coreStream) {
-                    if assetTrack.startTime == 0, startTime != 0 {
+                    if assetTrack.startTime == .zero, startTime != .zero {
                         assetTrack.startTime = startTime
                     }
                     if !options.subtitleDisable, assetTrack.mediaType == .subtitle {
@@ -398,7 +396,7 @@ extension MEPlayerItem {
                 condition.wait()
             }
             if state == .seeking {
-                let time = currentPlaybackTime + startTime
+                let time = currentPlaybackTime
                 allPlayerItemTracks.forEach { $0.seek(time: time) }
                 let timeStamp = Int64(time * TimeInterval(AV_TIME_BASE))
                 // can not seek to key frame
@@ -672,7 +670,7 @@ extension MEPlayerItem: OutputRenderSourceDelegate {
         }
         videoMediaTime = CACurrentMediaTime()
         if isAudioStalled {
-            currentPlaybackTime = time.seconds - options.audioDelay - startTime
+            currentPlaybackTime = time.seconds - options.audioDelay
         }
     }
 
@@ -681,7 +679,7 @@ extension MEPlayerItem: OutputRenderSourceDelegate {
             return
         }
         if !isAudioStalled {
-            currentPlaybackTime = time.seconds - startTime
+            currentPlaybackTime = time.seconds
         }
     }
 
@@ -689,10 +687,10 @@ extension MEPlayerItem: OutputRenderSourceDelegate {
         guard let videoTrack else {
             return nil
         }
-        var desire = currentPlaybackTime + options.audioDelay + startTime
+        var desire = currentPlaybackTime + options.audioDelay
         let predicate: ((VideoVTBFrame) -> Bool)? = force ? nil : { [weak self] frame -> Bool in
             guard let self else { return true }
-            desire = self.currentPlaybackTime + self.options.audioDelay + self.startTime
+            desire = self.currentPlaybackTime + self.options.audioDelay
             if self.isAudioStalled {
                 desire += max(CACurrentMediaTime() - self.videoMediaTime, 0) + self.videoClockDelay
             }
