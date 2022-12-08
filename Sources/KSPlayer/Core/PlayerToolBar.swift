@@ -138,6 +138,7 @@ public class PlayerToolBar: UIStackView {
         view.isHidden = false
     }
     
+    @available(tvOS 9.0, *)
     open override func didUpdateFocus(in context: UIFocusUpdateContext, with coordinator: UIFocusAnimationCoordinator) {
         super.didUpdateFocus(in: context, with: coordinator)
         if let nextFocusedItem = context.nextFocusedItem as? UIButton {
