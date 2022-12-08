@@ -264,12 +264,14 @@ open class VideoPlayerView: PlayerView {
     /// Add Customize functions here
     open func customizeUIComponents() {
         tapGesture.addTarget(self, action: #selector(tapGestureAction(_:)))
+        tapGesture.allowedPressTypes = [NSNumber(value: UIPress.PressType.select.rawValue)]
         tapGesture.numberOfTapsRequired = 1
         controllerView.addGestureRecognizer(tapGesture)
         panGesture.addTarget(self, action: #selector(panGestureAction(_:)))
         controllerView.addGestureRecognizer(panGesture)
         panGesture.isEnabled = false
         doubleTapGesture.addTarget(self, action: #selector(doubleTapGestureAction))
+        doubleTapGesture.allowedPressTypes = [NSNumber(value: UIPress.PressType.select.rawValue)]
         doubleTapGesture.numberOfTapsRequired = 2
         tapGesture.require(toFail: doubleTapGesture)
         controllerView.addGestureRecognizer(doubleTapGesture)
