@@ -137,9 +137,9 @@ public class PlayerToolBar: UIStackView {
         super.addArrangedSubview(view)
         view.isHidden = false
     }
-    
-#if canImport(UIKit)
-    open override func didUpdateFocus(in context: UIFocusUpdateContext, with coordinator: UIFocusAnimationCoordinator) {
+
+    #if canImport(UIKit)
+    override open func didUpdateFocus(in context: UIFocusUpdateContext, with coordinator: UIFocusAnimationCoordinator) {
         super.didUpdateFocus(in: context, with: coordinator)
         if let nextFocusedItem = context.nextFocusedItem as? UIButton {
             nextFocusedItem.tintColor = nextFocusedItem.titleColor(for: .focused)
@@ -147,16 +147,14 @@ public class PlayerToolBar: UIStackView {
         if let previouslyFocusedItem = context.previouslyFocusedItem as? UIButton {
             if previouslyFocusedItem.isSelected {
                 previouslyFocusedItem.tintColor = previouslyFocusedItem.titleColor(for: .selected)
-            }
-            else if previouslyFocusedItem.isHighlighted {
+            } else if previouslyFocusedItem.isHighlighted {
                 previouslyFocusedItem.tintColor = previouslyFocusedItem.titleColor(for: .highlighted)
-            }
-            else {
+            } else {
                 previouslyFocusedItem.tintColor = previouslyFocusedItem.titleColor(for: .normal)
             }
         }
     }
-#endif
+    #endif
 
     open func addTarget(_ target: AnyObject?, action: Selector) {
         playButton.addTarget(target, action: action, for: .primaryActionTriggered)

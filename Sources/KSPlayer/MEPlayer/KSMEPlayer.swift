@@ -130,7 +130,7 @@ extension KSMEPlayer: MEPlayerDelegate {
             $0.audioStreamBasicDescription?.mChannelsPerFrame ?? 2
         }.max() ?? 2
         let fps = tracks(mediaType: .video).map(\.nominalFrameRate).max() ?? 24
-        audioOutput.prepare(channels: channels)
+        audioOutput.prepare(channels: channels, options: options)
         videoOutput?.prepare(fps: fps)
         runInMainqueue { [weak self] in
             guard let self else { return }

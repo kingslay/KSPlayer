@@ -235,9 +235,9 @@ class AudioSwresample: Swresample {
     private var descriptor: AudioDescriptor
     private var outChannel: AVChannelLayout
     private let outSampleFmt = KSOptions.isAudioPlanar ? AV_SAMPLE_FMT_FLTP : AV_SAMPLE_FMT_FLT
-    init(codecpar: AVCodecParameters) {
+    init(codecpar: AVCodecParameters, outChannel: AVChannelLayout) {
         descriptor = AudioDescriptor(codecpar: codecpar)
-        outChannel = KSOptions.channelLayout.channel
+        self.outChannel = outChannel
         KSLog("out channelLayout: \(outChannel)")
         _ = setup(descriptor: descriptor)
     }
@@ -277,12 +277,11 @@ class AudioSwresample: Swresample {
     }
 }
 
-extension AVAudioChannelLayout {
+extension KSAudioChannelLayout {
     var channel: AVChannelLayout {
-        let mutableLayout = UnsafeMutablePointer(mutating: layout)
+        let mutableLayout = UnsafeMutablePointer(mutating: layout.layout)
         KSLog("KSOptions channelLayout: \(mutableLayout.pointee)")
         let tag = mutableLayout.pointee.mChannelLayoutTag
-        let n = Int(mutableLayout.pointee.mNumberChannelDescriptions)
         switch tag {
         case kAudioChannelLayoutTag_Mono: return .init(nb: 1, mask: swift_AV_CH_LAYOUT_MONO)
         case kAudioChannelLayoutTag_Stereo: return .init(nb: 2, mask: swift_AV_CH_LAYOUT_STEREO)
@@ -298,9 +297,9 @@ extension AVAudioChannelLayout {
         case kAudioChannelLayoutTag_AAC_7_1: return .init(nb: 8, mask: swift_AV_CH_LAYOUT_7POINT1_WIDE_BACK)
         case kAudioChannelLayoutTag_MPEG_7_1_C: return .init(nb: 8, mask: swift_AV_CH_LAYOUT_7POINT1)
         case kAudioChannelLayoutTag_UseChannelDescriptions:
-            let buffers = UnsafeBufferPointer<AudioChannelDescription>(start: &mutableLayout.pointee.mChannelDescriptions, count: n)
+            let buffers = UnsafeBufferPointer<AudioChannelDescription>(start: &mutableLayout.pointee.mChannelDescriptions, count: Int(channelCount))
             var mask = UInt64(0)
-            for i in 0 ..< n {
+            for i in 0 ..< Int(channelCount) {
                 let label = buffers[i].mChannelLabel
                 KSLog("KSOptions channelLayout label: \(label)")
                 let channel = label.avChannel.rawValue
@@ -316,7 +315,7 @@ extension AVAudioChannelLayout {
             return outChannel
         default:
             var outChannel = AVChannelLayout()
-            av_channel_layout_default(&outChannel, Int32(max(n, 1)))
+            av_channel_layout_default(&outChannel, Int32(max(channelCount, 2)))
             return outChannel
         }
     }
