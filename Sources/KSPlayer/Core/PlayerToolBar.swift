@@ -94,22 +94,29 @@ public class PlayerToolBar: UIStackView {
         playButton.tag = PlayerButtonType.play.rawValue
         playButton.setImage(KSOptions.image(named: "toolbar_ic_play"), for: .normal)
         playButton.setImage(KSOptions.image(named: "toolbar_ic_pause"), for: .selected)
+        playButton.setTitleColor(.brown, for: .focused)
         playbackRateButton.tag = PlayerButtonType.rate.rawValue
         playbackRateButton.titleFont = .systemFont(ofSize: 14, weight: .medium)
         playbackRateButton.setTitle(NSLocalizedString("speed", comment: ""), for: .normal)
+        playbackRateButton.setTitleColor(.brown, for: .focused)
         definitionButton.tag = PlayerButtonType.definition.rawValue
         definitionButton.titleFont = .systemFont(ofSize: 14, weight: .medium)
+        definitionButton.setTitleColor(.brown, for: .focused)
         audioSwitchButton.tag = PlayerButtonType.audioSwitch.rawValue
         audioSwitchButton.titleFont = .systemFont(ofSize: 14, weight: .medium)
         audioSwitchButton.setTitle(NSLocalizedString("switch audio", comment: ""), for: .normal)
+        audioSwitchButton.setTitleColor(.brown, for: .focused)
         videoSwitchButton.tag = PlayerButtonType.videoSwitch.rawValue
         videoSwitchButton.titleFont = .systemFont(ofSize: 14, weight: .medium)
         videoSwitchButton.setTitle(NSLocalizedString("switch video", comment: ""), for: .normal)
+        videoSwitchButton.setTitleColor(.brown, for: .focused)
         srtButton.tag = PlayerButtonType.srt.rawValue
         srtButton.setTitle(NSLocalizedString("subtitle", comment: ""), for: .normal)
         srtButton.titleFont = .systemFont(ofSize: 14, weight: .medium)
+        srtButton.setTitleColor(.brown, for: .focused)
         pipButton.tag = PlayerButtonType.pictureInPicture.rawValue
         pipButton.titleFont = .systemFont(ofSize: 14, weight: .medium)
+        pipButton.setTitleColor(.brown, for: .focused)
         if #available(tvOS 14.0, *) {
             pipButton.setImage(AVPictureInPictureController.pictureInPictureButtonStartImage, for: .normal)
             pipButton.setImage(AVPictureInPictureController.pictureInPictureButtonStopImage, for: .selected)
@@ -130,6 +137,26 @@ public class PlayerToolBar: UIStackView {
         super.addArrangedSubview(view)
         view.isHidden = false
     }
+    
+#if canImport(UIKit)
+    open override func didUpdateFocus(in context: UIFocusUpdateContext, with coordinator: UIFocusAnimationCoordinator) {
+        super.didUpdateFocus(in: context, with: coordinator)
+        if let nextFocusedItem = context.nextFocusedItem as? UIButton {
+            nextFocusedItem.tintColor = nextFocusedItem.titleColor(for: .focused)
+        }
+        if let previouslyFocusedItem = context.previouslyFocusedItem as? UIButton {
+            if previouslyFocusedItem.isSelected {
+                previouslyFocusedItem.tintColor = previouslyFocusedItem.titleColor(for: .selected)
+            }
+            else if previouslyFocusedItem.isHighlighted {
+                previouslyFocusedItem.tintColor = previouslyFocusedItem.titleColor(for: .highlighted)
+            }
+            else {
+                previouslyFocusedItem.tintColor = previouslyFocusedItem.titleColor(for: .normal)
+            }
+        }
+    }
+#endif
 
     open func addTarget(_ target: AnyObject?, action: Selector) {
         playButton.addTarget(target, action: action, for: .primaryActionTriggered)
