@@ -50,6 +50,7 @@ public class AudioRendererPlayer: AudioPlayer, FrameOutput {
     private let renderer = AVSampleBufferAudioRenderer()
     private var desc: CMAudioFormatDescription?
     private let synchronizer = AVSampleBufferRenderSynchronizer()
+    private let serializationQueue = DispatchQueue(label: "ks.player.serialization.queue")
     var isPaused: Bool {
         synchronizer.rate == 0
     }
@@ -95,22 +96,26 @@ public class AudioRendererPlayer: AudioPlayer, FrameOutput {
     }
 
     func play(time: TimeInterval) {
-        synchronizer.setRate(playbackRate, time: CMTime(seconds: time))
-        renderer.requestMediaDataWhenReady(on: DispatchQueue(label: "ksasbd")) { [unowned self] in
-            self.request()
-        }
-        periodicTimeObserver = synchronizer.addPeriodicTimeObserver(forInterval: CMTime(seconds: 0.1, preferredTimescale: 1000), queue: .main) { [unowned self] _ in
-            self.renderSource?.setAudio(time: self.synchronizer.currentTime())
+        serializationQueue.async {
+            self.synchronizer.setRate(self.playbackRate, time: CMTime(seconds: time))
+            self.renderer.requestMediaDataWhenReady(on: self.serializationQueue) { [unowned self] in
+                self.request()
+            }
+            self.periodicTimeObserver = self.synchronizer.addPeriodicTimeObserver(forInterval: CMTime(seconds: 0.1, preferredTimescale: 1000), queue: .main) { [unowned self] _ in
+                self.renderSource?.setAudio(time: self.synchronizer.currentTime())
+            }
         }
     }
 
     func pause() {
-        synchronizer.rate = 0
-        renderer.stopRequestingMediaData()
-        renderer.flush()
-        if let periodicTimeObserver {
-            synchronizer.removeTimeObserver(periodicTimeObserver)
-            self.periodicTimeObserver = nil
+        serializationQueue.async {
+            self.synchronizer.rate = 0
+            self.renderer.stopRequestingMediaData()
+            self.renderer.flush()
+            if let periodicTimeObserver = self.periodicTimeObserver {
+                self.synchronizer.removeTimeObserver(periodicTimeObserver)
+                self.periodicTimeObserver = nil
+            }
         }
     }
 
@@ -121,7 +126,7 @@ public class AudioRendererPlayer: AudioPlayer, FrameOutput {
 
         while renderer.isReadyForMoreMediaData, !isPaused {
             guard let render = renderSource?.getAudioOutputRender() else {
-                continue
+                break
             }
             var outBlockListBuffer: CMBlockBuffer?
             CMBlockBufferCreateEmpty(allocator: kCFAllocatorDefault, capacity: 0, flags: 0, blockBufferOut: &outBlockListBuffer)
