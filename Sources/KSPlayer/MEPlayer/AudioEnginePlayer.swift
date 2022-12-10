@@ -18,7 +18,7 @@ protocol AudioPlayer: AnyObject {
     var threshold: Float { get set }
     var expansionRatio: Float { get set }
     var overallGain: Float { get set }
-    func prepare(channels: UInt32, options: KSOptions)
+    func prepare(options: KSOptions)
     func play(time: TimeInterval)
     func pause()
 }
@@ -138,19 +138,16 @@ public final class AudioEnginePlayer: AudioPlayer, FrameOutput {
         engine.attach(dynamicsProcessor)
     }
 
-    func prepare(channels: UInt32, options: KSOptions) {
+    func prepare(options: KSOptions) {
         #if !os(macOS)
-        let channels = min(AVAudioSession.sharedInstance().maximumOutputNumberOfChannels, Int(channels))
+        let channels = min(AVAudioSession.sharedInstance().maximumOutputNumberOfChannels, Int(options.channels))
         try? AVAudioSession.sharedInstance().setPreferredOutputNumberOfChannels(channels)
         #endif
         var format = engine.outputNode.outputFormat(forBus: 0)
-        KSOptions.audioPlayerSampleRate = Int32(format.sampleRate)
         if let audioUnit = engine.outputNode.audioUnit {
             options.channelLayout = AVAudioChannelLayout(layout: audioUnit.channelLayout)
         }
-        if format.channelLayout != options.channelLayout || KSOptions.isAudioPlanar == format.isInterleaved {
-            format = AVAudioFormat(commonFormat: format.commonFormat, sampleRate: format.sampleRate, interleaved: !KSOptions.isAudioPlanar, channelLayout: options.channelLayout)
-        }
+        format = AVAudioFormat(commonFormat: format.commonFormat, sampleRate: options.sampleRate, interleaved: !KSOptions.isAudioPlanar, channelLayout: options.channelLayout)
         //        engine.attach(nbandEQ)
         //        engine.attach(distortion)
         //        engine.attach(delay)

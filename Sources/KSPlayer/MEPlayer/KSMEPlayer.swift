@@ -126,11 +126,18 @@ extension KSMEPlayer: MEPlayerDelegate {
     func sourceDidOpened() {
         isReadyToPlay = true
         options.readyTime = CACurrentMediaTime()
-        let channels = tracks(mediaType: .audio).map {
-            $0.audioStreamBasicDescription?.mChannelsPerFrame ?? 2
-        }.max() ?? 2
+        var channels = UInt32(1)
+        var sampleRate = Float64(0)
+        tracks(mediaType: .audio).forEach { track in
+            if let des = track.audioStreamBasicDescription {
+                sampleRate = max(des.mSampleRate, sampleRate)
+                channels = max(des.mChannelsPerFrame, channels)
+            }
+        }
+        options.channels = channels
+        options.sampleRate = sampleRate
         let fps = tracks(mediaType: .video).map(\.nominalFrameRate).max() ?? 24
-        audioOutput.prepare(channels: channels, options: options)
+        audioOutput.prepare(options: options)
         videoOutput?.prepare(fps: fps)
         runInMainqueue { [weak self] in
             guard let self else { return }

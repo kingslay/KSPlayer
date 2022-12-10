@@ -299,6 +299,8 @@ open class KSOptions {
     public internal(set) var decodeVideoTime = 0.0
     var formatCtx: UnsafeMutablePointer<AVFormatContext>?
     var channelLayout = AVAudioChannelLayout(layoutTag: kAudioChannelLayoutTag_Stereo)!
+    var channels: UInt32 = 2
+    var sampleRate: Float64 = 44100
     public init() {
         formatContextOptions["auto_convert"] = 0
         formatContextOptions["fps_probe_size"] = 3

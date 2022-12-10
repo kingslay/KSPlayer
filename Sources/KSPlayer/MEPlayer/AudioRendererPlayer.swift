@@ -63,23 +63,20 @@ public class AudioRendererPlayer: AudioPlayer, FrameOutput {
 //        }
     }
 
-    func prepare(channels: UInt32, options: KSOptions) {
-        if channels > 2 {
-            renderer.audioTimePitchAlgorithm = .spectral
-        }
+    func prepare(options: KSOptions) {
+        renderer.audioTimePitchAlgorithm = options.channels > 2 ? .spectral : .timeDomain
         #if os(macOS)
-
         #else
-        try? AVAudioSession.sharedInstance().setPreferredOutputNumberOfChannels(Int(channels))
+        try? AVAudioSession.sharedInstance().setPreferredOutputNumberOfChannels(Int(options.channels))
         #endif
-        if let format = AVAudioFormat(commonFormat: .pcmFormatFloat32, sampleRate: Double(KSOptions.audioPlayerSampleRate), channels: channels, interleaved: !KSOptions.isAudioPlanar) {
+        if let format = AVAudioFormat(commonFormat: .pcmFormatFloat32, sampleRate: options.sampleRate, channels: options.channels, interleaved: !KSOptions.isAudioPlanar) {
             desc = format.formatDescription
         } else {
             var audioStreamBasicDescription = AudioStreamBasicDescription()
             let floatByteSize = UInt32(MemoryLayout<Float>.size)
             audioStreamBasicDescription.mBitsPerChannel = 8 * floatByteSize
-            audioStreamBasicDescription.mBytesPerFrame = floatByteSize * (KSOptions.isAudioPlanar ? 1 : channels)
-            audioStreamBasicDescription.mChannelsPerFrame = channels
+            audioStreamBasicDescription.mBytesPerFrame = floatByteSize * (KSOptions.isAudioPlanar ? 1 : options.channels)
+            audioStreamBasicDescription.mChannelsPerFrame = options.channels
             audioStreamBasicDescription.mFormatFlags = kAudioFormatFlagIsPacked | kAudioFormatFlagIsFloat
             if KSOptions.isAudioPlanar {
                 audioStreamBasicDescription.mFormatFlags |= kAudioFormatFlagIsNonInterleaved
@@ -87,7 +84,7 @@ public class AudioRendererPlayer: AudioPlayer, FrameOutput {
             audioStreamBasicDescription.mFormatID = kAudioFormatLinearPCM
             audioStreamBasicDescription.mFramesPerPacket = 1
             audioStreamBasicDescription.mBytesPerPacket = audioStreamBasicDescription.mFramesPerPacket * audioStreamBasicDescription.mBytesPerFrame
-            audioStreamBasicDescription.mSampleRate = Float64(KSOptions.audioPlayerSampleRate)
+            audioStreamBasicDescription.mSampleRate = options.sampleRate
             CMAudioFormatDescriptionCreate(allocator: kCFAllocatorDefault, asbd: &audioStreamBasicDescription, layoutSize: 0, layout: nil, magicCookieSize: 0, magicCookie: nil, extensions: nil, formatDescriptionOut: &desc)
         }
         if let tag = desc?.audioFormatList.first?.mChannelLayoutTag, let layout = AVAudioChannelLayout(layoutTag: tag) {

@@ -98,14 +98,7 @@ public extension KSOptions {
     /// true: AVSampleBufferAudioRenderer false: AVAudioEngine
     static var isUseAudioRenderer = false
     static var isAudioPlanar = !isUseAudioRenderer
-
     internal static var channelLayout = AVAudioChannelLayout(layoutTag: kAudioChannelLayoutTag_Stereo)!
-    #if os(macOS)
-    internal static var audioPlayerSampleRate = Int32(44100)
-    #else
-    internal static var audioPlayerSampleRate = Int32(AVAudioSession.sharedInstance().sampleRate)
-    #endif
-
     static func colorSpace(ycbcrMatrix: CFString?, transferFunction: CFString?) -> CGColorSpace? {
         switch ycbcrMatrix {
         case kCVImageBufferYCbCrMatrix_ITU_R_709_2:

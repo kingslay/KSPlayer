@@ -96,7 +96,7 @@ public class FFmpegAssetTrack: MediaPlayerTrack {
         }
         var timebase = Timebase(stream.pointee.time_base)
         if timebase.num <= 0 || timebase.den <= 0 {
-            timebase = Timebase(num: 1, den: mediaType == .audio ? KSOptions.audioPlayerSampleRate : 25000)
+            timebase = Timebase(num: 1, den: 1000)
         }
         self.timebase = timebase
         if stream.pointee.start_time != Int64.min {

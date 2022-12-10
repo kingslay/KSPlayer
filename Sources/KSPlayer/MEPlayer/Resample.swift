@@ -235,15 +235,17 @@ class AudioSwresample: Swresample {
     private var descriptor: AudioDescriptor
     private var outChannel: AVChannelLayout
     private let outSampleFmt = KSOptions.isAudioPlanar ? AV_SAMPLE_FMT_FLTP : AV_SAMPLE_FMT_FLT
-    init(codecpar: AVCodecParameters, outChannel: AVChannelLayout) {
+    private let outSampleRate: UInt32
+    init(codecpar: AVCodecParameters, outChannel: AVChannelLayout, outSampleRate: UInt32) {
         descriptor = AudioDescriptor(codecpar: codecpar)
+        self.outSampleRate = outSampleRate
         self.outChannel = outChannel
         KSLog("out channelLayout: \(outChannel)")
         _ = setup(descriptor: descriptor)
     }
 
     private func setup(descriptor: AudioDescriptor) -> Bool {
-        _ = swr_alloc_set_opts2(&swrContext, &outChannel, outSampleFmt, KSOptions.audioPlayerSampleRate, &descriptor.inChannel, descriptor.inputFormat, descriptor.inputSampleRate, 0, nil)
+        _ = swr_alloc_set_opts2(&swrContext, &outChannel, outSampleFmt, Int32(outSampleRate), &descriptor.inChannel, descriptor.inputFormat, descriptor.inputSampleRate, 0, nil)
         let result = swr_init(swrContext)
         if result < 0 {
             shutdown()
@@ -361,14 +363,14 @@ private class AudioDescriptor: Equatable {
     init(codecpar: AVCodecParameters) {
         inChannel = codecpar.ch_layout
         let sampleRate = codecpar.sample_rate
-        inputSampleRate = sampleRate == 0 ? KSOptions.audioPlayerSampleRate : sampleRate
+        inputSampleRate = sampleRate
         inputFormat = AVSampleFormat(rawValue: codecpar.format)
     }
 
     init(frame: UnsafeMutablePointer<AVFrame>) {
         inChannel = frame.pointee.ch_layout
         let sampleRate = frame.pointee.sample_rate
-        inputSampleRate = sampleRate == 0 ? KSOptions.audioPlayerSampleRate : sampleRate
+        inputSampleRate = sampleRate
         inputFormat = AVSampleFormat(rawValue: frame.pointee.format)
     }
 
