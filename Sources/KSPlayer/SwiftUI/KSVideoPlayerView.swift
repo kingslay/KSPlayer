@@ -97,7 +97,7 @@ public struct KSVideoPlayerView: View {
             }
             .edgesIgnoringSafeArea(.all)
             VideoSubtitleView(model: subtitleModel)
-            VideoControllerView(config: playerCoordinator)
+            VideoControllerView(config: playerCoordinator).environmentObject(subtitleModel)
             #if !os(iOS)
                 .onMoveCommand { direction in
                     isMaskShow = true

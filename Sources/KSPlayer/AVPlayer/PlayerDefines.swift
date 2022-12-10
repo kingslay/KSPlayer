@@ -235,20 +235,6 @@ public struct VideoAdaptationState {
     public internal(set) var loadedCount: Int = 0
 }
 
-struct KSAudioChannelLayout {
-    let layout: AVAudioChannelLayout
-    let channelCount: AVAudioChannelCount
-    init(layout: AVAudioChannelLayout) {
-        self.layout = layout
-        channelCount = layout.channelCount
-    }
-
-    init(layout: AVAudioChannelLayout, channelCount: AVAudioChannelCount) {
-        self.layout = layout
-        self.channelCount = channelCount
-    }
-}
-
 open class KSOptions {
     //    public static let shared = KSOptions()
     /// 最低缓存视频时间
@@ -312,7 +298,7 @@ open class KSOptions {
     public internal(set) var decodeAudioTime = 0.0
     public internal(set) var decodeVideoTime = 0.0
     var formatCtx: UnsafeMutablePointer<AVFormatContext>?
-    var channelLayout = KSAudioChannelLayout(layout: AVAudioChannelLayout(layoutTag: kAudioChannelLayoutTag_Stereo)!)
+    var channelLayout = AVAudioChannelLayout(layoutTag: kAudioChannelLayoutTag_Stereo)!
     public init() {
         formatContextOptions["auto_convert"] = 0
         formatContextOptions["fps_probe_size"] = 3

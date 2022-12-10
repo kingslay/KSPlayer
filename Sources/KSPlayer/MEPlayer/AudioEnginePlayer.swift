@@ -146,11 +146,10 @@ public final class AudioEnginePlayer: AudioPlayer, FrameOutput {
         var format = engine.outputNode.outputFormat(forBus: 0)
         KSOptions.audioPlayerSampleRate = Int32(format.sampleRate)
         if let audioUnit = engine.outputNode.audioUnit {
-            options.channelLayout = KSAudioChannelLayout(layout: AVAudioChannelLayout(layout: audioUnit.channelLayout))
+            options.channelLayout = AVAudioChannelLayout(layout: audioUnit.channelLayout)
         }
-        let channelLayout = options.channelLayout.layout
-        if channelLayout != format.channelLayout || KSOptions.isAudioPlanar == format.isInterleaved {
-            format = AVAudioFormat(commonFormat: format.commonFormat, sampleRate: format.sampleRate, interleaved: !KSOptions.isAudioPlanar, channelLayout: channelLayout)
+        if format.channelLayout != options.channelLayout || KSOptions.isAudioPlanar == format.isInterleaved {
+            format = AVAudioFormat(commonFormat: format.commonFormat, sampleRate: format.sampleRate, interleaved: !KSOptions.isAudioPlanar, channelLayout: options.channelLayout)
         }
         //        engine.attach(nbandEQ)
         //        engine.attach(distortion)

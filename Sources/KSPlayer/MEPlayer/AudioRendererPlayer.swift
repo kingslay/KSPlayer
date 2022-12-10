@@ -57,9 +57,9 @@ public class AudioRendererPlayer: AudioPlayer, FrameOutput {
     init() {
         KSOptions.setAudioSession()
         synchronizer.addRenderer(renderer)
-        if #available(tvOS 15.0, iOS 15.0, macOS 12.0, *) {
-            renderer.allowedAudioSpatializationFormats = .monoStereoAndMultichannel
-        }
+//        if #available(tvOS 15.0, iOS 15.0, macOS 12.0, *) {
+//            renderer.allowedAudioSpatializationFormats = .monoStereoAndMultichannel
+//        }
     }
 
     func prepare(channels: UInt32, options: KSOptions) {
@@ -67,9 +67,8 @@ public class AudioRendererPlayer: AudioPlayer, FrameOutput {
             renderer.audioTimePitchAlgorithm = .spectral
         }
         #if os(macOS)
-        let channels = min(2, channels)
+
         #else
-//        let channels = min(UInt32(AVAudioSession.sharedInstance().maximumOutputNumberOfChannels), channels)
         try? AVAudioSession.sharedInstance().setPreferredOutputNumberOfChannels(Int(channels))
         #endif
         if let format = AVAudioFormat(commonFormat: .pcmFormatFloat32, sampleRate: Double(KSOptions.audioPlayerSampleRate), channels: channels, interleaved: !KSOptions.isAudioPlanar) {
@@ -91,7 +90,7 @@ public class AudioRendererPlayer: AudioPlayer, FrameOutput {
             CMAudioFormatDescriptionCreate(allocator: kCFAllocatorDefault, asbd: &audioStreamBasicDescription, layoutSize: 0, layout: nil, magicCookieSize: 0, magicCookie: nil, extensions: nil, formatDescriptionOut: &desc)
         }
         if let tag = desc?.audioFormatList.first?.mChannelLayoutTag, let layout = AVAudioChannelLayout(layoutTag: tag) {
-            options.channelLayout = KSAudioChannelLayout(layout: layout, channelCount: channels)
+            options.channelLayout = layout
         }
     }
 

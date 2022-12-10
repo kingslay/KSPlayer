@@ -23,6 +23,7 @@ English | [简体中文](./README_CN.md)
 - Picture in Picture
 - Record video
 - De-interlace auto detect
+- Spatial Audio 
 - 360° panorama video.
 
 ## Requirements

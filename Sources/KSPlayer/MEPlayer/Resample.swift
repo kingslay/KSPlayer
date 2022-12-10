@@ -277,11 +277,12 @@ class AudioSwresample: Swresample {
     }
 }
 
-extension KSAudioChannelLayout {
-    var channel: AVChannelLayout {
-        let mutableLayout = UnsafeMutablePointer(mutating: layout.layout)
+extension AVAudioChannelLayout {
+    func channelLayout(channelCount: AVAudioChannelCount) -> AVChannelLayout {
+        let mutableLayout = UnsafeMutablePointer(mutating: layout)
         KSLog("KSOptions channelLayout: \(mutableLayout.pointee)")
         let tag = mutableLayout.pointee.mChannelLayoutTag
+        let n = mutableLayout.pointee.mNumberChannelDescriptions
         switch tag {
         case kAudioChannelLayoutTag_Mono: return .init(nb: 1, mask: swift_AV_CH_LAYOUT_MONO)
         case kAudioChannelLayoutTag_Stereo: return .init(nb: 2, mask: swift_AV_CH_LAYOUT_STEREO)
@@ -297,9 +298,9 @@ extension KSAudioChannelLayout {
         case kAudioChannelLayoutTag_AAC_7_1: return .init(nb: 8, mask: swift_AV_CH_LAYOUT_7POINT1_WIDE_BACK)
         case kAudioChannelLayoutTag_MPEG_7_1_C: return .init(nb: 8, mask: swift_AV_CH_LAYOUT_7POINT1)
         case kAudioChannelLayoutTag_UseChannelDescriptions:
-            let buffers = UnsafeBufferPointer<AudioChannelDescription>(start: &mutableLayout.pointee.mChannelDescriptions, count: Int(channelCount))
+            let buffers = UnsafeBufferPointer<AudioChannelDescription>(start: &mutableLayout.pointee.mChannelDescriptions, count: Int(n))
             var mask = UInt64(0)
-            for i in 0 ..< Int(channelCount) {
+            for i in 0 ..< Int(n) {
                 let label = buffers[i].mChannelLabel
                 KSLog("KSOptions channelLayout label: \(label)")
                 let channel = label.avChannel.rawValue
@@ -315,7 +316,7 @@ extension KSAudioChannelLayout {
             return outChannel
         default:
             var outChannel = AVChannelLayout()
-            av_channel_layout_default(&outChannel, Int32(max(channelCount, 2)))
+            av_channel_layout_default(&outChannel, Int32(channelCount))
             return outChannel
         }
     }

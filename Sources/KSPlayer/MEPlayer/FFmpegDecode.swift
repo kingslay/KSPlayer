@@ -33,7 +33,8 @@ class FFmpegDecode: DecodeProtocol {
         if assetTrack.mediaType == .video {
             swresample = VideoSwresample()
         } else {
-            swresample = AudioSwresample(codecpar: codecpar, outChannel: options.channelLayout.channel)
+            let channels = assetTrack.audioStreamBasicDescription?.mChannelsPerFrame ?? 2
+            swresample = AudioSwresample(codecpar: codecpar, outChannel: options.channelLayout.channelLayout(channelCount: channels))
         }
     }
 
