@@ -74,7 +74,7 @@ let package = Package(
         ),
         .executableTarget(
             name: "build-FFmpeg",
-            path: "Plugins/Build FFmpeg"
+            path: "Plugins/BuildFFmpeg"
         ),
         // .plugin(
         //     name: "Build FFmpeg",

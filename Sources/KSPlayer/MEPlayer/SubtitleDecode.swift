@@ -22,7 +22,6 @@ class SubtitleDecode: DecodeProtocol {
     private var preSubtitleFrame: SubtitleFrame?
     required init(assetTrack: FFmpegAssetTrack, options: KSOptions, delegate: DecodeResultDelegate) {
         self.delegate = delegate
-        assetTrack.setIsEnabled(!assetTrack.isImageSubtitle)
         do {
             codecContext = try assetTrack.stream.pointee.codecpar.pointee.ceateContext(options: options)
         } catch {

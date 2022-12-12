@@ -35,17 +35,18 @@ import Foundation
         if BaseBuild.platforms.isEmpty {
             BaseBuild.platforms = PlatformType.allCases
         }
-
-        let enableOpenssl = arguments.firstIndex(of: "enable-openssl") != nil
-        if enableOpenssl {
+        if arguments.firstIndex(of: "enable-mpv") != nil {
+            BuildMPV().buildALL()
+            return
+        }
+        if arguments.firstIndex(of: "enable-openssl") != nil {
             BuildOpenSSL().buildALL()
             // BuildBoringSSL().buildALL()
         }
         if Utility.shell("which pkg-config") == nil {
             Utility.shell("brew install pkg-config")
         }
-        let enableSrt = arguments.firstIndex(of: "enable-libsrt") != nil
-        if enableSrt {
+        if arguments.firstIndex(of: "enable-libsrt") != nil {
             BuildSRT().buildALL()
         }
         BuildFFMPEG(arguments: arguments).buildALL()
@@ -615,6 +616,43 @@ private class BuildBoringSSL: BaseBuild {
 
     override func frameworks() -> [String] {
         ["Libcrypto", "Libssl"]
+    }
+}
+
+private class BuildMPV: BaseBuild {
+    private let version = "0.35.0"
+    private let mpvFile: String
+
+    init() {
+        mpvFile = "mpv-\(version)"
+        super.init(library: "MPV")
+    }
+
+    override func buildALL() {
+        if Utility.shell("which meson") == nil {
+            Utility.shell("brew install meson")
+        }
+        if !FileManager.default.fileExists(atPath: (URL.currentDirectory + mpvFile).path) {
+            Utility.shell("curl https://github.com/mpv-player/mpv/archive/refs/tags/v\(version).tar.gz | tar xj")
+        }
+        super.buildALL()
+    }
+
+    override func innerBuid(platform: PlatformType, arch: ArchType, cflags _: String, buildDir _: URL) {
+        let opensslPath = URL.currentDirectory + ["SSL", platform.rawValue, "thin", arch.rawValue]
+        var pkgConfigPath = ""
+        if FileManager.default.fileExists(atPath: opensslPath.path) {
+            pkgConfigPath += "\(opensslPath.path)/lib/pkgconfig:"
+        }
+        let ffmpegPath = URL.currentDirectory + ["FFmpeg", platform.rawValue, "thin", arch.rawValue]
+        if FileManager.default.fileExists(atPath: ffmpegPath.path) {
+            pkgConfigPath += "\(ffmpegPath.path)/lib/pkgconfig:"
+        }
+        let environment = ["PKG_CONFIG_PATH": pkgConfigPath]
+        let directoryURL = URL.currentDirectory + mpvFile
+        Utility.shell("meson setup build -Dprefer_static=true -Dbuildtype=release", currentDirectoryURL: directoryURL, environment: environment)
+        Utility.shell("meson compile -C build", currentDirectoryURL: directoryURL, environment: environment)
+        Utility.shell("meson install -C build", currentDirectoryURL: directoryURL, environment: environment)
     }
 }
 
