@@ -48,7 +48,7 @@ public class CircularBuffer<Item: ObjectQueueItem> {
             var index = tailIndex
             while index > headIndex {
                 guard let item = _buffer[Int((index - 1) & mask)] else {
-                    assertionFailure("value is nil of index: \((index - 1) & mask) headIndex: \(headIndex),tailIndex: \(tailIndex),mask: \(mask)")
+                    assertionFailure("value is nil of index: \((index - 1) & mask) headIndex: \(headIndex),tailIndex: \(tailIndex), bufferCount: \(_buffer.count),  mask: \(mask)")
                     break
                 }
                 if item.position <= _buffer[Int(index & mask)]!.position {
@@ -92,7 +92,7 @@ public class CircularBuffer<Item: ObjectQueueItem> {
         }
         let index = Int(headIndex & mask)
         guard let item = _buffer[index] else {
-            assertionFailure("value is nil of index: \(index) headIndex: \(headIndex), tailIndex: \(tailIndex)")
+            assertionFailure("value is nil of index: \(index) headIndex: \(headIndex),tailIndex: \(tailIndex), bufferCount: \(_buffer.count), mask: \(mask)")
             return nil
         }
         if let predicate, !predicate(item) {
@@ -118,7 +118,7 @@ public class CircularBuffer<Item: ObjectQueueItem> {
                     return item
                 }
             } else {
-                assertionFailure("value is nil of index: \(i) headIndex: \(headIndex), tailIndex: \(tailIndex), bufferCount: \(_buffer.count)")
+                assertionFailure("value is nil of index: \(i) headIndex: \(headIndex), tailIndex: \(tailIndex), bufferCount: \(_buffer.count), mask: \(mask)")
                 return nil
             }
             i += 1

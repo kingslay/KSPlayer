@@ -262,29 +262,32 @@ open class KSOptions {
     public var cache = false
     public var outputURL: URL?
     public var display = DisplayEnum.plane
-    public var audioDelay = 0.0 // s
-    public var subtitleDelay = 0.0 // s
-    public var videoDisable = false
-    public var audioFilters: String?
-    public var videoFilters: String?
-    public var subtitleDisable = false
-    public var videoAdaptable = true
-    public var syncDecodeAudio = false
-    public var syncDecodeVideo = false
     public var avOptions = [String: Any]()
     public var formatContextOptions = [String: Any]()
-    public var hardwareDecode = true
     public var decoderOptions = [String: Any]()
     public var probesize: Int64?
     public var maxAnalyzeDuration: Int64?
     public var lowres = UInt8(0)
-    public var autoSelectEmbedSubtitle = true
-    public var asynchronousDecompression = true
-    public var autoDeInterlace = false
     public var startPlayTime: TimeInterval?
-    public var isHDRToSDR = false
+    // audio
+    public var audioDelay = 0.0 // s
+    public var audioFilters: String?
+    public var syncDecodeAudio = false
+    // sutile
+    public var autoSelectEmbedSubtitle = true
+    public var subtitleDelay = 0.0 // s
+    public var subtitleDisable = false
+    // video
+    public var autoDeInterlace = false
     public var destinationDynamicRange: DynamicRange?
-    @Published var preferredFramesPerSecond = Float(60)
+    public var dropVideoFrame = true
+    public var videoAdaptable = true
+    public var videoFilters: String?
+    public var syncDecodeVideo = false
+    public var hardwareDecode = true
+    public var asynchronousDecompression = true
+    public var videoDisable = false
+
     public internal(set) var formatName = ""
     public internal(set) var prepareTime = 0.0
     public internal(set) var dnsStartTime = 0.0
