@@ -324,11 +324,14 @@ extension AVAudioChannelLayout {
     }
 }
 
+// swiftlint:disable identifier_name
 extension AVChannelLayout {
     init(nb: Int32, mask: UInt64) {
         self.init(order: AV_CHANNEL_ORDER_NATIVE, nb_channels: nb, u: AVChannelLayout.__Unnamed_union_u(mask: mask), opaque: nil)
     }
 }
+
+// swiftlint:enable identifier_name
 
 extension AudioChannelLabel {
     var avChannel: AVChannel {

@@ -49,6 +49,10 @@ import Foundation
         if arguments.firstIndex(of: "enable-libsrt") != nil {
             BuildSRT().buildALL()
         }
+        if arguments.firstIndex(of: "enable-libass") != nil {
+            BuildASS().buildALL()
+            return
+        }
         BuildFFMPEG(arguments: arguments).buildALL()
     }
 }
@@ -619,6 +623,47 @@ private class BuildBoringSSL: BaseBuild {
     }
 }
 
+private class BuildASS: BaseBuild {
+    private let version = "0.17.0"
+    private let assFile: String
+
+    init() {
+        assFile = "libass-\(version)"
+        super.init(library: "ASS")
+    }
+
+    override func buildALL() {
+        if !FileManager.default.fileExists(atPath: (URL.currentDirectory + assFile).path) {
+            Utility.shell("curl https://codeload.github.com/libass/libass/tar.gz/refs/tags/\(version) | tar xj")
+        }
+        super.buildALL()
+    }
+
+    override func innerBuid(platform: PlatformType, arch: ArchType, cflags _: String, buildDir: URL) {
+        let directoryURL = URL.currentDirectory + assFile
+        let prefix = thinDir(platform: platform, arch: arch)
+        let asmOptions = arch == .x86_64 ? "--disable-asm" : "--enable-asm"
+        let args = [
+            "--prefix=\(buildDir.path)",
+            "--libdir=\(prefix.path)",
+            "--with-sysroot=\(platform.isysroot())",
+            asmOptions,
+            "--enable-static",
+            "--disable-shared",
+//            "--with-pic",
+//            "--disable-libtool-lock",
+//            "--disable-require-system-font-provider",
+//            "--disable-fast-install",
+//            "--disable-test",
+//            "--disable-profile",
+//            "--disable-coretext",
+        ]
+        Utility.shell("./autogen.sh " + args.joined(separator: " "), currentDirectoryURL: directoryURL)
+        Utility.shell("./configure " + args.joined(separator: " "), currentDirectoryURL: directoryURL)
+        Utility.shell("make -j8 && make install", currentDirectoryURL: directoryURL)
+    }
+}
+
 private class BuildMPV: BaseBuild {
     private let version = "0.35.0"
     private let mpvFile: String
@@ -633,7 +678,7 @@ private class BuildMPV: BaseBuild {
             Utility.shell("brew install meson")
         }
         if !FileManager.default.fileExists(atPath: (URL.currentDirectory + mpvFile).path) {
-            Utility.shell("curl https://github.com/mpv-player/mpv/archive/refs/tags/v\(version).tar.gz | tar xj")
+            Utility.shell("curl https://github.com/mpv-player/mpv/archive/refs/tags/v\(version) | tar xj")
         }
         super.buildALL()
     }
