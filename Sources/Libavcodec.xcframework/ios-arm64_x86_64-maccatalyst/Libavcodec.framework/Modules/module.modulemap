@@ -1,9 +1,0 @@
-framework module Libavcodec [system] {
-    umbrella "."
-    exclude header "xvmc.h"
-    exclude header "vdpau.h"
-    exclude header "qsv.h"
-    exclude header "dxva2.h"
-    exclude header "d3d11va.h"
-    export *
-}

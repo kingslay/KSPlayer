@@ -30,16 +30,16 @@ PODS:
   - KSPlayer/Video (1.0):
     - KSPlayer/Core
     - KSPlayer/Subtitle
-  - OpenSSL (3.0.2):
-    - OpenSSL/OpenSSL (= 3.0.2)
-  - OpenSSL/OpenSSL (3.0.2)
+  - OpenSSL (3.0.7):
+    - OpenSSL/OpenSSL (= 3.0.7)
+  - OpenSSL/OpenSSL (3.0.7)
   - SwiftLint (0.39.2)
 
 DEPENDENCIES:
-  - FFmpeg (from `../`)
+  - FFmpeg (from `../../FFmpegKit`)
   - KSPlayer (from `../`)
   - KSPlayer/Tests (from `../`)
-  - OpenSSL (from `../`)
+  - OpenSSL (from `../../FFmpegKit`)
   - SwiftLint
 
 SPEC REPOS:
@@ -48,18 +48,18 @@ SPEC REPOS:
 
 EXTERNAL SOURCES:
   FFmpeg:
-    :path: "../"
+    :path: "../../FFmpegKit"
   KSPlayer:
     :path: "../"
   OpenSSL:
-    :path: "../"
+    :path: "../../FFmpegKit"
 
 SPEC CHECKSUMS:
   FFmpeg: afdcf31638c1a6a0253eaf9505983e21a3a5d2c1
   KSPlayer: d0ee11093f3230cc235a3f555f5c4aee9052265e
-  OpenSSL: 9637184330c49c5862fc0bb383005bd55e5a2335
+  OpenSSL: 1a6bdbed836300e614db17920d46b502cd72d7fc
   SwiftLint: 22ccbbe3b8008684be5955693bab135e0ed6a447
 
-PODFILE CHECKSUM: a88f7a03bcaf7f25903f40f95dcc14fdee02a835
+PODFILE CHECKSUM: 7bbd1533c7f3e89f867b9ea669f12edfd3b725c9
 
 COCOAPODS: 1.11.3

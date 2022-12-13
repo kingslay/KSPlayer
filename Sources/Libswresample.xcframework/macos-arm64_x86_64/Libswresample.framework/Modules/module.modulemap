@@ -1,4 +1,0 @@
-framework module Libswresample [system] {
-    umbrella "."
-    export *
-}

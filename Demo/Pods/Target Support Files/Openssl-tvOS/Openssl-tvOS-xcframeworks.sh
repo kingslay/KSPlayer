@@ -17,23 +17,26 @@ RSYNC_PROTECT_TMP_FILES=(--filter "P .*.??????")
 variant_for_slice()
 {
   case "$1" in
-  "Libssl.xcframework/ios-arm64_x86_64-simulator")
-    echo "simulator"
-    ;;
-  "Libssl.xcframework/tvos-arm64")
-    echo ""
-    ;;
   "Libssl.xcframework/ios-arm64_arm64e")
     echo ""
-    ;;
-  "Libssl.xcframework/tvos-arm64_x86_64-simulator")
-    echo "simulator"
     ;;
   "Libssl.xcframework/ios-arm64_x86_64-maccatalyst")
     echo "maccatalyst"
     ;;
+  "Libssl.xcframework/tvos-arm64")
+    echo ""
+    ;;
+  "Libssl.xcframework/ios-arm64_x86_64-simulator")
+    echo "simulator"
+    ;;
+  "Libssl.xcframework/tvos-arm64_x86_64-simulator")
+    echo "simulator"
+    ;;
   "Libssl.xcframework/macos-arm64_x86_64")
     echo ""
+    ;;
+  "Libcrypto.xcframework/ios-arm64_x86_64-maccatalyst")
+    echo "maccatalyst"
     ;;
   "Libcrypto.xcframework/ios-arm64_arm64e")
     echo ""
@@ -49,9 +52,6 @@ variant_for_slice()
     ;;
   "Libcrypto.xcframework/macos-arm64_x86_64")
     echo ""
-    ;;
-  "Libcrypto.xcframework/ios-arm64_x86_64-maccatalyst")
-    echo "maccatalyst"
     ;;
   esac
 }
@@ -59,22 +59,25 @@ variant_for_slice()
 archs_for_slice()
 {
   case "$1" in
-  "Libssl.xcframework/ios-arm64_x86_64-simulator")
+  "Libssl.xcframework/ios-arm64_arm64e")
+    echo "arm64 arm64e"
+    ;;
+  "Libssl.xcframework/ios-arm64_x86_64-maccatalyst")
     echo "arm64 x86_64"
     ;;
   "Libssl.xcframework/tvos-arm64")
     echo "arm64"
     ;;
-  "Libssl.xcframework/ios-arm64_arm64e")
-    echo "arm64 arm64e"
+  "Libssl.xcframework/ios-arm64_x86_64-simulator")
+    echo "arm64 x86_64"
     ;;
   "Libssl.xcframework/tvos-arm64_x86_64-simulator")
     echo "arm64 x86_64"
     ;;
-  "Libssl.xcframework/ios-arm64_x86_64-maccatalyst")
+  "Libssl.xcframework/macos-arm64_x86_64")
     echo "arm64 x86_64"
     ;;
-  "Libssl.xcframework/macos-arm64_x86_64")
+  "Libcrypto.xcframework/ios-arm64_x86_64-maccatalyst")
     echo "arm64 x86_64"
     ;;
   "Libcrypto.xcframework/ios-arm64_arm64e")
@@ -90,9 +93,6 @@ archs_for_slice()
     echo "arm64"
     ;;
   "Libcrypto.xcframework/macos-arm64_x86_64")
-    echo "arm64 x86_64"
-    ;;
-  "Libcrypto.xcframework/ios-arm64_x86_64-maccatalyst")
     echo "arm64 x86_64"
     ;;
   esac
@@ -177,6 +177,6 @@ install_xcframework() {
   echo "Copied $source to $destination"
 }
 
-install_xcframework "${PODS_ROOT}/../../Sources/Libssl.xcframework" "OpenSSL/OpenSSL" "framework" "tvos-arm64" "tvos-arm64_x86_64-simulator"
-install_xcframework "${PODS_ROOT}/../../Sources/Libcrypto.xcframework" "OpenSSL/OpenSSL" "framework" "tvos-arm64_x86_64-simulator" "tvos-arm64"
+install_xcframework "${PODS_ROOT}/../../../FFmpegKit/Sources/Libssl.xcframework" "OpenSSL/OpenSSL" "framework" "tvos-arm64" "tvos-arm64_x86_64-simulator"
+install_xcframework "${PODS_ROOT}/../../../FFmpegKit/Sources/Libcrypto.xcframework" "OpenSSL/OpenSSL" "framework" "tvos-arm64_x86_64-simulator" "tvos-arm64"
 

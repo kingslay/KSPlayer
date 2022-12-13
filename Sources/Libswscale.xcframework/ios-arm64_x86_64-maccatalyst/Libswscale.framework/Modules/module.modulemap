@@ -1,4 +1,0 @@
-framework module Libswscale [system] {
-    umbrella "."
-    export *
-}

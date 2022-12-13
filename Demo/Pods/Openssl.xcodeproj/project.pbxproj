@@ -40,72 +40,73 @@
 /* End PBXAggregateTarget section */
 
 /* Begin PBXFileReference section */
-		0E402F2FE2786E8B6CDE460181D6EB51 /* OpenSSL-macOS-xcframeworks.sh */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.script.sh; name = "OpenSSL-macOS-xcframeworks.sh"; path = "../OpenSSL-macOS/OpenSSL-macOS-xcframeworks.sh"; sourceTree = "<group>"; };
-		2454C238BF05CD2498F40E8B229BB64A /* OpenSSL-iOS.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "OpenSSL-iOS.release.xcconfig"; sourceTree = "<group>"; };
-		471A77DC87E230D1E087C8EC34632328 /* Libssl.xcframework */ = {isa = PBXFileReference; includeInIndex = 1; name = Libssl.xcframework; path = Sources/Libssl.xcframework; sourceTree = "<group>"; };
-		590B3CA86E22DD6E355EB9B8948E66E3 /* OpenSSL-iOS.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "OpenSSL-iOS.debug.xcconfig"; sourceTree = "<group>"; };
-		79A02B7034CBD86DACEEB19FB05F3293 /* OpenSSL-tvOS.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "OpenSSL-tvOS.debug.xcconfig"; path = "../OpenSSL-tvOS/OpenSSL-tvOS.debug.xcconfig"; sourceTree = "<group>"; };
-		96CC08D00FA64C670DCA71BE6B593663 /* OpenSSL-tvOS-xcframeworks.sh */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.script.sh; name = "OpenSSL-tvOS-xcframeworks.sh"; path = "../OpenSSL-tvOS/OpenSSL-tvOS-xcframeworks.sh"; sourceTree = "<group>"; };
-		A2443D6890D97B9C260F8CAD102FB699 /* OpenSSL-iOS-xcframeworks.sh */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.script.sh; path = "OpenSSL-iOS-xcframeworks.sh"; sourceTree = "<group>"; };
-		A884B524E351FDD0599A134510AB745E /* OpenSSL-macOS.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "OpenSSL-macOS.release.xcconfig"; path = "../OpenSSL-macOS/OpenSSL-macOS.release.xcconfig"; sourceTree = "<group>"; };
-		AE0062EBE4601146B90EDE767C42CF8C /* OpenSSL-macOS.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "OpenSSL-macOS.debug.xcconfig"; path = "../OpenSSL-macOS/OpenSSL-macOS.debug.xcconfig"; sourceTree = "<group>"; };
-		AE2160AB46AAD9BC8ABE25612FEF57F2 /* Libcrypto.xcframework */ = {isa = PBXFileReference; includeInIndex = 1; name = Libcrypto.xcframework; path = Sources/Libcrypto.xcframework; sourceTree = "<group>"; };
-		D3F237F636A2641E30CBB5E93505E0EC /* OpenSSL.podspec */ = {isa = PBXFileReference; explicitFileType = text.script.ruby; includeInIndex = 1; indentWidth = 2; lastKnownFileType = text; path = OpenSSL.podspec; sourceTree = "<group>"; tabWidth = 2; xcLanguageSpecificationIdentifier = xcode.lang.ruby; };
-		D4B5DC5BBB7267900692148B89C16402 /* OpenSSL-tvOS.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "OpenSSL-tvOS.release.xcconfig"; path = "../OpenSSL-tvOS/OpenSSL-tvOS.release.xcconfig"; sourceTree = "<group>"; };
+		01C2752DC7EAD887783A7E2FC33E3F3C /* OpenSSL-tvOS.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "OpenSSL-tvOS.release.xcconfig"; path = "../OpenSSL-tvOS/OpenSSL-tvOS.release.xcconfig"; sourceTree = "<group>"; };
+		265CBB6EACE99FD705A70C063EB96DD4 /* OpenSSL-iOS-xcframeworks.sh */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.script.sh; path = "OpenSSL-iOS-xcframeworks.sh"; sourceTree = "<group>"; };
+		3B51050184389D783A5A7A33C2D1502A /* Libssl.xcframework */ = {isa = PBXFileReference; includeInIndex = 1; name = Libssl.xcframework; path = Sources/Libssl.xcframework; sourceTree = "<group>"; };
+		40051B990E9B1E9F185D8DFA965662C3 /* OpenSSL-macOS-xcframeworks.sh */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.script.sh; name = "OpenSSL-macOS-xcframeworks.sh"; path = "../OpenSSL-macOS/OpenSSL-macOS-xcframeworks.sh"; sourceTree = "<group>"; };
+		6670A68353C32E050241D07853F80710 /* OpenSSL-macOS.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "OpenSSL-macOS.debug.xcconfig"; path = "../OpenSSL-macOS/OpenSSL-macOS.debug.xcconfig"; sourceTree = "<group>"; };
+		771D45FFA3FF7C51FC0A0F7E0F591839 /* OpenSSL.podspec */ = {isa = PBXFileReference; explicitFileType = text.script.ruby; includeInIndex = 1; indentWidth = 2; lastKnownFileType = text; path = OpenSSL.podspec; sourceTree = "<group>"; tabWidth = 2; xcLanguageSpecificationIdentifier = xcode.lang.ruby; };
+		8C2AAECBF3A9658FE5FABDE19FCB2C03 /* Libcrypto.xcframework */ = {isa = PBXFileReference; includeInIndex = 1; name = Libcrypto.xcframework; path = Sources/Libcrypto.xcframework; sourceTree = "<group>"; };
+		B721016303F9BC4A717F8F28889E187B /* OpenSSL-macOS.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "OpenSSL-macOS.release.xcconfig"; path = "../OpenSSL-macOS/OpenSSL-macOS.release.xcconfig"; sourceTree = "<group>"; };
+		D20900FF3E8C0E229C60482421F3CDC1 /* OpenSSL-tvOS-xcframeworks.sh */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.script.sh; name = "OpenSSL-tvOS-xcframeworks.sh"; path = "../OpenSSL-tvOS/OpenSSL-tvOS-xcframeworks.sh"; sourceTree = "<group>"; };
+		D3D4E4ED7A2E0B3517C52D4A0EB2EB76 /* OpenSSL-iOS.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "OpenSSL-iOS.release.xcconfig"; sourceTree = "<group>"; };
+		EA06E244D0D594220A7D10624214B63F /* OpenSSL-tvOS.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "OpenSSL-tvOS.debug.xcconfig"; path = "../OpenSSL-tvOS/OpenSSL-tvOS.debug.xcconfig"; sourceTree = "<group>"; };
+		F7377C84AD6FDB82AA71497C6D06E6B8 /* OpenSSL-iOS.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "OpenSSL-iOS.debug.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
-		25F1C3A92277C6AAF6CFA1D1F61F76AE /* Pod */ = {
+		10402AFF55219A775A05D13E4D66C859 /* OpenSSL */ = {
 			isa = PBXGroup;
 			children = (
-				D3F237F636A2641E30CBB5E93505E0EC /* OpenSSL.podspec */,
-			);
-			name = Pod;
-			sourceTree = "<group>";
-		};
-		48893C89AB2E1EAD87693B508A60E15C /* Support Files */ = {
-			isa = PBXGroup;
-			children = (
-				A2443D6890D97B9C260F8CAD102FB699 /* OpenSSL-iOS-xcframeworks.sh */,
-				590B3CA86E22DD6E355EB9B8948E66E3 /* OpenSSL-iOS.debug.xcconfig */,
-				2454C238BF05CD2498F40E8B229BB64A /* OpenSSL-iOS.release.xcconfig */,
-				0E402F2FE2786E8B6CDE460181D6EB51 /* OpenSSL-macOS-xcframeworks.sh */,
-				AE0062EBE4601146B90EDE767C42CF8C /* OpenSSL-macOS.debug.xcconfig */,
-				A884B524E351FDD0599A134510AB745E /* OpenSSL-macOS.release.xcconfig */,
-				96CC08D00FA64C670DCA71BE6B593663 /* OpenSSL-tvOS-xcframeworks.sh */,
-				79A02B7034CBD86DACEEB19FB05F3293 /* OpenSSL-tvOS.debug.xcconfig */,
-				D4B5DC5BBB7267900692148B89C16402 /* OpenSSL-tvOS.release.xcconfig */,
-			);
-			name = "Support Files";
-			path = "Demo/Pods/Target Support Files/OpenSSL-iOS";
-			sourceTree = "<group>";
-		};
-		4C9A6EF5C15829A4336ECFD36A113849 /* OpenSSL */ = {
-			isa = PBXGroup;
-			children = (
-				DD83E8149165B68302261166F60AC588 /* Frameworks */,
+				2F58C2DCAF88EC0547E75BBEF9FA993E /* Frameworks */,
 			);
 			name = OpenSSL;
+			sourceTree = "<group>";
+		};
+		104425E750D5F20F0B39B75B8F7C8B65 /* OpenSSL */ = {
+			isa = PBXGroup;
+			children = (
+				10402AFF55219A775A05D13E4D66C859 /* OpenSSL */,
+				F6FB3006DA92152A6C529BA5356062A7 /* Pod */,
+				34F0F8D8A86CFB2D4FC3D74FFB3FF1D2 /* Support Files */,
+			);
+			name = OpenSSL;
+			path = ../../../FFmpegKit;
+			sourceTree = "<group>";
+		};
+		2F58C2DCAF88EC0547E75BBEF9FA993E /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				8C2AAECBF3A9658FE5FABDE19FCB2C03 /* Libcrypto.xcframework */,
+				3B51050184389D783A5A7A33C2D1502A /* Libssl.xcframework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		34F0F8D8A86CFB2D4FC3D74FFB3FF1D2 /* Support Files */ = {
+			isa = PBXGroup;
+			children = (
+				265CBB6EACE99FD705A70C063EB96DD4 /* OpenSSL-iOS-xcframeworks.sh */,
+				F7377C84AD6FDB82AA71497C6D06E6B8 /* OpenSSL-iOS.debug.xcconfig */,
+				D3D4E4ED7A2E0B3517C52D4A0EB2EB76 /* OpenSSL-iOS.release.xcconfig */,
+				40051B990E9B1E9F185D8DFA965662C3 /* OpenSSL-macOS-xcframeworks.sh */,
+				6670A68353C32E050241D07853F80710 /* OpenSSL-macOS.debug.xcconfig */,
+				B721016303F9BC4A717F8F28889E187B /* OpenSSL-macOS.release.xcconfig */,
+				D20900FF3E8C0E229C60482421F3CDC1 /* OpenSSL-tvOS-xcframeworks.sh */,
+				EA06E244D0D594220A7D10624214B63F /* OpenSSL-tvOS.debug.xcconfig */,
+				01C2752DC7EAD887783A7E2FC33E3F3C /* OpenSSL-tvOS.release.xcconfig */,
+			);
+			name = "Support Files";
+			path = "../KSPlayer/Demo/Pods/Target Support Files/OpenSSL-iOS";
 			sourceTree = "<group>";
 		};
 		8B16A11C1B1193FD7ABD0CCA383F5525 = {
 			isa = PBXGroup;
 			children = (
 				CA3A86144F06B61FC7614A6692CFF9D7 /* Frameworks */,
-				91C9B42E7FBED925C09962FB4326F68F /* OpenSSL */,
+				104425E750D5F20F0B39B75B8F7C8B65 /* OpenSSL */,
 				A60504669570A5B181B3722B6A4F349A /* Products */,
 			);
-			sourceTree = "<group>";
-		};
-		91C9B42E7FBED925C09962FB4326F68F /* OpenSSL */ = {
-			isa = PBXGroup;
-			children = (
-				4C9A6EF5C15829A4336ECFD36A113849 /* OpenSSL */,
-				25F1C3A92277C6AAF6CFA1D1F61F76AE /* Pod */,
-				48893C89AB2E1EAD87693B508A60E15C /* Support Files */,
-			);
-			name = OpenSSL;
-			path = ../..;
 			sourceTree = "<group>";
 		};
 		A60504669570A5B181B3722B6A4F349A /* Products */ = {
@@ -122,13 +123,12 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
-		DD83E8149165B68302261166F60AC588 /* Frameworks */ = {
+		F6FB3006DA92152A6C529BA5356062A7 /* Pod */ = {
 			isa = PBXGroup;
 			children = (
-				AE2160AB46AAD9BC8ABE25612FEF57F2 /* Libcrypto.xcframework */,
-				471A77DC87E230D1E087C8EC34632328 /* Libssl.xcframework */,
+				771D45FFA3FF7C51FC0A0F7E0F591839 /* OpenSSL.podspec */,
 			);
-			name = Frameworks;
+			name = Pod;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -217,7 +217,7 @@
 /* Begin XCBuildConfiguration section */
 		177FE0A44244AEAF36FC558C224480BB /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = AE0062EBE4601146B90EDE767C42CF8C /* OpenSSL-macOS.debug.xcconfig */;
+			baseConfigurationReference = 6670A68353C32E050241D07853F80710 /* OpenSSL-macOS.debug.xcconfig */;
 			buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
@@ -235,7 +235,7 @@
 		};
 		4C5A1CB014A93DDA67130FAC94B2AD6C /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = D4B5DC5BBB7267900692148B89C16402 /* OpenSSL-tvOS.release.xcconfig */;
+			baseConfigurationReference = 01C2752DC7EAD887783A7E2FC33E3F3C /* OpenSSL-tvOS.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = "App Icon & Top Shelf Image";
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -320,7 +320,7 @@
 		};
 		92D1CDCCE2861EA41346622BA28FFFB1 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 2454C238BF05CD2498F40E8B229BB64A /* OpenSSL-iOS.release.xcconfig */;
+			baseConfigurationReference = D3D4E4ED7A2E0B3517C52D4A0EB2EB76 /* OpenSSL-iOS.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -402,7 +402,7 @@
 		};
 		CEF2EB26B8A052D60276889F45482BDD /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = A884B524E351FDD0599A134510AB745E /* OpenSSL-macOS.release.xcconfig */;
+			baseConfigurationReference = B721016303F9BC4A717F8F28889E187B /* OpenSSL-macOS.release.xcconfig */;
 			buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
@@ -420,7 +420,7 @@
 		};
 		DAF1F6383976E1EBE019329F9DB0E6D4 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 79A02B7034CBD86DACEEB19FB05F3293 /* OpenSSL-tvOS.debug.xcconfig */;
+			baseConfigurationReference = EA06E244D0D594220A7D10624214B63F /* OpenSSL-tvOS.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = "App Icon & Top Shelf Image";
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -436,7 +436,7 @@
 		};
 		F6379315F5A2A4ED357C5262CBDD8A75 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 590B3CA86E22DD6E355EB9B8948E66E3 /* OpenSSL-iOS.debug.xcconfig */;
+			baseConfigurationReference = F7377C84AD6FDB82AA71497C6D06E6B8 /* OpenSSL-iOS.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
