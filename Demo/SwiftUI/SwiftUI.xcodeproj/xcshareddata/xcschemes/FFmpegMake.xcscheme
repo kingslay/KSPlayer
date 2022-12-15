@@ -42,7 +42,7 @@
       allowLocationSimulation = "YES">
       <PathRunnable
          runnableDebuggingMode = "0"
-         FilePath = "/Users/kintan/Documents/Github/KSPlayer/Script/FFmpeg/macos/scratch/x86_64/ffplay_g">
+         FilePath = "/Users/kintan/Documents/Github/FFmpegKit/Script/FFmpeg/macos/scratch/x86_64/ffplay_g">
       </PathRunnable>
       <CommandLineArguments>
          <CommandLineArgument

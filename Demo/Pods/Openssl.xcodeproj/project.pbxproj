@@ -16,6 +16,7 @@
 			dependencies = (
 			);
 			name = "OpenSSL-tvOS";
+			productName = "OpenSSL-tvOS";
 		};
 		7B6EF2D08D36375BC7EDC372D2ED03FA /* OpenSSL-iOS */ = {
 			isa = PBXAggregateTarget;
@@ -26,6 +27,7 @@
 			dependencies = (
 			);
 			name = "OpenSSL-iOS";
+			productName = "OpenSSL-iOS";
 		};
 		991EE7C8B5B9FB326DB1290119072DB8 /* OpenSSL-macOS */ = {
 			isa = PBXAggregateTarget;
@@ -36,17 +38,18 @@
 			dependencies = (
 			);
 			name = "OpenSSL-macOS";
+			productName = "OpenSSL-macOS";
 		};
 /* End PBXAggregateTarget section */
 
 /* Begin PBXFileReference section */
 		01C2752DC7EAD887783A7E2FC33E3F3C /* OpenSSL-tvOS.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "OpenSSL-tvOS.release.xcconfig"; path = "../OpenSSL-tvOS/OpenSSL-tvOS.release.xcconfig"; sourceTree = "<group>"; };
 		265CBB6EACE99FD705A70C063EB96DD4 /* OpenSSL-iOS-xcframeworks.sh */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.script.sh; path = "OpenSSL-iOS-xcframeworks.sh"; sourceTree = "<group>"; };
-		3B51050184389D783A5A7A33C2D1502A /* Libssl.xcframework */ = {isa = PBXFileReference; includeInIndex = 1; name = Libssl.xcframework; path = Sources/Libssl.xcframework; sourceTree = "<group>"; };
+		3B51050184389D783A5A7A33C2D1502A /* Libssl.xcframework */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = wrapper.xcframework; name = Libssl.xcframework; path = Sources/Libssl.xcframework; sourceTree = "<group>"; };
 		40051B990E9B1E9F185D8DFA965662C3 /* OpenSSL-macOS-xcframeworks.sh */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.script.sh; name = "OpenSSL-macOS-xcframeworks.sh"; path = "../OpenSSL-macOS/OpenSSL-macOS-xcframeworks.sh"; sourceTree = "<group>"; };
 		6670A68353C32E050241D07853F80710 /* OpenSSL-macOS.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "OpenSSL-macOS.debug.xcconfig"; path = "../OpenSSL-macOS/OpenSSL-macOS.debug.xcconfig"; sourceTree = "<group>"; };
-		771D45FFA3FF7C51FC0A0F7E0F591839 /* OpenSSL.podspec */ = {isa = PBXFileReference; explicitFileType = text.script.ruby; includeInIndex = 1; indentWidth = 2; lastKnownFileType = text; path = OpenSSL.podspec; sourceTree = "<group>"; tabWidth = 2; xcLanguageSpecificationIdentifier = xcode.lang.ruby; };
-		8C2AAECBF3A9658FE5FABDE19FCB2C03 /* Libcrypto.xcframework */ = {isa = PBXFileReference; includeInIndex = 1; name = Libcrypto.xcframework; path = Sources/Libcrypto.xcframework; sourceTree = "<group>"; };
+		771D45FFA3FF7C51FC0A0F7E0F591839 /* OpenSSL.podspec */ = {isa = PBXFileReference; explicitFileType = text.script.ruby; includeInIndex = 1; indentWidth = 2; path = OpenSSL.podspec; sourceTree = "<group>"; tabWidth = 2; };
+		8C2AAECBF3A9658FE5FABDE19FCB2C03 /* Libcrypto.xcframework */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = wrapper.xcframework; name = Libcrypto.xcframework; path = Sources/Libcrypto.xcframework; sourceTree = "<group>"; };
 		B721016303F9BC4A717F8F28889E187B /* OpenSSL-macOS.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "OpenSSL-macOS.release.xcconfig"; path = "../OpenSSL-macOS/OpenSSL-macOS.release.xcconfig"; sourceTree = "<group>"; };
 		D20900FF3E8C0E229C60482421F3CDC1 /* OpenSSL-tvOS-xcframeworks.sh */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.script.sh; name = "OpenSSL-tvOS-xcframeworks.sh"; path = "../OpenSSL-tvOS/OpenSSL-tvOS-xcframeworks.sh"; sourceTree = "<group>"; };
 		D3D4E4ED7A2E0B3517C52D4A0EB2EB76 /* OpenSSL-iOS.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "OpenSSL-iOS.release.xcconfig"; sourceTree = "<group>"; };

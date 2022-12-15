@@ -133,7 +133,7 @@
 			buildPhases = (
 			);
 			buildToolPath = /usr/bin/make;
-			buildWorkingDirectory = "$(SRCROOT)/../../Script/FFmpeg/macos/scratch/x86_64";
+			buildWorkingDirectory = "$(SRCROOT)/../../../FFmpegKit/Script/FFmpeg/macos/scratch/x86_64";
 			dependencies = (
 			);
 			name = FFmpegMake;

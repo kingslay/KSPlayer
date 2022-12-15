@@ -1,6 +1,6 @@
 // swift-tools-version:5.7
-import PackageDescription
 import Foundation
+import PackageDescription
 let package = Package(
     name: "KSPlayer",
     defaultLocalization: "en",
@@ -11,7 +11,7 @@ let package = Package(
             name: "KSPlayer",
             type: .static,
             targets: ["KSPlayer"]
-        )
+        ),
     ],
     targets: [
         // Targets are the basic building blocks of a package. A target can define a module or a test suite.
@@ -37,13 +37,21 @@ let package = Package(
         ),
     ]
 )
+var ffmpegKitPath = FileManager.default.currentDirectoryPath + "/../FFmpegKit"
+if !FileManager.default.fileExists(atPath: ffmpegKitPath) {
+    ffmpegKitPath = (ProcessInfo.processInfo.environment["OLDPWD"] ?? "") + "/../FFmpegKit"
+}
 
-if FileManager.default.fileExists(atPath: FileManager.default.currentDirectoryPath + "/../FFmpegKit") || FileManager.default.fileExists(atPath: FileManager.default.homeDirectoryForCurrentUser.path + "/Documents/Github/FFmpegKit") {
+if !FileManager.default.fileExists(atPath: ffmpegKitPath) {
+    ffmpegKitPath = FileManager.default.homeDirectoryForCurrentUser.path + "/Documents/Github/FFmpegKit"
+}
+
+if FileManager.default.fileExists(atPath: ffmpegKitPath) {
     package.dependencies += [
-        .package(path: "../FFmpegKit"),
+        .package(path: ffmpegKitPath),
     ]
 } else {
-     package.dependencies += [
-        .package(url: "https://github.com/kingslay/FFmpegKit.git", branch: "main")
+    package.dependencies += [
+        .package(url: "https://github.com/kingslay/FFmpegKit.git", branch: "main"),
     ]
 }
