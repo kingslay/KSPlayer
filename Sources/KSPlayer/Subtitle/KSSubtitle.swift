@@ -16,6 +16,7 @@ import Foundation
 public class SubtitlePart: CustomStringConvertible, NSMutableCopying {
     public let start: TimeInterval
     public var end: TimeInterval
+    public var origin: CGPoint = .zero
     public let text: NSMutableAttributedString?
     public var image: UIImage?
     public var description: String {

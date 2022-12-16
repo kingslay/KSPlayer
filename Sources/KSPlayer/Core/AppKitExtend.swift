@@ -496,7 +496,7 @@ public class KSSlider: NSSlider {
     }
 
     open func setThumbImage(_: UIImage?, for _: State) {}
-    
+
     @IBInspectable var maximumValue: Float {
         get {
             Float(maxValue)

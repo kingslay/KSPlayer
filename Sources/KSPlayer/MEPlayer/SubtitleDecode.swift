@@ -41,7 +41,7 @@ class SubtitleDecode: DecodeProtocol {
         if len <= 0 {
             return
         }
-        let (attributedString, image) = text(subtitle: subtitle)
+        let (origin, attributedString, image) = text(subtitle: subtitle)
         let position = packet.position
         let seconds = (packet.assetTrack.timebase.cmtime(for: position) - packet.assetTrack.startTime).seconds
         var end = seconds
@@ -54,6 +54,7 @@ class SubtitleDecode: DecodeProtocol {
         }
         let part = SubtitlePart(seconds + TimeInterval(subtitle.start_display_time) / 1000.0, end, attributedString: attributedString)
         part.image = image
+        part.origin = origin
         let frame = SubtitleFrame(part: part, timebase: packet.assetTrack.timebase)
         frame.position = position
         if let preSubtitleFrame, preSubtitleFrame.part.end == Double(UInt32.max) {
@@ -86,12 +87,16 @@ class SubtitleDecode: DecodeProtocol {
         }
     }
 
-    private func text(subtitle: AVSubtitle) -> (NSMutableAttributedString?, UIImage?) {
+    private func text(subtitle: AVSubtitle) -> (CGPoint, NSMutableAttributedString?, UIImage?) {
         var attributedString: NSMutableAttributedString?
         var images = [(CGRect, CGImage)]()
+        var origin: CGPoint = .zero
         for i in 0 ..< Int(subtitle.num_rects) {
             guard let rect = subtitle.rects[i]?.pointee else {
                 continue
+            }
+            if i == 0 {
+                origin = CGPoint(x: Int(rect.x), y: Int(rect.y))
             }
             if let text = rect.text {
                 if attributedString == nil {
@@ -112,6 +117,9 @@ class SubtitleDecode: DecodeProtocol {
                 }
             }
         }
-        return (attributedString, CGImage.combine(images: images)?.image(quality: 0.2))
+        if images.count > 1 {
+            origin = .zero
+        }
+        return (origin, attributedString, CGImage.combine(images: images)?.image(quality: 0.2))
     }
 }

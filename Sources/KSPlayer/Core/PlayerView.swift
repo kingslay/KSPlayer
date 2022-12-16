@@ -71,26 +71,25 @@ open class PlayerView: UIView, KSPlayerLayerDelegate, KSSliderDelegate {
 
     @objc func onButtonPressed(_ button: UIButton) {
         guard let type = PlayerButtonType(rawValue: button.tag) else { return }
-        
-    #if os(macOS)
+
+        #if os(macOS)
         if let menu = button.menu,
-           let item = button.menu?.items.first(where: { $0.state == .on }) {
-            
+           let item = button.menu?.items.first(where: { $0.state == .on })
+        {
             menu.popUp(positioning: item,
                        at: button.frame.origin,
                        in: self)
         } else {
             onButtonPressed(type: type, button: button)
         }
-    #elseif os(tvOS)
+        #elseif os(tvOS)
         onButtonPressed(type: type, button: button)
-    #else
+        #else
         if #available(iOS 14.0, *), button.menu != nil {
             return
         }
         onButtonPressed(type: type, button: button)
-    #endif
-
+        #endif
     }
 
     open func onButtonPressed(type: PlayerButtonType, button: UIButton) {

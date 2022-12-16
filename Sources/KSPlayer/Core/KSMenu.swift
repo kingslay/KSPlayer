@@ -11,10 +11,11 @@ import UIKit
 import AppKit
 #endif
 
-final public class KSMenuBuilder {
+public enum KSMenuBuilder {
     static func definitionsMenu(from resource: KSPlayerResource?,
                                 selected definition: Int,
-                                completition handler: @escaping (KSAction) -> Void) -> KSMenuX? {
+                                completition handler: @escaping (KSAction) -> Void) -> KSMenuX?
+    {
         guard #available(macOS 11.0, iOS 13.0, tvOS 14.0, *) else { return nil }
         guard let resource, resource.definitions.count > 1 else { return nil }
 
@@ -36,7 +37,8 @@ final public class KSMenuBuilder {
 
     static func playbackRateMenu(_ currentRate: Double,
                                  speeds: [Double] = [0.75, 1.0, 1.25, 1.5, 2.0],
-                                 completition handler: @escaping (Double) -> Void) -> KSMenuX? {
+                                 completition handler: @escaping (Double) -> Void) -> KSMenuX?
+    {
         guard #available(macOS 11.0, iOS 13.0, tvOS 14.0, *) else { return nil }
 
         var actions: [KSAction] = []
@@ -44,7 +46,7 @@ final public class KSMenuBuilder {
             let title = "\(rate) x"
             let rateItem = KSAction.initialize(title: title,
                                                tag: index) { action in
-                guard speeds.count > action.tag  else { return }
+                guard speeds.count > action.tag else { return }
                 handler(speeds[action.tag])
             }
             if currentRate == rate {
@@ -58,10 +60,11 @@ final public class KSMenuBuilder {
 
     static func audioVideoChangeMenu(_ currentTrack: MediaPlayerTrack?,
                                      availableTracks: [MediaPlayerTrack],
-                                     completition handler: @escaping (KSAction) -> Void) -> KSMenuX? {
+                                     completition handler: @escaping (KSAction) -> Void) -> KSMenuX?
+    {
         guard availableTracks.count > 1,
-                let currentTrack,
-                #available(macOS 11.0, iOS 13.0, tvOS 14.0, *)
+              let currentTrack,
+              #available(macOS 11.0, iOS 13.0, tvOS 14.0, *)
         else { return nil }
         let title = NSLocalizedString(currentTrack.mediaType == .audio ? "switch audio" : "switch video", comment: "")
 
@@ -87,7 +90,8 @@ final public class KSMenuBuilder {
 
     static func srtChangeMenu(_ currentSub: SubtitleInfo?,
                               availableSubtitles: [SubtitleInfo],
-                              completition handler: @escaping (SubtitleInfo?) -> Void) -> KSMenuX? {
+                              completition handler: @escaping (SubtitleInfo?) -> Void) -> KSMenuX?
+    {
         guard availableSubtitles.count > 0, #available(macOS 11.0, iOS 13.0, tvOS 14.0, *) else { return nil }
         var actions: [KSAction] = []
 
@@ -118,16 +122,16 @@ final public class KSMenuBuilder {
 }
 
 #if canImport(UIKit)
-final public class KSAction: UIAction {
+public final class KSAction: UIAction {
     var tag: Int = 0
 
     @available(macOS 11.0, iOS 13.0, tvOS 14.0, *)
     static func initialize(title string: String,
-                           keyEquivalent charCode: String = "",
+                           keyEquivalent _: String = "",
                            state: KSMenuX.State = .off,
                            tag: Int = 0,
-                           completition handler: @escaping (KSAction) -> Void) -> KSAction {
-
+                           completition handler: @escaping (KSAction) -> Void) -> KSAction
+    {
         let action = KSAction(title: string,
                               image: nil,
                               identifier: nil,
@@ -143,25 +147,27 @@ final public class KSAction: UIAction {
     }
 }
 
-final public class KSMenuX: UIMenu {
+public final class KSMenuX: UIMenu {
     @available(iOS 13.0, tvOS 14.0, *)
     static func initialize(title: String, items: [KSAction]) -> KSMenuX {
-        return KSMenuX.init(title: title, children: items)
+        KSMenuX(title: title, children: items)
     }
 
-    required init?(coder: NSCoder) {
+    @available(*, unavailable)
+    required init?(coder _: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
 }
 #else
-final public class KSAction: NSMenuItem {
+public final class KSAction: NSMenuItem {
     var completition: ((KSAction) -> Void)?
 
     static func initialize(title string: String,
                            keyEquivalent charCode: String = "",
                            state: KSMenuX.State = .off,
                            tag: Int = 0,
-                           completition: @escaping (KSAction) -> Void) -> KSAction {
+                           completition: @escaping (KSAction) -> Void) -> KSAction
+    {
         let menuItem = KSAction(title: string, action: #selector(menuPressed), keyEquivalent: charCode)
         menuItem.completition = completition
         menuItem.state = state.value
@@ -175,7 +181,7 @@ final public class KSAction: NSMenuItem {
     }
 }
 
-final public class KSMenuX: NSMenu {
+public final class KSMenuX: NSMenu {
     static func initialize(title: String, items: [KSAction]) -> KSMenuX {
         let menu = KSMenuX(title: title)
         for item in items {
@@ -193,7 +199,7 @@ public extension KSMenuX {
         case on = 1
         case mixed = 2
 
-    #if canImport(UIKit)
+        #if canImport(UIKit)
         var value: UIMenuElement.State {
             switch self {
             case .off:
@@ -204,7 +210,7 @@ public extension KSMenuX {
                 return .mixed
             }
         }
-    #else
+        #else
         var value: NSControl.StateValue {
             switch self {
             case .off:
@@ -215,6 +221,6 @@ public extension KSMenuX {
                 return .mixed
             }
         }
-    #endif
+        #endif
     }
 }

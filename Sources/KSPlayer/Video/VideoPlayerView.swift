@@ -146,6 +146,7 @@ open class VideoPlayerView: PlayerView {
     }
 
     // MARK: - Action Response
+
     override open func onButtonPressed(type: PlayerButtonType, button: UIButton) {
         autoFadeOutViewWithAnimation()
         super.onButtonPressed(type: type, button: button)
@@ -164,7 +165,9 @@ open class VideoPlayerView: PlayerView {
             changeAudioVideo(type, button: button)
         }
     }
-// MARK: - setup UI
+
+    // MARK: - setup UI
+
     open func setupUIComponents() {
         backgroundColor = .black
         addSubview(contentOverlayView)
@@ -424,19 +427,21 @@ open class VideoPlayerView: PlayerView {
     }
     #endif
 }
+
 // MARK: - Action Response
+
 extension VideoPlayerView {
-    internal func buildMenusForButtons() {
+    func buildMenusForButtons() {
         let definitionsMenu = KSMenuBuilder.definitionsMenu(from: resource,
                                                             selected: currentDefinition,
                                                             completition: { [weak self] action in
-            let selecrtedDefinition = action.tag
-            guard selecrtedDefinition != self?.currentDefinition else { return }
-            self?.change(definitionIndex: selecrtedDefinition)
-            self?.buildMenusForButtons()
-        })
+                                                                let selecrtedDefinition = action.tag
+                                                                guard selecrtedDefinition != self?.currentDefinition else { return }
+                                                                self?.change(definitionIndex: selecrtedDefinition)
+                                                                self?.buildMenusForButtons()
+                                                            })
 
-        let speedMenu = KSMenuBuilder.playbackRateMenu(Double(self.playerLayer?.player.playbackRate ?? 1)) { [weak self] selectedSpeed in
+        let speedMenu = KSMenuBuilder.playbackRateMenu(Double(playerLayer?.player.playbackRate ?? 1)) { [weak self] selectedSpeed in
             let currentRate = Double(self?.playerLayer?.player.playbackRate ?? 1)
             guard selectedSpeed != currentRate else { return }
             self?.playerLayer?.player.playbackRate = Float(selectedSpeed)
@@ -448,7 +453,7 @@ extension VideoPlayerView {
                                                            availableTracks: videoTracks) { [weak self] action in
             guard let tracks = self?.playerLayer?.player.tracks(mediaType: .video),
                   tracks.count > action.tag,
-                    !tracks[action.tag].isEnabled
+                  !tracks[action.tag].isEnabled
             else { return }
             self?.playerLayer?.player.select(track: tracks[action.tag])
             self?.buildMenusForButtons()
@@ -459,7 +464,7 @@ extension VideoPlayerView {
                                                            availableTracks: audioTracks) { [weak self] action in
             guard let tracks = self?.playerLayer?.player.tracks(mediaType: .audio),
                   tracks.count > action.tag,
-                    !tracks[action.tag].isEnabled
+                  !tracks[action.tag].isEnabled
             else { return }
             self?.playerLayer?.player.select(track: tracks[action.tag])
             self?.buildMenusForButtons()
@@ -498,8 +503,9 @@ extension VideoPlayerView {
 }
 
 // MARK: - playback rate, definitions, audio and video tracks change
+
 public extension VideoPlayerView {
-    private func changeAudioVideo(_ type: PlayerButtonType, button: UIButton) {
+    private func changeAudioVideo(_ type: PlayerButtonType, button _: UIButton) {
         guard let tracks = playerLayer?.player.tracks(mediaType: type == .audioSwitch ? .audio : .video) else {
             return
         }
@@ -521,7 +527,7 @@ public extension VideoPlayerView {
         viewController?.present(alertController, animated: true, completion: nil)
     }
 
-    private func changeDefinitions(button: UIButton) {
+    private func changeDefinitions(button _: UIButton) {
         guard let resource, resource.definitions.count > 1 else { return }
         let alertController = UIAlertController(title: NSLocalizedString("select video quality", comment: ""), message: nil, preferredStyle: preferredStyle())
         for (index, definition) in resource.definitions.enumerated() {
@@ -575,6 +581,7 @@ public extension VideoPlayerView {
 }
 
 // MARK: - private functions
+
 extension VideoPlayerView {
     @objc private func panGestureAction(_ pan: UIPanGestureRecognizer) {
         // 播放结束时，忽略手势,锁屏状态忽略手势
@@ -825,7 +832,8 @@ extension UIView {
             constraint.firstItem === self
         } ?? [NSLayoutConstraint]()
         for constraint in constraints where
-            constraint.isMember(of: NSLayoutConstraint.self) && constraint.firstItem === self && (constraint.firstAttribute == .width || constraint.firstAttribute == .height){
+            constraint.isMember(of: NSLayoutConstraint.self) && constraint.firstItem === self && (constraint.firstAttribute == .width || constraint.firstAttribute == .height)
+        {
             frameConstraint.append(constraint)
         }
         return frameConstraint

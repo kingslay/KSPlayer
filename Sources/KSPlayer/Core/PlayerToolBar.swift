@@ -57,16 +57,14 @@ public class PlayerToolBar: UIStackView {
 
     internal lazy var startDateTimeInteral: TimeInterval = {
         let date = Date()
-        let calendar =  Calendar.current
+        let calendar = Calendar.current
         let components = calendar.dateComponents([.year, .month, .day], from: date)
         let startDate = calendar.date(from: components)
         return startDate?.timeIntervalSince1970 ?? 0
     }()
 
     internal var todayInterval: TimeInterval {
-        get {
-            return Date().timeIntervalSince1970 - startDateTimeInteral
-        }
+        Date().timeIntervalSince1970 - startDateTimeInteral
     }
 
     public var totalTime: TimeInterval = 0 {
@@ -88,9 +86,7 @@ public class PlayerToolBar: UIStackView {
     }
 
     public var isLiveStream: Bool {
-        get {
-            totalTime == 0
-        }
+        totalTime == 0
     }
 
     public var isSeekable: Bool = true {
