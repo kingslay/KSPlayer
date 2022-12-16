@@ -46,8 +46,26 @@ public class PlayerToolBar: UIStackView {
                 let text = currentTime.toString(for: timeType)
                 currentTimeLabel.text = text
                 timeLabel.text = "\(text) / \(totalTime.toString(for: timeType))"
-                timeSlider.value = Float(currentTime)
+                if isLiveStream {
+                    timeSlider.value = Float(todayInterval)
+                } else {
+                    timeSlider.value = Float(currentTime)
+                }
             }
+        }
+    }
+
+    internal lazy var startDateTimeInteral: TimeInterval = {
+        let date = Date()
+        let calendar =  Calendar.current
+        let components = calendar.dateComponents([.year, .month, .day], from: date)
+        let startDate = calendar.date(from: components)
+        return startDate?.timeIntervalSince1970 ?? 0
+    }()
+
+    internal var todayInterval: TimeInterval {
+        get {
+            return Date().timeIntervalSince1970 - startDateTimeInteral
         }
     }
 
@@ -63,6 +81,21 @@ public class PlayerToolBar: UIStackView {
                 timeLabel.text = "\(currentTime.toString(for: timeType)) / \(text)"
                 timeSlider.maximumValue = Float(totalTime)
             }
+            if isLiveStream {
+                timeSlider.maximumValue = Float(60 * 60 * 24)
+            }
+        }
+    }
+
+    public var isLiveStream: Bool {
+        get {
+            totalTime == 0
+        }
+    }
+
+    public var isSeekable: Bool = true {
+        didSet {
+            timeSlider.isUserInteractionEnabled = isSeekable
         }
     }
 
