@@ -1,2 +1,0 @@
-${PODS_XCFRAMEWORKS_BUILD_DIR}/OpenSSL/OpenSSL/Libssl.framework
-${PODS_XCFRAMEWORKS_BUILD_DIR}/OpenSSL/OpenSSL/Libcrypto.framework

@@ -32,6 +32,10 @@ English | [简体中文](./README_CN.md)
 
 ## Demo
 
+```bash
+cd Demo
+pod install
+```
 - Open Demo/Demo.xcworkspace with Xcode.
 
 ## Quick Start
