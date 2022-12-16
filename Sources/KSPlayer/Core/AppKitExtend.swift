@@ -257,33 +257,6 @@ public extension NSSlider {
         }
         set {}
     }
-
-    @IBInspectable var maximumValue: Float {
-        get {
-            Float(maxValue)
-        }
-        set {
-            maxValue = Double(newValue)
-        }
-    }
-
-    @IBInspectable var minimumValue: Float {
-        get {
-            Float(minValue)
-        }
-        set {
-            minValue = Double(newValue)
-        }
-    }
-
-    @IBInspectable var value: Float {
-        get {
-            floatValue
-        }
-        set {
-            floatValue = newValue
-        }
-    }
 }
 
 public extension NSStackView {
@@ -500,6 +473,7 @@ public class KSSlider: NSSlider {
     weak var delegate: KSSliderDelegate?
     public var trackHeigt = CGFloat(2)
     public var isPlayable = false
+    public var isUserInteractionEnabled: Bool = true
     public convenience init() {
         self.init(frame: .zero)
     }
@@ -516,10 +490,39 @@ public class KSSlider: NSSlider {
     }
 
     @objc private func progressSliderTouchEnded(_ sender: KSSlider) {
-        delegate?.slider(value: Double(sender.floatValue), event: .touchUpInside)
+        if isUserInteractionEnabled {
+            delegate?.slider(value: Double(sender.floatValue), event: .touchUpInside)
+        }
     }
 
     open func setThumbImage(_: UIImage?, for _: State) {}
+    
+    @IBInspectable var maximumValue: Float {
+        get {
+            Float(maxValue)
+        }
+        set {
+            maxValue = Double(newValue)
+        }
+    }
+
+    @IBInspectable var minimumValue: Float {
+        get {
+            Float(minValue)
+        }
+        set {
+            minValue = Double(newValue)
+        }
+    }
+
+    @IBInspectable var value: Float {
+        get {
+            floatValue
+        }
+        set {
+            floatValue = newValue
+        }
+    }
 }
 
 extension UIView {
