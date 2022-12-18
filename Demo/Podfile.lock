@@ -58,10 +58,10 @@ EXTERNAL SOURCES:
 
 CHECKOUT OPTIONS:
   FFmpeg:
-    :commit: e3e5d8fd0aad74301f8022afaefe6e14aa29e038
+    :commit: 84160ef6aea9b2921bd147cc3cf88ab5acffc3f7
     :git: https://github.com/kingslay/FFmpegKit.git
   OpenSSL:
-    :commit: e3e5d8fd0aad74301f8022afaefe6e14aa29e038
+    :commit: 84160ef6aea9b2921bd147cc3cf88ab5acffc3f7
     :git: https://github.com/kingslay/FFmpegKit.git
 
 SPEC CHECKSUMS:

@@ -35,7 +35,9 @@ class VideoToolboxDecode: DecodeProtocol {
             return
         }
         let sampleBuffer = try session.formatDescription.getSampleBuffer(isConvertNALSize: session.isConvertNALSize, data: data, size: Int(corePacket.size))
-        let flags: VTDecodeFrameFlags = [._EnableAsynchronousDecompression]
+        let flags: VTDecodeFrameFlags = [
+            ._EnableAsynchronousDecompression,
+        ]
         var flagOut = VTDecodeInfoFlags.frameDropped
         let pts = corePacket.pts
         let packetFlags = corePacket.flags
@@ -49,9 +51,6 @@ class VideoToolboxDecode: DecodeProtocol {
                 if status == kVTInvalidSessionErr || status == kVTVideoDecoderMalfunctionErr || status == kVTVideoDecoderBadDataErr {
                     if corePacket.flags & AV_PKT_FLAG_KEY == 1 {
                         self.error = NSError(errorCode: .codecVideoReceiveFrame, ffmpegErrnum: status)
-                    } else {
-                        // 解决从后台切换到前台，解码失败的问题
-                        self.doFlushCodec()
                     }
                 }
                 return
