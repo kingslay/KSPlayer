@@ -42,13 +42,81 @@ open class TvOSVideoPlayerView: VideoPlayerView {
         if #available(tvOS 14.0, *) {
             toolBar.pipButton.isHidden = !AVPictureInPictureController.isPictureInPictureSupported()
         }
+        
+        addRemoteControllerGestures()
     }
 }
 
 
-// MARK: -
+// MARK: - remote controller interactions
 extension TvOSVideoPlayerView {
-
+    internal func addRemoteControllerGestures() {
+        let rightPressRecognizer = UITapGestureRecognizer()
+        rightPressRecognizer.addTarget(self, action: #selector(rightArrowButtonPressed(_:)))
+        rightPressRecognizer.allowedPressTypes = [NSNumber(value: UIPress.PressType.rightArrow.rawValue)]
+        addGestureRecognizer(rightPressRecognizer)
+        
+        let leftPressRecognizer = UITapGestureRecognizer()
+        leftPressRecognizer.addTarget(self, action: #selector(leftArrowButtonPressed(_:)))
+        leftPressRecognizer.allowedPressTypes = [NSNumber(value: UIPress.PressType.leftArrow.rawValue)]
+        addGestureRecognizer(leftPressRecognizer)
+        
+        let selectPressRecognizer = UITapGestureRecognizer()
+        selectPressRecognizer.addTarget(self, action: #selector(selectButtonPressed(_:)))
+        selectPressRecognizer.allowedPressTypes = [NSNumber(value: UIPress.PressType.select.rawValue)]
+        addGestureRecognizer(selectPressRecognizer)
+        
+        let swipeUpRecognizer = UISwipeGestureRecognizer(target: self, action: #selector(swipedUp(_:)))
+        swipeUpRecognizer.direction = .up
+        addGestureRecognizer(swipeUpRecognizer)
+        
+        let swipeDownRecognizer = UISwipeGestureRecognizer(target: self, action: #selector(swipedDown(_:)))
+        swipeDownRecognizer.direction = .down
+        addGestureRecognizer(swipeDownRecognizer)
+    }
+    
+    @objc
+    private func rightArrowButtonPressed(_ sender: UITapGestureRecognizer) {
+        guard let playerLayer, playerLayer.state.isPlaying, toolBar.isSeekable else { return }
+        Task {
+            await seek(time: toolBar.currentTime + 15)
+        }
+    }
+    
+    @objc
+    private func leftArrowButtonPressed(_ sender: UITapGestureRecognizer) {
+        guard let playerLayer, playerLayer.state.isPlaying, toolBar.isSeekable else { return }
+        Task {
+            await seek(time: toolBar.currentTime - 15)
+        }
+    }
+    
+    @objc
+    private func selectButtonPressed(_ sender: UITapGestureRecognizer) {
+        guard toolBar.isSeekable else { return }
+        if let playerLayer,
+            playerLayer.state.isPlaying {
+            pause()
+        } else {
+            play()
+        }
+    }
+    
+    @objc
+    private func swipedUp(_ sender: UISwipeGestureRecognizer) {
+        guard let playerLayer, playerLayer.state.isPlaying else { return }
+        if isMaskShow == false {
+            isMaskShow = true
+        }
+    }
+    
+    @objc
+    private func swipedDown(_ sender: UISwipeGestureRecognizer) {
+        guard let playerLayer, playerLayer.state.isPlaying else { return }
+        if isMaskShow == true {
+            isMaskShow = false
+        }
+    }
 }
 
 #endif
