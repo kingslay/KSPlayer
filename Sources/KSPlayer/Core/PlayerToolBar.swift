@@ -158,8 +158,12 @@ public class PlayerToolBar: UIStackView {
         pipButton.titleFont = .systemFont(ofSize: 14, weight: .medium)
         pipButton.setTitleColor(focusColor, for: .focused)
         pipButton.setTitleColor(tintColor, for: .normal)
-        pipButton.setImage(UIImage(systemName: "pip.enter"), for: .normal)
-        pipButton.setImage(UIImage(systemName: "pip.exit"), for: .selected)
+        if #available(macOS 11.0, *) {
+            pipButton.setImage(UIImage(systemName: "pip.enter"), for: .normal)
+            pipButton.setImage(UIImage(systemName: "pip.exit"), for: .selected)
+        } else {
+            pipButton.setTitle(NSLocalizedString("pip", comment: ""), for: .normal)
+        }
         playButton.translatesAutoresizingMaskIntoConstraints = false
         srtButton.translatesAutoresizingMaskIntoConstraints = false
         translatesAutoresizingMaskIntoConstraints = false

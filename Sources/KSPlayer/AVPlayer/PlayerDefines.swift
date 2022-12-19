@@ -154,6 +154,7 @@ public enum DynamicRange: Int32 {
     case hlg = 3
     case dolbyVision = 5
     
+    #if canImport(UIKit)
     var hdrMode: AVPlayer.HDRMode {
         switch self {
         case .sdr:
@@ -166,6 +167,7 @@ public enum DynamicRange: Int32 {
             return .dolbyVision
         }
     }
+    #endif
 }
 
 extension DynamicRange {
