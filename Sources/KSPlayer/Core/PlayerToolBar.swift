@@ -24,6 +24,7 @@ public class PlayerToolBar: UIStackView {
     public let audioSwitchButton = UIButton()
     public let definitionButton = UIButton()
     public let pipButton = UIButton()
+    public var onFocusUpdate: ((_ cofusedItem: UIView)->Void)?
     public var timeType = TimeType.minOrHour {
         didSet {
             if timeType != oldValue {
@@ -106,6 +107,8 @@ public class PlayerToolBar: UIStackView {
     }
 
     private func initUI() {
+        let focusColor = UIColor.white
+        let tintColor = UIColor.gray
         distribution = .fill
         currentTimeLabel.textColor = UIColor(hex: 0x9B9B9B)
         currentTimeLabel.font = UIFont.monospacedDigitSystemFont(ofSize: 14, weight: .regular)
@@ -113,53 +116,86 @@ public class PlayerToolBar: UIStackView {
         totalTimeLabel.textColor = UIColor(hex: 0x9B9B9B)
         totalTimeLabel.font = UIFont.monospacedDigitSystemFont(ofSize: 14, weight: .regular)
         totalTimeLabel.text = 0.toString(for: timeType)
-        timeLabel.textColor = .white
+        
+        timeLabel.textColor = UIColor(hex: 0x9B9B9B)
         timeLabel.textAlignment = .left
         timeLabel.font = UIFont.monospacedDigitSystemFont(ofSize: 14, weight: .regular)
         timeLabel.text = "\(0.toString(for: timeType)) / \(0.toString(for: timeType))"
+        
         timeSlider.minimumValue = 0
-        timeSlider.maximumTrackTintColor = UIColor.white.withAlphaComponent(0.3)
-        timeSlider.minimumTrackTintColor = UIColor(red: 0.0, green: 164 / 255.0, blue: 1.0, alpha: 1.0)
+        timeSlider.maximumTrackTintColor = focusColor.withAlphaComponent(0.2)
+        timeSlider.minimumTrackTintColor = focusColor
         playButton.tag = PlayerButtonType.play.rawValue
         playButton.setImage(KSOptions.image(named: "toolbar_ic_play"), for: .normal)
         playButton.setImage(KSOptions.image(named: "toolbar_ic_pause"), for: .selected)
-        playButton.setTitleColor(.brown, for: .focused)
+        playButton.setTitleColor(focusColor, for: .focused)
+        playButton.setTitleColor(tintColor, for: .normal)
         playbackRateButton.tag = PlayerButtonType.rate.rawValue
         playbackRateButton.titleFont = .systemFont(ofSize: 14, weight: .medium)
         playbackRateButton.setTitle(NSLocalizedString("speed", comment: ""), for: .normal)
-        playbackRateButton.setTitleColor(.brown, for: .focused)
+        playbackRateButton.setTitleColor(focusColor, for: .focused)
+        playbackRateButton.setTitleColor(tintColor, for: .normal)
         definitionButton.tag = PlayerButtonType.definition.rawValue
         definitionButton.titleFont = .systemFont(ofSize: 14, weight: .medium)
-        definitionButton.setTitleColor(.brown, for: .focused)
+        definitionButton.setTitleColor(focusColor, for: .focused)
+        definitionButton.setTitleColor(tintColor, for: .normal)
         audioSwitchButton.tag = PlayerButtonType.audioSwitch.rawValue
         audioSwitchButton.titleFont = .systemFont(ofSize: 14, weight: .medium)
         audioSwitchButton.setTitle(NSLocalizedString("switch audio", comment: ""), for: .normal)
-        audioSwitchButton.setTitleColor(.brown, for: .focused)
+        audioSwitchButton.setTitleColor(focusColor, for: .focused)
+        audioSwitchButton.setTitleColor(tintColor, for: .normal)
         videoSwitchButton.tag = PlayerButtonType.videoSwitch.rawValue
         videoSwitchButton.titleFont = .systemFont(ofSize: 14, weight: .medium)
         videoSwitchButton.setTitle(NSLocalizedString("switch video", comment: ""), for: .normal)
-        videoSwitchButton.setTitleColor(.brown, for: .focused)
+        videoSwitchButton.setTitleColor(focusColor, for: .focused)
+        videoSwitchButton.setTitleColor(tintColor, for: .normal)
         srtButton.tag = PlayerButtonType.srt.rawValue
         srtButton.setTitle(NSLocalizedString("subtitle", comment: ""), for: .normal)
         srtButton.titleFont = .systemFont(ofSize: 14, weight: .medium)
-        srtButton.setTitleColor(.brown, for: .focused)
+        srtButton.setTitleColor(focusColor, for: .focused)
+        srtButton.setTitleColor(tintColor, for: .normal)
         pipButton.tag = PlayerButtonType.pictureInPicture.rawValue
         pipButton.titleFont = .systemFont(ofSize: 14, weight: .medium)
-        pipButton.setTitleColor(.brown, for: .focused)
-        if #available(tvOS 14.0, *) {
-            pipButton.setImage(AVPictureInPictureController.pictureInPictureButtonStartImage, for: .normal)
-            pipButton.setImage(AVPictureInPictureController.pictureInPictureButtonStopImage, for: .selected)
-        } else {
-            pipButton.setTitle(NSLocalizedString("pip", comment: ""), for: .normal)
-        }
+        pipButton.setTitleColor(focusColor, for: .focused)
+        pipButton.setTitleColor(tintColor, for: .normal)
+        pipButton.setImage(UIImage(systemName: "pip.enter"), for: .normal)
+        pipButton.setImage(UIImage(systemName: "pip.exit"), for: .selected)
         playButton.translatesAutoresizingMaskIntoConstraints = false
         srtButton.translatesAutoresizingMaskIntoConstraints = false
         translatesAutoresizingMaskIntoConstraints = false
+        
+        #if os(tvOS)
+        playButton.tintColor = tintColor
+        playbackRateButton.tintColor = tintColor
+        definitionButton.tintColor = tintColor
+        audioSwitchButton.tintColor = tintColor
+        videoSwitchButton.tintColor = tintColor
+        srtButton.tintColor = tintColor
+        pipButton.tintColor = tintColor
+        NSLayoutConstraint.activate([
+            playButton.widthAnchor.constraint(equalTo: playButton.heightAnchor),
+            playbackRateButton.widthAnchor.constraint(equalTo: playbackRateButton.heightAnchor),
+            definitionButton.widthAnchor.constraint(equalTo: definitionButton.heightAnchor),
+            audioSwitchButton.widthAnchor.constraint(equalTo: audioSwitchButton.heightAnchor),
+            videoSwitchButton.widthAnchor.constraint(equalTo: videoSwitchButton.heightAnchor),
+            srtButton.widthAnchor.constraint(equalTo: srtButton.heightAnchor),
+            pipButton.widthAnchor.constraint(equalTo: pipButton.heightAnchor),
+            heightAnchor.constraint(equalToConstant: 40)
+        ])
+        #else
+        playButton.tintColor = .white
+        playbackRateButton.tintColor = .white
+        definitionButton.tintColor = .white
+        audioSwitchButton.tintColor = .white
+        videoSwitchButton.tintColor = .white
+        srtButton.tintColor = .white
+        pipButton.tintColor = .white
         NSLayoutConstraint.activate([
             playButton.widthAnchor.constraint(equalToConstant: 30),
             heightAnchor.constraint(equalToConstant: 49),
             srtButton.widthAnchor.constraint(equalToConstant: 40),
         ])
+        #endif
     }
 
     override public func addArrangedSubview(_ view: UIView) {
@@ -170,8 +206,14 @@ public class PlayerToolBar: UIStackView {
     #if canImport(UIKit)
     override open func didUpdateFocus(in context: UIFocusUpdateContext, with coordinator: UIFocusAnimationCoordinator) {
         super.didUpdateFocus(in: context, with: coordinator)
-        if let nextFocusedItem = context.nextFocusedItem as? UIButton {
-            nextFocusedItem.tintColor = nextFocusedItem.titleColor(for: .focused)
+        if let nextFocusedItem = context.nextFocusedItem {
+            if let nextFocusedButton = nextFocusedItem as? UIButton {
+                nextFocusedButton.tintColor = nextFocusedButton.titleColor(for: .focused)
+            }
+            if context.previouslyFocusedItem != nil,
+                let nextFocusedView = nextFocusedItem as? UIView {
+                onFocusUpdate?(nextFocusedView)
+            }
         }
         if let previouslyFocusedItem = context.previouslyFocusedItem as? UIButton {
             if previouslyFocusedItem.isSelected {

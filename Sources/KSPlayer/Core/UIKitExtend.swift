@@ -166,6 +166,12 @@ public typealias UXSlider = UISlider
 
 public typealias UIViewContentMode = UIView.ContentMode
 internal extension UIButton {
+    func fillImage() {
+        contentMode = .scaleAspectFill
+        contentHorizontalAlignment = .fill
+        contentVerticalAlignment = .fill
+    }
+    
     var titleFont: UIFont? {
         get {
             titleLabel?.font
