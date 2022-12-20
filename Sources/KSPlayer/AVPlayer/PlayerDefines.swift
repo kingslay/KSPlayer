@@ -586,7 +586,7 @@ public enum MediaLoadState: Int {
     case playable
 }
 
-@inline(__always) func KSLog(_ message: CustomStringConvertible, file: String = #file, function: String = #function, line: Int = #line) {
+@inline(__always) public func KSLog(_ message: CustomStringConvertible, file: String = #file, function: String = #function, line: Int = #line) {
     let fileName = (file as NSString).lastPathComponent
     KSOptions.logFunctionPoint("KSPlayer: \(fileName):\(line) \(function) | \(message)")
 }
