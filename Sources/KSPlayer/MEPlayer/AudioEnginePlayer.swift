@@ -135,10 +135,11 @@ public final class AudioEnginePlayer: AudioPlayer, FrameOutput {
 
     init() {
         KSOptions.setAudioSession()
-        engine.attach(dynamicsProcessor)
     }
 
     func prepare(options: KSOptions) {
+        engine.stop()
+        engine.reset()
         #if !os(macOS)
         let channels = min(AVAudioSession.sharedInstance().maximumOutputNumberOfChannels, Int(options.channels))
         try? AVAudioSession.sharedInstance().setPreferredOutputNumberOfChannels(channels)
@@ -156,6 +157,7 @@ public final class AudioEnginePlayer: AudioPlayer, FrameOutput {
             return noErr
         }
         engine.attach(sourceNode)
+        engine.attach(dynamicsProcessor)
         engine.attach(playback)
         engine.connect(nodes: [sourceNode, dynamicsProcessor, playback, engine.mainMixerNode, engine.outputNode], format: format)
 
