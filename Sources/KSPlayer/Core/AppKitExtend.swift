@@ -158,6 +158,11 @@ public extension NSImage {
     convenience init(cgImage: CGImage) {
         self.init(cgImage: cgImage, size: NSSize.zero)
     }
+
+    @available(macOS 11.0, *)
+    convenience init?(systemName: String) {
+        self.init(systemSymbolName: systemName, accessibilityDescription: nil)
+    }
 }
 
 extension NSButton {
@@ -547,6 +552,8 @@ open class UIAlertController: UIViewController {
     public convenience init(title _: String?, message _: String?, preferredStyle _: UIAlertController.Style) {
         self.init()
     }
+    
+    var preferredAction: UIAlertAction?
 
     open func addAction(_: UIAlertAction) {}
 }

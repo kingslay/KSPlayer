@@ -143,6 +143,10 @@ open class VideoPlayerView: PlayerView {
         super.init(frame: frame)
         setupUIComponents()
         cancellable = playerLayer?.$isPipActive.assign(to: \.isSelected, on: toolBar.pipButton)
+        
+        toolBar.onFocusUpdate = { [weak self] _ in
+            self?.autoFadeOutViewWithAnimation()
+        }
     }
 
     // MARK: - Action Response
@@ -151,8 +155,12 @@ open class VideoPlayerView: PlayerView {
         autoFadeOutViewWithAnimation()
         super.onButtonPressed(type: type, button: button)
         if type == .srt {
+            #if os(tvOS)
+            changeSrt(button: button)
+            #else
             srtControl.view.isHidden = false
             isMaskShow = false
+            #endif
         } else if type == .rate {
             changePlaybackRate(button: button)
         } else if type == .definition {
@@ -221,18 +229,12 @@ open class VideoPlayerView: PlayerView {
     /// Add Customize functions here
     open func customizeUIComponents() {
         tapGesture.addTarget(self, action: #selector(tapGestureAction(_:)))
-        #if canImport(UIKit)
-        tapGesture.allowedPressTypes = [NSNumber(value: UIPress.PressType.select.rawValue)]
-        #endif
         tapGesture.numberOfTapsRequired = 1
         controllerView.addGestureRecognizer(tapGesture)
         panGesture.addTarget(self, action: #selector(panGestureAction(_:)))
         controllerView.addGestureRecognizer(panGesture)
         panGesture.isEnabled = false
         doubleTapGesture.addTarget(self, action: #selector(doubleTapGestureAction))
-        #if canImport(UIKit)
-        doubleTapGesture.allowedPressTypes = [NSNumber(value: UIPress.PressType.select.rawValue)]
-        #endif
         doubleTapGesture.numberOfTapsRequired = 2
         tapGesture.require(toFail: doubleTapGesture)
         controllerView.addGestureRecognizer(doubleTapGesture)
@@ -255,6 +257,7 @@ open class VideoPlayerView: PlayerView {
             embedSubtitleDataSouce = layer.player.subtitleDataSouce
             toolBar.videoSwitchButton.isHidden = layer.player.tracks(mediaType: .video).count < 2
             toolBar.audioSwitchButton.isHidden = layer.player.tracks(mediaType: .audio).count < 2
+            toolBar.srtButton.isHidden = srtControl.srtListCount == 0
             buildMenusForButtons()
         case .buffering:
             isPlayed = true
@@ -520,8 +523,11 @@ public extension VideoPlayerView {
                 guard let self, !isEnabled else { return }
                 self.playerLayer?.player.select(track: track)
             }
-            action.setValue(isEnabled, forKey: "checked")
             alertController.addAction(action)
+            if isEnabled {
+                alertController.preferredAction = action
+                action.setValue(isEnabled, forKey: "checked")
+            }
         }
         alertController.addAction(UIAlertAction(title: NSLocalizedString("cancel", comment: ""), style: .cancel, handler: nil))
         viewController?.present(alertController, animated: true, completion: nil)
@@ -535,9 +541,46 @@ public extension VideoPlayerView {
                 guard let self, index != self.currentDefinition else { return }
                 self.change(definitionIndex: index)
             }
-            action.setValue(index == currentDefinition, forKey: "checked")
             alertController.addAction(action)
+            if index == currentDefinition {
+                alertController.preferredAction = action
+                action.setValue(true, forKey: "checked")
+            }
         }
+        alertController.addAction(UIAlertAction(title: NSLocalizedString("cancel", comment: ""), style: .cancel, handler: nil))
+        viewController?.present(alertController, animated: true, completion: nil)
+    }
+    
+    private func changeSrt(button _: UIButton) {
+        let availableSubtitles = srtControl.filterInfos { _ in true }
+        guard availableSubtitles.count > 0 else { return }
+        
+        let alertController = UIAlertController(title: NSLocalizedString("subtitle", comment: ""),
+                                                message: nil,
+                                                preferredStyle: preferredStyle())
+        
+        let currentSub = srtControl.view.selectedInfo
+        
+        let disableAction = UIAlertAction(title: NSLocalizedString("Disabled", comment: ""), style: .default) { [weak self] _ in
+            self?.srtControl.view.selectedInfo = nil
+        }
+        alertController.addAction(disableAction)
+        if currentSub == nil {
+            alertController.preferredAction = disableAction
+            disableAction.setValue(true, forKey: "checked")
+        }
+
+        availableSubtitles.enumerated().forEach { index, srt in
+            let action = UIAlertAction(title: srt.name, style: .default) { [weak self] _ in
+                self?.srtControl.view.selectedInfo = srt
+            }
+            alertController.addAction(action)
+            if currentSub?.subtitleID == srt.subtitleID {
+                alertController.preferredAction = action
+                action.setValue(true, forKey: "checked")
+            }
+        }
+        
         alertController.addAction(UIAlertAction(title: NSLocalizedString("cancel", comment: ""), style: .cancel, handler: nil))
         viewController?.present(alertController, animated: true, completion: nil)
     }
@@ -551,8 +594,12 @@ public extension VideoPlayerView {
                 button.setTitle(title, for: .normal)
                 self.playerLayer?.player.playbackRate = Float(rate)
             }
-            action.setValue(title == button.title, forKey: "checked")
             alertController.addAction(action)
+            
+            if Float(rate) == self.playerLayer?.player.playbackRate {
+                alertController.preferredAction = action
+                action.setValue(true, forKey: "checked")
+            }
         }
         alertController.addAction(UIAlertAction(title: NSLocalizedString("cancel", comment: ""), style: .cancel, handler: nil))
         viewController?.present(alertController, animated: true, completion: nil)
@@ -676,36 +723,12 @@ extension VideoPlayerView {
     }
 
     private func addConstraint() {
-        toolBar.playButton.tintColor = .white
-        toolBar.playbackRateButton.tintColor = .white
-        toolBar.definitionButton.tintColor = .white
-        toolBar.audioSwitchButton.tintColor = .white
-        toolBar.videoSwitchButton.tintColor = .white
-        toolBar.srtButton.tintColor = .white
-        toolBar.pipButton.tintColor = .white
         toolBar.timeSlider.setThumbImage(KSOptions.image(named: "KSPlayer_slider_thumb"), for: .normal)
         toolBar.timeSlider.setThumbImage(KSOptions.image(named: "KSPlayer_slider_thumb_pressed"), for: .highlighted)
         bottomMaskView.addSubview(toolBar.timeSlider)
-        toolBar.spacing = 10
-        toolBar.addArrangedSubview(toolBar.playButton)
-        toolBar.addArrangedSubview(toolBar.timeLabel)
-        toolBar.addArrangedSubview(toolBar.playbackRateButton)
-        toolBar.addArrangedSubview(toolBar.definitionButton)
-        toolBar.addArrangedSubview(toolBar.audioSwitchButton)
-        toolBar.addArrangedSubview(toolBar.videoSwitchButton)
-        toolBar.addArrangedSubview(toolBar.srtButton)
-        toolBar.addArrangedSubview(toolBar.pipButton)
         toolBar.audioSwitchButton.isHidden = true
         toolBar.videoSwitchButton.isHidden = true
-        if #available(tvOS 14.0, *) {
-            toolBar.pipButton.isHidden = !AVPictureInPictureController.isPictureInPictureSupported()
-        } else {
-            toolBar.pipButton.isHidden = true
-        }
-        toolBar.setCustomSpacing(20, after: toolBar.timeLabel)
-        toolBar.setCustomSpacing(20, after: toolBar.playbackRateButton)
-        toolBar.setCustomSpacing(20, after: toolBar.definitionButton)
-        toolBar.setCustomSpacing(20, after: toolBar.srtButton)
+        toolBar.pipButton.isHidden = true
         contentOverlayView.translatesAutoresizingMaskIntoConstraints = false
         controllerView.translatesAutoresizingMaskIntoConstraints = false
         toolBar.timeSlider.translatesAutoresizingMaskIntoConstraints = false
@@ -738,13 +761,6 @@ extension VideoPlayerView {
             bottomMaskView.leadingAnchor.constraint(equalTo: leadingAnchor),
             bottomMaskView.trailingAnchor.constraint(equalTo: trailingAnchor),
             bottomMaskView.heightAnchor.constraint(equalToConstant: 105),
-            toolBar.bottomAnchor.constraint(equalTo: bottomMaskView.safeBottomAnchor),
-            toolBar.leadingAnchor.constraint(equalTo: bottomMaskView.safeLeadingAnchor, constant: 10),
-            toolBar.trailingAnchor.constraint(equalTo: bottomMaskView.safeTrailingAnchor, constant: -15),
-            toolBar.timeSlider.bottomAnchor.constraint(equalTo: toolBar.topAnchor),
-            toolBar.timeSlider.leadingAnchor.constraint(equalTo: bottomMaskView.safeLeadingAnchor, constant: 15),
-            toolBar.timeSlider.trailingAnchor.constraint(equalTo: bottomMaskView.safeTrailingAnchor, constant: -15),
-            toolBar.timeSlider.heightAnchor.constraint(equalToConstant: 30),
             loadingIndector.centerYAnchor.constraint(equalTo: centerYAnchor),
             loadingIndector.centerXAnchor.constraint(equalTo: centerXAnchor),
             seekToView.centerYAnchor.constraint(equalTo: centerYAnchor),
@@ -756,6 +772,72 @@ extension VideoPlayerView {
             lockButton.leadingAnchor.constraint(equalTo: safeLeadingAnchor, constant: 22),
             lockButton.centerYAnchor.constraint(equalTo: centerYAnchor),
         ])
+        
+        configureToolBarConstraints()
+    }
+    
+    private func configureToolBarConstraints() {
+        #if os(tvOS)
+        toolBar.spacing = 10
+        toolBar.addArrangedSubview(toolBar.playButton)
+        toolBar.addArrangedSubview(toolBar.timeLabel)
+        toolBar.addArrangedSubview(toolBar.playbackRateButton)
+        toolBar.addArrangedSubview(toolBar.definitionButton)
+        toolBar.addArrangedSubview(toolBar.audioSwitchButton)
+        toolBar.addArrangedSubview(toolBar.videoSwitchButton)
+        toolBar.addArrangedSubview(toolBar.srtButton)
+        toolBar.addArrangedSubview(toolBar.pipButton)
+        
+        toolBar.setCustomSpacing(20, after: toolBar.timeLabel)
+        toolBar.setCustomSpacing(20, after: toolBar.playbackRateButton)
+        toolBar.setCustomSpacing(20, after: toolBar.definitionButton)
+        toolBar.setCustomSpacing(20, after: toolBar.srtButton)
+        
+        NSLayoutConstraint.activate([
+            toolBar.bottomAnchor.constraint(equalTo: bottomMaskView.safeBottomAnchor),
+            toolBar.leadingAnchor.constraint(equalTo: bottomMaskView.safeLeadingAnchor, constant: 10),
+            toolBar.trailingAnchor.constraint(equalTo: bottomMaskView.safeTrailingAnchor, constant: -15),
+            toolBar.timeSlider.bottomAnchor.constraint(equalTo: toolBar.topAnchor, constant: -8),
+            toolBar.timeSlider.leadingAnchor.constraint(equalTo: bottomMaskView.safeLeadingAnchor, constant: 15),
+            toolBar.timeSlider.trailingAnchor.constraint(equalTo: bottomMaskView.safeTrailingAnchor, constant: -15),
+            toolBar.timeSlider.heightAnchor.constraint(equalToConstant: 16)
+        ])
+        
+        #else
+        
+        toolBar.playButton.tintColor = .white
+        toolBar.playbackRateButton.tintColor = .white
+        toolBar.definitionButton.tintColor = .white
+        toolBar.audioSwitchButton.tintColor = .white
+        toolBar.videoSwitchButton.tintColor = .white
+        toolBar.srtButton.tintColor = .white
+        toolBar.pipButton.tintColor = .white
+        
+        toolBar.spacing = 10
+        toolBar.addArrangedSubview(toolBar.playButton)
+        toolBar.addArrangedSubview(toolBar.timeLabel)
+        toolBar.addArrangedSubview(toolBar.playbackRateButton)
+        toolBar.addArrangedSubview(toolBar.definitionButton)
+        toolBar.addArrangedSubview(toolBar.audioSwitchButton)
+        toolBar.addArrangedSubview(toolBar.videoSwitchButton)
+        toolBar.addArrangedSubview(toolBar.srtButton)
+        toolBar.addArrangedSubview(toolBar.pipButton)
+        
+        toolBar.setCustomSpacing(20, after: toolBar.timeLabel)
+        toolBar.setCustomSpacing(20, after: toolBar.playbackRateButton)
+        toolBar.setCustomSpacing(20, after: toolBar.definitionButton)
+        toolBar.setCustomSpacing(20, after: toolBar.srtButton)
+        
+        NSLayoutConstraint.activate([
+            toolBar.bottomAnchor.constraint(equalTo: bottomMaskView.safeBottomAnchor),
+            toolBar.leadingAnchor.constraint(equalTo: bottomMaskView.safeLeadingAnchor, constant: 10),
+            toolBar.trailingAnchor.constraint(equalTo: bottomMaskView.safeTrailingAnchor, constant: -15),
+            toolBar.timeSlider.bottomAnchor.constraint(equalTo: toolBar.topAnchor),
+            toolBar.timeSlider.leadingAnchor.constraint(equalTo: bottomMaskView.safeLeadingAnchor, constant: 15),
+            toolBar.timeSlider.trailingAnchor.constraint(equalTo: bottomMaskView.safeTrailingAnchor, constant: -15),
+            toolBar.timeSlider.heightAnchor.constraint(equalToConstant: 30),
+        ])
+        #endif
     }
 
     private func preferredStyle() -> UIAlertController.Style {

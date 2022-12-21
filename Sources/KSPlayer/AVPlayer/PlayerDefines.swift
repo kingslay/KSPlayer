@@ -133,13 +133,13 @@ public extension MediaPlayerTrack {
 
     var dynamicRange: DynamicRange {
         if dovi != nil || codecType.string == "dvhe" || codecType == kCMVideoCodecType_DolbyVisionHEVC {
-            return .DOVI
+            return .dolbyVision
         } else if transferFunction == kCVImageBufferTransferFunction_SMPTE_ST_2084_PQ as String { /// HDR
-            return .HDR
+            return .hdr10
         } else if transferFunction == kCVImageBufferTransferFunction_ITU_R_2100_HLG as String { /// HDR
-            return .HLG
+            return .hlg
         } else {
-            return .SDR
+            return .sdr
         }
     }
 
@@ -149,38 +149,53 @@ public extension MediaPlayerTrack {
 }
 
 public enum DynamicRange: Int32 {
-    case SDR = 0
-    case HDR = 2
-    case HLG = 3
-    case DOVI = 5
+    case sdr = 0
+    case hdr10 = 2
+    case hlg = 3
+    case dolbyVision = 5
+    
+    #if canImport(UIKit)
+    var hdrMode: AVPlayer.HDRMode {
+        switch self {
+        case .sdr:
+            return AVPlayer.HDRMode(rawValue: 0)
+        case .hdr10:
+            return .hdr10
+        case .hlg:
+            return .hlg
+        case .dolbyVision:
+            return .dolbyVision
+        }
+    }
+    #endif
 }
 
 extension DynamicRange {
     var colorPrimaries: CFString {
         switch self {
-        case .SDR:
+        case .sdr:
             return kCVImageBufferColorPrimaries_ITU_R_709_2
-        case .HDR, .HLG, .DOVI:
+        case .hdr10, .hlg, .dolbyVision:
             return kCVImageBufferColorPrimaries_ITU_R_2020
         }
     }
 
     var transferFunction: CFString {
         switch self {
-        case .SDR:
+        case .sdr:
             return kCVImageBufferTransferFunction_ITU_R_709_2
-        case .HDR:
+        case .hdr10:
             return kCVImageBufferTransferFunction_SMPTE_ST_2084_PQ
-        case .HLG, .DOVI:
+        case .hlg, .dolbyVision:
             return kCVImageBufferTransferFunction_ITU_R_2100_HLG
         }
     }
 
     var yCbCrMatrix: CFString {
         switch self {
-        case .SDR:
+        case .sdr:
             return kCVImageBufferYCbCrMatrix_ITU_R_709_2
-        case .HDR, .HLG, .DOVI:
+        case .hdr10, .hlg, .dolbyVision:
             return kCVImageBufferYCbCrMatrix_ITU_R_2020
         }
     }

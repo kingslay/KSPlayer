@@ -24,6 +24,8 @@ class DetailViewController: UIViewController, DetailProtocol {
     }
 
     private let playerView = IOSVideoPlayerView()
+    #elseif os(tvOS)
+    private let playerView = TvOSVideoPlayerView()
     #else
     private let playerView = CustomVideoPlayerView()
     #endif
