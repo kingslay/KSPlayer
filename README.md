@@ -239,23 +239,6 @@ public protocol PlayerControllerDelegate: class {
 
 ![gif](./Demo/demo.gif)
 
-## Custom FFmpeg
-edit BuildFFmpeg.swift And run
-```bash
-swift run build-FFmpeg enable-openssl
-```
-
-## Debug FFmpeg
-
-```bash
-swift run build-FFmpeg enable-debug
-```
-
-run target TracyPlayer  
-
-
-![6](./Documents/6.png?raw=true)
-
 ## Developments and Tests
 
 Any contributing and pull requests are warmly welcome. However, before you plan to implement some features or try to fix an uncertain issue, it is recommended to open a discussion first. It would be appreciated if your pull requests could build and with all tests green. :)
@@ -275,6 +258,8 @@ Your user icon or company logo shows up this with a link to your home page.
 [skrew](https://github.com/skrew)
 
 [mrpajzl](https://github.com/mrpajzl)
+
+[byMohamedali](https://github.com/byMohamedali)
 
 ## Communication
 
