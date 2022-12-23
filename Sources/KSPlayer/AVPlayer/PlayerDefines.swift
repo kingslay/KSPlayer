@@ -131,16 +131,19 @@ public extension MediaPlayerTrack {
         mediaSubType.rawValue
     }
 
-    var dynamicRange: DynamicRange {
+    func dynamicRange(_ options: KSOptions) -> DynamicRange {
+        let cotentRange: DynamicRange
         if dovi != nil || codecType.string == "dvhe" || codecType == kCMVideoCodecType_DolbyVisionHEVC {
-            return .dolbyVision
+            cotentRange = .dolbyVision
         } else if transferFunction == kCVImageBufferTransferFunction_SMPTE_ST_2084_PQ as String { /// HDR
-            return .hdr10
+            cotentRange = .hdr10
         } else if transferFunction == kCVImageBufferTransferFunction_ITU_R_2100_HLG as String { /// HDR
-            return .hlg
+            cotentRange = .hlg
         } else {
-            return .sdr
+            cotentRange = .sdr
         }
+        
+        return options.availableDynamicRange(cotentRange) ?? cotentRange
     }
 
     var colorSpace: CGColorSpace? {
@@ -197,6 +200,22 @@ extension DynamicRange {
             return kCVImageBufferYCbCrMatrix_ITU_R_709_2
         case .hdr10, .hlg, .dolbyVision:
             return kCVImageBufferYCbCrMatrix_ITU_R_2020
+        }
+    }
+}
+
+extension AVPlayer.HDRMode {
+    var dynamicRange: DynamicRange {
+        if contains(.dolbyVision) {
+            return .dolbyVision
+        }
+        else if contains(.hlg) {
+            return .hlg
+        }
+        else if contains(.hdr10) {
+            return .hdr10
+        } else {
+            return .sdr
         }
     }
 }
@@ -515,6 +534,27 @@ open class KSOptions {
     open func preferredDisplayCriteria(refreshRate _: Float, videoDynamicRange _: Int32) -> AVDisplayCriteria? {
 //        AVDisplayCriteria(refreshRate: refreshRate, videoDynamicRange: videoDynamicRange)
         nil
+    }
+    
+    func availableDynamicRange(_ cotentRange:DynamicRange?) -> DynamicRange? {
+        let availableHDRModes = AVPlayer.availableHDRModes
+        // value of 0 indicates that no HDR modes are supported.
+        if availableHDRModes == AVPlayer.HDRMode(rawValue: 0) {
+            return .sdr
+        }
+        if let preferedDynamicRange = destinationDynamicRange {
+            if availableHDRModes.contains(preferedDynamicRange.hdrMode) {
+                return preferedDynamicRange
+            }
+            else if let cotentRange,
+                        availableHDRModes.contains(cotentRange.hdrMode) {
+                return cotentRange
+            }
+            else if preferedDynamicRange != .sdr { // trying update to HDR mode
+                return availableHDRModes.dynamicRange
+            }
+        }
+        return cotentRange
     }
     #endif
 }

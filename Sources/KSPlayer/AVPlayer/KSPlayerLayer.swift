@@ -213,7 +213,7 @@ open class KSPlayerLayer: UIView {
         NotificationCenter.default.removeObserver(self)
         MPNowPlayingInfoCenter.default().nowPlayingInfo = nil
         #if os(tvOS)
-        UIApplication.shared.keyWindow?.avDisplayManager.preferredDisplayCriteria = nil
+        UIApplication.shared.windows.first?.avDisplayManager.preferredDisplayCriteria = nil
         #endif
     }
 
@@ -421,13 +421,14 @@ extension KSPlayerLayer: AVPictureInPictureControllerDelegate {
 extension KSPlayerLayer {
     #if os(tvOS)
     private func setDisplayCriteria(track: MediaPlayerTrack) {
-        guard let displayManager = UIApplication.shared.keyWindow?.avDisplayManager,
+        guard let displayManager = UIApplication.shared.windows.first?.avDisplayManager,
               displayManager.isDisplayCriteriaMatchingEnabled,
               !displayManager.isDisplayModeSwitchInProgress
         else {
             return
         }
-        if let criteria = options.preferredDisplayCriteria(refreshRate: track.nominalFrameRate, videoDynamicRange: track.dynamicRange.rawValue) {
+        if let criteria = options.preferredDisplayCriteria(refreshRate: track.nominalFrameRate,
+                                                           videoDynamicRange: track.dynamicRange(options).rawValue) {
             displayManager.preferredDisplayCriteria = criteria
         }
     }
