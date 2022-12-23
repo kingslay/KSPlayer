@@ -203,7 +203,7 @@ extension DynamicRange {
         }
     }
 }
-
+#if canImport(UIKit)
 extension AVPlayer.HDRMode {
     var dynamicRange: DynamicRange {
         if contains(.dolbyVision) {
@@ -219,7 +219,7 @@ extension AVPlayer.HDRMode {
         }
     }
 }
-
+#endif
 public struct DOVIDecoderConfigurationRecord {
     // swiftlint:disable identifier_name
     let dv_version_major: UInt8
@@ -535,28 +535,27 @@ open class KSOptions {
 //        AVDisplayCriteria(refreshRate: refreshRate, videoDynamicRange: videoDynamicRange)
         nil
     }
-    
-    func availableDynamicRange(_ cotentRange:DynamicRange?) -> DynamicRange? {
+    #endif
+
+    func availableDynamicRange(_ cotentRange: DynamicRange?) -> DynamicRange? {
+        #if canImport(UIKit)
         let availableHDRModes = AVPlayer.availableHDRModes
-        // value of 0 indicates that no HDR modes are supported.
-        if availableHDRModes == AVPlayer.HDRMode(rawValue: 0) {
-            return .sdr
-        }
         if let preferedDynamicRange = destinationDynamicRange {
-            if availableHDRModes.contains(preferedDynamicRange.hdrMode) {
+            // value of 0 indicates that no HDR modes are supported.
+            if availableHDRModes == AVPlayer.HDRMode(rawValue: 0) {
+                return .sdr
+            } else if availableHDRModes.contains(preferedDynamicRange.hdrMode) {
                 return preferedDynamicRange
-            }
-            else if let cotentRange,
+            } else if let cotentRange,
                         availableHDRModes.contains(cotentRange.hdrMode) {
                 return cotentRange
-            }
-            else if preferedDynamicRange != .sdr { // trying update to HDR mode
+            } else if preferedDynamicRange != .sdr { // trying update to HDR mode
                 return availableHDRModes.dynamicRange
             }
         }
+        #endif
         return cotentRange
     }
-    #endif
 }
 
 // 缓冲情况
