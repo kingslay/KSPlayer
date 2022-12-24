@@ -552,7 +552,7 @@ open class UIAlertController: UIViewController {
     public convenience init(title _: String?, message _: String?, preferredStyle _: UIAlertController.Style) {
         self.init()
     }
-    
+
     var preferredAction: UIAlertAction?
 
     open func addAction(_: UIAlertAction) {}

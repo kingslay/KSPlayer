@@ -56,7 +56,6 @@ public class AudioRendererPlayer: AudioPlayer, FrameOutput {
     }
 
     init() {
-        KSOptions.setAudioSession()
         synchronizer.addRenderer(renderer)
 //        if #available(tvOS 15.0, iOS 15.0, macOS 12.0, *) {
 //            renderer.allowedAudioSpatializationFormats = .monoStereoAndMultichannel
@@ -68,6 +67,7 @@ public class AudioRendererPlayer: AudioPlayer, FrameOutput {
         options.channels = 2
         #else
         var maxChannels = UInt32(AVAudioSession.sharedInstance().maximumOutputNumberOfChannels)
+        KSOptions.setAudioSession()
         if options.channels > maxChannels {
             if #available(tvOS 15.0, iOS 15.0, *) {
                 if let port = AVAudioSession.sharedInstance().currentRoute.outputs.first, port.isSpatialAudioEnabled || port.portType == AVAudioSession.Port.bluetoothA2DP {

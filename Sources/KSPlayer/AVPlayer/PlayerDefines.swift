@@ -153,7 +153,7 @@ public enum DynamicRange: Int32 {
     case hdr10 = 2
     case hlg = 3
     case dolbyVision = 5
-    
+
     #if canImport(UIKit)
     var hdrMode: AVPlayer.HDRMode {
         switch self {
@@ -578,6 +578,7 @@ public extension KSOptions {
         if category != .playback, category != .playAndRecord {
             try? AVAudioSession.sharedInstance().setCategory(.playback, mode: .default, policy: .longFormAudio)
         }
+        try? AVAudioSession.sharedInstance().setMode(.moviePlayback)
         try? AVAudioSession.sharedInstance().setActive(true)
         if #available(tvOS 15.0, iOS 15.0, *) {
             try? AVAudioSession.sharedInstance().setSupportsMultichannelContent(true)

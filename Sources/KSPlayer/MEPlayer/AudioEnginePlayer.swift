@@ -133,21 +133,22 @@ public final class AudioEnginePlayer: AudioPlayer, FrameOutput {
         }
     }
 
-    init() {
-        KSOptions.setAudioSession()
-    }
-
     func prepare(options: KSOptions) {
         engine.stop()
         engine.reset()
-        #if !os(macOS)
-        let channels = min(AVAudioSession.sharedInstance().maximumOutputNumberOfChannels, Int(options.channels))
-        try? AVAudioSession.sharedInstance().setPreferredOutputNumberOfChannels(channels)
-        #endif
-        var format = engine.outputNode.outputFormat(forBus: 0)
+        #if os(macOS)
         if let audioUnit = engine.outputNode.audioUnit {
             options.channelLayout = AVAudioChannelLayout(layout: audioUnit.channelLayout)
         }
+        #else
+        let channels = min(AVAudioSession.sharedInstance().maximumOutputNumberOfChannels, Int(options.channels))
+        KSOptions.setAudioSession()
+        try? AVAudioSession.sharedInstance().setPreferredOutputNumberOfChannels(channels)
+        if AVAudioSession.sharedInstance().outputNumberOfChannels > 2, let audioUnit = engine.outputNode.audioUnit {
+            options.channelLayout = AVAudioChannelLayout(layout: audioUnit.channelLayout)
+        }
+        #endif
+        var format = engine.outputNode.outputFormat(forBus: 0)
         format = AVAudioFormat(commonFormat: format.commonFormat, sampleRate: options.sampleRate, interleaved: !KSOptions.isAudioPlanar, channelLayout: options.channelLayout)
         //        engine.attach(nbandEQ)
         //        engine.attach(distortion)

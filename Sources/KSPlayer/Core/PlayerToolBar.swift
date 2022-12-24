@@ -24,7 +24,7 @@ public class PlayerToolBar: UIStackView {
     public let audioSwitchButton = UIButton()
     public let definitionButton = UIButton()
     public let pipButton = UIButton()
-    public var onFocusUpdate: ((_ cofusedItem: UIView)->Void)?
+    public var onFocusUpdate: ((_ cofusedItem: UIView) -> Void)?
     public var timeType = TimeType.minOrHour {
         didSet {
             if timeType != oldValue {
@@ -116,12 +116,12 @@ public class PlayerToolBar: UIStackView {
         totalTimeLabel.textColor = UIColor(hex: 0x9B9B9B)
         totalTimeLabel.font = UIFont.monospacedDigitSystemFont(ofSize: 14, weight: .regular)
         totalTimeLabel.text = 0.toString(for: timeType)
-        
+
         timeLabel.textColor = UIColor(hex: 0x9B9B9B)
         timeLabel.textAlignment = .left
         timeLabel.font = UIFont.monospacedDigitSystemFont(ofSize: 14, weight: .regular)
         timeLabel.text = "\(0.toString(for: timeType)) / \(0.toString(for: timeType))"
-        
+
         timeSlider.minimumValue = 0
         timeSlider.maximumTrackTintColor = focusColor.withAlphaComponent(0.2)
         timeSlider.minimumTrackTintColor = focusColor
@@ -167,7 +167,7 @@ public class PlayerToolBar: UIStackView {
         playButton.translatesAutoresizingMaskIntoConstraints = false
         srtButton.translatesAutoresizingMaskIntoConstraints = false
         translatesAutoresizingMaskIntoConstraints = false
-        
+
         #if os(tvOS)
         playButton.tintColor = tintColor
         playbackRateButton.tintColor = tintColor
@@ -184,7 +184,7 @@ public class PlayerToolBar: UIStackView {
             videoSwitchButton.widthAnchor.constraint(equalTo: videoSwitchButton.heightAnchor),
             srtButton.widthAnchor.constraint(equalTo: srtButton.heightAnchor),
             pipButton.widthAnchor.constraint(equalTo: pipButton.heightAnchor),
-            heightAnchor.constraint(equalToConstant: 40)
+            heightAnchor.constraint(equalToConstant: 40),
         ])
         #else
         playButton.tintColor = .white
@@ -215,7 +215,8 @@ public class PlayerToolBar: UIStackView {
                 nextFocusedButton.tintColor = nextFocusedButton.titleColor(for: .focused)
             }
             if context.previouslyFocusedItem != nil,
-                let nextFocusedView = nextFocusedItem as? UIView {
+               let nextFocusedView = nextFocusedItem as? UIView
+            {
                 onFocusUpdate?(nextFocusedView)
             }
         }
