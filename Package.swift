@@ -41,9 +41,10 @@ let package = Package(
     ]
 )
 var ffmpegKitPath = FileManager.default.currentDirectoryPath + "/../FFmpegKit"
-if !FileManager.default.fileExists(atPath: ffmpegKitPath) {
-    ffmpegKitPath = (ProcessInfo.processInfo.environment["OLDPWD"] ?? "") + "/../FFmpegKit"
-}
+ffmpegKitPath = "../FFmpegKit"
+// if !FileManager.default.fileExists(atPath: ffmpegKitPath) {
+//     ffmpegKitPath = (ProcessInfo.processInfo.environment["OLDPWD"] ?? "") + "/../FFmpegKit"
+// }
 
 if !FileManager.default.fileExists(atPath: ffmpegKitPath) {
     ffmpegKitPath = FileManager.default.homeDirectoryForCurrentUser.path + "/Documents/Github/FFmpegKit"
