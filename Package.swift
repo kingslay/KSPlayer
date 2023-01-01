@@ -13,9 +13,6 @@ let package = Package(
             targets: ["KSPlayer"]
         ),
     ],
-    dependencies: [
-        .package(url: "https://github.com/kingslay/FFmpegKit.git", from: "5.1.2"),
-    ],
     targets: [
         // Targets are the basic building blocks of a package. A target can define a module or a test suite.
         .target(
@@ -50,7 +47,11 @@ if !FileManager.default.fileExists(atPath: ffmpegKitPath) {
 }
 
 if FileManager.default.fileExists(atPath: ffmpegKitPath) {
-    package.dependencies = [
+    package.dependencies += [
         .package(path: ffmpegKitPath),
+    ]
+} else {
+    package.dependencies += [
+        .package(url: "https://github.com/kingslay/FFmpegKit.git", from: "5.1.2"),
     ]
 }
