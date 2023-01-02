@@ -76,7 +76,7 @@ class FFmpegDecode: DecodeProtocol {
                 } else if result == AVError.tryAgain.code {
                     break
                 } else {
-                    let error = NSError(errorCode: packet.assetTrack.mediaType == .audio ? .codecAudioReceiveFrame : .codecVideoReceiveFrame, ffmpegErrnum: result)
+                    let error = NSError(errorCode: packet.assetTrack.mediaType == .audio ? .codecAudioReceiveFrame : .codecVideoReceiveFrame, avErrorCode: result)
                     KSLog(error)
                     throw error
                 }

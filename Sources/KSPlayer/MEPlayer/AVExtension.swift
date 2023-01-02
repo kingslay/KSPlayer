@@ -83,14 +83,14 @@ extension AVCodecParameters {
         var result = avcodec_parameters_to_context(codecContext, &self)
         guard result == 0 else {
             avcodec_free_context(&codecContextOption)
-            throw NSError(errorCode: .codecContextSetParam, ffmpegErrnum: result)
+            throw NSError(errorCode: .codecContextSetParam, avErrorCode: result)
         }
         if codec_type == AVMEDIA_TYPE_VIDEO, options.hardwareDecode {
             codecContext.getFormat()
         }
         guard let codec = avcodec_find_decoder(codecContext.pointee.codec_id) else {
             avcodec_free_context(&codecContextOption)
-            throw NSError(errorCode: .codecContextFindDecoder, ffmpegErrnum: result)
+            throw NSError(errorCode: .codecContextFindDecoder, avErrorCode: result)
         }
         codecContext.pointee.codec_id = codec.pointee.id
         codecContext.pointee.flags2 |= AV_CODEC_FLAG2_FAST
@@ -106,7 +106,7 @@ extension AVCodecParameters {
         result = avcodec_open2(codecContext, codec, &avOptions)
         guard result == 0 else {
             avcodec_free_context(&codecContextOption)
-            throw NSError(errorCode: .codesContextOpen, ffmpegErrnum: result)
+            throw NSError(errorCode: .codesContextOpen, avErrorCode: result)
         }
         return codecContext
     }
@@ -400,7 +400,114 @@ extension AVRational: Equatable {
     }
 }
 
+public struct AVError: Error, Equatable {
+    public var code: Int32
+    public var message: String
+
+    init(code: Int32) {
+        self.code = code
+        message = String(avErrorCode: code)
+    }
+}
+
+extension Dictionary where Key == String {
+    var avOptions: OpaquePointer? {
+        var avOptions: OpaquePointer?
+        forEach { key, value in
+            if let i = value as? Int64 {
+                av_dict_set_int(&avOptions, key, i, 0)
+            } else if let i = value as? Int {
+                av_dict_set_int(&avOptions, key, Int64(i), 0)
+            } else if let string = value as? String {
+                av_dict_set(&avOptions, key, string, 0)
+            } else if let dic = value as? Dictionary {
+                let string = dic.map { "\($0.0)=\($0.1)" }.joined(separator: "\r\n")
+                av_dict_set(&avOptions, key, string, 0)
+            }
+        }
+        return avOptions
+    }
+}
+
+extension String {
+    init(avErrorCode code: Int32) {
+        let buf = UnsafeMutablePointer<Int8>.allocate(capacity: Int(AV_ERROR_MAX_STRING_SIZE))
+        buf.initialize(repeating: 0, count: Int(AV_ERROR_MAX_STRING_SIZE))
+        defer { buf.deallocate() }
+        self = String(cString: av_make_error_string(buf, Int(AV_ERROR_MAX_STRING_SIZE), code))
+    }
+}
+
+extension NSError {
+    convenience init(errorCode: KSPlayerErrorCode, avErrorCode: Int32) {
+        let underlyingError = AVError(code: avErrorCode)
+        self.init(errorCode: errorCode, userInfo: [NSUnderlyingErrorKey: underlyingError])
+    }
+}
+
 public extension AVError {
+    /// Resource temporarily unavailable
     static let tryAgain = AVError(code: swift_AVERROR(EAGAIN))
+    /// Invalid argument
+    static let invalidArgument = AVError(code: swift_AVERROR(EINVAL))
+    /// Cannot allocate memory
+    static let outOfMemory = AVError(code: swift_AVERROR(ENOMEM))
+    /// The value is out of range
+    static let outOfRange = AVError(code: swift_AVERROR(ERANGE))
+    /// The value is not valid
+    static let invalidValue = AVError(code: swift_AVERROR(EINVAL))
+    /// Function not implemented
+    static let noSystem = AVError(code: swift_AVERROR(ENOSYS))
+
+    /// Bitstream filter not found
+    static let bitstreamFilterNotFound = AVError(code: swift_AVERROR_BSF_NOT_FOUND)
+    /// Internal bug, also see `bug2`
+    static let bug = AVError(code: swift_AVERROR_BUG)
+    /// Buffer too small
+    static let bufferTooSmall = AVError(code: swift_AVERROR_BUFFER_TOO_SMALL)
+    /// Decoder not found
+    static let decoderNotFound = AVError(code: swift_AVERROR_DECODER_NOT_FOUND)
+    /// Demuxer not found
+    static let demuxerNotFound = AVError(code: swift_AVERROR_DEMUXER_NOT_FOUND)
+    /// Encoder not found
+    static let encoderNotFound = AVError(code: swift_AVERROR_ENCODER_NOT_FOUND)
+    /// End of file
     static let eof = AVError(code: swift_AVERROR_EOF)
+    /// Immediate exit was requested; the called function should not be restarted
+    static let exit = AVError(code: swift_AVERROR_EXIT)
+    /// Generic error in an external library
+    static let external = AVError(code: swift_AVERROR_EXTERNAL)
+    /// Filter not found
+    static let filterNotFound = AVError(code: swift_AVERROR_FILTER_NOT_FOUND)
+    /// Invalid data found when processing input
+    static let invalidData = AVError(code: swift_AVERROR_INVALIDDATA)
+    /// Muxer not found
+    static let muxerNotFound = AVError(code: swift_AVERROR_MUXER_NOT_FOUND)
+    /// Option not found
+    static let optionNotFound = AVError(code: swift_AVERROR_OPTION_NOT_FOUND)
+    /// Not yet implemented in FFmpeg, patches welcome
+    static let patchWelcome = AVError(code: swift_AVERROR_PATCHWELCOME)
+    /// Protocol not found
+    static let protocolNotFound = AVError(code: swift_AVERROR_PROTOCOL_NOT_FOUND)
+    /// Stream not found
+    static let streamNotFound = AVError(code: swift_AVERROR_STREAM_NOT_FOUND)
+    /// This is semantically identical to `bug`. It has been introduced in Libav after our `bug` and
+    /// with a modified value.
+    static let bug2 = AVError(code: swift_AVERROR_BUG2)
+    /// Unknown error, typically from an external library
+    static let unknown = AVError(code: swift_AVERROR_UNKNOWN)
+    ///  Requested feature is flagged experimental. Set strict_std_compliance if you really want to use it.
+    static let experimental = AVError(code: swift_AVERROR_EXPERIMENTAL)
+    /// Input changed between calls. Reconfiguration is required. (can be OR-ed with `outputChanged`)
+    static let inputChanged = AVError(code: swift_AVERROR_INPUT_CHANGED)
+    /// Output changed between calls. Reconfiguration is required. (can be OR-ed with `inputChanged`)
+    static let outputChanged = AVError(code: swift_AVERROR_OUTPUT_CHANGED)
+
+    /* HTTP & RTSP errors */
+    static let httpBadRequest = AVError(code: swift_AVERROR_HTTP_BAD_REQUEST)
+    static let httpUnauthorized = AVError(code: swift_AVERROR_HTTP_UNAUTHORIZED)
+    static let httpForbidden = AVError(code: swift_AVERROR_HTTP_FORBIDDEN)
+    static let httpNotFound = AVError(code: swift_AVERROR_HTTP_NOT_FOUND)
+    static let httpOther4xx = AVError(code: swift_AVERROR_HTTP_OTHER_4XX)
+    static let httpServerError = AVError(code: swift_AVERROR_HTTP_SERVER_ERROR)
 }

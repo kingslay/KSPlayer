@@ -50,7 +50,7 @@ class VideoToolboxDecode: DecodeProtocol {
             guard status == noErr else {
                 if status == kVTInvalidSessionErr || status == kVTVideoDecoderMalfunctionErr || status == kVTVideoDecoderBadDataErr {
                     if corePacket.flags & AV_PKT_FLAG_KEY == 1 {
-                        self.error = NSError(errorCode: .codecVideoReceiveFrame, ffmpegErrnum: status)
+                        self.error = NSError(errorCode: .codecVideoReceiveFrame, avErrorCode: status)
                     }
                 }
                 return
@@ -74,7 +74,7 @@ class VideoToolboxDecode: DecodeProtocol {
         }
         if status == kVTInvalidSessionErr || status == kVTVideoDecoderMalfunctionErr || status == kVTVideoDecoderBadDataErr {
             if corePacket.flags & AV_PKT_FLAG_KEY == 1 {
-                throw NSError(errorCode: .codecVideoReceiveFrame, ffmpegErrnum: status)
+                throw NSError(errorCode: .codecVideoReceiveFrame, avErrorCode: status)
             } else {
                 // 解决从后台切换到前台，解码失败的问题
                 doFlushCodec()
@@ -227,7 +227,7 @@ extension CMFormatDescription {
                 let demuxSze = avio_close_dyn_buf(ioContext, &demuxBuffer)
                 return try createSampleBuffer(data: demuxBuffer, size: Int(demuxSze))
             } else {
-                throw NSError(errorCode: .codecVideoReceiveFrame, ffmpegErrnum: status)
+                throw NSError(errorCode: .codecVideoReceiveFrame, avErrorCode: status)
             }
         } else {
             return try createSampleBuffer(data: data, size: size)
@@ -245,7 +245,7 @@ extension CMFormatDescription {
                 return sampleBuffer
             }
         }
-        throw NSError(errorCode: .codecVideoReceiveFrame, ffmpegErrnum: status)
+        throw NSError(errorCode: .codecVideoReceiveFrame, avErrorCode: status)
         // swiftlint:enable line_length
     }
 }
