@@ -290,7 +290,7 @@ extension AVAudioChannelLayout {
         case kAudioChannelLayoutTag_Stereo: return .init(nb: 2, mask: swift_AV_CH_LAYOUT_STEREO)
         case kAudioChannelLayoutTag_AAC_3_0: return .init(nb: 3, mask: swift_AV_CH_LAYOUT_SURROUND)
         case kAudioChannelLayoutTag_AAC_4_0: return .init(nb: 4, mask: swift_AV_CH_LAYOUT_4POINT0)
-        case kAudioChannelLayoutTag_AAC_Quadraphonic: return .init(nb: 4, mask: swift_AV_CH_LAYOUT_QUAD)
+        case kAudioChannelLayoutTag_AAC_Quadraphonic: return .init(nb: 4, mask: swift_AV_CH_LAYOUT_2_2)
         case kAudioChannelLayoutTag_AAC_5_0: return .init(nb: 5, mask: swift_AV_CH_LAYOUT_5POINT0)
         case kAudioChannelLayoutTag_AAC_5_1: return .init(nb: 6, mask: swift_AV_CH_LAYOUT_5POINT1)
         case kAudioChannelLayoutTag_AAC_6_0: return .init(nb: 6, mask: swift_AV_CH_LAYOUT_6POINT0)
@@ -339,6 +339,10 @@ extension AudioChannelLabel {
             return AV_CHAN_NONE
         } else if self == kAudioChannelLabel_LeftSurround || self == kAudioChannelLabel_RightSurround {
             return AVChannel(Int32(self) + 4)
+        } else if self == kAudioChannelLabel_LeftSurroundDirect {
+            return AV_CHAN_SURROUND_DIRECT_LEFT
+        } else if self == kAudioChannelLabel_RightSurroundDirect {
+            return AV_CHAN_SURROUND_DIRECT_RIGHT
         } else if self <= kAudioChannelLabel_TopBackRight {
             return AVChannel(Int32(self) - 1)
         } else if self == kAudioChannelLabel_RearSurroundLeft || self == kAudioChannelLabel_RearSurroundRight {
