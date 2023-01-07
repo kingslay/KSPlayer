@@ -177,16 +177,10 @@ extension NSButton {
 
     var tintColor: UIColor? {
         get {
-            if #available(OSX 10.14, *) {
-                return contentTintColor
-            } else {
-                return nil
-            }
+            contentTintColor
         }
         set {
-            if #available(OSX 10.14, *) {
-                contentTintColor = newValue
-            } else {}
+            contentTintColor = newValue
         }
     }
 }
