@@ -392,7 +392,14 @@ extension KSMEPlayer: MediaPlayerProtocol {
     }
 
     public func tracks(mediaType: AVFoundation.AVMediaType) -> [MediaPlayerTrack] {
-        playerItem.assetTracks.filter { $0.mediaType == mediaType }
+        playerItem.assetTracks.compactMap { track -> MediaPlayerTrack? in
+            if track.mediaType == mediaType {
+                return track
+            } else if mediaType == .subtitle {
+                return track.closedCaptionsTrack
+            }
+            return nil
+        }
     }
 
     public func select(track: MediaPlayerTrack) {
@@ -492,5 +499,5 @@ extension KSMEPlayer: AVPlaybackCoordinatorPlaybackControlDelegate {
 }
 
 public extension KSMEPlayer {
-    var subtitleDataSouce: SubtitleDataSouce? { playerItem }
+    var subtitleDataSouce: SubtitleDataSouce? { self }
 }

@@ -140,7 +140,7 @@ final class MEPlayerItem {
             if $0.mediaType == .subtitle, !$0.isImageSubtitle {
                 return
             }
-            $0.stream.pointee.discard = AVDISCARD_ALL
+            $0.isEnabled = false
         }
         track.setIsEnabled(true)
         if track.mediaType == .video, let assetTrack = track as? FFmpegAssetTrack {
@@ -322,7 +322,7 @@ extension MEPlayerItem {
             return nil
         }
         if options.autoSelectEmbedSubtitle {
-            assetTracks.first { $0.mediaType == .subtitle }?.setIsEnabled(true)
+            assetTracks.first { $0.mediaType == .subtitle }?.isEnabled = true
         }
         var videoIndex: Int32 = -1
         if !options.videoDisable {
@@ -336,7 +336,7 @@ extension MEPlayerItem {
             }
             videoIndex = av_find_best_stream(formatCtx, AVMEDIA_TYPE_VIDEO, wantedStreamNb, -1, nil, 0)
             if let first = videos.first(where: { $0.trackID == videoIndex }) {
-                first.stream.pointee.discard = AVDISCARD_DEFAULT
+                first.isEnabled = true
                 rotation = first.rotation
                 naturalSize = first.naturalSize
                 let track = options.syncDecodeVideo ? SyncPlayerItemTrack<VideoVTBFrame>(assetTrack: first, options: options) : AsyncPlayerItemTrack<VideoVTBFrame>(assetTrack: first, options: options)
@@ -359,7 +359,7 @@ extension MEPlayerItem {
         }
         let index = av_find_best_stream(formatCtx, AVMEDIA_TYPE_AUDIO, wantedStreamNb, videoIndex, nil, 0)
         if let first = assetTracks.first(where: { $0.mediaType == .audio && $0.trackID == index }) {
-            first.stream.pointee.discard = AVDISCARD_DEFAULT
+            first.isEnabled = true
             let track = options.syncDecodeAudio ? SyncPlayerItemTrack<AudioFrame>(assetTrack: first, options: options) : AsyncPlayerItemTrack<AudioFrame>(assetTrack: first, options: options)
             track.delegate = self
             allPlayerItemTracks.append(track)

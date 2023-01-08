@@ -23,7 +23,7 @@ class SubtitleDecode: DecodeProtocol {
     required init(assetTrack: FFmpegAssetTrack, options: KSOptions, delegate: DecodeResultDelegate) {
         self.delegate = delegate
         do {
-            codecContext = try assetTrack.stream.pointee.codecpar.pointee.ceateContext(options: options)
+            codecContext = try assetTrack.ceateContext(options: options)
         } catch {
             KSLog(error as CustomStringConvertible)
         }

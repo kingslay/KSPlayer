@@ -22,9 +22,8 @@ class FFmpegDecode: DecodeProtocol {
     required init(assetTrack: FFmpegAssetTrack, options: KSOptions, delegate: DecodeResultDelegate) {
         self.delegate = delegate
         self.options = options
-        var codecpar = assetTrack.stream.pointee.codecpar.pointee
         do {
-            codecContext = try codecpar.ceateContext(options: options)
+            codecContext = try assetTrack.ceateContext(options: options)
         } catch {
             KSLog(error as CustomStringConvertible)
         }
@@ -33,7 +32,7 @@ class FFmpegDecode: DecodeProtocol {
         if assetTrack.mediaType == .video {
             swresample = VideoSwresample()
         } else {
-            swresample = AudioSwresample(codecpar: codecpar, outChannel: options.channelLayout.channelLayout(channelCount: options.channels), outSampleRate: UInt32(options.sampleRate))
+            swresample = AudioSwresample(audioDescriptor: assetTrack.audioDescriptor, outChannel: options.channelLayout.channelLayout(channelCount: options.channels), outSampleRate: UInt32(options.sampleRate))
         }
     }
 
@@ -50,14 +49,39 @@ class FFmpegDecode: DecodeProtocol {
 //                frame.timebase = Timebase(avframe.pointee.time_base)
                 frame.duration = avframe.pointee.pkt_duration
                 frame.size = avframe.pointee.pkt_size
-                if packet.assetTrack.mediaType == .audio {
-                    bestEffortTimestamp = max(bestEffortTimestamp, avframe.pointee.pts)
-                    frame.position = bestEffortTimestamp
-                    if frame.duration == 0 {
-                        frame.duration = Int64(avframe.pointee.nb_samples) * Int64(frame.timebase.den) / (Int64(avframe.pointee.sample_rate) * Int64(frame.timebase.num))
+                if frame.duration == 0 {
+                    frame.duration = Int64(avframe.pointee.nb_samples) * Int64(frame.timebase.den) / (Int64(avframe.pointee.sample_rate) * Int64(frame.timebase.num))
+                }
+                if packet.assetTrack.mediaType == .video {
+                    if Int32(codecContext.pointee.properties) & FF_CODEC_PROPERTY_CLOSED_CAPTIONS > 0, packet.assetTrack.closedCaptionsTrack == nil {
+                        var codecpar = AVCodecParameters()
+                        codecpar.codec_type = AVMEDIA_TYPE_SUBTITLE
+                        codecpar.codec_id = AV_CODEC_ID_EIA_608
+                        if let assetTrack = FFmpegAssetTrack(codecpar: codecpar) {
+                            assetTrack.name = "Closed Captions"
+                            let subtitle = SyncPlayerItemTrack<SubtitleFrame>(assetTrack: assetTrack, options: options)
+                            assetTrack.setIsEnabled(!assetTrack.isImageSubtitle)
+                            assetTrack.subtitle = subtitle
+                            packet.assetTrack.closedCaptionsTrack = assetTrack
+                            subtitle.decode()
+                        }
                     }
-                    bestEffortTimestamp += frame.duration
-                } else {
+                    if let sd = av_frame_get_side_data(avframe, AV_FRAME_DATA_A53_CC), let closedCaptionsTrack = packet.assetTrack.closedCaptionsTrack, let subtitle = closedCaptionsTrack.subtitle {
+                        let closedCaptionsPacket = Packet()
+                        closedCaptionsPacket.assetTrack = closedCaptionsTrack
+                        if let corePacket = packet.corePacket {
+                            closedCaptionsPacket.corePacket?.pointee.pts = corePacket.pointee.pts
+                            closedCaptionsPacket.corePacket?.pointee.dts = corePacket.pointee.dts
+                        }
+                        closedCaptionsPacket.corePacket?.pointee.flags |= AV_PKT_FLAG_KEY
+                        closedCaptionsPacket.corePacket?.pointee.size = Int32(sd.pointee.size)
+                        let buffer = av_buffer_ref(sd.pointee.buf)
+                        closedCaptionsPacket.corePacket?.pointee.data = buffer?.pointee.data
+                        closedCaptionsPacket.corePacket?.pointee.buf = buffer
+                        closedCaptionsPacket.fill()
+                        subtitle.putPacket(packet: closedCaptionsPacket)
+                    }
+
                     var position = avframe.pointee.best_effort_timestamp
                     if position < 0 {
                         position = avframe.pointee.pkt_dts
@@ -66,8 +90,12 @@ class FFmpegDecode: DecodeProtocol {
                         position = bestEffortTimestamp
                     }
                     frame.position = position
-                    bestEffortTimestamp += frame.duration
+
+                } else {
+                    bestEffortTimestamp = max(bestEffortTimestamp, avframe.pointee.pts)
+                    frame.position = bestEffortTimestamp
                 }
+                bestEffortTimestamp += frame.duration
                 delegate?.decodeResult(frame: frame)
             } else {
                 if result == AVError.eof.code {

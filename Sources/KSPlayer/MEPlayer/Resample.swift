@@ -236,8 +236,8 @@ class AudioSwresample: Swresample {
     private var outChannel: AVChannelLayout
     private let outSampleFmt = KSOptions.isAudioPlanar ? AV_SAMPLE_FMT_FLTP : AV_SAMPLE_FMT_FLT
     private let outSampleRate: UInt32
-    init(codecpar: AVCodecParameters, outChannel: AVChannelLayout, outSampleRate: UInt32) {
-        descriptor = AudioDescriptor(codecpar: codecpar)
+    init(audioDescriptor: AudioDescriptor, outChannel: AVChannelLayout, outSampleRate: UInt32) {
+        descriptor = audioDescriptor
         self.outSampleRate = outSampleRate
         self.outChannel = outChannel
         KSLog("out channelLayout: \(outChannel)")
@@ -300,22 +300,24 @@ extension AVAudioChannelLayout {
         case kAudioChannelLayoutTag_MPEG_7_1_C: return .init(nb: 8, mask: swift_AV_CH_LAYOUT_7POINT1)
         case kAudioChannelLayoutTag_AAC_Octagonal: return .init(nb: 8, mask: swift_AV_CH_LAYOUT_OCTAGONAL)
         case kAudioChannelLayoutTag_UseChannelDescriptions:
-            let buffers = UnsafeBufferPointer<AudioChannelDescription>(start: &mutableLayout.pointee.mChannelDescriptions, count: Int(n))
-            var mask = UInt64(0)
-            for i in 0 ..< Int(n) {
-                let label = buffers[i].mChannelLabel
-                KSLog("KSOptions channelLayout label: \(label)")
-                let channel = label.avChannel.rawValue
-                KSLog("KSOptions channelLayout avChannel: \(channel)")
-                if channel >= 0 {
-                    mask |= 1 << channel
+            return withUnsafeMutablePointer(to: &mutableLayout.pointee.mChannelDescriptions) { start in
+                let buffers = UnsafeBufferPointer<AudioChannelDescription>(start: start, count: Int(n))
+                var mask = UInt64(0)
+                for i in 0 ..< Int(n) {
+                    let label = buffers[i].mChannelLabel
+                    KSLog("KSOptions channelLayout label: \(label)")
+                    let channel = label.avChannel.rawValue
+                    KSLog("KSOptions channelLayout avChannel: \(channel)")
+                    if channel >= 0 {
+                        mask |= 1 << channel
+                    }
                 }
+                var outChannel = AVChannelLayout()
+                // 不能用AV_CHANNEL_ORDER_CUSTOM
+                av_channel_layout_from_mask(&outChannel, mask)
+                KSLog("out channelLayout mask: \(outChannel.u.mask) nb_channels: \(outChannel.nb_channels)")
+                return outChannel
             }
-            var outChannel = AVChannelLayout()
-            // 不能用AV_CHANNEL_ORDER_CUSTOM
-            av_channel_layout_from_mask(&outChannel, mask)
-            KSLog("out channelLayout mask: \(mask)")
-            return outChannel
         default:
             var outChannel = AVChannelLayout()
             av_channel_layout_default(&outChannel, Int32(channelCount))
@@ -332,43 +334,112 @@ extension AVChannelLayout {
 }
 
 // swiftlint:enable identifier_name
-
+// Some channel abbreviations used below:
+// Ts - top surround
+// Ltm - left top middle
+// Rtm - right top middle
+// Lss - left side surround
+// Rss - right side surround
+// Lb - left bottom
+// Rb - Right bottom
+// Cb - Center bottom
+// Lts - Left top surround
+// Rts - Right top surround
+// Leos - Left edge of screen
+// Reos - Right edge of screen
+// Lbs - Left back surround
+// Rbs - Right back surround
+// Lt - left matrix total. for matrix encoded stereo.
+// Rt - right matrix total. for matrix encoded stereo.
 extension AudioChannelLabel {
     var avChannel: AVChannel {
-        if self == 0 {
-            return AV_CHAN_NONE
-        } else if self == kAudioChannelLabel_LeftSurround || self == kAudioChannelLabel_RightSurround {
-            return AVChannel(Int32(self) + 4)
-        } else if self == kAudioChannelLabel_LeftSurroundDirect {
-            return AV_CHAN_SURROUND_DIRECT_LEFT
-        } else if self == kAudioChannelLabel_RightSurroundDirect {
-            return AV_CHAN_SURROUND_DIRECT_RIGHT
-        } else if self <= kAudioChannelLabel_TopBackRight {
-            return AVChannel(Int32(self) - 1)
-        } else if self == kAudioChannelLabel_RearSurroundLeft || self == kAudioChannelLabel_RearSurroundRight {
-            return AVChannel(Int32(self) - 29)
-        } else if self == kAudioChannelLabel_LeftWide {
-            return AV_CHAN_WIDE_LEFT
-        } else if self == kAudioChannelLabel_RightWide {
-            return AV_CHAN_WIDE_RIGHT
-        } else if self == kAudioChannelLabel_LFE2 {
-            return AV_CHAN_LOW_FREQUENCY_2
-        } else if self == kAudioChannelLabel_Mono {
+        switch self {
+        case kAudioChannelLabel_Left:
+            // L - left
+            return AV_CHAN_FRONT_LEFT
+        case kAudioChannelLabel_Right:
+            // R - right
+            return AV_CHAN_FRONT_RIGHT
+        case kAudioChannelLabel_Center:
+            // C - center
             return AV_CHAN_FRONT_CENTER
-        } else if self == kAudioChannelLabel_HeadphonesLeft {
+        case kAudioChannelLabel_LFEScreen:
+            // Lfe
+            return AV_CHAN_LOW_FREQUENCY
+        case kAudioChannelLabel_LeftSurround:
+            // Ls - left surround
+            return AV_CHAN_SIDE_LEFT
+        case kAudioChannelLabel_RightSurround:
+            // Rs - right surround
+            return AV_CHAN_SIDE_RIGHT
+        case kAudioChannelLabel_LeftCenter:
+            // Lc - left center
+            return AV_CHAN_FRONT_LEFT_OF_CENTER
+        case kAudioChannelLabel_RightCenter:
+            // Rc - right center
+            return AV_CHAN_FRONT_RIGHT_OF_CENTER
+        case kAudioChannelLabel_CenterSurround:
+            // Cs - center surround "Back Center" or plain "Rear Surround"
+            return AV_CHAN_BACK_CENTER
+        case kAudioChannelLabel_LeftSurroundDirect:
+            // Lsd - left surround direct
+            return AV_CHAN_SURROUND_DIRECT_LEFT
+        case kAudioChannelLabel_RightSurroundDirect:
+            // Rsd - right surround direct
+            return AV_CHAN_SURROUND_DIRECT_RIGHT
+        case kAudioChannelLabel_TopCenterSurround:
+            // TS
+            return AV_CHAN_TOP_CENTER
+        case kAudioChannelLabel_VerticalHeightLeft:
+            // Vhl - vertical height left Top Front Left
+            return AV_CHAN_TOP_FRONT_LEFT
+        case kAudioChannelLabel_VerticalHeightCenter:
+            // Vhc - vertical height center Top Front Center
+            return AV_CHAN_TOP_FRONT_CENTER
+        case kAudioChannelLabel_VerticalHeightRight:
+            // Vhr - vertical height right Top Front right
+            return AV_CHAN_TOP_FRONT_RIGHT
+        case kAudioChannelLabel_TopBackLeft:
+            // Ltr - left top rear
+            return AV_CHAN_TOP_BACK_LEFT
+        case kAudioChannelLabel_TopBackCenter:
+            // Ctr - center top rear
+            return AV_CHAN_TOP_BACK_CENTER
+        case kAudioChannelLabel_TopBackRight:
+            // Rtr - right top rear
+            return AV_CHAN_TOP_BACK_RIGHT
+        case kAudioChannelLabel_RearSurroundLeft:
+            // Rls - rear left surround
+            return AV_CHAN_BACK_LEFT
+        case kAudioChannelLabel_RearSurroundRight:
+            // Rrs - rear right surround
+            return AV_CHAN_BACK_RIGHT
+        case kAudioChannelLabel_LeftWide:
+            // Lw - left wide
+            return AV_CHAN_WIDE_LEFT
+        case kAudioChannelLabel_RightWide:
+            // Rw - right wide
+            return AV_CHAN_WIDE_RIGHT
+        case kAudioChannelLabel_LFE2:
+            // LFE2
+            return AV_CHAN_LOW_FREQUENCY_2
+        case kAudioChannelLabel_Mono:
+            // C - center
+            return AV_CHAN_FRONT_CENTER
+        case kAudioChannelLabel_HeadphonesLeft:
             return AV_CHAN_STEREO_LEFT
-        } else if self == kAudioChannelLabel_HeadphonesRight {
+        case kAudioChannelLabel_HeadphonesRight:
             return AV_CHAN_STEREO_RIGHT
-        } else {
+        default:
             return AV_CHAN_NONE
         }
     }
 }
 
-private class AudioDescriptor: Equatable {
+class AudioDescriptor: Equatable {
     fileprivate let inputSampleRate: Int32
     fileprivate let inputFormat: AVSampleFormat
-    fileprivate var inChannel: AVChannelLayout
+    var inChannel: AVChannelLayout
     init(codecpar: AVCodecParameters) {
         inChannel = codecpar.ch_layout
         let sampleRate = codecpar.sample_rate

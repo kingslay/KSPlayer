@@ -39,12 +39,12 @@ extension FFmpegAssetTrack: KSSubtitleProtocol {
     }
 }
 
-extension MEPlayerItem: SubtitleDataSouce {
-    var infos: [SubtitleInfo]? {
-        assetTracks.filter { $0.mediaType == .subtitle }
+extension KSMEPlayer: SubtitleDataSouce {
+    public var infos: [SubtitleInfo]? {
+        tracks(mediaType: .subtitle) as? [FFmpegAssetTrack]
     }
 
-    func searchSubtitle(name _: String, completion: @escaping (() -> Void)) {
+    public func searchSubtitle(name _: String, completion: @escaping (() -> Void)) {
         completion()
     }
 }

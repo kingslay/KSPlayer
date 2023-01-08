@@ -1,6 +1,6 @@
-@testable import KSPlayer
 import AVFoundation
 import FFmpeg
+@testable import KSPlayer
 import XCTest
 class AudioTest: XCTestCase {
     func testChannelLayout() {
@@ -21,6 +21,11 @@ class AudioTest: XCTestCase {
 
     private func assert(tag: AudioChannelLayoutTag, mask: UInt64) {
         let channelLayout = AVAudioChannelLayout(layout: tag.channelLayout)
+        XCTAssertEqual(channelLayout.channelLayout(channelCount: channelLayout.channelCount).u.mask == mask, true)
+    }
+
+    private func assert(bitmap: AudioChannelBitmap, mask: UInt64) {
+        let channelLayout = AVAudioChannelLayout(layout: bitmap.channelLayout)
         XCTAssertEqual(channelLayout.channelLayout(channelCount: channelLayout.channelCount).u.mask == mask, true)
     }
 }
