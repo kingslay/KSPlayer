@@ -49,7 +49,7 @@ class FFmpegDecode: DecodeProtocol {
 //                frame.timebase = Timebase(avframe.pointee.time_base)
                 frame.duration = avframe.pointee.pkt_duration
                 frame.size = avframe.pointee.pkt_size
-                if frame.duration == 0 {
+                if frame.duration == 0, avframe.pointee.sample_rate != 0, frame.timebase.num != 0 {
                     frame.duration = Int64(avframe.pointee.nb_samples) * Int64(frame.timebase.den) / (Int64(avframe.pointee.sample_rate) * Int64(frame.timebase.num))
                 }
                 if packet.assetTrack.mediaType == .video {
@@ -59,6 +59,8 @@ class FFmpegDecode: DecodeProtocol {
                         codecpar.codec_id = AV_CODEC_ID_EIA_608
                         if let assetTrack = FFmpegAssetTrack(codecpar: codecpar) {
                             assetTrack.name = "Closed Captions"
+                            assetTrack.timebase = packet.assetTrack.timebase
+                            assetTrack.startTime = packet.assetTrack.startTime
                             let subtitle = SyncPlayerItemTrack<SubtitleFrame>(assetTrack: assetTrack, options: options)
                             assetTrack.setIsEnabled(!assetTrack.isImageSubtitle)
                             assetTrack.subtitle = subtitle
