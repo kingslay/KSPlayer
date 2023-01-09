@@ -113,7 +113,7 @@ extension AudioChannelBitmap {
 
 extension UnsafePointer<AudioChannelLayout> {
     var channelDescriptions: [AudioChannelDescription] {
-        return UnsafeMutablePointer(mutating: self).channelDescriptions
+        UnsafeMutablePointer(mutating: self).channelDescriptions
     }
 }
 

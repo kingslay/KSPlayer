@@ -156,6 +156,7 @@ public final class AudioEnginePlayer: AudioPlayer, FrameOutput {
         var settings = format.settings
         settings[AVSampleRateKey] = options.sampleRate
         settings[AVLinearPCMIsNonInterleaved] = KSOptions.isAudioPlanar
+        settings[AVChannelLayoutKey] = options.channelLayout
         if let newFormat = AVAudioFormat(settings: settings) {
             format = newFormat
         }
