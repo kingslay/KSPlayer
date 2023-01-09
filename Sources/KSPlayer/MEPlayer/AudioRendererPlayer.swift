@@ -87,8 +87,8 @@ public class AudioRendererPlayer: AudioPlayer, FrameOutput {
             var audioStreamBasicDescription = AudioStreamBasicDescription()
             let floatByteSize = UInt32(MemoryLayout<Float>.size)
             audioStreamBasicDescription.mBitsPerChannel = 8 * floatByteSize
-            audioStreamBasicDescription.mBytesPerFrame = floatByteSize * (KSOptions.isAudioPlanar ? 1 : options.channels)
             audioStreamBasicDescription.mChannelsPerFrame = options.channels
+            audioStreamBasicDescription.mBytesPerFrame = floatByteSize * (KSOptions.isAudioPlanar ? 1 : audioStreamBasicDescription.mChannelsPerFrame)
             audioStreamBasicDescription.mFormatFlags = kAudioFormatFlagIsPacked | kAudioFormatFlagIsFloat
             if KSOptions.isAudioPlanar {
                 audioStreamBasicDescription.mFormatFlags |= kAudioFormatFlagIsNonInterleaved

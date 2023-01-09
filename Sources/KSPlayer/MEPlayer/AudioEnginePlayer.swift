@@ -137,17 +137,38 @@ public final class AudioEnginePlayer: AudioPlayer, FrameOutput {
         engine.stop()
         engine.reset()
         #if os(macOS)
-        if let audioUnit = engine.outputNode.audioUnit {
-            options.channelLayout = AVAudioChannelLayout(layout: audioUnit.channelLayout)
-        }
+        let channels = 2
+//        if let audioUnit = engine.outputNode.audioUnit {
+//            options.channelLayout = AVAudioChannelLayout(layout: audioUnit.channelLayout)
+//        }
         #else
-        let channels = min(AVAudioSession.sharedInstance().maximumOutputNumberOfChannels, Int(options.channels))
+        let channels = max(min(AVAudioSession.sharedInstance().maximumOutputNumberOfChannels, Int(options.channels)), 2)
         KSOptions.setAudioSession()
         try? AVAudioSession.sharedInstance().setPreferredOutputNumberOfChannels(channels)
-        if AVAudioSession.sharedInstance().outputNumberOfChannels > 2, let audioUnit = engine.outputNode.audioUnit {
-            options.channelLayout = AVAudioChannelLayout(layout: audioUnit.channelLayout)
-        }
+//        if AVAudioSession.sharedInstance().outputNumberOfChannels > 2, let audioUnit = engine.outputNode.audioUnit {
+//            options.channelLayout = AVAudioChannelLayout(layout: audioUnit.channelLayout)
+//        }
         #endif
+        var audioStreamBasicDescription = AudioStreamBasicDescription()
+        let floatByteSize = UInt32(MemoryLayout<Float>.size)
+        audioStreamBasicDescription.mBitsPerChannel = 8 * floatByteSize
+        audioStreamBasicDescription.mChannelsPerFrame = UInt32(channels)
+        audioStreamBasicDescription.mBytesPerFrame = floatByteSize * (KSOptions.isAudioPlanar ? 1 : audioStreamBasicDescription.mChannelsPerFrame)
+        audioStreamBasicDescription.mFormatFlags = kAudioFormatFlagIsPacked | kAudioFormatFlagIsFloat
+        if KSOptions.isAudioPlanar {
+            audioStreamBasicDescription.mFormatFlags |= kAudioFormatFlagIsNonInterleaved
+        }
+        audioStreamBasicDescription.mFormatID = kAudioFormatLinearPCM
+        audioStreamBasicDescription.mFramesPerPacket = 1
+        audioStreamBasicDescription.mBytesPerPacket = audioStreamBasicDescription.mFramesPerPacket * audioStreamBasicDescription.mBytesPerFrame
+        audioStreamBasicDescription.mSampleRate = options.sampleRate
+        var desc: CMAudioFormatDescription?
+        CMAudioFormatDescriptionCreate(allocator: kCFAllocatorDefault, asbd: &audioStreamBasicDescription, layoutSize: 0, layout: nil, magicCookieSize: 0, magicCookie: nil, extensions: nil, formatDescriptionOut: &desc)
+        if let tag = desc?.audioFormatList.first?.mChannelLayoutTag, let layout = AVAudioChannelLayout(layoutTag: tag) {
+            options.channelLayout = layout
+            KSLog("audioStreamBasicDescription channelLayout tag: \(layout.layoutTag)")
+            KSLog("audioStreamBasicDescription channelLayout channelDescriptions: \(layout.layout.channelDescriptions)")
+        }
         var format = engine.outputNode.outputFormat(forBus: 0)
         if let channelLayout = format.channelLayout {
             KSLog("outputFormat channelLayout tag: \(channelLayout.layoutTag)")
@@ -170,8 +191,7 @@ public final class AudioEnginePlayer: AudioPlayer, FrameOutput {
         engine.attach(sourceNode)
         engine.attach(dynamicsProcessor)
         engine.attach(playback)
-        engine.connect(nodes: [sourceNode, dynamicsProcessor, playback, engine.mainMixerNode, engine.outputNode], format: format)
-
+        engine.connect(nodes: [sourceNode, dynamicsProcessor, playback, engine.mainMixerNode, engine.outputNode], format: nil)
         if let audioUnit = engine.outputNode.audioUnit {
             addRenderNotify(audioUnit: audioUnit)
         }
