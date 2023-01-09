@@ -321,10 +321,12 @@ struct VideoSubtitleView: View {
                 Image(nsImage: image)
                     .resizable()
                     .scaledToFit()
+                    .padding()
                 #else
                 Image(uiImage: image)
                     .resizable()
                     .scaledToFit()
+                    .padding()
                 #endif
             } else if let text = model.text {
                 Text(AttributedString(text))

@@ -149,7 +149,16 @@ public final class AudioEnginePlayer: AudioPlayer, FrameOutput {
         }
         #endif
         var format = engine.outputNode.outputFormat(forBus: 0)
-        format = AVAudioFormat(commonFormat: format.commonFormat, sampleRate: options.sampleRate, interleaved: !KSOptions.isAudioPlanar, channelLayout: options.channelLayout)
+        if let channelLayout = format.channelLayout {
+            KSLog("outputFormat channelLayout tag: \(channelLayout.layoutTag)")
+            KSLog("outputFormat channelLayout channelDescriptions: \(channelLayout.layout.channelDescriptions)")
+        }
+        var settings = format.settings
+        settings[AVSampleRateKey] = options.sampleRate
+        settings[AVLinearPCMIsNonInterleaved] = KSOptions.isAudioPlanar
+        if let newFormat = AVAudioFormat(settings: settings) {
+            format = newFormat
+        }
         //        engine.attach(nbandEQ)
         //        engine.attach(distortion)
         //        engine.attach(delay)
@@ -263,52 +272,6 @@ extension AVAudioEngine {
         for i in 0 ..< nodes.count - 1 {
             connect(nodes[i], to: nodes[i + 1], format: format)
         }
-    }
-}
-
-extension AudioUnit {
-    var channelLayout: UnsafeMutablePointer<AudioChannelLayout> {
-        var size = UInt32(0)
-        AudioUnitGetPropertyInfo(self, kAudioUnitProperty_AudioChannelLayout, kAudioUnitScope_Output, 0, &size, nil)
-        let data = UnsafeMutableRawPointer.allocate(byteCount: Int(size), alignment: MemoryLayout<Int8>.alignment)
-        AudioUnitGetProperty(self, kAudioUnitProperty_AudioChannelLayout, kAudioUnitScope_Output, 0, data, &size)
-        let layout = data.bindMemory(to: AudioChannelLayout.self, capacity: 1)
-        let tag = layout.pointee.mChannelLayoutTag
-        KSLog("audio unit channelLayout tag: \(tag)")
-        if tag == kAudioChannelLayoutTag_UseChannelDescriptions {
-            return layout
-        }
-        if tag == kAudioChannelLayoutTag_UseChannelBitmap {
-            return layout.pointee.mChannelBitmap.channelLayout
-        } else {
-            return tag.channelLayout
-        }
-    }
-}
-
-extension AudioChannelLayoutTag {
-    var channelLayout: UnsafeMutablePointer<AudioChannelLayout> {
-        var tag = self
-        var size = UInt32(0)
-        AudioFormatGetPropertyInfo(kAudioFormatProperty_ChannelLayoutForTag, UInt32(MemoryLayout<AudioChannelLayoutTag>.size), &tag, &size)
-        let data = UnsafeMutableRawPointer.allocate(byteCount: Int(size), alignment: MemoryLayout<Int8>.alignment)
-        AudioFormatGetProperty(kAudioFormatProperty_ChannelLayoutForTag, UInt32(MemoryLayout<AudioChannelLayoutTag>.size), &tag, &size, data)
-        let newLayout = data.bindMemory(to: AudioChannelLayout.self, capacity: 1)
-        newLayout.pointee.mChannelLayoutTag = kAudioChannelLayoutTag_UseChannelDescriptions
-        return newLayout
-    }
-}
-
-extension AudioChannelBitmap {
-    var channelLayout: UnsafeMutablePointer<AudioChannelLayout> {
-        var mChannelBitmap = self
-        var size = UInt32(0)
-        AudioFormatGetPropertyInfo(kAudioFormatProperty_ChannelLayoutForBitmap, UInt32(MemoryLayout<AudioChannelBitmap>.size), &mChannelBitmap, &size)
-        let data = UnsafeMutableRawPointer.allocate(byteCount: Int(size), alignment: MemoryLayout<Int8>.alignment)
-        AudioFormatGetProperty(kAudioFormatProperty_ChannelLayoutForBitmap, UInt32(MemoryLayout<AudioChannelBitmap>.size), &mChannelBitmap, &size, data)
-        let newLayout = data.bindMemory(to: AudioChannelLayout.self, capacity: 1)
-        newLayout.pointee.mChannelLayoutTag = kAudioChannelLayoutTag_UseChannelDescriptions
-        return newLayout
     }
 }
 
