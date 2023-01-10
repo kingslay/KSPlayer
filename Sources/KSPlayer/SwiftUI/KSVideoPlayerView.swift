@@ -47,7 +47,7 @@ public struct KSVideoPlayerView: View {
             }
             .onStateChanged { playerLayer, state in
                 if state == .readyToPlay {
-                    if let track = playerCoordinator.subtitleTracks.first, playerLayer.options.autoSelectEmbedSubtitle {
+                    if let track = playerLayer.player.tracks(mediaType: .subtitle).first, playerLayer.options.autoSelectEmbedSubtitle {
                         playerCoordinator.selectedSubtitleTrack = track
                     }
                 } else if state == .bufferFinished {
@@ -321,10 +321,12 @@ struct VideoSubtitleView: View {
                 Image(nsImage: image)
                     .resizable()
                     .scaledToFit()
+                    .padding()
                 #else
                 Image(uiImage: image)
                     .resizable()
                     .scaledToFit()
+                    .padding()
                 #endif
             } else if let text = model.text {
                 Text(AttributedString(text))
@@ -347,6 +349,7 @@ struct VideoSettingView: View {
     var body: some View {
         config.selectedAudioTrack = (config.playerLayer?.player.isMuted ?? false) ? nil : config.audioTracks.first { $0.isEnabled }
         config.selectedVideoTrack = config.videoTracks.first { $0.isEnabled }
+        let subtitleTracks = config.playerLayer?.player.tracks(mediaType: .subtitle) ?? []
         return TabView {
             List {
                 Picker("audio tracks", selection: Binding(get: {
@@ -367,10 +370,10 @@ struct VideoSettingView: View {
                 Picker("subtitle tracks", selection: Binding(get: {
                     config.selectedSubtitleTrack?.trackID
                 }, set: { value in
-                    config.selectedSubtitleTrack = config.subtitleTracks.first { $0.trackID == value }
+                    config.selectedSubtitleTrack = subtitleTracks.first { $0.trackID == value }
                 })) {
                     Text("None").tag(nil as Int32?)
-                    ForEach(config.subtitleTracks, id: \.trackID) { track in
+                    ForEach(subtitleTracks, id: \.trackID) { track in
                         Text(track.name).tag(track.trackID as Int32?)
                     }
                 }

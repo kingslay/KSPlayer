@@ -18,7 +18,7 @@ protocol AudioPlayer: AnyObject {
     var threshold: Float { get set }
     var expansionRatio: Float { get set }
     var overallGain: Float { get set }
-    func prepare(options: KSOptions)
+    func prepare(options: KSOptions, audioDescriptor: AudioDescriptor?)
     func play(time: TimeInterval)
     func pause()
 }
@@ -133,22 +133,24 @@ public final class AudioEnginePlayer: AudioPlayer, FrameOutput {
         }
     }
 
-    init() {
-        KSOptions.setAudioSession()
-    }
-
-    func prepare(options: KSOptions) {
+    func prepare(options: KSOptions, audioDescriptor: AudioDescriptor?) {
         engine.stop()
         engine.reset()
-        #if !os(macOS)
-        let channels = min(AVAudioSession.sharedInstance().maximumOutputNumberOfChannels, Int(options.channels))
-        try? AVAudioSession.sharedInstance().setPreferredOutputNumberOfChannels(channels)
-        #endif
-        var format = engine.outputNode.outputFormat(forBus: 0)
-        if let audioUnit = engine.outputNode.audioUnit {
-            options.channelLayout = AVAudioChannelLayout(layout: audioUnit.channelLayout)
+        #if os(macOS)
+
+        #else
+        let channels = max(min(AVAudioSession.sharedInstance().maximumOutputNumberOfChannels, Int(audioDescriptor?.inChannel.nb_channels ?? 2)), 2)
+        KSOptions.setAudioSession()
+        try? AVAudioSession.sharedInstance().setPreferredOutputNumberOfChannels(Int(channels))
+        if let audioDescriptor {
+            options.channelLayout = audioDescriptor.audioChannelLayout(channels: channels)
         }
-        format = AVAudioFormat(commonFormat: format.commonFormat, sampleRate: options.sampleRate, interleaved: !KSOptions.isAudioPlanar, channelLayout: options.channelLayout)
+        #endif
+        let format = AVAudioFormat(commonFormat: .pcmFormatFloat32, sampleRate: options.sampleRate, interleaved: !KSOptions.isAudioPlanar, channelLayout: options.channelLayout)
+        if let channelLayout = format.channelLayout {
+            KSLog("outputFormat channelLayout tag: \(channelLayout.layoutTag)")
+            KSLog("outputFormat channelLayout channelDescriptions: \(channelLayout.layout.channelDescriptions)")
+        }
         //        engine.attach(nbandEQ)
         //        engine.attach(distortion)
         //        engine.attach(delay)
@@ -160,7 +162,6 @@ public final class AudioEnginePlayer: AudioPlayer, FrameOutput {
         engine.attach(dynamicsProcessor)
         engine.attach(playback)
         engine.connect(nodes: [sourceNode, dynamicsProcessor, playback, engine.mainMixerNode, engine.outputNode], format: format)
-
         if let audioUnit = engine.outputNode.audioUnit {
             addRenderNotify(audioUnit: audioUnit)
         }
@@ -262,35 +263,6 @@ extension AVAudioEngine {
         for i in 0 ..< nodes.count - 1 {
             connect(nodes[i], to: nodes[i + 1], format: format)
         }
-    }
-}
-
-extension AudioUnit {
-    var channelLayout: UnsafeMutablePointer<AudioChannelLayout> {
-        var size = UInt32(0)
-        AudioUnitGetPropertyInfo(self, kAudioUnitProperty_AudioChannelLayout, kAudioUnitScope_Output, 0, &size, nil)
-        let data = UnsafeMutableRawPointer.allocate(byteCount: Int(size), alignment: MemoryLayout<Int8>.alignment)
-        AudioUnitGetProperty(self, kAudioUnitProperty_AudioChannelLayout, kAudioUnitScope_Output, 0, data, &size)
-        let layout = data.bindMemory(to: AudioChannelLayout.self, capacity: 1)
-        let tag = layout.pointee.mChannelLayoutTag
-        KSLog("audio unit channelLayout tag: \(tag)")
-        guard tag != kAudioChannelLayoutTag_UseChannelDescriptions else {
-            return layout
-        }
-        let newLayout: UnsafeMutablePointer<AudioChannelLayout>
-        if tag == kAudioChannelLayoutTag_UseChannelBitmap {
-            AudioFormatGetPropertyInfo(kAudioFormatProperty_ChannelLayoutForBitmap, UInt32(MemoryLayout<AudioChannelBitmap>.size), &layout.pointee.mChannelBitmap, &size)
-            let data = UnsafeMutableRawPointer.allocate(byteCount: Int(size), alignment: MemoryLayout<Int8>.alignment)
-            AudioFormatGetProperty(kAudioFormatProperty_ChannelLayoutForBitmap, UInt32(MemoryLayout<AudioChannelBitmap>.size), &layout.pointee.mChannelBitmap, &size, data)
-            newLayout = data.bindMemory(to: AudioChannelLayout.self, capacity: 1)
-        } else {
-            AudioFormatGetPropertyInfo(kAudioFormatProperty_ChannelLayoutForTag, UInt32(MemoryLayout<AudioChannelLayoutTag>.size), &layout.pointee.mChannelLayoutTag, &size)
-            let data = UnsafeMutableRawPointer.allocate(byteCount: Int(size), alignment: MemoryLayout<Int8>.alignment)
-            AudioFormatGetProperty(kAudioFormatProperty_ChannelLayoutForTag, UInt32(MemoryLayout<AudioChannelLayoutTag>.size), &layout.pointee.mChannelLayoutTag, &size, data)
-            newLayout = data.bindMemory(to: AudioChannelLayout.self, capacity: 1)
-        }
-        newLayout.pointee.mChannelLayoutTag = kAudioChannelLayoutTag_UseChannelDescriptions
-        return newLayout
     }
 }
 

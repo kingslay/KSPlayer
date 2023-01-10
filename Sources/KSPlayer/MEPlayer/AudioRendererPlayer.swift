@@ -56,52 +56,37 @@ public class AudioRendererPlayer: AudioPlayer, FrameOutput {
     }
 
     init() {
-        KSOptions.setAudioSession()
         synchronizer.addRenderer(renderer)
 //        if #available(tvOS 15.0, iOS 15.0, macOS 12.0, *) {
 //            renderer.allowedAudioSpatializationFormats = .monoStereoAndMultichannel
 //        }
     }
 
-    func prepare(options: KSOptions) {
+    func prepare(options: KSOptions, audioDescriptor: AudioDescriptor?) {
+        var channels = max(AVAudioChannelCount(audioDescriptor?.inChannel.nb_channels ?? 2), 2)
         #if os(macOS)
-        options.channels = 2
+        channels = 2
         #else
-        var maxChannels = UInt32(AVAudioSession.sharedInstance().maximumOutputNumberOfChannels)
-        if options.channels > maxChannels {
+        let maxChannels = AVAudioChannelCount(AVAudioSession.sharedInstance().maximumOutputNumberOfChannels)
+        KSOptions.setAudioSession()
+        if channels > maxChannels {
             if #available(tvOS 15.0, iOS 15.0, *) {
                 if let port = AVAudioSession.sharedInstance().currentRoute.outputs.first, port.isSpatialAudioEnabled || port.portType == AVAudioSession.Port.bluetoothA2DP {
-                    maxChannels = options.channels
+                } else {
+                    channels = maxChannels
                 }
+            } else {
+                channels = maxChannels
             }
-        } else {
-            maxChannels = options.channels
         }
-        options.channels = maxChannels
-        try? AVAudioSession.sharedInstance().setPreferredOutputNumberOfChannels(Int(options.channels))
+        try? AVAudioSession.sharedInstance().setPreferredOutputNumberOfChannels(Int(channels))
+        if let audioDescriptor {
+            options.channelLayout = audioDescriptor.audioChannelLayout(channels: Int(channels))
+        }
         #endif
-        renderer.audioTimePitchAlgorithm = options.channels > 2 ? .spectral : .timeDomain
-        if let format = AVAudioFormat(commonFormat: .pcmFormatFloat32, sampleRate: options.sampleRate, channels: options.channels, interleaved: !KSOptions.isAudioPlanar) {
-            desc = format.formatDescription
-        } else {
-            var audioStreamBasicDescription = AudioStreamBasicDescription()
-            let floatByteSize = UInt32(MemoryLayout<Float>.size)
-            audioStreamBasicDescription.mBitsPerChannel = 8 * floatByteSize
-            audioStreamBasicDescription.mBytesPerFrame = floatByteSize * (KSOptions.isAudioPlanar ? 1 : options.channels)
-            audioStreamBasicDescription.mChannelsPerFrame = options.channels
-            audioStreamBasicDescription.mFormatFlags = kAudioFormatFlagIsPacked | kAudioFormatFlagIsFloat
-            if KSOptions.isAudioPlanar {
-                audioStreamBasicDescription.mFormatFlags |= kAudioFormatFlagIsNonInterleaved
-            }
-            audioStreamBasicDescription.mFormatID = kAudioFormatLinearPCM
-            audioStreamBasicDescription.mFramesPerPacket = 1
-            audioStreamBasicDescription.mBytesPerPacket = audioStreamBasicDescription.mFramesPerPacket * audioStreamBasicDescription.mBytesPerFrame
-            audioStreamBasicDescription.mSampleRate = options.sampleRate
-            CMAudioFormatDescriptionCreate(allocator: kCFAllocatorDefault, asbd: &audioStreamBasicDescription, layoutSize: 0, layout: nil, magicCookieSize: 0, magicCookie: nil, extensions: nil, formatDescriptionOut: &desc)
-        }
-        if let tag = desc?.audioFormatList.first?.mChannelLayoutTag, let layout = AVAudioChannelLayout(layoutTag: tag) {
-            options.channelLayout = layout
-        }
+        renderer.audioTimePitchAlgorithm = channels > 2 ? .spectral : .timeDomain
+        let format = AVAudioFormat(commonFormat: .pcmFormatFloat32, sampleRate: options.sampleRate, interleaved: !KSOptions.isAudioPlanar, channelLayout: options.channelLayout)
+        desc = format.formatDescription
     }
 
     func play(time: TimeInterval) {

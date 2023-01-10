@@ -177,16 +177,10 @@ extension NSButton {
 
     var tintColor: UIColor? {
         get {
-            if #available(OSX 10.14, *) {
-                return contentTintColor
-            } else {
-                return nil
-            }
+            contentTintColor
         }
         set {
-            if #available(OSX 10.14, *) {
-                contentTintColor = newValue
-            } else {}
+            contentTintColor = newValue
         }
     }
 }
@@ -552,7 +546,7 @@ open class UIAlertController: UIViewController {
     public convenience init(title _: String?, message _: String?, preferredStyle _: UIAlertController.Style) {
         self.init()
     }
-    
+
     var preferredAction: UIAlertAction?
 
     open func addAction(_: UIAlertAction) {}

@@ -156,7 +156,7 @@ public enum DynamicRange: Int32 {
     case hdr10 = 2
     case hlg = 3
     case dolbyVision = 5
-    
+
     #if canImport(UIKit)
     var hdrMode: AVPlayer.HDRMode {
         switch self {
@@ -336,7 +336,6 @@ open class KSOptions {
     public internal(set) var decodeVideoTime = 0.0
     var formatCtx: UnsafeMutablePointer<AVFormatContext>?
     var channelLayout = AVAudioChannelLayout(layoutTag: kAudioChannelLayoutTag_Stereo)!
-    var channels: UInt32 = 2
     var sampleRate: Float64 = 44100
     public init() {
         formatContextOptions["auto_convert"] = 0
@@ -617,6 +616,7 @@ public extension KSOptions {
         if category != .playback, category != .playAndRecord {
             try? AVAudioSession.sharedInstance().setCategory(.playback, mode: .default, policy: .longFormAudio)
         }
+        try? AVAudioSession.sharedInstance().setMode(.moviePlayback)
         try? AVAudioSession.sharedInstance().setActive(true)
         if #available(tvOS 15.0, iOS 15.0, *) {
             try? AVAudioSession.sharedInstance().setSupportsMultichannelContent(true)

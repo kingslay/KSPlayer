@@ -11,15 +11,6 @@ import Libavcodec
 
 // MARK: enum
 
-extension NSError {
-    convenience init(errorCode: KSPlayerErrorCode, ffmpegErrnum: Int32) {
-        var errorStringBuffer = [Int8](repeating: 0, count: 512)
-        av_strerror(ffmpegErrnum, &errorStringBuffer, 512)
-        let underlyingError = NSError(domain: "FFmpegDomain", code: Int(ffmpegErrnum), userInfo: [NSLocalizedDescriptionKey: String(cString: errorStringBuffer)])
-        self.init(errorCode: errorCode, userInfo: [NSUnderlyingErrorKey: underlyingError])
-    }
-}
-
 enum MESourceState {
     case idle
     case opening
@@ -98,7 +89,6 @@ public extension KSOptions {
     /// true: AVSampleBufferAudioRenderer false: AVAudioEngine
     static var isUseAudioRenderer = false
     static var isAudioPlanar = !isUseAudioRenderer
-    internal static var channelLayout = AVAudioChannelLayout(layoutTag: kAudioChannelLayoutTag_Stereo)!
     static func colorSpace(ycbcrMatrix: CFString?, transferFunction: CFString?) -> CGColorSpace? {
         switch ycbcrMatrix {
         case kCVImageBufferYCbCrMatrix_ITU_R_709_2:
@@ -229,44 +219,6 @@ final class VideoVTBFrame: MEFrame {
     var position: Int64 = 0
     var size: Int32 = 0
     var corePixelBuffer: CVPixelBuffer?
-}
-
-extension Dictionary where Key == String {
-    var avOptions: OpaquePointer? {
-        var avOptions: OpaquePointer?
-        forEach { key, value in
-            if let i = value as? Int64 {
-                av_dict_set_int(&avOptions, key, i, 0)
-            } else if let i = value as? Int {
-                av_dict_set_int(&avOptions, key, Int64(i), 0)
-            } else if let string = value as? String {
-                av_dict_set(&avOptions, key, string, 0)
-            } else if let dic = value as? Dictionary {
-                let string = dic.map { "\($0.0)=\($0.1)" }.joined(separator: "\r\n")
-                av_dict_set(&avOptions, key, string, 0)
-            }
-        }
-        return avOptions
-    }
-}
-
-public struct AVError: Error, Equatable {
-    public var code: Int32
-    public var message: String
-
-    init(code: Int32) {
-        self.code = code
-        message = String(avErrorCode: code)
-    }
-}
-
-extension String {
-    init(avErrorCode code: Int32) {
-        let buf = UnsafeMutablePointer<Int8>.allocate(capacity: Int(AV_ERROR_MAX_STRING_SIZE))
-        buf.initialize(repeating: 0, count: Int(AV_ERROR_MAX_STRING_SIZE))
-        defer { buf.deallocate() }
-        self = String(cString: av_make_error_string(buf, Int(AV_ERROR_MAX_STRING_SIZE), code))
-    }
 }
 
 extension Array {

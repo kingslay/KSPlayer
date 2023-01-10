@@ -171,7 +171,7 @@ internal extension UIButton {
         contentHorizontalAlignment = .fill
         contentVerticalAlignment = .fill
     }
-    
+
     var titleFont: UIFont? {
         get {
             titleLabel?.font

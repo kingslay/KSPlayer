@@ -126,18 +126,16 @@ extension KSMEPlayer: MEPlayerDelegate {
     func sourceDidOpened() {
         isReadyToPlay = true
         options.readyTime = CACurrentMediaTime()
-        var channels = UInt32(1)
-        var sampleRate = Float64(0)
-        tracks(mediaType: .audio).forEach { track in
-            if let des = track.audioStreamBasicDescription {
-                sampleRate = max(des.mSampleRate, sampleRate)
-                channels = max(des.mChannelsPerFrame, channels)
-            }
+        let audioDescriptor = tracks(mediaType: .audio).compactMap {
+            $0 as? FFmpegAssetTrack
+        }.max { track1, track2 in
+            track1.audioDescriptor.inChannel.nb_channels >= track2.audioDescriptor.inChannel.nb_channels
+        }?.audioDescriptor
+        if let audioDescriptor {
+            options.sampleRate = Float64(audioDescriptor.inputSampleRate)
         }
-        options.channels = channels
-        options.sampleRate = sampleRate
         let fps = tracks(mediaType: .video).map(\.nominalFrameRate).max() ?? 24
-        audioOutput.prepare(options: options)
+        audioOutput.prepare(options: options, audioDescriptor: audioDescriptor)
         videoOutput?.prepare(fps: fps)
         runInMainqueue { [weak self] in
             guard let self else { return }
@@ -392,7 +390,14 @@ extension KSMEPlayer: MediaPlayerProtocol {
     }
 
     public func tracks(mediaType: AVFoundation.AVMediaType) -> [MediaPlayerTrack] {
-        playerItem.assetTracks.filter { $0.mediaType == mediaType }
+        playerItem.assetTracks.compactMap { track -> MediaPlayerTrack? in
+            if track.mediaType == mediaType {
+                return track
+            } else if mediaType == .subtitle {
+                return track.closedCaptionsTrack
+            }
+            return nil
+        }
     }
 
     public func select(track: MediaPlayerTrack) {
@@ -492,5 +497,5 @@ extension KSMEPlayer: AVPlaybackCoordinatorPlaybackControlDelegate {
 }
 
 public extension KSMEPlayer {
-    var subtitleDataSouce: SubtitleDataSouce? { playerItem }
+    var subtitleDataSouce: SubtitleDataSouce? { self }
 }

@@ -140,7 +140,7 @@ final class MEPlayerItem {
             if $0.mediaType == .subtitle, !$0.isImageSubtitle {
                 return
             }
-            $0.stream.pointee.discard = AVDISCARD_ALL
+            $0.isEnabled = false
         }
         track.setIsEnabled(true)
         if track.mediaType == .video, let assetTrack = track as? FFmpegAssetTrack {
@@ -200,7 +200,7 @@ extension MEPlayerItem {
             return
         }
         guard result == 0 else {
-            error = .init(errorCode: .formatOpenInput, ffmpegErrnum: result)
+            error = .init(errorCode: .formatOpenInput, avErrorCode: result)
             avformat_close_input(&self.formatCtx)
             return
         }
@@ -215,7 +215,7 @@ extension MEPlayerItem {
         }
         result = avformat_find_stream_info(formatCtx, nil)
         guard result == 0 else {
-            error = .init(errorCode: .formatFindStreamInfo, ffmpegErrnum: result)
+            error = .init(errorCode: .formatFindStreamInfo, avErrorCode: result)
             avformat_close_input(&self.formatCtx)
             return
         }
@@ -245,7 +245,7 @@ extension MEPlayerItem {
         let filename = url.isFileURL ? url.path : url.absoluteString
         var ret = avformat_alloc_output_context2(&outputFormatCtx, nil, nil, filename)
         guard let outputFormatCtx, let formatCtx else {
-            KSLog(NSError(errorCode: .formatOutputCreate, ffmpegErrnum: ret))
+            KSLog(NSError(errorCode: .formatOutputCreate, avErrorCode: ret))
             return
         }
         var index = 0
@@ -290,7 +290,7 @@ extension MEPlayerItem {
         avio_open(&(outputFormatCtx.pointee.pb), filename, AVIO_FLAG_WRITE)
         ret = avformat_write_header(outputFormatCtx, nil)
         guard ret >= 0 else {
-            KSLog(NSError(errorCode: .formatWriteHeader, ffmpegErrnum: ret))
+            KSLog(NSError(errorCode: .formatWriteHeader, avErrorCode: ret))
             avformat_close_input(&self.outputFormatCtx)
             return
         }
@@ -322,7 +322,7 @@ extension MEPlayerItem {
             return nil
         }
         if options.autoSelectEmbedSubtitle {
-            assetTracks.first { $0.mediaType == .subtitle }?.setIsEnabled(true)
+            assetTracks.first { $0.mediaType == .subtitle }?.isEnabled = true
         }
         var videoIndex: Int32 = -1
         if !options.videoDisable {
@@ -336,7 +336,7 @@ extension MEPlayerItem {
             }
             videoIndex = av_find_best_stream(formatCtx, AVMEDIA_TYPE_VIDEO, wantedStreamNb, -1, nil, 0)
             if let first = videos.first(where: { $0.trackID == videoIndex }) {
-                first.stream.pointee.discard = AVDISCARD_DEFAULT
+                first.isEnabled = true
                 rotation = first.rotation
                 naturalSize = first.naturalSize
                 let track = options.syncDecodeVideo ? SyncPlayerItemTrack<VideoVTBFrame>(assetTrack: first, options: options) : AsyncPlayerItemTrack<VideoVTBFrame>(assetTrack: first, options: options)
@@ -359,7 +359,7 @@ extension MEPlayerItem {
         }
         let index = av_find_best_stream(formatCtx, AVMEDIA_TYPE_AUDIO, wantedStreamNb, videoIndex, nil, 0)
         if let first = assetTracks.first(where: { $0.mediaType == .audio && $0.trackID == index }) {
-            first.stream.pointee.discard = AVDISCARD_DEFAULT
+            first.isEnabled = true
             let track = options.syncDecodeAudio ? SyncPlayerItemTrack<AudioFrame>(assetTrack: first, options: options) : AsyncPlayerItemTrack<AudioFrame>(assetTrack: first, options: options)
             track.delegate = self
             allPlayerItemTracks.append(track)
@@ -487,7 +487,7 @@ extension MEPlayerItem {
                 }
             } else {
                 //                        if IS_AVERROR_INVALIDDATA(readResult)
-                error = .init(errorCode: .readFrame, ffmpegErrnum: readResult)
+                error = .init(errorCode: .readFrame, avErrorCode: readResult)
             }
         }
     }

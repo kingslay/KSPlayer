@@ -175,59 +175,6 @@ extension BinaryInteger {
     }
 }
 
-extension OSType {
-    func planeCount() -> UInt8 {
-        switch self {
-        case
-            kCVPixelFormatType_48RGB,
-            kCVPixelFormatType_32ABGR,
-            kCVPixelFormatType_32ARGB,
-            kCVPixelFormatType_32BGRA,
-            kCVPixelFormatType_32RGBA,
-            kCVPixelFormatType_24BGR,
-            kCVPixelFormatType_24RGB,
-            kCVPixelFormatType_16BE555,
-            kCVPixelFormatType_16LE555,
-            kCVPixelFormatType_16BE565,
-            kCVPixelFormatType_16LE565,
-            kCVPixelFormatType_16BE555,
-            kCVPixelFormatType_OneComponent8,
-            kCVPixelFormatType_1Monochrome:
-            return 1
-        case
-            kCVPixelFormatType_444YpCbCr8,
-            kCVPixelFormatType_4444YpCbCrA8R,
-            kCVPixelFormatType_444YpCbCr10,
-            kCVPixelFormatType_4444AYpCbCr16,
-            kCVPixelFormatType_422YpCbCr8,
-            kCVPixelFormatType_422YpCbCr8_yuvs,
-            kCVPixelFormatType_422YpCbCr10,
-            kCVPixelFormatType_422YpCbCr16,
-            kCVPixelFormatType_420YpCbCr8Planar,
-            kCVPixelFormatType_420YpCbCr8PlanarFullRange:
-            return 3
-        default: return 2
-        }
-    }
-}
-
-extension CVPixelBufferPool {
-    static func ceate(width: Int32, height: Int32, bytesPerRowAlignment: Int32, pixelFormatType: OSType, bufferCount: Int = 24) -> CVPixelBufferPool? {
-        let sourcePixelBufferOptions: NSMutableDictionary = [
-            kCVPixelBufferPixelFormatTypeKey: pixelFormatType,
-            kCVPixelBufferWidthKey: width,
-            kCVPixelBufferHeightKey: height,
-            kCVPixelBufferBytesPerRowAlignmentKey: bytesPerRowAlignment.alignment(value: 64),
-            kCVPixelBufferMetalCompatibilityKey: true,
-//            kCVPixelBufferIOSurfacePropertiesKey: NSDictionary()
-        ]
-        var outputPool: CVPixelBufferPool?
-        let pixelBufferPoolOptions: NSDictionary = [kCVPixelBufferPoolMinimumBufferCountKey: bufferCount]
-        CVPixelBufferPoolCreate(kCFAllocatorDefault, pixelBufferPoolOptions, sourcePixelBufferOptions, &outputPool)
-        return outputPool
-    }
-}
-
 typealias SwrContext = OpaquePointer
 
 class AudioSwresample: Swresample {
@@ -236,8 +183,8 @@ class AudioSwresample: Swresample {
     private var outChannel: AVChannelLayout
     private let outSampleFmt = KSOptions.isAudioPlanar ? AV_SAMPLE_FMT_FLTP : AV_SAMPLE_FMT_FLT
     private let outSampleRate: UInt32
-    init(codecpar: AVCodecParameters, outChannel: AVChannelLayout, outSampleRate: UInt32) {
-        descriptor = AudioDescriptor(codecpar: codecpar)
+    init(audioDescriptor: AudioDescriptor, outChannel: AVChannelLayout, outSampleRate: UInt32) {
+        descriptor = audioDescriptor
         self.outSampleRate = outSampleRate
         self.outChannel = outChannel
         KSLog("out channelLayout: \(outChannel)")
@@ -279,90 +226,10 @@ class AudioSwresample: Swresample {
     }
 }
 
-extension AVAudioChannelLayout {
-    func channelLayout(channelCount: AVAudioChannelCount) -> AVChannelLayout {
-        let mutableLayout = UnsafeMutablePointer(mutating: layout)
-        KSLog("KSOptions channelLayout: \(mutableLayout.pointee)")
-        let tag = mutableLayout.pointee.mChannelLayoutTag
-        let n = mutableLayout.pointee.mNumberChannelDescriptions
-        switch tag {
-        case kAudioChannelLayoutTag_Mono: return .init(nb: 1, mask: swift_AV_CH_LAYOUT_MONO)
-        case kAudioChannelLayoutTag_Stereo: return .init(nb: 2, mask: swift_AV_CH_LAYOUT_STEREO)
-        case kAudioChannelLayoutTag_AAC_Quadraphonic: return .init(nb: 4, mask: swift_AV_CH_LAYOUT_QUAD)
-        case kAudioChannelLayoutTag_AAC_Octagonal: return .init(nb: 8, mask: swift_AV_CH_LAYOUT_OCTAGONAL)
-        case kAudioChannelLayoutTag_AAC_3_0: return .init(nb: 3, mask: swift_AV_CH_LAYOUT_SURROUND)
-        case kAudioChannelLayoutTag_AAC_4_0: return .init(nb: 4, mask: swift_AV_CH_LAYOUT_4POINT0)
-        case kAudioChannelLayoutTag_AAC_5_0: return .init(nb: 5, mask: swift_AV_CH_LAYOUT_5POINT0)
-        case kAudioChannelLayoutTag_AAC_5_1: return .init(nb: 6, mask: swift_AV_CH_LAYOUT_5POINT1)
-        case kAudioChannelLayoutTag_AAC_6_0: return .init(nb: 6, mask: swift_AV_CH_LAYOUT_6POINT0)
-        case kAudioChannelLayoutTag_AAC_6_1: return .init(nb: 7, mask: swift_AV_CH_LAYOUT_6POINT1)
-        case kAudioChannelLayoutTag_AAC_7_0: return .init(nb: 7, mask: swift_AV_CH_LAYOUT_7POINT0)
-        case kAudioChannelLayoutTag_AAC_7_1: return .init(nb: 8, mask: swift_AV_CH_LAYOUT_7POINT1_WIDE_BACK)
-        case kAudioChannelLayoutTag_MPEG_7_1_C: return .init(nb: 8, mask: swift_AV_CH_LAYOUT_7POINT1)
-        case kAudioChannelLayoutTag_UseChannelDescriptions:
-            let buffers = UnsafeBufferPointer<AudioChannelDescription>(start: &mutableLayout.pointee.mChannelDescriptions, count: Int(n))
-            var mask = UInt64(0)
-            for i in 0 ..< Int(n) {
-                let label = buffers[i].mChannelLabel
-                KSLog("KSOptions channelLayout label: \(label)")
-                let channel = label.avChannel.rawValue
-                KSLog("KSOptions channelLayout avChannel: \(channel)")
-                if channel >= 0 {
-                    mask |= 1 << channel
-                }
-            }
-            var outChannel = AVChannelLayout()
-            // 不能用AV_CHANNEL_ORDER_CUSTOM
-            av_channel_layout_from_mask(&outChannel, mask)
-            KSLog("out channelLayout mask: \(mask)")
-            return outChannel
-        default:
-            var outChannel = AVChannelLayout()
-            av_channel_layout_default(&outChannel, Int32(channelCount))
-            return outChannel
-        }
-    }
-}
-
-// swiftlint:disable identifier_name
-extension AVChannelLayout {
-    init(nb: Int32, mask: UInt64) {
-        self.init(order: AV_CHANNEL_ORDER_NATIVE, nb_channels: nb, u: AVChannelLayout.__Unnamed_union_u(mask: mask), opaque: nil)
-    }
-}
-
-// swiftlint:enable identifier_name
-
-extension AudioChannelLabel {
-    var avChannel: AVChannel {
-        if self == 0 {
-            return AV_CHAN_NONE
-        } else if self <= kAudioChannelLabel_TopBackRight {
-            return AVChannel(Int32(self) - 1)
-        } else if self == kAudioChannelLabel_RearSurroundLeft || self == kAudioChannelLabel_RearSurroundRight {
-            return AVChannel(Int32(self))
-        } else if self == kAudioChannelLabel_LeftWide {
-            return AV_CHAN_WIDE_LEFT
-        } else if self == kAudioChannelLabel_RightWide {
-            return AV_CHAN_WIDE_RIGHT
-        } else if self == kAudioChannelLabel_LFE2 {
-            return AV_CHAN_LOW_FREQUENCY_2
-        } else if self == kAudioChannelLabel_Mono {
-            return AV_CHAN_FRONT_CENTER
-        } else if self == kAudioChannelLabel_HeadphonesLeft {
-            return AV_CHAN_STEREO_LEFT
-        } else if self == kAudioChannelLabel_HeadphonesRight {
-            return AV_CHAN_STEREO_RIGHT
-        } else {
-            return AV_CHAN_NONE
-        }
-    }
-}
-
-private class AudioDescriptor: Equatable {
-    fileprivate let inputSampleRate: Int32
+class AudioDescriptor: Equatable {
+    let inputSampleRate: Int32
     fileprivate let inputFormat: AVSampleFormat
-    fileprivate var inChannel: AVChannelLayout
+    var inChannel: AVChannelLayout
     init(codecpar: AVCodecParameters) {
         inChannel = codecpar.ch_layout
         let sampleRate = codecpar.sample_rate
@@ -383,5 +250,15 @@ private class AudioDescriptor: Equatable {
 
     static func == (lhs: AudioDescriptor, rhs: AVFrame) -> Bool {
         lhs.inputFormat.rawValue == rhs.format && lhs.inputSampleRate == rhs.sample_rate && lhs.inChannel == rhs.ch_layout
+    }
+
+    func audioChannelLayout(channels: Int) -> AVAudioChannelLayout {
+        var outChannel = inChannel
+        if channels != inChannel.nb_channels {
+            outChannel = AVChannelLayout()
+            av_channel_layout_default(&outChannel, Int32(channels))
+        }
+        return AVAudioChannelLayout(layoutTag: outChannel.layoutTag)!
+//        return AVAudioChannelLayout(layout: outChannel.layoutTag.channelLayout)
     }
 }
