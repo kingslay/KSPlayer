@@ -18,7 +18,7 @@ protocol AudioPlayer: AnyObject {
     var threshold: Float { get set }
     var expansionRatio: Float { get set }
     var overallGain: Float { get set }
-    func prepare(options: KSOptions)
+    func prepare(options: KSOptions, audioDescriptor: AudioDescriptor?)
     func play(time: TimeInterval)
     func pause()
 }
@@ -133,53 +133,23 @@ public final class AudioEnginePlayer: AudioPlayer, FrameOutput {
         }
     }
 
-    func prepare(options: KSOptions) {
+    func prepare(options: KSOptions, audioDescriptor: AudioDescriptor?) {
         engine.stop()
         engine.reset()
         #if os(macOS)
-        let channels = 2
-//        if let audioUnit = engine.outputNode.audioUnit {
-//            options.channelLayout = AVAudioChannelLayout(layout: audioUnit.channelLayout)
-//        }
+
         #else
-        let channels = max(min(AVAudioSession.sharedInstance().maximumOutputNumberOfChannels, Int(options.channels)), 2)
+        let channels = max(min(AVAudioSession.sharedInstance().maximumOutputNumberOfChannels, Int(audioDescriptor?.inChannel.nb_channels ?? 2)), 2)
         KSOptions.setAudioSession()
-        try? AVAudioSession.sharedInstance().setPreferredOutputNumberOfChannels(channels)
-//        if AVAudioSession.sharedInstance().outputNumberOfChannels > 2, let audioUnit = engine.outputNode.audioUnit {
-//            options.channelLayout = AVAudioChannelLayout(layout: audioUnit.channelLayout)
-//        }
+        try? AVAudioSession.sharedInstance().setPreferredOutputNumberOfChannels(Int(channels))
+        if let audioDescriptor {
+            options.channelLayout = audioDescriptor.audioChannelLayout(channels: channels)
+        }
         #endif
-        var audioStreamBasicDescription = AudioStreamBasicDescription()
-        let floatByteSize = UInt32(MemoryLayout<Float>.size)
-        audioStreamBasicDescription.mBitsPerChannel = 8 * floatByteSize
-        audioStreamBasicDescription.mChannelsPerFrame = UInt32(channels)
-        audioStreamBasicDescription.mBytesPerFrame = floatByteSize * (KSOptions.isAudioPlanar ? 1 : audioStreamBasicDescription.mChannelsPerFrame)
-        audioStreamBasicDescription.mFormatFlags = kAudioFormatFlagIsPacked | kAudioFormatFlagIsFloat
-        if KSOptions.isAudioPlanar {
-            audioStreamBasicDescription.mFormatFlags |= kAudioFormatFlagIsNonInterleaved
-        }
-        audioStreamBasicDescription.mFormatID = kAudioFormatLinearPCM
-        audioStreamBasicDescription.mFramesPerPacket = 1
-        audioStreamBasicDescription.mBytesPerPacket = audioStreamBasicDescription.mFramesPerPacket * audioStreamBasicDescription.mBytesPerFrame
-        audioStreamBasicDescription.mSampleRate = options.sampleRate
-        var desc: CMAudioFormatDescription?
-        CMAudioFormatDescriptionCreate(allocator: kCFAllocatorDefault, asbd: &audioStreamBasicDescription, layoutSize: 0, layout: nil, magicCookieSize: 0, magicCookie: nil, extensions: nil, formatDescriptionOut: &desc)
-        if let tag = desc?.audioFormatList.first?.mChannelLayoutTag, let layout = AVAudioChannelLayout(layoutTag: tag) {
-            options.channelLayout = layout
-            KSLog("audioStreamBasicDescription channelLayout tag: \(layout.layoutTag)")
-            KSLog("audioStreamBasicDescription channelLayout channelDescriptions: \(layout.layout.channelDescriptions)")
-        }
-        var format = engine.outputNode.outputFormat(forBus: 0)
+        let format = AVAudioFormat(commonFormat: .pcmFormatFloat32, sampleRate: options.sampleRate, interleaved: !KSOptions.isAudioPlanar, channelLayout: options.channelLayout)
         if let channelLayout = format.channelLayout {
             KSLog("outputFormat channelLayout tag: \(channelLayout.layoutTag)")
             KSLog("outputFormat channelLayout channelDescriptions: \(channelLayout.layout.channelDescriptions)")
-        }
-        var settings = format.settings
-        settings[AVSampleRateKey] = options.sampleRate
-        settings[AVLinearPCMIsNonInterleaved] = KSOptions.isAudioPlanar
-        settings[AVChannelLayoutKey] = NSData(bytes: options.channelLayout.layout, length: MemoryLayout<AudioChannelLayout>.size)
-        if let newFormat = AVAudioFormat(settings: settings) {
-            format = newFormat
         }
         //        engine.attach(nbandEQ)
         //        engine.attach(distortion)

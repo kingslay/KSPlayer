@@ -226,15 +226,8 @@ class AudioSwresample: Swresample {
     }
 }
 
-// swiftlint:disable identifier_name
-extension AVChannelLayout {
-    init(nb: Int32, mask: UInt64) {
-        self.init(order: AV_CHANNEL_ORDER_NATIVE, nb_channels: nb, u: AVChannelLayout.__Unnamed_union_u(mask: mask), opaque: nil)
-    }
-}
-
 class AudioDescriptor: Equatable {
-    fileprivate let inputSampleRate: Int32
+    let inputSampleRate: Int32
     fileprivate let inputFormat: AVSampleFormat
     var inChannel: AVChannelLayout
     init(codecpar: AVCodecParameters) {
@@ -257,5 +250,15 @@ class AudioDescriptor: Equatable {
 
     static func == (lhs: AudioDescriptor, rhs: AVFrame) -> Bool {
         lhs.inputFormat.rawValue == rhs.format && lhs.inputSampleRate == rhs.sample_rate && lhs.inChannel == rhs.ch_layout
+    }
+
+    func audioChannelLayout(channels: Int) -> AVAudioChannelLayout {
+        var outChannel = inChannel
+        if channels != inChannel.nb_channels {
+            outChannel = AVChannelLayout()
+            av_channel_layout_default(&outChannel, Int32(channels))
+        }
+        return AVAudioChannelLayout(layoutTag: outChannel.layoutTag)!
+//        return AVAudioChannelLayout(layout: outChannel.layoutTag.channelLayout)
     }
 }
