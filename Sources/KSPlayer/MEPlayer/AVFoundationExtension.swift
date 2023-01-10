@@ -164,22 +164,15 @@ extension AVAudioChannelLayout {
 
 // swiftlint:enable identifier_name
 // Some channel abbreviations used below:
-// Ts - top surround
-// Ltm - left top middle
-// Rtm - right top middle
 // Lss - left side surround
 // Rss - right side surround
-// Lb - left bottom
-// Rb - Right bottom
-// Cb - Center bottom
-// Lts - Left top surround
-// Rts - Right top surround
 // Leos - Left edge of screen
 // Reos - Right edge of screen
 // Lbs - Left back surround
 // Rbs - Right back surround
 // Lt - left matrix total. for matrix encoded stereo.
 // Rt - right matrix total. for matrix encoded stereo.
+
 extension AudioChannelLabel {
     var avChannel: AVChannel {
         switch self {
@@ -217,7 +210,7 @@ extension AudioChannelLabel {
             // Rsd - right surround direct
             return AV_CHAN_SURROUND_DIRECT_RIGHT
         case kAudioChannelLabel_TopCenterSurround:
-            // TS
+            // Ts - top surround
             return AV_CHAN_TOP_CENTER
         case kAudioChannelLabel_VerticalHeightLeft:
             // Vhl - vertical height left Top Front Left
@@ -255,6 +248,27 @@ extension AudioChannelLabel {
         case kAudioChannelLabel_Mono:
             // C - center
             return AV_CHAN_FRONT_CENTER
+        case kAudioChannelLabel_LeftTopMiddle:
+            // Ltm - left top middle
+            return AV_CHAN_NONE
+        case kAudioChannelLabel_RightTopMiddle:
+            // Rtm - right top middle
+            return AV_CHAN_NONE
+        case kAudioChannelLabel_LeftTopSurround:
+            // Lts - Left top surround
+            return AV_CHAN_TOP_SIDE_LEFT
+        case kAudioChannelLabel_RightTopSurround:
+            // Rts - Right top surround
+            return AV_CHAN_TOP_SIDE_RIGHT
+        case kAudioChannelLabel_LeftBottom:
+            // Lb - left bottom
+            return AV_CHAN_BOTTOM_FRONT_LEFT
+        case kAudioChannelLabel_RightBottom:
+            // Rb - Right bottom
+            return AV_CHAN_BOTTOM_FRONT_RIGHT
+        case kAudioChannelLabel_CenterBottom:
+            // Cb - Center bottom
+            return AV_CHAN_BOTTOM_FRONT_CENTER
         case kAudioChannelLabel_HeadphonesLeft:
             return AV_CHAN_STEREO_LEFT
         case kAudioChannelLabel_HeadphonesRight:
