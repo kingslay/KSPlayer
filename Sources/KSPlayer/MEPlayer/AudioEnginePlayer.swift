@@ -161,7 +161,7 @@ public final class AudioEnginePlayer: AudioPlayer, FrameOutput {
         engine.attach(sourceNode)
         engine.attach(dynamicsProcessor)
         engine.attach(playback)
-        engine.connect(nodes: [sourceNode, dynamicsProcessor, playback, engine.mainMixerNode, engine.outputNode], format: nil)
+        engine.connect(nodes: [sourceNode, dynamicsProcessor, playback, engine.mainMixerNode, engine.outputNode], format: format)
         if let audioUnit = engine.outputNode.audioUnit {
             addRenderNotify(audioUnit: audioUnit)
         }
