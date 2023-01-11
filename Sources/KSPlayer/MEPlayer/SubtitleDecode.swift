@@ -47,7 +47,7 @@ class SubtitleDecode: DecodeProtocol {
         var end = start
         if packet.duration > 0 {
             end += packet.assetTrack.timebase.cmtime(for: packet.duration).seconds
-        } else if (subtitle.end_display_time - subtitle.start_display_time) < 10000 {
+        } else {
             end += TimeInterval(subtitle.end_display_time) / 1000.0
         }
         let part = SubtitlePart(start, end, attributedString: attributedString)
