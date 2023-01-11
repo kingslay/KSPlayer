@@ -162,6 +162,73 @@ extension AVAudioChannelLayout {
     }
 }
 
+extension AVAudioFormat {
+    var sampleFormat: AVSampleFormat {
+        switch commonFormat {
+        case .pcmFormatFloat32:
+            return isInterleaved ? AV_SAMPLE_FMT_FLT : AV_SAMPLE_FMT_FLTP
+        case .pcmFormatFloat64:
+            return isInterleaved ? AV_SAMPLE_FMT_DBL : AV_SAMPLE_FMT_DBLP
+        case .pcmFormatInt16:
+            return isInterleaved ? AV_SAMPLE_FMT_S16 : AV_SAMPLE_FMT_S16P
+        case .pcmFormatInt32:
+            return isInterleaved ? AV_SAMPLE_FMT_S32 : AV_SAMPLE_FMT_S32P
+        case .otherFormat:
+            return isInterleaved ? AV_SAMPLE_FMT_FLT : AV_SAMPLE_FMT_FLTP
+        @unknown default:
+            return isInterleaved ? AV_SAMPLE_FMT_FLT : AV_SAMPLE_FMT_FLTP
+        }
+    }
+
+    var sampleSize: UInt32 {
+        UInt32(av_get_bytes_per_sample(sampleFormat))
+    }
+
+    func toPCMBuffer(frame: AudioFrame) -> AVAudioPCMBuffer? {
+        guard let pcmBuffer = AVAudioPCMBuffer(pcmFormat: self, frameCapacity: UInt32(frame.dataSize) / streamDescription.pointee.mBytesPerFrame) else {
+            return nil
+        }
+        pcmBuffer.frameLength = pcmBuffer.frameCapacity
+        for i in 0 ..< min(Int(pcmBuffer.format.channelCount), frame.data.count) {
+            frame.data[i]?.withMemoryRebound(to: Float.self, capacity: Int(pcmBuffer.frameCapacity)) { srcFloatsForChannel in
+                pcmBuffer.floatChannelData?[i].assign(from: srcFloatsForChannel, count: Int(pcmBuffer.frameCapacity))
+            }
+        }
+        return pcmBuffer
+    }
+}
+
+let layoutMapTuple =
+    [(tag: kAudioChannelLayoutTag_Mono, mask: swift_AV_CH_LAYOUT_MONO),
+     (tag: kAudioChannelLayoutTag_Stereo, mask: swift_AV_CH_LAYOUT_STEREO),
+     (tag: kAudioChannelLayoutTag_MPEG_3_0_A, mask: swift_AV_CH_LAYOUT_SURROUND),
+     (tag: kAudioChannelLayoutTag_Logic_4_0_A, mask: swift_AV_CH_LAYOUT_4POINT0),
+     (tag: kAudioChannelLayoutTag_Logic_Quadraphonic, mask: swift_AV_CH_LAYOUT_2_2),
+     (tag: kAudioChannelLayoutTag_Logic_5_0_A, mask: swift_AV_CH_LAYOUT_5POINT0),
+     (tag: kAudioChannelLayoutTag_Logic_5_1_A, mask: swift_AV_CH_LAYOUT_5POINT1),
+     (tag: kAudioChannelLayoutTag_Logic_6_0_A, mask: swift_AV_CH_LAYOUT_6POINT0),
+     (tag: kAudioChannelLayoutTag_Logic_6_1_C, mask: swift_AV_CH_LAYOUT_6POINT1),
+     (tag: kAudioChannelLayoutTag_AAC_7_0, mask: swift_AV_CH_LAYOUT_7POINT0),
+     (tag: kAudioChannelLayoutTag_Logic_7_1_A, mask: swift_AV_CH_LAYOUT_7POINT1),
+     (tag: kAudioChannelLayoutTag_Logic_7_1_SDDS_A, mask: swift_AV_CH_LAYOUT_7POINT1_WIDE),
+     (tag: kAudioChannelLayoutTag_AAC_Octagonal, mask: swift_AV_CH_LAYOUT_OCTAGONAL),
+     //     (tag: kAudioChannelLayoutTag_Logic_Atmos_5_1_2, mask: swift_AV_CH_LAYOUT_7POINT1_WIDE_BACK),
+    ]
+// let pcmFormatMapTuple: [(AVAudioCommonFormat, AVSampleFormat)] =
+// [ (format: pcmFormatFloat32, sampleFormat: AV_SAMPLE_FMT_S32),
+//  AV_SAMPLE_FMT_S16,         ///< signed 16 bits
+//  AV_SAMPLE_FMT_S32,         ///< signed 32 bits
+//   pcmFormatFloat64
+//
+//   pcmFormatInt16
+//
+//   pcmFormatInt32
+//
+//  ///< float
+//  public var AV_SAMPLE_FMT_FLT: AVSampleFormat { get }
+//  ///< double
+//  public var AV_SAMPLE_FMT_DBL: AVSampleFormat { get }
+
 // swiftlint:enable identifier_name
 // Some channel abbreviations used below:
 // Lss - left side surround

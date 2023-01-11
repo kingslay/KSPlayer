@@ -803,7 +803,6 @@ extension KSVideoPlayer: UIViewRepresentable {
                 let playerLayer = KSPlayerLayer(url: url, options: options)
                 playerLayer.delegate = self
                 self.playerLayer = playerLayer
-                isPlay = options.isAutoPlay
                 return playerLayer
             }
         }
@@ -824,7 +823,9 @@ extension KSVideoPlayer: UIViewRepresentable {
 
 extension KSVideoPlayer.Coordinator: KSPlayerLayerDelegate {
     public func player(layer: KSPlayerLayer, state: KSPlayerState) {
-        if state == .readyToPlay {
+        if state == .prepareToPlay {
+            isPlay = layer.options.isAutoPlay
+        } else if state == .readyToPlay {
             videoTracks = layer.player.tracks(mediaType: .video)
             audioTracks = layer.player.tracks(mediaType: .audio)
         } else {

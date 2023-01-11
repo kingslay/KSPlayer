@@ -51,6 +51,7 @@ public class AudioRendererPlayer: AudioPlayer, FrameOutput {
     private var desc: CMAudioFormatDescription?
     private let synchronizer = AVSampleBufferRenderSynchronizer()
     private let serializationQueue = DispatchQueue(label: "ks.player.serialization.queue")
+    private var sampleSize = UInt32(MemoryLayout<Float>.size)
     var isPaused: Bool {
         synchronizer.rate == 0
     }
@@ -62,8 +63,8 @@ public class AudioRendererPlayer: AudioPlayer, FrameOutput {
 //        }
     }
 
-    func prepare(options: KSOptions, audioDescriptor: AudioDescriptor?) {
-        var channels = max(AVAudioChannelCount(audioDescriptor?.inChannel.nb_channels ?? 2), 2)
+    func prepare(options: KSOptions, audioDescriptor: AudioDescriptor) {
+        var channels = max(audioDescriptor.channels, 2)
         #if os(macOS)
         channels = 2
         #else
@@ -80,13 +81,11 @@ public class AudioRendererPlayer: AudioPlayer, FrameOutput {
             }
         }
         try? AVAudioSession.sharedInstance().setPreferredOutputNumberOfChannels(Int(channels))
-        if let audioDescriptor {
-            options.channelLayout = audioDescriptor.audioChannelLayout(channels: Int(channels))
-        }
         #endif
         renderer.audioTimePitchAlgorithm = channels > 2 ? .spectral : .timeDomain
-        let format = AVAudioFormat(commonFormat: .pcmFormatFloat32, sampleRate: options.sampleRate, interleaved: !KSOptions.isAudioPlanar, channelLayout: options.channelLayout)
-        desc = format.formatDescription
+        options.audioFormat = audioDescriptor.audioFormat(channels: channels)
+        sampleSize = options.audioFormat.sampleSize
+        desc = options.audioFormat.formatDescription
     }
 
     func play(time: TimeInterval) {
@@ -136,7 +135,7 @@ public class AudioRendererPlayer: AudioPlayer, FrameOutput {
             let n = render.data.count
             for i in 0 ..< n {
                 var outBlockBuffer: CMBlockBuffer?
-                let dataByteSize = Int(render.numberOfSamples * UInt32(MemoryLayout<Float>.size) * render.channels) / n
+                let dataByteSize = Int(render.numberOfSamples * sampleSize * render.channels) / n
                 if dataByteSize > render.dataSize {
                     assertionFailure("dataByteSize: \(dataByteSize),render.dataSize: \(render.dataSize)")
                 }

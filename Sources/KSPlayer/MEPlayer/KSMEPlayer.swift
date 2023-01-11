@@ -129,11 +129,8 @@ extension KSMEPlayer: MEPlayerDelegate {
         let audioDescriptor = tracks(mediaType: .audio).compactMap {
             $0 as? FFmpegAssetTrack
         }.max { track1, track2 in
-            track1.audioDescriptor.inChannel.nb_channels >= track2.audioDescriptor.inChannel.nb_channels
-        }?.audioDescriptor
-        if let audioDescriptor {
-            options.sampleRate = Float64(audioDescriptor.inputSampleRate)
-        }
+            track1.audioDescriptor.channels < track2.audioDescriptor.channels
+        }?.audioDescriptor ?? .defaultValue
         let fps = tracks(mediaType: .video).map(\.nominalFrameRate).max() ?? 24
         audioOutput.prepare(options: options, audioDescriptor: audioDescriptor)
         videoOutput?.prepare(fps: fps)

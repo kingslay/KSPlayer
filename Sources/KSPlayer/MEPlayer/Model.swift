@@ -88,7 +88,6 @@ public extension KSOptions {
     static var isClearVideoWhereReplace = true
     /// true: AVSampleBufferAudioRenderer false: AVAudioEngine
     static var isUseAudioRenderer = false
-    static var isAudioPlanar = !isUseAudioRenderer
     static func colorSpace(ycbcrMatrix: CFString?, transferFunction: CFString?) -> CGColorSpace? {
         switch ycbcrMatrix {
         case kCVImageBufferYCbCrMatrix_ITU_R_709_2:
@@ -195,9 +194,8 @@ final class AudioFrame: MEFrame {
     let channels: UInt32
     let dataSize: Int
     var data: [UnsafeMutablePointer<UInt8>?]
-    public init(bufferSize: Int32, channels: UInt32) {
+    public init(bufferSize: Int32, channels: UInt32, count: Int) {
         self.channels = channels
-        let count = Int(KSOptions.isAudioPlanar ? channels : 1)
         dataSize = Int(bufferSize)
         data = (0 ..< count).map { _ in
             UnsafeMutablePointer<UInt8>.allocate(capacity: Int(bufferSize))

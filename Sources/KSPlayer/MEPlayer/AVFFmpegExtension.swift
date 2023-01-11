@@ -376,10 +376,7 @@ extension AVBufferSrcParameters: Equatable {
     var arg: String {
         if sample_rate > 0 {
             let fmt = String(cString: av_get_sample_fmt_name(AVSampleFormat(rawValue: format)))
-            var str = [Int8](repeating: 0, count: 64)
-            var chLayout = ch_layout
-            _ = av_channel_layout_describe(&chLayout, &str, str.count)
-            return "sample_rate=\(sample_rate):sample_fmt=\(fmt):time_base=\(time_base.num)/\(time_base.den):channels=\(ch_layout.nb_channels):channel_layout=\(String(cString: str))"
+            return "sample_rate=\(sample_rate):sample_fmt=\(fmt):time_base=\(time_base.num)/\(time_base.den):channels=\(ch_layout.nb_channels):channel_layout=\(ch_layout.description)"
         } else {
             return "video_size=\(width)x\(height):pix_fmt=\(format):time_base=\(time_base.num)/\(time_base.den):pixel_aspect=\(sample_aspect_ratio.num)/\(sample_aspect_ratio.den)"
         }
@@ -394,23 +391,8 @@ extension AVChannelLayout: Equatable {
     }
 }
 
-let layoutMapTuple =
-    [(tag: kAudioChannelLayoutTag_Mono, mask: swift_AV_CH_LAYOUT_MONO),
-     (tag: kAudioChannelLayoutTag_Stereo, mask: swift_AV_CH_LAYOUT_STEREO),
-     (tag: kAudioChannelLayoutTag_MPEG_3_0_A, mask: swift_AV_CH_LAYOUT_SURROUND),
-     (tag: kAudioChannelLayoutTag_Logic_4_0_A, mask: swift_AV_CH_LAYOUT_4POINT0),
-     (tag: kAudioChannelLayoutTag_Logic_Quadraphonic, mask: swift_AV_CH_LAYOUT_2_2),
-     (tag: kAudioChannelLayoutTag_Logic_5_0_A, mask: swift_AV_CH_LAYOUT_5POINT0),
-     (tag: kAudioChannelLayoutTag_Logic_5_1_A, mask: swift_AV_CH_LAYOUT_5POINT1),
-     (tag: kAudioChannelLayoutTag_Logic_6_0_A, mask: swift_AV_CH_LAYOUT_6POINT0),
-     (tag: kAudioChannelLayoutTag_Logic_6_1_C, mask: swift_AV_CH_LAYOUT_6POINT1),
-     (tag: kAudioChannelLayoutTag_AAC_7_0, mask: swift_AV_CH_LAYOUT_7POINT0),
-     (tag: kAudioChannelLayoutTag_Logic_7_1_A, mask: swift_AV_CH_LAYOUT_7POINT1),
-     (tag: kAudioChannelLayoutTag_Logic_7_1_SDDS_A, mask: swift_AV_CH_LAYOUT_7POINT1_WIDE),
-     (tag: kAudioChannelLayoutTag_AAC_Octagonal, mask: swift_AV_CH_LAYOUT_OCTAGONAL),
-//     (tag: kAudioChannelLayoutTag_Logic_Atmos_5_1_2, mask: swift_AV_CH_LAYOUT_7POINT1_WIDE_BACK),
-    ]
-extension AVChannelLayout {
+extension AVChannelLayout: CustomStringConvertible {
+    static let defaultValue = AVChannelLayout(order: AV_CHANNEL_ORDER_NATIVE, nb_channels: 2, u: AVChannelLayout.__Unnamed_union_u(mask: swift_AV_CH_LAYOUT_STEREO), opaque: nil)
     var layoutTag: AudioChannelLayoutTag {
         KSLog("FFmepg channelLayout: \(self)")
         let tag = layoutMapTuple.first { _, mask in
@@ -422,6 +404,13 @@ extension AVChannelLayout {
             assertionFailure("can not find AudioChannelLayoutTag for \(self)")
             return kAudioChannelLayoutTag_Stereo
         }
+    }
+
+    public var description: String {
+        var channelLayout = self
+        var str = [Int8](repeating: 0, count: 64)
+        _ = av_channel_layout_describe(&channelLayout, &str, str.count)
+        return String(cString: str)
     }
 }
 
