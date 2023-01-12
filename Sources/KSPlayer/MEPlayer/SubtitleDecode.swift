@@ -44,26 +44,24 @@ class SubtitleDecode: DecodeProtocol {
         let (origin, attributedString, image) = text(subtitle: subtitle)
         let position = packet.position
         let start = packet.assetTrack.timebase.cmtime(for: position).seconds + TimeInterval(subtitle.start_display_time) / 1000.0
-        var end = start
-        if packet.duration > 0 {
-            end += packet.assetTrack.timebase.cmtime(for: packet.duration).seconds
-        } else {
-            end += TimeInterval(subtitle.end_display_time) / 1000.0
+        var duration = TimeInterval(subtitle.end_display_time - subtitle.start_display_time) / 1000.0
+        if duration == 0 {
+            duration = packet.assetTrack.timebase.cmtime(for: packet.duration).seconds
         }
-        let part = SubtitlePart(start, end, attributedString: attributedString)
+        let part = SubtitlePart(start, start + duration, attributedString: attributedString)
         part.image = image
         part.origin = origin
         let frame = SubtitleFrame(part: part, timebase: packet.assetTrack.timebase)
         frame.position = position
-        if let preSubtitleFrame, preSubtitleFrame.part.end == Double(UInt32.max) {
-            preSubtitleFrame.part.end = frame.part.start
-        }
         if let preSubtitleFrame, preSubtitleFrame.part == part {
             if let attributedString {
                 preSubtitleFrame.part.text?.append(NSAttributedString(string: "\n"))
                 preSubtitleFrame.part.text?.append(attributedString)
             }
         } else {
+            if let preSubtitleFrame {
+                preSubtitleFrame.part.end = frame.part.start
+            }
             preSubtitleFrame = frame
             delegate?.decodeResult(frame: frame)
         }

@@ -29,7 +29,6 @@ public class FFmpegAssetTrack: MediaPlayerTrack {
     public let fieldOrder: FFmpegFieldOrder
     private var stream: UnsafeMutablePointer<AVStream>?
     var codecpar: AVCodecParameters
-    var startTime: CMTime = .zero
     var timebase: Timebase = .defaultValue
     var subtitle: SyncPlayerItemTrack<SubtitleFrame>?
     var closedCaptionsTrack: FFmpegAssetTrack?
@@ -52,11 +51,6 @@ public class FFmpegAssetTrack: MediaPlayerTrack {
             timebase = Timebase(num: 1, den: 1000)
         }
         self.timebase = timebase
-        if stream.pointee.start_time != Int64.min {
-            startTime = CMTime(value: stream.pointee.start_time * Int64(timebase.num), timescale: timebase.den)
-        } else {
-            startTime = .zero
-        }
         rotation = stream.rotation
         let frameRate = stream.pointee.avg_frame_rate
         if stream.pointee.duration > 0, stream.pointee.nb_frames > 0, stream.pointee.nb_frames != stream.pointee.duration {

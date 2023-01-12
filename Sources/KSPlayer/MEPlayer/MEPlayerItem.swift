@@ -307,9 +307,6 @@ extension MEPlayerItem {
             if let coreStream = formatCtx.pointee.streams[i] {
                 coreStream.pointee.discard = AVDISCARD_ALL
                 if let assetTrack = FFmpegAssetTrack(stream: coreStream) {
-                    if assetTrack.startTime == .zero, startTime != .zero {
-                        assetTrack.startTime = startTime
-                    }
                     if !options.subtitleDisable, assetTrack.mediaType == .subtitle {
                         let subtitle = SyncPlayerItemTrack<SubtitleFrame>(assetTrack: assetTrack, options: options)
                         assetTrack.setIsEnabled(!assetTrack.isImageSubtitle)

@@ -60,7 +60,6 @@ class FFmpegDecode: DecodeProtocol {
                         if let assetTrack = FFmpegAssetTrack(codecpar: codecpar) {
                             assetTrack.name = "Closed Captions"
                             assetTrack.timebase = packet.assetTrack.timebase
-                            assetTrack.startTime = packet.assetTrack.startTime
                             let subtitle = SyncPlayerItemTrack<SubtitleFrame>(assetTrack: assetTrack, options: options)
                             assetTrack.setIsEnabled(!assetTrack.isImageSubtitle)
                             assetTrack.subtitle = subtitle
@@ -74,6 +73,7 @@ class FFmpegDecode: DecodeProtocol {
                         if let corePacket = packet.corePacket {
                             closedCaptionsPacket.corePacket?.pointee.pts = corePacket.pointee.pts
                             closedCaptionsPacket.corePacket?.pointee.dts = corePacket.pointee.dts
+                            closedCaptionsPacket.corePacket?.pointee.duration = corePacket.pointee.duration
                         }
                         closedCaptionsPacket.corePacket?.pointee.flags |= AV_PKT_FLAG_KEY
                         closedCaptionsPacket.corePacket?.pointee.size = Int32(sd.pointee.size)
