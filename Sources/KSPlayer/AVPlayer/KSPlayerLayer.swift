@@ -693,6 +693,8 @@ extension KSVideoPlayer: UIViewRepresentable {
 
     public static func dismantleUIView(_: UIViewType, coordinator: Coordinator) {
         #if os(tvOS)
+        coordinator.playerLayer?.delegate = nil
+        coordinator.playerLayer?.pause()
         coordinator.playerLayer = nil
         #endif
     }
@@ -830,9 +832,7 @@ extension KSVideoPlayer.Coordinator: KSPlayerLayerDelegate {
             audioTracks = layer.player.tracks(mediaType: .audio)
         } else {
             isLoading = state == .buffering
-            if state != .prepareToPlay {
-                isPlay = state.isPlaying
-            }
+            isPlay = state.isPlaying
         }
         onStateChanged?(layer, state)
     }
