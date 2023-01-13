@@ -73,7 +73,9 @@ class FFmpegDecode: DecodeProtocol {
                         if let corePacket = packet.corePacket {
                             closedCaptionsPacket.corePacket?.pointee.pts = corePacket.pointee.pts
                             closedCaptionsPacket.corePacket?.pointee.dts = corePacket.pointee.dts
-                            closedCaptionsPacket.corePacket?.pointee.duration = corePacket.pointee.duration
+                            closedCaptionsPacket.corePacket?.pointee.pos = corePacket.pointee.pos
+                            closedCaptionsPacket.corePacket?.pointee.time_base = corePacket.pointee.time_base
+                            closedCaptionsPacket.corePacket?.pointee.stream_index = corePacket.pointee.stream_index
                         }
                         closedCaptionsPacket.corePacket?.pointee.flags |= AV_PKT_FLAG_KEY
                         closedCaptionsPacket.corePacket?.pointee.size = Int32(sd.pointee.size)

@@ -28,21 +28,14 @@ public struct KSVideoPlayerView: View {
                 if let subtile = subtitleModel.selectedSubtitle {
                     let time = current + options.subtitleDelay
                     if let part = subtile.search(for: time) {
-                        subtitleModel.endTime = part.end
-                        if let image = part.image {
-                            subtitleModel.image = image
-                        } else {
-                            subtitleModel.text = part.text
-                        }
+                        subtitleModel.part = part
                     } else {
-                        if time > subtitleModel.endTime {
-                            subtitleModel.image = nil
-                            subtitleModel.text = nil
+                        if let part = subtitleModel.part, part.end > part.start, time > part.end {
+                            subtitleModel.part = nil
                         }
                     }
                 } else {
-                    subtitleModel.image = nil
-                    subtitleModel.text = nil
+                    subtitleModel.part = nil
                 }
             }
             .onStateChanged { playerLayer, state in
@@ -305,9 +298,7 @@ public class SubtitleModel: ObservableObject {
     @Published public var textFont: Font = .largeTitle
     @Published public var textColor: Color = .white
     @Published public var textPositionFromBottom = 0
-    @Published fileprivate var text: NSMutableAttributedString?
-    @Published fileprivate var image: UIImage?
-    fileprivate var endTime = TimeInterval(0)
+    @Published fileprivate var part: SubtitlePart?
 }
 
 @available(iOS 15, tvOS 15, macOS 12, *)
@@ -316,7 +307,7 @@ struct VideoSubtitleView: View {
     var body: some View {
         VStack {
             Spacer()
-            if let image = model.image {
+            if let image = model.part?.image {
                 #if os(macOS)
                 Image(nsImage: image)
                     .resizable()
@@ -328,7 +319,7 @@ struct VideoSubtitleView: View {
                     .scaledToFit()
                     .padding()
                 #endif
-            } else if let text = model.text {
+            } else if let text = model.part?.text {
                 Text(AttributedString(text))
                     .multilineTextAlignment(.center)
                     .font(model.textFont)
