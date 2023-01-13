@@ -10,11 +10,12 @@ import SwiftUI
 @available(iOS 15, tvOS 15, macOS 12, *)
 public struct KSVideoPlayerView: View {
     @StateObject public var subtitleModel = SubtitleModel()
-    @State private var model = ControllerTimeModel()
     @StateObject public var playerCoordinator = KSVideoPlayer.Coordinator()
-    @State var isMaskShow = true
     @State public var url: URL
     public let options: KSOptions
+    @State var isMaskShow = true
+    @State private var model = ControllerTimeModel()
+    @Environment(\.dismiss) private var dismiss
     public init(url: URL, options: KSOptions) {
         _url = .init(initialValue: url)
         self.options = options
@@ -108,6 +109,13 @@ public struct KSVideoPlayerView: View {
                         break
                     }
                     #endif
+                }
+                .onExitCommand {
+                    if isMaskShow {
+                        isMaskShow = false
+                    } else {
+                        dismiss()
+                    }
                 }
             #endif
                 .opacity(isMaskShow ? 1 : 0)
