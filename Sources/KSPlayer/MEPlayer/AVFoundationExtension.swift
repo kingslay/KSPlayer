@@ -226,22 +226,7 @@ let layoutMapTuple =
      (tag: kAudioChannelLayoutTag_AAC_Octagonal, mask: swift_AV_CH_LAYOUT_OCTAGONAL),
      //     (tag: kAudioChannelLayoutTag_Logic_Atmos_5_1_2, mask: swift_AV_CH_LAYOUT_7POINT1_WIDE_BACK),
     ]
-// let pcmFormatMapTuple: [(AVAudioCommonFormat, AVSampleFormat)] =
-// [ (format: pcmFormatFloat32, sampleFormat: AV_SAMPLE_FMT_S32),
-//  AV_SAMPLE_FMT_S16,         ///< signed 16 bits
-//  AV_SAMPLE_FMT_S32,         ///< signed 32 bits
-//   pcmFormatFloat64
-//
-//   pcmFormatInt16
-//
-//   pcmFormatInt32
-//
-//  ///< float
-//  public var AV_SAMPLE_FMT_FLT: AVSampleFormat { get }
-//  ///< double
-//  public var AV_SAMPLE_FMT_DBL: AVSampleFormat { get }
 
-// swiftlint:enable identifier_name
 // Some channel abbreviations used below:
 // Lss - left side surround
 // Rss - right side surround

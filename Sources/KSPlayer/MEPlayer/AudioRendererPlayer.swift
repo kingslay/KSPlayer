@@ -133,12 +133,12 @@ public class AudioRendererPlayer: AudioPlayer, FrameOutput {
                 continue
             }
             let n = render.data.count
+            let dataByteSize = Int(render.numberOfSamples * sampleSize * render.channels) / n
+            if dataByteSize > render.dataSize {
+                assertionFailure("dataByteSize: \(dataByteSize),render.dataSize: \(render.dataSize)")
+            }
             for i in 0 ..< n {
                 var outBlockBuffer: CMBlockBuffer?
-                let dataByteSize = Int(render.numberOfSamples * sampleSize * render.channels) / n
-                if dataByteSize > render.dataSize {
-                    assertionFailure("dataByteSize: \(dataByteSize),render.dataSize: \(render.dataSize)")
-                }
                 CMBlockBufferCreateWithMemoryBlock(
                     allocator: kCFAllocatorDefault,
                     memoryBlock: nil,
