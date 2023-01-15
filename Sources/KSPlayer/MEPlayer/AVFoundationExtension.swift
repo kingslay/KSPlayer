@@ -6,7 +6,7 @@
 //
 
 import AVFoundation
-import CoreAudioTypes
+import CoreMedia
 import FFmpeg
 import Libavutil
 

@@ -394,14 +394,14 @@ extension AVChannelLayout: Equatable {
 extension AVChannelLayout: CustomStringConvertible {
     static let defaultValue = AVChannelLayout(order: AV_CHANNEL_ORDER_NATIVE, nb_channels: 2, u: AVChannelLayout.__Unnamed_union_u(mask: swift_AV_CH_LAYOUT_STEREO), opaque: nil)
     var layoutTag: AudioChannelLayoutTag {
-        KSLog("FFmepg channelLayout: \(self)")
+        KSLog("FFmepg channelLayout: \(self) order: \(order)")
         let tag = layoutMapTuple.first { _, mask in
             u.mask == mask
         }?.tag
         if let tag {
             return tag
         } else {
-            assertionFailure("can not find AudioChannelLayoutTag for \(self)")
+            KSLog("can not find AudioChannelLayoutTag FFmepg channelLayout: \(self) order: \(order)")
             return kAudioChannelLayoutTag_Stereo
         }
     }
