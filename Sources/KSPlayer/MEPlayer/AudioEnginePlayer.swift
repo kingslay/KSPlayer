@@ -147,6 +147,7 @@ public final class AudioEnginePlayer: AudioPlayer, FrameOutput {
         #endif
         options.audioFormat = audioDescriptor.audioFormat(channels: channels)
         sampleSize = options.audioFormat.sampleSize
+        KSLog("outputFormat channelLayout AudioFormat: \(options.audioFormat)")
         if let channelLayout = options.audioFormat.channelLayout {
             KSLog("outputFormat channelLayout tag: \(channelLayout.layoutTag)")
             KSLog("outputFormat channelLayout channelDescriptions: \(channelLayout.layout.channelDescriptions)")
