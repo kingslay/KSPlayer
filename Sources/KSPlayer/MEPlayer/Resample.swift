@@ -206,8 +206,8 @@ class AudioSwresample: Swresample {
     }
 
     func transfer(avframe: UnsafeMutablePointer<AVFrame>) throws -> MEFrame {
-        if !(descriptor == avframe.pointee) {
-            let descriptor = AudioDescriptor(frame: avframe)
+        let descriptor = AudioDescriptor(frame: avframe.pointee)
+        if !(self.descriptor == descriptor) {
             if setup(descriptor: descriptor) {
                 self.descriptor = descriptor
             } else {
@@ -247,22 +247,28 @@ class AudioDescriptor: Equatable {
 
     init(codecpar: AVCodecParameters) {
         channel = codecpar.ch_layout
-        sampleRate = codecpar.sample_rate
+        let sampleRate = codecpar.sample_rate
+        if sampleRate <= 0 {
+            self.sampleRate = 44100
+        } else {
+            self.sampleRate = sampleRate
+        }
         sampleFormat = AVSampleFormat(rawValue: codecpar.format)
     }
 
-    init(frame: UnsafeMutablePointer<AVFrame>) {
-        channel = frame.pointee.ch_layout
-        sampleRate = frame.pointee.sample_rate
-        sampleFormat = AVSampleFormat(rawValue: frame.pointee.format)
+    init(frame: AVFrame) {
+        channel = frame.ch_layout
+        let sampleRate = frame.sample_rate
+        if sampleRate <= 0 {
+            self.sampleRate = 44100
+        } else {
+            self.sampleRate = sampleRate
+        }
+        sampleFormat = AVSampleFormat(rawValue: frame.format)
     }
 
     static func == (lhs: AudioDescriptor, rhs: AudioDescriptor) -> Bool {
         lhs.sampleFormat == rhs.sampleFormat && lhs.sampleRate == rhs.sampleRate && lhs.channel == rhs.channel
-    }
-
-    static func == (lhs: AudioDescriptor, rhs: AVFrame) -> Bool {
-        lhs.sampleFormat.rawValue == rhs.format && lhs.sampleRate == rhs.sample_rate && lhs.channel == rhs.ch_layout
     }
 
     func audioFormat(channels: AVAudioChannelCount) -> AVAudioFormat {
