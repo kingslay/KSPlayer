@@ -3,12 +3,14 @@ import Libavcodec
 import Libavfilter
 import Libavformat
 
-func toDictionary(_ native: OpaquePointer) -> [String: String] {
+func toDictionary(_ native: OpaquePointer?) -> [String: String] {
     var dict = [String: String]()
-    var prev: UnsafeMutablePointer<AVDictionaryEntry>?
-    while let tag = av_dict_get(native, "", prev, AV_DICT_IGNORE_SUFFIX) {
-        dict[String(cString: tag.pointee.key)] = String(cString: tag.pointee.value)
-        prev = tag
+    if let native {
+        var prev: UnsafeMutablePointer<AVDictionaryEntry>?
+        while let tag = av_dict_get(native, "", prev, AV_DICT_IGNORE_SUFFIX) {
+            dict[String(cString: tag.pointee.key)] = String(cString: tag.pointee.value)
+            prev = tag
+        }
     }
     return dict
 }
