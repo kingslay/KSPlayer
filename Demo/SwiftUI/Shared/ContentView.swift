@@ -65,13 +65,15 @@ struct ContentView: View {
         }
         path.appendPathComponent("cache.m3u8")
         if FileManager.default.fileExists(atPath: path.path) {
-            do {
-                let data = try Data(contentsOf: path)
-                guard let string = String(data: data, encoding: .utf8) else {
-                    return
-                }
-                resources.append(contentsOf: parsem3u8(string: string))
-            } catch {}
+            DispatchQueue.main.async {
+                do {
+                    let data = try Data(contentsOf: path)
+                    guard let string = String(data: data, encoding: .utf8) else {
+                        return
+                    }
+                    self.resources.append(contentsOf: parsem3u8(string: string))
+                } catch {}
+            }
         }
     }
 

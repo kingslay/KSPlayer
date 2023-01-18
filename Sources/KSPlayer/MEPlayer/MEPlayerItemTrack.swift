@@ -37,9 +37,8 @@ public class FFmpegAssetTrack: MediaPlayerTrack {
         let codecpar = stream.pointee.codecpar.pointee
         self.init(codecpar: codecpar)
         self.stream = stream
-        if let bitrateEntry = av_dict_get(stream.pointee.metadata, "variant_bitrate", nil, 0) ?? av_dict_get(stream.pointee.metadata, "BPS", nil, 0),
-           let bitRate = Int64(String(cString: bitrateEntry.pointee.value))
-        {
+        let metadata = toDictionary(stream.pointee.metadata)
+        if let value = metadata["variant_bitrate"] ?? metadata["BPS"], let bitRate = Int64(value) {
             self.bitRate = bitRate
         }
         if stream.pointee.side_data?.pointee.type == AV_PKT_DATA_DOVI_CONF {
@@ -51,7 +50,14 @@ public class FFmpegAssetTrack: MediaPlayerTrack {
             timebase = Timebase(num: 1, den: 1000)
         }
         self.timebase = timebase
-        rotation = stream.rotation
+        if let rotateTag = metadata["rotate"], rotateTag == "0" {
+            rotation = 0
+        } else if let displaymatrix = av_stream_get_side_data(stream, AV_PKT_DATA_DISPLAYMATRIX, nil) {
+            let matrix = displaymatrix.withMemoryRebound(to: Int32.self, capacity: 1) { $0 }
+            rotation = -av_display_rotation_get(matrix)
+        } else {
+            rotation = 0
+        }
         let frameRate = stream.pointee.avg_frame_rate
         if stream.pointee.duration > 0, stream.pointee.nb_frames > 0, stream.pointee.nb_frames != stream.pointee.duration {
             nominalFrameRate = Float(stream.pointee.nb_frames) * Float(timebase.den) / Float(stream.pointee.duration) * Float(timebase.num)
@@ -63,13 +69,13 @@ public class FFmpegAssetTrack: MediaPlayerTrack {
         if codecpar.codec_type == AVMEDIA_TYPE_VIDEO {
             description += ", \(nominalFrameRate) fps"
         }
-        if let entry = av_dict_get(stream.pointee.metadata, "language", nil, 0), let title = entry.pointee.value {
-            language = NSLocalizedString(String(cString: title), comment: "")
+        if let value = metadata["language"] {
+            language = NSLocalizedString(value, comment: "")
         } else {
             language = nil
         }
-        if let entry = av_dict_get(stream.pointee.metadata, "title", nil, 0), let title = entry.pointee.value {
-            name = String(cString: title)
+        if let value = metadata["title"] {
+            name = value
         } else {
             name = language ?? mediaType.rawValue
         }

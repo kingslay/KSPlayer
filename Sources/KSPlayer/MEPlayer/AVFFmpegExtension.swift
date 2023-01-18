@@ -2,18 +2,15 @@ import FFmpeg
 import Libavcodec
 import Libavfilter
 import Libavformat
-extension UnsafeMutablePointer where Pointee == AVStream {
-    var rotation: Double {
-        let displaymatrix = av_stream_get_side_data(self, AV_PKT_DATA_DISPLAYMATRIX, nil)
-        let rotateTag = av_dict_get(pointee.metadata, "rotate", nil, 0)
-        if let rotateTag, String(cString: rotateTag.pointee.value) == "0" {
-            return 0.0
-        } else if let displaymatrix {
-            let matrix = displaymatrix.withMemoryRebound(to: Int32.self, capacity: 1) { $0 }
-            return -av_display_rotation_get(matrix)
-        }
-        return 0.0
+
+func toDictionary(_ native: OpaquePointer) -> [String: String] {
+    var dict = [String: String]()
+    var prev: UnsafeMutablePointer<AVDictionaryEntry>?
+    while let tag = av_dict_get(native, "", prev, AV_DICT_IGNORE_SUFFIX) {
+        dict[String(cString: tag.pointee.key)] = String(cString: tag.pointee.value)
+        prev = tag
     }
+    return dict
 }
 
 extension UnsafeMutablePointer where Pointee == AVCodecContext {

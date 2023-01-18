@@ -19,7 +19,7 @@ struct DemoApp: App {
     init() {
         KSOptions.canBackgroundPlay = true
         #if DEBUG
-        KSOptions.logLevel = .debug
+//        KSOptions.logLevel = .warning
         #endif
         KSOptions.firstPlayerType = KSMEPlayer.self
         KSOptions.secondPlayerType = KSMEPlayer.self
