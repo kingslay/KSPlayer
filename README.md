@@ -263,4 +263,6 @@ Your user icon or company logo shows up this with a link to your home page.
 
 ## Communication
 
+![1](https://github.com/kingslay/KSPlayer/raw/develop/Documents/Sponsors.jpg)
+
 - Email : kingslay@icloud.com

@@ -100,7 +100,7 @@ var objects: [KSPlayerResource] = {
         let options = MEOptions()
         options.autoDeInterlace = true
         options.videoFilters = "hflip,vflip"
-        let res0 = KSPlayerResourceDefinition(url: url, definition: "标准", options: options)
+        let res0 = KSPlayerResourceDefinition(url: url, definition: "标准", options: MEOptions())
         let res1 = KSPlayerResourceDefinition(url: url, definition: "颠倒", options: options)
         let asset = KSPlayerResource(name: "http视频", definitions: [res0, res1], cover: URL(string: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c5/Big_buck_bunny_poster_big.jpg/848px-Big_buck_bunny_poster_big.jpg"))
         objects.append(asset)

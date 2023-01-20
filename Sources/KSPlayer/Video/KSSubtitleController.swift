@@ -18,7 +18,6 @@ public class KSSubtitleController {
     private var infos = [SubtitleInfo]()
     private var subtitleName: String?
     public var view: KSSubtitleView
-    public var subtitle: KSSubtitleProtocol?
     public var selectWithFilePath: ((Result<KSSubtitleProtocol, NSError>) -> Void)? {
         didSet {
             view.selectWithFilePath = selectWithFilePath

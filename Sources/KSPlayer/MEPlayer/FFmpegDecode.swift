@@ -67,7 +67,10 @@ class FFmpegDecode: DecodeProtocol {
                             subtitle.decode()
                         }
                     }
-                    if let sd = av_frame_get_side_data(avframe, AV_FRAME_DATA_A53_CC), let closedCaptionsTrack = packet.assetTrack.closedCaptionsTrack, let subtitle = closedCaptionsTrack.subtitle {
+                    if let sideData = av_frame_get_side_data(avframe, AV_FRAME_DATA_A53_CC),
+                       let closedCaptionsTrack = packet.assetTrack.closedCaptionsTrack,
+                       let subtitle = closedCaptionsTrack.subtitle
+                    {
                         let closedCaptionsPacket = Packet()
                         closedCaptionsPacket.assetTrack = closedCaptionsTrack
                         if let corePacket = packet.corePacket {
@@ -78,8 +81,8 @@ class FFmpegDecode: DecodeProtocol {
                             closedCaptionsPacket.corePacket?.pointee.stream_index = corePacket.pointee.stream_index
                         }
                         closedCaptionsPacket.corePacket?.pointee.flags |= AV_PKT_FLAG_KEY
-                        closedCaptionsPacket.corePacket?.pointee.size = Int32(sd.pointee.size)
-                        let buffer = av_buffer_ref(sd.pointee.buf)
+                        closedCaptionsPacket.corePacket?.pointee.size = Int32(sideData.pointee.size)
+                        let buffer = av_buffer_ref(sideData.pointee.buf)
                         closedCaptionsPacket.corePacket?.pointee.data = buffer?.pointee.data
                         closedCaptionsPacket.corePacket?.pointee.buf = buffer
                         closedCaptionsPacket.fill()

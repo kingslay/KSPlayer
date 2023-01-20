@@ -154,24 +154,26 @@ open class VideoPlayerView: PlayerView {
     override open func onButtonPressed(type: PlayerButtonType, button: UIButton) {
         autoFadeOutViewWithAnimation()
         super.onButtonPressed(type: type, button: button)
+        if type == .pictureInPicture {
+            if #available(tvOS 14.0, *) {
+                playerLayer?.isPipActive.toggle()
+            }
+        }
+        #if os(tvOS)
         if type == .srt {
-            #if os(tvOS)
             changeSrt(button: button)
-            #else
-            srtControl.view.isHidden = false
-            isMaskShow = false
-            #endif
         } else if type == .rate {
             changePlaybackRate(button: button)
         } else if type == .definition {
             changeDefinitions(button: button)
-        } else if type == .pictureInPicture {
-            if #available(tvOS 14.0, *) {
-                playerLayer?.isPipActive.toggle()
-            }
         } else if type == .audioSwitch || type == .videoSwitch {
             changeAudioVideo(type, button: button)
         }
+        #elseif os(macOS)
+//        if let menu = button.menu, let event = NSApplication.shared.currentEvent {
+//            NSMenu.popUpContextMenu(menu, with: event, for: button)
+//        }
+        #endif
     }
 
     // MARK: - setup UI
@@ -258,7 +260,9 @@ open class VideoPlayerView: PlayerView {
             toolBar.videoSwitchButton.isHidden = layer.player.tracks(mediaType: .video).count < 2
             toolBar.audioSwitchButton.isHidden = layer.player.tracks(mediaType: .audio).count < 2
             toolBar.srtButton.isHidden = srtControl.srtListCount == 0
-            buildMenusForButtons()
+            if #available(iOS 14.0, tvOS 15.0, *) {
+                buildMenusForButtons()
+            }
         case .buffering:
             isPlayed = true
             replayButton.isHidden = true
@@ -434,43 +438,28 @@ open class VideoPlayerView: PlayerView {
 // MARK: - Action Response
 
 extension VideoPlayerView {
+    @available(iOS 14.0, tvOS 15.0, *)
     func buildMenusForButtons() {
-        let definitionsMenu = KSMenuBuilder.definitionsMenu(from: resource,
-                                                            selected: currentDefinition,
-                                                            completition: { [weak self] action in
-                                                                let selecrtedDefinition = action.tag
-                                                                guard selecrtedDefinition != self?.currentDefinition else { return }
-                                                                self?.change(definitionIndex: selecrtedDefinition)
-                                                                self?.buildMenusForButtons()
-                                                            })
+        let definitionsMenu = KSMenuBuilder.definitionsMenu(from: resource, selected: currentDefinition) { [weak self] selecrtedDefinition in
+            self?.change(definitionIndex: selecrtedDefinition)
+        }
 
         let speedMenu = KSMenuBuilder.playbackRateMenu(Double(playerLayer?.player.playbackRate ?? 1)) { [weak self] selectedSpeed in
             let currentRate = Double(self?.playerLayer?.player.playbackRate ?? 1)
             guard selectedSpeed != currentRate else { return }
             self?.playerLayer?.player.playbackRate = Float(selectedSpeed)
-            self?.buildMenusForButtons()
         }
 
         let videoTracks = playerLayer?.player.tracks(mediaType: .video) ?? []
         let videoMenu = KSMenuBuilder.audioVideoChangeMenu(videoTracks.first(where: { $0.isEnabled }),
-                                                           availableTracks: videoTracks) { [weak self] action in
-            guard let tracks = self?.playerLayer?.player.tracks(mediaType: .video),
-                  tracks.count > action.tag,
-                  !tracks[action.tag].isEnabled
-            else { return }
-            self?.playerLayer?.player.select(track: tracks[action.tag])
-            self?.buildMenusForButtons()
+                                                           availableTracks: videoTracks) { [weak self] track in
+            self?.playerLayer?.player.select(track: track)
         }
 
         let audioTracks = playerLayer?.player.tracks(mediaType: .audio) ?? []
         let audioMenu = KSMenuBuilder.audioVideoChangeMenu(audioTracks.first(where: { $0.isEnabled }),
-                                                           availableTracks: audioTracks) { [weak self] action in
-            guard let tracks = self?.playerLayer?.player.tracks(mediaType: .audio),
-                  tracks.count > action.tag,
-                  !tracks[action.tag].isEnabled
-            else { return }
-            self?.playerLayer?.player.select(track: tracks[action.tag])
-            self?.buildMenusForButtons()
+                                                           availableTracks: audioTracks) { [weak self] track in
+            self?.playerLayer?.player.select(track: track)
         }
 
         let subtitles = srtControl.filterInfos { _ in true }
@@ -478,29 +467,20 @@ extension VideoPlayerView {
                                                   availableSubtitles: subtitles) { [weak self] selectedSrt in
             guard self?.srtControl.view.selectedInfo?.subtitleID != selectedSrt?.subtitleID else { return }
             self?.srtControl.view.selectedInfo = selectedSrt
-            self?.buildMenusForButtons()
         }
-
-        #if os(iOS)
-        if #available(iOS 14.0, *) {
-            toolBar.definitionButton.showsMenuAsPrimaryAction = true
-            toolBar.definitionButton.menu = definitionsMenu
-            toolBar.videoSwitchButton.showsMenuAsPrimaryAction = true
-            toolBar.videoSwitchButton.menu = videoMenu
-            toolBar.audioSwitchButton.showsMenuAsPrimaryAction = true
-            toolBar.audioSwitchButton.menu = audioMenu
-            toolBar.playbackRateButton.showsMenuAsPrimaryAction = true
-            toolBar.playbackRateButton.menu = speedMenu
-            toolBar.srtButton.showsMenuAsPrimaryAction = true
-            toolBar.srtButton.menu = srtMenu
-        }
-        #endif
-        #if os(macOS)
+        #if !os(tvOS)
         toolBar.definitionButton.menu = definitionsMenu
         toolBar.videoSwitchButton.menu = videoMenu
         toolBar.audioSwitchButton.menu = audioMenu
         toolBar.playbackRateButton.menu = speedMenu
         toolBar.srtButton.menu = srtMenu
+        #if os(iOS)
+        toolBar.definitionButton.showsMenuAsPrimaryAction = true
+        toolBar.videoSwitchButton.showsMenuAsPrimaryAction = true
+        toolBar.audioSwitchButton.showsMenuAsPrimaryAction = true
+        toolBar.playbackRateButton.showsMenuAsPrimaryAction = true
+        toolBar.srtButton.showsMenuAsPrimaryAction = true
+        #endif
         #endif
     }
 }
