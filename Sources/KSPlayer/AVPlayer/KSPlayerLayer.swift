@@ -68,28 +68,16 @@ open class KSPlayerLayer: UIView {
     @Published public var isPipActive = false {
         didSet {
             if #available(tvOS 14.0, *) {
-                var pipController: AVPictureInPictureController?
-                if let controller = KSOptions.pipController as? AVPictureInPictureController, controller.delegate === self {
-                    pipController = controller
-                } else {
-                    KSOptions.pipController = nil
-                    pipController = player.pipController()
+                guard let pipController = player.pipController else {
+                    return
                 }
-                if let pipController,
-                   isPipActive != pipController.isPictureInPictureActive
-                {
-                    if pipController.isPictureInPictureActive {
-                        pipController.stopPictureInPicture()
-                        pipController.delegate = nil
-                        KSOptions.pipController = nil
-                    } else {
-                        DispatchQueue.main.async { [weak self] in
-                            guard let self else { return }
-                            pipController.startPictureInPicture()
-                            pipController.delegate = self
-                            KSOptions.pipController = pipController
-                        }
+                if isPipActive {
+                    DispatchQueue.main.async { [weak self] in
+                        guard let self else { return }
+                        pipController.start(view: self)
                     }
+                } else {
+                    pipController.stop()
                 }
             }
         }
@@ -210,6 +198,9 @@ open class KSPlayerLayer: UIView {
     }
 
     deinit {
+        if #available(iOS 15.0, tvOS 15.0, macOS 12.0, *) {
+            player.pipController?.contentSource = nil
+        }
         NotificationCenter.default.removeObserver(self)
         MPNowPlayingInfoCenter.default().nowPlayingInfo = nil
         #if os(tvOS)
@@ -259,6 +250,9 @@ open class KSPlayerLayer: UIView {
         }
         state = player.loadState == .playable ? .bufferFinished : .buffering
         MPNowPlayingInfoCenter.default().playbackState = .playing
+        if #available(tvOS 14.0, *) {
+            KSPictureInPictureController.mute()
+        }
     }
 
     open func pause() {

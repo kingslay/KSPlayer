@@ -58,10 +58,10 @@ public protocol MediaPlayerProtocol: MediaPlayback {
     var subtitleDataSouce: SubtitleDataSouce? { get }
     @available(macOS 12.0, iOS 15.0, tvOS 15.0, *)
     var playbackCoordinator: AVPlaybackCoordinator { get }
+    @available(tvOS 14.0, *)
+    var pipController: KSPictureInPictureController? { get }
     init(url: URL, options: KSOptions)
     func replace(url: URL, options: KSOptions)
-    @available(tvOS 14.0, *)
-    func pipController() -> AVPictureInPictureController?
     func play()
     func pause()
     func enterBackground()
@@ -555,7 +555,6 @@ public extension KSOptions {
     static var isAutoPlay = false
     /// seek完是否自动播放
     static var isSeekedAutoPlay = true
-    static var pipController: Any?
     /// 日志输出方式
     static var logFunctionPoint: (String) -> Void = {
         print($0)

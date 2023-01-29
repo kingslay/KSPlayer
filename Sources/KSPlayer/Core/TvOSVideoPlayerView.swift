@@ -16,16 +16,6 @@ import MediaPlayer
 open class TvOSVideoPlayerView: VideoPlayerView {
     override open func customizeUIComponents() {
         super.customizeUIComponents()
-        srtButton.fillImage()
-        pipButton.fillImage()
-        playButton.fillImage()
-        definitionButton.fillImage()
-        audioSwitchButton.fillImage()
-        videoSwitchButton.fillImage()
-        playbackRateButton.fillImage()
-        if #available(tvOS 14.0, *) {
-            toolBar.pipButton.isHidden = !AVPictureInPictureController.isPictureInPictureSupported()
-        }
         addRemoteControllerGestures()
     }
 }
@@ -33,7 +23,7 @@ open class TvOSVideoPlayerView: VideoPlayerView {
 // MARK: - remote controller interactions
 
 extension TvOSVideoPlayerView {
-    internal func addRemoteControllerGestures() {
+    private func addRemoteControllerGestures() {
         let rightPressRecognizer = UITapGestureRecognizer()
         rightPressRecognizer.addTarget(self, action: #selector(rightArrowButtonPressed(_:)))
         rightPressRecognizer.allowedPressTypes = [NSNumber(value: UIPress.PressType.rightArrow.rawValue)]

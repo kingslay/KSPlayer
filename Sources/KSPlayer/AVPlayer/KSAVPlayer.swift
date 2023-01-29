@@ -94,9 +94,17 @@ public class KSAVPlayer {
         }
     }
 
+    private lazy var _pipController: Any? = {
+        if #available(tvOS 14.0, *) {
+            return KSPictureInPictureController(playerLayer: playerView.playerLayer)
+        } else {
+            return nil
+        }
+    }()
+
     @available(tvOS 14.0, *)
-    public func pipController() -> AVPictureInPictureController? {
-        AVPictureInPictureController(playerLayer: playerView.playerLayer)
+    public var pipController: KSPictureInPictureController? {
+        _pipController as? KSPictureInPictureController
     }
 
     @available(macOS 12.0, iOS 15.0, tvOS 15.0, *)

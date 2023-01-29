@@ -184,7 +184,8 @@ struct VideoControllerView: View {
                     Button {
                         dismiss()
                     } label: {
-                        Image(systemName: "xmark").font(.system(.title))
+                        Image(systemName: "xmark")
+                            .font(.system(.title))
                     }
                     Button {
                         config.playerLayer?.isPipActive.toggle()
@@ -212,7 +213,7 @@ struct VideoControllerView: View {
                     Button {
                         isShowSetting.toggle()
                     } label: {
-                        Image(systemName: "ellipsis.circle").frame(minWidth: 20, minHeight: 20)
+                        Image(systemName: "ellipsis.circle").font(.system(.title))
                     }
                 }
             }
