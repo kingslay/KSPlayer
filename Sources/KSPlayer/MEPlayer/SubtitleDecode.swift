@@ -59,7 +59,7 @@ class SubtitleDecode: DecodeProtocol {
                 preSubtitleFrame.part.text?.append(attributedString)
             }
         } else {
-            if let preSubtitleFrame {
+            if let preSubtitleFrame, preSubtitleFrame.part.end == preSubtitleFrame.part.start {
                 preSubtitleFrame.part.end = frame.part.start
             }
             preSubtitleFrame = frame
