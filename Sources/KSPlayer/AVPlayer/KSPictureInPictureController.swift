@@ -59,11 +59,13 @@ public class KSPictureInPictureController: AVPictureInPictureController {
                 pre.view?.isPipActive = false
             } else {
                 self.navigationController?.popViewController(animated: true)
+                #if os(iOS)
                 if self.navigationController?.tabBarController != nil, self.navigationController?.viewControllers.count == 1 {
                     DispatchQueue.main.async { [weak self] in
                         self?.navigationController?.setToolbarHidden(false, animated: true)
                     }
                 }
+                #endif
             }
         }
         #endif
