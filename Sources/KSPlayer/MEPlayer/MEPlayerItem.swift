@@ -705,7 +705,8 @@ extension MEPlayerItem: OutputRenderSourceDelegate {
                     }
                 }
                 if videoClockDelay > 2 {
-                    KSLog("video track seek to \(desire)")
+                    KSLog("video track from \(frame.seconds) seek to \(desire)")
+                    videoTrack.outputRenderQueue.flush()
                     videoTrack.seekTime = desire
                 }
             }

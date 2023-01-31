@@ -219,7 +219,9 @@ class SyncPlayerItemTrack<Frame: MEFrame>: PlayerItemTrackProtocol, CustomString
     }
 
     func seek(time: TimeInterval) {
-        seekTime = time
+        if options.isAccurateSeek {
+            seekTime = time
+        }
         isEndOfFile = false
         state = .flush
         outputRenderQueue.flush()
@@ -286,7 +288,7 @@ extension SyncPlayerItemTrack: DecodeResultDelegate {
         if state == .flush || state == .closed {
             return
         }
-        if seekTime > 0, options.isAccurateSeek {
+        if seekTime > 0 {
             let timestamp = frame.position + frame.duration
             if timestamp <= 0 || frame.timebase.cmtime(for: timestamp).seconds < seekTime {
                 return
