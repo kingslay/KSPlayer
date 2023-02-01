@@ -47,8 +47,8 @@ class FFmpegDecode: DecodeProtocol {
                 var frame = try swresample.transfer(avframe: filter.filter(options: options, inputFrame: avframe, hwFramesCtx: codecContext.pointee.hw_frames_ctx))
                 frame.timebase = packet.assetTrack.timebase
 //                frame.timebase = Timebase(avframe.pointee.time_base)
-                frame.duration = avframe.pointee.pkt_duration
                 frame.size = avframe.pointee.pkt_size
+                frame.duration = avframe.pointee.pkt_duration
                 if frame.duration == 0, avframe.pointee.sample_rate != 0, frame.timebase.num != 0 {
                     frame.duration = Int64(avframe.pointee.nb_samples) * Int64(frame.timebase.den) / (Int64(avframe.pointee.sample_rate) * Int64(frame.timebase.num))
                 }
@@ -88,20 +88,19 @@ class FFmpegDecode: DecodeProtocol {
                         closedCaptionsPacket.fill()
                         subtitle.putPacket(packet: closedCaptionsPacket)
                     }
-
-                    var position = avframe.pointee.best_effort_timestamp
-                    if position < 0 {
-                        position = avframe.pointee.pkt_dts
-                    }
-                    if position < 0 {
-                        position = bestEffortTimestamp
-                    }
-                    frame.position = position
-
-                } else {
-                    bestEffortTimestamp = max(bestEffortTimestamp, avframe.pointee.pts)
-                    frame.position = bestEffortTimestamp
                 }
+                var position = avframe.pointee.best_effort_timestamp
+                if position < 0 {
+                    position = avframe.pointee.pts
+                }
+                if position < 0 {
+                    position = avframe.pointee.pkt_dts
+                }
+                if position < 0 {
+                    position = bestEffortTimestamp
+                }
+                frame.position = position
+                bestEffortTimestamp = position
                 bestEffortTimestamp += frame.duration
                 delegate?.decodeResult(frame: frame)
             } else {

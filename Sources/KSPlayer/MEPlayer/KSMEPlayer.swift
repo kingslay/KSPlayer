@@ -182,7 +182,7 @@ extension KSMEPlayer: MEPlayerDelegate {
             playableTime = currentPlaybackTime + loadingState.loadedTime
         }
         if loadState == .playable {
-            if !loadingState.isEndOfFile, loadingState.packetCount == 0, loadingState.frameCount == 0 {
+            if !loadingState.isEndOfFile, loadingState.frameCount == 0 {
                 loadState = .loading
                 if playbackState == .playing {
                     runInMainqueue { [weak self] in
