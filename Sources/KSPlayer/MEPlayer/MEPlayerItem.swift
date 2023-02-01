@@ -695,15 +695,15 @@ extension MEPlayerItem: OutputRenderSourceDelegate {
             videoClockDelay = desire - frame.seconds
             if videoClockDelay > 0.4 {
                 if videoClockDelay > 2 {
-                    KSLog("video delay, video track from \(frame.seconds) seek to \(desire)")
+                    KSLog("video delay time: \(videoClockDelay), audio time:\(desire). seek video track ")
                     videoTrack.outputRenderQueue.flush()
                     videoTrack.seekTime = desire
                 } else {
                     let frameCount = videoTrack.frameCount
-                    KSLog("video delay time: \(videoClockDelay) frameCount: \(frameCount) frameMaxCount: \(videoTrack.frameMaxCount)")
+                    KSLog("video delay time: \(videoClockDelay), audio time:\(desire). frameCount: \(frameCount) frameMaxCount: \(videoTrack.frameMaxCount)")
                     if options.dropVideoFrame, frameCount > 0 {
                         _ = videoTrack.getOutputRender(where: nil)
-                        KSLog("video delay, dropped video frame")
+                        KSLog("video delay time: \(videoClockDelay), audio time:\(desire). dropped video frame")
                     }
                 }
             }
