@@ -67,23 +67,10 @@ extension MEFrame {
 
 // MARK: model
 
-public enum LogLevel: Int32 {
-    case panic = 0
-    case fatal = 8
-    case error = 16
-    case warning = 24
-    case info = 32
-    case verbose = 40
-    case debug = 48
-    case trace = 56
-}
-
 // for MEPlayer
 public extension KSOptions {
     /// 开启VR模式的陀飞轮
     static var enableSensor = true
-    /// 日志级别
-    static var logLevel = LogLevel.warning
     static var stackSize = 32768
     static var isClearVideoWhereReplace = true
     /// true: AVSampleBufferAudioRenderer false: AVAudioEngine

@@ -538,6 +538,17 @@ public struct LoadingState {
     public let isSeek: Bool
 }
 
+public enum LogLevel: Int32 {
+    case panic = 0
+    case fatal = 8
+    case error = 16
+    case warning = 24
+    case info = 32
+    case verbose = 40
+    case debug = 48
+    case trace = 56
+}
+
 public extension KSOptions {
     static var firstPlayerType: MediaPlayerProtocol.Type = KSAVPlayer.self
     static var secondPlayerType: MediaPlayerProtocol.Type?
@@ -555,9 +566,13 @@ public extension KSOptions {
     static var isAutoPlay = false
     /// seek完是否自动播放
     static var isSeekedAutoPlay = true
+    /// 日志级别
+    static var logLevel = LogLevel.warning
     /// 日志输出方式
-    static var logFunctionPoint: (String) -> Void = {
-        print($0)
+    static var logFunctionPoint: (String, LogLevel) -> Void = { str, level in
+        if level.rawValue <= KSOptions.logLevel.rawValue {
+            print(str)
+        }
     }
 
     internal static func deviceCpuCount() -> Int {
@@ -599,9 +614,9 @@ public enum MediaLoadState: Int {
     case playable
 }
 
-@inline(__always) public func KSLog(_ message: CustomStringConvertible, file: String = #file, function: String = #function, line: Int = #line) {
+@inline(__always) public func KSLog(_ message: CustomStringConvertible, logLevel: LogLevel = .warning, file: String = #file, function: String = #function, line: Int = #line) {
     let fileName = (file as NSString).lastPathComponent
-    KSOptions.logFunctionPoint("KSPlayer: \(fileName):\(line) \(function) | \(message)")
+    KSOptions.logFunctionPoint("KSPlayer: \(fileName):\(line) \(function) | \(message)", logLevel)
 }
 
 public let KSPlayerErrorDomain = "KSPlayerErrorDomain"

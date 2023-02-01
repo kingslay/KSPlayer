@@ -123,9 +123,7 @@ final class MEPlayerItem {
             if log.hasPrefix("parser not found for codec") {
                 KSLog(log)
             }
-            if level <= KSOptions.logLevel.rawValue {
-                KSLog(log)
-            }
+            KSLog(log, logLevel: LogLevel(rawValue: level) ?? .warning)
         }
         operationQueue.name = "KSPlayer_" + String(describing: self).components(separatedBy: ".").last!
         operationQueue.maxConcurrentOperationCount = 1
@@ -696,18 +694,17 @@ extension MEPlayerItem: OutputRenderSourceDelegate {
         if let frame {
             videoClockDelay = desire - frame.seconds
             if videoClockDelay > 0.4 {
-                let frameCount = videoTrack.frameCount
-                if frameCount > 0 {
-                    KSLog("video delay time: \(videoClockDelay) frameCount: \(videoTrack.frameCount) frameMaxCount: \(videoTrack.frameMaxCount)")
-                    if options.dropVideoFrame {
-                        _ = videoTrack.getOutputRender(where: nil)
-                        KSLog("dropped video frame")
-                    }
-                }
                 if videoClockDelay > 2 {
-                    KSLog("video track from \(frame.seconds) seek to \(desire)")
+                    KSLog("video delay, video track from \(frame.seconds) seek to \(desire)")
                     videoTrack.outputRenderQueue.flush()
                     videoTrack.seekTime = desire
+                } else {
+                    let frameCount = videoTrack.frameCount
+                    KSLog("video delay time: \(videoClockDelay) frameCount: \(frameCount) frameMaxCount: \(videoTrack.frameMaxCount)")
+                    if options.dropVideoFrame, frameCount > 0 {
+                        _ = videoTrack.getOutputRender(where: nil)
+                        KSLog("video delay, dropped video frame")
+                    }
                 }
             }
         }
