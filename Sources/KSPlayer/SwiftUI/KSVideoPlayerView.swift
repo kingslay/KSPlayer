@@ -315,17 +315,20 @@ struct VideoSubtitleView: View {
         VStack {
             Spacer()
             if let image = model.part?.image {
-                #if os(macOS)
-                Image(nsImage: image)
-                    .resizable()
-                    .scaledToFit()
-                    .padding()
-                #else
-                Image(uiImage: image)
-                    .resizable()
-                    .scaledToFit()
-                    .padding()
-                #endif
+                GeometryReader { geometry in
+                    let fitSize = image.fitSize(geometry.size)
+                    #if os(macOS)
+                    Image(nsImage: image)
+                        .resizable()
+                        .frame(width: fitSize.width, height: fitSize.height)
+                    #else
+                    Image(uiImage: image)
+                        .resizable()
+                        .frame(width: fitSize.width, height: fitSize.height)
+                    #endif
+                }
+                .scaledToFit()
+                .padding()
             } else if let text = model.part?.text {
                 Text(AttributedString(text))
                     .multilineTextAlignment(.center)
@@ -334,6 +337,15 @@ struct VideoSubtitleView: View {
                     .padding(.bottom, CGFloat(model.textPositionFromBottom))
             }
         }
+    }
+}
+
+extension UIImage {
+    func fitSize(_ fitSize: CGSize) -> CGSize {
+        let hZoom = fitSize.width / size.width
+        let vZoom = fitSize.height / size.height
+        let zoom = min(min(hZoom, vZoom), 1)
+        return size * zoom
     }
 }
 
