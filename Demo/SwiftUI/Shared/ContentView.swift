@@ -11,7 +11,7 @@ import SwiftUI
 
 struct ContentView: View {
     @State private var showAddActionSheet = false
-    @State private var resources = objects
+    @State private var resources = testObjects
     @State private var searchText = ""
     @State private var playURL: String = ""
     @State private var playList: String = ""

@@ -88,13 +88,13 @@ extension RootViewController: UITableViewDataSource {
     }
 
     func tableView(_: UITableView, numberOfRowsInSection _: Int) -> Int {
-        objects.count
+        testObjects.count
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath)
         if let cell = cell as? TableViewCell {
-            let resource = objects[indexPath.row]
+            let resource = testObjects[indexPath.row]
             cell.nameLabel.text = resource.name
         }
         return cell
@@ -107,8 +107,8 @@ extension RootViewController: UITableViewDelegate {
         guard let cell = tableView.cellForRow(at: indexPath) as? TableViewCell else {
             return
         }
-        if playerView.resource != objects[indexPath.row] {
-            playerView.set(resource: objects[indexPath.row])
+        if playerView.resource != testObjects[indexPath.row] {
+            playerView.set(resource: testObjects[indexPath.row])
         }
         cell.videoView.addSubview(playerView)
         playerView.translatesAutoresizingMaskIntoConstraints = false
@@ -155,8 +155,8 @@ extension RootViewController: UITableViewDelegate {
         guard let index, let cell = tableView.cellForRow(at: index) as? TableViewCell else {
             return
         }
-        if playerView.resource != objects[index.row] {
-            playerView.set(resource: objects[index.row])
+        if playerView.resource != testObjects[index.row] {
+            playerView.set(resource: testObjects[index.row])
         }
         cell.videoView.addSubview(playerView)
         NSLayoutConstraint.activate([

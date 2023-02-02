@@ -26,6 +26,7 @@
 		AC458DE621DF830F00BD4CF9 /* AudioViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC458DE521DF830F00BD4CF9 /* AudioViewController.swift */; };
 		AC80332224BA1A2F002B3D40 /* hevc.mkv in Resources */ = {isa = PBXBuildFile; fileRef = AC80331E24BA1A2F002B3D40 /* hevc.mkv */; };
 		ACA2123E2756169900F58F75 /* raw.h264 in Resources */ = {isa = PBXBuildFile; fileRef = ACA2123D2756169900F58F75 /* raw.h264 */; };
+		ACEA9FED298BFDAD00FBA74B /* TestURL.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACEA9FEC298BFDAD00FBA74B /* TestURL.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -76,6 +77,7 @@
 		AC7E04DB2414DA5E00B0F540 /* libxml2.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libxml2.tbd; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk/usr/lib/libxml2.tbd; sourceTree = DEVELOPER_DIR; };
 		AC80331E24BA1A2F002B3D40 /* hevc.mkv */ = {isa = PBXFileReference; lastKnownFileType = file; path = hevc.mkv; sourceTree = "<group>"; };
 		ACA2123D2756169900F58F75 /* raw.h264 */ = {isa = PBXFileReference; lastKnownFileType = file; path = raw.h264; sourceTree = "<group>"; };
+		ACEA9FEC298BFDAD00FBA74B /* TestURL.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = TestURL.swift; path = ../../SwiftUI/Shared/TestURL.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -139,6 +141,7 @@
 		AC08614D20B69A4500D801FC /* demo-iOS */ = {
 			isa = PBXGroup;
 			children = (
+				ACEA9FEC298BFDAD00FBA74B /* TestURL.swift */,
 				AC155F1223AFA9F40092D004 /* demo-iOS.entitlements */,
 				AC08614E20B69A4500D801FC /* AppDelegate.swift */,
 				AC21D0E526D226B40007891C /* RootViewController.swift */,
@@ -399,6 +402,7 @@
 				AC458DE621DF830F00BD4CF9 /* AudioViewController.swift in Sources */,
 				AC08619620B69AB400D801FC /* DetailViewController.swift in Sources */,
 				AC08614F20B69A4500D801FC /* AppDelegate.swift in Sources */,
+				ACEA9FED298BFDAD00FBA74B /* TestURL.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

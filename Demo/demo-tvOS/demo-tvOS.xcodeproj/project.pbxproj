@@ -24,6 +24,7 @@
 		AC3A420423D32DFE00B666A4 /* DetailViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC3A420023D32DFE00B666A4 /* DetailViewController.swift */; };
 		AC3A420523D32DFE00B666A4 /* AudioViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC3A420123D32DFE00B666A4 /* AudioViewController.swift */; };
 		AC80333224BA1B54002B3D40 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = AC80333124BA1B54002B3D40 /* Main.storyboard */; };
+		ACEA9FEF298BFDC900FBA74B /* TestURL.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACEA9FEE298BFDC900FBA74B /* TestURL.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -69,6 +70,7 @@
 		AC3A420023D32DFE00B666A4 /* DetailViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = DetailViewController.swift; path = "../../demo-iOS/demo-iOS/DetailViewController.swift"; sourceTree = "<group>"; };
 		AC3A420123D32DFE00B666A4 /* AudioViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = AudioViewController.swift; path = "../../demo-iOS/demo-iOS/AudioViewController.swift"; sourceTree = "<group>"; };
 		AC80333124BA1B54002B3D40 /* Main.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = Main.storyboard; sourceTree = "<group>"; };
+		ACEA9FEE298BFDC900FBA74B /* TestURL.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = TestURL.swift; path = ../../SwiftUI/Shared/TestURL.swift; sourceTree = "<group>"; };
 		D4B47B55C1204959E7C6D995 /* Pods-demo-tvOS.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-demo-tvOS.release.xcconfig"; path = "../Pods/Target Support Files/Pods-demo-tvOS/Pods-demo-tvOS.release.xcconfig"; sourceTree = "<group>"; };
 		F227C20AECAAE8524D2F0F1D /* Pods_demo_tvOS.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_demo_tvOS.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -124,6 +126,7 @@
 		AC08611620B69A1C00D801FC /* demo-tvOS */ = {
 			isa = PBXGroup;
 			children = (
+				ACEA9FEE298BFDC900FBA74B /* TestURL.swift */,
 				AC3A41FF23D32DFE00B666A4 /* AppDelegate.swift */,
 				AC3A420123D32DFE00B666A4 /* AudioViewController.swift */,
 				AC3A420023D32DFE00B666A4 /* DetailViewController.swift */,
@@ -374,6 +377,7 @@
 				AC3A420523D32DFE00B666A4 /* AudioViewController.swift in Sources */,
 				AC3A420323D32DFE00B666A4 /* AppDelegate.swift in Sources */,
 				AC3A420223D32DFE00B666A4 /* MasterViewController.swift in Sources */,
+				ACEA9FEF298BFDC900FBA74B /* TestURL.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
