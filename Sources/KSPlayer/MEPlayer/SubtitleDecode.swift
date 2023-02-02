@@ -29,7 +29,9 @@ class SubtitleDecode: DecodeProtocol {
         }
     }
 
-    func decode() {}
+    func decode() {
+        preSubtitleFrame = nil
+    }
 
     func doDecode(packet: Packet) throws {
         guard let codecContext else {

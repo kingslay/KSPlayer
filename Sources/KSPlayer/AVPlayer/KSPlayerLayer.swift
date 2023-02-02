@@ -234,9 +234,11 @@ open class KSPlayerLayer: UIView {
         if player.isReadyToPlay {
             if state == .playedToTheEnd {
                 Task {
-                    let finished = await player.seek(time: 0)
-                    if finished {
-                        player.play()
+                    player.seek(time: 0) { [weak self] finished in
+                        guard let self else { return }
+                        if finished {
+                            self.player.play()
+                        }
                     }
                 }
             } else {
@@ -278,20 +280,22 @@ open class KSPlayerLayer: UIView {
         #endif
     }
 
-    open func seek(time: TimeInterval, autoPlay: Bool) async -> Bool {
+    open func seek(time: TimeInterval, autoPlay: Bool, completion: @escaping ((Bool) -> Void)) {
         if time.isInfinite || time.isNaN {
-            return false
+            completion(false)
         }
         if player.isReadyToPlay {
-            let finished = await player.seek(time: time)
-            if finished, autoPlay {
-                play()
+            player.seek(time: time) { [weak self] finished in
+                guard let self else { return }
+                if finished, autoPlay {
+                    self.play()
+                }
+                completion(finished)
             }
-            return finished
         } else {
             isAutoPlay = autoPlay
             shouldSeekTo = time
-            return false
+            completion(false)
         }
     }
 
@@ -323,10 +327,11 @@ extension KSPlayerLayer: MediaPlayerDelegate {
         }
         if isAutoPlay {
             if shouldSeekTo > 0 {
-                Task {
-                    _ = await seek(time: shouldSeekTo, autoPlay: true)
-                    shouldSeekTo = 0
+                seek(time: shouldSeekTo, autoPlay: true) { [weak self] _ in
+                    guard let self else { return }
+                    self.shouldSeekTo = 0
                 }
+
             } else {
                 play()
             }
@@ -477,9 +482,8 @@ extension KSPlayerLayer {
         }
     }
 
-    private func seek(time: TimeInterval) {
-        Task {
-            await self.seek(time: time, autoPlay: self.options.isSeekedAutoPlay)
+    fileprivate func seek(time: TimeInterval) {
+        seek(time: time, autoPlay: options.isSeekedAutoPlay) { _ in
         }
     }
 
@@ -810,9 +814,7 @@ extension KSVideoPlayer: UIViewRepresentable {
         }
 
         public func seek(time: TimeInterval) {
-            Task {
-                await playerLayer?.seek(time: TimeInterval(time), autoPlay: true)
-            }
+            playerLayer?.seek(time: TimeInterval(time))
         }
     }
 }

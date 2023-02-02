@@ -35,7 +35,7 @@ public protocol MediaPlayback: AnyObject {
     var currentPlaybackTime: TimeInterval { get }
     func prepareToPlay()
     func shutdown()
-    func seek(time: TimeInterval) async -> Bool
+    func seek(time: TimeInterval, completion: @escaping ((Bool) -> Void))
 }
 
 public protocol MediaPlayerProtocol: MediaPlayback {

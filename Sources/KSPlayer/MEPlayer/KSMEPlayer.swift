@@ -302,9 +302,7 @@ extension KSMEPlayer: MediaPlayerProtocol {
             playerItem.currentPlaybackTime - playerItem.startTime
         }
         set {
-            Task {
-                await seek(time: newValue)
-            }
+            seek(time: newValue) { _ in }
         }
     }
 
@@ -312,7 +310,7 @@ extension KSMEPlayer: MediaPlayerProtocol {
 
     public var seekable: Bool { playerItem.seekable }
 
-    public func seek(time: TimeInterval) async -> Bool {
+    public func seek(time: TimeInterval, completion: @escaping ((Bool) -> Void)) {
         let time = max(time, 0)
         playbackState = .seeking
         runInMainqueue { [weak self] in
@@ -324,7 +322,7 @@ extension KSMEPlayer: MediaPlayerProtocol {
         } else {
             seekTime = time
         }
-        return await playerItem.seek(time: seekTime + playerItem.startTime)
+        playerItem.seek(time: seekTime + playerItem.startTime, completion: completion)
     }
 
     public func prepareToPlay() {
@@ -422,7 +420,7 @@ extension KSMEPlayer: AVPictureInPictureSampleBufferPlaybackDelegate {
 
     public func pictureInPictureController(_: AVPictureInPictureController, didTransitionToRenderSize _: CMVideoDimensions) {}
     public func pictureInPictureController(_: AVPictureInPictureController, skipByInterval skipInterval: CMTime) async {
-        _ = await seek(time: currentPlaybackTime + skipInterval.seconds)
+        seek(time: currentPlaybackTime + skipInterval.seconds) { _ in }
     }
 
     public func pictureInPictureControllerShouldProhibitBackgroundAudioPlayback(_: AVPictureInPictureController) -> Bool {
@@ -472,7 +470,7 @@ extension KSMEPlayer: AVPlaybackCoordinatorPlaybackControlDelegate {
         if abs(currentPlaybackTime - seekTime) < CGFLOAT_EPSILON {
             return
         }
-        _ = await seek(time: seekTime)
+        seek(time: seekTime) { _ in }
     }
 
     public func playbackCoordinator(_: AVDelegatingPlaybackCoordinator, didIssue bufferingCommand: AVDelegatingPlaybackCoordinatorBufferingCommand, completionHandler: @escaping () -> Void) {
