@@ -51,17 +51,13 @@ extension TvOSVideoPlayerView {
     @objc
     private func rightArrowButtonPressed(_: UITapGestureRecognizer) {
         guard let playerLayer, playerLayer.state.isPlaying, toolBar.isSeekable else { return }
-        Task {
-            await seek(time: toolBar.currentTime + 15)
-        }
+        seek(time: toolBar.currentTime + 15) { _ in }
     }
 
     @objc
     private func leftArrowButtonPressed(_: UITapGestureRecognizer) {
         guard let playerLayer, playerLayer.state.isPlaying, toolBar.isSeekable else { return }
-        Task {
-            await seek(time: toolBar.currentTime - 15)
-        }
+        seek(time: toolBar.currentTime - 15) { _ in }
     }
 
     @objc
