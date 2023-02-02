@@ -167,22 +167,22 @@ var objects: [KSPlayerResource] = {
         objects.append(KSPlayerResource(url: URL(fileURLWithPath: path), options: options, name: "本地视频"))
     }
     if let path = Bundle.main.path(forResource: "subrip", ofType: "mkv") {
-        let options = KSOptions()
+        let options = MEOptions()
         options.asynchronousDecompression = false
         options.videoFilters = "yadif_videotoolbox=mode=0:parity=auto:deint=1"
         objects.append(KSPlayerResource(url: URL(fileURLWithPath: path), options: options, name: "文字字幕"))
     }
     if let path = Bundle.main.path(forResource: "dvd_subtitle", ofType: "mkv") {
-        let options = KSOptions()
+        let options = MEOptions()
 //        options.videoFilters = "hflip,vflip"
         objects.append(KSPlayerResource(url: URL(fileURLWithPath: path), options: options, name: "图片字幕"))
     }
     if let path = Bundle.main.path(forResource: "dolby-digital-plus-channel", ofType: "mkv") {
-        let options = KSOptions()
+        let options = MEOptions()
         objects.append(KSPlayerResource(url: URL(fileURLWithPath: path), options: options, name: "dolby-digital-plus"))
     }
     if let path = Bundle.main.path(forResource: "vr", ofType: "mp4") {
-        let options = KSOptions()
+        let options = MEOptions()
         options.display = .vr
         objects.append(KSPlayerResource(url: URL(fileURLWithPath: path), options: options, name: "本地全景视频"))
     }
@@ -196,6 +196,10 @@ var objects: [KSPlayerResource] = {
         objects.append(KSPlayerResource(url: URL(fileURLWithPath: path), name: "h265视频"))
     }
 
+    if let path = Bundle.main.path(forResource: "raw", ofType: "h264") {
+        objects.append(KSPlayerResource(url: URL(fileURLWithPath: path), name: "raw h264"))
+    }
+    
     if let url = URL(string: "http://clips.vorwaerts-gmbh.de/big_buck_bunny.mp4") {
         let options = MEOptions()
         options.startPlayTime = 25
@@ -212,30 +216,26 @@ var objects: [KSPlayerResource] = {
     }
 
     if let url = URL(string: "https://bitmovin-a.akamaihd.net/content/dataset/multi-codec/hevc/stream_fmp4.m3u8") {
-        let options = KSOptions()
+        let options = MEOptions()
         options.dropVideoFrame = false
         objects.append(KSPlayerResource(url: url, options: options, name: "fmp4"))
     }
 
     if let url = URL(string: "http://116.199.5.51:8114/00000000/hls/index.m3u8?Fsv_chan_hls_se_idx=188&FvSeid=1&Fsv_ctype=LIVES&Fsv_otype=1&Provider_id=&Pcontent_id=.m3u8") {
-        objects.append(KSPlayerResource(url: url, options: KSOptions(), name: "tvb视频"))
+        objects.append(KSPlayerResource(url: url, options: MEOptions(), name: "tvb视频"))
     }
 
     if let url = URL(string: "http://dash.edgesuite.net/akamai/bbb_30fps/bbb_30fps.mpd") {
-        objects.append(KSPlayerResource(url: url, options: KSOptions(), name: "dash视频"))
+        objects.append(KSPlayerResource(url: url, options: MEOptions(), name: "dash视频"))
     }
     if let url = URL(string: "https://devstreaming-cdn.apple.com/videos/wwdc/2019/244gmopitz5ezs2kkq/244/hls_vod_mvp.m3u8") {
-        let options = KSOptions()
+        let options = MEOptions()
         objects.append(KSPlayerResource(url: url, options: options, name: "https视频"))
     }
 
     if let url = URL(string: "rtsp://rtsp.stream/pattern") {
-        let options = KSOptions()
+        let options = MEOptions()
         objects.append(KSPlayerResource(url: url, options: options, name: "rtsp video"))
-    }
-
-    if let path = Bundle.main.path(forResource: "raw", ofType: "h264") {
-        objects.append(KSPlayerResource(url: URL(fileURLWithPath: path), name: "raw h264"))
     }
     return objects
 }()
