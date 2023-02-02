@@ -28,6 +28,7 @@ public class FFmpegAssetTrack: MediaPlayerTrack {
     public let audioStreamBasicDescription: AudioStreamBasicDescription?
     public let fieldOrder: FFmpegFieldOrder
     private var stream: UnsafeMutablePointer<AVStream>?
+    var startTime = TimeInterval(0)
     var codecpar: AVCodecParameters
     var timebase: Timebase = .defaultValue
     var subtitle: SyncPlayerItemTrack<SubtitleFrame>?

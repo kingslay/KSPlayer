@@ -261,6 +261,8 @@ Your user icon or company logo shows up this with a link to your home page.
 
 [byMohamedali](https://github.com/byMohamedali)
 
+[Kimentanm](https://github.com/Kimentanm)
+
 ## Communication
 
 ![1](https://github.com/kingslay/KSPlayer/raw/develop/Documents/Sponsors.jpg)

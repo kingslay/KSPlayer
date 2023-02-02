@@ -299,7 +299,7 @@ extension KSMEPlayer: MediaPlayerProtocol {
 
     public var currentPlaybackTime: TimeInterval {
         get {
-            playerItem.currentPlaybackTime
+            playerItem.currentPlaybackTime - playerItem.startTime
         }
         set {
             Task {
@@ -324,7 +324,7 @@ extension KSMEPlayer: MediaPlayerProtocol {
         } else {
             seekTime = time
         }
-        return await playerItem.seek(time: seekTime)
+        return await playerItem.seek(time: seekTime + playerItem.startTime)
     }
 
     public func prepareToPlay() {

@@ -51,7 +51,7 @@ final class MEPlayerItem {
     private(set) var assetTracks = [FFmpegAssetTrack]()
     private var videoAdaptation: VideoAdaptationState?
     private(set) var currentPlaybackTime = TimeInterval(0)
-    private var startTime = CMTime.zero
+    private(set) var startTime = TimeInterval(0)
     private var videoClockDelay = TimeInterval(0)
     private(set) var rotation = 0.0
     private(set) var duration: TimeInterval = 0
@@ -220,9 +220,9 @@ extension MEPlayerItem {
         options.findTime = CACurrentMediaTime()
         options.formatName = String(cString: formatCtx.pointee.iformat.pointee.name)
         if formatCtx.pointee.start_time != Int64.min {
-            startTime = CMTime(value: formatCtx.pointee.start_time, timescale: AV_TIME_BASE)
+            startTime = CMTime(value: formatCtx.pointee.start_time, timescale: AV_TIME_BASE).seconds
         }
-        currentPlaybackTime = startTime.seconds
+        currentPlaybackTime = startTime
         duration = TimeInterval(max(formatCtx.pointee.duration, 0) / Int64(AV_TIME_BASE))
         createCodec(formatCtx: formatCtx)
         if let outputURL = options.outputURL {
@@ -302,6 +302,7 @@ extension MEPlayerItem {
             if let coreStream = formatCtx.pointee.streams[i] {
                 coreStream.pointee.discard = AVDISCARD_ALL
                 if let assetTrack = FFmpegAssetTrack(stream: coreStream) {
+                    assetTrack.startTime = startTime
                     if !options.subtitleDisable, assetTrack.mediaType == .subtitle {
                         let subtitle = SyncPlayerItemTrack<SubtitleFrame>(assetTrack: assetTrack, options: options)
                         assetTrack.setIsEnabled(!assetTrack.isImageSubtitle)
