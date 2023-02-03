@@ -35,7 +35,7 @@ public protocol MediaPlayback: AnyObject {
     var currentPlaybackTime: TimeInterval { get }
     func prepareToPlay()
     func shutdown()
-    func seek(time: TimeInterval) async -> Bool
+    func seek(time: TimeInterval, completion: @escaping ((Bool) -> Void))
 }
 
 public protocol MediaPlayerProtocol: MediaPlayback {
@@ -58,10 +58,10 @@ public protocol MediaPlayerProtocol: MediaPlayback {
     var subtitleDataSouce: SubtitleDataSouce? { get }
     @available(macOS 12.0, iOS 15.0, tvOS 15.0, *)
     var playbackCoordinator: AVPlaybackCoordinator { get }
+    @available(tvOS 14.0, *)
+    var pipController: KSPictureInPictureController? { get }
     init(url: URL, options: KSOptions)
     func replace(url: URL, options: KSOptions)
-    @available(tvOS 14.0, *)
-    func pipController() -> AVPictureInPictureController?
     func play()
     func pause()
     func enterBackground()
@@ -335,8 +335,7 @@ open class KSOptions {
     public internal(set) var decodeAudioTime = 0.0
     public internal(set) var decodeVideoTime = 0.0
     var formatCtx: UnsafeMutablePointer<AVFormatContext>?
-    var channelLayout = AVAudioChannelLayout(layoutTag: kAudioChannelLayoutTag_Stereo)!
-    var sampleRate: Float64 = 44100
+    var audioFormat = AVAudioFormat(standardFormatWithSampleRate: 44100, channelLayout: AVAudioChannelLayout(layoutTag: kAudioChannelLayoutTag_Stereo)!)
     public init() {
         formatContextOptions["auto_convert"] = 0
         formatContextOptions["fps_probe_size"] = 3
@@ -453,7 +452,7 @@ open class KSOptions {
     }
 
     open func videoFrameMaxCount(fps: Float) -> Int {
-        Int(fps / 4)
+        Int(fps) >> 1
     }
 
     open func audioFrameMaxCount(fps _: Float, channels: Int) -> Int {
@@ -578,6 +577,17 @@ public struct LoadingState {
     public let isSeek: Bool
 }
 
+public enum LogLevel: Int32 {
+    case panic = 0
+    case fatal = 8
+    case error = 16
+    case warning = 24
+    case info = 32
+    case verbose = 40
+    case debug = 48
+    case trace = 56
+}
+
 public extension KSOptions {
     static var firstPlayerType: MediaPlayerProtocol.Type = KSAVPlayer.self
     static var secondPlayerType: MediaPlayerProtocol.Type?
@@ -595,10 +605,13 @@ public extension KSOptions {
     static var isAutoPlay = false
     /// seek完是否自动播放
     static var isSeekedAutoPlay = true
-    static var pipController: Any?
+    /// 日志级别
+    static var logLevel = LogLevel.warning
     /// 日志输出方式
-    static var logFunctionPoint: (String) -> Void = {
-        print($0)
+    static var logFunctionPoint: (String, LogLevel) -> Void = { str, level in
+        if level.rawValue <= KSOptions.logLevel.rawValue {
+            print(str)
+        }
     }
 
     internal static func deviceCpuCount() -> Int {
@@ -640,9 +653,9 @@ public enum MediaLoadState: Int {
     case playable
 }
 
-@inline(__always) public func KSLog(_ message: CustomStringConvertible, file: String = #file, function: String = #function, line: Int = #line) {
+@inline(__always) public func KSLog(_ message: CustomStringConvertible, logLevel: LogLevel = .warning, file: String = #file, function: String = #function, line: Int = #line) {
     let fileName = (file as NSString).lastPathComponent
-    KSOptions.logFunctionPoint("KSPlayer: \(fileName):\(line) \(function) | \(message)")
+    KSOptions.logFunctionPoint("KSPlayer: \(fileName):\(line) \(function) | \(message)", logLevel)
 }
 
 public let KSPlayerErrorDomain = "KSPlayerErrorDomain"

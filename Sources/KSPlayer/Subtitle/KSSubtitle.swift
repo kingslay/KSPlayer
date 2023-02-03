@@ -13,7 +13,7 @@ import AppKit
 import CoreFoundation
 import CoreGraphics
 import Foundation
-public class SubtitlePart: CustomStringConvertible, NSMutableCopying {
+public class SubtitlePart: CustomStringConvertible, NSMutableCopying, ObservableObject {
     public let start: TimeInterval
     public var end: TimeInterval
     public var origin: CGPoint = .zero

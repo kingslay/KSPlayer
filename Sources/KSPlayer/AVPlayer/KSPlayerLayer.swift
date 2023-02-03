@@ -68,28 +68,16 @@ open class KSPlayerLayer: UIView {
     @Published public var isPipActive = false {
         didSet {
             if #available(tvOS 14.0, *) {
-                var pipController: AVPictureInPictureController?
-                if let controller = KSOptions.pipController as? AVPictureInPictureController, controller.delegate === self {
-                    pipController = controller
-                } else {
-                    KSOptions.pipController = nil
-                    pipController = player.pipController()
+                guard let pipController = player.pipController else {
+                    return
                 }
-                if let pipController,
-                   isPipActive != pipController.isPictureInPictureActive
-                {
-                    if pipController.isPictureInPictureActive {
-                        pipController.stopPictureInPicture()
-                        pipController.delegate = nil
-                        KSOptions.pipController = nil
-                    } else {
-                        DispatchQueue.main.async { [weak self] in
-                            guard let self else { return }
-                            pipController.startPictureInPicture()
-                            pipController.delegate = self
-                            KSOptions.pipController = pipController
-                        }
+                if isPipActive {
+                    DispatchQueue.main.async { [weak self] in
+                        guard let self else { return }
+                        pipController.start(view: self)
                     }
+                } else {
+                    pipController.stop()
                 }
             }
         }
@@ -210,6 +198,9 @@ open class KSPlayerLayer: UIView {
     }
 
     deinit {
+        if #available(iOS 15.0, tvOS 15.0, macOS 12.0, *) {
+            player.pipController?.contentSource = nil
+        }
         NotificationCenter.default.removeObserver(self)
         MPNowPlayingInfoCenter.default().nowPlayingInfo = nil
         #if os(tvOS)
@@ -243,9 +234,11 @@ open class KSPlayerLayer: UIView {
         if player.isReadyToPlay {
             if state == .playedToTheEnd {
                 Task {
-                    let finished = await player.seek(time: 0)
-                    if finished {
-                        player.play()
+                    player.seek(time: 0) { [weak self] finished in
+                        guard let self else { return }
+                        if finished {
+                            self.player.play()
+                        }
                     }
                 }
             } else {
@@ -259,6 +252,9 @@ open class KSPlayerLayer: UIView {
         }
         state = player.loadState == .playable ? .bufferFinished : .buffering
         MPNowPlayingInfoCenter.default().playbackState = .playing
+        if #available(tvOS 14.0, *) {
+            KSPictureInPictureController.mute()
+        }
     }
 
     open func pause() {
@@ -284,20 +280,22 @@ open class KSPlayerLayer: UIView {
         #endif
     }
 
-    open func seek(time: TimeInterval, autoPlay: Bool) async -> Bool {
+    open func seek(time: TimeInterval, autoPlay: Bool, completion: @escaping ((Bool) -> Void)) {
         if time.isInfinite || time.isNaN {
-            return false
+            completion(false)
         }
         if player.isReadyToPlay {
-            let finished = await player.seek(time: time)
-            if finished, autoPlay {
-                play()
+            player.seek(time: time) { [weak self] finished in
+                guard let self else { return }
+                if finished, autoPlay {
+                    self.play()
+                }
+                completion(finished)
             }
-            return finished
         } else {
             isAutoPlay = autoPlay
             shouldSeekTo = time
-            return false
+            completion(false)
         }
     }
 
@@ -329,10 +327,11 @@ extension KSPlayerLayer: MediaPlayerDelegate {
         }
         if isAutoPlay {
             if shouldSeekTo > 0 {
-                Task {
-                    _ = await seek(time: shouldSeekTo, autoPlay: true)
-                    shouldSeekTo = 0
+                seek(time: shouldSeekTo, autoPlay: true) { [weak self] _ in
+                    guard let self else { return }
+                    self.shouldSeekTo = 0
                 }
+
             } else {
                 play()
             }
@@ -484,9 +483,8 @@ extension KSPlayerLayer {
         }
     }
 
-    private func seek(time: TimeInterval) {
-        Task {
-            await self.seek(time: time, autoPlay: self.options.isSeekedAutoPlay)
+    fileprivate func seek(time: TimeInterval) {
+        seek(time: time, autoPlay: options.isSeekedAutoPlay) { _ in
         }
     }
 
@@ -694,6 +692,8 @@ extension KSVideoPlayer: UIViewRepresentable {
 
     public static func dismantleUIView(_: UIViewType, coordinator: Coordinator) {
         #if os(tvOS)
+        coordinator.playerLayer?.delegate = nil
+        coordinator.playerLayer?.pause()
         coordinator.playerLayer = nil
         #endif
     }
@@ -804,7 +804,6 @@ extension KSVideoPlayer: UIViewRepresentable {
                 let playerLayer = KSPlayerLayer(url: url, options: options)
                 playerLayer.delegate = self
                 self.playerLayer = playerLayer
-                isPlay = options.isAutoPlay
                 return playerLayer
             }
         }
@@ -816,23 +815,21 @@ extension KSVideoPlayer: UIViewRepresentable {
         }
 
         public func seek(time: TimeInterval) {
-            Task {
-                await playerLayer?.seek(time: TimeInterval(time), autoPlay: true)
-            }
+            playerLayer?.seek(time: TimeInterval(time))
         }
     }
 }
 
 extension KSVideoPlayer.Coordinator: KSPlayerLayerDelegate {
     public func player(layer: KSPlayerLayer, state: KSPlayerState) {
-        if state == .readyToPlay {
+        if state == .prepareToPlay {
+            isPlay = layer.options.isAutoPlay
+        } else if state == .readyToPlay {
             videoTracks = layer.player.tracks(mediaType: .video)
             audioTracks = layer.player.tracks(mediaType: .audio)
         } else {
             isLoading = state == .buffering
-            if state != .prepareToPlay {
-                isPlay = state.isPlaying
-            }
+            isPlay = state.isPlaying
         }
         onStateChanged?(layer, state)
     }

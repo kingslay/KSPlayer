@@ -10,105 +10,105 @@ import UIKit
 #else
 import AppKit
 #endif
-
+@available(tvOS 15.0, *)
 public enum KSMenuBuilder {
     static func definitionsMenu(from resource: KSPlayerResource?,
                                 selected definition: Int,
-                                completition handler: @escaping (KSAction) -> Void) -> KSMenuX?
+                                completition handler: @escaping (Int) -> Void) -> UIMenu?
     {
-        guard #available(macOS 11.0, iOS 13.0, tvOS 14.0, *) else { return nil }
-        guard let resource, resource.definitions.count > 1 else { return nil }
-
-        var actions: [KSAction] = []
+        guard let resource, resource.definitions.count > 1 else {
+            return nil
+        }
+        var actions = [UIAction]()
         resource.definitions.enumerated().forEach { index, currentDefinition in
-            let definitionItem = KSAction.initialize(title: currentDefinition.definition,
-                                                     tag: index,
-                                                     completition: handler)
+            let definitionItem = UIAction(title: currentDefinition.definition) { item in
+                handler(index)
+                actions.forEach { action in
+                    action.state = item.title == action.title ? .on : .off
+                }
+            }
             if index == definition {
                 definitionItem.state = .on
             }
             actions.append(definitionItem)
         }
-
-        let menu = KSMenuX.initialize(title: NSLocalizedString("select video quality", comment: ""), items: actions)
-
-        return menu
+        return UIMenu(title: NSLocalizedString("select video quality", comment: ""), children: actions)
     }
 
     static func playbackRateMenu(_ currentRate: Double,
                                  speeds: [Double] = [0.75, 1.0, 1.25, 1.5, 2.0],
-                                 completition handler: @escaping (Double) -> Void) -> KSMenuX?
+                                 completition handler: @escaping (Double) -> Void) -> UIMenu
     {
-        guard #available(macOS 11.0, iOS 13.0, tvOS 14.0, *) else { return nil }
-
-        var actions: [KSAction] = []
-        speeds.enumerated().forEach { index, rate in
+        var actions = [UIAction]()
+        speeds.forEach { rate in
             let title = "\(rate) x"
-            let rateItem = KSAction.initialize(title: title,
-                                               tag: index) { action in
-                guard speeds.count > action.tag else { return }
-                handler(speeds[action.tag])
+            let rateItem = UIAction(title: title) { item in
+                handler(rate)
+                actions.forEach { action in
+                    action.state = item.title == action.title ? .on : .off
+                }
             }
             if currentRate == rate {
                 rateItem.state = .on
             }
             actions.append(rateItem)
         }
-        let menu = KSMenuX.initialize(title: NSLocalizedString("speed", comment: ""), items: actions)
-        return menu
+        return UIMenu(title: NSLocalizedString("speed", comment: ""), children: actions)
     }
 
     static func audioVideoChangeMenu(_ currentTrack: MediaPlayerTrack?,
                                      availableTracks: [MediaPlayerTrack],
-                                     completition handler: @escaping (KSAction) -> Void) -> KSMenuX?
+                                     completition handler: @escaping (MediaPlayerTrack) -> Void) -> UIMenu?
     {
-        guard availableTracks.count > 1,
-              let currentTrack,
-              #available(macOS 11.0, iOS 13.0, tvOS 14.0, *)
-        else { return nil }
+        guard let currentTrack, availableTracks.count > 1 else {
+            return nil
+        }
         let title = NSLocalizedString(currentTrack.mediaType == .audio ? "switch audio" : "switch video", comment: "")
-
-        var actions: [KSAction] = []
-        availableTracks.enumerated().forEach { index, track in
+        var actions = [UIAction]()
+        availableTracks.forEach { track in
             var title = track.name
             if track.mediaType == .video {
                 title += " \(track.naturalSize.width)x\(track.naturalSize.height)"
             }
 
-            let tracksItem = KSAction.initialize(title: title,
-                                                 tag: index,
-                                                 completition: handler)
+            let tracksItem = UIAction(title: title) { item in
+                handler(track)
+                actions.forEach { action in
+                    action.state = item.title == action.title ? .on : .off
+                }
+            }
 
             if track.isEnabled {
                 tracksItem.state = .on
             }
             actions.append(tracksItem)
         }
-        let menu = KSMenuX.initialize(title: title, items: actions)
-        return menu
+        return UIMenu(title: title, children: actions)
     }
 
     static func srtChangeMenu(_ currentSub: SubtitleInfo?,
                               availableSubtitles: [SubtitleInfo],
-                              completition handler: @escaping (SubtitleInfo?) -> Void) -> KSMenuX?
+                              completition handler: @escaping (SubtitleInfo?) -> Void) -> UIMenu?
     {
-        guard availableSubtitles.count > 0, #available(macOS 11.0, iOS 13.0, tvOS 14.0, *) else { return nil }
-        var actions: [KSAction] = []
-
-        let subtitleItem = KSAction.initialize(title: "Disabled",
-                                               tag: -1) { _ in
+        guard availableSubtitles.count > 0 else { return nil }
+        var actions = [UIAction]()
+        let subtitleItem = UIAction(title: "Disabled") { item in
             handler(nil)
+            actions.forEach { action in
+                action.state = item.title == action.title ? .on : .off
+            }
         }
         if currentSub == nil {
             subtitleItem.state = .on
         }
-        actions.append(subtitleItem)
 
-        availableSubtitles.enumerated().forEach { index, srt in
-            let subtitleItem = KSAction.initialize(title: srt.name,
-                                                   tag: index) { _ in
-                let selectedSrt = availableSubtitles[index]
-                handler(selectedSrt)
+        actions.append(subtitleItem)
+        availableSubtitles.forEach { srt in
+            let subtitleItem = UIAction(title: srt.name) { item in
+                handler(srt)
+                actions.forEach { action in
+                    action.state = item.title == action.title ? .on : .off
+                }
             }
             if srt.subtitleID == currentSub?.subtitleID {
                 subtitleItem.state = .on
@@ -116,83 +116,45 @@ public enum KSMenuBuilder {
             actions.append(subtitleItem)
         }
 
-        let menu = KSMenuX.initialize(title: NSLocalizedString("subtitle", comment: ""), items: actions)
-        return menu
+        return UIMenu(title: NSLocalizedString("subtitle", comment: ""), children: actions)
     }
 }
 
 #if canImport(UIKit)
-public final class KSAction: UIAction {
-    var tag: Int = 0
 
-    @available(macOS 11.0, iOS 13.0, tvOS 14.0, *)
-    static func initialize(title string: String,
-                           keyEquivalent _: String = "",
-                           state: KSMenuX.State = .off,
-                           tag: Int = 0,
-                           completition handler: @escaping (KSAction) -> Void) -> KSAction
-    {
-        let action = KSAction(title: string,
-                              image: nil,
-                              identifier: nil,
-                              discoverabilityTitle: nil,
-                              attributes: [],
-                              state: state.value) { action in
-            guard let action = action as? KSAction else { return }
-            handler(action)
-        }
-        action.tag = tag
+#else
+public typealias UIMenu = NSMenu
 
-        return action
+public final class UIAction: NSMenuItem {
+    private let handler: (UIAction) -> Void
+    init(title: String, handler: @escaping (UIAction) -> Void) {
+        self.handler = handler
+        super.init(title: title, action: #selector(menuPressed), keyEquivalent: "")
+        state = UIMenu.State.off.value
+        target = self
     }
-}
 
-public final class KSMenuX: UIMenu {
-    @available(iOS 13.0, tvOS 14.0, *)
-    static func initialize(title: String, items: [KSAction]) -> KSMenuX {
-        KSMenuX(title: title, children: items)
+    @objc private func menuPressed() {
+        handler(self)
     }
 
     @available(*, unavailable)
-    required init?(coder _: NSCoder) {
+    required init(coder _: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
 }
-#else
-public final class KSAction: NSMenuItem {
-    var completition: ((KSAction) -> Void)?
 
-    static func initialize(title string: String,
-                           keyEquivalent charCode: String = "",
-                           state: KSMenuX.State = .off,
-                           tag: Int = 0,
-                           completition: @escaping (KSAction) -> Void) -> KSAction
-    {
-        let menuItem = KSAction(title: string, action: #selector(menuPressed), keyEquivalent: charCode)
-        menuItem.completition = completition
-        menuItem.state = state.value
-        menuItem.target = menuItem
-        menuItem.tag = tag
-        return menuItem
-    }
-
-    @objc internal func menuPressed() {
-        completition?(self)
-    }
-}
-
-public final class KSMenuX: NSMenu {
-    static func initialize(title: String, items: [KSAction]) -> KSMenuX {
-        let menu = KSMenuX(title: title)
-        for item in items {
-            menu.addItem(item)
+extension UIMenu {
+    convenience init(title: String, children: [UIAction]) {
+        self.init(title: title)
+        for item in children {
+            addItem(item)
         }
-        return menu
     }
 }
 #endif
 
-public extension KSMenuX {
+public extension UIMenu {
     // swiftlint:disable identifier_name
     enum State: Int, @unchecked Sendable {
         case off = 0

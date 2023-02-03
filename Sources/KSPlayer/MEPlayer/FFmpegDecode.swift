@@ -32,7 +32,7 @@ class FFmpegDecode: DecodeProtocol {
         if assetTrack.mediaType == .video {
             swresample = VideoSwresample()
         } else {
-            swresample = AudioSwresample(audioDescriptor: assetTrack.audioDescriptor, outChannel: options.channelLayout.channelLayout(), outSampleRate: UInt32(options.sampleRate))
+            swresample = AudioSwresample(audioDescriptor: assetTrack.audioDescriptor, audioFormat: options.audioFormat)
         }
     }
 
@@ -47,8 +47,8 @@ class FFmpegDecode: DecodeProtocol {
                 var frame = try swresample.transfer(avframe: filter.filter(options: options, inputFrame: avframe, hwFramesCtx: codecContext.pointee.hw_frames_ctx))
                 frame.timebase = packet.assetTrack.timebase
 //                frame.timebase = Timebase(avframe.pointee.time_base)
-                frame.duration = avframe.pointee.pkt_duration
                 frame.size = avframe.pointee.pkt_size
+                frame.duration = avframe.pointee.pkt_duration
                 if frame.duration == 0, avframe.pointee.sample_rate != 0, frame.timebase.num != 0 {
                     frame.duration = Int64(avframe.pointee.nb_samples) * Int64(frame.timebase.den) / (Int64(avframe.pointee.sample_rate) * Int64(frame.timebase.num))
                 }
@@ -59,8 +59,8 @@ class FFmpegDecode: DecodeProtocol {
                         codecpar.codec_id = AV_CODEC_ID_EIA_608
                         if let assetTrack = FFmpegAssetTrack(codecpar: codecpar) {
                             assetTrack.name = "Closed Captions"
-                            assetTrack.timebase = packet.assetTrack.timebase
                             assetTrack.startTime = packet.assetTrack.startTime
+                            assetTrack.timebase = packet.assetTrack.timebase
                             let subtitle = SyncPlayerItemTrack<SubtitleFrame>(assetTrack: assetTrack, options: options)
                             assetTrack.setIsEnabled(!assetTrack.isImageSubtitle)
                             assetTrack.subtitle = subtitle
@@ -68,35 +68,40 @@ class FFmpegDecode: DecodeProtocol {
                             subtitle.decode()
                         }
                     }
-                    if let sd = av_frame_get_side_data(avframe, AV_FRAME_DATA_A53_CC), let closedCaptionsTrack = packet.assetTrack.closedCaptionsTrack, let subtitle = closedCaptionsTrack.subtitle {
+                    if let sideData = av_frame_get_side_data(avframe, AV_FRAME_DATA_A53_CC),
+                       let closedCaptionsTrack = packet.assetTrack.closedCaptionsTrack,
+                       let subtitle = closedCaptionsTrack.subtitle
+                    {
                         let closedCaptionsPacket = Packet()
                         closedCaptionsPacket.assetTrack = closedCaptionsTrack
                         if let corePacket = packet.corePacket {
                             closedCaptionsPacket.corePacket?.pointee.pts = corePacket.pointee.pts
                             closedCaptionsPacket.corePacket?.pointee.dts = corePacket.pointee.dts
+                            closedCaptionsPacket.corePacket?.pointee.pos = corePacket.pointee.pos
+                            closedCaptionsPacket.corePacket?.pointee.time_base = corePacket.pointee.time_base
+                            closedCaptionsPacket.corePacket?.pointee.stream_index = corePacket.pointee.stream_index
                         }
                         closedCaptionsPacket.corePacket?.pointee.flags |= AV_PKT_FLAG_KEY
-                        closedCaptionsPacket.corePacket?.pointee.size = Int32(sd.pointee.size)
-                        let buffer = av_buffer_ref(sd.pointee.buf)
+                        closedCaptionsPacket.corePacket?.pointee.size = Int32(sideData.pointee.size)
+                        let buffer = av_buffer_ref(sideData.pointee.buf)
                         closedCaptionsPacket.corePacket?.pointee.data = buffer?.pointee.data
                         closedCaptionsPacket.corePacket?.pointee.buf = buffer
                         closedCaptionsPacket.fill()
                         subtitle.putPacket(packet: closedCaptionsPacket)
                     }
-
-                    var position = avframe.pointee.best_effort_timestamp
-                    if position < 0 {
-                        position = avframe.pointee.pkt_dts
-                    }
-                    if position < 0 {
-                        position = bestEffortTimestamp
-                    }
-                    frame.position = position
-
-                } else {
-                    bestEffortTimestamp = max(bestEffortTimestamp, avframe.pointee.pts)
-                    frame.position = bestEffortTimestamp
                 }
+                var position = avframe.pointee.best_effort_timestamp
+                if position < 0 {
+                    position = avframe.pointee.pts
+                }
+                if position < 0 {
+                    position = avframe.pointee.pkt_dts
+                }
+                if position < 0 {
+                    position = bestEffortTimestamp
+                }
+                frame.position = position
+                bestEffortTimestamp = position
                 bestEffortTimestamp += frame.duration
                 delegate?.decodeResult(frame: frame)
             } else {

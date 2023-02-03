@@ -67,7 +67,7 @@ extension MasterViewController: UITableViewDataSource {
 
     func tableView(_: UITableView, numberOfRowsInSection section: Int) -> Int {
         if section == 1 {
-            return objects.count
+            return testObjects.count
         }
         return 1
     }
@@ -76,7 +76,7 @@ extension MasterViewController: UITableViewDataSource {
         let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath)
         if let cell = cell as? TableViewCell {
             if indexPath.section == 1 {
-                cell.nameLabel.text = objects[indexPath.row].name
+                cell.nameLabel.text = testObjects[indexPath.row].name
             } else {
                 cell.nameLabel.text = "Enter self URL"
             }
@@ -90,7 +90,7 @@ extension MasterViewController: UITableViewDelegate {
         tableView.deselectRow(at: indexPath, animated: true)
 
         if indexPath.section == 1 {
-            play(resource: objects[indexPath.row])
+            play(resource: testObjects[indexPath.row])
         } else {
             showAlertForEnterURL()
         }

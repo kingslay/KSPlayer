@@ -26,14 +26,18 @@ public class KSMEPlayer: NSObject {
         }
     }
 
-    @available(tvOS 14.0, *)
-    public func pipController() -> AVPictureInPictureController? {
+    private lazy var _pipController: Any? = {
         if #available(iOS 15.0, tvOS 15.0, macOS 12.0, *), let videoOutput {
             let contentSource = AVPictureInPictureController.ContentSource(sampleBufferDisplayLayer: videoOutput.displayLayer, playbackDelegate: self)
-            return AVPictureInPictureController(contentSource: contentSource)
+            return KSPictureInPictureController(contentSource: contentSource)
         } else {
             return nil
         }
+    }()
+
+    @available(tvOS 14.0, *)
+    public var pipController: KSPictureInPictureController? {
+        _pipController as? KSPictureInPictureController
     }
 
     private lazy var _playbackCoordinator: Any? = {
@@ -129,11 +133,8 @@ extension KSMEPlayer: MEPlayerDelegate {
         let audioDescriptor = tracks(mediaType: .audio).compactMap {
             $0 as? FFmpegAssetTrack
         }.max { track1, track2 in
-            track1.audioDescriptor.inChannel.nb_channels >= track2.audioDescriptor.inChannel.nb_channels
-        }?.audioDescriptor
-        if let audioDescriptor {
-            options.sampleRate = Float64(audioDescriptor.inputSampleRate)
-        }
+            track1.audioDescriptor.channels < track2.audioDescriptor.channels
+        }?.audioDescriptor ?? .defaultValue
         let fps = tracks(mediaType: .video).map(\.nominalFrameRate).max() ?? 24
         audioOutput.prepare(options: options, audioDescriptor: audioDescriptor)
         videoOutput?.prepare(fps: fps)
@@ -181,7 +182,7 @@ extension KSMEPlayer: MEPlayerDelegate {
             playableTime = currentPlaybackTime + loadingState.loadedTime
         }
         if loadState == .playable {
-            if !loadingState.isEndOfFile, loadingState.packetCount == 0, loadingState.frameCount == 0 {
+            if !loadingState.isEndOfFile, loadingState.frameCount == 0 {
                 loadState = .loading
                 if playbackState == .playing {
                     runInMainqueue { [weak self] in
@@ -298,12 +299,10 @@ extension KSMEPlayer: MediaPlayerProtocol {
 
     public var currentPlaybackTime: TimeInterval {
         get {
-            playerItem.currentPlaybackTime
+            playerItem.currentPlaybackTime - playerItem.startTime
         }
         set {
-            Task {
-                await seek(time: newValue)
-            }
+            seek(time: newValue) { _ in }
         }
     }
 
@@ -311,7 +310,7 @@ extension KSMEPlayer: MediaPlayerProtocol {
 
     public var seekable: Bool { playerItem.seekable }
 
-    public func seek(time: TimeInterval) async -> Bool {
+    public func seek(time: TimeInterval, completion: @escaping ((Bool) -> Void)) {
         let time = max(time, 0)
         playbackState = .seeking
         runInMainqueue { [weak self] in
@@ -323,7 +322,7 @@ extension KSMEPlayer: MediaPlayerProtocol {
         } else {
             seekTime = time
         }
-        return await playerItem.seek(time: seekTime)
+        playerItem.seek(time: seekTime + playerItem.startTime, completion: completion)
     }
 
     public func prepareToPlay() {
@@ -421,7 +420,7 @@ extension KSMEPlayer: AVPictureInPictureSampleBufferPlaybackDelegate {
 
     public func pictureInPictureController(_: AVPictureInPictureController, didTransitionToRenderSize _: CMVideoDimensions) {}
     public func pictureInPictureController(_: AVPictureInPictureController, skipByInterval skipInterval: CMTime) async {
-        _ = await seek(time: currentPlaybackTime + skipInterval.seconds)
+        seek(time: currentPlaybackTime + skipInterval.seconds) { _ in }
     }
 
     public func pictureInPictureControllerShouldProhibitBackgroundAudioPlayback(_: AVPictureInPictureController) -> Bool {
@@ -471,7 +470,7 @@ extension KSMEPlayer: AVPlaybackCoordinatorPlaybackControlDelegate {
         if abs(currentPlaybackTime - seekTime) < CGFLOAT_EPSILON {
             return
         }
-        _ = await seek(time: seekTime)
+        seek(time: seekTime) { _ in }
     }
 
     public func playbackCoordinator(_: AVDelegatingPlaybackCoordinator, didIssue bufferingCommand: AVDelegatingPlaybackCoordinatorBufferingCommand, completionHandler: @escaping () -> Void) {

@@ -50,11 +50,11 @@ open class IOSVideoPlayerView: VideoPlayerView {
         maskImageView.contentMode = .scaleAspectFit
         toolBar.addArrangedSubview(landscapeButton)
         landscapeButton.tag = PlayerButtonType.landscape.rawValue
-        landscapeButton.setImage(KSOptions.image(named: "KSPlayer_fullscreen"), for: .normal)
-        landscapeButton.setImage(KSOptions.image(named: "KSPlayer_portialscreen"), for: .selected)
+        landscapeButton.setImage(UIImage(systemName: "arrow.up.left.and.arrow.down.right"), for: .normal)
+        landscapeButton.setImage(UIImage(systemName: "arrow.down.right.and.arrow.up.left"), for: .selected)
         landscapeButton.addTarget(self, action: #selector(onButtonPressed(_:)), for: .touchUpInside)
         backButton.tag = PlayerButtonType.back.rawValue
-        backButton.setImage(KSOptions.image(named: "KSPlayer_back"), for: .normal)
+        backButton.setImage(UIImage(systemName: "chevron.left"), for: .normal)
         backButton.addTarget(self, action: #selector(onButtonPressed(_:)), for: .touchUpInside)
         navigationBar.insertArrangedSubview(backButton, at: 0)
         routeButton.isHidden = true

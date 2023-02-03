@@ -10,11 +10,12 @@ import SwiftUI
 @available(iOS 15, tvOS 15, macOS 12, *)
 public struct KSVideoPlayerView: View {
     @StateObject public var subtitleModel = SubtitleModel()
-    @State private var model = ControllerTimeModel()
     @StateObject public var playerCoordinator = KSVideoPlayer.Coordinator()
-    @State var isMaskShow = true
     @State public var url: URL
     public let options: KSOptions
+    @State var isMaskShow = true
+    @State private var model = ControllerTimeModel()
+    @Environment(\.dismiss) private var dismiss
     public init(url: URL, options: KSOptions) {
         _url = .init(initialValue: url)
         self.options = options
@@ -28,21 +29,14 @@ public struct KSVideoPlayerView: View {
                 if let subtile = subtitleModel.selectedSubtitle {
                     let time = current + options.subtitleDelay
                     if let part = subtile.search(for: time) {
-                        subtitleModel.endTime = part.end
-                        if let image = part.image {
-                            subtitleModel.image = image
-                        } else {
-                            subtitleModel.text = part.text
-                        }
+                        subtitleModel.part = part
                     } else {
-                        if time > subtitleModel.endTime {
-                            subtitleModel.image = nil
-                            subtitleModel.text = nil
+                        if let part = subtitleModel.part, part.end > part.start, time > part.end {
+                            subtitleModel.part = nil
                         }
                     }
                 } else {
-                    subtitleModel.image = nil
-                    subtitleModel.text = nil
+                    subtitleModel.part = nil
                 }
             }
             .onStateChanged { playerLayer, state in
@@ -116,6 +110,13 @@ public struct KSVideoPlayerView: View {
                     }
                     #endif
                 }
+                .onExitCommand {
+                    if isMaskShow {
+                        isMaskShow = false
+                    } else {
+                        dismiss()
+                    }
+                }
             #endif
                 .opacity(isMaskShow ? 1 : 0)
             // 设置opacity为0，还是会去更新View。所以只能这样了
@@ -183,7 +184,8 @@ struct VideoControllerView: View {
                     Button {
                         dismiss()
                     } label: {
-                        Image(systemName: "xmark").imageScale(.large)
+                        Image(systemName: "xmark")
+                            .font(.system(.title))
                     }
                     Button {
                         config.playerLayer?.isPipActive.toggle()
@@ -211,14 +213,10 @@ struct VideoControllerView: View {
                     Button {
                         isShowSetting.toggle()
                     } label: {
-                        Image(systemName: "ellipsis.circle").frame(minWidth: 20, minHeight: 20)
+                        Image(systemName: "ellipsis.circle").font(.system(.title))
                     }
                 }
             }
-            #if os(tvOS)
-//             can not add focusSection
-            .focusSection()
-            #endif
             Spacer()
             HStack {
                 Spacer()
@@ -250,7 +248,7 @@ struct VideoControllerView: View {
                 #endif
                 Spacer()
             }
-            .imageScale(.large)
+            .font(.system(.title))
             Spacer()
         }
         .padding()
@@ -259,6 +257,8 @@ struct VideoControllerView: View {
         }
         .foregroundColor(.white)
         #if os(tvOS)
+            //             can not add focusSection
+            .focusSection()
             .onPlayPauseCommand {
                 config.isPlay.toggle()
             }
@@ -305,9 +305,7 @@ public class SubtitleModel: ObservableObject {
     @Published public var textFont: Font = .largeTitle
     @Published public var textColor: Color = .white
     @Published public var textPositionFromBottom = 0
-    @Published fileprivate var text: NSMutableAttributedString?
-    @Published fileprivate var image: UIImage?
-    fileprivate var endTime = TimeInterval(0)
+    @Published fileprivate var part: SubtitlePart?
 }
 
 @available(iOS 15, tvOS 15, macOS 12, *)
@@ -316,19 +314,17 @@ struct VideoSubtitleView: View {
     var body: some View {
         VStack {
             Spacer()
-            if let image = model.image {
-                #if os(macOS)
-                Image(nsImage: image)
-                    .resizable()
-                    .scaledToFit()
-                    .padding()
-                #else
-                Image(uiImage: image)
-                    .resizable()
-                    .scaledToFit()
-                    .padding()
-                #endif
-            } else if let text = model.text {
+            if let image = model.part?.image {
+                GeometryReader { geometry in
+                    let fitRect = image.fitRect(geometry.size)
+                    Image(uiImage: image)
+                        .resizable()
+                        .offset(CGSize(width: fitRect.origin.x, height: fitRect.origin.y))
+                        .frame(width: fitRect.size.width, height: fitRect.size.height)
+                }
+                .scaledToFit()
+                .padding()
+            } else if let text = model.part?.text {
                 Text(AttributedString(text))
                     .multilineTextAlignment(.center)
                     .font(model.textFont)
@@ -336,6 +332,24 @@ struct VideoSubtitleView: View {
                     .padding(.bottom, CGFloat(model.textPositionFromBottom))
             }
         }
+    }
+}
+
+#if os(macOS)
+public extension Image {
+    init(uiImage: UIImage) {
+        self.init(nsImage: uiImage)
+    }
+}
+#endif
+
+public extension UIImage {
+    func fitRect(_ fitSize: CGSize) -> CGRect {
+        let hZoom = fitSize.width / size.width
+        let vZoom = fitSize.height / size.height
+        let zoom = min(min(hZoom, vZoom), 1)
+        let newSize = size * zoom
+        return CGRect(origin: CGPoint(x: (fitSize.width - newSize.width) / 2, y: fitSize.height - newSize.height), size: newSize)
     }
 }
 

@@ -28,19 +28,19 @@ public class FFmpegAssetTrack: MediaPlayerTrack {
     public let audioStreamBasicDescription: AudioStreamBasicDescription?
     public let fieldOrder: FFmpegFieldOrder
     private var stream: UnsafeMutablePointer<AVStream>?
+    let isImageSubtitle: Bool
+    let audioDescriptor: AudioDescriptor
+    var startTime = TimeInterval(0)
     var codecpar: AVCodecParameters
-    var startTime: CMTime = .zero
     var timebase: Timebase = .defaultValue
     var subtitle: SyncPlayerItemTrack<SubtitleFrame>?
     var closedCaptionsTrack: FFmpegAssetTrack?
-    let audioDescriptor: AudioDescriptor
     convenience init?(stream: UnsafeMutablePointer<AVStream>) {
         let codecpar = stream.pointee.codecpar.pointee
         self.init(codecpar: codecpar)
         self.stream = stream
-        if let bitrateEntry = av_dict_get(stream.pointee.metadata, "variant_bitrate", nil, 0) ?? av_dict_get(stream.pointee.metadata, "BPS", nil, 0),
-           let bitRate = Int64(String(cString: bitrateEntry.pointee.value))
-        {
+        let metadata = toDictionary(stream.pointee.metadata)
+        if let value = metadata["variant_bitrate"] ?? metadata["BPS"], let bitRate = Int64(value) {
             self.bitRate = bitRate
         }
         if stream.pointee.side_data?.pointee.type == AV_PKT_DATA_DOVI_CONF {
@@ -52,12 +52,14 @@ public class FFmpegAssetTrack: MediaPlayerTrack {
             timebase = Timebase(num: 1, den: 1000)
         }
         self.timebase = timebase
-        if stream.pointee.start_time != Int64.min {
-            startTime = CMTime(value: stream.pointee.start_time * Int64(timebase.num), timescale: timebase.den)
+        if let rotateTag = metadata["rotate"], rotateTag == "0" {
+            rotation = 0
+        } else if let displaymatrix = av_stream_get_side_data(stream, AV_PKT_DATA_DISPLAYMATRIX, nil) {
+            let matrix = displaymatrix.withMemoryRebound(to: Int32.self, capacity: 1) { $0 }
+            rotation = -av_display_rotation_get(matrix)
         } else {
-            startTime = .zero
+            rotation = 0
         }
-        rotation = stream.rotation
         let frameRate = stream.pointee.avg_frame_rate
         if stream.pointee.duration > 0, stream.pointee.nb_frames > 0, stream.pointee.nb_frames != stream.pointee.duration {
             nominalFrameRate = Float(stream.pointee.nb_frames) * Float(timebase.den) / Float(stream.pointee.duration) * Float(timebase.num)
@@ -69,13 +71,13 @@ public class FFmpegAssetTrack: MediaPlayerTrack {
         if codecpar.codec_type == AVMEDIA_TYPE_VIDEO {
             description += ", \(nominalFrameRate) fps"
         }
-        if let entry = av_dict_get(stream.pointee.metadata, "language", nil, 0), let title = entry.pointee.value {
-            language = NSLocalizedString(String(cString: title), comment: "")
+        if let value = metadata["language"] {
+            language = NSLocalizedString(value, comment: "")
         } else {
             language = nil
         }
-        if let entry = av_dict_get(stream.pointee.metadata, "title", nil, 0), let title = entry.pointee.value {
-            name = String(cString: title)
+        if let value = metadata["title"] {
+            name = value
         } else {
             name = language ?? mediaType.rawValue
         }
@@ -116,9 +118,7 @@ public class FFmpegAssetTrack: MediaPlayerTrack {
             let formatFlags = ((sampleFormat == AV_SAMPLE_FMT_FLT || sampleFormat == AV_SAMPLE_FMT_DBL) ? kAudioFormatFlagIsFloat : sampleFormat == AV_SAMPLE_FMT_U8 ? 0 : kAudioFormatFlagIsSignedInteger) | kAudioFormatFlagIsPacked
             audioStreamBasicDescription = AudioStreamBasicDescription(mSampleRate: Float64(codecpar.sample_rate), mFormatID: codecpar.codec_id.mediaSubType.rawValue, mFormatFlags: formatFlags, mBytesPerPacket: bytesPerSample * channelsPerFrame, mFramesPerPacket: 1, mBytesPerFrame: bytesPerSample * channelsPerFrame, mChannelsPerFrame: channelsPerFrame, mBitsPerChannel: bytesPerSample * 8, mReserved: 0)
             description += ", \(codecpar.sample_rate)Hz"
-            var str = [Int8](repeating: 0, count: 64)
-            _ = av_channel_layout_describe(&self.codecpar.ch_layout, &str, str.count)
-            description += ", \(String(cString: str))"
+            description += ", \(codecpar.ch_layout.description)"
             if let name = av_get_sample_fmt_name(AVSampleFormat(rawValue: codecpar.format)) {
                 let fmt = String(cString: name)
                 description += ", \(fmt)"
@@ -154,8 +154,6 @@ public class FFmpegAssetTrack: MediaPlayerTrack {
         }
     }
 
-    let isImageSubtitle: Bool
-
     public func setIsEnabled(_ isEnabled: Bool) {
         self.isEnabled = isEnabled
     }
@@ -175,7 +173,7 @@ protocol PlayerItemTrackProtocol: CapacityProtocol, AnyObject {
 }
 
 class SyncPlayerItemTrack<Frame: MEFrame>: PlayerItemTrackProtocol, CustomStringConvertible {
-    private var seekTime = 0.0
+    var seekTime = 0.0
     fileprivate let options: KSOptions
     fileprivate var decoderMap = [Int32: DecodeProtocol]()
     fileprivate var state = MECodecState.idle {
@@ -205,7 +203,7 @@ class SyncPlayerItemTrack<Frame: MEFrame>: PlayerItemTrackProtocol, CustomString
         fps = assetTrack.nominalFrameRate
         // 默认缓存队列大小跟帧率挂钩,经测试除以4，最优
         if mediaType == .audio {
-            let capacity = options.audioFrameMaxCount(fps: fps, channels: Int(assetTrack.audioDescriptor.inChannel.nb_channels))
+            let capacity = options.audioFrameMaxCount(fps: fps, channels: Int(assetTrack.audioDescriptor.channels))
             outputRenderQueue = CircularBuffer(initialCapacity: capacity, expanding: false)
         } else if mediaType == .video {
             outputRenderQueue = CircularBuffer(initialCapacity: options.videoFrameMaxCount(fps: fps), sorted: true, expanding: false)
@@ -221,7 +219,9 @@ class SyncPlayerItemTrack<Frame: MEFrame>: PlayerItemTrackProtocol, CustomString
     }
 
     func seek(time: TimeInterval) {
-        seekTime = time
+        if options.isAccurateSeek {
+            seekTime = time
+        }
         isEndOfFile = false
         state = .flush
         outputRenderQueue.flush()
@@ -288,7 +288,7 @@ extension SyncPlayerItemTrack: DecodeResultDelegate {
         if state == .flush || state == .closed {
             return
         }
-        if seekTime > 0, options.isAccurateSeek {
+        if seekTime > 0 {
             let timestamp = frame.position + frame.duration
             if timestamp <= 0 || frame.timebase.cmtime(for: timestamp).seconds < seekTime {
                 return

@@ -6,6 +6,7 @@
 //
 
 import AVFoundation
+import CoreMedia
 import FFmpeg
 import Libavutil
 
@@ -162,24 +163,80 @@ extension AVAudioChannelLayout {
     }
 }
 
-// swiftlint:enable identifier_name
+extension AVAudioFormat {
+    var sampleFormat: AVSampleFormat {
+        switch commonFormat {
+        case .pcmFormatFloat32:
+            return isInterleaved ? AV_SAMPLE_FMT_FLT : AV_SAMPLE_FMT_FLTP
+        case .pcmFormatFloat64:
+            return isInterleaved ? AV_SAMPLE_FMT_DBL : AV_SAMPLE_FMT_DBLP
+        case .pcmFormatInt16:
+            return isInterleaved ? AV_SAMPLE_FMT_S16 : AV_SAMPLE_FMT_S16P
+        case .pcmFormatInt32:
+            return isInterleaved ? AV_SAMPLE_FMT_S32 : AV_SAMPLE_FMT_S32P
+        case .otherFormat:
+            return isInterleaved ? AV_SAMPLE_FMT_FLT : AV_SAMPLE_FMT_FLTP
+        @unknown default:
+            return isInterleaved ? AV_SAMPLE_FMT_FLT : AV_SAMPLE_FMT_FLTP
+        }
+    }
+
+    var sampleSize: UInt32 {
+        UInt32(av_get_bytes_per_sample(sampleFormat))
+    }
+
+    func toPCMBuffer(frame: AudioFrame) -> AVAudioPCMBuffer? {
+        guard let pcmBuffer = AVAudioPCMBuffer(pcmFormat: self, frameCapacity: UInt32(frame.dataSize) / streamDescription.pointee.mBytesPerFrame) else {
+            return nil
+        }
+        pcmBuffer.frameLength = pcmBuffer.frameCapacity
+        for i in 0 ..< min(Int(pcmBuffer.format.channelCount), frame.data.count) {
+            frame.data[i]?.withMemoryRebound(to: Float.self, capacity: Int(pcmBuffer.frameCapacity)) { srcFloatsForChannel in
+                pcmBuffer.floatChannelData?[i].assign(from: srcFloatsForChannel, count: Int(pcmBuffer.frameCapacity))
+            }
+        }
+        return pcmBuffer
+    }
+}
+
+let layoutMapTuple =
+    [(tag: kAudioChannelLayoutTag_Mono, mask: swift_AV_CH_LAYOUT_MONO),
+     (tag: kAudioChannelLayoutTag_Stereo, mask: swift_AV_CH_LAYOUT_STEREO),
+     (tag: kAudioChannelLayoutTag_WAVE_2_1, mask: swift_AV_CH_LAYOUT_2POINT1),
+     (tag: kAudioChannelLayoutTag_ITU_2_1, mask: swift_AV_CH_LAYOUT_2_1),
+     (tag: kAudioChannelLayoutTag_MPEG_3_0_A, mask: swift_AV_CH_LAYOUT_SURROUND),
+     (tag: kAudioChannelLayoutTag_DVD_10, mask: swift_AV_CH_LAYOUT_3POINT1),
+     (tag: kAudioChannelLayoutTag_Logic_4_0_A, mask: swift_AV_CH_LAYOUT_4POINT0),
+     (tag: kAudioChannelLayoutTag_Logic_Quadraphonic, mask: swift_AV_CH_LAYOUT_2_2),
+     (tag: kAudioChannelLayoutTag_WAVE_4_0_B, mask: swift_AV_CH_LAYOUT_QUAD),
+     (tag: kAudioChannelLayoutTag_DVD_11, mask: swift_AV_CH_LAYOUT_4POINT1),
+     (tag: kAudioChannelLayoutTag_Logic_5_0_A, mask: swift_AV_CH_LAYOUT_5POINT0),
+     (tag: kAudioChannelLayoutTag_WAVE_5_0_B, mask: swift_AV_CH_LAYOUT_5POINT0_BACK),
+     (tag: kAudioChannelLayoutTag_Logic_5_1_A, mask: swift_AV_CH_LAYOUT_5POINT1),
+     (tag: kAudioChannelLayoutTag_WAVE_5_1_B, mask: swift_AV_CH_LAYOUT_5POINT1_BACK),
+     (tag: kAudioChannelLayoutTag_Logic_6_0_A, mask: swift_AV_CH_LAYOUT_6POINT0),
+     (tag: kAudioChannelLayoutTag_DTS_6_0_A, mask: swift_AV_CH_LAYOUT_6POINT0_FRONT),
+     (tag: kAudioChannelLayoutTag_DTS_6_0_C, mask: swift_AV_CH_LAYOUT_HEXAGONAL),
+     (tag: kAudioChannelLayoutTag_Logic_6_1_C, mask: swift_AV_CH_LAYOUT_6POINT1),
+     (tag: kAudioChannelLayoutTag_DTS_6_1_A, mask: swift_AV_CH_LAYOUT_6POINT1_FRONT),
+     (tag: kAudioChannelLayoutTag_DTS_6_1_C, mask: swift_AV_CH_LAYOUT_6POINT1_BACK),
+     (tag: kAudioChannelLayoutTag_AAC_7_0, mask: swift_AV_CH_LAYOUT_7POINT0),
+     (tag: kAudioChannelLayoutTag_Logic_7_1_A, mask: swift_AV_CH_LAYOUT_7POINT1),
+     (tag: kAudioChannelLayoutTag_Logic_7_1_SDDS_A, mask: swift_AV_CH_LAYOUT_7POINT1_WIDE),
+     (tag: kAudioChannelLayoutTag_AAC_Octagonal, mask: swift_AV_CH_LAYOUT_OCTAGONAL),
+     //     (tag: kAudioChannelLayoutTag_Logic_Atmos_5_1_2, mask: swift_AV_CH_LAYOUT_7POINT1_WIDE_BACK),
+    ]
+
 // Some channel abbreviations used below:
-// Ts - top surround
-// Ltm - left top middle
-// Rtm - right top middle
 // Lss - left side surround
 // Rss - right side surround
-// Lb - left bottom
-// Rb - Right bottom
-// Cb - Center bottom
-// Lts - Left top surround
-// Rts - Right top surround
 // Leos - Left edge of screen
 // Reos - Right edge of screen
 // Lbs - Left back surround
 // Rbs - Right back surround
 // Lt - left matrix total. for matrix encoded stereo.
 // Rt - right matrix total. for matrix encoded stereo.
+
 extension AudioChannelLabel {
     var avChannel: AVChannel {
         switch self {
@@ -217,7 +274,7 @@ extension AudioChannelLabel {
             // Rsd - right surround direct
             return AV_CHAN_SURROUND_DIRECT_RIGHT
         case kAudioChannelLabel_TopCenterSurround:
-            // TS
+            // Ts - top surround
             return AV_CHAN_TOP_CENTER
         case kAudioChannelLabel_VerticalHeightLeft:
             // Vhl - vertical height left Top Front Left
@@ -255,6 +312,27 @@ extension AudioChannelLabel {
         case kAudioChannelLabel_Mono:
             // C - center
             return AV_CHAN_FRONT_CENTER
+        case kAudioChannelLabel_LeftTopMiddle:
+            // Ltm - left top middle
+            return AV_CHAN_NONE
+        case kAudioChannelLabel_RightTopMiddle:
+            // Rtm - right top middle
+            return AV_CHAN_NONE
+        case kAudioChannelLabel_LeftTopSurround:
+            // Lts - Left top surround
+            return AV_CHAN_TOP_SIDE_LEFT
+        case kAudioChannelLabel_RightTopSurround:
+            // Rts - Right top surround
+            return AV_CHAN_TOP_SIDE_RIGHT
+        case kAudioChannelLabel_LeftBottom:
+            // Lb - left bottom
+            return AV_CHAN_BOTTOM_FRONT_LEFT
+        case kAudioChannelLabel_RightBottom:
+            // Rb - Right bottom
+            return AV_CHAN_BOTTOM_FRONT_RIGHT
+        case kAudioChannelLabel_CenterBottom:
+            // Cb - Center bottom
+            return AV_CHAN_BOTTOM_FRONT_CENTER
         case kAudioChannelLabel_HeadphonesLeft:
             return AV_CHAN_STEREO_LEFT
         case kAudioChannelLabel_HeadphonesRight:

@@ -126,13 +126,10 @@ public class PlayerToolBar: UIStackView {
         timeSlider.maximumTrackTintColor = focusColor.withAlphaComponent(0.2)
         timeSlider.minimumTrackTintColor = focusColor
         playButton.tag = PlayerButtonType.play.rawValue
-        playButton.setImage(KSOptions.image(named: "toolbar_ic_play"), for: .normal)
-        playButton.setImage(KSOptions.image(named: "toolbar_ic_pause"), for: .selected)
         playButton.setTitleColor(focusColor, for: .focused)
         playButton.setTitleColor(tintColor, for: .normal)
         playbackRateButton.tag = PlayerButtonType.rate.rawValue
         playbackRateButton.titleFont = .systemFont(ofSize: 14, weight: .medium)
-        playbackRateButton.setTitle(NSLocalizedString("speed", comment: ""), for: .normal)
         playbackRateButton.setTitleColor(focusColor, for: .focused)
         playbackRateButton.setTitleColor(tintColor, for: .normal)
         definitionButton.tag = PlayerButtonType.definition.rawValue
@@ -141,16 +138,13 @@ public class PlayerToolBar: UIStackView {
         definitionButton.setTitleColor(tintColor, for: .normal)
         audioSwitchButton.tag = PlayerButtonType.audioSwitch.rawValue
         audioSwitchButton.titleFont = .systemFont(ofSize: 14, weight: .medium)
-        audioSwitchButton.setTitle(NSLocalizedString("switch audio", comment: ""), for: .normal)
         audioSwitchButton.setTitleColor(focusColor, for: .focused)
         audioSwitchButton.setTitleColor(tintColor, for: .normal)
         videoSwitchButton.tag = PlayerButtonType.videoSwitch.rawValue
         videoSwitchButton.titleFont = .systemFont(ofSize: 14, weight: .medium)
-        videoSwitchButton.setTitle(NSLocalizedString("switch video", comment: ""), for: .normal)
         videoSwitchButton.setTitleColor(focusColor, for: .focused)
         videoSwitchButton.setTitleColor(tintColor, for: .normal)
         srtButton.tag = PlayerButtonType.srt.rawValue
-        srtButton.setTitle(NSLocalizedString("subtitle", comment: ""), for: .normal)
         srtButton.titleFont = .systemFont(ofSize: 14, weight: .medium)
         srtButton.setTitleColor(focusColor, for: .focused)
         srtButton.setTitleColor(tintColor, for: .normal)
@@ -161,14 +155,28 @@ public class PlayerToolBar: UIStackView {
         if #available(macOS 11.0, *) {
             pipButton.setImage(UIImage(systemName: "pip.enter"), for: .normal)
             pipButton.setImage(UIImage(systemName: "pip.exit"), for: .selected)
-        } else {
-            pipButton.setTitle(NSLocalizedString("pip", comment: ""), for: .normal)
+            playButton.setImage(UIImage(systemName: "play.fill"), for: .normal)
+            playButton.setImage(UIImage(systemName: "pause.fill"), for: .selected)
+            srtButton.setImage(UIImage(systemName: "contextualmenu.and.cursorarrow"), for: .normal)
+            definitionButton.setImage(UIImage(systemName: "arrow.up.right.video"), for: .normal)
+            audioSwitchButton.setImage(UIImage(systemName: "waveform"), for: .normal)
+            videoSwitchButton.setImage(UIImage(systemName: "video.badge.ellipsis"), for: .normal)
+            playbackRateButton.setImage(UIImage(systemName: "speedometer"), for: .normal)
         }
         playButton.translatesAutoresizingMaskIntoConstraints = false
         srtButton.translatesAutoresizingMaskIntoConstraints = false
         translatesAutoresizingMaskIntoConstraints = false
-
+        if #available(tvOS 14.0, *) {
+            pipButton.isHidden = !AVPictureInPictureController.isPictureInPictureSupported()
+        }
         #if os(tvOS)
+        srtButton.fillImage()
+        pipButton.fillImage()
+        playButton.fillImage()
+        definitionButton.fillImage()
+        audioSwitchButton.fillImage()
+        videoSwitchButton.fillImage()
+        playbackRateButton.fillImage()
         playButton.tintColor = tintColor
         playbackRateButton.tintColor = tintColor
         definitionButton.tintColor = tintColor

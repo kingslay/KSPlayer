@@ -2,18 +2,17 @@ import FFmpeg
 import Libavcodec
 import Libavfilter
 import Libavformat
-extension UnsafeMutablePointer where Pointee == AVStream {
-    var rotation: Double {
-        let displaymatrix = av_stream_get_side_data(self, AV_PKT_DATA_DISPLAYMATRIX, nil)
-        let rotateTag = av_dict_get(pointee.metadata, "rotate", nil, 0)
-        if let rotateTag, String(cString: rotateTag.pointee.value) == "0" {
-            return 0.0
-        } else if let displaymatrix {
-            let matrix = displaymatrix.withMemoryRebound(to: Int32.self, capacity: 1) { $0 }
-            return -av_display_rotation_get(matrix)
+
+func toDictionary(_ native: OpaquePointer?) -> [String: String] {
+    var dict = [String: String]()
+    if let native {
+        var prev: UnsafeMutablePointer<AVDictionaryEntry>?
+        while let tag = av_dict_get(native, "", prev, AV_DICT_IGNORE_SUFFIX) {
+            dict[String(cString: tag.pointee.key)] = String(cString: tag.pointee.value)
+            prev = tag
         }
-        return 0.0
     }
+    return dict
 }
 
 extension UnsafeMutablePointer where Pointee == AVCodecContext {
@@ -376,10 +375,7 @@ extension AVBufferSrcParameters: Equatable {
     var arg: String {
         if sample_rate > 0 {
             let fmt = String(cString: av_get_sample_fmt_name(AVSampleFormat(rawValue: format)))
-            var str = [Int8](repeating: 0, count: 64)
-            var chLayout = ch_layout
-            _ = av_channel_layout_describe(&chLayout, &str, str.count)
-            return "sample_rate=\(sample_rate):sample_fmt=\(fmt):time_base=\(time_base.num)/\(time_base.den):channels=\(ch_layout.nb_channels):channel_layout=\(String(cString: str))"
+            return "sample_rate=\(sample_rate):sample_fmt=\(fmt):time_base=\(time_base.num)/\(time_base.den):channels=\(ch_layout.nb_channels):channel_layout=\(ch_layout.description)"
         } else {
             return "video_size=\(width)x\(height):pix_fmt=\(format):time_base=\(time_base.num)/\(time_base.den):pixel_aspect=\(sample_aspect_ratio.num)/\(sample_aspect_ratio.den)"
         }
@@ -394,32 +390,26 @@ extension AVChannelLayout: Equatable {
     }
 }
 
-var layoutMapTuple = [(tag: kAudioChannelLayoutTag_Mono, mask: swift_AV_CH_LAYOUT_MONO),
-                      (tag: kAudioChannelLayoutTag_Stereo, mask: swift_AV_CH_LAYOUT_STEREO),
-                      (tag: kAudioChannelLayoutTag_MPEG_3_0_A, mask: swift_AV_CH_LAYOUT_SURROUND),
-                      (tag: kAudioChannelLayoutTag_Logic_4_0_A, mask: swift_AV_CH_LAYOUT_4POINT0),
-                      (tag: kAudioChannelLayoutTag_Logic_Quadraphonic, mask: swift_AV_CH_LAYOUT_2_2),
-                      (tag: kAudioChannelLayoutTag_Logic_5_0_A, mask: swift_AV_CH_LAYOUT_5POINT0),
-                      (tag: kAudioChannelLayoutTag_Logic_5_1_A, mask: swift_AV_CH_LAYOUT_5POINT1),
-                      (tag: kAudioChannelLayoutTag_Logic_6_0_A, mask: swift_AV_CH_LAYOUT_6POINT0),
-                      (tag: kAudioChannelLayoutTag_Logic_6_1_C, mask: swift_AV_CH_LAYOUT_6POINT1),
-                      (tag: kAudioChannelLayoutTag_AAC_7_0, mask: swift_AV_CH_LAYOUT_7POINT0),
-                      (tag: kAudioChannelLayoutTag_Logic_7_1_A, mask: swift_AV_CH_LAYOUT_7POINT1),
-                      (tag: kAudioChannelLayoutTag_Logic_7_1_SDDS_A, mask: swift_AV_CH_LAYOUT_7POINT1_WIDE),
-                      //        (tag: kAudioChannelLayoutTag_Logic_Atmos_5_1_2, mask: swift_AV_CH_LAYOUT_7POINT1_WIDE_BACK),
-                      (tag: kAudioChannelLayoutTag_AAC_Octagonal, mask: swift_AV_CH_LAYOUT_OCTAGONAL)]
-extension AVChannelLayout {
+extension AVChannelLayout: CustomStringConvertible {
+    static let defaultValue = AVChannelLayout(order: AV_CHANNEL_ORDER_NATIVE, nb_channels: 2, u: AVChannelLayout.__Unnamed_union_u(mask: swift_AV_CH_LAYOUT_STEREO), opaque: nil)
     var layoutTag: AudioChannelLayoutTag {
-        KSLog("FFmepg channelLayout: \(self)")
+        KSLog("FFmepg channelLayout: \(self) order: \(order)")
         let tag = layoutMapTuple.first { _, mask in
             u.mask == mask
         }?.tag
         if let tag {
             return tag
         } else {
-            assertionFailure("can not find AudioChannelLayoutTag for \(self)")
+            KSLog("can not find AudioChannelLayoutTag FFmepg channelLayout: \(self) order: \(order)")
             return kAudioChannelLayoutTag_Stereo
         }
+    }
+
+    public var description: String {
+        var channelLayout = self
+        var str = [Int8](repeating: 0, count: 64)
+        _ = av_channel_layout_describe(&channelLayout, &str, str.count)
+        return String(cString: str)
     }
 }
 

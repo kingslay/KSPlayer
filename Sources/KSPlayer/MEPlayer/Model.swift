@@ -67,28 +67,14 @@ extension MEFrame {
 
 // MARK: model
 
-public enum LogLevel: Int32 {
-    case panic = 0
-    case fatal = 8
-    case error = 16
-    case warning = 24
-    case info = 32
-    case verbose = 40
-    case debug = 48
-    case trace = 56
-}
-
 // for MEPlayer
 public extension KSOptions {
     /// 开启VR模式的陀飞轮
     static var enableSensor = true
-    /// 日志级别
-    static var logLevel = LogLevel.warning
     static var stackSize = 32768
     static var isClearVideoWhereReplace = true
     /// true: AVSampleBufferAudioRenderer false: AVAudioEngine
     static var isUseAudioRenderer = false
-    static var isAudioPlanar = !isUseAudioRenderer
     static func colorSpace(ycbcrMatrix: CFString?, transferFunction: CFString?) -> CGColorSpace? {
         switch ycbcrMatrix {
         case kCVImageBufferYCbCrMatrix_ITU_R_709_2:
@@ -195,9 +181,8 @@ final class AudioFrame: MEFrame {
     let channels: UInt32
     let dataSize: Int
     var data: [UnsafeMutablePointer<UInt8>?]
-    public init(bufferSize: Int32, channels: UInt32) {
+    public init(bufferSize: Int32, channels: UInt32, count: Int) {
         self.channels = channels
-        let count = Int(KSOptions.isAudioPlanar ? channels : 1)
         dataSize = Int(bufferSize)
         data = (0 ..< count).map { _ in
             UnsafeMutablePointer<UInt8>.allocate(capacity: Int(bufferSize))

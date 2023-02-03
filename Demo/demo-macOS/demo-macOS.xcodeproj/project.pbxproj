@@ -17,6 +17,7 @@
 		AC62AEF420C9830300A75F85 /* ViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = AC62AEF220C9830300A75F85 /* ViewController.xib */; };
 		ACB5A251226579E1004C4EEF /* OpenURLWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACB5A24F226579E0004C4EEF /* OpenURLWindowController.swift */; };
 		ACB5A252226579E1004C4EEF /* OpenURLWindowController.xib in Resources */ = {isa = PBXBuildFile; fileRef = ACB5A250226579E1004C4EEF /* OpenURLWindowController.xib */; };
+		ACEA9FF1298BFDD400FBA74B /* TestURL.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACEA9FF0298BFDD300FBA74B /* TestURL.swift */; };
 		FCE576E4DF033905B99A93E6 /* Pods_demo_macOS.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 90F4636D697BEE812114E1B4 /* Pods_demo_macOS.framework */; };
 /* End PBXBuildFile section */
 
@@ -58,6 +59,7 @@
 		AC62AEF220C9830300A75F85 /* ViewController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = ViewController.xib; sourceTree = "<group>"; };
 		ACB5A24F226579E0004C4EEF /* OpenURLWindowController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OpenURLWindowController.swift; sourceTree = "<group>"; };
 		ACB5A250226579E1004C4EEF /* OpenURLWindowController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = OpenURLWindowController.xib; sourceTree = "<group>"; };
+		ACEA9FF0298BFDD300FBA74B /* TestURL.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = TestURL.swift; path = ../../SwiftUI/Shared/TestURL.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -128,6 +130,7 @@
 		AC0860DE20B699E100D801FC /* demo-macOS */ = {
 			isa = PBXGroup;
 			children = (
+				ACEA9FF0298BFDD300FBA74B /* TestURL.swift */,
 				AC0860DF20B699E100D801FC /* AppDelegate.swift */,
 				AC3B64622187411000570305 /* MainWindow.swift */,
 				AC62AEF120C9830300A75F85 /* ViewController.swift */,
@@ -337,6 +340,7 @@
 			files = (
 				AC3B64632187411000570305 /* MainWindow.swift in Sources */,
 				ACB5A251226579E1004C4EEF /* OpenURLWindowController.swift in Sources */,
+				ACEA9FF1298BFDD400FBA74B /* TestURL.swift in Sources */,
 				AC62AEF320C9830300A75F85 /* ViewController.swift in Sources */,
 				AC0860E020B699E100D801FC /* AppDelegate.swift in Sources */,
 			);

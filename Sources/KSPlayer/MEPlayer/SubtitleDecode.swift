@@ -29,7 +29,9 @@ class SubtitleDecode: DecodeProtocol {
         }
     }
 
-    func decode() {}
+    func decode() {
+        preSubtitleFrame = nil
+    }
 
     func doDecode(packet: Packet) throws {
         guard let codecContext else {
@@ -37,41 +39,35 @@ class SubtitleDecode: DecodeProtocol {
             return
         }
         var gotsubtitle = Int32(0)
-        let len = avcodec_decode_subtitle2(codecContext, &subtitle, &gotsubtitle, packet.corePacket)
-        if len <= 0 {
+        _ = avcodec_decode_subtitle2(codecContext, &subtitle, &gotsubtitle, packet.corePacket)
+        if gotsubtitle == 0 {
             return
         }
         let (origin, attributedString, image) = text(subtitle: subtitle)
         let position = packet.position
-        let seconds = (packet.assetTrack.timebase.cmtime(for: position) - packet.assetTrack.startTime).seconds
-        var end = seconds
-        if subtitle.end_display_time == UInt32.max {
-            end = Double(UInt32.max)
-        } else if subtitle.end_display_time > 0 {
-            end += TimeInterval(subtitle.end_display_time) / 1000.0
-        } else if packet.duration > 0 {
-            end += packet.assetTrack.timebase.cmtime(for: packet.duration).seconds
+        let start = packet.assetTrack.timebase.cmtime(for: position).seconds + TimeInterval(subtitle.start_display_time) / 1000.0
+        var duration = TimeInterval(subtitle.end_display_time - subtitle.start_display_time) / 1000.0
+        if duration == 0 {
+            duration = packet.assetTrack.timebase.cmtime(for: packet.duration).seconds
         }
-        let part = SubtitlePart(seconds + TimeInterval(subtitle.start_display_time) / 1000.0, end, attributedString: attributedString)
+        let part = SubtitlePart(start, start + duration, attributedString: attributedString)
         part.image = image
         part.origin = origin
         let frame = SubtitleFrame(part: part, timebase: packet.assetTrack.timebase)
         frame.position = position
-        if let preSubtitleFrame, preSubtitleFrame.part.end == Double(UInt32.max) {
-            preSubtitleFrame.part.end = frame.part.start
-        }
         if let preSubtitleFrame, preSubtitleFrame.part == part {
             if let attributedString {
                 preSubtitleFrame.part.text?.append(NSAttributedString(string: "\n"))
                 preSubtitleFrame.part.text?.append(attributedString)
             }
         } else {
+            if let preSubtitleFrame, preSubtitleFrame.part.end == preSubtitleFrame.part.start {
+                preSubtitleFrame.part.end = frame.part.start
+            }
             preSubtitleFrame = frame
             delegate?.decodeResult(frame: frame)
         }
-        if gotsubtitle > 0 {
-            avsubtitle_free(&subtitle)
-        }
+        avsubtitle_free(&subtitle)
     }
 
     func doFlushCodec() {

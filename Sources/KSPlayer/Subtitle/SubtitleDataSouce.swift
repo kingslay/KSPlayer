@@ -23,12 +23,14 @@ public class URLSubtitleInfo: SubtitleInfo {
 
     public func enableSubtitle(completion: @escaping (Result<KSSubtitleProtocol, NSError>) -> Void) {
         let block = { (url: URL) in
-            let subtitles = KSURLSubtitle()
-            do {
-                try subtitles.parse(url: url)
-                completion(.success(subtitles))
-            } catch {
-                completion(.failure(error as NSError))
+            DispatchQueue.global().async {
+                do {
+                    let subtitles = KSURLSubtitle()
+                    try subtitles.parse(url: url)
+                    completion(.success(subtitles))
+                } catch {
+                    completion(.failure(error as NSError))
+                }
             }
         }
         if let downloadURL {
