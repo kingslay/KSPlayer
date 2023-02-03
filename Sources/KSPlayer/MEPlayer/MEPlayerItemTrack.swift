@@ -28,12 +28,13 @@ public class FFmpegAssetTrack: MediaPlayerTrack {
     public let audioStreamBasicDescription: AudioStreamBasicDescription?
     public let fieldOrder: FFmpegFieldOrder
     private var stream: UnsafeMutablePointer<AVStream>?
+    let isImageSubtitle: Bool
+    let audioDescriptor: AudioDescriptor
     var startTime = TimeInterval(0)
     var codecpar: AVCodecParameters
     var timebase: Timebase = .defaultValue
     var subtitle: SyncPlayerItemTrack<SubtitleFrame>?
     var closedCaptionsTrack: FFmpegAssetTrack?
-    let audioDescriptor: AudioDescriptor
     convenience init?(stream: UnsafeMutablePointer<AVStream>) {
         let codecpar = stream.pointee.codecpar.pointee
         self.init(codecpar: codecpar)
@@ -152,8 +153,6 @@ public class FFmpegAssetTrack: MediaPlayerTrack {
             stream?.pointee.discard = newValue ? AVDISCARD_DEFAULT : AVDISCARD_ALL
         }
     }
-
-    let isImageSubtitle: Bool
 
     public func setIsEnabled(_ isEnabled: Bool) {
         self.isEnabled = isEnabled

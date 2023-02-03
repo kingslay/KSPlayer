@@ -59,6 +59,7 @@ class FFmpegDecode: DecodeProtocol {
                         codecpar.codec_id = AV_CODEC_ID_EIA_608
                         if let assetTrack = FFmpegAssetTrack(codecpar: codecpar) {
                             assetTrack.name = "Closed Captions"
+                            assetTrack.startTime = packet.assetTrack.startTime
                             assetTrack.timebase = packet.assetTrack.timebase
                             let subtitle = SyncPlayerItemTrack<SubtitleFrame>(assetTrack: assetTrack, options: options)
                             assetTrack.setIsEnabled(!assetTrack.isImageSubtitle)
