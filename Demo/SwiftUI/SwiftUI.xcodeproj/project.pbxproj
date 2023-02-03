@@ -196,7 +196,7 @@
 			isa = PBXProject;
 			attributes = {
 				LastSwiftUpdateCheck = 1310;
-				LastUpgradeCheck = 1400;
+				LastUpgradeCheck = 1420;
 				TargetAttributes = {
 					AC611E1B2902A0DF00553022 = {
 						CreatedOnToolsVersion = 14.0.1;
@@ -422,6 +422,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 10500;
 				DEVELOPMENT_TEAM = 3RVHT92X9D;
+				ENABLE_HARDENED_RUNTIME = YES;
 				"ENABLE_HARDENED_RUNTIME[sdk=macosx*]" = YES;
 				ENABLE_PREVIEWS = YES;
 				INFOPLIST_FILE = "TracyPlayer-Info.plist";
@@ -460,6 +461,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 10500;
 				DEVELOPMENT_TEAM = 3RVHT92X9D;
+				ENABLE_HARDENED_RUNTIME = YES;
 				"ENABLE_HARDENED_RUNTIME[sdk=macosx*]" = YES;
 				ENABLE_PREVIEWS = YES;
 				INFOPLIST_FILE = "TracyPlayer-Info.plist";
