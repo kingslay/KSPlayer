@@ -391,7 +391,6 @@ extension MEPlayerItem {
             }
             if state == .seeking {
                 let time = currentPlaybackTime
-                allPlayerItemTracks.forEach { $0.seek(time: time) }
                 let timeStamp = Int64(time * TimeInterval(AV_TIME_BASE))
                 // can not seek to key frame
 //                let result = avformat_seek_file(formatCtx, -1, Int64.min, timeStamp, Int64.max, options.seekFlags)
@@ -569,6 +568,7 @@ extension MEPlayerItem: MediaPlayback {
             currentPlaybackTime = time
             seekingCompletionHandler = completion
             condition.broadcast()
+            allPlayerItemTracks.forEach { $0.seek(time: time) }
         } else if state == .finished {
             state = .seeking
             currentPlaybackTime = time
