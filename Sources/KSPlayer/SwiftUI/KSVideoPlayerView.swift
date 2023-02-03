@@ -340,7 +340,7 @@ struct VideoSubtitleView: View {
     }
 }
 
-extension UIImage {
+public extension UIImage {
     func fitSize(_ fitSize: CGSize) -> CGSize {
         let hZoom = fitSize.width / size.width
         let vZoom = fitSize.height / size.height
