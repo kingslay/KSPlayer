@@ -316,16 +316,11 @@ struct VideoSubtitleView: View {
             Spacer()
             if let image = model.part?.image {
                 GeometryReader { geometry in
-                    let fitSize = image.fitSize(geometry.size)
-                    #if os(macOS)
-                    Image(nsImage: image)
-                        .resizable()
-                        .frame(width: fitSize.width, height: fitSize.height)
-                    #else
+                    let fitRect = image.fitRect(geometry.size)
                     Image(uiImage: image)
                         .resizable()
-                        .frame(width: fitSize.width, height: fitSize.height)
-                    #endif
+                        .offset(CGSize(width: fitRect.origin.x, height: fitRect.origin.y))
+                        .frame(width: fitRect.size.width, height: fitRect.size.height)
                 }
                 .scaledToFit()
                 .padding()
@@ -340,12 +335,21 @@ struct VideoSubtitleView: View {
     }
 }
 
+#if os(macOS)
+public extension Image {
+    init(uiImage: UIImage) {
+        self.init(nsImage: uiImage)
+    }
+}
+#endif
+
 public extension UIImage {
-    func fitSize(_ fitSize: CGSize) -> CGSize {
+    func fitRect(_ fitSize: CGSize) -> CGRect {
         let hZoom = fitSize.width / size.width
         let vZoom = fitSize.height / size.height
         let zoom = min(min(hZoom, vZoom), 1)
-        return size * zoom
+        let newSize = size * zoom
+        return CGRect(origin: CGPoint(x: (fitSize.width - newSize.width) / 2, y: fitSize.height - newSize.height), size: newSize)
     }
 }
 
