@@ -1,7 +1,7 @@
 {
   "images" : [
     {
-      "filename" : "JPEG to PDF | CloudConvert.png",
+      "filename" : "AppIcon.png",
       "idiom" : "universal",
       "platform" : "ios",
       "size" : "1024x1024"
@@ -27,38 +27,43 @@
       "size" : "32x32"
     },
     {
+      "filename" : "AppIcon 7.png",
       "idiom" : "mac",
       "scale" : "1x",
       "size" : "128x128"
     },
     {
+      "filename" : "AppIcon 6.png",
       "idiom" : "mac",
       "scale" : "2x",
       "size" : "128x128"
     },
     {
+      "filename" : "AppIcon 5.png",
       "idiom" : "mac",
       "scale" : "1x",
       "size" : "256x256"
     },
     {
+      "filename" : "AppIcon 4.png",
       "idiom" : "mac",
       "scale" : "2x",
       "size" : "256x256"
     },
     {
+      "filename" : "AppIcon 3.png",
       "idiom" : "mac",
       "scale" : "1x",
       "size" : "512x512"
     },
     {
-      "filename" : "JPEG to PDF | CloudConvert 2.png",
+      "filename" : "AppIcon 1.png",
       "idiom" : "mac",
       "scale" : "2x",
       "size" : "512x512"
     },
     {
-      "filename" : "JPEG to PDF | CloudConvert 1.png",
+      "filename" : "AppIcon 2.png",
       "idiom" : "universal",
       "platform" : "watchos",
       "size" : "1024x1024"
