@@ -184,6 +184,7 @@ public class PlayerToolBar: UIStackView {
         videoSwitchButton.tintColor = tintColor
         srtButton.tintColor = tintColor
         pipButton.tintColor = tintColor
+        timeSlider.tintColor = tintColor
         NSLayoutConstraint.activate([
             playButton.widthAnchor.constraint(equalTo: playButton.heightAnchor),
             playbackRateButton.widthAnchor.constraint(equalTo: playbackRateButton.heightAnchor),
@@ -195,6 +196,7 @@ public class PlayerToolBar: UIStackView {
             heightAnchor.constraint(equalToConstant: 40),
         ])
         #else
+        timeSlider.tintColor = .white
         playButton.tintColor = .white
         playbackRateButton.tintColor = .white
         definitionButton.tintColor = .white

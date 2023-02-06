@@ -473,6 +473,7 @@ public class KSSlider: NSSlider {
     public var trackHeigt = CGFloat(2)
     public var isPlayable = false
     public var isUserInteractionEnabled: Bool = true
+    var tintColor: UIColor?
     public convenience init() {
         self.init(frame: .zero)
     }

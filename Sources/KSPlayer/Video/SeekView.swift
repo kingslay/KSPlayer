@@ -26,7 +26,9 @@ class SeekView: UIView {
         cornerRadius = 4
         clipsToBounds = true
         isHidden = true
-        seekToViewImage.image = KSOptions.image(named: "KSPlayer_seek_to_image")
+        if #available(macOS 11.0, *) {
+            seekToViewImage.image = UIImage(systemName: "forward.fill")
+        }
         translatesAutoresizingMaskIntoConstraints = false
         seekToViewImage.translatesAutoresizingMaskIntoConstraints = false
         seekToLabel.translatesAutoresizingMaskIntoConstraints = false
