@@ -72,7 +72,7 @@ public class FFmpegAssetTrack: MediaPlayerTrack {
             description += ", \(nominalFrameRate) fps"
         }
         if let value = metadata["language"] {
-            language = NSLocalizedString(value, comment: "")
+            language = Locale.current.localizedString(forLanguageCode: value)
         } else {
             language = nil
         }

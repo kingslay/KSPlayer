@@ -24,7 +24,7 @@ public class KSSRTOptions {
             switch self {
             case .smaller:
                 #if os(tvOS)
-                return .systemFont(ofSize: 26)
+                return .systemFont(ofSize: 30)
                 #elseif os(macOS)
                 return .systemFont(ofSize: 20)
                 #else
@@ -32,7 +32,7 @@ public class KSSRTOptions {
                 #endif
             case .standard:
                 #if os(tvOS)
-                return .systemFont(ofSize: 32)
+                return .systemFont(ofSize: 36)
                 #elseif os(macOS)
                 return .systemFont(ofSize: 26)
                 #else
@@ -40,7 +40,7 @@ public class KSSRTOptions {
                 #endif
             case .large:
                 #if os(tvOS)
-                return .systemFont(ofSize: 38)
+                return .systemFont(ofSize: 42)
                 #elseif os(macOS)
                 return .systemFont(ofSize: 32)
                 #else
