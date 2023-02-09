@@ -12,6 +12,55 @@ import UIKit
 import AppKit
 #endif
 import Combine
+
+public class KSSRTOptions {
+    
+    public enum Size {
+        case smaller
+        case standard
+        case large
+        
+        var font: UIFont {
+            switch self {
+            case .smaller:
+                #if os(tvOS)
+                return .systemFont(ofSize: 20)
+                #elseif os(macOS)
+                return .systemFont(ofSize: 20)
+                #else
+                return .systemFont(ofSize: 12)
+                #endif
+            case .standard:
+                #if os(tvOS)
+                return .systemFont(ofSize: 26)
+                #elseif os(macOS)
+                return .systemFont(ofSize: 26)
+                #else
+                return .systemFont(ofSize: 16)
+                #endif
+            case .large:
+                #if os(tvOS)
+                return .systemFont(ofSize: 32)
+                #elseif os(macOS)
+                return .systemFont(ofSize: 32)
+                #else
+                return .systemFont(ofSize: 20)
+                #endif
+            }
+        }
+    }
+    
+    var size: Size
+    var bacgroundColor: UIColor
+    var textColor: UIColor
+    
+    init(size: Size = .standard, bacgroundColor: UIColor = .clear, textColor: UIColor = .white) {
+        self.size = size
+        self.bacgroundColor = bacgroundColor
+        self.textColor = textColor
+    }
+}
+
 public class KSSubtitleController {
     private let cacheDataSouce = CacheDataSouce()
     private var subtitleDataSouces: [SubtitleDataSouce] = []

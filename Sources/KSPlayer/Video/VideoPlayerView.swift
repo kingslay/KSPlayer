@@ -634,18 +634,25 @@ extension VideoPlayerView {
             break
         }
     }
+    
+    /// change during playback
+    public func updateSrt(_ options: KSSRTOptions) {
+        subtitleLabel.textColor = options.textColor
+        subtitleLabel.font = options.size.font
+        subtitleBackView.backgroundColor = options.bacgroundColor
+    }
 
     private func setupSrtControl() {
         subtitleLabel.numberOfLines = 0
         subtitleLabel.textAlignment = .center
-        subtitleLabel.textColor = .white
-        subtitleLabel.font = .systemFont(ofSize: 16)
+        subtitleLabel.textColor = KSOptions.srtOptions.textColor
+        subtitleLabel.font = KSOptions.srtOptions.size.font
         subtitleLabel.backingLayer?.shadowColor = UIColor.black.cgColor
         subtitleLabel.backingLayer?.shadowOffset = CGSize(width: 1.0, height: 1.0)
         subtitleLabel.backingLayer?.shadowOpacity = 0.9
         subtitleLabel.backingLayer?.shadowRadius = 1.0
         subtitleLabel.backingLayer?.shouldRasterize = true
-        subtitleBackView.backgroundColor = UIColor.clear
+        subtitleBackView.backgroundColor = KSOptions.srtOptions.bacgroundColor
         subtitleBackView.cornerRadius = 2
         subtitleBackView.addSubview(subtitleLabel)
         subtitleBackView.isHidden = true
@@ -860,6 +867,9 @@ public extension KSOptions {
     /// 播放内核选择策略 先使用firstPlayer，失败了自动切换到secondPlayer，播放内核有KSAVPlayer、KSMEPlayer两个选项
     /// 是否能后台播放视频
     static var canBackgroundPlay = false
+    
+    /// Subtitle configuration
+    static var srtOptions:KSSRTOptions = KSSRTOptions()
 }
 
 extension UIView {
