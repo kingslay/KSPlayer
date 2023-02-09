@@ -1,3 +1,9 @@
-/Carthage
-Cartfile.resolved
-Gemfile.lock
+.DS_Store
+/.build
+/Packages
+xcuserdata
+.swiftpm
+Script
+Demo/Pods
+Podfile.lock
+*.lock
