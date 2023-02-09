@@ -53,9 +53,11 @@ open class IOSVideoPlayerView: VideoPlayerView {
         landscapeButton.setImage(UIImage(systemName: "arrow.up.left.and.arrow.down.right"), for: .normal)
         landscapeButton.setImage(UIImage(systemName: "arrow.down.right.and.arrow.up.left"), for: .selected)
         landscapeButton.addTarget(self, action: #selector(onButtonPressed(_:)), for: .touchUpInside)
+        landscapeButton.tintColor = .white
         backButton.tag = PlayerButtonType.back.rawValue
         backButton.setImage(UIImage(systemName: "chevron.left"), for: .normal)
         backButton.addTarget(self, action: #selector(onButtonPressed(_:)), for: .touchUpInside)
+        backButton.tintColor = .white
         navigationBar.insertArrangedSubview(backButton, at: 0)
         routeButton.isHidden = true
         navigationBar.addArrangedSubview(routeButton)
@@ -302,7 +304,7 @@ extension IOSVideoPlayerView {
 public class AirplayStatusView: UIView {
     override public init(frame: CGRect) {
         super.init(frame: frame)
-        let airplayicon = UIImageView(image: KSOptions.image(named: "airplayicon_play"))
+        let airplayicon = UIImageView(image: UIImage(systemName: "airplayvideo"))
         addSubview(airplayicon)
         let airplaymessage = UILabel()
         airplaymessage.backgroundColor = .clear

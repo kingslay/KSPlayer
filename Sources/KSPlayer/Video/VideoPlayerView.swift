@@ -208,17 +208,21 @@ open class VideoPlayerView: PlayerView {
         replayButton.cornerRadius = 32
         replayButton.titleFont = .systemFont(ofSize: 16)
         replayButton.backgroundColor = UIColor.black.withAlphaComponent(0.5)
-        replayButton.setImage(KSOptions.image(named: "KSPlayer_play"), for: .normal)
-        replayButton.setImage(KSOptions.image(named: "KSPlayer_replay"), for: .selected)
         replayButton.addTarget(self, action: #selector(onButtonPressed(_:)), for: .primaryActionTriggered)
         replayButton.tag = PlayerButtonType.replay.rawValue
         lockButton.backgroundColor = UIColor.black.withAlphaComponent(0.5)
         lockButton.cornerRadius = 32
-        lockButton.setImage(KSOptions.image(named: "KSPlayer_unlocking"), for: .normal)
-        lockButton.setImage(KSOptions.image(named: "KSPlayer_autoRotationLock"), for: .selected)
         lockButton.tag = PlayerButtonType.lock.rawValue
         lockButton.addTarget(self, action: #selector(onButtonPressed(_:)), for: .primaryActionTriggered)
         lockButton.isHidden = true
+        if #available(macOS 11.0, *) {
+            replayButton.setImage(UIImage(systemName: "play.fill"), for: .normal)
+            replayButton.setImage(UIImage(systemName: "arrow.counterclockwise"), for: .selected)
+            lockButton.setImage(UIImage(systemName: "lock.open"), for: .normal)
+            lockButton.setImage(UIImage(systemName: "lock"), for: .selected)
+        }
+        lockButton.tintColor = .white
+        replayButton.tintColor = .white
         controllerView.addSubview(lockButton)
         controllerView.addSubview(topMaskView)
         controllerView.addSubview(bottomMaskView)
@@ -701,8 +705,14 @@ extension VideoPlayerView {
     }
 
     private func addConstraint() {
-        toolBar.timeSlider.setThumbImage(KSOptions.image(named: "KSPlayer_slider_thumb"), for: .normal)
-        toolBar.timeSlider.setThumbImage(KSOptions.image(named: "KSPlayer_slider_thumb_pressed"), for: .highlighted)
+        if #available(macOS 11.0, *) {
+            toolBar.timeSlider.setThumbImage(UIImage(systemName: "circle.fill"), for: .normal)
+            #if os(macOS)
+            toolBar.timeSlider.setThumbImage(UIImage(systemName: "circle.fill"), for: .highlighted)
+            #else
+            toolBar.timeSlider.setThumbImage(UIImage(systemName: "circle.fill", withConfiguration: UIImage.SymbolConfiguration(scale: .large)), for: .highlighted)
+            #endif
+        }
         bottomMaskView.addSubview(toolBar.timeSlider)
         toolBar.audioSwitchButton.isHidden = true
         toolBar.videoSwitchButton.isHidden = true

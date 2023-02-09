@@ -23,6 +23,9 @@ Pod::Spec.new do |s|
     end
     s.subspec 'Metal' do |ss|
         ss.source_files = 'Sources/KSPlayer/Metal/*.{swift,metal}'
+        ss.resource_bundles = {
+            'KSPlayer_KSPlayer' => ['Sources/KSPlayer/Metal/*.metal']
+        } 
         ss.weak_framework = 'MetalKit'
     end
     #AVPlayer播放内核
@@ -46,9 +49,6 @@ Pod::Spec.new do |s|
     s.subspec 'Core' do |ss|
         ss.source_files = 'Sources/KSPlayer/Core/*'
         ss.dependency 'KSPlayer/AVPlayer'
-        ss.resource_bundles = {
-            'KSPlayer_KSPlayer' => ['Sources/KSPlayer/Core/Resources/*', 'Sources/KSPlayer/Metal/*.metal']
-        } 
     end
 
     s.subspec 'SwiftUI'do |ss|
