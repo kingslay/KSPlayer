@@ -118,7 +118,7 @@ extension KSMEPlayer {
             if isPaused {
                 self.audioOutput.pause()
             } else {
-                self.audioOutput.play(time: self.currentPlaybackTime)
+                self.audioOutput.play(time: self.playerItem.currentPlaybackTime)
             }
             self.videoOutput?.isPaused = isPaused
             self.delegate?.changeLoadState(player: self)
