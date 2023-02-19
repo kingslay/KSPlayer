@@ -1,0 +1,34 @@
+on:
+  push:
+    branches:
+      - develop
+  pull_request:
+    branches:
+      - develop
+
+jobs:
+  buidMacOS:
+    name: buidMacOS
+    runs-on: macos-12
+    steps:
+      - uses: actions/checkout@main
+      - name: Build
+        run: swift build -v
+      - name: Test
+        run: swift test -v
+
+  buidIOS:
+    name: buidIOS
+    runs-on: macos-12
+    steps:
+      - uses: actions/checkout@main
+      - name: Build
+        run: swift build --sdk `xcrun -sdk iphonesimulator -show-sdk-path` -Xswiftc -target -Xswiftc x86_64-apple-ios13.0-simulator
+
+  buidTVOS:
+    name: buidTVOS
+    runs-on: macos-12
+    steps:
+      - uses: actions/checkout@main
+      - name: Build
+        run: swift build --sdk `xcrun -sdk appletvsimulator -show-sdk-path` -Xswiftc -target -Xswiftc x86_64-apple-tvos13.0-simulator

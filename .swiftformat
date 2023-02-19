@@ -1,0 +1,4 @@
+# 格式化规则
+--swiftversion 5.7
+--ifdef noindent
+--disable

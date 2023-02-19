@@ -1,0 +1,32 @@
+use_frameworks! :linkage => :static
+workspace 'Demo.xcworkspace'
+install! 'cocoapods', :generate_multiple_pod_projects => true
+def common
+  pod 'KSPlayer', :path => '../', :testspecs => ['Tests']
+  pod 'OpenSSL', :path => '../FFmpegKit'
+  pod 'FFmpegKit', :path => '../FFmpegKit'
+#  pod 'FFmpegKit',:git => 'https://github.com/kingslay/FFmpegKit.git', :branch => 'main'
+#  pod 'OpenSSL',:git => 'https://github.com/kingslay/FFmpegKit.git', :branch => 'main'
+  pod 'SwiftLint'
+end
+target 'demo-iOS' do
+  project 'demo-iOS/demo-iOS.xcodeproj'
+  platform :ios, 13.0
+  common
+end
+
+target 'demo-macOS' do
+  project 'demo-macOS/demo-macOS.xcodeproj'
+  platform :osx, 10.15
+  common
+end
+
+target 'demo-tvOS' do
+  project 'demo-tvOS/demo-tvOS.xcodeproj'
+  platform :tvos, 13.0
+  common
+end
+#target 'iOS' do
+#  project 'SwiftUI/SwiftUI.xcodeproj'
+#  platform :ios, 15.0
+#end

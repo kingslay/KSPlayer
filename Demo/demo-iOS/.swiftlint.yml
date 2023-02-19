@@ -1,0 +1,27 @@
+disabled_rules:
+ - trailing_comma
+included:
+ - ../../Sources
+line_length: 200
+function_body_length: 85
+# cyclomatic_complexity: 25
+file_length: 800
+large_tuple: 8
+identifier_name:
+  min_length: # 只有最小长度
+    error: 3 # 只有错误
+  excluded: # 排除某些名字
+    - id
+    - URL
+    - i
+    - j
+    - r
+    - x
+    - y
+    - z
+    - n
+    - l
+    - d
+    - usesExternalPlaybackWhileExternalScreenIsActive
+type_name:
+  excluded: E # 排除某个名字
