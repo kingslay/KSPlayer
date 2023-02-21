@@ -141,11 +141,19 @@ final class MEPlayerItem {
             $0.isEnabled = false
         }
         track.setIsEnabled(true)
-        if track.mediaType == .video, let assetTrack = track as? FFmpegAssetTrack {
-            findBestAudio(videoTrack: assetTrack)
-        }
-        if track.mediaType == .subtitle {
+        guard let assetTrack = track as? FFmpegAssetTrack else {
             return
+        }
+        if assetTrack.mediaType == .video {
+            findBestAudio(videoTrack: assetTrack)
+        } else if assetTrack.mediaType == .subtitle {
+            if assetTrack.isImageSubtitle {
+                if !options.isSeekImageSubtitle {
+                    return
+                }
+            } else {
+                return
+            }
         }
         seek(time: currentPlaybackTime) { _ in
         }

@@ -310,6 +310,7 @@ open class KSOptions {
     public var autoSelectEmbedSubtitle = true
     public var subtitleDelay = 0.0 // s
     public var subtitleDisable = false
+    public var isSeekImageSubtitle = false
     // video
     public var autoDeInterlace = false
     public var destinationDynamicRange: DynamicRange?
