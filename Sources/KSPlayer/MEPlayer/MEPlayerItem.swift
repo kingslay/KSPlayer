@@ -82,7 +82,7 @@ final class MEPlayerItem {
         }
     }
 
-    private lazy var timer: Timer = Timer.scheduledTimer(withTimeInterval: 0.02, repeats: true) { [weak self] _ in
+    private lazy var timer: Timer = .scheduledTimer(withTimeInterval: 0.02, repeats: true) { [weak self] _ in
         self?.codecDidChangeCapacity()
     }
 

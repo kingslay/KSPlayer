@@ -244,6 +244,9 @@ open class VideoPlayerView: PlayerView {
         doubleTapGesture.numberOfTapsRequired = 2
         tapGesture.require(toFail: doubleTapGesture)
         controllerView.addGestureRecognizer(doubleTapGesture)
+        #if canImport(UIKit)
+        addRemoteControllerGestures()
+        #endif
     }
 
     override open func player(layer: KSPlayerLayer, currentTime: TimeInterval, totalTime: TimeInterval) {
@@ -827,6 +830,71 @@ extension VideoPlayerView {
         return .alert
         #endif
     }
+
+    #if canImport(UIKit)
+    private func addRemoteControllerGestures() {
+        let rightPressRecognizer = UITapGestureRecognizer()
+        rightPressRecognizer.addTarget(self, action: #selector(rightArrowButtonPressed(_:)))
+        rightPressRecognizer.allowedPressTypes = [NSNumber(value: UIPress.PressType.rightArrow.rawValue)]
+        addGestureRecognizer(rightPressRecognizer)
+
+        let leftPressRecognizer = UITapGestureRecognizer()
+        leftPressRecognizer.addTarget(self, action: #selector(leftArrowButtonPressed(_:)))
+        leftPressRecognizer.allowedPressTypes = [NSNumber(value: UIPress.PressType.leftArrow.rawValue)]
+        addGestureRecognizer(leftPressRecognizer)
+
+        let selectPressRecognizer = UITapGestureRecognizer()
+        selectPressRecognizer.addTarget(self, action: #selector(selectButtonPressed(_:)))
+        selectPressRecognizer.allowedPressTypes = [NSNumber(value: UIPress.PressType.select.rawValue)]
+        addGestureRecognizer(selectPressRecognizer)
+
+        let swipeUpRecognizer = UISwipeGestureRecognizer(target: self, action: #selector(swipedUp(_:)))
+        swipeUpRecognizer.direction = .up
+        addGestureRecognizer(swipeUpRecognizer)
+
+        let swipeDownRecognizer = UISwipeGestureRecognizer(target: self, action: #selector(swipedDown(_:)))
+        swipeDownRecognizer.direction = .down
+        addGestureRecognizer(swipeDownRecognizer)
+    }
+
+    @objc
+    private func rightArrowButtonPressed(_: UITapGestureRecognizer) {
+        guard let playerLayer, playerLayer.state.isPlaying, toolBar.isSeekable else { return }
+        seek(time: toolBar.currentTime + 15) { _ in }
+    }
+
+    @objc
+    private func leftArrowButtonPressed(_: UITapGestureRecognizer) {
+        guard let playerLayer, playerLayer.state.isPlaying, toolBar.isSeekable else { return }
+        seek(time: toolBar.currentTime - 15) { _ in }
+    }
+
+    @objc
+    private func selectButtonPressed(_: UITapGestureRecognizer) {
+        guard toolBar.isSeekable else { return }
+        if let playerLayer, playerLayer.state.isPlaying {
+            pause()
+        } else {
+            play()
+        }
+    }
+
+    @objc
+    private func swipedUp(_: UISwipeGestureRecognizer) {
+        guard let playerLayer, playerLayer.state.isPlaying else { return }
+        if isMaskShow == false {
+            isMaskShow = true
+        }
+    }
+
+    @objc
+    private func swipedDown(_: UISwipeGestureRecognizer) {
+        guard let playerLayer, playerLayer.state.isPlaying else { return }
+        if isMaskShow == true {
+            isMaskShow = false
+        }
+    }
+    #endif
 }
 
 public enum KSPlayerTopBarShowCase {

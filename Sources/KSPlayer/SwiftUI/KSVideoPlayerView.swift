@@ -542,7 +542,7 @@ public class TVSlide: UIControl {
 
     private var preMoveDirection: UISwipeGestureRecognizer.Direction?
     private var preMoveTime = CACurrentMediaTime()
-    private lazy var timer: Timer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { [weak self] _ in
+    private lazy var timer: Timer = .scheduledTimer(withTimeInterval: 0.1, repeats: true) { [weak self] _ in
         guard let self, let preMoveDirection = self.preMoveDirection, preMoveDirection == .left || preMoveDirection == .right, self.process.wrappedValue < 0.99, self.process.wrappedValue > 0.01 else {
             return
         }
