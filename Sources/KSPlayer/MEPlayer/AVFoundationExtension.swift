@@ -54,7 +54,7 @@ extension CVPixelBufferPool {
             kCVPixelBufferHeightKey: height,
             kCVPixelBufferBytesPerRowAlignmentKey: bytesPerRowAlignment.alignment(value: 64),
             kCVPixelBufferMetalCompatibilityKey: true,
-            //            kCVPixelBufferIOSurfacePropertiesKey: NSDictionary()
+            kCVPixelBufferIOSurfacePropertiesKey: NSDictionary(),
         ]
         var outputPool: CVPixelBufferPool?
         let pixelBufferPoolOptions: NSDictionary = [kCVPixelBufferPoolMinimumBufferCountKey: bufferCount]

@@ -65,11 +65,11 @@ var testObjects: [KSPlayerResource] = {
         objects.append(KSPlayerResource(url: URL(fileURLWithPath: path), options: options, name: "本地音频"))
     }
     if let path = Bundle.main.path(forResource: "hevc", ofType: "mkv") {
-        objects.append(KSPlayerResource(url: URL(fileURLWithPath: path), name: "h265视频"))
+        objects.append(KSPlayerResource(url: URL(fileURLWithPath: path), options: MEOptions(), name: "h265视频"))
     }
 
     if let path = Bundle.main.path(forResource: "raw", ofType: "h264") {
-        objects.append(KSPlayerResource(url: URL(fileURLWithPath: path), name: "raw h264"))
+        objects.append(KSPlayerResource(url: URL(fileURLWithPath: path), options: MEOptions(), name: "raw h264"))
     }
 
     if let url = URL(string: "http://clips.vorwaerts-gmbh.de/big_buck_bunny.mp4") {

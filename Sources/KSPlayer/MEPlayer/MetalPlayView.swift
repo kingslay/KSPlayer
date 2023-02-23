@@ -9,9 +9,8 @@ import AVFoundation
 import Combine
 import CoreMedia
 import MetalKit
-public final class MetalPlayView: UIView {
+public final class MetalPlayView: MTKView {
     private let render = MetalRender()
-    private let view = MTKView(frame: .zero, device: MetalRender.device)
     private var videoInfo: CMVideoFormatDescription?
     public private(set) var pixelBuffer: CVPixelBuffer?
     /// 用displayLink会导致锁屏无法draw，
@@ -21,20 +20,11 @@ public final class MetalPlayView: UIView {
 //    private let timer = DispatchSource.makeTimerSource(queue: DispatchQueue.main)
     var options: KSOptions
     weak var renderSource: OutputRenderSourceDelegate?
-    #if canImport(UIKit)
-    override public class var layerClass: AnyClass { AVSampleBufferDisplayLayer.self }
-    #endif
     // AVSampleBufferAudioRenderer AVSampleBufferRenderSynchronizer AVSampleBufferDisplayLayer
-    var displayLayer: AVSampleBufferDisplayLayer {
-        // swiftlint:disable force_cast
-        layer as! AVSampleBufferDisplayLayer
-        // swiftlint:enable force_cast
-    }
-
-    var isPaused: Bool = true {
+    var displayView = AVSampleBufferDisplayView()
+    override public var isPaused: Bool {
         willSet {
             if isPaused != newValue {
-                view.isPaused = newValue
                 displayLink.isPaused = newValue
             }
         }
@@ -42,32 +32,15 @@ public final class MetalPlayView: UIView {
 
     init(options: KSOptions) {
         self.options = options
-        super.init(frame: .zero)
-        #if !canImport(UIKit)
-        layer = AVSampleBufferDisplayLayer()
-        #endif
+        super.init(frame: .zero, device: MetalRender.device)
         #if os(macOS)
-        (view.layer as? CAMetalLayer)?.wantsExtendedDynamicRangeContent = true
+        (layer as? CAMetalLayer)?.wantsExtendedDynamicRangeContent = true
         #endif
-        view.framebufferOnly = true
-        view.isPaused = true
-        addSubview(view)
-        view.isHidden = true
-        view.translatesAutoresizingMaskIntoConstraints = false
         displayLink.add(to: .main, forMode: .common)
-        NSLayoutConstraint.activate([
-            topAnchor.constraint(equalTo: view.topAnchor),
-            leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            bottomAnchor.constraint(equalTo: view.bottomAnchor),
-        ])
-        var controlTimebase: CMTimebase?
-        CMTimebaseCreateWithSourceClock(allocator: kCFAllocatorDefault, sourceClock: CMClockGetHostTimeClock(), timebaseOut: &controlTimebase)
-        if let controlTimebase {
-            displayLayer.controlTimebase = controlTimebase
-            CMTimebaseSetTime(controlTimebase, time: .zero)
-            CMTimebaseSetRate(controlTimebase, rate: 1.0)
-        }
+        framebufferOnly = true
+        isPaused = true
+        displayLink.isPaused = true
+        addSubview(displayView)
     }
 
     func prepare(fps: Float) {
@@ -79,16 +52,29 @@ public final class MetalPlayView: UIView {
         fatalError("init(coder:) has not been implemented")
     }
 
+    override public func didAddSubview(_ subview: UIView) {
+        super.didAddSubview(subview)
+        if subview == displayView {
+            subview.frame = frame
+            subview.translatesAutoresizingMaskIntoConstraints = false
+            NSLayoutConstraint.activate([
+                subview.leftAnchor.constraint(equalTo: leftAnchor),
+                subview.topAnchor.constraint(equalTo: topAnchor),
+                subview.centerXAnchor.constraint(equalTo: centerXAnchor),
+                subview.centerYAnchor.constraint(equalTo: centerYAnchor),
+            ])
+        }
+    }
+
     override public var contentMode: UIViewContentMode {
         didSet {
-            view.contentMode = contentMode
             switch contentMode {
             case .scaleToFill:
-                displayLayer.videoGravity = .resize
+                displayView.displayLayer.videoGravity = .resize
             case .scaleAspectFit, .center:
-                displayLayer.videoGravity = .resizeAspect
+                displayView.displayLayer.videoGravity = .resizeAspect
             case .scaleAspectFill:
-                displayLayer.videoGravity = .resizeAspectFill
+                displayView.displayLayer.videoGravity = .resizeAspectFill
             default:
                 break
             }
@@ -106,12 +92,12 @@ public final class MetalPlayView: UIView {
     #endif
 
     func clear() {
-        if view.isHidden {
-            displayLayer.flushAndRemoveImage()
-        } else {
-            if let drawable = view.currentDrawable, let renderPassDescriptor = view.currentRenderPassDescriptor {
+        if displayView.isHidden {
+            if let drawable = currentDrawable, let renderPassDescriptor = currentRenderPassDescriptor {
                 render.clear(drawable: drawable, renderPassDescriptor: renderPassDescriptor)
             }
+        } else {
+            displayView.displayLayer.flushAndRemoveImage()
         }
     }
 
@@ -121,6 +107,60 @@ public final class MetalPlayView: UIView {
 
     public func readNextFrame() {
         draw(force: true)
+    }
+}
+
+class AVSampleBufferDisplayView: UIView {
+    #if canImport(UIKit)
+    override public class var layerClass: AnyClass { AVSampleBufferDisplayLayer.self }
+    #endif
+    var displayLayer: AVSampleBufferDisplayLayer {
+        // swiftlint:disable force_cast
+        layer as! AVSampleBufferDisplayLayer
+        // swiftlint:enable force_cast
+    }
+
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        #if !canImport(UIKit)
+        layer = AVSampleBufferDisplayLayer()
+        #endif
+        var controlTimebase: CMTimebase?
+        CMTimebaseCreateWithSourceClock(allocator: kCFAllocatorDefault, sourceClock: CMClockGetHostTimeClock(), timebaseOut: &controlTimebase)
+        if let controlTimebase {
+            displayLayer.controlTimebase = controlTimebase
+            CMTimebaseSetTime(controlTimebase, time: .zero)
+            CMTimebaseSetRate(controlTimebase, rate: 1.0)
+        }
+    }
+
+    @available(*, unavailable)
+    required init?(coder _: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+
+    func enqueue(imageBuffer: CVPixelBuffer, formatDescription: CMVideoFormatDescription) {
+        var timing = CMSampleTimingInfo(duration: .invalid, presentationTimeStamp: .zero, decodeTimeStamp: .invalid)
+        //        var timing = CMSampleTimingInfo(duration: .invalid, presentationTimeStamp: time, decodeTimeStamp: .invalid)
+        var sampleBuffer: CMSampleBuffer?
+        CMSampleBufferCreateReadyWithImageBuffer(allocator: kCFAllocatorDefault, imageBuffer: imageBuffer, formatDescription: formatDescription, sampleTiming: &timing, sampleBufferOut: &sampleBuffer)
+        if let sampleBuffer {
+            if let attachmentsArray = CMSampleBufferGetSampleAttachmentsArray(sampleBuffer, createIfNecessary: true) as? [NSMutableDictionary], let dic = attachmentsArray.first {
+                dic[kCMSampleAttachmentKey_DisplayImmediately] = true
+            }
+            if displayLayer.isReadyForMoreMediaData {
+                displayLayer.enqueue(sampleBuffer)
+            }
+            if displayLayer.status == .failed {
+                displayLayer.flush()
+                //                    if let error = displayLayer.error as NSError?, error.code == -11847 {
+                //                        displayLayer.stopRequestingMediaData()
+                //                    }
+            }
+            //            if let controlTimebase = displayLayer.controlTimebase {
+            //                CMTimebaseSetTime(controlTimebase, time: time)
+            //            }
+        }
     }
 }
 
@@ -143,9 +183,9 @@ extension MetalPlayView {
             let par = pixelBuffer.size
             let sar = pixelBuffer.aspectRatio
             if options.isUseDisplayLayer() {
-                if !view.isHidden {
-                    view.isHidden = true
-                    if let drawable = view.currentDrawable, let renderPassDescriptor = view.currentRenderPassDescriptor {
+                if displayView.isHidden {
+                    displayView.isHidden = false
+                    if let drawable = currentDrawable, let renderPassDescriptor = currentRenderPassDescriptor {
                         render.clear(drawable: drawable, renderPassDescriptor: renderPassDescriptor)
                     }
                 }
@@ -154,22 +194,22 @@ extension MetalPlayView {
                 }
                 set(pixelBuffer: pixelBuffer, time: cmtime)
             } else {
-                if view.isHidden {
-                    view.isHidden = false
-                    displayLayer.flushAndRemoveImage()
+                if !displayView.isHidden {
+                    displayView.isHidden = true
+                    displayView.displayLayer.flushAndRemoveImage()
                 }
                 if options.display == .plane {
                     if let dar = options.customizeDar(sar: sar, par: par) {
-                        view.drawableSize = CGSize(width: par.width, height: par.width * dar.height / dar.width)
+                        drawableSize = CGSize(width: par.width, height: par.width * dar.height / dar.width)
                     } else {
-                        view.drawableSize = CGSize(width: par.width, height: par.height * sar.height / sar.width)
+                        drawableSize = CGSize(width: par.width, height: par.height * sar.height / sar.width)
                     }
                 } else {
-                    view.drawableSize = UIScreen.size
+                    drawableSize = UIScreen.size
                 }
-                (view.layer as? CAMetalLayer)?.pixelFormat = KSOptions.colorPixelFormat(bitDepth: pixelBuffer.bitDepth)
-                (view.layer as? CAMetalLayer)?.colorspace = pixelBuffer.colorspace
-                guard let drawable = view.currentDrawable else {
+                (layer as? CAMetalLayer)?.pixelFormat = KSOptions.colorPixelFormat(bitDepth: pixelBuffer.bitDepth)
+                (layer as? CAMetalLayer)?.colorspace = pixelBuffer.colorspace
+                guard let drawable = currentDrawable else {
                     return
                 }
                 render.draw(pixelBuffer: pixelBuffer, display: options.display, drawable: drawable)
@@ -179,44 +219,18 @@ extension MetalPlayView {
 
     private func set(pixelBuffer: CVPixelBuffer, time _: CMTime) {
         if videoInfo == nil || !CMVideoFormatDescriptionMatchesImageBuffer(videoInfo!, imageBuffer: pixelBuffer) {
+            if videoInfo != nil {
+                displayView.removeFromSuperview()
+                displayView = AVSampleBufferDisplayView()
+                addSubview(displayView)
+            }
             let err = CMVideoFormatDescriptionCreateForImageBuffer(allocator: nil, imageBuffer: pixelBuffer, formatDescriptionOut: &videoInfo)
             if err != noErr {
                 KSLog("Error at CMVideoFormatDescriptionCreateForImageBuffer \(err)")
             }
         }
         guard let videoInfo else { return }
-        var timing = CMSampleTimingInfo(duration: .invalid, presentationTimeStamp: .zero, decodeTimeStamp: .invalid)
-//        var timing = CMSampleTimingInfo(duration: .invalid, presentationTimeStamp: time, decodeTimeStamp: .invalid)
-        var sampleBuffer: CMSampleBuffer?
-        CMSampleBufferCreateReadyWithImageBuffer(allocator: kCFAllocatorDefault, imageBuffer: pixelBuffer, formatDescription: videoInfo, sampleTiming: &timing, sampleBufferOut: &sampleBuffer)
-        if let sampleBuffer {
-            if let attachmentsArray = CMSampleBufferGetSampleAttachmentsArray(sampleBuffer, createIfNecessary: true) as? [NSMutableDictionary], let dic = attachmentsArray.first {
-                dic[kCMSampleAttachmentKey_DisplayImmediately] = true
-            }
-            if displayLayer.isReadyForMoreMediaData {
-                displayLayer.enqueue(sampleBuffer)
-            }
-            if displayLayer.status == .failed {
-                displayLayer.flush()
-                //                    if let error = displayLayer.error as NSError?, error.code == -11847 {
-                //                        displayLayer.stopRequestingMediaData()
-                //                    }
-            }
-//            if let controlTimebase = displayLayer.controlTimebase {
-//                CMTimebaseSetTime(controlTimebase, time: time)
-//            }
-        }
-    }
-}
-
-extension MetalPlayView: FrameOutput {
-    var drawableSize: CGSize {
-        get {
-            view.drawableSize
-        }
-        set {
-            view.drawableSize = newValue
-        }
+        displayView.enqueue(imageBuffer: pixelBuffer, formatDescription: videoInfo)
     }
 }
 
