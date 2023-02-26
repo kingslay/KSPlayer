@@ -12,7 +12,6 @@ protocol AudioPlayer: AnyObject {
     var playbackRate: Float { get set }
     var volume: Float { get set }
     var isMuted: Bool { get set }
-    var isPaused: Bool { get }
     var attackTime: Float { get set }
     var releaseTime: Float { get set }
     var threshold: Float { get set }

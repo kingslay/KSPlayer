@@ -117,10 +117,11 @@ extension KSMEPlayer {
             let isPaused = !(self.playbackState == .playing && self.loadState == .playable)
             if isPaused {
                 self.audioOutput.pause()
+                self.videoOutput?.pause()
             } else {
                 self.audioOutput.play(time: self.playerItem.currentPlaybackTime)
+                self.videoOutput?.play()
             }
-            self.videoOutput?.isPaused = isPaused
             self.delegate?.changeLoadState(player: self)
         }
     }
@@ -142,7 +143,7 @@ extension KSMEPlayer: MEPlayerDelegate {
             guard let self else { return }
             self.videoOutput?.drawableSize = self.naturalSize
             self.view?.centerRotate(byDegrees: self.playerItem.rotation)
-            self.videoOutput?.isPaused = false
+            self.videoOutput?.play()
             self.delegate?.readyToPlay(player: self)
         }
     }
@@ -162,13 +163,13 @@ extension KSMEPlayer: MEPlayerDelegate {
                     self.loopCount += 1
                     self.delegate?.playBack(player: self, loopCount: self.loopCount)
                     self.audioOutput.play(time: self.currentPlaybackTime)
-                    self.videoOutput?.isPaused = false
+                    self.videoOutput?.play()
                 } else {
                     self.playbackState = .finished
                     if type == .audio {
                         self.audioOutput.pause()
                     } else if type == .video {
-                        self.videoOutput?.isPaused = true
+                        self.videoOutput?.pause()
                     }
                 }
             }

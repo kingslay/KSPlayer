@@ -22,13 +22,6 @@ public final class MetalPlayView: MTKView {
     weak var renderSource: OutputRenderSourceDelegate?
     // AVSampleBufferAudioRenderer AVSampleBufferRenderSynchronizer AVSampleBufferDisplayLayer
     var displayView = AVSampleBufferDisplayView()
-    override public var isPaused: Bool {
-        willSet {
-            if isPaused != newValue {
-                displayLink.isPaused = newValue
-            }
-        }
-    }
 
     init(options: KSOptions) {
         self.options = options
@@ -38,13 +31,21 @@ public final class MetalPlayView: MTKView {
         #endif
         displayLink.add(to: .main, forMode: .common)
         framebufferOnly = true
-        isPaused = true
-        displayLink.isPaused = true
         addSubview(displayView)
+        isPaused = true
+        pause()
     }
 
     func prepare(fps: Float) {
         displayLink.preferredFramesPerSecond = Int(ceil(fps)) << 1
+    }
+
+    func play() {
+        displayLink.isPaused = false
+    }
+
+    func pause() {
+        displayLink.isPaused = true
     }
 
     @available(*, unavailable)
