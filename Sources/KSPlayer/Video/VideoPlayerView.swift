@@ -440,19 +440,22 @@ extension VideoPlayerView {
 
         let videoTracks = playerLayer?.player.tracks(mediaType: .video) ?? []
         let videoMenu = KSMenuBuilder.audioVideoChangeMenu(videoTracks.first(where: { $0.isEnabled }),
-                                                           availableTracks: videoTracks) { [weak self] track in
+                                                           availableTracks: videoTracks)
+        { [weak self] track in
             self?.playerLayer?.player.select(track: track)
         }
 
         let audioTracks = playerLayer?.player.tracks(mediaType: .audio) ?? []
         let audioMenu = KSMenuBuilder.audioVideoChangeMenu(audioTracks.first(where: { $0.isEnabled }),
-                                                           availableTracks: audioTracks) { [weak self] track in
+                                                           availableTracks: audioTracks)
+        { [weak self] track in
             self?.playerLayer?.player.select(track: track)
         }
 
         let subtitles = srtControl.filterInfos { _ in true }
         let srtMenu = KSMenuBuilder.srtChangeMenu(srtControl.view.selectedInfo,
-                                                  availableSubtitles: subtitles) { [weak self] selectedSrt in
+                                                  availableSubtitles: subtitles)
+        { [weak self] selectedSrt in
             guard self?.srtControl.view.selectedInfo?.subtitleID != selectedSrt?.subtitleID else { return }
             self?.srtControl.view.selectedInfo = selectedSrt
         }

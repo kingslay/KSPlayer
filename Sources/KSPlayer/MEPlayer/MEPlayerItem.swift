@@ -402,13 +402,13 @@ extension MEPlayerItem {
                 let timeStamp = Int64(time * TimeInterval(AV_TIME_BASE))
                 // can not seek to key frame
 //                let result = avformat_seek_file(formatCtx, -1, Int64.min, timeStamp, Int64.max, options.seekFlags)
-                let result = av_seek_frame(formatCtx, -1, timeStamp, options.seekFlags)
+                var result = av_seek_frame(formatCtx, -1, timeStamp, options.seekFlags)
                 // When seeking before the beginning of the file, and seeking fails,
                 // try again without the backwards flag to make it seek to the
                 // beginning.
                 if result < 0, options.seekFlags & AVSEEK_FLAG_BACKWARD > 0 {
                     options.seekFlags &= ~AVSEEK_FLAG_BACKWARD
-                    av_seek_frame(formatCtx, -1, timeStamp, options.seekFlags)
+                    result = av_seek_frame(formatCtx, -1, timeStamp, options.seekFlags)
                 }
                 if state == .closed {
                     break

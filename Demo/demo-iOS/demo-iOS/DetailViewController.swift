@@ -61,12 +61,12 @@ class DetailViewController: UIViewController, DetailProtocol {
         playerView.backBlock = { [unowned self] in
             #if os(iOS)
             if UIApplication.shared.statusBarOrientation.isLandscape {
-                self.playerView.updateUI(isLandscape: false)
+                playerView.updateUI(isLandscape: false)
             } else {
-                self.navigationController?.popViewController(animated: true)
+                navigationController?.popViewController(animated: true)
             }
             #else
-            self.navigationController?.popViewController(animated: true)
+            navigationController?.popViewController(animated: true)
             #endif
         }
         playerView.becomeFirstResponder()

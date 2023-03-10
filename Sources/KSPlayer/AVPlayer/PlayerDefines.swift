@@ -290,7 +290,7 @@ open class KSOptions {
      AVSEEK_FLAG_ANY: 4
      AVSEEK_FLAG_FRAME: 8
      */
-    public var seekFlags = Int32(1)
+    public var seekFlags = Int32(0)
     // ffmpeg only cache http
     public var cache = false
     public var outputURL: URL?
@@ -599,7 +599,7 @@ public extension KSOptions {
     /// 是否开启秒开
     static var isSecondOpen = false
     /// 开启精确seek
-    static var isAccurateSeek = true
+    static var isAccurateSeek = false
     /// Applies to short videos only
     static var isLoopPlay = false
     /// 是否自动播放，默认false

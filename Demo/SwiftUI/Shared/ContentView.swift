@@ -22,7 +22,7 @@ struct ContentView: View {
                 ForEach(resources.filter { searchText.count == 0 || $0.name.contains(searchText) }, id: \.self) { resource in
                     NavigationLink(resource.name, destination: KSVideoPlayerView(resource: resource))
                 }.onDelete { indices in
-                    indices.forEach { self.resources.remove(at: $0) }
+                    indices.forEach { resources.remove(at: $0) }
                 }
             }
             .searchable(text: $searchText)
@@ -34,9 +34,9 @@ struct ContentView: View {
                 }
             }
         }.onAppear {
-            self.loadCachem3u8()
-            if self.resources.count == 0 {
-                self.updatem3u8("https://iptv-org.github.io/iptv/index.nsfw.m3u")
+            loadCachem3u8()
+            if resources.count == 0 {
+                updatem3u8("https://iptv-org.github.io/iptv/index.nsfw.m3u")
             }
         }.sheet(isPresented: $showAddActionSheet) {} content: {
             Form {
@@ -45,9 +45,9 @@ struct ContentView: View {
                 TextField("play list", text: $playList)
                 Button("Done") {
                     if let url = URL(string: playURL.trimmingCharacters(in: NSMutableCharacterSet.whitespacesAndNewlines)) {
-                        self.resources.insert(KSPlayerResource(url: url, options: MEOptions(), name: "new add"), at: 0)
+                        resources.insert(KSPlayerResource(url: url, options: MEOptions(), name: "new add"), at: 0)
                     } else if !playList.isEmpty {
-                        self.updatem3u8(playList.trimmingCharacters(in: NSMutableCharacterSet.whitespacesAndNewlines))
+                        updatem3u8(playList.trimmingCharacters(in: NSMutableCharacterSet.whitespacesAndNewlines))
                     }
                     showAddActionSheet = false
                 }
@@ -71,7 +71,7 @@ struct ContentView: View {
                     guard let string = String(data: data, encoding: .utf8) else {
                         return
                     }
-                    self.resources.append(contentsOf: parsem3u8(string: string))
+                    resources.append(contentsOf: parsem3u8(string: string))
                 } catch {}
             }
         }
@@ -85,8 +85,8 @@ struct ContentView: View {
             guard let data, let string = String(data: data, encoding: .utf8) else {
                 return
             }
-            self.saveToDocument(data: data, filename: "cache.m3u8")
-            self.resources.append(contentsOf: self.parsem3u8(string: string))
+            saveToDocument(data: data, filename: "cache.m3u8")
+            resources.append(contentsOf: parsem3u8(string: string))
         }.resume()
     }
 
