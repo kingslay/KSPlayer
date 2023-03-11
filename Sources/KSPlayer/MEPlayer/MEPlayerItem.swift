@@ -400,6 +400,7 @@ extension MEPlayerItem {
             if state == .seeking {
                 let time = currentPlaybackTime
                 let timeStamp = Int64(time * TimeInterval(AV_TIME_BASE))
+                let startTime = CACurrentMediaTime()
                 // can not seek to key frame
 //                let result = avformat_seek_file(formatCtx, -1, Int64.min, timeStamp, Int64.max, options.seekFlags)
                 var result = av_seek_frame(formatCtx, -1, timeStamp, options.seekFlags)
@@ -410,6 +411,7 @@ extension MEPlayerItem {
                     options.seekFlags &= ~AVSEEK_FLAG_BACKWARD
                     result = av_seek_frame(formatCtx, -1, timeStamp, options.seekFlags)
                 }
+                KSLog("seekTime: \(CACurrentMediaTime() - startTime)")
                 if state == .closed {
                     break
                 }
