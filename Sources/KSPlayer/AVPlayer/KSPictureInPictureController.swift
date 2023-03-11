@@ -12,6 +12,7 @@ public class KSPictureInPictureController: AVPictureInPictureController {
     private var originalViewController: UIViewController?
     private weak var view: KSPlayerLayer?
     private weak var viewController: UIViewController?
+    private weak var presentingViewController: UIViewController?
     #if canImport(UIKit)
     private weak var navigationController: UINavigationController?
     #endif
@@ -20,19 +21,23 @@ public class KSPictureInPictureController: AVPictureInPictureController {
         delegate = nil
         KSPictureInPictureController.pipController = nil
         #if canImport(UIKit)
-        if let navigationController, let viewController, let originalViewController {
+        if let viewController, let originalViewController {
             if let nav = viewController as? UINavigationController,
                nav.viewControllers.count == 0 || (nav.viewControllers.count == 1 && nav.viewControllers[0] != originalViewController)
             {
                 nav.viewControllers = [originalViewController]
             }
-            var viewControllers = navigationController.viewControllers
-            if let last = viewControllers.last, type(of: last) == type(of: viewController) {
-                viewControllers[viewControllers.count - 1] = viewController
-                navigationController.viewControllers = viewControllers
-            }
-            if viewControllers.firstIndex(of: viewController) == nil {
-                navigationController.pushViewController(viewController, animated: true)
+            if let navigationController {
+                var viewControllers = navigationController.viewControllers
+                if let last = viewControllers.last, type(of: last) == type(of: viewController) {
+                    viewControllers[viewControllers.count - 1] = viewController
+                    navigationController.viewControllers = viewControllers
+                }
+                if viewControllers.firstIndex(of: viewController) == nil {
+                    navigationController.pushViewController(viewController, animated: true)
+                }
+            } else {
+                presentingViewController?.present(originalViewController, animated: true)
             }
         }
         #endif
@@ -46,26 +51,31 @@ public class KSPictureInPictureController: AVPictureInPictureController {
         delegate = view
         self.view = view
         #if canImport(UIKit)
-        if let viewController = view.viewController, let navigationController = viewController.navigationController {
+        if let viewController = view.viewController {
             originalViewController = viewController
-            if navigationController.viewControllers.count == 1 {
+            if let navigationController = viewController.navigationController, navigationController.viewControllers.count == 1 {
                 self.viewController = navigationController
             } else {
                 self.viewController = viewController
             }
-            self.navigationController = self.viewController?.navigationController
+            navigationController = self.viewController?.navigationController
             if let pre = KSPictureInPictureController.pipController {
                 view.player.isMuted = true
                 pre.view?.isPipActive = false
             } else {
-                self.navigationController?.popViewController(animated: true)
-                #if os(iOS)
-                if self.navigationController?.tabBarController != nil, self.navigationController?.viewControllers.count == 1 {
-                    DispatchQueue.main.async { [weak self] in
-                        self?.navigationController?.setToolbarHidden(false, animated: true)
+                if let navigationController {
+                    navigationController.popViewController(animated: true)
+                    #if os(iOS)
+                    if navigationController.tabBarController != nil, navigationController.viewControllers.count == 1 {
+                        DispatchQueue.main.async { [weak self] in
+                            self?.navigationController?.setToolbarHidden(false, animated: true)
+                        }
                     }
+                    #endif
+                } else {
+                    presentingViewController = originalViewController?.presentingViewController
+                    originalViewController?.dismiss(animated: true)
                 }
-                #endif
             }
         }
         #endif
