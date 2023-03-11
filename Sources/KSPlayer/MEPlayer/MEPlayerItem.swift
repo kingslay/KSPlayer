@@ -687,9 +687,15 @@ extension MEPlayerItem: OutputRenderSourceDelegate {
             return nil
         }
         var desire = currentPlaybackTime + options.audioDelay
+        #if !os(macOS)
+        desire -= AVAudioSession.sharedInstance().outputLatency
+        #endif
         let predicate: ((VideoVTBFrame) -> Bool)? = force ? nil : { [weak self] frame -> Bool in
             guard let self else { return true }
             desire = self.currentPlaybackTime + self.options.audioDelay
+            #if !os(macOS)
+            desire -= AVAudioSession.sharedInstance().outputLatency
+            #endif
             if self.isAudioStalled {
                 desire += max(CACurrentMediaTime() - self.videoMediaTime, 0) + self.videoClockDelay
             }
