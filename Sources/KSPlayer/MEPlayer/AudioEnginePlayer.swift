@@ -20,6 +20,7 @@ protocol AudioPlayer: AnyObject {
     func prepare(options: KSOptions, audioDescriptor: AudioDescriptor)
     func play(time: TimeInterval)
     func pause()
+    func flush()
 }
 
 public final class AudioEnginePlayer: AudioPlayer, FrameOutput {
@@ -176,6 +177,10 @@ public final class AudioEnginePlayer: AudioPlayer, FrameOutput {
 
     func pause() {
         engine.pause()
+    }
+
+    func flush() {
+        currentRender = nil
     }
 
     private func addRenderNotify(audioUnit: AudioUnit) {

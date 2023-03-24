@@ -12,7 +12,7 @@ class MEOptions: KSOptions {
     override func process(assetTrack: MediaPlayerTrack) {
         if assetTrack.mediaType == .video {
             if [FFmpegFieldOrder.bb, .bt, .tt, .tb].contains(assetTrack.fieldOrder) {
-                videoFilters = "yadif=mode=0:parity=auto:deint=0"
+                videoFilters = "yadif=mode=1:parity=-1:deint=0"
                 hardwareDecode = false
             }
         }

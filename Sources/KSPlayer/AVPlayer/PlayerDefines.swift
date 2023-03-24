@@ -337,6 +337,7 @@ open class KSOptions {
     var formatCtx: UnsafeMutablePointer<AVFormatContext>?
     var audioFormat = AVAudioFormat(standardFormatWithSampleRate: 44100, channelLayout: AVAudioChannelLayout(layoutTag: kAudioChannelLayoutTag_Stereo)!)
     public init() {
+        // 参数的配置可以参考protocols.texi 和 http.c
         formatContextOptions["auto_convert"] = 0
         formatContextOptions["fps_probe_size"] = 3
         formatContextOptions["reconnect"] = 1

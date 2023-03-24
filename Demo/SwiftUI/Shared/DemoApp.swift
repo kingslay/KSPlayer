@@ -53,6 +53,10 @@ struct DemoApp: App {
     var body: some Scene {
         WindowGroup {
 //            FirstView()
+//            HStack {
+//                KSVideoPlayerView(resource: testObjects[0])
+//                KSVideoPlayerView(resource: testObjects[1])
+//            }
             ContentView()
                 .background(Color.black)
                 .onOpenURL { url in

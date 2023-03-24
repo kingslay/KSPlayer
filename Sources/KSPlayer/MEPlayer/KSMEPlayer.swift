@@ -323,6 +323,7 @@ extension KSMEPlayer: MediaPlayerProtocol {
         } else {
             seekTime = time
         }
+        audioOutput.flush()
         playerItem.seek(time: seekTime + playerItem.startTime, completion: completion)
     }
 
