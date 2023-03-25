@@ -16,33 +16,37 @@ public class KSPictureInPictureController: AVPictureInPictureController {
     #if canImport(UIKit)
     private weak var navigationController: UINavigationController?
     #endif
-    func stop() {
+
+    func stop(restoreUserInterface: Bool) {
         stopPictureInPicture()
         delegate = nil
         KSPictureInPictureController.pipController = nil
-        #if canImport(UIKit)
-        if let viewController, let originalViewController {
-            if let nav = viewController as? UINavigationController,
-               nav.viewControllers.count == 0 || (nav.viewControllers.count == 1 && nav.viewControllers[0] != originalViewController)
-            {
-                nav.viewControllers = [originalViewController]
-            }
-            if let navigationController {
-                var viewControllers = navigationController.viewControllers
-                if let last = viewControllers.last, type(of: last) == type(of: viewController) {
-                    viewControllers[viewControllers.count - 1] = viewController
-                    navigationController.viewControllers = viewControllers
+        if restoreUserInterface {
+            #if canImport(UIKit)
+            if let viewController, let originalViewController {
+                if let nav = viewController as? UINavigationController,
+                   nav.viewControllers.count == 0 || (nav.viewControllers.count == 1 && nav.viewControllers[0] != originalViewController)
+                {
+                    nav.viewControllers = [originalViewController]
                 }
-                if viewControllers.firstIndex(of: viewController) == nil {
-                    navigationController.pushViewController(viewController, animated: true)
+                if let navigationController {
+                    var viewControllers = navigationController.viewControllers
+                    if let last = viewControllers.last, type(of: last) == type(of: viewController) {
+                        viewControllers[viewControllers.count - 1] = viewController
+                        navigationController.viewControllers = viewControllers
+                    }
+                    if viewControllers.firstIndex(of: viewController) == nil {
+                        navigationController.pushViewController(viewController, animated: true)
+                    }
+                } else {
+                    presentingViewController?.present(originalViewController, animated: true)
                 }
-            } else {
-                presentingViewController?.present(originalViewController, animated: true)
             }
+            #endif
+            view?.player.isMuted = false
+            view?.play()
         }
-        #endif
-        view?.player.isMuted = false
-        view?.play()
+
         originalViewController = nil
     }
 

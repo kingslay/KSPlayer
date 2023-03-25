@@ -70,13 +70,14 @@ open class KSPlayerLayer: UIView {
                 guard let pipController = player.pipController else {
                     return
                 }
+
                 if isPipActive {
                     DispatchQueue.main.async { [weak self] in
                         guard let self else { return }
                         pipController.start(view: self)
                     }
                 } else {
-                    pipController.stop()
+                    pipController.stop(restoreUserInterface: true)
                 }
             }
         }
@@ -410,6 +411,10 @@ extension KSPlayerLayer: MediaPlayerDelegate {
 @available(tvOS 14.0, *)
 extension KSPlayerLayer: AVPictureInPictureControllerDelegate {
     public func pictureInPictureControllerDidStopPictureInPicture(_: AVPictureInPictureController) {
+        player.pipController?.stop(restoreUserInterface: false)
+    }
+
+    public func pictureInPictureController(_: AVPictureInPictureController, restoreUserInterfaceForPictureInPictureStopWithCompletionHandler _: @escaping (Bool) -> Void) {
         isPipActive = false
     }
 }
