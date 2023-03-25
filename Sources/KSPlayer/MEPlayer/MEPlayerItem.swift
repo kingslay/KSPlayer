@@ -411,7 +411,7 @@ extension MEPlayerItem {
                     options.seekFlags &= ~AVSEEK_FLAG_BACKWARD
                     result = av_seek_frame(formatCtx, -1, timeStamp, options.seekFlags)
                 }
-                KSLog("seekTime: \(CACurrentMediaTime() - startTime)")
+                KSLog("seek to \(time) spend Time: \(CACurrentMediaTime() - startTime)")
                 if state == .closed {
                     break
                 }
