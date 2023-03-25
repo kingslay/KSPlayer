@@ -96,7 +96,13 @@ public class KSAVPlayer {
 
     private lazy var _pipController: Any? = {
         if #available(tvOS 14.0, *) {
-            return KSPictureInPictureController(playerLayer: playerView.playerLayer)
+            let pip = KSPictureInPictureController(playerLayer: playerView.playerLayer)
+            #if os(iOS)
+            if #available(iOS 14.2, *) {
+                pip?.canStartPictureInPictureAutomaticallyFromInline = true
+            }
+            #endif
+            return pip
         } else {
             return nil
         }

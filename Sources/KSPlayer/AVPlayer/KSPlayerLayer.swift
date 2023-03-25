@@ -596,7 +596,10 @@ extension KSPlayerLayer {
     }
 
     @objc private func enterBackground() {
-        guard state.isPlaying, !player.isExternalPlaybackActive, !isPipActive else {
+        guard state.isPlaying, !player.isExternalPlaybackActive else {
+            return
+        }
+        if #available(tvOS 14.0, *), player.pipController?.isPictureInPictureActive == true {
             return
         }
 
