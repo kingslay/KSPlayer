@@ -19,6 +19,8 @@
 		AC84D8EA28ABBD0E00344154 /* mjpeg.flac in Resources */ = {isa = PBXBuildFile; fileRef = AC84D8DB28ABBD0D00344154 /* mjpeg.flac */; };
 		AC84D8ED28ABBD0E00344154 /* hevc.mkv in Resources */ = {isa = PBXBuildFile; fileRef = AC84D8DC28ABBD0D00344154 /* hevc.mkv */; };
 		AC84D8F028ABBD0E00344154 /* raw.h264 in Resources */ = {isa = PBXBuildFile; fileRef = AC84D8DD28ABBD0D00344154 /* raw.h264 */; };
+		AC9FB92129D94A7E0082E210 /* vp9.webm in Resources */ = {isa = PBXBuildFile; fileRef = AC9FB91F29D94A7E0082E210 /* vp9.webm */; };
+		AC9FB92229D94A7E0082E210 /* av1.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = AC9FB92029D94A7E0082E210 /* av1.mp4 */; };
 		ACA237132938B78B008916E3 /* dolby-digital-plus-channel.mkv in Resources */ = {isa = PBXBuildFile; fileRef = ACA237122938B78A008916E3 /* dolby-digital-plus-channel.mkv */; };
 		ACD2F772275F735C0006D16F /* KSPlayer in Frameworks */ = {isa = PBXBuildFile; productRef = ACD2F771275F735C0006D16F /* KSPlayer */; };
 		ACEA9FEB298BFC8800FBA74B /* TestURL.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACEA9FEA298BFC8800FBA74B /* TestURL.swift */; };
@@ -40,6 +42,8 @@
 		AC84D8DB28ABBD0D00344154 /* mjpeg.flac */ = {isa = PBXFileReference; lastKnownFileType = file; path = mjpeg.flac; sourceTree = "<group>"; };
 		AC84D8DC28ABBD0D00344154 /* hevc.mkv */ = {isa = PBXFileReference; lastKnownFileType = file; path = hevc.mkv; sourceTree = "<group>"; };
 		AC84D8DD28ABBD0D00344154 /* raw.h264 */ = {isa = PBXFileReference; lastKnownFileType = file; path = raw.h264; sourceTree = "<group>"; };
+		AC9FB91F29D94A7E0082E210 /* vp9.webm */ = {isa = PBXFileReference; lastKnownFileType = file; path = vp9.webm; sourceTree = "<group>"; };
+		AC9FB92029D94A7E0082E210 /* av1.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = av1.mp4; sourceTree = "<group>"; };
 		ACA237122938B78A008916E3 /* dolby-digital-plus-channel.mkv */ = {isa = PBXFileReference; lastKnownFileType = file; path = "dolby-digital-plus-channel.mkv"; sourceTree = "<group>"; };
 		ACADA07528EDC067001B76D1 /* TracyPlayer.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = TracyPlayer.entitlements; sourceTree = "<group>"; };
 		ACD2F747275F6E860006D16F /* KSPlayer */ = {isa = PBXFileReference; lastKnownFileType = folder; name = KSPlayer; path = ../..; sourceTree = "<group>"; };
@@ -121,6 +125,8 @@
 				AC84D8DD28ABBD0D00344154 /* raw.h264 */,
 				AC84D8D828ABBD0D00344154 /* subrip.mkv */,
 				AC84D8D728ABBD0D00344154 /* vr.mp4 */,
+				AC9FB92029D94A7E0082E210 /* av1.mp4 */,
+				AC9FB91F29D94A7E0082E210 /* vp9.webm */,
 			);
 			name = Resources;
 			path = ../../../Tests/KSPlayerTests/Resources;
@@ -186,7 +192,9 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				AC9FB92129D94A7E0082E210 /* vp9.webm in Resources */,
 				AC84D8EA28ABBD0E00344154 /* mjpeg.flac in Resources */,
+				AC9FB92229D94A7E0082E210 /* av1.mp4 in Resources */,
 				AC84D8DE28ABBD0D00344154 /* vr.mp4 in Resources */,
 				AC84D8E128ABBD0E00344154 /* subrip.mkv in Resources */,
 				AC84D8ED28ABBD0E00344154 /* hevc.mkv in Resources */,

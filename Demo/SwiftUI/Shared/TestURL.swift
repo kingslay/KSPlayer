@@ -45,13 +45,12 @@ var testObjects: [KSPlayerResource] = {
         objects.append(KSPlayerResource(url: URL(fileURLWithPath: path), options: options, name: "文字字幕"))
     }
     if let path = Bundle.main.path(forResource: "dvd_subtitle", ofType: "mkv") {
-        let options = MEOptions()
-        //        options.videoFilters = "hflip,vflip"
-        objects.append(KSPlayerResource(url: URL(fileURLWithPath: path), options: options, name: "图片字幕"))
+        let url = URL(fileURLWithPath: path)
+        objects.append(KSPlayerResource(url: url, options: MEOptions(), name: url.lastPathComponent))
     }
     if let path = Bundle.main.path(forResource: "dolby-digital-plus-channel", ofType: "mkv") {
-        let options = MEOptions()
-        objects.append(KSPlayerResource(url: URL(fileURLWithPath: path), options: options, name: "dolby-digital-plus"))
+        let url = URL(fileURLWithPath: path)
+        objects.append(KSPlayerResource(url: url, options: MEOptions(), name: url.lastPathComponent))
     }
     if let path = Bundle.main.path(forResource: "vr", ofType: "mp4") {
         let options = MEOptions()
@@ -65,11 +64,21 @@ var testObjects: [KSPlayerResource] = {
         objects.append(KSPlayerResource(url: URL(fileURLWithPath: path), options: options, name: "本地音频"))
     }
     if let path = Bundle.main.path(forResource: "hevc", ofType: "mkv") {
-        objects.append(KSPlayerResource(url: URL(fileURLWithPath: path), options: MEOptions(), name: "h265视频"))
+        let url = URL(fileURLWithPath: path)
+        objects.append(KSPlayerResource(url: url, options: MEOptions(), name: url.lastPathComponent))
+    }
+    if let path = Bundle.main.path(forResource: "av1", ofType: "mp4") {
+        let url = URL(fileURLWithPath: path)
+        objects.append(KSPlayerResource(url: url, options: MEOptions(), name: url.lastPathComponent))
+    }
+    if let path = Bundle.main.path(forResource: "vp9", ofType: "webm") {
+        let url = URL(fileURLWithPath: path)
+        objects.append(KSPlayerResource(url: url, options: MEOptions(), name: url.lastPathComponent))
     }
 
     if let path = Bundle.main.path(forResource: "raw", ofType: "h264") {
-        objects.append(KSPlayerResource(url: URL(fileURLWithPath: path), options: MEOptions(), name: "raw h264"))
+        let url = URL(fileURLWithPath: path)
+        objects.append(KSPlayerResource(url: url, options: MEOptions(), name: url.lastPathComponent))
     }
 
     if let url = URL(string: "http://clips.vorwaerts-gmbh.de/big_buck_bunny.mp4") {
