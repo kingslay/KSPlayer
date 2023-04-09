@@ -257,10 +257,6 @@ Your user icon or company logo shows up this with a link to your home page.
 
 [skrew](https://github.com/skrew)
 
-[mrpajzl](https://github.com/mrpajzl)
-
-[byMohamedali](https://github.com/byMohamedali)
-
 [Kimentanm](https://github.com/Kimentanm)
 
 ## Communication

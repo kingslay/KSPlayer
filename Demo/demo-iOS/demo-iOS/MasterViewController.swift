@@ -44,7 +44,9 @@ class MasterViewController: UIViewController {
         tableView.delegate = self
         tableView.dataSource = self
         tableView.rowHeight = 40
+        #if !os(tvOS)
         tableView.separatorStyle = .singleLine
+        #endif
         tableView.register(TableViewCell.self, forCellReuseIdentifier: "Cell")
         tableView.reloadData()
     }

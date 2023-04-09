@@ -255,6 +255,9 @@ open class VideoPlayerView: PlayerView {
         if let subtitle = resource?.subtitle {
             showSubtile(from: subtitle, at: currentTime)
             subtitleBackView.isHidden = false
+        } else {
+            subtitleBackView.image = nil
+            subtitleLabel.attributedText = nil
         }
     }
 
