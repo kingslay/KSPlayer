@@ -109,6 +109,10 @@ final class MEPlayerItem {
                     if let opaque = context.interrupt_callback.opaque {
                         let formatContext = Unmanaged<MEPlayerItem>.fromOpaque(opaque).takeUnretainedValue()
                         formatContext.options.io(log: log)
+                        if log.starts(with: "Will reconnect at") {
+                            formatContext.videoTrack?.seekTime = formatContext.currentPlaybackTime
+                            formatContext.audioTrack?.seekTime = formatContext.currentPlaybackTime
+                        }
                     }
 
                 } else if avclass == avfilter_get_class() {
@@ -185,6 +189,10 @@ extension MEPlayerItem {
             }
         }
         formatCtx.pointee.interrupt_callback = interruptCB
+//        formatCtx.pointee.io_close2 = { formatCtx, pb -> Int32 in
+//            return 0
+//
+//        }
 //        formatCtx.pointee.io_open = { formatCtx, context, url, flags, options -> Int32 in
 //            return 0
 //        }
