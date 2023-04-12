@@ -511,6 +511,7 @@ struct AVMediaPlayerTrack: MediaPlayerTrack {
     let colorPrimaries: String?
     let transferFunction: String?
     let yCbCrMatrix: String?
+    let isImageSubtitle = false
     var dovi: DOVIDecoderConfigurationRecord?
     var audioStreamBasicDescription: AudioStreamBasicDescription?
     let fieldOrder: FFmpegFieldOrder = .unknown

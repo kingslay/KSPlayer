@@ -149,9 +149,10 @@ extension CGImage {
     }
 
     func image(quality: CGFloat) -> UIImage? {
+        // 用heic格式，那展示的时候会卡主线程。也不能用jpg，因为字幕需要有透明度。所以改成用tif
         autoreleasepool {
             guard let mutableData = CFDataCreateMutable(nil, 0),
-                  let destination = CGImageDestinationCreateWithData(mutableData, AVFileType.heic.rawValue as CFString, 1, nil)
+                  let destination = CGImageDestinationCreateWithData(mutableData, AVFileType.tif.rawValue as CFString, 1, nil)
             else {
                 return nil
             }

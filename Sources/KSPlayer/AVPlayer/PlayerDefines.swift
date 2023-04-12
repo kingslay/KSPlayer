@@ -102,6 +102,7 @@ public protocol MediaPlayerTrack: CustomStringConvertible {
     var colorPrimaries: String? { get }
     var transferFunction: String? { get }
     var yCbCrMatrix: String? { get }
+    var isImageSubtitle: Bool { get }
     var audioStreamBasicDescription: AudioStreamBasicDescription? { get }
     var dovi: DOVIDecoderConfigurationRecord? { get }
     var fieldOrder: FFmpegFieldOrder { get }
@@ -341,7 +342,7 @@ open class KSOptions {
         formatContextOptions["auto_convert"] = 0
         formatContextOptions["fps_probe_size"] = 3
         formatContextOptions["reconnect"] = 1
-//        formatContextOptions["reconnect_at_eof"] = 1
+        formatContextOptions["reconnect_at_eof"] = 1
         formatContextOptions["reconnect_streamed"] = 1
         formatContextOptions["reconnect_on_network_error"] = 1
 
