@@ -551,7 +551,7 @@ struct AVMediaPlayerTrack: MediaPlayerTrack {
             colorPrimaries = nil
             transferFunction = nil
             yCbCrMatrix = nil
-            mediaSubType = CMFormatDescription.MediaSubType(string: "")
+            mediaSubType = .boxed
             fullRangeVideo = false
             description = ""
         }
