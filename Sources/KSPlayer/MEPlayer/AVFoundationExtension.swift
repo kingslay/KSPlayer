@@ -192,7 +192,7 @@ extension AVAudioFormat {
         pcmBuffer.frameLength = pcmBuffer.frameCapacity
         for i in 0 ..< min(Int(pcmBuffer.format.channelCount), frame.data.count) {
             frame.data[i]?.withMemoryRebound(to: Float.self, capacity: Int(pcmBuffer.frameCapacity)) { srcFloatsForChannel in
-                pcmBuffer.floatChannelData?[i].update(from: srcFloatsForChannel, count: Int(pcmBuffer.frameCapacity))
+                pcmBuffer.floatChannelData?[i].assign(from: srcFloatsForChannel, count: Int(pcmBuffer.frameCapacity))
             }
         }
         return pcmBuffer
