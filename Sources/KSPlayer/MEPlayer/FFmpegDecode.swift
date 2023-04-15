@@ -89,6 +89,13 @@ class FFmpegDecode: DecodeProtocol {
                         closedCaptionsPacket.fill()
                         subtitle.putPacket(packet: closedCaptionsPacket)
                     }
+                    if let sideData = av_frame_get_side_data(avframe, AV_FRAME_DATA_SEI_UNREGISTERED) {
+                        let size = sideData.pointee.size
+                        if size > AV_UUID_LEN {
+                            let str = String(cString: sideData.pointee.data.advanced(by: Int(AV_UUID_LEN)))
+                            KSLog("sei \(str)")
+                        }
+                    }
                 }
                 var position = avframe.pointee.best_effort_timestamp
                 if position < 0 {
