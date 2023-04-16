@@ -31,7 +31,7 @@ public class KSMEPlayer: NSObject {
             let contentSource = AVPictureInPictureController.ContentSource(sampleBufferDisplayLayer: videoOutput.displayView.displayLayer, playbackDelegate: self)
             let pip = KSPictureInPictureController(contentSource: contentSource)
             #if os(iOS)
-            pip.canStartPictureInPictureAutomaticallyFromInline = true
+            pip.canStartPictureInPictureAutomaticallyFromInline = options.canStartPictureInPictureAutomaticallyFromInline
             #endif
             return pip
         } else {

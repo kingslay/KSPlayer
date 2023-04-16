@@ -322,7 +322,7 @@ open class KSOptions {
     public var hardwareDecode = true
     public var asynchronousDecompression = true
     public var videoDisable = false
-
+    public var canStartPictureInPictureAutomaticallyFromInline = true
     public internal(set) var formatName = ""
     public internal(set) var prepareTime = 0.0
     public internal(set) var dnsStartTime = 0.0

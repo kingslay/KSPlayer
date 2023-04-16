@@ -99,7 +99,7 @@ public class KSAVPlayer {
             let pip = KSPictureInPictureController(playerLayer: playerView.playerLayer)
             #if os(iOS)
             if #available(iOS 14.2, *) {
-                pip?.canStartPictureInPictureAutomaticallyFromInline = true
+                pip?.canStartPictureInPictureAutomaticallyFromInline = options.canStartPictureInPictureAutomaticallyFromInline
             }
             #endif
             return pip
