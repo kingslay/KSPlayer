@@ -523,6 +523,10 @@ extension MEPlayerItem {
 // MARK: MediaPlayback
 
 extension MEPlayerItem: MediaPlayback {
+    var bytesRead: Int64 {
+        formatCtx?.pointee.pb.pointee.bytes_read ?? 0
+    }
+
     var seekable: Bool {
         guard let formatCtx else {
             return false

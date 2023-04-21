@@ -223,6 +223,10 @@ extension KSMEPlayer: MEPlayerDelegate {
 }
 
 extension KSMEPlayer: MediaPlayerProtocol {
+    public var bytesRead: Int64 {
+        playerItem.bytesRead
+    }
+
     public var playbackVolume: Float {
         get {
             audioOutput.volume
