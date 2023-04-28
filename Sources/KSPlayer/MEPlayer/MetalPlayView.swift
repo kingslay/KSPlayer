@@ -52,10 +52,12 @@ public final class MetalPlayView: UIView {
 
     func play() {
         displayLink.isPaused = false
+        metalView.isPaused = false
     }
 
     func pause() {
         displayLink.isPaused = true
+        metalView.isPaused = true
     }
 
     @available(*, unavailable)
