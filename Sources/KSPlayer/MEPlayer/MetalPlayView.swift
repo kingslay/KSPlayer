@@ -9,8 +9,9 @@ import AVFoundation
 import Combine
 import CoreMedia
 import MetalKit
-public final class MetalPlayView: MTKView {
+public final class MetalPlayView: UIView {
     private let render = MetalRender()
+    private let metalView = MTKView(frame: .zero, device: MetalRender.device)
     private var videoInfo: CMVideoFormatDescription?
     public private(set) var pixelBuffer: CVPixelBuffer?
     /// 用displayLink会导致锁屏无法draw，
@@ -22,17 +23,26 @@ public final class MetalPlayView: MTKView {
     weak var renderSource: OutputRenderSourceDelegate?
     // AVSampleBufferAudioRenderer AVSampleBufferRenderSynchronizer AVSampleBufferDisplayLayer
     var displayView = AVSampleBufferDisplayView()
+    var drawableSize: CGSize {
+        get {
+            metalView.drawableSize
+        }
+        set {
+            metalView.drawableSize = newValue
+        }
+    }
 
     init(options: KSOptions) {
         self.options = options
-        super.init(frame: .zero, device: MetalRender.device)
+        super.init(frame: .zero)
         #if os(macOS)
-        (layer as? CAMetalLayer)?.wantsExtendedDynamicRangeContent = true
+        (metalView.layer as? CAMetalLayer)?.wantsExtendedDynamicRangeContent = true
         #endif
-        displayLink.add(to: .main, forMode: .common)
-        framebufferOnly = true
+        metalView.framebufferOnly = true
+        metalView.isPaused = true
+        addSubview(metalView)
         addSubview(displayView)
-        isPaused = true
+        displayLink.add(to: .main, forMode: .common)
         pause()
     }
 
@@ -55,7 +65,7 @@ public final class MetalPlayView: MTKView {
 
     override public func didAddSubview(_ subview: UIView) {
         super.didAddSubview(subview)
-        if subview == displayView {
+        if subview == displayView || subview == metalView {
             subview.frame = frame
             subview.translatesAutoresizingMaskIntoConstraints = false
             NSLayoutConstraint.activate([
@@ -69,6 +79,7 @@ public final class MetalPlayView: MTKView {
 
     override public var contentMode: UIViewContentMode {
         didSet {
+            metalView.contentMode = contentMode
             switch contentMode {
             case .scaleToFill:
                 displayView.displayLayer.videoGravity = .resize
@@ -94,7 +105,7 @@ public final class MetalPlayView: MTKView {
 
     func clear() {
         if displayView.isHidden {
-            if let drawable = currentDrawable, let renderPassDescriptor = currentRenderPassDescriptor {
+            if let drawable = metalView.currentDrawable, let renderPassDescriptor = metalView.currentRenderPassDescriptor {
                 render.clear(drawable: drawable, renderPassDescriptor: renderPassDescriptor)
             }
         } else {
@@ -186,7 +197,7 @@ extension MetalPlayView {
             if options.isUseDisplayLayer() {
                 if displayView.isHidden {
                     displayView.isHidden = false
-                    if let drawable = currentDrawable, let renderPassDescriptor = currentRenderPassDescriptor {
+                    if let drawable = metalView.currentDrawable, let renderPassDescriptor = metalView.currentRenderPassDescriptor {
                         render.clear(drawable: drawable, renderPassDescriptor: renderPassDescriptor)
                     }
                 }
@@ -201,16 +212,16 @@ extension MetalPlayView {
                 }
                 if options.display == .plane {
                     if let dar = options.customizeDar(sar: sar, par: par) {
-                        drawableSize = CGSize(width: par.width, height: par.width * dar.height / dar.width)
+                        metalView.drawableSize = CGSize(width: par.width, height: par.width * dar.height / dar.width)
                     } else {
-                        drawableSize = CGSize(width: par.width, height: par.height * sar.height / sar.width)
+                        metalView.drawableSize = CGSize(width: par.width, height: par.height * sar.height / sar.width)
                     }
                 } else {
-                    drawableSize = UIScreen.size
+                    metalView.drawableSize = UIScreen.size
                 }
-                (layer as? CAMetalLayer)?.pixelFormat = KSOptions.colorPixelFormat(bitDepth: pixelBuffer.bitDepth)
-                (layer as? CAMetalLayer)?.colorspace = pixelBuffer.colorspace
-                guard let drawable = currentDrawable else {
+                (metalView.layer as? CAMetalLayer)?.pixelFormat = KSOptions.colorPixelFormat(bitDepth: pixelBuffer.bitDepth)
+                (metalView.layer as? CAMetalLayer)?.colorspace = pixelBuffer.colorspace
+                guard let drawable = metalView.currentDrawable else {
                     return
                 }
                 render.draw(pixelBuffer: pixelBuffer, display: options.display, drawable: drawable)
