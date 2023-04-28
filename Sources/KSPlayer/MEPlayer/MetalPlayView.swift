@@ -104,6 +104,14 @@ public final class MetalPlayView: UIView {
             options.display.touchesMoved(touch: touches.first!)
         }
     }
+    #else
+    override public func touchesMoved(with event: NSEvent) {
+        if options.display == .plane {
+            super.touchesMoved(with: event)
+        } else {
+            options.display.touchesMoved(touch: event.allTouches().first!)
+        }
+    }
     #endif
 
     func clear() {
