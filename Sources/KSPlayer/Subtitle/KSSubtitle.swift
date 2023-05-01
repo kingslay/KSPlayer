@@ -109,7 +109,7 @@ public class KSSubtitle {
 
 public class KSURLSubtitle: KSSubtitle {
     public var url: URL?
-    public var parses: [KSParseProtocol] = [SrtParse(), AssParse()]
+    public var parses: [KSParseProtocol] = [SrtParse(), AssParse(), VTTParse()]
     public convenience init(url: URL, encoding: String.Encoding? = nil) {
         self.init()
         self.url = url

@@ -5,6 +5,7 @@
 //  Created by kintan on 2018/8/7.
 //
 import Foundation
+
 public protocol KSParseProtocol {
     func canParse(subtitle: String) -> Bool
     func parse(subtitle: String) -> [SubtitlePart]
@@ -16,12 +17,17 @@ public extension KSParseProtocol {
     }
 
     /// 把字符串时间转为对应的秒
-    /// - Parameter fromStr: srt 00:02:52,184 ass0:30:11.56
+    /// - Parameter fromStr: srt 00:02:52,184 ass0:30:11.56 vtt:00:00.430
     /// - Returns: 秒
     static func parseDuration(_ fromStr: String) -> TimeInterval {
         let scanner = Scanner(string: fromStr)
-        let hour = scanner.scanDouble() ?? 0.0
-        _ = scanner.scanString(":")
+
+        var hour: Double = 0
+        if fromStr.split(separator: ":").count > 2 {
+            hour = scanner.scanDouble() ?? 0.0
+            _ = scanner.scanString(":")
+        }
+
         let min = scanner.scanDouble() ?? 0.0
         _ = scanner.scanString(":")
         let sec = scanner.scanDouble() ?? 0.0
@@ -111,9 +117,49 @@ public class AssParse: KSParseProtocol {
     }
 }
 
+public class VTTParse: KSParseProtocol {
+    public func canParse(subtitle: String) -> Bool {
+        subtitle.contains(" --> ") && subtitle.contains("WEBVTT")
+    }
+
+    /**
+     00:00.430 --> 00:03.380
+     简中封装 by Q66
+     */
+    public class func parse(scanner: Scanner, reg: NSRegularExpression?) -> SubtitlePart? {
+        _ = scanner.scanUpToString("\n\n")
+        let startString = scanner.scanUpToString(" --> ")
+        // skip spaces and newlines by default.
+        _ = scanner.scanString("-->")
+        if let startString,
+           let endString = scanner.scanUpToCharacters(from: .newlines),
+           var text = scanner.scanUpToString("\n\n")
+        {
+            if let reg {
+                text = reg.stringByReplacingMatches(in: text, range: NSRange(location: 0, length: text.count), withTemplate: "")
+            }
+            return SubtitlePart(AssParse.parseDuration(startString), AssParse.parseDuration(endString), text)
+        }
+        return nil
+    }
+
+    public func parse(subtitle: String) -> [SubtitlePart] {
+        let reg = AssParse.patternReg()
+        var groups = [SubtitlePart]()
+        let subtitle = subtitle.replacingOccurrences(of: "\r\n\r\n", with: "\n\n\n")
+        let scanner = Scanner(string: subtitle)
+        while !scanner.isAtEnd {
+            if let group = VTTParse.parse(scanner: scanner, reg: reg) {
+                groups.append(group)
+            }
+        }
+        return groups
+    }
+}
+
 public class SrtParse: KSParseProtocol {
     public func canParse(subtitle: String) -> Bool {
-        subtitle.contains(" --> ")
+        subtitle.contains(" --> ") && !subtitle.contains("WEBVTT")
     }
 
     /**
