@@ -114,8 +114,8 @@ public class KSMEPlayer: NSObject {
 
 // MARK: - private functions
 
-extension KSMEPlayer {
-    private func playOrPause() {
+private extension KSMEPlayer {
+    func playOrPause() {
         runInMainqueue { [weak self] in
             guard let self else { return }
             let isPaused = !(self.playbackState == .playing && self.loadState == .playable)
@@ -223,61 +223,13 @@ extension KSMEPlayer: MEPlayerDelegate {
 }
 
 extension KSMEPlayer: MediaPlayerProtocol {
-    public var bytesRead: Int64 {
-        playerItem.bytesRead
-    }
-
+    public var subtitleDataSouce: SubtitleDataSouce? { self }
     public var playbackVolume: Float {
         get {
             audioOutput.volume
         }
         set {
             audioOutput.volume = newValue
-        }
-    }
-
-    public var attackTime: Float {
-        get {
-            audioOutput.attackTime
-        }
-        set {
-            audioOutput.attackTime = newValue
-        }
-    }
-
-    public var releaseTime: Float {
-        get {
-            audioOutput.releaseTime
-        }
-        set {
-            audioOutput.releaseTime = newValue
-        }
-    }
-
-    public var threshold: Float {
-        get {
-            audioOutput.threshold
-        }
-        set {
-            audioOutput.threshold = newValue
-        }
-    }
-
-    public var expansionRatio: Float {
-        get {
-            audioOutput.expansionRatio
-        }
-        set {
-            audioOutput.expansionRatio = newValue
-        }
-    }
-
-    public var overallGain: Float {
-        get {
-            audioOutput.overallGain
-        }
-        set {
-            audioOutput.overallGain = newValue
         }
     }
 
@@ -505,6 +457,59 @@ extension KSMEPlayer: AVPlaybackCoordinatorPlaybackControlDelegate {
     }
 }
 
+// MARK: - public functions
+
 public extension KSMEPlayer {
-    var subtitleDataSouce: SubtitleDataSouce? { self }
+    var metadata: [String: String] {
+        playerItem.metadata
+    }
+
+    var bytesRead: Int64 {
+        playerItem.bytesRead
+    }
+
+    var attackTime: Float {
+        get {
+            audioOutput.attackTime
+        }
+        set {
+            audioOutput.attackTime = newValue
+        }
+    }
+
+    var releaseTime: Float {
+        get {
+            audioOutput.releaseTime
+        }
+        set {
+            audioOutput.releaseTime = newValue
+        }
+    }
+
+    var threshold: Float {
+        get {
+            audioOutput.threshold
+        }
+        set {
+            audioOutput.threshold = newValue
+        }
+    }
+
+    var expansionRatio: Float {
+        get {
+            audioOutput.expansionRatio
+        }
+        set {
+            audioOutput.expansionRatio = newValue
+        }
+    }
+
+    var overallGain: Float {
+        get {
+            audioOutput.overallGain
+        }
+        set {
+            audioOutput.overallGain = newValue
+        }
+    }
 }

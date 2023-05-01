@@ -520,13 +520,19 @@ extension MEPlayerItem {
     }
 }
 
-// MARK: MediaPlayback
+extension MEPlayerItem {
+    var metadata: [String: String] {
+        toDictionary(formatCtx?.pointee.metadata)
+    }
 
-extension MEPlayerItem: MediaPlayback {
     var bytesRead: Int64 {
         formatCtx?.pointee.pb.pointee.bytes_read ?? 0
     }
+}
 
+// MARK: MediaPlayback
+
+extension MEPlayerItem: MediaPlayback {
     var seekable: Bool {
         guard let formatCtx else {
             return false
@@ -585,7 +591,7 @@ extension MEPlayerItem: MediaPlayback {
         self.closeOperation = closeOperation
     }
 
-    internal func seek(time: TimeInterval, completion: @escaping ((Bool) -> Void)) {
+    func seek(time: TimeInterval, completion: @escaping ((Bool) -> Void)) {
         if state == .reading || state == .paused {
             state = .seeking
             currentPlaybackTime = time
