@@ -588,6 +588,7 @@ extension MEPlayerItem: MediaPlayback {
             closeOperation.addDependency(openOperation)
         }
         operationQueue.addOperation(closeOperation)
+        allPlayerItemTracks.forEach { $0.shutdown() }
         self.closeOperation = closeOperation
     }
 
