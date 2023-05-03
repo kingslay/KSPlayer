@@ -566,7 +566,6 @@ extension MEPlayerItem: MediaPlayback {
         if let outputFormatCtx {
             av_write_trailer(outputFormatCtx)
         }
-        condition.signal()
         // 故意循环引用。等结束了。才释放
         let closeOperation = BlockOperation {
             Thread.current.name = (self.operationQueue.name ?? "") + "_close"
@@ -588,6 +587,7 @@ extension MEPlayerItem: MediaPlayback {
             closeOperation.addDependency(openOperation)
         }
         operationQueue.addOperation(closeOperation)
+        condition.signal()
         allPlayerItemTracks.forEach { $0.shutdown() }
         self.closeOperation = closeOperation
     }
