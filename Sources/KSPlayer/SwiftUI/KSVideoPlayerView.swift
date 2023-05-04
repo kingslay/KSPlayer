@@ -32,7 +32,7 @@ public struct KSVideoPlayerView: View {
                     if let part = subtile.search(for: time) {
                         subtitleModel.part = part
                     } else {
-                        if let part = subtitleModel.part, part.end > part.start, time > part.end {
+                        if let part = subtitleModel.part, part.end > part.start, !(part == time) {
                             subtitleModel.part = nil
                         }
                     }
@@ -306,8 +306,12 @@ public class SubtitleModel: ObservableObject {
     public var selectedSubtitleInfo: SubtitleInfo? {
         didSet {
             oldValue?.disableSubtitle()
-            selectedSubtitleInfo?.enableSubtitle {
-                self.selectedSubtitle = try? $0.get()
+            if let selectedSubtitleInfo {
+                selectedSubtitleInfo.enableSubtitle {
+                    self.selectedSubtitle = try? $0.get()
+                }
+            } else {
+                selectedSubtitle = nil
             }
         }
     }
@@ -332,10 +336,16 @@ struct VideoSubtitleView: View {
             if let image = model.part?.image {
                 GeometryReader { geometry in
                     let fitRect = image.fitRect(geometry.size)
-                    Image(uiImage: image)
-                        .resizable()
-                        .offset(CGSize(width: fitRect.origin.x, height: fitRect.origin.y))
-                        .frame(width: fitRect.size.width, height: fitRect.size.height)
+                    if #available(macOS 13.0, iOS 16.0, tvOS 16.0, *) {
+                        LiveTextImage(uiImage: image)
+                            .offset(CGSize(width: fitRect.origin.x, height: fitRect.origin.y))
+                            .frame(width: fitRect.size.width, height: fitRect.size.height)
+                    } else {
+                        Image(uiImage: image)
+                            .resizable()
+                            .offset(CGSize(width: fitRect.origin.x, height: fitRect.origin.y))
+                            .frame(width: fitRect.size.width, height: fitRect.size.height)
+                    }
                 }
                 .scaledToFit()
                 .padding()
@@ -350,24 +360,6 @@ struct VideoSubtitleView: View {
                 #endif
             }
         }
-    }
-}
-
-#if os(macOS)
-public extension Image {
-    init(uiImage: UIImage) {
-        self.init(nsImage: uiImage)
-    }
-}
-#endif
-
-public extension UIImage {
-    func fitRect(_ fitSize: CGSize) -> CGRect {
-        let hZoom = fitSize.width / size.width
-        let vZoom = fitSize.height / size.height
-        let zoom = min(min(hZoom, vZoom), 1)
-        let newSize = size * zoom
-        return CGRect(origin: CGPoint(x: (fitSize.width - newSize.width) / 2, y: fitSize.height - newSize.height), size: newSize)
     }
 }
 

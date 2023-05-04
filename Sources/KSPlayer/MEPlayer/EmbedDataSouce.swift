@@ -27,7 +27,6 @@ extension FFmpegAssetTrack: SubtitleInfo {
 
 extension FFmpegAssetTrack: KSSubtitleProtocol {
     public func search(for time: TimeInterval) -> SubtitlePart? {
-        let time = time + startTime
         if isImageSubtitle {
             return subtitle?.outputRenderQueue.pop { item -> Bool in
                 item.part < time || item.part == time

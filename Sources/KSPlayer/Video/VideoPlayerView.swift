@@ -91,7 +91,7 @@ open class VideoPlayerView: PlayerView {
     public var titleLabel = UILabel()
     public var subtitleLabel = UILabel()
     public var subtitleBackView = UIImageView()
-    private var subtitleEndTime = TimeInterval(0)
+    private var subtitlePart: SubtitlePart?
     /// Activty Indector for loading
     public var loadingIndector: UIView & LoadingIndector = UIActivityIndicatorView(frame: CGRect(x: 0, y: 0, width: 30, height: 30))
     public var seekToView: UIView & SeekViewProtocol = SeekView()
@@ -414,11 +414,11 @@ open class VideoPlayerView: PlayerView {
     open func showSubtile(from subtitle: KSSubtitleProtocol, at time: TimeInterval) {
         let time = time + (resource?.definitions[currentDefinition].options.subtitleDelay ?? 0.0)
         if let part = subtitle.search(for: time) {
-            subtitleEndTime = part.end
+            subtitlePart = part
             subtitleBackView.image = part.image
             subtitleLabel.attributedText = part.text
         } else {
-            if time > subtitleEndTime {
+            if let subtitlePart, !(subtitlePart == time) {
                 subtitleBackView.image = nil
                 subtitleLabel.attributedText = nil
             }

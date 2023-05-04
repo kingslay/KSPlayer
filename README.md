@@ -25,6 +25,7 @@ English | [简体中文](./README_CN.md)
 - De-interlace auto detect
 - Spatial Audio 
 - 360° panorama video.
+- selectable subtitle
 
 ## Requirements
 
