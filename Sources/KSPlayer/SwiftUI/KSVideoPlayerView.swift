@@ -336,10 +336,17 @@ struct VideoSubtitleView: View {
             if let image = model.part?.image {
                 GeometryReader { geometry in
                     let fitRect = image.fitRect(geometry.size)
-                    if #available(macOS 13.0, iOS 16.0, tvOS 16.0, *) {
+                    if #available(macOS 13.0, iOS 16.0, *) {
+                        #if os(tvOS)
+                        Image(uiImage: image)
+                            .resizable()
+                            .offset(CGSize(width: fitRect.origin.x, height: fitRect.origin.y))
+                            .frame(width: fitRect.size.width, height: fitRect.size.height)
+                        #else
                         LiveTextImage(uiImage: image)
                             .offset(CGSize(width: fitRect.origin.x, height: fitRect.origin.y))
                             .frame(width: fitRect.size.width, height: fitRect.size.height)
+                        #endif
                     } else {
                         Image(uiImage: image)
                             .resizable()
@@ -373,6 +380,7 @@ struct VideoSettingView: View {
     var body: some View {
         config.selectedAudioTrack = (config.playerLayer?.player.isMuted ?? false) ? nil : config.audioTracks.first { $0.isEnabled }
         config.selectedVideoTrack = config.videoTracks.first { $0.isEnabled }
+        // 要在这里增加内嵌字幕。因为有些内嵌字幕是放在视频流的。所以会比readyToPlay回调晚。
         config.playerLayer?.player.tracks(mediaType: .subtitle).forEach {
             if let info = $0 as? any SubtitleInfo {
                 subtitleModel.addSubtitle(info: info)

@@ -6,9 +6,10 @@
 //
 
 import SwiftUI
+#if !os(tvOS)
 import VisionKit
 @MainActor
-@available(macOS 13.0, iOS 16.0, tvOS 16.0, *)
+@available(macOS 13.0, iOS 16.0, *)
 public struct LiveTextImage: UIViewRepresentable {
     public let uiImage: UIImage
     private let analyzer = ImageAnalyzer()
@@ -56,6 +57,7 @@ public struct LiveTextImage: UIViewRepresentable {
         }
     }
 }
+#endif
 
 #if os(macOS)
 public extension Image {
