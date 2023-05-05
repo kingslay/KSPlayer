@@ -47,7 +47,7 @@ public struct KSVideoPlayerView: View {
                     }
                     subtitleModel.selectedSubtitleInfo = subtitleModel.subtitleInfos.first
                     if subtitleModel.selectedSubtitleInfo == nil, let track = playerLayer.player.tracks(mediaType: .subtitle).first, playerLayer.options.autoSelectEmbedSubtitle {
-                        subtitleModel.selectedSubtitleInfo = track as? SubtitleInfo
+                        subtitleModel.selectedSubtitleInfo = track as? (any SubtitleInfo)
                     }
                 } else if state == .bufferFinished {
                     if isMaskShow {
@@ -302,8 +302,8 @@ extension EventModifiers {
 
 public class SubtitleModel: ObservableObject {
     public var selectedSubtitle: KSSubtitleProtocol?
-    public private(set) var subtitleInfos = [SubtitleInfo]()
-    public var selectedSubtitleInfo: SubtitleInfo? {
+    public private(set) var subtitleInfos = [any SubtitleInfo & Hashable]()
+    @Published public var selectedSubtitleInfo: (any SubtitleInfo)? {
         didSet {
             oldValue?.disableSubtitle()
             if let selectedSubtitleInfo {
@@ -320,7 +320,7 @@ public class SubtitleModel: ObservableObject {
     @Published public var textColor: Color = .white
     @Published public var textPositionFromBottom = 0
     @Published fileprivate var part: SubtitlePart?
-    public func addSubtitle(info: SubtitleInfo) {
+    public func addSubtitle(info: any SubtitleInfo) {
         if subtitleInfos.first(where: { $0.subtitleID == info.subtitleID }) == nil {
             subtitleInfos.append(info)
         }
@@ -374,7 +374,7 @@ struct VideoSettingView: View {
         config.selectedAudioTrack = (config.playerLayer?.player.isMuted ?? false) ? nil : config.audioTracks.first { $0.isEnabled }
         config.selectedVideoTrack = config.videoTracks.first { $0.isEnabled }
         config.playerLayer?.player.tracks(mediaType: .subtitle).forEach {
-            if let info = $0 as? SubtitleInfo {
+            if let info = $0 as? any SubtitleInfo {
                 subtitleModel.addSubtitle(info: info)
             }
         }

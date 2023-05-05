@@ -63,7 +63,7 @@ public class KSSRTOptions {
 public class KSSubtitleController {
     private let cacheDataSouce = CacheDataSouce()
     private var subtitleDataSouces: [SubtitleDataSouce] = []
-    private var infos = [SubtitleInfo]()
+    private var infos = [any SubtitleInfo]()
     private var subtitleName: String?
     public var view: KSSubtitleView
     public var selectWithFilePath: ((Result<KSSubtitleProtocol, NSError>) -> Void)? {
@@ -120,7 +120,7 @@ public class KSSubtitleController {
         }
     }
 
-    public func filterInfos(_ isIncluded: (SubtitleInfo) -> Bool) -> [SubtitleInfo] {
+    public func filterInfos(_ isIncluded: (any SubtitleInfo) -> Bool) -> [any SubtitleInfo] {
         infos.filter(isIncluded)
     }
 

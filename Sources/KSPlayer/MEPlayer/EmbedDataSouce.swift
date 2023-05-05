@@ -40,7 +40,7 @@ extension FFmpegAssetTrack: KSSubtitleProtocol {
 }
 
 extension KSMEPlayer: SubtitleDataSouce {
-    public var infos: [SubtitleInfo]? {
+    public var infos: [any SubtitleInfo]? {
         tracks(mediaType: .subtitle) as? [FFmpegAssetTrack]
     }
 

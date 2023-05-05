@@ -86,9 +86,9 @@ public enum KSMenuBuilder {
         return UIMenu(title: title, children: actions)
     }
 
-    static func srtChangeMenu(_ currentSub: SubtitleInfo?,
-                              availableSubtitles: [SubtitleInfo],
-                              completition handler: @escaping (SubtitleInfo?) -> Void) -> UIMenu?
+    static func srtChangeMenu(_ currentSub: (any SubtitleInfo)?,
+                              availableSubtitles: [any SubtitleInfo],
+                              completition handler: @escaping ((any SubtitleInfo)?) -> Void) -> UIMenu?
     {
         guard availableSubtitles.count > 0 else { return nil }
         var actions = [UIAction]()

@@ -77,12 +77,12 @@ public extension SubtitletoCache {
 }
 
 public protocol SubtitleDataSouce: AnyObject {
-    var infos: [SubtitleInfo]? { get }
+    var infos: [any SubtitleInfo]? { get }
     func searchSubtitle(name: String, completion: @escaping (() -> Void))
 }
 
 public class CacheDataSouce: SubtitleDataSouce {
-    public var infos: [SubtitleInfo]?
+    public var infos: [any SubtitleInfo]?
     private let cacheFolder = (NSTemporaryDirectory() as NSString).appendingPathComponent("KSSubtitleCache")
     private var srtCacheInfoPath: String
     // 因为plist不能保存URL
@@ -101,7 +101,7 @@ public class CacheDataSouce: SubtitleDataSouce {
             if srtInfoCaches.isEmpty {
                 infos = nil
             } else {
-                let array = srtInfoCaches.map { subtitleID, downloadURL -> SubtitleInfo in
+                let array = srtInfoCaches.map { subtitleID, downloadURL -> (any SubtitleInfo) in
                     let info = URLSubtitleInfo(subtitleID: subtitleID, name: (downloadURL as NSString).lastPathComponent, url: URL(fileURLWithPath: downloadURL))
                     info.comment = "本地"
                     return info

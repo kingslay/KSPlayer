@@ -74,7 +74,7 @@ public protocol KSSubtitleProtocol {
     func search(for time: TimeInterval) -> SubtitlePart?
 }
 
-public protocol SubtitleInfo: AnyObject {
+public protocol SubtitleInfo: AnyObject, Hashable, Identifiable {
     var subtitleID: String { get }
     var name: String { get }
     //    var userInfo: NSMutableDictionary? { get set }
@@ -82,6 +82,17 @@ public protocol SubtitleInfo: AnyObject {
 //    var comment: String? { get }
     func disableSubtitle()
     func enableSubtitle(completion: @escaping (Result<KSSubtitleProtocol, NSError>) -> Void)
+}
+
+public extension SubtitleInfo {
+    var id: String { subtitleID }
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(subtitleID)
+    }
+
+    static func == (lhs: Self, rhs: Self) -> Bool {
+        lhs.subtitleID == rhs.subtitleID
+    }
 }
 
 public class KSSubtitle {
