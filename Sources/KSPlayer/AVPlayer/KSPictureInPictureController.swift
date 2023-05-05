@@ -39,7 +39,10 @@ public class KSPictureInPictureController: AVPictureInPictureController {
                         navigationController.pushViewController(viewController, animated: true)
                     }
                 } else {
-                    presentingViewController?.present(originalViewController, animated: true)
+                    if originalViewController.parent == nil {
+                        presentingViewController?.present(originalViewController, animated: true)
+                    }       
+                    //presentingViewController?.present(originalViewController, animated: true)
                 }
             }
             #endif
