@@ -38,13 +38,8 @@ public class KSPictureInPictureController: AVPictureInPictureController {
                     if viewControllers.firstIndex(of: viewController) == nil {
                         navigationController.pushViewController(viewController, animated: true)
                     }
-                } else {
-                    if let presentingViewController = originalViewController.presentingViewController {
-                        presentingViewController.dismiss(animated: true) {
-                            presentingViewController.present(originalViewController, animated: true)
-                        }
-                     }     
-                    //presentingViewController?.present(originalViewController, animated: true)
+                } else {   
+                    presentingViewController?.present(originalViewController, animated: true)
                 }
             }
             #endif
