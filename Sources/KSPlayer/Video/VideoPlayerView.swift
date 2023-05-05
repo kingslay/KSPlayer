@@ -758,8 +758,8 @@ extension VideoPlayerView {
             seekToView.heightAnchor.constraint(equalToConstant: 40),
             
             //change size of button
-            replayButton.widthAnchor.constraint(equalToConstant: 60),
-            replayButton.heightAnchor.constraint(equalToConstant: 60),
+            //replayButton.widthAnchor.constraint(equalToConstant: 60),
+            //replayButton.heightAnchor.constraint(equalToConstant: 60),
             
             replayButton.centerYAnchor.constraint(equalTo: centerYAnchor),
             replayButton.centerXAnchor.constraint(equalTo: centerXAnchor),
