@@ -16,6 +16,10 @@ public struct LiveTextImage: UIViewRepresentable {
     #if canImport(UIKit)
     public typealias UIViewType = UIImageView
     private let interaction = ImageAnalysisInteraction()
+    public init(uiImage: UIImage) {
+        self.uiImage = uiImage
+    }
+
     public func makeUIView(context _: Context) -> UIViewType {
         let imageView = LiveTextImageView()
         imageView.addInteraction(interaction)
