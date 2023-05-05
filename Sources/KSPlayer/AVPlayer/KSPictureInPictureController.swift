@@ -39,9 +39,11 @@ public class KSPictureInPictureController: AVPictureInPictureController {
                         navigationController.pushViewController(viewController, animated: true)
                     }
                 } else {
-                    if originalViewController.parent == nil {
-                        presentingViewController?.present(originalViewController, animated: true)
-                    }       
+                    if let presentingViewController = originalViewController.presentingViewController {
+                        presentingViewController.dismiss(animated: true) {
+                            presentingViewController.present(originalViewController, animated: true)
+                        }
+                     }     
                     //presentingViewController?.present(originalViewController, animated: true)
                 }
             }
