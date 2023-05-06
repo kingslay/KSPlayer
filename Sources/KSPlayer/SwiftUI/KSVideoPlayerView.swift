@@ -8,18 +8,27 @@ import AVFoundation
 import SwiftUI
 @available(iOS 15, tvOS 15, macOS 12, *)
 public struct KSVideoPlayerView: View {
-    @StateObject public var subtitleModel = SubtitleModel()
-    @StateObject public var playerCoordinator = KSVideoPlayer.Coordinator()
-    @State public var url: URL
-    private let subtitleURLs: [URL]
-    public let options: KSOptions
-    @State var isMaskShow = true
+    private let subtitleDataSouce: SubtitleDataSouce
     @State private var model = ControllerTimeModel()
     @Environment(\.dismiss) private var dismiss
+    @State var isMaskShow = true
+    public let options: KSOptions
+    @StateObject public var subtitleModel = SubtitleModel()
+    @StateObject public var playerCoordinator = KSVideoPlayer.Coordinator()
+    @State public var url: URL {
+        didSet {
+            subtitleModel.subtitleName = url.lastPathComponent
+        }
+    }
+
     public init(url: URL, options: KSOptions, subtitleURLs: [URL] = [URL]()) {
+        self.init(url: url, options: options, subtitleDataSouce: URLSubtitleDataSouce(urls: subtitleURLs))
+    }
+
+    public init(url: URL, options: KSOptions, subtitleDataSouce: SubtitleDataSouce) {
         _url = .init(initialValue: url)
         self.options = options
-        self.subtitleURLs = subtitleURLs
+        self.subtitleDataSouce = subtitleDataSouce
     }
 
     public var body: some View {
@@ -27,28 +36,21 @@ public struct KSVideoPlayerView: View {
             KSVideoPlayer(coordinator: playerCoordinator, url: url, options: options).onPlay { current, total in
                 model.currentTime = Int(current)
                 model.totalTime = Int(max(max(0, total), current))
-                if let subtile = subtitleModel.selectedSubtitle {
-                    let time = current + options.subtitleDelay
-                    if let part = subtile.search(for: time) {
-                        subtitleModel.part = part
-                    } else {
-                        if let part = subtitleModel.part, part.end > part.start, !(part == time) {
-                            subtitleModel.part = nil
-                        }
-                    }
-                } else {
-                    subtitleModel.part = nil
-                }
+                subtitleModel.subtitle(currentTime: current + options.subtitleDelay)
             }
             .onStateChanged { playerLayer, state in
                 if state == .readyToPlay {
-                    subtitleURLs.forEach { url in
-                        subtitleModel.addSubtitle(info: URLSubtitleInfo(url: url))
-                    }
                     subtitleModel.selectedSubtitleInfo = subtitleModel.subtitleInfos.first
-                    if subtitleModel.selectedSubtitleInfo == nil, let track = playerLayer.player.tracks(mediaType: .subtitle).first, playerLayer.options.autoSelectEmbedSubtitle {
-                        subtitleModel.selectedSubtitleInfo = track as? (any SubtitleInfo)
+                    if let subtitleDataSouce = playerLayer.player.subtitleDataSouce {
+                        // 要延后增加内嵌字幕。因为有些内嵌字幕是放在视频流的。所以会比readyToPlay回调晚。
+                        DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 1) {
+                            subtitleModel.add(dataSouce: subtitleDataSouce)
+                            if subtitleModel.selectedSubtitleInfo == nil, playerLayer.options.autoSelectEmbedSubtitle {
+                                subtitleModel.selectedSubtitleInfo = subtitleModel.subtitleInfos.first
+                            }
+                        }
                     }
+
                 } else if state == .bufferFinished {
                     if isMaskShow {
                         DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + KSOptions.animateDelayTimeInterval) {
@@ -77,6 +79,10 @@ public struct KSVideoPlayerView: View {
                 #endif
             }
             #endif
+            .onAppear {
+                subtitleModel.subtitleName = url.lastPathComponent
+                subtitleModel.add(dataSouce: subtitleDataSouce)
+            }
             .onDisappear {
                 if let playerLayer = playerCoordinator.playerLayer {
                     if !playerLayer.isPipActive {
@@ -144,16 +150,21 @@ public struct KSVideoPlayerView: View {
     public func openURL(_ url: URL) {
         if url.isAudio || url.isMovie {
             self.url = url
-            try? FileManager.default.contentsOfDirectory(at: url.deletingLastPathComponent(), includingPropertiesForKeys: nil).forEach {
-                if $0.isSubtitle {
-                    subtitleModel.addSubtitle(info: URLSubtitleInfo(url: url))
+            let subtitleURLs: [URL]? = try? FileManager.default.contentsOfDirectory(at: url.deletingLastPathComponent(), includingPropertiesForKeys: nil).compactMap { url in
+                if url.isSubtitle {
+                    return url
+                } else {
+                    return nil
                 }
             }
-            subtitleModel.selectedSubtitleInfo = subtitleModel.subtitleInfos.first
+            if let subtitleURLs {
+                let dataSouce = URLSubtitleDataSouce(urls: subtitleURLs)
+                subtitleModel.add(dataSouce: dataSouce)
+                subtitleModel.selectedSubtitleInfo = dataSouce.infos.first
+            }
         } else {
             let info = URLSubtitleInfo(url: url)
             subtitleModel.selectedSubtitleInfo = info
-            subtitleModel.addSubtitle(info: info)
         }
     }
 }
@@ -300,33 +311,6 @@ extension EventModifiers {
     static let none = Self()
 }
 
-public class SubtitleModel: ObservableObject {
-    public var selectedSubtitle: KSSubtitleProtocol?
-    public private(set) var subtitleInfos = [any SubtitleInfo & Hashable]()
-    @Published public var selectedSubtitleInfo: (any SubtitleInfo)? {
-        didSet {
-            oldValue?.disableSubtitle()
-            if let selectedSubtitleInfo {
-                selectedSubtitleInfo.enableSubtitle {
-                    self.selectedSubtitle = try? $0.get()
-                }
-            } else {
-                selectedSubtitle = nil
-            }
-        }
-    }
-
-    @Published public var textFont: Font = .largeTitle
-    @Published public var textColor: Color = .white
-    @Published public var textPositionFromBottom = 0
-    @Published fileprivate var part: SubtitlePart?
-    public func addSubtitle(info: any SubtitleInfo) {
-        if subtitleInfos.first(where: { $0.subtitleID == info.subtitleID }) == nil {
-            subtitleInfos.append(info)
-        }
-    }
-}
-
 @available(iOS 15, tvOS 15, macOS 12, *)
 struct VideoSubtitleView: View {
     @StateObject fileprivate var model: SubtitleModel
@@ -380,12 +364,6 @@ struct VideoSettingView: View {
     var body: some View {
         config.selectedAudioTrack = (config.playerLayer?.player.isMuted ?? false) ? nil : config.audioTracks.first { $0.isEnabled }
         config.selectedVideoTrack = config.videoTracks.first { $0.isEnabled }
-        // 要在这里增加内嵌字幕。因为有些内嵌字幕是放在视频流的。所以会比readyToPlay回调晚。
-        config.playerLayer?.player.tracks(mediaType: .subtitle).forEach {
-            if let info = $0 as? any SubtitleInfo {
-                subtitleModel.addSubtitle(info: info)
-            }
-        }
         let subtitleTracks = subtitleModel.subtitleInfos
         return TabView {
             List {

@@ -69,13 +69,11 @@ class CustomVideoPlayerView: VideoPlayerView {
         if state == .readyToPlay {
             print(layer.player.naturalSize)
             // list the all subtitles
-            let subtitleInfos = srtControl.filterInfos { _ in true }
+            let subtitleInfos = srtControl.subtitleInfos
             subtitleInfos.forEach {
                 print($0.name)
             }
-            subtitleInfos.first?.enableSubtitle { result in
-                self.resource?.subtitle = try? result.get()
-            }
+            srtControl.selectedSubtitleInfo = subtitleInfos.first
             for track in layer.player.tracks(mediaType: .audio) {
                 print("audio name: \(track.name) language: \(track.language ?? "")")
             }

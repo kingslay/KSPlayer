@@ -53,8 +53,8 @@ open class VideoPlayerView: PlayerView {
                 }
                 if let embedSubtitleDataSouce {
                     srtControl.add(dataSouce: embedSubtitleDataSouce)
-                    if resource?.definitions[currentDefinition].options.autoSelectEmbedSubtitle ?? false, let first = embedSubtitleDataSouce.infos?.first {
-                        srtControl.view.selectedInfo = first
+                    if resource?.definitions[currentDefinition].options.autoSelectEmbedSubtitle ?? false, let first = embedSubtitleDataSouce.infos.first {
+                        srtControl.selectedSubtitleInfo = first
                     }
                 }
             }
@@ -72,7 +72,13 @@ open class VideoPlayerView: PlayerView {
     public private(set) var resource: KSPlayerResource? {
         didSet {
             if let resource, oldValue !== resource {
-                srtControl.searchSubtitle(name: resource.name)
+                srtControl.subtitleName = resource.name
+                if let subtitleDataSouce = oldValue?.subtitleDataSouce {
+                    srtControl.remove(dataSouce: subtitleDataSouce)
+                }
+                if let subtitleDataSouce = resource.subtitleDataSouce {
+                    srtControl.add(dataSouce: subtitleDataSouce)
+                }
                 subtitleBackView.isHidden = true
                 subtitleBackView.image = nil
                 subtitleLabel.attributedText = nil
@@ -252,7 +258,7 @@ open class VideoPlayerView: PlayerView {
     override open func player(layer: KSPlayerLayer, currentTime: TimeInterval, totalTime: TimeInterval) {
         guard !isSliderSliding else { return }
         super.player(layer: layer, currentTime: currentTime, totalTime: totalTime)
-        if let subtitle = resource?.subtitle {
+        if let subtitle = srtControl.selectedSubtitle {
             showSubtile(from: subtitle, at: currentTime)
             subtitleBackView.isHidden = false
         } else {
@@ -455,12 +461,11 @@ extension VideoPlayerView {
             self?.playerLayer?.player.select(track: track)
         }
 
-        let subtitles = srtControl.filterInfos { _ in true }
-        let srtMenu = KSMenuBuilder.srtChangeMenu(srtControl.view.selectedInfo,
+        let subtitles = srtControl.subtitleInfos
+        let srtMenu = KSMenuBuilder.srtChangeMenu(srtControl.selectedSubtitleInfo,
                                                   availableSubtitles: subtitles)
         { [weak self] selectedSrt in
-            guard self?.srtControl.view.selectedInfo?.subtitleID != selectedSrt?.subtitleID else { return }
-            self?.srtControl.view.selectedInfo = selectedSrt
+            self?.srtControl.selectedSubtitleInfo = selectedSrt
         }
         #if !os(tvOS)
         toolBar.definitionButton.menu = definitionsMenu
@@ -526,17 +531,17 @@ public extension VideoPlayerView {
     }
 
     private func changeSrt(button _: UIButton) {
-        let availableSubtitles = srtControl.filterInfos { _ in true }
+        let availableSubtitles = srtControl.subtitleInfos
         guard availableSubtitles.count > 0 else { return }
 
         let alertController = UIAlertController(title: NSLocalizedString("subtitle", comment: ""),
                                                 message: nil,
                                                 preferredStyle: preferredStyle())
 
-        let currentSub = srtControl.view.selectedInfo
+        let currentSub = srtControl.selectedSubtitleInfo
 
         let disableAction = UIAlertAction(title: NSLocalizedString("Disabled", comment: ""), style: .default) { [weak self] _ in
-            self?.srtControl.view.selectedInfo = nil
+            self?.srtControl.selectedSubtitleInfo = nil
         }
         alertController.addAction(disableAction)
         if currentSub == nil {
@@ -546,7 +551,7 @@ public extension VideoPlayerView {
 
         availableSubtitles.enumerated().forEach { _, srt in
             let action = UIAlertAction(title: srt.name, style: .default) { [weak self] _ in
-                self?.srtControl.view.selectedInfo = srt
+                self?.srtControl.selectedSubtitleInfo = srt
             }
             alertController.addAction(action)
             if currentSub?.subtitleID == srt.subtitleID {
@@ -667,16 +672,6 @@ extension VideoPlayerView {
             srtControl.view.bottomAnchor.constraint(equalTo: bottomAnchor),
             srtControl.view.trailingAnchor.constraint(equalTo: trailingAnchor),
         ])
-        srtControl.selectWithFilePath = { [weak self] result in
-            guard let self else { return }
-            if let subtitle = try? result.get() {
-                self.subtitleBackView.isHidden = false
-                self.resource?.subtitle = subtitle
-            } else {
-                self.subtitleBackView.isHidden = true
-                self.resource?.subtitle = nil
-            }
-        }
     }
 
     /**

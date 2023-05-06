@@ -136,7 +136,7 @@ struct DemoApp: App {
             }
             if let hostingController = controllers.first {
                 hostingController.becomeFirstResponder()
-                hostingController.rootView.subtitleModel.selectedSubtitle = KSURLSubtitle(url: url)
+                hostingController.rootView.subtitleModel.selectedSubtitleInfo = URLSubtitleInfo(url: url)
             }
         }
     }

@@ -377,7 +377,7 @@ extension IOSVideoPlayerView: UIDocumentPickerDelegate {
             if url.isMovie || url.isAudio {
                 set(url: url, options: KSOptions())
             } else {
-                resource?.subtitle = KSURLSubtitle(url: url)
+                srtControl.selectedSubtitleInfo = URLSubtitleInfo(url: url)
             }
         }
     }

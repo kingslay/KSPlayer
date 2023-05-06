@@ -122,7 +122,7 @@ extension MacVideoPlayerView {
                 set(resource: KSPlayerResource(url: url, options: KSOptions()))
                 return true
             } else {
-                resource?.subtitle = KSURLSubtitle(url: url)
+                srtControl.selectedSubtitleInfo = URLSubtitleInfo(url: url)
                 return true
             }
         }

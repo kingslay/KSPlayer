@@ -5,14 +5,16 @@
 //  Created by kintan on 2017/4/2.
 //
 //
-#if canImport(UIKit)
-import UIKit
-#else
-import AppKit
-#endif
+// #if canImport(UIKit)
+// import UIKit
+// #else
+// import AppKit
+// #endif
 import CoreFoundation
 import CoreGraphics
 import Foundation
+import SwiftUI
+
 public class SubtitlePart: CustomStringConvertible, NSMutableCopying, ObservableObject {
     public let start: TimeInterval
     public var end: TimeInterval
@@ -118,63 +120,6 @@ public class KSSubtitle {
     public init() {}
 }
 
-public class KSURLSubtitle: KSSubtitle {
-    public var url: URL?
-    public var parses: [KSParseProtocol] = [SrtParse(), AssParse(), VTTParse()]
-    public convenience init(url: URL, encoding: String.Encoding? = nil) {
-        self.init()
-        self.url = url
-        DispatchQueue.global().async { [weak self] in
-            guard let self else { return }
-            do {
-                try self.parse(url: url, encoding: encoding)
-            } catch {
-                NSLog("[Error] failed to load \(url.absoluteString) \(error.localizedDescription)")
-            }
-        }
-    }
-
-    public func parse(url: URL) throws {
-        try parse(url: url, encoding: nil)
-    }
-
-    public func parse(url: URL, encoding: String.Encoding? = nil) throws {
-        self.url = url
-        do {
-            var string: String?
-            let srtData = try Data(contentsOf: url)
-            let encodes = [encoding ?? String.Encoding.utf8,
-                           String.Encoding(rawValue: CFStringConvertEncodingToNSStringEncoding(CFStringEncoding(CFStringEncodings.big5.rawValue))),
-                           String.Encoding(rawValue: CFStringConvertEncodingToNSStringEncoding(CFStringEncoding(CFStringEncodings.GB_18030_2000.rawValue))),
-                           String.Encoding.unicode]
-            for encode in encodes {
-                string = String(data: srtData, encoding: encode)
-                if string != nil {
-                    break
-                }
-            }
-            guard let subtitle = string else {
-                throw NSError(errorCode: .subtitleUnEncoding, userInfo: ["url": url.absoluteString])
-            }
-            let parse = parses.first { $0.canParse(subtitle: subtitle) }
-            if let parse {
-                parts = parse.parse(subtitle: subtitle)
-                if partsCount == 0 {
-                    throw NSError(errorCode: .subtitleUnParse, userInfo: ["url": url.absoluteString])
-                }
-            } else {
-                throw NSError(errorCode: .subtitleFormatUnSupport, userInfo: ["url": url.absoluteString])
-            }
-        } catch {
-            throw NSError(errorCode: .subtitleUnEncoding, userInfo: ["url": url.absoluteString])
-        }
-    }
-
-    public static func == (lhs: KSURLSubtitle, rhs: KSURLSubtitle) -> Bool {
-        lhs.url == rhs.url
-    }
-}
-
 extension KSSubtitle: KSSubtitleProtocol {
     /// Search for target group for time
     public func search(for time: TimeInterval) -> SubtitlePart? {
@@ -253,6 +198,59 @@ extension KSSubtitle: KSSubtitleProtocol {
     }
 }
 
+class KSURLSubtitle: KSSubtitle {
+    public var url: URL?
+    public var parses: [KSParseProtocol] = [SrtParse(), AssParse(), VTTParse()]
+//    public convenience init(url: URL, encoding: String.Encoding? = nil) {
+//        self.init()
+//        self.url = url
+//        DispatchQueue.global().async { [weak self] in
+//            guard let self else { return }
+//            do {
+//                try self.parse(url: url, encoding: encoding)
+//            } catch {
+//                NSLog("[Error] failed to load \(url.absoluteString) \(error.localizedDescription)")
+//            }
+//        }
+//    }
+
+    public func parse(url: URL, encoding: String.Encoding? = nil) throws {
+        self.url = url
+        do {
+            var string: String?
+            let srtData = try Data(contentsOf: url)
+            let encodes = [encoding ?? String.Encoding.utf8,
+                           String.Encoding(rawValue: CFStringConvertEncodingToNSStringEncoding(CFStringEncoding(CFStringEncodings.big5.rawValue))),
+                           String.Encoding(rawValue: CFStringConvertEncodingToNSStringEncoding(CFStringEncoding(CFStringEncodings.GB_18030_2000.rawValue))),
+                           String.Encoding.unicode]
+            for encode in encodes {
+                string = String(data: srtData, encoding: encode)
+                if string != nil {
+                    break
+                }
+            }
+            guard let subtitle = string else {
+                throw NSError(errorCode: .subtitleUnEncoding, userInfo: ["url": url.absoluteString])
+            }
+            let parse = parses.first { $0.canParse(subtitle: subtitle) }
+            if let parse {
+                parts = parse.parse(subtitle: subtitle)
+                if partsCount == 0 {
+                    throw NSError(errorCode: .subtitleUnParse, userInfo: ["url": url.absoluteString])
+                }
+            } else {
+                throw NSError(errorCode: .subtitleFormatUnSupport, userInfo: ["url": url.absoluteString])
+            }
+        } catch {
+            throw NSError(errorCode: .subtitleUnEncoding, userInfo: ["url": url.absoluteString])
+        }
+    }
+
+    public static func == (lhs: KSURLSubtitle, rhs: KSURLSubtitle) -> Bool {
+        lhs.url == rhs.url
+    }
+}
+
 public protocol NumericComparable {
     associatedtype Compare
     static func < (lhs: Self, rhs: Compare) -> Bool
@@ -274,5 +272,84 @@ extension Collection where Element: NumericComparable {
             }
         }
         return nil
+    }
+}
+
+public class SubtitleModel: ObservableObject {
+    private var subtitleDataSouces: [SubtitleDataSouce] = []
+    public private(set) var selectedSubtitle: KSSubtitleProtocol?
+    public private(set) var subtitleInfos = [any SubtitleInfo]()
+    @Published public var srtListCount: Int = 0
+    @Published public private(set) var part: SubtitlePart?
+    @Published public var textFont: Font = .largeTitle
+    @Published public var textColor: Color = .white
+    @Published public var textPositionFromBottom = 0
+    public var subtitleName: String = "" {
+        didSet {
+            subtitleInfos.removeAll()
+            subtitleDataSouces.forEach { datasouce in
+                searchSubtitle(datasouce: datasouce)
+            }
+        }
+    }
+
+    @Published public var selectedSubtitleInfo: (any SubtitleInfo)? {
+        didSet {
+            oldValue?.disableSubtitle()
+            if let selectedSubtitleInfo {
+                addSubtitle(info: selectedSubtitleInfo)
+                selectedSubtitleInfo.enableSubtitle {
+                    self.selectedSubtitle = try? $0.get()
+                }
+            } else {
+                selectedSubtitle = nil
+            }
+        }
+    }
+
+    private func addSubtitle(info: any SubtitleInfo) {
+        if subtitleInfos.first(where: { $0.subtitleID == info.subtitleID }) == nil {
+            subtitleInfos.append(info)
+            srtListCount = subtitleInfos.count
+        }
+    }
+
+    public func subtitle(currentTime: TimeInterval) {
+        if let subtile = selectedSubtitle {
+            if let part = subtile.search(for: currentTime) {
+                self.part = part
+            } else {
+                if let part, part.end > part.start, !(part == currentTime) {
+                    self.part = nil
+                }
+            }
+        } else {
+            part = nil
+        }
+    }
+
+    public func add(dataSouce: SubtitleDataSouce) {
+        subtitleDataSouces.append(dataSouce)
+        searchSubtitle(datasouce: dataSouce)
+    }
+
+    public func remove(dataSouce: SubtitleDataSouce) {
+        subtitleDataSouces.removeAll { $0 === dataSouce }
+        dataSouce.infos.forEach { info in
+            subtitleInfos.removeAll { other in
+                other.subtitleID == info.subtitleID
+            }
+            if info.subtitleID == self.selectedSubtitleInfo?.subtitleID {
+                selectedSubtitleInfo = nil
+            }
+        }
+    }
+
+    private func searchSubtitle(datasouce: SubtitleDataSouce) {
+        datasouce.searchSubtitle(name: subtitleName) {
+            datasouce.infos.forEach { info in
+                self.addSubtitle(info: info)
+            }
+        }
     }
 }

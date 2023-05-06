@@ -17,7 +17,7 @@ public class KSSubtitleView: UIControl {
     private let tableView = UITableView()
     private let tableWidth = CGFloat(360)
     private var tableViewTrailingConstraint: NSLayoutConstraint!
-    public weak var selectedInfo: (any SubtitleInfo)? {
+    private weak var selectedInfo: (any SubtitleInfo)? {
         didSet {
             DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 0.2) { [weak self] in
                 guard let self else { return }
@@ -25,12 +25,12 @@ public class KSSubtitleView: UIControl {
             }
             oldValue?.disableSubtitle()
             if let selectWithFilePath {
-                selectedInfo?.enableSubtitle(completion: selectWithFilePath)
+                selectWithFilePath(selectedInfo)
             }
         }
     }
 
-    public var selectWithFilePath: ((Result<KSSubtitleProtocol, NSError>) -> Void)?
+    public var selectWithFilePath: (((any SubtitleInfo)?) -> Void)?
     override public var isHidden: Bool {
         didSet {
             if isHidden {
