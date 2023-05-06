@@ -123,8 +123,7 @@ struct DemoApp: App {
         NSDocumentController.shared.noteNewRecentDocumentURL(url)
         #endif
         if url.isAudio || url.isMovie {
-            let subtitleURLs: [URL] = (try? FileManager.default.contentsOfDirectory(at: url.deletingLastPathComponent(), includingPropertiesForKeys: nil).filter(\.isSubtitle)) ?? []
-            newPlayerView(KSVideoPlayerView(url: url, options: MEOptions(), subtitleURLs: subtitleURLs))
+            newPlayerView(KSVideoPlayerView(url: url, options: MEOptions()))
 
         } else {
             let controllers = UIApplication.shared.windows.reversed().compactMap {

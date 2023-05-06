@@ -8,7 +8,7 @@ import AVFoundation
 import SwiftUI
 @available(iOS 15, tvOS 15, macOS 12, *)
 public struct KSVideoPlayerView: View {
-    private let subtitleDataSouce: SubtitleDataSouce
+    private let subtitleDataSouce: SubtitleDataSouce?
     @State private var model = ControllerTimeModel()
     @Environment(\.dismiss) private var dismiss
     @State var isMaskShow = true
@@ -21,11 +21,7 @@ public struct KSVideoPlayerView: View {
         }
     }
 
-    public init(url: URL, options: KSOptions, subtitleURLs: [URL] = [URL]()) {
-        self.init(url: url, options: options, subtitleDataSouce: URLSubtitleDataSouce(urls: subtitleURLs))
-    }
-
-    public init(url: URL, options: KSOptions, subtitleDataSouce: SubtitleDataSouce) {
+    public init(url: URL, options: KSOptions, subtitleDataSouce: SubtitleDataSouce? = nil) {
         _url = .init(initialValue: url)
         self.options = options
         self.subtitleDataSouce = subtitleDataSouce
@@ -81,8 +77,11 @@ public struct KSVideoPlayerView: View {
             #endif
             .onAppear {
                 subtitleModel.url = url
+                subtitleModel.add(dataSouce: FileURLSubtitleDataSouce())
                 subtitleModel.add(dataSouce: ShooterSubtitleDataSouce())
-                subtitleModel.add(dataSouce: subtitleDataSouce)
+                if let subtitleDataSouce {
+                    subtitleModel.add(dataSouce: subtitleDataSouce)
+                }
             }
             .onDisappear {
                 if let playerLayer = playerCoordinator.playerLayer {
@@ -149,23 +148,13 @@ public struct KSVideoPlayerView: View {
     }
 
     public func openURL(_ url: URL) {
-        if url.isAudio || url.isMovie {
-            self.url = url
-            let subtitleURLs: [URL]? = try? FileManager.default.contentsOfDirectory(at: url.deletingLastPathComponent(), includingPropertiesForKeys: nil).compactMap { url in
-                if url.isSubtitle {
-                    return url
-                } else {
-                    return nil
-                }
+        runInMainqueue {
+            if url.isAudio || url.isMovie {
+                self.url = url
+            } else {
+                let info = URLSubtitleInfo(url: url)
+                subtitleModel.selectedSubtitleInfo = info
             }
-            if let subtitleURLs {
-                let dataSouce = URLSubtitleDataSouce(urls: subtitleURLs)
-                subtitleModel.add(dataSouce: dataSouce)
-                subtitleModel.selectedSubtitleInfo = dataSouce.infos.first
-            }
-        } else {
-            let info = URLSubtitleInfo(url: url)
-            subtitleModel.selectedSubtitleInfo = info
         }
     }
 }

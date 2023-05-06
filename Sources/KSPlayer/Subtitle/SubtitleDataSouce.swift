@@ -128,7 +128,23 @@ public class URLSubtitleDataSouce: SubtitleDataSouce {
         infos = urls.map { URLSubtitleInfo(url: $0) }
     }
 
-    public func searchSubtitle(url _: URL, completion _: @escaping (() -> Void)) {}
+    public func searchSubtitle(url _: URL, completion: @escaping (() -> Void)) {
+        completion()
+    }
+}
+
+public class FileURLSubtitleDataSouce: SubtitleDataSouce {
+    public var infos = [any SubtitleInfo]()
+    public init() {}
+
+    public func searchSubtitle(url: URL, completion: @escaping (() -> Void)) {
+        infos.removeAll()
+        if url.isFileURL {
+            let subtitleURLs: [URL] = (try? FileManager.default.contentsOfDirectory(at: url.deletingLastPathComponent(), includingPropertiesForKeys: nil).filter(\.isSubtitle)) ?? []
+            infos.append(contentsOf: subtitleURLs.map { URLSubtitleInfo(url: $0) })
+        }
+        completion()
+    }
 }
 
 public class ShooterSubtitleDataSouce: SubtitleDataSouce {
@@ -153,8 +169,7 @@ public class ShooterSubtitleDataSouce: SubtitleDataSouce {
                     }
                 }
             }
-            completion()
-
+            DispatchQueue.main.async(execute: completion)
         }.resume()
     }
 }
