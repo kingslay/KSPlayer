@@ -9,19 +9,14 @@ import Libavcodec
 import Libavutil
 
 extension FFmpegAssetTrack: SubtitleInfo {
-    public var subtitleID: String {
-        String(trackID)
-    }
-
-    public func disableSubtitle() {
+    public func subtitle(isEnabled: Bool) {
         if isImageSubtitle {
-            setIsEnabled(false)
+            self.isEnabled = isEnabled
         }
     }
 
-    public func enableSubtitle(completion: @escaping (Result<KSSubtitleProtocol, NSError>) -> Void) {
-        setIsEnabled(true)
-        completion(.success(self))
+    public var subtitleID: String {
+        String(trackID)
     }
 }
 
@@ -44,7 +39,7 @@ extension KSMEPlayer: SubtitleDataSouce {
         tracks(mediaType: .subtitle).compactMap { $0 as? (any SubtitleInfo) }
     }
 
-    public func searchSubtitle(name _: String, completion: @escaping (() -> Void)) {
+    public func searchSubtitle(url _: URL, completion: @escaping (() -> Void)) {
         completion()
     }
 }

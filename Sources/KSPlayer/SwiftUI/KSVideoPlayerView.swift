@@ -17,7 +17,7 @@ public struct KSVideoPlayerView: View {
     @StateObject public var playerCoordinator = KSVideoPlayer.Coordinator()
     @State public var url: URL {
         didSet {
-            subtitleModel.subtitleName = url.lastPathComponent
+            subtitleModel.url = url
         }
     }
 
@@ -80,7 +80,8 @@ public struct KSVideoPlayerView: View {
             }
             #endif
             .onAppear {
-                subtitleModel.subtitleName = url.lastPathComponent
+                subtitleModel.url = url
+                subtitleModel.add(dataSouce: ShooterSubtitleDataSouce())
                 subtitleModel.add(dataSouce: subtitleDataSouce)
             }
             .onDisappear {

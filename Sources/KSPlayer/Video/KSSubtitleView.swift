@@ -13,7 +13,7 @@ import AppKit
 
 public class KSSubtitleView: UIControl {
     private var infos = [any SubtitleInfo]()
-    private let closeInfo = URLSubtitleInfo(subtitleID: "", name: NSLocalizedString("no show subtitle", comment: ""), url: nil)
+    private let closeInfo = EmptySubtitleInfo()
     private let tableView = UITableView()
     private let tableWidth = CGFloat(360)
     private var tableViewTrailingConstraint: NSLayoutConstraint!
@@ -23,7 +23,7 @@ public class KSSubtitleView: UIControl {
                 guard let self else { return }
                 self.isHidden = true
             }
-            oldValue?.disableSubtitle()
+            oldValue?.subtitle(isEnabled: false)
             if let selectWithFilePath {
                 selectWithFilePath(selectedInfo)
             }

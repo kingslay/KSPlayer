@@ -76,14 +76,13 @@ public protocol KSSubtitleProtocol {
     func search(for time: TimeInterval) -> SubtitlePart?
 }
 
-public protocol SubtitleInfo: AnyObject, Hashable, Identifiable {
+public protocol SubtitleInfo: KSSubtitleProtocol, AnyObject, Hashable, Identifiable {
     var subtitleID: String { get }
     var name: String { get }
     //    var userInfo: NSMutableDictionary? { get set }
     //    var subtitleDataSouce: SubtitleDataSouce? { get set }
 //    var comment: String? { get }
-    func disableSubtitle()
-    func enableSubtitle(completion: @escaping (Result<KSSubtitleProtocol, NSError>) -> Void)
+    func subtitle(isEnabled: Bool)
 }
 
 public extension SubtitleInfo {
@@ -199,20 +198,8 @@ extension KSSubtitle: KSSubtitleProtocol {
 }
 
 class KSURLSubtitle: KSSubtitle {
-    public var url: URL?
+    private var url: URL?
     public var parses: [KSParseProtocol] = [SrtParse(), AssParse(), VTTParse()]
-//    public convenience init(url: URL, encoding: String.Encoding? = nil) {
-//        self.init()
-//        self.url = url
-//        DispatchQueue.global().async { [weak self] in
-//            guard let self else { return }
-//            do {
-//                try self.parse(url: url, encoding: encoding)
-//            } catch {
-//                NSLog("[Error] failed to load \(url.absoluteString) \(error.localizedDescription)")
-//            }
-//        }
-//    }
 
     public func parse(url: URL, encoding: String.Encoding? = nil) throws {
         self.url = url
@@ -277,14 +264,13 @@ extension Collection where Element: NumericComparable {
 
 public class SubtitleModel: ObservableObject {
     private var subtitleDataSouces: [SubtitleDataSouce] = []
-    public private(set) var selectedSubtitle: KSSubtitleProtocol?
     public private(set) var subtitleInfos = [any SubtitleInfo]()
     @Published public var srtListCount: Int = 0
     @Published public private(set) var part: SubtitlePart?
     @Published public var textFont: Font = .largeTitle
     @Published public var textColor: Color = .white
     @Published public var textPositionFromBottom = 0
-    public var subtitleName: String = "" {
+    public var url: URL? {
         didSet {
             subtitleInfos.removeAll()
             subtitleDataSouces.forEach { datasouce in
@@ -295,14 +281,10 @@ public class SubtitleModel: ObservableObject {
 
     @Published public var selectedSubtitleInfo: (any SubtitleInfo)? {
         didSet {
-            oldValue?.disableSubtitle()
+            oldValue?.subtitle(isEnabled: false)
             if let selectedSubtitleInfo {
                 addSubtitle(info: selectedSubtitleInfo)
-                selectedSubtitleInfo.enableSubtitle {
-                    self.selectedSubtitle = try? $0.get()
-                }
-            } else {
-                selectedSubtitle = nil
+                selectedSubtitleInfo.subtitle(isEnabled: true)
             }
         }
     }
@@ -315,7 +297,7 @@ public class SubtitleModel: ObservableObject {
     }
 
     public func subtitle(currentTime: TimeInterval) {
-        if let subtile = selectedSubtitle {
+        if let subtile = selectedSubtitleInfo {
             if let part = subtile.search(for: currentTime) {
                 self.part = part
             } else {
@@ -346,9 +328,11 @@ public class SubtitleModel: ObservableObject {
     }
 
     private func searchSubtitle(datasouce: SubtitleDataSouce) {
-        datasouce.searchSubtitle(name: subtitleName) {
-            datasouce.infos.forEach { info in
-                self.addSubtitle(info: info)
+        if let url {
+            datasouce.searchSubtitle(url: url) {
+                datasouce.infos.forEach { info in
+                    self.addSubtitle(info: info)
+                }
             }
         }
     }

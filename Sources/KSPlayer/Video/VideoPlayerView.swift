@@ -72,7 +72,7 @@ open class VideoPlayerView: PlayerView {
     public private(set) var resource: KSPlayerResource? {
         didSet {
             if let resource, oldValue !== resource {
-                srtControl.subtitleName = resource.name
+                srtControl.url = resource.definitions.first?.url
                 if let subtitleDataSouce = oldValue?.subtitleDataSouce {
                     srtControl.remove(dataSouce: subtitleDataSouce)
                 }
@@ -258,7 +258,7 @@ open class VideoPlayerView: PlayerView {
     override open func player(layer: KSPlayerLayer, currentTime: TimeInterval, totalTime: TimeInterval) {
         guard !isSliderSliding else { return }
         super.player(layer: layer, currentTime: currentTime, totalTime: totalTime)
-        if let subtitle = srtControl.selectedSubtitle {
+        if let subtitle = srtControl.selectedSubtitleInfo {
             showSubtile(from: subtitle, at: currentTime)
             subtitleBackView.isHidden = false
         } else {
