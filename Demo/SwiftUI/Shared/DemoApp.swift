@@ -9,13 +9,11 @@ import AVFoundation
 import AVKit
 import KSPlayer
 import SwiftUI
-#if !canImport(UIKit)
-typealias UIHostingController = NSHostingController
-typealias UIApplication = NSApplication
-#endif
+
 @main
 struct DemoApp: App {
     @State private var isImporting: Bool = false
+    @State private var url: URL? = nil
     init() {
         KSOptions.canBackgroundPlay = true
         #if DEBUG
@@ -46,21 +44,35 @@ struct DemoApp: App {
             }
         }
         if let urlString = filenames.first {
-            newPlayerView(KSVideoPlayerView(url: URL(fileURLWithPath: urlString), options: MEOptions()))
+            url = URL(fileURLWithPath: urlString)
+        }
+    }
+
+    @ViewBuilder
+    var contentView: some View {
+        if let url {
+            KSVideoPlayerView(url: url, options: MEOptions())
+                .onDisappear {
+                    self.url = nil
+                }
+        } else {
+            //            HStack {
+            //                KSVideoPlayerView(resource: testObjects[0])
+            //                KSVideoPlayerView(resource: testObjects[1])
+            //            }
+            //
+            //            VideoPlayer(player: AVPlayer(url: URL(string: "https://bitmovin-a.akamaihd.net/content/dataset/multi-codec/hevc/stream_fmp4.m3u8")!))
+            //            AVContentView()
+            ContentView()
         }
     }
 
     var body: some Scene {
         WindowGroup {
-//            FirstView()
-//            HStack {
-//                KSVideoPlayerView(resource: testObjects[0])
-//                KSVideoPlayerView(resource: testObjects[1])
-//            }
-            ContentView()
+            contentView
                 .background(Color.black)
                 .onOpenURL { url in
-                    open(url: url)
+                    self.url = url
                 }
             #if !os(tvOS)
                 .onDrop(of: ["public.url", "public.file-url"], isTargeted: nil) { items -> Bool in
@@ -71,7 +83,7 @@ struct DemoApp: App {
                         if let urlData = urlData as? Data {
                             let url = NSURL(absoluteURLWithDataRepresentation: urlData, relativeTo: nil) as URL
                             DispatchQueue.main.async {
-                                open(url: url)
+                                self.url = url
                             }
                         }
                     }
@@ -81,12 +93,9 @@ struct DemoApp: App {
                     guard let url = try? result.get() else {
                         return
                     }
-                    open(url: url)
+                    self.url = url
                 }
             #endif
-//
-//            VideoPlayer(player: AVPlayer(url: URL(string: "https://bitmovin-a.akamaihd.net/content/dataset/multi-codec/hevc/stream_fmp4.m3u8")!))
-//            AVContentView()
         }
         #if !os(tvOS)
         .commands {
@@ -99,45 +108,6 @@ struct DemoApp: App {
             #endif
         }
         #endif
-    }
-
-    private func newPlayerView(_ view: KSVideoPlayerView) {
-        let controller = UIHostingController(rootView: view)
-        #if os(macOS)
-        let win = UIWindow(contentViewController: controller)
-        win.makeKeyAndOrderFront(nil)
-        if let frame = win.screen?.frame {
-            win.setFrame(frame, display: true)
-        }
-        win.title = view.url.lastPathComponent
-        #else
-        let win = UIWindow()
-        win.rootViewController = controller
-        win.makeKey()
-        #endif
-        win.backgroundColor = .black
-    }
-
-    private func open(url: URL) {
-        #if os(macOS)
-        NSDocumentController.shared.noteNewRecentDocumentURL(url)
-        #endif
-        if url.isAudio || url.isMovie {
-            newPlayerView(KSVideoPlayerView(url: url, options: MEOptions()))
-
-        } else {
-            let controllers = UIApplication.shared.windows.reversed().compactMap {
-                #if os(macOS)
-                $0.contentViewController as? UIHostingController<KSVideoPlayerView>
-                #else
-                $0.rootViewController as? UIHostingController<KSVideoPlayerView>
-                #endif
-            }
-            if let hostingController = controllers.first {
-                hostingController.becomeFirstResponder()
-                hostingController.rootView.subtitleModel.selectedSubtitleInfo = URLSubtitleInfo(url: url)
-            }
-        }
     }
 }
 
