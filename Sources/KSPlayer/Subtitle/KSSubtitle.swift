@@ -258,7 +258,7 @@ extension Collection where Element: NumericComparable {
     }
 }
 
-public class SubtitleModel: ObservableObject {
+open class SubtitleModel: ObservableObject {
     private var subtitleDataSouces: [SubtitleDataSouce] = KSOptions.subtitleDataSouces
     public private(set) var subtitleInfos = [any SubtitleInfo]()
     @Published public var srtListCount: Int = 0
@@ -266,6 +266,8 @@ public class SubtitleModel: ObservableObject {
     @Published public var textFont: Font = .largeTitle
     @Published public var textColor: Color = .white
     @Published public var textPositionFromBottom = 0
+    @Published public var textBackgroundColor: Color = .clear
+    @Published public var delay = "0.0"
     public var url: URL? {
         didSet {
             subtitleInfos.removeAll()

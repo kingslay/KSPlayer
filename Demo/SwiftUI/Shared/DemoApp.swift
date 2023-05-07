@@ -64,6 +64,9 @@ struct DemoApp: App {
             //            VideoPlayer(player: AVPlayer(url: URL(string: "https://bitmovin-a.akamaihd.net/content/dataset/multi-codec/hevc/stream_fmp4.m3u8")!))
             //            AVContentView()
             ContentView()
+                .onOpenURL { url in
+                    self.url = url
+                }
         }
     }
 
@@ -71,9 +74,6 @@ struct DemoApp: App {
         WindowGroup {
             contentView
                 .background(Color.black)
-                .onOpenURL { url in
-                    self.url = url
-                }
             #if !os(tvOS)
                 .onDrop(of: ["public.url", "public.file-url"], isTargeted: nil) { items -> Bool in
                     guard let item = items.first, let identifier = item.registeredTypeIdentifiers.first else {

@@ -588,7 +588,11 @@ extension MEPlayerItem: MediaPlayback {
         }
         operationQueue.addOperation(closeOperation)
         condition.signal()
-        allPlayerItemTracks.forEach { $0.shutdown() }
+        if options.syncDecodeVideo || options.syncDecodeAudio {
+            DispatchQueue.global().async { [weak self] in
+                self?.allPlayerItemTracks.forEach { $0.shutdown() }
+            }
+        }
         self.closeOperation = closeOperation
     }
 

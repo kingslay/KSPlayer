@@ -333,6 +333,7 @@ struct VideoSubtitleView: View {
                     .multilineTextAlignment(.center)
                     .font(model.textFont)
                     .foregroundColor(model.textColor).shadow(color: .black.opacity(0.9), radius: 1, x: 1, y: 1)
+                    .background(model.textBackgroundColor)
                     .padding(.bottom, CGFloat(model.textPositionFromBottom))
                 #if !os(tvOS)
                     .textSelection(.enabled)
