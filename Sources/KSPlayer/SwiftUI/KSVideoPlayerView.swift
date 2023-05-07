@@ -11,7 +11,14 @@ public struct KSVideoPlayerView: View {
     private let subtitleDataSouce: SubtitleDataSouce?
     @State private var model = ControllerTimeModel()
     @Environment(\.dismiss) private var dismiss
-    @State var isMaskShow = true
+    @State var isMaskShow = true {
+        didSet {
+            #if os(macOS)
+            isMaskShow ? NSCursor.unhide() : NSCursor.setHiddenUntilMouseMoves(true)
+            #endif
+        }
+    }
+
     public let options: KSOptions
     @StateObject public var subtitleModel = SubtitleModel()
     @StateObject public var playerCoordinator = KSVideoPlayer.Coordinator()
@@ -72,9 +79,6 @@ public struct KSVideoPlayerView: View {
             #if !os(tvOS)
             .onTapGesture {
                 isMaskShow.toggle()
-                #if os(macOS)
-                isMaskShow ? NSCursor.unhide() : NSCursor.setHiddenUntilMouseMoves(true)
-                #endif
             }
             #endif
             .onAppear {
