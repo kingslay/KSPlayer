@@ -40,7 +40,7 @@ public struct KSVideoPlayerView: View {
                     if let subtitleDataSouce = playerLayer.player.subtitleDataSouce {
                         // 要延后增加内嵌字幕。因为有些内嵌字幕是放在视频流的。所以会比readyToPlay回调晚。
                         DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 1) {
-                            subtitleModel.add(dataSouce: subtitleDataSouce)
+                            subtitleModel.addSubtitle(dataSouce: subtitleDataSouce)
                             if subtitleModel.selectedSubtitleInfo == nil, playerLayer.options.autoSelectEmbedSubtitle {
                                 subtitleModel.selectedSubtitleInfo = subtitleModel.subtitleInfos.first
                             }
@@ -77,10 +77,8 @@ public struct KSVideoPlayerView: View {
             #endif
             .onAppear {
                 subtitleModel.url = url
-                subtitleModel.add(dataSouce: FileURLSubtitleDataSouce())
-                subtitleModel.add(dataSouce: ShooterSubtitleDataSouce())
                 if let subtitleDataSouce {
-                    subtitleModel.add(dataSouce: subtitleDataSouce)
+                    subtitleModel.addSubtitle(dataSouce: subtitleDataSouce)
                 }
             }
             .onDisappear {

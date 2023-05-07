@@ -48,11 +48,8 @@ open class VideoPlayerView: PlayerView {
     private var embedSubtitleDataSouce: SubtitleDataSouce? {
         didSet {
             if oldValue !== embedSubtitleDataSouce {
-                if let oldValue {
-                    srtControl.remove(dataSouce: oldValue)
-                }
                 if let embedSubtitleDataSouce {
-                    srtControl.add(dataSouce: embedSubtitleDataSouce)
+                    srtControl.addSubtitle(dataSouce: embedSubtitleDataSouce)
                     if resource?.definitions[currentDefinition].options.autoSelectEmbedSubtitle ?? false, let first = embedSubtitleDataSouce.infos.first {
                         srtControl.selectedSubtitleInfo = first
                     }
@@ -73,11 +70,8 @@ open class VideoPlayerView: PlayerView {
         didSet {
             if let resource, oldValue !== resource {
                 srtControl.url = resource.definitions.first?.url
-                if let subtitleDataSouce = oldValue?.subtitleDataSouce {
-                    srtControl.remove(dataSouce: subtitleDataSouce)
-                }
                 if let subtitleDataSouce = resource.subtitleDataSouce {
-                    srtControl.add(dataSouce: subtitleDataSouce)
+                    srtControl.addSubtitle(dataSouce: subtitleDataSouce)
                 }
                 subtitleBackView.isHidden = true
                 subtitleBackView.image = nil

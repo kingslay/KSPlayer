@@ -1,5 +1,5 @@
 //
-//  CacheDataSouce.swift
+//  SubtitleDataSouce.swift
 //  KSPlayer-7de52535
 //
 //  Created by kintan on 2018/8/7.
@@ -79,6 +79,10 @@ public protocol SubtitleDataSouce: AnyObject {
     func searchSubtitle(url: URL, completion: @escaping (() -> Void))
 }
 
+extension KSOptions {
+    static var subtitleDataSouces: [SubtitleDataSouce] = [DirectorySubtitleDataSouce(), ShooterSubtitleDataSouce()]
+}
+
 public class CacheDataSouce: SubtitleDataSouce {
     public var infos = [any SubtitleInfo]()
     private let cacheFolder = (NSTemporaryDirectory() as NSString).appendingPathComponent("KSSubtitleCache")
@@ -133,7 +137,7 @@ public class URLSubtitleDataSouce: SubtitleDataSouce {
     }
 }
 
-public class FileURLSubtitleDataSouce: SubtitleDataSouce {
+public class DirectorySubtitleDataSouce: SubtitleDataSouce {
     public var infos = [any SubtitleInfo]()
     public init() {}
 

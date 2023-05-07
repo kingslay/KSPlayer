@@ -61,7 +61,6 @@ public class KSSRTOptions {
 }
 
 public class KSSubtitleController: SubtitleModel {
-    private let cacheDataSouce = CacheDataSouce()
     public var view: KSSubtitleView
     public init(customControlView: KSSubtitleView? = nil) {
         if let customView = customControlView {

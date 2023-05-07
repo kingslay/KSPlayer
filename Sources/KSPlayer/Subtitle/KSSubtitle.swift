@@ -5,11 +5,7 @@
 //  Created by kintan on 2017/4/2.
 //
 //
-// #if canImport(UIKit)
-// import UIKit
-// #else
-// import AppKit
-// #endif
+
 import CoreFoundation
 import CoreGraphics
 import Foundation
@@ -263,7 +259,7 @@ extension Collection where Element: NumericComparable {
 }
 
 public class SubtitleModel: ObservableObject {
-    private var subtitleDataSouces: [SubtitleDataSouce] = []
+    private var subtitleDataSouces: [SubtitleDataSouce] = KSOptions.subtitleDataSouces
     public private(set) var subtitleInfos = [any SubtitleInfo]()
     @Published public var srtListCount: Int = 0
     @Published public private(set) var part: SubtitlePart?
@@ -274,7 +270,7 @@ public class SubtitleModel: ObservableObject {
         didSet {
             subtitleInfos.removeAll()
             subtitleDataSouces.forEach { datasouce in
-                searchSubtitle(datasouce: datasouce)
+                addSubtitle(dataSouce: datasouce)
             }
         }
     }
@@ -288,6 +284,8 @@ public class SubtitleModel: ObservableObject {
             }
         }
     }
+
+    public init() {}
 
     private func addSubtitle(info: any SubtitleInfo) {
         if subtitleInfos.first(where: { $0.subtitleID == info.subtitleID }) == nil {
@@ -310,28 +308,11 @@ public class SubtitleModel: ObservableObject {
         }
     }
 
-    public func add(dataSouce: SubtitleDataSouce) {
-        subtitleDataSouces.append(dataSouce)
-        searchSubtitle(datasouce: dataSouce)
-    }
-
-    public func remove(dataSouce: SubtitleDataSouce) {
-        subtitleDataSouces.removeAll { $0 === dataSouce }
-        dataSouce.infos.forEach { info in
-            subtitleInfos.removeAll { other in
-                other.subtitleID == info.subtitleID
-            }
-            if info.subtitleID == self.selectedSubtitleInfo?.subtitleID {
-                selectedSubtitleInfo = nil
-            }
-        }
-    }
-
-    private func searchSubtitle(datasouce: SubtitleDataSouce) {
+    public func addSubtitle(dataSouce: SubtitleDataSouce) {
         if let url {
-            datasouce.searchSubtitle(url: url) {
-                datasouce.infos.forEach { info in
-                    self.addSubtitle(info: info)
+            dataSouce.searchSubtitle(url: url) { [weak self] in
+                dataSouce.infos.forEach { info in
+                    self?.addSubtitle(info: info)
                 }
             }
         }
