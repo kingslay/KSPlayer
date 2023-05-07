@@ -86,9 +86,9 @@ public enum KSMenuBuilder {
         return UIMenu(title: title, children: actions)
     }
 
-    static func srtChangeMenu(_ currentSub: SubtitleInfo?,
-                              availableSubtitles: [SubtitleInfo],
-                              completition handler: @escaping (SubtitleInfo?) -> Void) -> UIMenu?
+    static func srtChangeMenu(_ currentSub: (any SubtitleInfo)?,
+                              availableSubtitles: [any SubtitleInfo],
+                              completition handler: @escaping ((any SubtitleInfo)?) -> Void) -> UIMenu?
     {
         guard availableSubtitles.count > 0 else { return nil }
         var actions = [UIAction]()
@@ -130,7 +130,7 @@ public final class UIAction: NSMenuItem {
     init(title: String, handler: @escaping (UIAction) -> Void) {
         self.handler = handler
         super.init(title: title, action: #selector(menuPressed), keyEquivalent: "")
-        state = UIMenu.State.off.value
+        state = .off
         target = self
     }
 
@@ -153,36 +153,3 @@ extension UIMenu {
     }
 }
 #endif
-
-public extension UIMenu {
-    // swiftlint:disable identifier_name
-    enum State: Int, @unchecked Sendable {
-        case off = 0
-        case on = 1
-        case mixed = 2
-
-        #if canImport(UIKit)
-        var value: UIMenuElement.State {
-            switch self {
-            case .off:
-                return .off
-            case .on:
-                return .on
-            case .mixed:
-                return .mixed
-            }
-        }
-        #else
-        var value: NSControl.StateValue {
-            switch self {
-            case .off:
-                return .off
-            case .on:
-                return .on
-            case .mixed:
-                return .mixed
-            }
-        }
-        #endif
-    }
-}

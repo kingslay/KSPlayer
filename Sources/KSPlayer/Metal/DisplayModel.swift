@@ -39,7 +39,6 @@ extension DisplayEnum {
         }
     }
 
-    #if canImport(UIKit)
     func touchesMoved(touch: UITouch) {
         switch self {
         case .vr:
@@ -50,7 +49,6 @@ extension DisplayEnum {
             break
         }
     }
-    #endif
 }
 
 private class PlaneDisplayModel {
@@ -162,17 +160,21 @@ private class SphereDisplayModel {
         #endif
     }
 
-    #if canImport(UIKit)
     func touchesMoved(touch: UITouch) {
-        var distX = Float(touch.location(in: touch.view).x - touch.previousLocation(in: touch.view).x)
-        var distY = Float(touch.location(in: touch.view).y - touch.previousLocation(in: touch.view).y)
+        #if canImport(UIKit)
+        let view = touch.view
+        #else
+        let view: UIView? = nil
+        #endif
+        var distX = Float(touch.location(in: view).x - touch.previousLocation(in: view).x)
+        var distY = Float(touch.location(in: view).y - touch.previousLocation(in: view).y)
         distX *= 0.005
         distY *= 0.005
         fingerRotationX -= distY * 60 / 100
         fingerRotationY -= distX * 60 / 100
         modelViewMatrix = matrix_identity_float4x4.rotateX(radians: fingerRotationX).rotateY(radians: fingerRotationY)
     }
-    #endif
+
     func reset() {
         fingerRotationX = 0
         fingerRotationY = 0

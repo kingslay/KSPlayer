@@ -12,7 +12,6 @@ protocol AudioPlayer: AnyObject {
     var playbackRate: Float { get set }
     var volume: Float { get set }
     var isMuted: Bool { get set }
-    var isPaused: Bool { get }
     var attackTime: Float { get set }
     var releaseTime: Float { get set }
     var threshold: Float { get set }
@@ -21,6 +20,7 @@ protocol AudioPlayer: AnyObject {
     func prepare(options: KSOptions, audioDescriptor: AudioDescriptor)
     func play(time: TimeInterval)
     func pause()
+    func flush()
 }
 
 public final class AudioEnginePlayer: AudioPlayer, FrameOutput {
@@ -162,7 +162,7 @@ public final class AudioEnginePlayer: AudioPlayer, FrameOutput {
         engine.attach(sourceNode)
         engine.attach(dynamicsProcessor)
         engine.attach(timePitch)
-        engine.connect(nodes: [sourceNode, dynamicsProcessor, timePitch, engine.mainMixerNode, engine.outputNode], format: options.audioFormat)
+        engine.connect(nodes: [sourceNode, dynamicsProcessor, timePitch, engine.mainMixerNode], format: options.audioFormat)
         if let audioUnit = engine.outputNode.audioUnit {
             addRenderNotify(audioUnit: audioUnit)
         }
@@ -177,6 +177,10 @@ public final class AudioEnginePlayer: AudioPlayer, FrameOutput {
 
     func pause() {
         engine.pause()
+    }
+
+    func flush() {
+        currentRender = nil
     }
 
     private func addRenderNotify(audioUnit: AudioUnit) {

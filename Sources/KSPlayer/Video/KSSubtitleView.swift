@@ -12,25 +12,25 @@ import AppKit
 #endif
 
 public class KSSubtitleView: UIControl {
-    private var infos = [SubtitleInfo]()
-    private let closeInfo = URLSubtitleInfo(subtitleID: "", name: NSLocalizedString("no show subtitle", comment: ""), url: nil)
+    private var infos = [any SubtitleInfo]()
+    private let closeInfo = EmptySubtitleInfo()
     private let tableView = UITableView()
     private let tableWidth = CGFloat(360)
     private var tableViewTrailingConstraint: NSLayoutConstraint!
-    public weak var selectedInfo: SubtitleInfo? {
+    private weak var selectedInfo: (any SubtitleInfo)? {
         didSet {
             DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 0.2) { [weak self] in
                 guard let self else { return }
                 self.isHidden = true
             }
-            oldValue?.disableSubtitle()
+            oldValue?.subtitle(isEnabled: false)
             if let selectWithFilePath {
-                selectedInfo?.enableSubtitle(completion: selectWithFilePath)
+                selectWithFilePath(selectedInfo)
             }
         }
     }
 
-    public var selectWithFilePath: ((Result<KSSubtitleProtocol, NSError>) -> Void)?
+    public var selectWithFilePath: (((any SubtitleInfo)?) -> Void)?
     override public var isHidden: Bool {
         didSet {
             if isHidden {
@@ -96,8 +96,8 @@ public class KSSubtitleView: UIControl {
         fatalError("init(coder:) has not been implemented")
     }
 
-    public func setupDatas(infos: [SubtitleInfo]) {
-        var arrays: [SubtitleInfo] = [closeInfo]
+    public func setupDatas(infos: [any SubtitleInfo]) {
+        var arrays: [any SubtitleInfo] = [closeInfo]
         arrays.append(contentsOf: infos)
         self.infos = arrays
         tableView.reloadData()

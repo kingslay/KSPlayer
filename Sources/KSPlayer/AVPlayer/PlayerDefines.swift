@@ -102,6 +102,7 @@ public protocol MediaPlayerTrack: CustomStringConvertible {
     var colorPrimaries: String? { get }
     var transferFunction: String? { get }
     var yCbCrMatrix: String? { get }
+    var isImageSubtitle: Bool { get }
     var audioStreamBasicDescription: AudioStreamBasicDescription? { get }
     var dovi: DOVIDecoderConfigurationRecord? { get }
     var fieldOrder: FFmpegFieldOrder { get }
@@ -290,7 +291,7 @@ open class KSOptions {
      AVSEEK_FLAG_ANY: 4
      AVSEEK_FLAG_FRAME: 8
      */
-    public var seekFlags = Int32(1)
+    public var seekFlags = Int32(0)
     // ffmpeg only cache http
     public var cache = false
     public var outputURL: URL?
@@ -310,6 +311,7 @@ open class KSOptions {
     public var autoSelectEmbedSubtitle = true
     public var subtitleDelay = 0.0 // s
     public var subtitleDisable = false
+    public var isSeekImageSubtitle = false
     // video
     public var autoDeInterlace = false
     public var destinationDynamicRange: DynamicRange?
@@ -320,7 +322,7 @@ open class KSOptions {
     public var hardwareDecode = true
     public var asynchronousDecompression = true
     public var videoDisable = false
-
+    public var canStartPictureInPictureAutomaticallyFromInline = true
     public internal(set) var formatName = ""
     public internal(set) var prepareTime = 0.0
     public internal(set) var dnsStartTime = 0.0
@@ -336,9 +338,11 @@ open class KSOptions {
     var formatCtx: UnsafeMutablePointer<AVFormatContext>?
     var audioFormat = AVAudioFormat(standardFormatWithSampleRate: 44100, channelLayout: AVAudioChannelLayout(layoutTag: kAudioChannelLayoutTag_Stereo)!)
     public init() {
+        // 参数的配置可以参考protocols.texi 和 http.c
         formatContextOptions["auto_convert"] = 0
         formatContextOptions["fps_probe_size"] = 3
         formatContextOptions["reconnect"] = 1
+        // 开启这个，纯ipv6地址会无法播放。
 //        formatContextOptions["reconnect_at_eof"] = 1
         formatContextOptions["reconnect_streamed"] = 1
         formatContextOptions["reconnect_on_network_error"] = 1
@@ -598,7 +602,7 @@ public extension KSOptions {
     /// 是否开启秒开
     static var isSecondOpen = false
     /// 开启精确seek
-    static var isAccurateSeek = true
+    static var isAccurateSeek = false
     /// Applies to short videos only
     static var isLoopPlay = false
     /// 是否自动播放，默认false

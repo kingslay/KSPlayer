@@ -28,8 +28,12 @@ public class KSMEPlayer: NSObject {
 
     private lazy var _pipController: Any? = {
         if #available(iOS 15.0, tvOS 15.0, macOS 12.0, *), let videoOutput {
-            let contentSource = AVPictureInPictureController.ContentSource(sampleBufferDisplayLayer: videoOutput.displayLayer, playbackDelegate: self)
-            return KSPictureInPictureController(contentSource: contentSource)
+            let contentSource = AVPictureInPictureController.ContentSource(sampleBufferDisplayLayer: videoOutput.displayView.displayLayer, playbackDelegate: self)
+            let pip = KSPictureInPictureController(contentSource: contentSource)
+            #if os(iOS)
+            pip.canStartPictureInPictureAutomaticallyFromInline = options.canStartPictureInPictureAutomaticallyFromInline
+            #endif
+            return pip
         } else {
             return nil
         }
@@ -110,17 +114,18 @@ public class KSMEPlayer: NSObject {
 
 // MARK: - private functions
 
-extension KSMEPlayer {
-    private func playOrPause() {
+private extension KSMEPlayer {
+    func playOrPause() {
         runInMainqueue { [weak self] in
             guard let self else { return }
             let isPaused = !(self.playbackState == .playing && self.loadState == .playable)
             if isPaused {
                 self.audioOutput.pause()
+                self.videoOutput?.pause()
             } else {
-                self.audioOutput.play(time: self.currentPlaybackTime)
+                self.audioOutput.play(time: self.playerItem.currentPlaybackTime)
+                self.videoOutput?.play()
             }
-            self.videoOutput?.isPaused = isPaused
             self.delegate?.changeLoadState(player: self)
         }
     }
@@ -142,7 +147,7 @@ extension KSMEPlayer: MEPlayerDelegate {
             guard let self else { return }
             self.videoOutput?.drawableSize = self.naturalSize
             self.view?.centerRotate(byDegrees: self.playerItem.rotation)
-            self.videoOutput?.isPaused = false
+            self.videoOutput?.play()
             self.delegate?.readyToPlay(player: self)
         }
     }
@@ -162,13 +167,13 @@ extension KSMEPlayer: MEPlayerDelegate {
                     self.loopCount += 1
                     self.delegate?.playBack(player: self, loopCount: self.loopCount)
                     self.audioOutput.play(time: self.currentPlaybackTime)
-                    self.videoOutput?.isPaused = false
+                    self.videoOutput?.play()
                 } else {
                     self.playbackState = .finished
                     if type == .audio {
                         self.audioOutput.pause()
                     } else if type == .video {
-                        self.videoOutput?.isPaused = true
+                        self.videoOutput?.pause()
                     }
                 }
             }
@@ -201,7 +206,13 @@ extension KSMEPlayer: MEPlayerDelegate {
             if loadingState.isPlayable {
                 loadState = .playable
             } else {
-                progress = min(100, Int(loadingState.progress))
+                if loadingState.progress.isInfinite {
+                    progress = 100
+                } else if loadingState.progress.isNaN {
+                    progress = 0
+                } else {
+                    progress = min(100, Int(loadingState.progress))
+                }
             }
             if playbackState == .playing {
                 runInMainqueue { [weak self] in
@@ -218,57 +229,13 @@ extension KSMEPlayer: MEPlayerDelegate {
 }
 
 extension KSMEPlayer: MediaPlayerProtocol {
+    public var subtitleDataSouce: SubtitleDataSouce? { self }
     public var playbackVolume: Float {
         get {
             audioOutput.volume
         }
         set {
             audioOutput.volume = newValue
-        }
-    }
-
-    public var attackTime: Float {
-        get {
-            audioOutput.attackTime
-        }
-        set {
-            audioOutput.attackTime = newValue
-        }
-    }
-
-    public var releaseTime: Float {
-        get {
-            audioOutput.releaseTime
-        }
-        set {
-            audioOutput.releaseTime = newValue
-        }
-    }
-
-    public var threshold: Float {
-        get {
-            audioOutput.threshold
-        }
-        set {
-            audioOutput.threshold = newValue
-        }
-    }
-
-    public var expansionRatio: Float {
-        get {
-            audioOutput.expansionRatio
-        }
-        set {
-            audioOutput.expansionRatio = newValue
-        }
-    }
-
-    public var overallGain: Float {
-        get {
-            audioOutput.overallGain
-        }
-        set {
-            audioOutput.overallGain = newValue
         }
     }
 
@@ -322,6 +289,7 @@ extension KSMEPlayer: MediaPlayerProtocol {
         } else {
             seekTime = time
         }
+        audioOutput.flush()
         playerItem.seek(time: seekTime + playerItem.startTime, completion: completion)
     }
 
@@ -495,6 +463,59 @@ extension KSMEPlayer: AVPlaybackCoordinatorPlaybackControlDelegate {
     }
 }
 
+// MARK: - public functions
+
 public extension KSMEPlayer {
-    var subtitleDataSouce: SubtitleDataSouce? { self }
+    var metadata: [String: String] {
+        playerItem.metadata
+    }
+
+    var bytesRead: Int64 {
+        playerItem.bytesRead
+    }
+
+    var attackTime: Float {
+        get {
+            audioOutput.attackTime
+        }
+        set {
+            audioOutput.attackTime = newValue
+        }
+    }
+
+    var releaseTime: Float {
+        get {
+            audioOutput.releaseTime
+        }
+        set {
+            audioOutput.releaseTime = newValue
+        }
+    }
+
+    var threshold: Float {
+        get {
+            audioOutput.threshold
+        }
+        set {
+            audioOutput.threshold = newValue
+        }
+    }
+
+    var expansionRatio: Float {
+        get {
+            audioOutput.expansionRatio
+        }
+        set {
+            audioOutput.expansionRatio = newValue
+        }
+    }
+
+    var overallGain: Float {
+        get {
+            audioOutput.overallGain
+        }
+        set {
+            audioOutput.overallGain = newValue
+        }
+    }
 }

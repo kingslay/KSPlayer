@@ -25,6 +25,7 @@ English | [简体中文](./README_CN.md)
 - De-interlace auto detect
 - Spatial Audio 
 - 360° panorama video.
+- selectable subtitle
 
 ## Requirements
 
@@ -256,10 +257,6 @@ Your user icon or company logo shows up this with a link to your home page.
 [UnknownCoder807](https://github.com/UnknownCoder807)
 
 [skrew](https://github.com/skrew)
-
-[mrpajzl](https://github.com/mrpajzl)
-
-[byMohamedali](https://github.com/byMohamedali)
 
 [Kimentanm](https://github.com/Kimentanm)
 

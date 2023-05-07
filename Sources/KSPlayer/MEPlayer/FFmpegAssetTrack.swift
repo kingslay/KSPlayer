@@ -27,8 +27,8 @@ public class FFmpegAssetTrack: MediaPlayerTrack {
     public var dovi: DOVIDecoderConfigurationRecord?
     public let audioStreamBasicDescription: AudioStreamBasicDescription?
     public let fieldOrder: FFmpegFieldOrder
+    public let isImageSubtitle: Bool
     private var stream: UnsafeMutablePointer<AVStream>?
-    let isImageSubtitle: Bool
     let audioDescriptor: AudioDescriptor
     var startTime = TimeInterval(0)
     var codecpar: AVCodecParameters

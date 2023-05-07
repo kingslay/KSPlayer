@@ -19,9 +19,11 @@ class SubtitleDecode: DecodeProtocol {
     private var codecContext: UnsafeMutablePointer<AVCodecContext>?
     private let scale = VideoSwresample(dstFormat: AV_PIX_FMT_ARGB)
     private var subtitle = AVSubtitle()
+    private var startTime = TimeInterval(0)
     private var preSubtitleFrame: SubtitleFrame?
     required init(assetTrack: FFmpegAssetTrack, options: KSOptions, delegate: DecodeResultDelegate) {
         self.delegate = delegate
+        startTime = assetTrack.startTime
         do {
             codecContext = try assetTrack.ceateContext(options: options)
         } catch {
@@ -45,7 +47,10 @@ class SubtitleDecode: DecodeProtocol {
         }
         let (origin, attributedString, image) = text(subtitle: subtitle)
         let position = packet.position
-        let start = packet.assetTrack.timebase.cmtime(for: position).seconds + TimeInterval(subtitle.start_display_time) / 1000.0
+        var start = packet.assetTrack.timebase.cmtime(for: position).seconds + TimeInterval(subtitle.start_display_time) / 1000.0
+        if start >= startTime {
+            start -= startTime
+        }
         var duration = TimeInterval(subtitle.end_display_time - subtitle.start_display_time) / 1000.0
         if duration == 0 {
             duration = packet.assetTrack.timebase.cmtime(for: packet.duration).seconds

@@ -89,34 +89,32 @@ public class AudioRendererPlayer: AudioPlayer, FrameOutput {
     }
 
     func play(time: TimeInterval) {
-        serializationQueue.async {
-            self.synchronizer.setRate(self.playbackRate, time: CMTime(seconds: time))
-            self.renderer.requestMediaDataWhenReady(on: self.serializationQueue) { [weak self] in
-                guard let self else {
-                    return
-                }
-                self.request()
+        synchronizer.setRate(playbackRate, time: CMTime(seconds: time))
+        renderer.requestMediaDataWhenReady(on: serializationQueue) { [weak self] in
+            guard let self else {
+                return
             }
-            self.periodicTimeObserver = self.synchronizer.addPeriodicTimeObserver(forInterval: CMTime(seconds: 0.1, preferredTimescale: 1000), queue: .main) { [weak self] _ in
-                guard let self else {
-                    return
-                }
-                self.renderSource?.setAudio(time: self.synchronizer.currentTime())
+            self.request()
+        }
+        periodicTimeObserver = synchronizer.addPeriodicTimeObserver(forInterval: CMTime(seconds: 0.1, preferredTimescale: 1000), queue: .main) { [weak self] _ in
+            guard let self else {
+                return
             }
+            self.renderSource?.setAudio(time: self.synchronizer.currentTime())
         }
     }
 
     func pause() {
-        serializationQueue.async {
-            self.synchronizer.rate = 0
-            self.renderer.stopRequestingMediaData()
-            self.renderer.flush()
-            if let periodicTimeObserver = self.periodicTimeObserver {
-                self.synchronizer.removeTimeObserver(periodicTimeObserver)
-                self.periodicTimeObserver = nil
-            }
+        synchronizer.rate = 0
+        renderer.stopRequestingMediaData()
+        renderer.flush()
+        if let periodicTimeObserver {
+            synchronizer.removeTimeObserver(periodicTimeObserver)
+            self.periodicTimeObserver = nil
         }
     }
+
+    func flush() {}
 
     private func request() {
         guard let desc else {

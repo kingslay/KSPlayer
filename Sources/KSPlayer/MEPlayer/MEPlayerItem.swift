@@ -82,7 +82,7 @@ final class MEPlayerItem {
         }
     }
 
-    private lazy var timer: Timer = Timer.scheduledTimer(withTimeInterval: 0.02, repeats: true) { [weak self] _ in
+    private lazy var timer: Timer = .scheduledTimer(withTimeInterval: 0.02, repeats: true) { [weak self] _ in
         self?.codecDidChangeCapacity()
     }
 
@@ -109,6 +109,10 @@ final class MEPlayerItem {
                     if let opaque = context.interrupt_callback.opaque {
                         let formatContext = Unmanaged<MEPlayerItem>.fromOpaque(opaque).takeUnretainedValue()
                         formatContext.options.io(log: log)
+                        if log.starts(with: "Will reconnect at") {
+                            formatContext.videoTrack?.seekTime = formatContext.currentPlaybackTime
+                            formatContext.audioTrack?.seekTime = formatContext.currentPlaybackTime
+                        }
                     }
 
                 } else if avclass == avfilter_get_class() {
@@ -141,11 +145,19 @@ final class MEPlayerItem {
             $0.isEnabled = false
         }
         track.setIsEnabled(true)
-        if track.mediaType == .video, let assetTrack = track as? FFmpegAssetTrack {
-            findBestAudio(videoTrack: assetTrack)
-        }
-        if track.mediaType == .subtitle {
+        guard let assetTrack = track as? FFmpegAssetTrack else {
             return
+        }
+        if assetTrack.mediaType == .video {
+            findBestAudio(videoTrack: assetTrack)
+        } else if assetTrack.mediaType == .subtitle {
+            if assetTrack.isImageSubtitle {
+                if !options.isSeekImageSubtitle {
+                    return
+                }
+            } else {
+                return
+            }
         }
         seek(time: currentPlaybackTime) { _ in
         }
@@ -177,6 +189,10 @@ extension MEPlayerItem {
             }
         }
         formatCtx.pointee.interrupt_callback = interruptCB
+//        formatCtx.pointee.io_close2 = { formatCtx, pb -> Int32 in
+//            return 0
+//
+//        }
 //        formatCtx.pointee.io_open = { formatCtx, context, url, flags, options -> Int32 in
 //            return 0
 //        }
@@ -191,6 +207,7 @@ extension MEPlayerItem {
                 urlString = "async:cache:" + url.absoluteString
             }
         }
+        // 如果要自定义协议的话，那就用avio_alloc_context，对formatCtx.pointee.pb赋值
         var result = avformat_open_input(&self.formatCtx, urlString, nil, &avOptions)
         av_dict_free(&avOptions)
         if result == AVError.eof.code {
@@ -392,16 +409,18 @@ extension MEPlayerItem {
             if state == .seeking {
                 let time = currentPlaybackTime
                 let timeStamp = Int64(time * TimeInterval(AV_TIME_BASE))
+                let startTime = CACurrentMediaTime()
                 // can not seek to key frame
 //                let result = avformat_seek_file(formatCtx, -1, Int64.min, timeStamp, Int64.max, options.seekFlags)
-                let result = av_seek_frame(formatCtx, -1, timeStamp, options.seekFlags)
+                var result = av_seek_frame(formatCtx, -1, timeStamp, options.seekFlags)
                 // When seeking before the beginning of the file, and seeking fails,
                 // try again without the backwards flag to make it seek to the
                 // beginning.
                 if result < 0, options.seekFlags & AVSEEK_FLAG_BACKWARD > 0 {
                     options.seekFlags &= ~AVSEEK_FLAG_BACKWARD
-                    av_seek_frame(formatCtx, -1, timeStamp, options.seekFlags)
+                    result = av_seek_frame(formatCtx, -1, timeStamp, options.seekFlags)
                 }
+                KSLog("seek to \(time) spend Time: \(CACurrentMediaTime() - startTime)")
                 if state == .closed {
                     break
                 }
@@ -501,6 +520,16 @@ extension MEPlayerItem {
     }
 }
 
+extension MEPlayerItem {
+    var metadata: [String: String] {
+        toDictionary(formatCtx?.pointee.metadata)
+    }
+
+    var bytesRead: Int64 {
+        formatCtx?.pointee.pb.pointee.bytes_read ?? 0
+    }
+}
+
 // MARK: MediaPlayback
 
 extension MEPlayerItem: MediaPlayback {
@@ -537,7 +566,6 @@ extension MEPlayerItem: MediaPlayback {
         if let outputFormatCtx {
             av_write_trailer(outputFormatCtx)
         }
-        condition.signal()
         // 故意循环引用。等结束了。才释放
         let closeOperation = BlockOperation {
             Thread.current.name = (self.operationQueue.name ?? "") + "_close"
@@ -559,10 +587,16 @@ extension MEPlayerItem: MediaPlayback {
             closeOperation.addDependency(openOperation)
         }
         operationQueue.addOperation(closeOperation)
+        condition.signal()
+        if options.syncDecodeVideo || options.syncDecodeAudio {
+            DispatchQueue.global().async { [weak self] in
+                self?.allPlayerItemTracks.forEach { $0.shutdown() }
+            }
+        }
         self.closeOperation = closeOperation
     }
 
-    internal func seek(time: TimeInterval, completion: @escaping ((Bool) -> Void)) {
+    func seek(time: TimeInterval, completion: @escaping ((Bool) -> Void)) {
         if state == .reading || state == .paused {
             state = .seeking
             currentPlaybackTime = time
@@ -677,9 +711,15 @@ extension MEPlayerItem: OutputRenderSourceDelegate {
             return nil
         }
         var desire = currentPlaybackTime + options.audioDelay
+        #if !os(macOS)
+        desire -= AVAudioSession.sharedInstance().outputLatency
+        #endif
         let predicate: ((VideoVTBFrame) -> Bool)? = force ? nil : { [weak self] frame -> Bool in
             guard let self else { return true }
             desire = self.currentPlaybackTime + self.options.audioDelay
+            #if !os(macOS)
+            desire -= AVAudioSession.sharedInstance().outputLatency
+            #endif
             if self.isAudioStalled {
                 desire += max(CACurrentMediaTime() - self.videoMediaTime, 0) + self.videoClockDelay
             }

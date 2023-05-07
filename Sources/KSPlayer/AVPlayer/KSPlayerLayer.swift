@@ -70,13 +70,14 @@ open class KSPlayerLayer: UIView {
                 guard let pipController = player.pipController else {
                     return
                 }
+
                 if isPipActive {
                     DispatchQueue.main.async { [weak self] in
                         guard let self else { return }
                         pipController.start(view: self)
                     }
                 } else {
-                    pipController.stop()
+                    pipController.stop(restoreUserInterface: true)
                 }
             }
         }
@@ -139,7 +140,7 @@ open class KSPlayerLayer: UIView {
         }
     }
 
-    private lazy var timer: Timer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { [weak self] _ in
+    private lazy var timer: Timer = .scheduledTimer(withTimeInterval: 0.1, repeats: true) { [weak self] _ in
         guard let self, self.player.isReadyToPlay else {
             return
         }
@@ -410,6 +411,10 @@ extension KSPlayerLayer: MediaPlayerDelegate {
 @available(tvOS 14.0, *)
 extension KSPlayerLayer: AVPictureInPictureControllerDelegate {
     public func pictureInPictureControllerDidStopPictureInPicture(_: AVPictureInPictureController) {
+        player.pipController?.stop(restoreUserInterface: false)
+    }
+
+    public func pictureInPictureController(_: AVPictureInPictureController, restoreUserInterfaceForPictureInPictureStopWithCompletionHandler _: @escaping (Bool) -> Void) {
         isPipActive = false
     }
 }
@@ -591,7 +596,10 @@ extension KSPlayerLayer {
     }
 
     @objc private func enterBackground() {
-        guard state.isPlaying, !player.isExternalPlaybackActive, !isPipActive else {
+        guard state.isPlaying, !player.isExternalPlaybackActive else {
+            return
+        }
+        if #available(tvOS 14.0, *), player.pipController?.isPictureInPictureActive == true {
             return
         }
 

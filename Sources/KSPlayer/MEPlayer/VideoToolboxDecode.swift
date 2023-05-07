@@ -136,7 +136,7 @@ class DecompressionSession {
                 guard avio_open_dyn_buf(&ioContext) == 0 else {
                     return nil
                 }
-                ff_isom_write_vpcc(options.formatCtx, ioContext, &self.codecpar)
+                ff_isom_write_vpcc(options.formatCtx, ioContext, nil, 0, &self.codecpar)
                 extradataSize = avio_close_dyn_buf(ioContext, &extradata)
                 guard let extradata else {
                     return nil

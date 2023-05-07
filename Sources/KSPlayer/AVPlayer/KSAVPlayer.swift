@@ -96,7 +96,13 @@ public class KSAVPlayer {
 
     private lazy var _pipController: Any? = {
         if #available(tvOS 14.0, *) {
-            return KSPictureInPictureController(playerLayer: playerView.playerLayer)
+            let pip = KSPictureInPictureController(playerLayer: playerView.playerLayer)
+            #if os(iOS)
+            if #available(iOS 14.2, *) {
+                pip?.canStartPictureInPictureAutomaticallyFromInline = options.canStartPictureInPictureAutomaticallyFromInline
+            }
+            #endif
+            return pip
         } else {
             return nil
         }
@@ -505,6 +511,7 @@ struct AVMediaPlayerTrack: MediaPlayerTrack {
     let colorPrimaries: String?
     let transferFunction: String?
     let yCbCrMatrix: String?
+    let isImageSubtitle = false
     var dovi: DOVIDecoderConfigurationRecord?
     var audioStreamBasicDescription: AudioStreamBasicDescription?
     let fieldOrder: FFmpegFieldOrder = .unknown
@@ -544,7 +551,7 @@ struct AVMediaPlayerTrack: MediaPlayerTrack {
             colorPrimaries = nil
             transferFunction = nil
             yCbCrMatrix = nil
-            mediaSubType = CMFormatDescription.MediaSubType(string: "")
+            mediaSubType = .boxed
             fullRangeVideo = false
             description = ""
         }

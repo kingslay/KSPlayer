@@ -1,69 +1,67 @@
 //
-//  CacheDataSouce.swift
+//  SubtitleDataSouce.swift
 //  KSPlayer-7de52535
 //
 //  Created by kintan on 2018/8/7.
 //
 import Foundation
+public class EmptySubtitleInfo: SubtitleInfo {
+    public let subtitleID: String = ""
 
-public class URLSubtitleInfo: SubtitleInfo {
-    public let name: String
-    public let subtitleID: String
-    public var comment: String?
-    public let downloadURL: URL?
-    public var userInfo: NSMutableDictionary?
-    private let fetchSubtitleDetail: (((NSError?) -> Void) -> Void)?
-    public init(subtitleID: String, name: String, fetchSubtitleDetail: @escaping ((NSError?) -> Void) -> Void) {
-        self.subtitleID = subtitleID
-        self.name = name
-        self.fetchSubtitleDetail = fetchSubtitleDetail
-        downloadURL = nil
+    public let name = NSLocalizedString("no show subtitle", comment: "")
+    public func search(for _: TimeInterval) -> SubtitlePart? {
+        nil
     }
 
+    public func subtitle(isEnabled _: Bool) {}
+}
+
+public class URLSubtitleInfo: SubtitleInfo {
+    private var subtitles: KSURLSubtitle?
+//    private let fetchSubtitleDetail: (((NSError?) -> Void) -> Void)?
+    private let downloadURL: URL?
+    public private(set) var name: String
+    public let subtitleID: String
+    public var comment: String?
+    public var userInfo: NSMutableDictionary?
     public convenience init(url: URL) {
         self.init(subtitleID: url.path, name: url.lastPathComponent, url: url)
     }
 
-    public init(subtitleID: String, name: String, url: URL?) {
+    public init(subtitleID: String, name: String, url: URL) {
         self.subtitleID = subtitleID
         self.name = name
         downloadURL = url
-        fetchSubtitleDetail = nil
-    }
-
-    public func disableSubtitle() {}
-
-    public func enableSubtitle(completion: @escaping (Result<KSSubtitleProtocol, NSError>) -> Void) {
-        let block = { (url: URL) in
-            DispatchQueue.global().async {
+        if url.isFileURL {
+            do {
+                let subtitles = KSURLSubtitle()
+                try subtitles.parse(url: url)
+                self.subtitles = subtitles
+            } catch {}
+        } else {
+            URLSession.shared.downloadTask(with: url) { [weak self] url, response, _ in
+                guard let self, let url, let response = response as? HTTPURLResponse else {
+                    return
+                }
+                let httpFileName = "attachment; filename="
+                if var filename = response.value(forHTTPHeaderField: "Content-Disposition"), filename.hasPrefix(httpFileName) {
+                    filename.removeFirst(httpFileName.count)
+                    self.name = filename
+                }
                 do {
                     let subtitles = KSURLSubtitle()
                     try subtitles.parse(url: url)
-                    completion(.success(subtitles))
-                } catch {
-                    completion(.failure(error as NSError))
-                }
-            }
-        }
-        if let downloadURL {
-            block(downloadURL)
-        } else if let fetchSubtitleDetail {
-            fetchSubtitleDetail { [weak self] error in
-                guard let self else { return }
-                if let error {
-                    completion(.failure(error))
-                } else {
-                    if let downloadURL = self.downloadURL {
-                        block(downloadURL)
-                    } else {
-                        completion(.failure(NSError(errorCode: .subtitleParamsEmpty)))
-                    }
-                }
-            }
-        } else {
-            completion(.failure(NSError(errorCode: .subtitleParamsEmpty)))
+                    self.subtitles = subtitles
+                } catch {}
+            }.resume()
         }
     }
+
+    public func search(for time: TimeInterval) -> SubtitlePart? {
+        subtitles?.search(for: time)
+    }
+
+    public func subtitle(isEnabled _: Bool) {}
 }
 
 public protocol SubtitletoCache: AnyObject {
@@ -77,12 +75,16 @@ public extension SubtitletoCache {
 }
 
 public protocol SubtitleDataSouce: AnyObject {
-    var infos: [SubtitleInfo]? { get }
-    func searchSubtitle(name: String, completion: @escaping (() -> Void))
+    var infos: [any SubtitleInfo] { get }
+    func searchSubtitle(url: URL, completion: @escaping (() -> Void))
+}
+
+extension KSOptions {
+    static var subtitleDataSouces: [SubtitleDataSouce] = [DirectorySubtitleDataSouce(), ShooterSubtitleDataSouce()]
 }
 
 public class CacheDataSouce: SubtitleDataSouce {
-    public var infos: [SubtitleInfo]?
+    public var infos = [any SubtitleInfo]()
     private let cacheFolder = (NSTemporaryDirectory() as NSString).appendingPathComponent("KSSubtitleCache")
     private var srtCacheInfoPath: String
     // 因为plist不能保存URL
@@ -94,14 +96,14 @@ public class CacheDataSouce: SubtitleDataSouce {
         srtCacheInfoPath = (cacheFolder as NSString).appendingPathComponent("KSSrtInfo.plist")
     }
 
-    public func searchSubtitle(name: String, completion: @escaping (() -> Void)) {
-        srtCacheInfoPath = (cacheFolder as NSString).appendingPathComponent("KSSrtInfo_\(name).plist")
+    public func searchSubtitle(url: URL, completion: @escaping (() -> Void)) {
+        srtCacheInfoPath = (cacheFolder as NSString).appendingPathComponent("KSSrtInfo_\(url.lastPathComponent).plist")
         if FileManager.default.fileExists(atPath: srtCacheInfoPath), let files = NSMutableDictionary(contentsOfFile: srtCacheInfoPath) as? [String: String] {
             srtInfoCaches = files.filter { FileManager.default.fileExists(atPath: $1) }
             if srtInfoCaches.isEmpty {
-                infos = nil
+                infos = []
             } else {
-                let array = srtInfoCaches.map { subtitleID, downloadURL -> SubtitleInfo in
+                let array = srtInfoCaches.map { subtitleID, downloadURL -> (any SubtitleInfo) in
                     let info = URLSubtitleInfo(subtitleID: subtitleID, name: (downloadURL as NSString).lastPathComponent, url: URL(fileURLWithPath: downloadURL))
                     info.comment = "本地"
                     return info
@@ -113,7 +115,7 @@ public class CacheDataSouce: SubtitleDataSouce {
             }
         } else {
             srtInfoCaches = [String: String]()
-            infos = nil
+            infos = []
         }
         completion()
     }
@@ -121,5 +123,123 @@ public class CacheDataSouce: SubtitleDataSouce {
     public func addCache(subtitleID: String, downloadURL: URL) {
         srtInfoCaches[subtitleID] = downloadURL.path
         (srtInfoCaches as NSDictionary).write(toFile: srtCacheInfoPath, atomically: false)
+    }
+}
+
+public class URLSubtitleDataSouce: SubtitleDataSouce {
+    public let infos: [any SubtitleInfo]
+    public init(urls: [URL]) {
+        infos = urls.map { URLSubtitleInfo(url: $0) }
+    }
+
+    public func searchSubtitle(url _: URL, completion: @escaping (() -> Void)) {
+        completion()
+    }
+}
+
+public class DirectorySubtitleDataSouce: SubtitleDataSouce {
+    public var infos = [any SubtitleInfo]()
+    public init() {}
+
+    public func searchSubtitle(url: URL, completion: @escaping (() -> Void)) {
+        infos.removeAll()
+        if url.isFileURL {
+            let subtitleURLs: [URL] = (try? FileManager.default.contentsOfDirectory(at: url.deletingLastPathComponent(), includingPropertiesForKeys: nil).filter(\.isSubtitle)) ?? []
+            infos.append(contentsOf: subtitleURLs.map { URLSubtitleInfo(url: $0) })
+        }
+        completion()
+    }
+}
+
+public class ShooterSubtitleDataSouce: SubtitleDataSouce {
+    public var infos = [any SubtitleInfo]()
+    public func searchSubtitle(url: URL, completion: @escaping (() -> Void)) {
+        guard url.isFileURL, let url = URL(string: "https://www.shooter.cn/api/subapi.php")?
+            .add(queryItems: ["format": "json", "pathinfo": url.path, "filehash": url.shooterFilehash])
+        else {
+            return
+        }
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        URLSession.shared.dataTask(with: request) { [weak self] data, _, _ in
+            guard let self, let data, let json = try? JSONSerialization.jsonObject(with: data) as? [[String: Any]] else {
+                return
+            }
+            json.forEach { sub in
+                let filesDic = sub["Files"] as? [[String: String]]
+                filesDic?.forEach { dic in
+                    if let string = dic["Link"], let url = URL(string: string) {
+                        self.infos.append(URLSubtitleInfo(url: url))
+                    }
+                }
+            }
+            DispatchQueue.main.async(execute: completion)
+        }.resume()
+    }
+}
+
+extension URL {
+    var components: URLComponents? {
+        URLComponents(url: self, resolvingAgainstBaseURL: true)
+    }
+
+    func add(queryItems: [String: String]) -> URL? {
+        guard var urlComponents = components else {
+            return nil
+        }
+        var reserved = CharacterSet.urlQueryAllowed
+        reserved.remove(charactersIn: ": #[]@!$&'()*+, ;=")
+        urlComponents.percentEncodedQueryItems = queryItems.compactMap { key, value in
+            URLQueryItem(name: key.addingPercentEncoding(withAllowedCharacters: reserved) ?? key, value: value.addingPercentEncoding(withAllowedCharacters: reserved))
+        }
+        return urlComponents.url
+    }
+
+    var shooterFilehash: String {
+        let file: FileHandle
+        do {
+            file = try FileHandle(forReadingFrom: self)
+        } catch {
+            return ""
+        }
+        defer { file.closeFile() }
+
+        file.seekToEndOfFile()
+        let fileSize: UInt64 = file.offsetInFile
+
+        guard fileSize >= 12288 else {
+            return ""
+        }
+
+        let offsets: [UInt64] = [
+            4096,
+            fileSize / 3 * 2,
+            fileSize / 3,
+            fileSize - 8192,
+        ]
+
+        let hash = offsets.map { offset -> String in
+            file.seek(toFileOffset: offset)
+            return (file.readData(ofLength: 4096) as NSData).md5()
+        }.joined(separator: ";")
+        return hash
+    }
+}
+
+import CommonCrypto
+extension NSData {
+    func md5() -> String {
+        let digestLength = Int(CC_MD5_DIGEST_LENGTH)
+        let md5Buffer = UnsafeMutablePointer<CUnsignedChar>.allocate(capacity: digestLength)
+
+        CC_MD5(bytes, CC_LONG(length), md5Buffer)
+
+        let output = NSMutableString(capacity: Int(CC_MD5_DIGEST_LENGTH * 2))
+        for i in 0 ..< digestLength {
+            output.appendFormat("%02x", md5Buffer[i])
+        }
+
+        md5Buffer.deallocate()
+        return NSString(format: output) as String
     }
 }

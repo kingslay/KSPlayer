@@ -48,7 +48,7 @@ class FFmpegDecode: DecodeProtocol {
                 frame.timebase = packet.assetTrack.timebase
 //                frame.timebase = Timebase(avframe.pointee.time_base)
                 frame.size = avframe.pointee.pkt_size
-                frame.duration = avframe.pointee.pkt_duration
+                frame.duration = avframe.pointee.duration
                 if frame.duration == 0, avframe.pointee.sample_rate != 0, frame.timebase.num != 0 {
                     frame.duration = Int64(avframe.pointee.nb_samples) * Int64(frame.timebase.den) / (Int64(avframe.pointee.sample_rate) * Int64(frame.timebase.num))
                 }
@@ -88,6 +88,13 @@ class FFmpegDecode: DecodeProtocol {
                         closedCaptionsPacket.corePacket?.pointee.buf = buffer
                         closedCaptionsPacket.fill()
                         subtitle.putPacket(packet: closedCaptionsPacket)
+                    }
+                    if let sideData = av_frame_get_side_data(avframe, AV_FRAME_DATA_SEI_UNREGISTERED) {
+                        let size = sideData.pointee.size
+                        if size > AV_UUID_LEN {
+                            let str = String(cString: sideData.pointee.data.advanced(by: Int(AV_UUID_LEN)))
+                            KSLog("sei \(str)")
+                        }
                     }
                 }
                 var position = avframe.pointee.best_effort_timestamp

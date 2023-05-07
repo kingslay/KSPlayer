@@ -48,13 +48,10 @@ open class VideoPlayerView: PlayerView {
     private var embedSubtitleDataSouce: SubtitleDataSouce? {
         didSet {
             if oldValue !== embedSubtitleDataSouce {
-                if let oldValue {
-                    srtControl.remove(dataSouce: oldValue)
-                }
                 if let embedSubtitleDataSouce {
-                    srtControl.add(dataSouce: embedSubtitleDataSouce)
-                    if resource?.definitions[currentDefinition].options.autoSelectEmbedSubtitle ?? false, let first = embedSubtitleDataSouce.infos?.first {
-                        srtControl.view.selectedInfo = first
+                    srtControl.addSubtitle(dataSouce: embedSubtitleDataSouce)
+                    if resource?.definitions[currentDefinition].options.autoSelectEmbedSubtitle ?? false, let first = embedSubtitleDataSouce.infos.first {
+                        srtControl.selectedSubtitleInfo = first
                     }
                 }
             }
@@ -72,7 +69,10 @@ open class VideoPlayerView: PlayerView {
     public private(set) var resource: KSPlayerResource? {
         didSet {
             if let resource, oldValue !== resource {
-                srtControl.searchSubtitle(name: resource.name)
+                srtControl.url = resource.definitions.first?.url
+                if let subtitleDataSouce = resource.subtitleDataSouce {
+                    srtControl.addSubtitle(dataSouce: subtitleDataSouce)
+                }
                 subtitleBackView.isHidden = true
                 subtitleBackView.image = nil
                 subtitleLabel.attributedText = nil
@@ -91,7 +91,7 @@ open class VideoPlayerView: PlayerView {
     public var titleLabel = UILabel()
     public var subtitleLabel = UILabel()
     public var subtitleBackView = UIImageView()
-    private var subtitleEndTime = TimeInterval(0)
+    private var subtitlePart: SubtitlePart?
     /// Activty Indector for loading
     public var loadingIndector: UIView & LoadingIndector = UIActivityIndicatorView(frame: CGRect(x: 0, y: 0, width: 30, height: 30))
     public var seekToView: UIView & SeekViewProtocol = SeekView()
@@ -244,14 +244,20 @@ open class VideoPlayerView: PlayerView {
         doubleTapGesture.numberOfTapsRequired = 2
         tapGesture.require(toFail: doubleTapGesture)
         controllerView.addGestureRecognizer(doubleTapGesture)
+        #if canImport(UIKit)
+        addRemoteControllerGestures()
+        #endif
     }
 
     override open func player(layer: KSPlayerLayer, currentTime: TimeInterval, totalTime: TimeInterval) {
         guard !isSliderSliding else { return }
         super.player(layer: layer, currentTime: currentTime, totalTime: totalTime)
-        if let subtitle = resource?.subtitle {
+        if let subtitle = srtControl.selectedSubtitleInfo {
             showSubtile(from: subtitle, at: currentTime)
             subtitleBackView.isHidden = false
+        } else {
+            subtitleBackView.image = nil
+            subtitleLabel.attributedText = nil
         }
     }
 
@@ -408,11 +414,11 @@ open class VideoPlayerView: PlayerView {
     open func showSubtile(from subtitle: KSSubtitleProtocol, at time: TimeInterval) {
         let time = time + (resource?.definitions[currentDefinition].options.subtitleDelay ?? 0.0)
         if let part = subtitle.search(for: time) {
-            subtitleEndTime = part.end
+            subtitlePart = part
             subtitleBackView.image = part.image
             subtitleLabel.attributedText = part.text
         } else {
-            if time > subtitleEndTime {
+            if let subtitlePart, !(subtitlePart == time) {
                 subtitleBackView.image = nil
                 subtitleLabel.attributedText = nil
             }
@@ -437,21 +443,23 @@ extension VideoPlayerView {
 
         let videoTracks = playerLayer?.player.tracks(mediaType: .video) ?? []
         let videoMenu = KSMenuBuilder.audioVideoChangeMenu(videoTracks.first(where: { $0.isEnabled }),
-                                                           availableTracks: videoTracks) { [weak self] track in
+                                                           availableTracks: videoTracks)
+        { [weak self] track in
             self?.playerLayer?.player.select(track: track)
         }
 
         let audioTracks = playerLayer?.player.tracks(mediaType: .audio) ?? []
         let audioMenu = KSMenuBuilder.audioVideoChangeMenu(audioTracks.first(where: { $0.isEnabled }),
-                                                           availableTracks: audioTracks) { [weak self] track in
+                                                           availableTracks: audioTracks)
+        { [weak self] track in
             self?.playerLayer?.player.select(track: track)
         }
 
-        let subtitles = srtControl.filterInfos { _ in true }
-        let srtMenu = KSMenuBuilder.srtChangeMenu(srtControl.view.selectedInfo,
-                                                  availableSubtitles: subtitles) { [weak self] selectedSrt in
-            guard self?.srtControl.view.selectedInfo?.subtitleID != selectedSrt?.subtitleID else { return }
-            self?.srtControl.view.selectedInfo = selectedSrt
+        let subtitles = srtControl.subtitleInfos
+        let srtMenu = KSMenuBuilder.srtChangeMenu(srtControl.selectedSubtitleInfo,
+                                                  availableSubtitles: subtitles)
+        { [weak self] selectedSrt in
+            self?.srtControl.selectedSubtitleInfo = selectedSrt
         }
         #if !os(tvOS)
         toolBar.definitionButton.menu = definitionsMenu
@@ -517,17 +525,17 @@ public extension VideoPlayerView {
     }
 
     private func changeSrt(button _: UIButton) {
-        let availableSubtitles = srtControl.filterInfos { _ in true }
+        let availableSubtitles = srtControl.subtitleInfos
         guard availableSubtitles.count > 0 else { return }
 
         let alertController = UIAlertController(title: NSLocalizedString("subtitle", comment: ""),
                                                 message: nil,
                                                 preferredStyle: preferredStyle())
 
-        let currentSub = srtControl.view.selectedInfo
+        let currentSub = srtControl.selectedSubtitleInfo
 
         let disableAction = UIAlertAction(title: NSLocalizedString("Disabled", comment: ""), style: .default) { [weak self] _ in
-            self?.srtControl.view.selectedInfo = nil
+            self?.srtControl.selectedSubtitleInfo = nil
         }
         alertController.addAction(disableAction)
         if currentSub == nil {
@@ -537,7 +545,7 @@ public extension VideoPlayerView {
 
         availableSubtitles.enumerated().forEach { _, srt in
             let action = UIAlertAction(title: srt.name, style: .default) { [weak self] _ in
-                self?.srtControl.view.selectedInfo = srt
+                self?.srtControl.selectedSubtitleInfo = srt
             }
             alertController.addAction(action)
             if currentSub?.subtitleID == srt.subtitleID {
@@ -658,16 +666,6 @@ extension VideoPlayerView {
             srtControl.view.bottomAnchor.constraint(equalTo: bottomAnchor),
             srtControl.view.trailingAnchor.constraint(equalTo: trailingAnchor),
         ])
-        srtControl.selectWithFilePath = { [weak self] result in
-            guard let self else { return }
-            if let subtitle = try? result.get() {
-                self.subtitleBackView.isHidden = false
-                self.resource?.subtitle = subtitle
-            } else {
-                self.subtitleBackView.isHidden = true
-                self.resource?.subtitle = nil
-            }
-        }
     }
 
     /**
@@ -827,6 +825,71 @@ extension VideoPlayerView {
         return .alert
         #endif
     }
+
+    #if canImport(UIKit)
+    private func addRemoteControllerGestures() {
+        let rightPressRecognizer = UITapGestureRecognizer()
+        rightPressRecognizer.addTarget(self, action: #selector(rightArrowButtonPressed(_:)))
+        rightPressRecognizer.allowedPressTypes = [NSNumber(value: UIPress.PressType.rightArrow.rawValue)]
+        addGestureRecognizer(rightPressRecognizer)
+
+        let leftPressRecognizer = UITapGestureRecognizer()
+        leftPressRecognizer.addTarget(self, action: #selector(leftArrowButtonPressed(_:)))
+        leftPressRecognizer.allowedPressTypes = [NSNumber(value: UIPress.PressType.leftArrow.rawValue)]
+        addGestureRecognizer(leftPressRecognizer)
+
+        let selectPressRecognizer = UITapGestureRecognizer()
+        selectPressRecognizer.addTarget(self, action: #selector(selectButtonPressed(_:)))
+        selectPressRecognizer.allowedPressTypes = [NSNumber(value: UIPress.PressType.select.rawValue)]
+        addGestureRecognizer(selectPressRecognizer)
+
+        let swipeUpRecognizer = UISwipeGestureRecognizer(target: self, action: #selector(swipedUp(_:)))
+        swipeUpRecognizer.direction = .up
+        addGestureRecognizer(swipeUpRecognizer)
+
+        let swipeDownRecognizer = UISwipeGestureRecognizer(target: self, action: #selector(swipedDown(_:)))
+        swipeDownRecognizer.direction = .down
+        addGestureRecognizer(swipeDownRecognizer)
+    }
+
+    @objc
+    private func rightArrowButtonPressed(_: UITapGestureRecognizer) {
+        guard let playerLayer, playerLayer.state.isPlaying, toolBar.isSeekable else { return }
+        seek(time: toolBar.currentTime + 15) { _ in }
+    }
+
+    @objc
+    private func leftArrowButtonPressed(_: UITapGestureRecognizer) {
+        guard let playerLayer, playerLayer.state.isPlaying, toolBar.isSeekable else { return }
+        seek(time: toolBar.currentTime - 15) { _ in }
+    }
+
+    @objc
+    private func selectButtonPressed(_: UITapGestureRecognizer) {
+        guard toolBar.isSeekable else { return }
+        if let playerLayer, playerLayer.state.isPlaying {
+            pause()
+        } else {
+            play()
+        }
+    }
+
+    @objc
+    private func swipedUp(_: UISwipeGestureRecognizer) {
+        guard let playerLayer, playerLayer.state.isPlaying else { return }
+        if isMaskShow == false {
+            isMaskShow = true
+        }
+    }
+
+    @objc
+    private func swipedDown(_: UISwipeGestureRecognizer) {
+        guard let playerLayer, playerLayer.state.isPlaying else { return }
+        if isMaskShow == true {
+            isMaskShow = false
+        }
+    }
+    #endif
 }
 
 public enum KSPlayerTopBarShowCase {
