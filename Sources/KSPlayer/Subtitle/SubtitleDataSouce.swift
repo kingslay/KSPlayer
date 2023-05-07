@@ -19,7 +19,7 @@ public class EmptySubtitleInfo: SubtitleInfo {
 public class URLSubtitleInfo: SubtitleInfo {
     private var subtitles: KSURLSubtitle?
 //    private let fetchSubtitleDetail: (((NSError?) -> Void) -> Void)?
-    private let downloadURL: URL?
+    private var downloadURL: URL
     public private(set) var name: String
     public let subtitleID: String
     public var comment: String?
@@ -32,13 +32,7 @@ public class URLSubtitleInfo: SubtitleInfo {
         self.subtitleID = subtitleID
         self.name = name
         downloadURL = url
-        if url.isFileURL {
-            do {
-                let subtitles = KSURLSubtitle()
-                try subtitles.parse(url: url)
-                self.subtitles = subtitles
-            } catch {}
-        } else {
+        if !url.isFileURL {
             URLSession.shared.downloadTask(with: url) { [weak self] url, response, _ in
                 guard let self, let url, let response = response as? HTTPURLResponse else {
                     return
@@ -48,11 +42,7 @@ public class URLSubtitleInfo: SubtitleInfo {
                     filename.removeFirst(httpFileName.count)
                     self.name = filename
                 }
-                do {
-                    let subtitles = KSURLSubtitle()
-                    try subtitles.parse(url: url)
-                    self.subtitles = subtitles
-                } catch {}
+                self.downloadURL = url
             }.resume()
         }
     }
@@ -61,7 +51,18 @@ public class URLSubtitleInfo: SubtitleInfo {
         subtitles?.search(for: time)
     }
 
-    public func subtitle(isEnabled _: Bool) {}
+    public func subtitle(isEnabled: Bool) {
+        if isEnabled, subtitles == nil {
+            DispatchQueue.global().async { [weak self] in
+                guard let self else { return }
+                do {
+                    let subtitles = KSURLSubtitle()
+                    try subtitles.parse(url: self.downloadURL)
+                    self.subtitles = subtitles
+                } catch {}
+            }
+        }
+    }
 }
 
 public protocol SubtitletoCache: AnyObject {
