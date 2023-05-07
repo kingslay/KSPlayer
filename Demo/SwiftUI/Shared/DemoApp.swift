@@ -49,7 +49,7 @@ struct DemoApp: App {
     }
 
     @ViewBuilder
-    var contentView: some View {
+    private var contentView: some View {
         if let url {
             KSVideoPlayerView(url: url, options: MEOptions())
                 .onDisappear {

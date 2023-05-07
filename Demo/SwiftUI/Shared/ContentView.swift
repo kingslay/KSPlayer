@@ -14,7 +14,7 @@ struct ContentView: View {
     @State private var resources = testObjects
     @State private var searchText = ""
     @State private var playURL: String = ""
-    @State private var playList: String = ""
+    @State private var playList: String = "https://iptv-org.github.io/iptv/index.nsfw.m3u"
 
     var body: some View {
         NavigationView {
@@ -32,11 +32,6 @@ struct ContentView: View {
                 } label: {
                     Label("Add", systemImage: "plus")
                 }
-            }
-        }.onAppear {
-            loadCachem3u8()
-            if resources.count == 0 {
-                updatem3u8("https://iptv-org.github.io/iptv/index.nsfw.m3u")
             }
         }.sheet(isPresented: $showAddActionSheet) {} content: {
             Form {

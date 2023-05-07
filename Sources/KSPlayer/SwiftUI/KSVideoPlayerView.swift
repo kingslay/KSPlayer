@@ -24,6 +24,8 @@ public struct KSVideoPlayerView: View {
     public init(url: URL, options: KSOptions, subtitleDataSouce: SubtitleDataSouce? = nil) {
         _url = .init(initialValue: url)
         self.options = options
+        let key = "playtime_\(url)"
+        options.startPlayTime = UserDefaults.standard.value(forKey: key) as? TimeInterval
         self.subtitleDataSouce = subtitleDataSouce
     }
 
@@ -83,6 +85,12 @@ public struct KSVideoPlayerView: View {
             }
             .onDisappear {
                 if let playerLayer = playerCoordinator.playerLayer {
+                    let key = "playtime_\(url)"
+                    if playerLayer.state != .playedToTheEnd {
+                        UserDefaults.standard.set(playerLayer.player.currentPlaybackTime, forKey: key)
+                    } else {
+                        UserDefaults.standard.removeObject(forKey: key)
+                    }
                     if !playerLayer.isPipActive {
                         playerCoordinator.playerLayer?.pause()
                         playerCoordinator.playerLayer = nil
