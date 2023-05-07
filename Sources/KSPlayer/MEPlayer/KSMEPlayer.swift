@@ -206,7 +206,13 @@ extension KSMEPlayer: MEPlayerDelegate {
             if loadingState.isPlayable {
                 loadState = .playable
             } else {
-                progress = min(100, Int(loadingState.progress))
+                if loadingState.progress.isInfinite {
+                    progress = 100
+                } else if loadingState.progress.isNaN {
+                    progress = 0
+                } else {
+                    progress = min(100, Int(loadingState.progress))
+                }
             }
             if playbackState == .playing {
                 runInMainqueue { [weak self] in
