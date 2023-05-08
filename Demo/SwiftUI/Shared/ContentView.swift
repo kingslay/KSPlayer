@@ -33,7 +33,8 @@ struct ContentView: View {
                     Label("Add", systemImage: "plus")
                 }
             }
-        }.sheet(isPresented: $showAddActionSheet) {} content: {
+        }
+        .sheet(isPresented: $showAddActionSheet) {} content: {
             Form {
                 Text("Input URL")
                 TextField("play url", text: $playURL)

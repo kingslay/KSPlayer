@@ -98,6 +98,7 @@ public class CacheDataSouce: SubtitleDataSouce {
     }
 
     public func searchSubtitle(url: URL, completion: @escaping (() -> Void)) {
+        infos.removeAll()
         srtCacheInfoPath = (cacheFolder as NSString).appendingPathComponent("KSSrtInfo_\(url.lastPathComponent).plist")
         if FileManager.default.fileExists(atPath: srtCacheInfoPath), let files = NSMutableDictionary(contentsOfFile: srtCacheInfoPath) as? [String: String] {
             srtInfoCaches = files.filter { FileManager.default.fileExists(atPath: $1) }
@@ -155,6 +156,7 @@ public class DirectorySubtitleDataSouce: SubtitleDataSouce {
 public class ShooterSubtitleDataSouce: SubtitleDataSouce {
     public var infos = [any SubtitleInfo]()
     public func searchSubtitle(url: URL, completion: @escaping (() -> Void)) {
+        infos.removeAll()
         guard url.isFileURL, let url = URL(string: "https://www.shooter.cn/api/subapi.php")?
             .add(queryItems: ["format": "json", "pathinfo": url.path, "filehash": url.shooterFilehash])
         else {

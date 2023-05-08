@@ -526,6 +526,10 @@ open class KSOptions {
         }
     }
 
+    open func sei(string: String) {
+        KSLog("sei \(string)")
+    }
+
     /**
             在创建解码器之前可以对KSOptions做一些处理。例如判断fieldOrder为tt或bb的话，那就自动加videofilters
      */

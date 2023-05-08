@@ -32,7 +32,7 @@ public struct KSVideoPlayerView: View {
         _url = .init(initialValue: url)
         self.options = options
         let key = "playtime_\(url)"
-        options.startPlayTime = UserDefaults.standard.value(forKey: key) as? TimeInterval
+        options.startPlayTime = UserDefaults.standard.double(forKey: key)
         self.subtitleDataSouce = subtitleDataSouce
     }
 
@@ -90,13 +90,13 @@ public struct KSVideoPlayerView: View {
             .onDisappear {
                 if let playerLayer = playerCoordinator.playerLayer {
                     let key = "playtime_\(url)"
-                    if playerLayer.state != .playedToTheEnd {
+                    if playerLayer.player.duration > 0, playerLayer.player.currentPlaybackTime > 0, playerLayer.state != .playedToTheEnd {
                         UserDefaults.standard.set(playerLayer.player.currentPlaybackTime, forKey: key)
                     } else {
                         UserDefaults.standard.removeObject(forKey: key)
                     }
                     if !playerLayer.isPipActive {
-                        playerCoordinator.playerLayer?.pause()
+                        playerLayer.pause()
                         playerCoordinator.playerLayer = nil
                     }
                 }
@@ -340,7 +340,8 @@ struct VideoSubtitleView: View {
                 }
                 .scaledToFit()
                 .padding()
-            } else if let text = model.part?.text {
+            }
+            if let text = model.part?.text {
                 Text(AttributedString(text))
                     .multilineTextAlignment(.center)
                     .font(model.textFont)

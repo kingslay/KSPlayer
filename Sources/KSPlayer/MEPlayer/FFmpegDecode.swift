@@ -93,7 +93,7 @@ class FFmpegDecode: DecodeProtocol {
                         let size = sideData.pointee.size
                         if size > AV_UUID_LEN {
                             let str = String(cString: sideData.pointee.data.advanced(by: Int(AV_UUID_LEN)))
-                            KSLog("sei \(str)")
+                            options.sei(string: str)
                         }
                     }
                 }
