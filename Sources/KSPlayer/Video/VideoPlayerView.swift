@@ -97,7 +97,7 @@ open class VideoPlayerView: PlayerView {
     public var seekToView: UIView & SeekViewProtocol = SeekView()
     public var replayButton = UIButton()
     public var lockButton = UIButton()
-    public let srtControl = KSSubtitleController()
+    public let srtControl = SubtitleModel()
     public var isLock: Bool { lockButton.isSelected }
     open var isMaskShow = true {
         didSet {
@@ -361,11 +361,7 @@ open class VideoPlayerView: PlayerView {
     }
 
     @objc open func tapGestureAction(_: UITapGestureRecognizer) {
-        if srtControl.view.isHidden {
-            isMaskShow.toggle()
-        } else {
-            srtControl.view.isHidden = true
-        }
+        isMaskShow.toggle()
     }
 
     open func panGestureBegan(location _: CGPoint, direction: KSPanDirection) {
@@ -627,32 +623,27 @@ extension VideoPlayerView {
     }
 
     /// change during playback
-    public func updateSrt(_ options: KSSRTOptions) {
-        subtitleLabel.textColor = options.textColor
-        subtitleLabel.font = options.size.font
-        subtitleBackView.backgroundColor = options.bacgroundColor
+    public func updateSrt() {
+        subtitleLabel.textColor = srtControl.textColor
+        subtitleLabel.font = srtControl.textFont
+        subtitleBackView.backgroundColor = srtControl.textBackgroundColor
     }
 
     private func setupSrtControl() {
         subtitleLabel.numberOfLines = 0
         subtitleLabel.textAlignment = .center
-        subtitleLabel.textColor = KSOptions.srtOptions.textColor
-        subtitleLabel.font = KSOptions.srtOptions.size.font
         subtitleLabel.backingLayer?.shadowColor = UIColor.black.cgColor
         subtitleLabel.backingLayer?.shadowOffset = CGSize(width: 1.0, height: 1.0)
         subtitleLabel.backingLayer?.shadowOpacity = 0.9
         subtitleLabel.backingLayer?.shadowRadius = 1.0
         subtitleLabel.backingLayer?.shouldRasterize = true
-        subtitleBackView.backgroundColor = KSOptions.srtOptions.bacgroundColor
+        updateSrt()
         subtitleBackView.cornerRadius = 2
         subtitleBackView.addSubview(subtitleLabel)
         subtitleBackView.isHidden = true
         addSubview(subtitleBackView)
-        addSubview(srtControl.view)
-        srtControl.view.isHidden = true
         subtitleBackView.translatesAutoresizingMaskIntoConstraints = false
         subtitleLabel.translatesAutoresizingMaskIntoConstraints = false
-        srtControl.view.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
             subtitleBackView.bottomAnchor.constraint(equalTo: safeBottomAnchor, constant: -5),
             subtitleBackView.centerXAnchor.constraint(equalTo: centerXAnchor),
@@ -661,10 +652,6 @@ extension VideoPlayerView {
             subtitleLabel.trailingAnchor.constraint(equalTo: subtitleBackView.trailingAnchor, constant: -10),
             subtitleLabel.topAnchor.constraint(equalTo: subtitleBackView.topAnchor, constant: 2),
             subtitleLabel.bottomAnchor.constraint(equalTo: subtitleBackView.bottomAnchor, constant: -2),
-            srtControl.view.topAnchor.constraint(equalTo: topAnchor),
-            srtControl.view.leadingAnchor.constraint(equalTo: leadingAnchor),
-            srtControl.view.bottomAnchor.constraint(equalTo: bottomAnchor),
-            srtControl.view.trailingAnchor.constraint(equalTo: trailingAnchor),
         ])
     }
 
@@ -915,9 +902,6 @@ public extension KSOptions {
     /// 播放内核选择策略 先使用firstPlayer，失败了自动切换到secondPlayer，播放内核有KSAVPlayer、KSMEPlayer两个选项
     /// 是否能后台播放视频
     static var canBackgroundPlay = false
-
-    /// Subtitle configuration
-    static var srtOptions: KSSRTOptions = .init()
 }
 
 extension UIView {

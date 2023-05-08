@@ -176,7 +176,6 @@ open class IOSVideoPlayerView: VideoPlayerView {
         }
         toolBar.playbackRateButton.isHidden = false
         toolBar.srtButton.isHidden = srtControl.srtListCount == 0
-        srtControl.view.isHidden = true
         if UIDevice.current.userInterfaceIdiom == .phone {
             if isLandscape {
                 landscapeButton.isHidden = true

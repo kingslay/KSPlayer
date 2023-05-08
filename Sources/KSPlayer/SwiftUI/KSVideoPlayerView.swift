@@ -344,9 +344,9 @@ struct VideoSubtitleView: View {
             if let text = model.part?.text {
                 Text(AttributedString(text))
                     .multilineTextAlignment(.center)
-                    .font(model.textFont)
-                    .foregroundColor(model.textColor).shadow(color: .black.opacity(0.9), radius: 1, x: 1, y: 1)
-                    .background(model.textBackgroundColor)
+                    .font(Font(model.textFont))
+                    .foregroundColor(Color(model.textColor)).shadow(color: .black.opacity(0.9), radius: 1, x: 1, y: 1)
+                    .background(Color(model.textBackgroundColor))
                     .padding(.bottom, CGFloat(model.textPositionFromBottom))
                 #if !os(tvOS)
                     .textSelection(.enabled)

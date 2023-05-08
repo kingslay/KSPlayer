@@ -259,14 +259,49 @@ extension Collection where Element: NumericComparable {
 }
 
 open class SubtitleModel: ObservableObject {
+    public enum Size {
+        case smaller
+        case standard
+        case large
+
+        var font: UIFont {
+            switch self {
+            case .smaller:
+                #if os(tvOS)
+                return .systemFont(ofSize: 30)
+                #elseif os(macOS)
+                return .systemFont(ofSize: 20)
+                #else
+                return .systemFont(ofSize: 12)
+                #endif
+            case .standard:
+                #if os(tvOS)
+                return .systemFont(ofSize: 36)
+                #elseif os(macOS)
+                return .systemFont(ofSize: 26)
+                #else
+                return .systemFont(ofSize: 16)
+                #endif
+            case .large:
+                #if os(tvOS)
+                return .systemFont(ofSize: 42)
+                #elseif os(macOS)
+                return .systemFont(ofSize: 32)
+                #else
+                return .systemFont(ofSize: 20)
+                #endif
+            }
+        }
+    }
+
     private var subtitleDataSouces: [SubtitleDataSouce] = KSOptions.subtitleDataSouces
     public private(set) var subtitleInfos = [any SubtitleInfo]()
     @Published public var srtListCount: Int = 0
     @Published public private(set) var part: SubtitlePart?
-    @Published public var textFont: Font = .largeTitle
-    @Published public var textColor: Color = .white
+    @Published public var textFont: UIFont = SubtitleModel.Size.standard.font
+    @Published public var textColor: UIColor = .white
     @Published public var textPositionFromBottom = 0
-    @Published public var textBackgroundColor: Color = .clear
+    @Published public var textBackgroundColor: UIColor = .clear
     @Published public var delay = "0.0"
     public var url: URL? {
         didSet {
