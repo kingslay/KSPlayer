@@ -185,7 +185,7 @@ struct ControllerTimeModel {
 
 @available(iOS 15, tvOS 15, macOS 12, *)
 struct VideoControllerView: View {
-    @StateObject fileprivate var config: KSVideoPlayer.Coordinator
+    @ObservedObject fileprivate var config: KSVideoPlayer.Coordinator
     @Environment(\.dismiss) private var dismiss
     @State private var isShowSetting = false
     public var body: some View {
@@ -279,7 +279,7 @@ struct VideoControllerView: View {
 
 @available(iOS 15, tvOS 15, macOS 12, *)
 struct VideoTimeShowView: View {
-    @StateObject fileprivate var config: KSVideoPlayer.Coordinator
+    @ObservedObject fileprivate var config: KSVideoPlayer.Coordinator
     @Binding fileprivate var model: ControllerTimeModel
     public var body: some View {
         VStack {
@@ -313,7 +313,7 @@ extension EventModifiers {
 
 @available(iOS 15, tvOS 15, macOS 12, *)
 struct VideoSubtitleView: View {
-    @StateObject fileprivate var model: SubtitleModel
+    @ObservedObject fileprivate var model: SubtitleModel
     var body: some View {
         VStack {
             Spacer()
@@ -362,7 +362,7 @@ struct VideoSettingView: View {
     @State private var presentSubtileDelayAlert = false
     @State private var presentSubtileDelay = ""
     @EnvironmentObject private var subtitleModel: SubtitleModel
-    @StateObject fileprivate var config: KSVideoPlayer.Coordinator
+    @ObservedObject fileprivate var config: KSVideoPlayer.Coordinator
     var body: some View {
         config.selectedAudioTrack = (config.playerLayer?.player.isMuted ?? false) ? nil : config.audioTracks.first { $0.isEnabled }
         config.selectedVideoTrack = config.videoTracks.first { $0.isEnabled }

@@ -77,7 +77,6 @@ extension KSOptions {
     static var subtitleDataSouces: [SubtitleDataSouce] = [DirectorySubtitleDataSouce(), ShooterSubtitleDataSouce()]
 }
 
-
 public extension SubtitleDataSouce {
     func addCache(subtitleID: String, downloadURL: URL) {
         CacheDataSouce.singleton.addCache(subtitleID: subtitleID, downloadURL: downloadURL)

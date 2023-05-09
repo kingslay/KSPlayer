@@ -241,6 +241,9 @@ extension MEPlayerItem {
         }
         currentPlaybackTime = startTime
         duration = TimeInterval(max(formatCtx.pointee.duration, 0) / Int64(AV_TIME_BASE))
+        if duration > startTime {
+            duration -= startTime
+        }
         createCodec(formatCtx: formatCtx)
         if let outputURL = options.outputURL {
             openOutput(url: outputURL)
