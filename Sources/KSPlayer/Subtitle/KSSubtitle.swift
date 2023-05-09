@@ -264,7 +264,7 @@ open class SubtitleModel: ObservableObject {
         case standard
         case large
 
-        var font: UIFont {
+        public var font: UIFont {
             switch self {
             case .smaller:
                 #if os(tvOS)
@@ -346,11 +346,17 @@ open class SubtitleModel: ObservableObject {
     }
 
     public func addSubtitle(dataSouce: SubtitleDataSouce) {
-        if let url {
-            dataSouce.searchSubtitle(url: url) { [weak self] in
-                dataSouce.infos.forEach { info in
-                    self?.addSubtitle(info: info)
+        if let dataSouce = dataSouce as? SearchSubtitleDataSouce {
+            if let url {
+                dataSouce.searchSubtitle(url: url) { [weak self] in
+                    dataSouce.infos.forEach { info in
+                        self?.addSubtitle(info: info)
+                    }
                 }
+            }
+        } else {
+            dataSouce.infos.forEach { info in
+                addSubtitle(info: info)
             }
         }
     }

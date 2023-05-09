@@ -65,18 +65,11 @@ public class URLSubtitleInfo: SubtitleInfo {
     }
 }
 
-public protocol SubtitletoCache: AnyObject {
-    var cache: CacheDataSouce? { get set }
-}
-
-public extension SubtitletoCache {
-    func addCache(subtitleID: String, downloadURL: URL) {
-        cache?.addCache(subtitleID: subtitleID, downloadURL: downloadURL)
-    }
-}
-
 public protocol SubtitleDataSouce: AnyObject {
     var infos: [any SubtitleInfo] { get }
+}
+
+public protocol SearchSubtitleDataSouce: SubtitleDataSouce {
     func searchSubtitle(url: URL, completion: @escaping (() -> Void))
 }
 
@@ -84,13 +77,21 @@ extension KSOptions {
     static var subtitleDataSouces: [SubtitleDataSouce] = [DirectorySubtitleDataSouce(), ShooterSubtitleDataSouce()]
 }
 
-public class CacheDataSouce: SubtitleDataSouce {
+
+public extension SubtitleDataSouce {
+    func addCache(subtitleID: String, downloadURL: URL) {
+        CacheDataSouce.singleton.addCache(subtitleID: subtitleID, downloadURL: downloadURL)
+    }
+}
+
+public class CacheDataSouce: SearchSubtitleDataSouce {
+    public static let singleton = CacheDataSouce()
     public var infos = [any SubtitleInfo]()
     private let cacheFolder = (NSTemporaryDirectory() as NSString).appendingPathComponent("KSSubtitleCache")
     private var srtCacheInfoPath: String
     // 因为plist不能保存URL
     private var srtInfoCaches = [String: String]()
-    init() {
+    private init() {
         if !FileManager.default.fileExists(atPath: cacheFolder) {
             try? FileManager.default.createDirectory(atPath: cacheFolder, withIntermediateDirectories: true, attributes: nil)
         }
@@ -133,13 +134,9 @@ public class URLSubtitleDataSouce: SubtitleDataSouce {
     public init(urls: [URL]) {
         infos = urls.map { URLSubtitleInfo(url: $0) }
     }
-
-    public func searchSubtitle(url _: URL, completion: @escaping (() -> Void)) {
-        completion()
-    }
 }
 
-public class DirectorySubtitleDataSouce: SubtitleDataSouce {
+public class DirectorySubtitleDataSouce: SearchSubtitleDataSouce {
     public var infos = [any SubtitleInfo]()
     public init() {}
 
@@ -153,7 +150,7 @@ public class DirectorySubtitleDataSouce: SubtitleDataSouce {
     }
 }
 
-public class ShooterSubtitleDataSouce: SubtitleDataSouce {
+public class ShooterSubtitleDataSouce: SearchSubtitleDataSouce {
     public var infos = [any SubtitleInfo]()
     public func searchSubtitle(url: URL, completion: @escaping (() -> Void)) {
         infos.removeAll()

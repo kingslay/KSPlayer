@@ -38,8 +38,4 @@ extension KSMEPlayer: SubtitleDataSouce {
     public var infos: [any SubtitleInfo] {
         tracks(mediaType: .subtitle).compactMap { $0 as? (any SubtitleInfo) }
     }
-
-    public func searchSubtitle(url _: URL, completion: @escaping (() -> Void)) {
-        completion()
-    }
 }
