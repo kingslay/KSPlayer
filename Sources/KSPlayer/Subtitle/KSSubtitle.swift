@@ -354,4 +354,7 @@ open class SubtitleModel: ObservableObject {
             }
         }
     }
+    public func removeAllSubtitleInfos() {
+        subtitleInfos.removeAll()
+    }
 }
