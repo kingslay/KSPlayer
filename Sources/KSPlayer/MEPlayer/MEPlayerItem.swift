@@ -731,7 +731,7 @@ extension MEPlayerItem: OutputRenderSourceDelegate {
         let frame = videoTrack.getOutputRender(where: predicate)
         if let frame {
             videoClockDelay = desire - frame.seconds
-            if videoClockDelay > 0.4 {
+            if !isAudioStalled, videoClockDelay > 0.4 {
                 if videoClockDelay > 2 {
                     KSLog("video delay time: \(videoClockDelay), audio time:\(desire). seek video track ")
                     videoTrack.outputRenderQueue.flush()
