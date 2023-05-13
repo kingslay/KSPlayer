@@ -8,7 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		AC44E0FC29290CBC00617BD3 /* SecondView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC44E0FA29290CBC00617BD3 /* SecondView.swift */; };
-		AC44E0FD29290CF800617BD3 /* FirstView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC44E0F929290CBB00617BD3 /* FirstView.swift */; };
+		AC44E0FD29290CF800617BD3 /* InitialView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC44E0F929290CBB00617BD3 /* InitialView.swift */; };
 		AC77DFC326402329001351AE /* DemoApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC77DFB026402327001351AE /* DemoApp.swift */; };
 		AC77DFC526402329001351AE /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC77DFB126402327001351AE /* ContentView.swift */; };
 		AC77DFC726402329001351AE /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AC77DFB226402329001351AE /* Assets.xcassets */; };
@@ -29,7 +29,7 @@
 /* Begin PBXFileReference section */
 		AC3CAD6228BB88A200AA1C2C /* AVDisplayCriteriaKS.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AVDisplayCriteriaKS.h; sourceTree = "<group>"; };
 		AC3CAD6328BB893500AA1C2C /* Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Bridging-Header.h"; sourceTree = "<group>"; };
-		AC44E0F929290CBB00617BD3 /* FirstView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FirstView.swift; sourceTree = "<group>"; };
+		AC44E0F929290CBB00617BD3 /* InitialView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InitialView.swift; sourceTree = "<group>"; };
 		AC44E0FA29290CBC00617BD3 /* SecondView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SecondView.swift; sourceTree = "<group>"; };
 		AC77DFB026402327001351AE /* DemoApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoApp.swift; sourceTree = "<group>"; };
 		AC77DFB126402327001351AE /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -81,7 +81,7 @@
 				AC3CAD6228BB88A200AA1C2C /* AVDisplayCriteriaKS.h */,
 				AC3CAD6328BB893500AA1C2C /* Bridging-Header.h */,
 				ACEA9FEA298BFC8800FBA74B /* TestURL.swift */,
-				AC44E0F929290CBB00617BD3 /* FirstView.swift */,
+				AC44E0F929290CBB00617BD3 /* InitialView.swift */,
 				AC44E0FA29290CBC00617BD3 /* SecondView.swift */,
 				AC77DFB026402327001351AE /* DemoApp.swift */,
 				AC77DFB126402327001351AE /* ContentView.swift */,
@@ -214,7 +214,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				AC77DFC526402329001351AE /* ContentView.swift in Sources */,
-				AC44E0FD29290CF800617BD3 /* FirstView.swift in Sources */,
+				AC44E0FD29290CF800617BD3 /* InitialView.swift in Sources */,
 				ACEA9FEB298BFC8800FBA74B /* TestURL.swift in Sources */,
 				AC44E0FC29290CBC00617BD3 /* SecondView.swift in Sources */,
 				AC77DFC326402329001351AE /* DemoApp.swift in Sources */,

@@ -25,11 +25,17 @@ public struct KSVideoPlayerView: View {
     @State public var url: URL {
         didSet {
             subtitleModel.url = url
+            #if os(macOS)
+            NSDocumentController.shared.noteNewRecentDocumentURL(url)
+            #endif
         }
     }
 
     public init(url: URL, options: KSOptions, subtitleDataSouce: SubtitleDataSouce? = nil) {
         _url = .init(initialValue: url)
+        #if os(macOS)
+        NSDocumentController.shared.noteNewRecentDocumentURL(url)
+        #endif
         self.options = options
         let key = "playtime_\(url)"
         options.startPlayTime = UserDefaults.standard.double(forKey: key)

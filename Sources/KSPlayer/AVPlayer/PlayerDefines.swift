@@ -816,7 +816,30 @@ public extension URL {
     }
 
     var isSubtitle: Bool {
-        pathExtension == "srt" || pathExtension == "ass"
+        ["ass", "srt", "vtt"].contains(pathExtension.lowercased())
+    }
+
+    var isPlaylist: Bool {
+        ["cue", "m3u", "pls"].contains(pathExtension.lowercased())
+    }
+
+    func parsePlaylist(completion: @escaping (([KSPlayerResource]) -> Void)) {
+        URLSession.shared.dataTask(with: self) { data, _, _ in
+            guard let data, let string = String(data: data, encoding: .utf8) else {
+                return
+            }
+            let result = string.components(separatedBy: "#EXTINF:").compactMap { content -> KSPlayerResource? in
+                let array = content.split(separator: "\n")
+                guard array.count > 1, let url = URL(string: String(array[1])) else {
+                    return nil
+                }
+                guard let name = array[0].split(separator: ",").last else {
+                    return nil
+                }
+                return KSPlayerResource(url: url, options: KSOptions(), name: String(name))
+            }
+            completion(result)
+        }.resume()
     }
 }
 
