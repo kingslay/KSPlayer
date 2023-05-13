@@ -302,7 +302,7 @@ open class KSOptions {
     public var probesize: Int64?
     public var maxAnalyzeDuration: Int64?
     public var lowres = UInt8(0)
-    public var startPlayTime: TimeInterval?
+    public var startPlayTime: TimeInterval = 0
     // audio
     public var audioDelay = 0.0 // s
     public var audioFilters: String?
