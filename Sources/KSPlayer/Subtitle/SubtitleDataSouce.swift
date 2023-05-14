@@ -178,7 +178,7 @@ public class ShooterSubtitleDataSouce: SearchSubtitleDataSouce {
 }
 
 extension URL {
-    var components: URLComponents? {
+    public var components: URLComponents? {
         URLComponents(url: self, resolvingAgainstBaseURL: true)
     }
 

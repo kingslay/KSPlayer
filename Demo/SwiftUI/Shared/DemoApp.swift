@@ -13,19 +13,7 @@ import SwiftUI
 @main
 struct DemoApp: App {
     @ObservedObject var appModel = APPModel()
-    @State private var playURL: String = "https://iptv-org.github.io/iptv/index.nsfw.m3u"
     init() {
-        KSOptions.canBackgroundPlay = true
-        #if DEBUG
-//        KSOptions.logLevel = .warning
-        #endif
-        KSOptions.firstPlayerType = KSMEPlayer.self
-        KSOptions.secondPlayerType = KSMEPlayer.self
-        KSOptions.isAutoPlay = true
-        KSOptions.isSecondOpen = true
-        KSOptions.isAccurateSeek = true
-//        KSOptions.isUseAudioRenderer = true
-//        KSOptions.isLoopPlay = true
         let arguments = ProcessInfo.processInfo.arguments.dropFirst()
         var dropNextArg = false
         var playerArgs = [String]()
@@ -63,16 +51,20 @@ struct DemoApp: App {
             //
             //            VideoPlayer(player: AVPlayer(url: URL(string: "https://bitmovin-a.akamaihd.net/content/dataset/multi-codec/hevc/stream_fmp4.m3u8")!))
             //            AVContentView()
+            #if os(macOS)
             InitialView()
-                .onOpenURL { url in
-                    appModel.url = url
-                }
+            #else
+            NavigationView {
+                InitialView()
+            }
+            #endif
         }
     }
 
     var body: some Scene {
         WindowGroup {
             contentView
+                .preferredColorScheme(.dark)
                 .background(Color.black)
             #if !os(tvOS)
                 .onDrop(of: ["public.url", "public.file-url"], isTargeted: nil) { items -> Bool in
@@ -96,30 +88,9 @@ struct DemoApp: App {
                     appModel.url = url
                 }
             #endif
-                .sheet(isPresented: $appModel.openURLImport) {} content: {
-                    Form {
-                        Text("Input URL")
-                        TextField("play url", text: $playURL)
-                        Button("Done") {
-                            if let url = URL(string: playURL.trimmingCharacters(in: NSMutableCharacterSet.whitespacesAndNewlines)) {
-                                if url.isPlaylist {
-                                    url.parsePlaylist { result in
-                                        DispatchQueue.main.async {
-                                            appModel.playlist.insert(contentsOf: result, at: 0)
-                                        }
-                                    }
-                                } else {
-                                    appModel.url = url
-                                }
-                            }
-                            appModel.openURLImport = false
-                        }
-                    }
-                    #if os(macOS)
-                    .fixedSize()
-                    #endif
-                    .padding()
-                }
+                .sheet(isPresented: $appModel.openURLImport, content: {
+                    URLImportView()
+                })
                 .environmentObject(appModel)
         }
         #if !os(tvOS)
@@ -131,8 +102,8 @@ struct DemoApp: App {
                 }.keyboardShortcut("o")
             }
             CommandGroup(before: .newItem) {
-                Button("Open") {
-                    appModel.openFileImport = true
+                Button("Open URL") {
+                    appModel.openURLImport = true
                 }.keyboardShortcut("o", modifiers: [.command, .shift])
             }
             #endif
@@ -147,6 +118,17 @@ class APPModel: ObservableObject {
     @Published var openFileImport: Bool = false
     @Published var openURLImport: Bool = false
     init() {
+        KSOptions.canBackgroundPlay = true
+        #if DEBUG
+//        KSOptions.logLevel = .warning
+        #endif
+        KSOptions.firstPlayerType = KSMEPlayer.self
+        KSOptions.secondPlayerType = KSMEPlayer.self
+        KSOptions.isAutoPlay = true
+        KSOptions.isSecondOpen = true
+        KSOptions.isAccurateSeek = true
+//        KSOptions.isUseAudioRenderer = true
+//        KSOptions.isLoopPlay = true
         #if os(macOS)
         for url in NSDocumentController.shared.recentDocumentURLs {
             playlist.append(KSPlayerResource(url: url, name: url.lastPathComponent))

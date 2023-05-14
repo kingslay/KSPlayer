@@ -415,8 +415,13 @@ struct VideoSettingView: View {
                     Button("Cancel", role: .cancel, action: {})
                 })
                 Picker("subtitle text color", selection: $subtitleModel.textColor) {
-                    ForEach([Color.red, Color.white, Color.orange], id: \.description) { color in
-                        Text(color.description).tag(color)
+                    ForEach([UIColor.white, .red, .orange], id: \.self) { color in
+                        Text("text color").foregroundColor(Color(color)).background(Color(subtitleModel.textBackgroundColor)).tag(color)
+                    }
+                }
+                Picker("subtitle text color", selection: $subtitleModel.textBackgroundColor) {
+                    ForEach([UIColor.clear, .black, .gray], id: \.self) { color in
+                        Text("text background color").foregroundColor(Color(subtitleModel.textColor)).background(Color(color)).tag(color)
                     }
                 }
             }
