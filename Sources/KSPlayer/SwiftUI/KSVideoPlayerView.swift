@@ -6,10 +6,16 @@
 //
 import AVFoundation
 import SwiftUI
+
+public class KSVideoViewModel: ObservableObject {
+    fileprivate var timemodel = ControllerTimeModel()
+    public var playerCoordinator = KSVideoPlayer.Coordinator()
+}
+
 @available(iOS 15, tvOS 15, macOS 12, *)
 public struct KSVideoPlayerView: View {
     private let subtitleDataSouce: SubtitleDataSouce?
-    @State private var model = ControllerTimeModel()
+    public let options: KSOptions
     @Environment(\.dismiss) private var dismiss
     @State var isMaskShow = true {
         didSet {
@@ -19,12 +25,9 @@ public struct KSVideoPlayerView: View {
         }
     }
 
-    public let options: KSOptions
-    @StateObject public var subtitleModel = SubtitleModel()
-    @StateObject public var playerCoordinator = KSVideoPlayer.Coordinator()
+    @StateObject private var viewModel = KSVideoViewModel()
     @State public var url: URL {
         didSet {
-            subtitleModel.url = url
             #if os(macOS)
             NSDocumentController.shared.noteNewRecentDocumentURL(url)
             #endif
@@ -44,25 +47,12 @@ public struct KSVideoPlayerView: View {
 
     public var body: some View {
         ZStack {
-            KSVideoPlayer(coordinator: playerCoordinator, url: url, options: options).onPlay { current, total in
-                model.currentTime = Int(current)
-                model.totalTime = Int(max(max(0, total), current))
-                subtitleModel.subtitle(currentTime: current + options.subtitleDelay)
+            KSVideoPlayer(coordinator: viewModel.playerCoordinator, url: url, options: options).onPlay { current, total in
+                viewModel.timemodel.currentTime = Int(current)
+                viewModel.timemodel.totalTime = Int(max(max(0, total), current))
             }
             .onStateChanged { playerLayer, state in
-                if state == .readyToPlay {
-                    subtitleModel.selectedSubtitleInfo = subtitleModel.subtitleInfos.first
-                    if let subtitleDataSouce = playerLayer.player.subtitleDataSouce {
-                        // 要延后增加内嵌字幕。因为有些内嵌字幕是放在视频流的。所以会比readyToPlay回调晚。
-                        DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 1) {
-                            subtitleModel.addSubtitle(dataSouce: subtitleDataSouce)
-                            if subtitleModel.selectedSubtitleInfo == nil, playerLayer.options.autoSelectEmbedSubtitle {
-                                subtitleModel.selectedSubtitleInfo = subtitleModel.subtitleInfos.first
-                            }
-                        }
-                    }
-
-                } else if state == .bufferFinished {
+                if state == .bufferFinished {
                     if isMaskShow {
                         DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + KSOptions.animateDelayTimeInterval) {
                             isMaskShow = playerLayer.state != .bufferFinished
@@ -88,13 +78,12 @@ public struct KSVideoPlayerView: View {
             }
             #endif
             .onAppear {
-                subtitleModel.url = url
                 if let subtitleDataSouce {
-                    subtitleModel.addSubtitle(dataSouce: subtitleDataSouce)
+                    viewModel.playerCoordinator.subtitleModel.addSubtitle(dataSouce: subtitleDataSouce)
                 }
             }
             .onDisappear {
-                if let playerLayer = playerCoordinator.playerLayer {
+                if let playerLayer = viewModel.playerCoordinator.playerLayer {
                     let key = "playtime_\(url)"
                     if playerLayer.player.duration > 0, playerLayer.player.currentPlaybackTime > 0, playerLayer.state != .playedToTheEnd {
                         UserDefaults.standard.set(playerLayer.player.currentPlaybackTime, forKey: key)
@@ -103,26 +92,26 @@ public struct KSVideoPlayerView: View {
                     }
                     if !playerLayer.isPipActive {
                         playerLayer.pause()
-                        playerCoordinator.playerLayer = nil
+                        viewModel.playerCoordinator.playerLayer = nil
                     }
                 }
             }
             .edgesIgnoringSafeArea(.all)
-            VideoSubtitleView(model: subtitleModel)
-            VideoControllerView(config: playerCoordinator).environmentObject(subtitleModel)
+            VideoSubtitleView(model: viewModel.playerCoordinator.subtitleModel)
+            VideoControllerView(config: viewModel.playerCoordinator)
             #if !os(iOS)
                 .onMoveCommand { direction in
                     isMaskShow = true
                     #if os(macOS)
                     switch direction {
                     case .left:
-                        playerCoordinator.skip(interval: -15)
+                        viewModel.playerCoordinator.skip(interval: -15)
                     case .right:
-                        playerCoordinator.skip(interval: 15)
+                        viewModel.playerCoordinator.skip(interval: 15)
                     case .up:
-                        playerCoordinator.playerLayer?.player.playbackVolume += 1
+                        viewModel.playerCoordinator.playerLayer?.player.playbackVolume += 1
                     case .down:
-                        playerCoordinator.playerLayer?.player.playbackVolume -= 1
+                        viewModel.playerCoordinator.playerLayer?.player.playbackVolume -= 1
                     @unknown default:
                         break
                     }
@@ -139,7 +128,7 @@ public struct KSVideoPlayerView: View {
                 .opacity(isMaskShow ? 1 : 0)
             // 设置opacity为0，还是会去更新View。所以只能这样了
             if isMaskShow {
-                VideoTimeShowView(config: playerCoordinator, model: $model)
+                VideoTimeShowView(config: viewModel.playerCoordinator, model: viewModel.timemodel)
             }
         }
         .preferredColorScheme(.dark)
@@ -169,7 +158,7 @@ public struct KSVideoPlayerView: View {
                 self.url = url
             } else {
                 let info = URLSubtitleInfo(url: url)
-                subtitleModel.selectedSubtitleInfo = info
+                viewModel.playerCoordinator.subtitleModel.selectedSubtitleInfo = info
             }
         }
     }
@@ -183,9 +172,11 @@ extension KSVideoPlayerView: Equatable {
 }
 
 /// 这是一个频繁变化的model。View要少用这个
-struct ControllerTimeModel {
+class ControllerTimeModel: ObservableObject {
     // 改成int才不会频繁更新
+    @Published
     var currentTime = 0
+    @Published
     var totalTime = 1
 }
 
@@ -286,7 +277,7 @@ struct VideoControllerView: View {
 @available(iOS 15, tvOS 15, macOS 12, *)
 struct VideoTimeShowView: View {
     @ObservedObject fileprivate var config: KSVideoPlayer.Coordinator
-    @Binding fileprivate var model: ControllerTimeModel
+    @ObservedObject fileprivate var model: ControllerTimeModel
     public var body: some View {
         VStack {
             Spacer()
@@ -367,12 +358,11 @@ struct VideoSettingView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var presentSubtileDelayAlert = false
     @State private var presentSubtileDelay = ""
-    @EnvironmentObject private var subtitleModel: SubtitleModel
     @ObservedObject fileprivate var config: KSVideoPlayer.Coordinator
     var body: some View {
         config.selectedAudioTrack = (config.playerLayer?.player.isMuted ?? false) ? nil : config.audioTracks.first { $0.isEnabled }
         config.selectedVideoTrack = config.videoTracks.first { $0.isEnabled }
-        let subtitleTracks = subtitleModel.subtitleInfos
+        let subtitleTracks = config.subtitleModel.subtitleInfos
         return TabView {
             List {
                 Picker("audio tracks", selection: Binding(get: {
@@ -391,9 +381,9 @@ struct VideoSettingView: View {
             }
             List {
                 Picker("subtitle tracks", selection: Binding(get: {
-                    subtitleModel.selectedSubtitleInfo?.subtitleID
+                    config.subtitleModel.selectedSubtitleInfo?.subtitleID
                 }, set: { value in
-                    subtitleModel.selectedSubtitleInfo = subtitleTracks.first { $0.subtitleID == value }
+                    config.subtitleModel.selectedSubtitleInfo = subtitleTracks.first { $0.subtitleID == value }
                 })) {
                     Text("None").tag(nil as String?)
                     ForEach(subtitleTracks, id: \.subtitleID) { track in
@@ -414,14 +404,14 @@ struct VideoSettingView: View {
                     })
                     Button("Cancel", role: .cancel, action: {})
                 })
-                Picker("subtitle text color", selection: $subtitleModel.textColor) {
+                Picker("subtitle text color", selection: $config.subtitleModel.textColor) {
                     ForEach([UIColor.white, .red, .orange], id: \.self) { color in
-                        Text("text color").foregroundColor(Color(color)).background(Color(subtitleModel.textBackgroundColor)).tag(color)
+                        Text("text color").foregroundColor(Color(color)).background(Color(config.subtitleModel.textBackgroundColor)).tag(color)
                     }
                 }
-                Picker("subtitle text color", selection: $subtitleModel.textBackgroundColor) {
+                Picker("subtitle text color", selection: $config.subtitleModel.textBackgroundColor) {
                     ForEach([UIColor.clear, .black, .gray], id: \.self) { color in
-                        Text("text background color").foregroundColor(Color(subtitleModel.textColor)).background(Color(color)).tag(color)
+                        Text("text background color").foregroundColor(Color(config.subtitleModel.textColor)).background(Color(color)).tag(color)
                     }
                 }
             }

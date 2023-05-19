@@ -76,9 +76,7 @@ extension KSVideoPlayer: UIViewRepresentable {
 
     private func updateView(_ view: KSPlayerLayer, context: Context) {
         if view.url != url {
-            view.delegate = nil
-            view.set(url: url, options: options)
-            view.delegate = context.coordinator
+            _ = context.coordinator.makeView(url: url, options: options)
         }
     }
 
@@ -104,6 +102,7 @@ extension KSVideoPlayer: UIViewRepresentable {
         }
 
         @Published public var isLoading = true
+        public var subtitleModel = SubtitleModel()
         public var selectedAudioTrack: MediaPlayerTrack? {
             didSet {
                 if oldValue?.trackID != selectedAudioTrack?.trackID {
@@ -150,12 +149,15 @@ extension KSVideoPlayer: UIViewRepresentable {
 
         public func makeView(url: URL, options: KSOptions) -> KSPlayerLayer {
             if let playerLayer {
+                playerLayer.delegate = nil
                 playerLayer.set(url: url, options: options)
+                subtitleModel.url = url
                 playerLayer.delegate = self
                 isPlay = options.isAutoPlay
                 return playerLayer
             } else {
                 let playerLayer = KSPlayerLayer(url: url, options: options)
+                subtitleModel.url = url
                 playerLayer.delegate = self
                 self.playerLayer = playerLayer
                 return playerLayer
@@ -181,6 +183,17 @@ extension KSVideoPlayer.Coordinator: KSPlayerLayerDelegate {
         } else if state == .readyToPlay {
             videoTracks = layer.player.tracks(mediaType: .video)
             audioTracks = layer.player.tracks(mediaType: .audio)
+            subtitleModel.selectedSubtitleInfo = subtitleModel.subtitleInfos.first
+            if let subtitleDataSouce = layer.player.subtitleDataSouce {
+                // 要延后增加内嵌字幕。因为有些内嵌字幕是放在视频流的。所以会比readyToPlay回调晚。
+                DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 1) { [weak self] in
+                    guard let self else { return }
+                    self.subtitleModel.addSubtitle(dataSouce: subtitleDataSouce)
+                    if self.subtitleModel.selectedSubtitleInfo == nil, layer.options.autoSelectEmbedSubtitle {
+                        self.subtitleModel.selectedSubtitleInfo = self.subtitleModel.subtitleInfos.first
+                    }
+                }
+            }
         } else {
             isLoading = state == .buffering
             isPlay = state.isPlaying
@@ -188,8 +201,9 @@ extension KSVideoPlayer.Coordinator: KSPlayerLayerDelegate {
         onStateChanged?(layer, state)
     }
 
-    public func player(layer _: KSPlayerLayer, currentTime: TimeInterval, totalTime: TimeInterval) {
+    public func player(layer: KSPlayerLayer, currentTime: TimeInterval, totalTime: TimeInterval) {
         onPlay?(currentTime, totalTime)
+        subtitleModel.subtitle(currentTime: currentTime + layer.options.subtitleDelay)
     }
 
     public func player(layer: KSPlayerLayer, finish error: Error?) {
