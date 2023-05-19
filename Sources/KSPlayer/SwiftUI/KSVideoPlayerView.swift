@@ -66,9 +66,9 @@ public struct KSVideoPlayerView: View {
             .onSwipe { direction in
                 isMaskShow = true
                 if direction == .left {
-                    playerCoordinator.skip(interval: -15)
+                    viewModel.playerCoordinator.skip(interval: -15)
                 } else if direction == .right {
-                    playerCoordinator.skip(interval: 15)
+                    viewModel.playerCoordinator.skip(interval: 15)
                 }
             }
             #endif
