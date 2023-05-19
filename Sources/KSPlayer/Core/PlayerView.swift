@@ -47,6 +47,7 @@ open class PlayerView: UIView, KSPlayerLayerDelegate, KSSliderDelegate {
 
     public weak var delegate: ControllerDelegate?
     public let toolBar = PlayerToolBar()
+    public let srtControl = SubtitleModel()
     // Closure fired when play time changed
     public var playTimeDidChange: ((TimeInterval, TimeInterval) -> Void)?
     public var backBlock: (() -> Void)?

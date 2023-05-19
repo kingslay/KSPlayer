@@ -96,7 +96,6 @@ open class VideoPlayerView: PlayerView {
     public var seekToView: UIView & SeekViewProtocol = SeekView()
     public var replayButton = UIButton()
     public var lockButton = UIButton()
-    public let srtControl = SubtitleModel()
     public var isLock: Bool { lockButton.isSelected }
     open var isMaskShow = true {
         didSet {
