@@ -45,18 +45,6 @@ open class VideoPlayerView: PlayerView {
     // 是否播放过
     private(set) var isPlayed = false
     private var cancellable: AnyCancellable?
-    private var embedSubtitleDataSouce: SubtitleDataSouce? {
-        didSet {
-            if oldValue !== embedSubtitleDataSouce {
-                if let embedSubtitleDataSouce {
-                    srtControl.addSubtitle(dataSouce: embedSubtitleDataSouce)
-                    if resource?.definitions[currentDefinition].options.autoSelectEmbedSubtitle ?? false, let first = embedSubtitleDataSouce.infos.first {
-                        srtControl.selectedSubtitleInfo = first
-                    }
-                }
-            }
-        }
-    }
 
     public private(set) var currentDefinition = 0 {
         didSet {
@@ -69,7 +57,6 @@ open class VideoPlayerView: PlayerView {
     public private(set) var resource: KSPlayerResource? {
         didSet {
             if let resource, oldValue !== resource {
-                srtControl.url = resource.definitions.first?.url
                 if let subtitleDataSouce = resource.subtitleDataSouce {
                     srtControl.addSubtitle(dataSouce: subtitleDataSouce)
                 }
@@ -267,7 +254,6 @@ open class VideoPlayerView: PlayerView {
         switch state {
         case .readyToPlay:
             toolBar.timeSlider.isPlayable = true
-            embedSubtitleDataSouce = layer.player.subtitleDataSouce
             toolBar.videoSwitchButton.isHidden = layer.player.tracks(mediaType: .video).count < 2
             toolBar.audioSwitchButton.isHidden = layer.player.tracks(mediaType: .audio).count < 2
             toolBar.srtButton.isHidden = srtControl.srtListCount == 0
@@ -295,7 +281,7 @@ open class VideoPlayerView: PlayerView {
                 replayButton.isSelected = true
             }
         case .prepareToPlay:
-            embedSubtitleDataSouce = nil
+            break
         }
     }
 
@@ -309,7 +295,6 @@ open class VideoPlayerView: PlayerView {
         replayButton.isHidden = false
         seekToView.isHidden = true
         isPlayed = false
-        embedSubtitleDataSouce = nil
         lockButton.isSelected = false
     }
 
