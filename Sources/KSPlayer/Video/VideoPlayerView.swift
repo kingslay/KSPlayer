@@ -91,7 +91,6 @@ open class VideoPlayerView: PlayerView {
     public var titleLabel = UILabel()
     public var subtitleLabel = UILabel()
     public var subtitleBackView = UIImageView()
-    private var subtitlePart: SubtitlePart?
     /// Activty Indector for loading
     public var loadingIndector: UIView & LoadingIndector = UIActivityIndicatorView(frame: CGRect(x: 0, y: 0, width: 30, height: 30))
     public var seekToView: UIView & SeekViewProtocol = SeekView()
@@ -252,12 +251,15 @@ open class VideoPlayerView: PlayerView {
     override open func player(layer: KSPlayerLayer, currentTime: TimeInterval, totalTime: TimeInterval) {
         guard !isSliderSliding else { return }
         super.player(layer: layer, currentTime: currentTime, totalTime: totalTime)
-        if let subtitle = srtControl.selectedSubtitleInfo {
-            showSubtile(from: subtitle, at: currentTime)
+        let time = currentTime + (resource?.definitions[currentDefinition].options.subtitleDelay ?? 0.0)
+        if let part = srtControl.subtitle(currentTime: time) {
+            subtitleBackView.image = part.image
+            subtitleLabel.attributedText = part.text
             subtitleBackView.isHidden = false
         } else {
             subtitleBackView.image = nil
             subtitleLabel.attributedText = nil
+            subtitleBackView.isHidden = true
         }
     }
 
@@ -404,20 +406,6 @@ open class VideoPlayerView: PlayerView {
             isSliderSliding = false
             slider(value: Double(tmpPanValue), event: .touchUpInside)
             tmpPanValue = 0.0
-        }
-    }
-
-    open func showSubtile(from subtitle: KSSubtitleProtocol, at time: TimeInterval) {
-        let time = time + (resource?.definitions[currentDefinition].options.subtitleDelay ?? 0.0)
-        if let part = subtitle.search(for: time) {
-            subtitlePart = part
-            subtitleBackView.image = part.image
-            subtitleLabel.attributedText = part.text
-        } else {
-            if let subtitlePart, !(subtitlePart == time) {
-                subtitleBackView.image = nil
-                subtitleLabel.attributedText = nil
-            }
         }
     }
 }

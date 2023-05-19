@@ -28,6 +28,7 @@ public class FFmpegAssetTrack: MediaPlayerTrack {
     public let audioStreamBasicDescription: AudioStreamBasicDescription?
     public let fieldOrder: FFmpegFieldOrder
     public let isImageSubtitle: Bool
+    public var delay: TimeInterval = 0
     private var stream: UnsafeMutablePointer<AVStream>?
     let audioDescriptor: AudioDescriptor
     var startTime = TimeInterval(0)

@@ -7,7 +7,7 @@
 import Foundation
 public class EmptySubtitleInfo: SubtitleInfo {
     public let subtitleID: String = ""
-
+    public var delay: TimeInterval = 0
     public let name = NSLocalizedString("no show subtitle", comment: "")
     public func search(for _: TimeInterval) -> SubtitlePart? {
         nil
@@ -20,12 +20,13 @@ public class URLSubtitleInfo: SubtitleInfo {
     private var subtitles: KSURLSubtitle?
 //    private let fetchSubtitleDetail: (((NSError?) -> Void) -> Void)?
     private var downloadURL: URL
+    public var delay: TimeInterval = 0
     public private(set) var name: String
     public let subtitleID: String
     public var comment: String?
     public var userInfo: NSMutableDictionary?
     public convenience init(url: URL) {
-        self.init(subtitleID: url.path, name: url.lastPathComponent, url: url)
+        self.init(subtitleID: url.absoluteString, name: url.lastPathComponent, url: url)
     }
 
     public init(subtitleID: String, name: String, url: URL) {
@@ -42,7 +43,14 @@ public class URLSubtitleInfo: SubtitleInfo {
                     filename.removeFirst(httpFileName.count)
                     self.name = filename
                 }
+                // 下载的临时文件要马上就用。不然可能会马上被清空
                 self.downloadURL = url
+                let subtitles = KSURLSubtitle()
+                do {
+                    try subtitles.parse(url: url)
+                } catch {}
+
+                self.subtitles = subtitles
             }.resume()
         }
     }
@@ -166,11 +174,17 @@ public class ShooterSubtitleDataSouce: SearchSubtitleDataSouce {
             }
             json.forEach { sub in
                 let filesDic = sub["Files"] as? [[String: String]]
-                filesDic?.forEach { dic in
+                let desc = sub["Desc"] as? String ?? ""
+                let delay = TimeInterval(sub["Delay"] as? Int ?? 0) / 1000.0
+                let result = filesDic?.compactMap { dic in
                     if let string = dic["Link"], let url = URL(string: string) {
-                        self.infos.append(URLSubtitleInfo(url: url))
+                        let info = URLSubtitleInfo(url: url)
+                        info.delay = delay
+                        return info
                     }
-                }
+                    return nil
+                } ?? [URLSubtitleInfo]()
+                self.infos.append(contentsOf: result)
             }
             DispatchQueue.main.async(execute: completion)
         }.resume()

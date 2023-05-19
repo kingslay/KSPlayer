@@ -12,7 +12,7 @@ import SwiftUI
 
 @main
 struct DemoApp: App {
-    @ObservedObject var appModel = APPModel()
+    @StateObject var appModel = APPModel()
     init() {
         let arguments = ProcessInfo.processInfo.arguments.dropFirst()
         var dropNextArg = false
@@ -137,9 +137,7 @@ class APPModel: ObservableObject {
 
         #endif
         #if DEBUG
-        if playlist.count == 0 {
-            playlist.append(contentsOf: testObjects)
-        }
+        playlist.append(contentsOf: testObjects)
         #endif
     }
 }

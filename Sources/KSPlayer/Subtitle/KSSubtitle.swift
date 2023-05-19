@@ -75,6 +75,7 @@ public protocol KSSubtitleProtocol {
 public protocol SubtitleInfo: KSSubtitleProtocol, AnyObject, Hashable, Identifiable {
     var subtitleID: String { get }
     var name: String { get }
+    var delay: TimeInterval { get set }
     //    var userInfo: NSMutableDictionary? { get set }
     //    var subtitleDataSouce: SubtitleDataSouce? { get set }
 //    var comment: String? { get }
@@ -331,8 +332,10 @@ open class SubtitleModel: ObservableObject {
         }
     }
 
-    public func subtitle(currentTime: TimeInterval) {
+    @discardableResult
+    public func subtitle(currentTime: TimeInterval) -> SubtitlePart? {
         if let subtile = selectedSubtitleInfo {
+            let currentTime = currentTime - subtile.delay
             if let part = subtile.search(for: currentTime) {
                 self.part = part
             } else {
@@ -343,6 +346,7 @@ open class SubtitleModel: ObservableObject {
         } else {
             part = nil
         }
+        return part
     }
 
     public func addSubtitle(dataSouce: SubtitleDataSouce) {
