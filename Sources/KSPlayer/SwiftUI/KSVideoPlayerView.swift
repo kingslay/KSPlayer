@@ -261,7 +261,7 @@ struct VideoControllerView: View {
         }
         .padding()
         .sheet(isPresented: $isShowSetting) {
-            VideoSettingView(config: config)
+            VideoSettingView(config: config, subtitleModel: config.subtitleModel)
         }
         .foregroundColor(.white)
         #if os(tvOS)
@@ -359,10 +359,11 @@ struct VideoSettingView: View {
     @State private var presentSubtileDelayAlert = false
     @State private var presentSubtileDelay = ""
     @ObservedObject fileprivate var config: KSVideoPlayer.Coordinator
+    @ObservedObject fileprivate var subtitleModel: SubtitleModel
     var body: some View {
         config.selectedAudioTrack = (config.playerLayer?.player.isMuted ?? false) ? nil : config.audioTracks.first { $0.isEnabled }
         config.selectedVideoTrack = config.videoTracks.first { $0.isEnabled }
-        let subtitleTracks = config.subtitleModel.subtitleInfos
+        let subtitleTracks = subtitleModel.subtitleInfos
         return TabView {
             List {
                 Picker("audio tracks", selection: Binding(get: {
@@ -381,9 +382,9 @@ struct VideoSettingView: View {
             }
             List {
                 Picker("subtitle tracks", selection: Binding(get: {
-                    config.subtitleModel.selectedSubtitleInfo?.subtitleID
+                    subtitleModel.selectedSubtitleInfo?.subtitleID
                 }, set: { value in
-                    config.subtitleModel.selectedSubtitleInfo = subtitleTracks.first { $0.subtitleID == value }
+                    subtitleModel.selectedSubtitleInfo = subtitleTracks.first { $0.subtitleID == value }
                 })) {
                     Text("None").tag(nil as String?)
                     ForEach(subtitleTracks, id: \.subtitleID) { track in
@@ -404,14 +405,14 @@ struct VideoSettingView: View {
                     })
                     Button("Cancel", role: .cancel, action: {})
                 })
-                Picker("subtitle text color", selection: $config.subtitleModel.textColor) {
+                Picker("subtitle text color", selection: $subtitleModel.textColor) {
                     ForEach([UIColor.white, .red, .orange], id: \.self) { color in
-                        Text("text color").foregroundColor(Color(color)).background(Color(config.subtitleModel.textBackgroundColor)).tag(color)
+                        Text("text color").foregroundColor(Color(color)).background(Color(subtitleModel.textBackgroundColor)).tag(color)
                     }
                 }
-                Picker("subtitle text color", selection: $config.subtitleModel.textBackgroundColor) {
+                Picker("subtitle text color", selection: $subtitleModel.textBackgroundColor) {
                     ForEach([UIColor.clear, .black, .gray], id: \.self) { color in
-                        Text("text background color").foregroundColor(Color(config.subtitleModel.textColor)).background(Color(color)).tag(color)
+                        Text("text background color").foregroundColor(Color(subtitleModel.textColor)).background(Color(color)).tag(color)
                     }
                 }
             }
