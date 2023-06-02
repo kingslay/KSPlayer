@@ -212,6 +212,7 @@ extension MEPlayerItem {
         av_dict_free(&avOptions)
         if result == AVError.eof.code {
             state = .finished
+            delegate?.sourceDidFinished()
             return
         }
         guard result == 0 else {
@@ -640,8 +641,8 @@ extension MEPlayerItem: CodecCapacityDelegate {
             isAudioStalled = true
         }
         let allSatisfy = videoAudioTracks.allSatisfy { $0.isEndOfFile && $0.frameCount == 0 && $0.packetCount == 0 }
-        delegate?.sourceDidFinished(type: track.mediaType, allSatisfy: allSatisfy)
         if allSatisfy {
+            delegate?.sourceDidFinished()
             timer.fireDate = Date.distantFuture
             if options.isLoopPlay {
                 isAudioStalled = audioTrack == nil

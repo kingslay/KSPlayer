@@ -159,23 +159,16 @@ extension KSMEPlayer: MEPlayerDelegate {
         }
     }
 
-    func sourceDidFinished(type: AVFoundation.AVMediaType, allSatisfy: Bool) {
+    func sourceDidFinished() {
         runInMainqueue { [weak self] in
             guard let self else { return }
-            if allSatisfy {
-                if self.options.isLoopPlay {
-                    self.loopCount += 1
-                    self.delegate?.playBack(player: self, loopCount: self.loopCount)
-                    self.audioOutput.play(time: self.currentPlaybackTime)
-                    self.videoOutput?.play()
-                } else {
-                    self.playbackState = .finished
-                    if type == .audio {
-                        self.audioOutput.pause()
-                    } else if type == .video {
-                        self.videoOutput?.pause()
-                    }
-                }
+            if self.options.isLoopPlay {
+                self.loopCount += 1
+                self.delegate?.playBack(player: self, loopCount: self.loopCount)
+                self.audioOutput.play(time: 0)
+                self.videoOutput?.play()
+            } else {
+                self.playbackState = .finished
             }
         }
     }

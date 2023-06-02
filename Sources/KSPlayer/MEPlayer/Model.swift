@@ -40,7 +40,7 @@ protocol MEPlayerDelegate: AnyObject {
     func sourceDidChange(loadingState: LoadingState)
     func sourceDidOpened()
     func sourceDidFailed(error: NSError?)
-    func sourceDidFinished(type: AVFoundation.AVMediaType, allSatisfy: Bool)
+    func sourceDidFinished()
     func sourceDidChange(oldBitRate: Int64, newBitrate: Int64)
 }
 
