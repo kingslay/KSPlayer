@@ -6,7 +6,7 @@
 //
 
 import SwiftUI
-#if !os(tvOS)
+#if canImport(VisionKit)
 import VisionKit
 @MainActor
 @available(macOS 13.0, iOS 16.0, *)

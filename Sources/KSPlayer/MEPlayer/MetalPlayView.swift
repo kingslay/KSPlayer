@@ -8,7 +8,9 @@
 import AVFoundation
 import Combine
 import CoreMedia
+#if canImport(MetalKit)
 import MetalKit
+#endif
 public final class MetalPlayView: UIView {
     private let render = MetalRender()
     private let metalView = MTKView(frame: .zero, device: MetalRender.device)
@@ -23,14 +25,6 @@ public final class MetalPlayView: UIView {
     weak var renderSource: OutputRenderSourceDelegate?
     // AVSampleBufferAudioRenderer AVSampleBufferRenderSynchronizer AVSampleBufferDisplayLayer
     var displayView = AVSampleBufferDisplayView()
-    var drawableSize: CGSize {
-        get {
-            metalView.drawableSize
-        }
-        set {
-            metalView.drawableSize = newValue
-        }
-    }
 
     init(options: KSOptions) {
         self.options = options

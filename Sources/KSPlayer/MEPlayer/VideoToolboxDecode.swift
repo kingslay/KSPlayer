@@ -7,6 +7,7 @@
 
 import FFmpegKit
 import Libavformat
+#if canImport(VideoToolbox)
 import VideoToolbox
 class VideoToolboxDecode: DecodeProtocol {
     private weak var delegate: DecodeResultDelegate?
@@ -207,6 +208,7 @@ class DecompressionSession {
         VTDecompressionSessionInvalidate(decompressionSession)
     }
 }
+#endif
 
 extension CMFormatDescription {
     fileprivate func getSampleBuffer(isConvertNALSize: Bool, data: UnsafeMutablePointer<UInt8>, size: Int) throws -> CMSampleBuffer {

@@ -6,13 +6,10 @@
 //
 
 import AVFoundation
-import CoreImage
 import CoreVideo
 import Foundation
-import Metal
 import simd
 import VideoToolbox
-
 #if canImport(UIKit)
 import UIKit
 #endif

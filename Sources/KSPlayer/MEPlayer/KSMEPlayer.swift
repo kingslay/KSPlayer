@@ -145,7 +145,6 @@ extension KSMEPlayer: MEPlayerDelegate {
         videoOutput?.prepare(fps: fps)
         runInMainqueue { [weak self] in
             guard let self else { return }
-            self.videoOutput?.drawableSize = self.naturalSize
             self.view?.centerRotate(byDegrees: self.playerItem.rotation)
             self.videoOutput?.play()
             self.delegate?.readyToPlay(player: self)
