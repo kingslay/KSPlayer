@@ -134,8 +134,13 @@ open class KSPlayerLayer: UIView {
     public private(set) var state = KSPlayerState.prepareToPlay {
         didSet {
             if state != oldValue {
-                KSLog("playerStateDidChange - \(state)")
-                delegate?.player(layer: self, state: state)
+                runInMainqueue { [weak self] in
+                    guard let self else {
+                        return
+                    }
+                    KSLog("playerStateDidChange - \(self.state)")
+                    self.delegate?.player(layer: self, state: self.state)
+                }
             }
         }
     }

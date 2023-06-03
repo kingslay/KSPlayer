@@ -27,58 +27,31 @@ class MEOptions: KSOptions {
 
 var testObjects: [KSPlayerResource] = {
     var objects = [KSPlayerResource]()
-    if let path = Bundle.main.path(forResource: "h264", ofType: "mp4") {
-        let options = MEOptions()
-        options.videoFilters = "hflip,vflip"
-        options.hardwareDecode = false
-        options.startPlayTime = 13
-        #if os(macOS)
-        let moviesDirectory = try? FileManager.default.url(for: .moviesDirectory, in: .userDomainMask, appropriateFor: nil, create: false)
-        options.outputURL = moviesDirectory?.appendingPathComponent("recording.mov")
-        #endif
-        objects.append(KSPlayerResource(url: URL(fileURLWithPath: path), options: options, name: "本地视频"))
-    }
-    if let path = Bundle.main.path(forResource: "subrip", ofType: "mkv") {
-        let options = MEOptions()
-        options.asynchronousDecompression = false
-        options.videoFilters = "yadif_videotoolbox=mode=0:parity=auto:deint=1"
-        objects.append(KSPlayerResource(url: URL(fileURLWithPath: path), options: options, name: "文字字幕"))
-    }
-    if let path = Bundle.main.path(forResource: "dvd_subtitle", ofType: "mkv") {
-        let url = URL(fileURLWithPath: path)
-        objects.append(KSPlayerResource(url: url, options: MEOptions(), name: url.lastPathComponent))
-    }
-    if let path = Bundle.main.path(forResource: "dolby-digital-plus-channel", ofType: "mkv") {
-        let url = URL(fileURLWithPath: path)
-        objects.append(KSPlayerResource(url: url, options: MEOptions(), name: url.lastPathComponent))
-    }
-    if let path = Bundle.main.path(forResource: "vr", ofType: "mp4") {
-        let options = MEOptions()
-        options.display = .vr
-        objects.append(KSPlayerResource(url: URL(fileURLWithPath: path), options: options, name: "本地全景视频"))
-    }
-    if let path = Bundle.main.path(forResource: "mjpeg", ofType: "flac") {
-        let options = MEOptions()
-        options.videoDisable = true
-        options.syncDecodeAudio = true
-        objects.append(KSPlayerResource(url: URL(fileURLWithPath: path), options: options, name: "本地音频"))
-    }
-    if let path = Bundle.main.path(forResource: "hevc", ofType: "mkv") {
-        let url = URL(fileURLWithPath: path)
-        objects.append(KSPlayerResource(url: url, options: MEOptions(), name: url.lastPathComponent))
-    }
-    if let path = Bundle.main.path(forResource: "av1", ofType: "mp4") {
-        let url = URL(fileURLWithPath: path)
-        objects.append(KSPlayerResource(url: url, options: MEOptions(), name: url.lastPathComponent))
-    }
-    if let path = Bundle.main.path(forResource: "vp9", ofType: "webm") {
-        let url = URL(fileURLWithPath: path)
-        objects.append(KSPlayerResource(url: url, options: MEOptions(), name: url.lastPathComponent))
-    }
-
-    if let path = Bundle.main.path(forResource: "raw", ofType: "h264") {
-        let url = URL(fileURLWithPath: path)
-        objects.append(KSPlayerResource(url: url, options: MEOptions(), name: url.lastPathComponent))
+    for ext in ["mp4", "mkv", "mov", "h264", "flac", "webm"] {
+        guard let urls = Bundle.main.urls(forResourcesWithExtension: ext, subdirectory: nil) else {
+            continue
+        }
+        for url in urls {
+            let options = MEOptions()
+            if url.lastPathComponent == "h264.mp4" {
+                options.videoFilters = "hflip,vflip"
+                options.hardwareDecode = false
+                options.startPlayTime = 13
+                #if os(macOS)
+                let moviesDirectory = try? FileManager.default.url(for: .moviesDirectory, in: .userDomainMask, appropriateFor: nil, create: false)
+                options.outputURL = moviesDirectory?.appendingPathComponent("recording.mov")
+                #endif
+            } else if url.lastPathComponent == "vr.mp4" {
+                options.display = .vr
+            } else if url.lastPathComponent == "mjpeg.flac" {
+                options.videoDisable = true
+                options.syncDecodeAudio = true
+            } else if url.lastPathComponent == "subrip.mkv" {
+                options.asynchronousDecompression = false
+                options.videoFilters = "yadif_videotoolbox=mode=0:parity=auto:deint=1"
+            }
+            objects.append(KSPlayerResource(url: url, options: options, name: url.lastPathComponent))
+        }
     }
 
     if let url = URL(string: "http://clips.vorwaerts-gmbh.de/big_buck_bunny.mp4") {
