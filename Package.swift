@@ -20,14 +20,6 @@ let package = Package(
             dependencies: [.product(name: "FFmpegKit", package: "FFmpegKit")],
             resources: [.process("Metal/Shaders.metal")],
             linkerSettings: [
-                .linkedFramework("AudioToolbox"),
-                .linkedFramework("AVFoundation"),
-                .linkedFramework("CoreImage"),
-                .linkedFramework("CoreMedia"),
-                .linkedFramework("CoreVideo"),
-                .linkedFramework("MetalKit"),
-                .linkedFramework("Security"),
-                .linkedFramework("VideoToolbox"),
             ]
         ),
         .testTarget(
