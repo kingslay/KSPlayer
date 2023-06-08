@@ -104,6 +104,11 @@ public class KSMEPlayer: NSObject {
         playerItem.delegate = self
         audioOutput.renderSource = playerItem
         videoOutput?.renderSource = playerItem
+        #if !os(macOS)
+        if #available(tvOS 15.0, iOS 15.0, *) {
+            NotificationCenter.default.addObserver(self, selector: #selector(spatialCapabilityChange), name: AVAudioSession.spatialPlaybackCapabilitiesChangedNotification, object: nil)
+        }
+        #endif
     }
 
     deinit {
@@ -129,19 +134,25 @@ private extension KSMEPlayer {
             self.delegate?.changeLoadState(player: self)
         }
     }
+
+    @objc private func spatialCapabilityChange(notification _: Notification) {
+        let audioDescriptor = tracks(mediaType: .audio).first { $0.isEnabled }.flatMap {
+            $0 as? FFmpegAssetTrack
+        }?.audioDescriptor ?? .defaultValue
+        options.setAudioSession(audioDescriptor: audioDescriptor)
+    }
 }
 
 extension KSMEPlayer: MEPlayerDelegate {
     func sourceDidOpened() {
         isReadyToPlay = true
         options.readyTime = CACurrentMediaTime()
-        let audioDescriptor = tracks(mediaType: .audio).compactMap {
+        let audioDescriptor = tracks(mediaType: .audio).first { $0.isEnabled }.flatMap {
             $0 as? FFmpegAssetTrack
-        }.max { track1, track2 in
-            track1.audioDescriptor.channels < track2.audioDescriptor.channels
         }?.audioDescriptor ?? .defaultValue
-        let fps = tracks(mediaType: .video).map(\.nominalFrameRate).max() ?? 24
-        audioOutput.prepare(options: options, audioDescriptor: audioDescriptor)
+        options.setAudioSession(audioDescriptor: audioDescriptor)
+        audioOutput.prepare(audioFormat: options.audioFormat)
+        let fps = tracks(mediaType: .video).first { $0.isEnabled }.map(\.nominalFrameRate) ?? 24
         videoOutput?.prepare(fps: fps)
         runInMainqueue { [weak self] in
             guard let self else { return }
@@ -360,6 +371,21 @@ extension KSMEPlayer: MediaPlayerProtocol {
     }
 
     public func select(track: MediaPlayerTrack) {
+        if track.mediaType == .video {
+            let fps = tracks(mediaType: .video).first { $0.isEnabled }.map(\.nominalFrameRate) ?? 24
+            if fps != track.nominalFrameRate {
+                videoOutput?.prepare(fps: fps)
+            }
+        }
+        if track.mediaType == .audio {
+            let audioDescriptor = tracks(mediaType: .audio).first { $0.isEnabled }.flatMap {
+                $0 as? FFmpegAssetTrack
+            }?.audioDescriptor ?? .defaultValue
+            if let assetTrack = track as? FFmpegAssetTrack, assetTrack.audioDescriptor != audioDescriptor {
+                options.setAudioSession(audioDescriptor: audioDescriptor)
+                audioOutput.prepare(audioFormat: options.audioFormat)
+            }
+        }
         playerItem.select(track: track)
     }
 }

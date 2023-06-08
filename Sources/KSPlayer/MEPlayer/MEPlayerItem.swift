@@ -15,12 +15,7 @@ final class MEPlayerItem {
     private let options: KSOptions
     private let operationQueue = OperationQueue()
     private let condition = NSCondition()
-    private var formatCtx: UnsafeMutablePointer<AVFormatContext>? {
-        didSet {
-            options.formatCtx = formatCtx
-        }
-    }
-
+    private var formatCtx: UnsafeMutablePointer<AVFormatContext>?
     private var outputFormatCtx: UnsafeMutablePointer<AVFormatContext>?
     private var outputPacket: UnsafeMutablePointer<AVPacket>?
     private var streamMapping = [Int: Int]()

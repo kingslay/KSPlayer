@@ -9,7 +9,6 @@ import AVFoundation
 import AVKit
 import CoreMedia
 import CoreServices
-import Libavformat
 
 #if canImport(UIKit)
 import UIKit
@@ -335,7 +334,6 @@ open class KSOptions {
     public internal(set) var readVideoTime = 0.0
     public internal(set) var decodeAudioTime = 0.0
     public internal(set) var decodeVideoTime = 0.0
-    var formatCtx: UnsafeMutablePointer<AVFormatContext>?
     var audioFormat = AVAudioFormat(standardFormatWithSampleRate: 44100, channelLayout: AVAudioChannelLayout(layoutTag: kAudioChannelLayoutTag_Stereo)!)
     public init() {
         // 参数的配置可以参考protocols.texi 和 http.c
@@ -542,6 +540,33 @@ open class KSOptions {
     }
     #endif
 
+    open func setAudioSession(audioDescriptor: AudioDescriptor) {
+        #if os(macOS)
+        let channels = AVAudioChannelCount(2)
+//        try? AVAudioSession.sharedInstance().setRouteSharingPolicy(.longFormAudio)
+        #else
+        KSOptions.setAudioSession()
+        let isSpatialAudioEnabled: Bool
+        if #available(tvOS 15.0, iOS 15.0, *) {
+            isSpatialAudioEnabled = AVAudioSession.sharedInstance().currentRoute.outputs.contains { $0.isSpatialAudioEnabled }
+            try? AVAudioSession.sharedInstance().setSupportsMultichannelContent(isSpatialAudioEnabled)
+        } else {
+            isSpatialAudioEnabled = false
+        }
+        var channels = audioDescriptor.channels
+        if channels > 2 {
+            let minChannels = min(AVAudioChannelCount(AVAudioSession.sharedInstance().maximumOutputNumberOfChannels), channels)
+            try? AVAudioSession.sharedInstance().setPreferredOutputNumberOfChannels(Int(minChannels))
+            if !isSpatialAudioEnabled {
+                channels = AVAudioChannelCount(AVAudioSession.sharedInstance().preferredOutputNumberOfChannels)
+            }
+        } else {
+            try? AVAudioSession.sharedInstance().setPreferredOutputNumberOfChannels(2)
+        }
+        #endif
+        audioFormat = audioDescriptor.audioFormat(channels: channels)
+    }
+
     func availableDynamicRange(_ cotentRange: DynamicRange?) -> DynamicRange? {
         #if canImport(UIKit)
         let availableHDRModes = AVPlayer.availableHDRModes
@@ -639,9 +664,6 @@ public extension KSOptions {
         }
         try? AVAudioSession.sharedInstance().setMode(.moviePlayback)
         try? AVAudioSession.sharedInstance().setActive(true)
-        if #available(tvOS 15.0, iOS 15.0, *) {
-            try? AVAudioSession.sharedInstance().setSupportsMultichannelContent(true)
-        }
         #endif
     }
 }

@@ -63,29 +63,10 @@ public class AudioRendererPlayer: AudioPlayer, FrameOutput {
 //        }
     }
 
-    func prepare(options: KSOptions, audioDescriptor: AudioDescriptor) {
-        var channels = max(audioDescriptor.channels, 2)
-        #if os(macOS)
-        channels = 2
-        #else
-        let maxChannels = AVAudioChannelCount(AVAudioSession.sharedInstance().maximumOutputNumberOfChannels)
-        KSOptions.setAudioSession()
-        if channels > maxChannels {
-            if #available(tvOS 15.0, iOS 15.0, *) {
-                if let port = AVAudioSession.sharedInstance().currentRoute.outputs.first, port.isSpatialAudioEnabled || port.portType == AVAudioSession.Port.bluetoothA2DP {
-                } else {
-                    channels = maxChannels
-                }
-            } else {
-                channels = maxChannels
-            }
-        }
-        try? AVAudioSession.sharedInstance().setPreferredOutputNumberOfChannels(Int(channels))
-        #endif
-        renderer.audioTimePitchAlgorithm = channels > 2 ? .spectral : .timeDomain
-        options.audioFormat = audioDescriptor.audioFormat(channels: channels)
-        sampleSize = options.audioFormat.sampleSize
-        desc = options.audioFormat.formatDescription
+    func prepare(audioFormat: AVAudioFormat) {
+        renderer.audioTimePitchAlgorithm = audioFormat.channelCount > 2 ? .spectral : .timeDomain
+        sampleSize = audioFormat.sampleSize
+        desc = audioFormat.formatDescription
     }
 
     func play(time: TimeInterval) {

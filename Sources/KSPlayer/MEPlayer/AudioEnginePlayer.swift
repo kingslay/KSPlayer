@@ -17,7 +17,7 @@ protocol AudioPlayer: AnyObject {
     var threshold: Float { get set }
     var expansionRatio: Float { get set }
     var overallGain: Float { get set }
-    func prepare(options: KSOptions, audioDescriptor: AudioDescriptor)
+    func prepare(audioFormat: AVAudioFormat)
     func play(time: TimeInterval)
     func pause()
     func flush()
@@ -134,35 +134,26 @@ public final class AudioEnginePlayer: AudioPlayer, FrameOutput {
         }
     }
 
-    func prepare(options: KSOptions, audioDescriptor: AudioDescriptor) {
+    func prepare(audioFormat: AVAudioFormat) {
         engine.stop()
         engine.reset()
-        var channels = audioDescriptor.channels
-        #if os(macOS)
-        channels = 2
-        #else
-        channels = max(min(AVAudioChannelCount(AVAudioSession.sharedInstance().maximumOutputNumberOfChannels), channels), 2)
-        KSOptions.setAudioSession()
-        try? AVAudioSession.sharedInstance().setPreferredOutputNumberOfChannels(Int(channels))
-        #endif
-        options.audioFormat = audioDescriptor.audioFormat(channels: channels)
-        sampleSize = options.audioFormat.sampleSize
-        KSLog("outputFormat channelLayout AudioFormat: \(options.audioFormat)")
-        if let channelLayout = options.audioFormat.channelLayout {
+        sampleSize = audioFormat.sampleSize
+        KSLog("outputFormat channelLayout AudioFormat: \(audioFormat)")
+        if let channelLayout = audioFormat.channelLayout {
             KSLog("outputFormat channelLayout tag: \(channelLayout.layoutTag)")
             KSLog("outputFormat channelLayout channelDescriptions: \(channelLayout.layout.channelDescriptions)")
         }
         //        engine.attach(nbandEQ)
         //        engine.attach(distortion)
         //        engine.attach(delay)
-        let sourceNode = AVAudioSourceNode(format: options.audioFormat) { [weak self] _, _, frameCount, audioBufferList in
+        let sourceNode = AVAudioSourceNode(format: audioFormat) { [weak self] _, _, frameCount, audioBufferList in
             self?.audioPlayerShouldInputData(ioData: UnsafeMutableAudioBufferListPointer(audioBufferList), numberOfFrames: frameCount)
             return noErr
         }
         engine.attach(sourceNode)
         engine.attach(dynamicsProcessor)
         engine.attach(timePitch)
-        engine.connect(nodes: [sourceNode, dynamicsProcessor, timePitch, engine.mainMixerNode], format: options.audioFormat)
+        engine.connect(nodes: [sourceNode, dynamicsProcessor, timePitch, engine.mainMixerNode], format: audioFormat)
         if let audioUnit = engine.outputNode.audioUnit {
             addRenderNotify(audioUnit: audioUnit)
         }
