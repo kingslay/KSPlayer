@@ -103,17 +103,16 @@ final class MEPlayerItem {
             }
             if let ptr {
                 let avclass = ptr.assumingMemoryBound(to: UnsafePointer<AVClass>.self).pointee
-                if avclass == &ffurl_context_class {
+                if avclass.pointee.category == AV_CLASS_CATEGORY_NA, avclass == &ffurl_context_class {
                     let context = ptr.assumingMemoryBound(to: URLContext.self).pointee
                     if let opaque = context.interrupt_callback.opaque {
-                        let formatContext = Unmanaged<MEPlayerItem>.fromOpaque(opaque).takeUnretainedValue()
-                        formatContext.options.io(log: log)
+                        let playerItem = Unmanaged<MEPlayerItem>.fromOpaque(opaque).takeUnretainedValue()
+                        playerItem.options.io(log: log)
                         if log.starts(with: "Will reconnect at") {
-                            formatContext.videoTrack?.seekTime = formatContext.currentPlaybackTime
-                            formatContext.audioTrack?.seekTime = formatContext.currentPlaybackTime
+                            playerItem.videoTrack?.seekTime = playerItem.currentPlaybackTime
+                            playerItem.audioTrack?.seekTime = playerItem.currentPlaybackTime
                         }
                     }
-
                 } else if avclass == avfilter_get_class() {
                     let context = ptr.assumingMemoryBound(to: AVFilterContext.self).pointee
                     if let opaque = context.graph?.pointee.opaque {

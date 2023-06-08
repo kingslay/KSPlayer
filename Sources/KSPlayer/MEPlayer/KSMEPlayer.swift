@@ -371,7 +371,7 @@ extension KSMEPlayer: AVPictureInPictureSampleBufferPlaybackDelegate {
     }
 
     public func pictureInPictureControllerTimeRangeForPlayback(_: AVPictureInPictureController) -> CMTimeRange {
-        CMTimeRange(start: currentPlaybackTime, end: currentPlaybackTime + playableTime)
+        CMTimeRange(start: currentPlaybackTime, end: playableTime)
     }
 
     public func pictureInPictureControllerIsPlaybackPaused(_: AVPictureInPictureController) -> Bool {
