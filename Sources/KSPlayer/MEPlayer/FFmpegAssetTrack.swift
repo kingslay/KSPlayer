@@ -154,8 +154,4 @@ public class FFmpegAssetTrack: MediaPlayerTrack {
             stream?.pointee.discard = newValue ? AVDISCARD_DEFAULT : AVDISCARD_ALL
         }
     }
-
-    public func setIsEnabled(_ isEnabled: Bool) {
-        self.isEnabled = isEnabled
-    }
 }

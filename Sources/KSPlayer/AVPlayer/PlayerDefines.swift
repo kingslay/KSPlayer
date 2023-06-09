@@ -85,7 +85,7 @@ public protocol MediaPlayerDelegate: AnyObject {
     func finish(player: some MediaPlayerProtocol, error: Error?)
 }
 
-public protocol MediaPlayerTrack: CustomStringConvertible {
+public protocol MediaPlayerTrack: AnyObject, CustomStringConvertible {
     var trackID: Int32 { get }
     var name: String { get }
     var language: String? { get }
@@ -105,7 +105,6 @@ public protocol MediaPlayerTrack: CustomStringConvertible {
     var audioStreamBasicDescription: AudioStreamBasicDescription? { get }
     var dovi: DOVIDecoderConfigurationRecord? { get }
     var fieldOrder: FFmpegFieldOrder { get }
-    func setIsEnabled(_ isEnabled: Bool)
 }
 
 // swiftlint:disable identifier_name
@@ -855,10 +854,28 @@ public extension URL {
                 guard array.count > 1, let url = URL(string: String(array[1])) else {
                     return nil
                 }
-                guard let name = array[0].split(separator: ",").last else {
+                let infos = array[0].split(separator: ",")
+                guard infos.count > 1, let name = infos.last else {
                     return nil
                 }
-                return KSPlayerResource(url: url, options: KSOptions(), name: String(name))
+                var extinf = [String: String]()
+                let tvgString: Substring
+                if infos.count > 2 {
+                    extinf["duration"] = String(infos[0])
+                    tvgString = infos[1]
+                } else {
+                    tvgString = infos[0]
+                }
+                tvgString.split(separator: " ").forEach { str in
+                    let keyValue = str.split(separator: "=")
+                    if keyValue.count == 2 {
+                        extinf[String(keyValue[0])] = keyValue[1].trimmingCharacters(in: CharacterSet(charactersIn: #"""#))
+                    } else {
+                        extinf["duration"] = String(keyValue[0])
+                    }
+                }
+                let logo = extinf["tvg-logo"].flatMap { URL(string: $0) }
+                return KSPlayerResource(url: url, options: KSOptions(), name: String(name), cover: logo, extinf: extinf)
             }
             completion(result)
         }.resume()

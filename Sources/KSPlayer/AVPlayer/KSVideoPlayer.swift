@@ -123,7 +123,7 @@ extension KSVideoPlayer: UIViewRepresentable {
                         playerLayer?.player.select(track: track)
                         playerLayer?.options.videoDisable = false
                     } else {
-                        oldValue?.setIsEnabled(false)
+                        oldValue?.isEnabled = false
                         playerLayer?.options.videoDisable = true
                     }
                 }

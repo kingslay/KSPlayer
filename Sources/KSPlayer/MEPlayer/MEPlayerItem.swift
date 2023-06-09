@@ -137,7 +137,7 @@ final class MEPlayerItem {
             }
             $0.isEnabled = false
         }
-        track.setIsEnabled(true)
+        track.isEnabled = true
         guard let assetTrack = track as? FFmpegAssetTrack else {
             return
         }
@@ -319,7 +319,7 @@ extension MEPlayerItem {
                     assetTrack.startTime = startTime
                     if !options.subtitleDisable, assetTrack.mediaType == .subtitle {
                         let subtitle = SyncPlayerItemTrack<SubtitleFrame>(assetTrack: assetTrack, options: options)
-                        assetTrack.setIsEnabled(!assetTrack.isImageSubtitle)
+                        assetTrack.isEnabled = !assetTrack.isImageSubtitle
                         assetTrack.subtitle = subtitle
                         allPlayerItemTracks.append(subtitle)
                     }

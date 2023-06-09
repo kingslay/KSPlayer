@@ -20,7 +20,7 @@ public class KSPlayerResource: Hashable {
     public let definitions: [KSPlayerResourceDefinition]
     public let subtitleDataSouce: SubtitleDataSouce?
     public var nowPlayingInfo: KSNowPlayableMetadata?
-
+    public let extinf: [String: String]?
     /**
      Player recource item with url, used to play single difinition video
 
@@ -29,7 +29,7 @@ public class KSPlayerResource: Hashable {
      - parameter cover:     video cover, will show before playing, and hide when play
      - parameter subtitleURLs: video subtitles
      */
-    public convenience init(url: URL, options: KSOptions = KSOptions(), name: String = "", cover: URL? = nil, subtitleURLs: [URL]? = nil) {
+    public convenience init(url: URL, options: KSOptions = KSOptions(), name: String = "", cover: URL? = nil, subtitleURLs: [URL]? = nil, extinf: [String: String]? = nil) {
         let definition = KSPlayerResourceDefinition(url: url, definition: "", options: options)
         let subtitleDataSouce: URLSubtitleDataSouce?
         if let subtitleURLs {
@@ -38,7 +38,7 @@ public class KSPlayerResource: Hashable {
             subtitleDataSouce = nil
         }
 
-        self.init(name: name, definitions: [definition], cover: cover, subtitleDataSouce: subtitleDataSouce)
+        self.init(name: name, definitions: [definition], cover: cover, subtitleDataSouce: subtitleDataSouce, extinf: extinf)
     }
 
     /**
@@ -49,11 +49,12 @@ public class KSPlayerResource: Hashable {
      - parameter cover:       video cover
      - parameter subtitle:   video subtitle
      */
-    public init(name: String, definitions: [KSPlayerResourceDefinition], cover: URL? = nil, subtitleDataSouce: SubtitleDataSouce? = nil) {
+    public init(name: String, definitions: [KSPlayerResourceDefinition], cover: URL? = nil, subtitleDataSouce: SubtitleDataSouce? = nil, extinf: [String: String]? = nil) {
         self.name = name
         self.cover = cover
         self.subtitleDataSouce = subtitleDataSouce
         self.definitions = definitions
+        self.extinf = extinf
         nowPlayingInfo = KSNowPlayableMetadata(title: name)
     }
 
