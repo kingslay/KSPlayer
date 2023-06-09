@@ -80,12 +80,7 @@ final class MEPlayerItem {
         self?.codecDidChangeCapacity()
     }
 
-    weak var delegate: MEPlayerDelegate?
-
-    init(url: URL, options: KSOptions) {
-        self.url = url
-        self.options = options
-        timer.fireDate = Date.distantFuture
+    private lazy var onceInitial: Void = {
         avformat_network_init()
         av_log_set_callback { ptr, level, format, args in
             guard let format else {
@@ -122,9 +117,17 @@ final class MEPlayerItem {
             }
             KSLog(log, logLevel: LogLevel(rawValue: level) ?? .warning)
         }
+    }()
+
+    weak var delegate: MEPlayerDelegate?
+    init(url: URL, options: KSOptions) {
+        self.url = url
+        self.options = options
+        timer.fireDate = Date.distantFuture
         operationQueue.name = "KSPlayer_" + String(describing: self).components(separatedBy: ".").last!
         operationQueue.maxConcurrentOperationCount = 1
         operationQueue.qualityOfService = .userInteractive
+        _ = onceInitial
     }
 
     func select(track: MediaPlayerTrack) {
@@ -568,6 +571,8 @@ extension MEPlayerItem: MediaPlayback {
             Thread.current.name = (self.operationQueue.name ?? "") + "_close"
             self.allPlayerItemTracks.forEach { $0.shutdown() }
             KSLog("清空formatCtx")
+            self.formatCtx?.pointee.interrupt_callback.opaque = nil
+            self.formatCtx?.pointee.interrupt_callback.callback = nil
             avformat_close_input(&self.formatCtx)
             avformat_close_input(&self.outputFormatCtx)
             self.duration = 0

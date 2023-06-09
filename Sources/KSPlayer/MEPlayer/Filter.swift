@@ -19,6 +19,7 @@ class MEFilter {
     private var params = AVBufferSrcParameters()
     private let nominalFrameRate: Float
     deinit {
+        graph?.pointee.opaque = nil
         avfilter_graph_free(&graph)
         av_frame_free(&outputFrame)
     }
