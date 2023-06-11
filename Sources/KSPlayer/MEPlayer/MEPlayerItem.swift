@@ -368,7 +368,9 @@ extension MEPlayerItem {
             wantedStreamNb = -1
         }
         let index = av_find_best_stream(formatCtx, AVMEDIA_TYPE_AUDIO, wantedStreamNb, videoIndex, nil, 0)
-        if let first = assetTracks.first(where: { $0.mediaType == .audio && $0.trackID == index }) {
+        if let first = audios.first(where: {
+            index > 0 ? $0.trackID == index : true
+        }) {
             first.isEnabled = true
             let track = options.syncDecodeAudio ? SyncPlayerItemTrack<AudioFrame>(assetTrack: first, options: options) : AsyncPlayerItemTrack<AudioFrame>(assetTrack: first, options: options)
             track.delegate = self
