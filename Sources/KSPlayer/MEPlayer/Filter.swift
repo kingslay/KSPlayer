@@ -69,20 +69,16 @@ class MEFilter {
     }
 
     public func filter(options: KSOptions, inputFrame: UnsafeMutablePointer<AVFrame>, hwFramesCtx: UnsafeMutablePointer<AVBufferRef>?) -> UnsafeMutablePointer<AVFrame> {
-        var filters: String?
+        let filters: String
         if isAudio {
-            filters = options.audioFilters
+            filters = options.audioFilters.joined(separator: ",")
         } else {
-            filters = options.videoFilters
-            if options.autoDeInterlace {
-                if var filters {
-                    filters = "idet," + filters
-                } else {
-                    filters = "idet"
-                }
+            if options.autoDeInterlace, !options.videoFilters.contains("idet") {
+                options.videoFilters.append("idet")
             }
+            filters = options.videoFilters.joined(separator: ",")
         }
-        guard let filters else {
+        guard filters.count > 0 else {
             return inputFrame
         }
         var params = AVBufferSrcParameters()

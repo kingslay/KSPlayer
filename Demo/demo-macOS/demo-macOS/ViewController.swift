@@ -10,16 +10,16 @@ import AppKit
 import KSPlayer
 
 class MeOptions: KSOptions {
-    override func customizeDar(sar: CGSize, par: CGSize) -> CGSize? {
-        let rate = sar.width * par.height / (sar.height * par.height)
-        if rate < 5 / 4 {
-            return CGSize(width: 5, height: 4)
-        } else if rate < 4 / 3 {
-            return CGSize(width: 4, height: 3)
-        } else if rate < 16 / 9 {
-            return CGSize(width: 16, height: 9)
-        }
-        return nil
+    override func customizeDar(sar _: CGSize, par _: CGSize) -> CGSize? {
+//        let rate = sar.width * par.height / (sar.height * par.height)
+//        if rate < 5 / 4 {
+//            return CGSize(width: 5, height: 4)
+//        } else if rate < 4 / 3 {
+//            return CGSize(width: 4, height: 3)
+//        } else if rate < 16 / 9 {
+//            return CGSize(width: 16, height: 9)
+//        }
+        nil
     }
 }
 

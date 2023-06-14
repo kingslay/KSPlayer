@@ -92,7 +92,7 @@ public protocol MediaPlayerTrack: AnyObject, CustomStringConvertible {
     var mediaType: AVFoundation.AVMediaType { get }
     var mediaSubType: CMFormatDescription.MediaSubType { get }
     var nominalFrameRate: Float { get }
-    var rotation: Double { get }
+    var rotation: Int16 { get }
     var bitRate: Int64 { get }
     var naturalSize: CGSize { get }
     var isEnabled: Bool { get set }
@@ -303,7 +303,7 @@ open class KSOptions {
     public var startPlayTime: TimeInterval = 0
     // audio
     public var audioDelay = 0.0 // s
-    public var audioFilters: String?
+    public var audioFilters = [String]()
     public var syncDecodeAudio = false
     // sutile
     public var autoSelectEmbedSubtitle = true
@@ -312,10 +312,11 @@ open class KSOptions {
     public var isSeekImageSubtitle = false
     // video
     public var autoDeInterlace = false
+    public var autoRotate = true
     public var destinationDynamicRange: DynamicRange?
     public var dropVideoFrame = true
     public var videoAdaptable = true
-    public var videoFilters: String?
+    public var videoFilters = [String]()
     public var syncDecodeVideo = false
     public var hardwareDecode = true
     public var asynchronousDecompression = true

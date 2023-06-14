@@ -47,7 +47,6 @@ final class MEPlayerItem {
     private(set) var currentPlaybackTime = TimeInterval(0)
     private(set) var startTime = TimeInterval(0)
     private var videoClockDelay = TimeInterval(0)
-    private(set) var rotation = 0.0
     private(set) var duration: TimeInterval = 0
     private(set) var naturalSize = CGSize.zero
     private var error: NSError? {
@@ -347,8 +346,21 @@ extension MEPlayerItem {
             videoIndex = av_find_best_stream(formatCtx, AVMEDIA_TYPE_VIDEO, wantedStreamNb, -1, nil, 0)
             if let first = videos.first(where: { $0.trackID == videoIndex }) {
                 first.isEnabled = true
-                rotation = first.rotation
-                naturalSize = first.naturalSize
+                let rotation = first.rotation
+                if rotation > 0, options.autoRotate {
+                    options.hardwareDecode = false
+                    if abs(rotation - 90) <= 1 {
+                        options.videoFilters.append("transpose=clock")
+                    } else if abs(rotation - 180) <= 1 {
+                        options.videoFilters.append("hflip")
+                        options.videoFilters.append("vflip")
+                    } else if abs(rotation - 270) <= 1 {
+                        options.videoFilters.append("transpose=cclock")
+                    } else if abs(rotation) > 1 {
+                        options.videoFilters.append("rotate=\(rotation)*PI/180")
+                    }
+                }
+                naturalSize = abs(rotation - 90) <= 1 || abs(rotation - 270) <= 1 ? first.naturalSize.reverse : first.naturalSize
                 let track = options.syncDecodeVideo ? SyncPlayerItemTrack<VideoVTBFrame>(assetTrack: first, options: options) : AsyncPlayerItemTrack<VideoVTBFrame>(assetTrack: first, options: options)
                 track.delegate = self
                 allPlayerItemTracks.append(track)

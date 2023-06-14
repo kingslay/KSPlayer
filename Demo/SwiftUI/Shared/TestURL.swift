@@ -12,7 +12,7 @@ class MEOptions: KSOptions {
     override func process(assetTrack: MediaPlayerTrack) {
         if assetTrack.mediaType == .video {
             if [FFmpegFieldOrder.bb, .bt, .tt, .tb].contains(assetTrack.fieldOrder) {
-                videoFilters = "yadif=mode=1:parity=-1:deint=0"
+                videoFilters.append("yadif=mode=1:parity=-1:deint=0")
                 hardwareDecode = false
             }
         }
@@ -34,7 +34,7 @@ var testObjects: [KSPlayerResource] = {
         for url in urls {
             let options = MEOptions()
             if url.lastPathComponent == "h264.mp4" {
-                options.videoFilters = "hflip,vflip"
+                options.videoFilters = ["hflip", "vflip"]
                 options.hardwareDecode = false
                 options.startPlayTime = 13
                 #if os(macOS)
@@ -48,7 +48,7 @@ var testObjects: [KSPlayerResource] = {
                 options.syncDecodeAudio = true
             } else if url.lastPathComponent == "subrip.mkv" {
                 options.asynchronousDecompression = false
-                options.videoFilters = "yadif_videotoolbox=mode=0:parity=auto:deint=1"
+                options.videoFilters.append("yadif_videotoolbox=mode=0:parity=auto:deint=1")
             }
             objects.append(KSPlayerResource(url: url, options: options, name: url.lastPathComponent))
         }

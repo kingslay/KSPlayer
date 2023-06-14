@@ -500,7 +500,7 @@ class AVMediaPlayerTrack: MediaPlayerTrack {
     let nominalFrameRate: Float
     let trackID: Int32
     let mediaSubType: CMFormatDescription.MediaSubType
-    let rotation: Double = 0
+    let rotation: Int16 = 0
     let bitRate: Int64
     let naturalSize: CGSize
     let name: String

@@ -14,7 +14,7 @@ public class FFmpegAssetTrack: MediaPlayerTrack {
     public private(set) var language: String?
     public private(set) var nominalFrameRate: Float = 0
     public private(set) var bitRate: Int64 = 0
-    public private(set) var rotation: Double = 0
+    public private(set) var rotation: Int16 = 0
     public private(set) var description: String
     public let mediaType: AVFoundation.AVMediaType
     public let naturalSize: CGSize
@@ -57,7 +57,7 @@ public class FFmpegAssetTrack: MediaPlayerTrack {
             rotation = 0
         } else if let displaymatrix = av_stream_get_side_data(stream, AV_PKT_DATA_DISPLAYMATRIX, nil) {
             let matrix = displaymatrix.withMemoryRebound(to: Int32.self, capacity: 1) { $0 }
-            rotation = -av_display_rotation_get(matrix)
+            rotation = Int16(Int(-av_display_rotation_get(matrix)) % 360)
         } else {
             rotation = 0
         }
