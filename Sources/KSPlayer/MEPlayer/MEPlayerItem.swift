@@ -46,7 +46,6 @@ final class MEPlayerItem {
     private var videoAdaptation: VideoAdaptationState?
     private(set) var currentPlaybackTime = TimeInterval(0)
     private(set) var startTime = TimeInterval(0)
-    private var videoClockDelay = TimeInterval(0)
     private(set) var duration: TimeInterval = 0
     private(set) var naturalSize = CGSize.zero
     private var error: NSError? {
@@ -707,8 +706,8 @@ extension MEPlayerItem: OutputRenderSourceDelegate {
         if state == .seeking {
             return
         }
-        videoMediaTime = CACurrentMediaTime()
         if isAudioStalled {
+            videoMediaTime = CACurrentMediaTime()
             currentPlaybackTime = time.seconds - options.audioDelay
         }
     }
@@ -726,10 +725,7 @@ extension MEPlayerItem: OutputRenderSourceDelegate {
         guard let videoTrack else {
             return nil
         }
-        var desire = currentPlaybackTime + options.audioDelay
-        #if !os(macOS)
-        desire -= AVAudioSession.sharedInstance().outputLatency
-        #endif
+        var desire: TimeInterval = 0
         let predicate: ((VideoVTBFrame) -> Bool)? = force ? nil : { [weak self] frame -> Bool in
             guard let self else { return true }
             desire = self.currentPlaybackTime + self.options.audioDelay
@@ -737,26 +733,22 @@ extension MEPlayerItem: OutputRenderSourceDelegate {
             desire -= AVAudioSession.sharedInstance().outputLatency
             #endif
             if self.isAudioStalled {
-                desire += max(CACurrentMediaTime() - self.videoMediaTime, 0) + self.videoClockDelay
+                desire += max(CACurrentMediaTime() - self.videoMediaTime, 0)
             }
             return frame.seconds <= desire
         }
         let frame = videoTrack.getOutputRender(where: predicate)
-        if let frame {
-            videoClockDelay = desire - frame.seconds
-            if !isAudioStalled, videoClockDelay > 0.4 {
-                if videoClockDelay > 2 {
-                    KSLog("video delay time: \(videoClockDelay), audio time:\(desire). seek video track ")
-                    videoTrack.outputRenderQueue.flush()
-                    videoTrack.seekTime = desire
-                } else {
-                    let frameCount = videoTrack.frameCount
-                    KSLog("video delay time: \(videoClockDelay), audio time:\(desire). frameCount: \(frameCount) frameMaxCount: \(videoTrack.frameMaxCount)")
-                    if options.dropVideoFrame, frameCount > 0 {
-                        _ = videoTrack.getOutputRender(where: nil)
-                        KSLog("video delay time: \(videoClockDelay), audio time:\(desire). dropped video frame")
-                    }
-                }
+        if let frame, !isAudioStalled {
+            let type = options.videoClockSync(audioTime: desire, videoTime: frame.seconds)
+            switch type {
+            case .drop:
+                return nil
+            case .seek:
+                videoTrack.outputRenderQueue.flush()
+                videoTrack.seekTime = desire
+                return nil
+            case .show:
+                break
             }
         }
         return options.videoDisable ? nil : frame

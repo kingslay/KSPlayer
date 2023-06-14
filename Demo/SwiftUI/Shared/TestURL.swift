@@ -71,7 +71,6 @@ var testObjects: [KSPlayerResource] = {
 
     if let url = URL(string: "https://bitmovin-a.akamaihd.net/content/dataset/multi-codec/hevc/stream_fmp4.m3u8") {
         let options = MEOptions()
-        options.dropVideoFrame = false
         objects.append(KSPlayerResource(url: url, options: options, name: "fmp4"))
     }
 

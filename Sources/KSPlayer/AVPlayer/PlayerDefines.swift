@@ -9,7 +9,7 @@ import AVFoundation
 import AVKit
 import CoreMedia
 import CoreServices
-
+import OSLog
 #if canImport(UIKit)
 import UIKit
 public extension UIScreen {
@@ -267,6 +267,12 @@ public struct VideoAdaptationState {
     public internal(set) var loadedCount: Int = 0
 }
 
+public enum ClockProcessType {
+    case show
+    case drop
+    case seek
+}
+
 open class KSOptions {
     //    public static let shared = KSOptions()
     /// 最低缓存视频时间
@@ -314,7 +320,6 @@ open class KSOptions {
     public var autoDeInterlace = false
     public var autoRotate = true
     public var destinationDynamicRange: DynamicRange?
-    public var dropVideoFrame = true
     public var videoAdaptable = true
     public var videoFilters = [String]()
     public var syncDecodeVideo = false
@@ -322,6 +327,8 @@ open class KSOptions {
     public var asynchronousDecompression = true
     public var videoDisable = false
     public var canStartPictureInPictureAutomaticallyFromInline = true
+    private var videoClockDelayCount = 0
+
     public internal(set) var formatName = ""
     public internal(set) var prepareTime = 0.0
     public internal(set) var dnsStartTime = 0.0
@@ -567,6 +574,27 @@ open class KSOptions {
         audioFormat = audioDescriptor.audioFormat(channels: channels)
     }
 
+    open func videoClockSync(audioTime: TimeInterval, videoTime: TimeInterval) -> ClockProcessType {
+        let delay = audioTime - videoTime
+        if delay > 0.4 {
+            KSLog("video delay time: \(delay), audio time:\(audioTime), delay count:\(videoClockDelayCount)")
+            if delay > 2 {
+                videoClockDelayCount += 1
+                if videoClockDelayCount > 10 {
+                    KSLog("seek video track")
+                    return .seek
+                } else {
+                    return .drop
+                }
+            } else {
+                return .drop
+            }
+        } else {
+            videoClockDelayCount = 0
+            return .show
+        }
+    }
+
     func availableDynamicRange(_ cotentRange: DynamicRange?) -> DynamicRange? {
         #if canImport(UIKit)
         let availableHDRModes = AVPlayer.availableHDRModes
@@ -610,7 +638,7 @@ public struct LoadingState {
     public let isSeek: Bool
 }
 
-public enum LogLevel: Int32 {
+public enum LogLevel: Int32, CustomStringConvertible {
     case panic = 0
     case fatal = 8
     case error = 16
@@ -619,6 +647,41 @@ public enum LogLevel: Int32 {
     case verbose = 40
     case debug = 48
     case trace = 56
+    var logType: OSLogType {
+        switch self {
+        case .panic, .fatal:
+            return .fault
+        case .error:
+            return .error
+        case .warning:
+            return .debug
+        case .info, .verbose, .debug:
+            return .info
+        case .trace:
+            return .default
+        }
+    }
+
+    public var description: String {
+        switch self {
+        case .panic:
+            return "panic"
+        case .fatal:
+            return "fault"
+        case .error:
+            return "error"
+        case .warning:
+            return "warning"
+        case .info:
+            return "info"
+        case .verbose:
+            return "verbose"
+        case .debug:
+            return "debug"
+        case .trace:
+            return "trace"
+        }
+    }
 }
 
 public extension KSOptions {
@@ -640,12 +703,8 @@ public extension KSOptions {
     static var isSeekedAutoPlay = true
     /// 日志级别
     static var logLevel = LogLevel.warning
-    /// 日志输出方式
-    static var logFunctionPoint: (String, LogLevel) -> Void = { str, level in
-        if level.rawValue <= KSOptions.logLevel.rawValue {
-            print(str)
-        }
-    }
+    @available(macOS 11.0, iOS 14.0, watchOS 7.0, tvOS 14.0, *)
+    static var logger = Logger()
 
     internal static func deviceCpuCount() -> Int {
         var ncpu = UInt(0)
@@ -684,9 +743,25 @@ public enum MediaLoadState: Int {
 }
 
 @inline(__always) public func KSLog(_ message: CustomStringConvertible, logLevel: LogLevel = .warning, file: String = #file, function: String = #function, line: Int = #line) {
-    let fileName = (file as NSString).lastPathComponent
-    KSOptions.logFunctionPoint("KSPlayer: \(fileName):\(line) \(function) | \(message)", logLevel)
+    if logLevel.rawValue <= KSOptions.logLevel.rawValue {
+        let fileName = (file as NSString).lastPathComponent
+        print("logLevel: \(logLevel) KSPlayer: \(fileName):\(line) \(function) | \(message)")
+    }
 }
+
+@inline(__always) public func KSLog(level: LogLevel = .warning, dso: UnsafeRawPointer = #dsohandle, _ message: StaticString, _ args: CVarArg...) {
+    if level.rawValue <= KSOptions.logLevel.rawValue {
+        os_log(level.logType, dso: dso, message, args)
+    }
+}
+
+//
+// @available(macOS 11.0, iOS 14.0, watchOS 7.0, tvOS 14.0, *)
+// @inline(__always) public func KSLog(level: LogLevel = .warning, _ message: OSLogMessage) {
+//    if level.rawValue <= KSOptions.logLevel.rawValue {
+//        KSOptions.logger.log(level: level.logType, message)
+//    }
+// }
 
 public let KSPlayerErrorDomain = "KSPlayerErrorDomain"
 
