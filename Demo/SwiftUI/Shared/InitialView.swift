@@ -2,7 +2,6 @@ import KSPlayer
 import SwiftUI
 struct InitialView: View {
     @EnvironmentObject private var appModel: APPModel
-    @Environment(\.openWindow) var openWindow
 //    @Environment(\.horizontalSizeClass) var horizontalSizeClass
     private let columns = [GridItem(.adaptive(minimum: MoiveView.width))]
     init() {}
