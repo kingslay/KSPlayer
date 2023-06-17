@@ -41,15 +41,7 @@ struct URLImportView: View {
                             components.password = password
                         }
                         if let url = components.url {
-                            if url.isPlaylist {
-                                url.parsePlaylist { result in
-                                    DispatchQueue.main.async {
-                                        appModel.playlist.insert(contentsOf: result, at: 0)
-                                    }
-                                }
-                            } else {
-                                appModel.url = url
-                            }
+                            appModel.open(url: url)
                         }
                     }
                     appModel.openURLImport = false

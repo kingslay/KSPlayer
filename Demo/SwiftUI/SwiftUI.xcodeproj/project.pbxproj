@@ -7,9 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		AC44E0FC29290CBC00617BD3 /* SecondView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC44E0FA29290CBC00617BD3 /* SecondView.swift */; };
+		AC44E0FC29290CBC00617BD3 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC44E0FA29290CBC00617BD3 /* ContentView.swift */; };
 		AC44E0FD29290CF800617BD3 /* InitialView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC44E0F929290CBB00617BD3 /* InitialView.swift */; };
-		AC77DFC326402329001351AE /* DemoApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC77DFB026402327001351AE /* DemoApp.swift */; };
+		AC77DFC326402329001351AE /* TracyApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC77DFB026402327001351AE /* TracyApp.swift */; };
 		AC77DFC526402329001351AE /* URLImportView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC77DFB126402327001351AE /* URLImportView.swift */; };
 		AC77DFC726402329001351AE /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AC77DFB226402329001351AE /* Assets.xcassets */; };
 		AC84D8DE28ABBD0D00344154 /* vr.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = AC84D8D728ABBD0D00344154 /* vr.mp4 */; };
@@ -31,8 +31,8 @@
 		AC3CAD6228BB88A200AA1C2C /* AVDisplayCriteriaKS.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AVDisplayCriteriaKS.h; sourceTree = "<group>"; };
 		AC3CAD6328BB893500AA1C2C /* Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Bridging-Header.h"; sourceTree = "<group>"; };
 		AC44E0F929290CBB00617BD3 /* InitialView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InitialView.swift; sourceTree = "<group>"; };
-		AC44E0FA29290CBC00617BD3 /* SecondView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SecondView.swift; sourceTree = "<group>"; };
-		AC77DFB026402327001351AE /* DemoApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoApp.swift; sourceTree = "<group>"; };
+		AC44E0FA29290CBC00617BD3 /* ContentView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		AC77DFB026402327001351AE /* TracyApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TracyApp.swift; sourceTree = "<group>"; };
 		AC77DFB126402327001351AE /* URLImportView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = URLImportView.swift; sourceTree = "<group>"; };
 		AC77DFB226402329001351AE /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		AC77DFB726402329001351AE /* TracyPlayer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TracyPlayer.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -84,8 +84,8 @@
 				AC3CAD6328BB893500AA1C2C /* Bridging-Header.h */,
 				ACEA9FEA298BFC8800FBA74B /* TestURL.swift */,
 				AC44E0F929290CBB00617BD3 /* InitialView.swift */,
-				AC44E0FA29290CBC00617BD3 /* SecondView.swift */,
-				AC77DFB026402327001351AE /* DemoApp.swift */,
+				AC44E0FA29290CBC00617BD3 /* ContentView.swift */,
+				AC77DFB026402327001351AE /* TracyApp.swift */,
 				AC77DFB126402327001351AE /* URLImportView.swift */,
 				AC77DFB226402329001351AE /* Assets.xcassets */,
 				ACD2F77F275F9BEE0006D16F /* Resources */,
@@ -220,8 +220,8 @@
 				AC77DFC526402329001351AE /* URLImportView.swift in Sources */,
 				AC44E0FD29290CF800617BD3 /* InitialView.swift in Sources */,
 				ACEA9FEB298BFC8800FBA74B /* TestURL.swift in Sources */,
-				AC44E0FC29290CBC00617BD3 /* SecondView.swift in Sources */,
-				AC77DFC326402329001351AE /* DemoApp.swift in Sources */,
+				AC44E0FC29290CBC00617BD3 /* ContentView.swift in Sources */,
+				AC77DFC326402329001351AE /* TracyApp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -283,15 +283,15 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.video";
 				INFOPLIST_KEY_LSSupportsOpeningDocumentsInPlace = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
-				MACOSX_DEPLOYMENT_TARGET = 12.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_NAME = TracyPlayer;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
-				TVOS_DEPLOYMENT_TARGET = 15.0;
+				TVOS_DEPLOYMENT_TARGET = 16.0;
 			};
 			name = Debug;
 		};
@@ -344,14 +344,14 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.video";
 				INFOPLIST_KEY_LSSupportsOpeningDocumentsInPlace = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
-				MACOSX_DEPLOYMENT_TARGET = 12.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				PRODUCT_NAME = TracyPlayer;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
-				TVOS_DEPLOYMENT_TARGET = 15.0;
+				TVOS_DEPLOYMENT_TARGET = 16.0;
 			};
 			name = Release;
 		};
@@ -376,7 +376,7 @@
 				INFOPLIST_KEY_UIRequiresFullScreen = YES;
 				INFOPLIST_KEY_UIStatusBarStyle = UIStatusBarStyleDarkContent;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
-				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -415,7 +415,7 @@
 				INFOPLIST_KEY_UIRequiresFullScreen = YES;
 				INFOPLIST_KEY_UIStatusBarStyle = UIStatusBarStyleDarkContent;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
-				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",

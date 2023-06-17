@@ -393,12 +393,12 @@ public extension URL {
         ["cue", "m3u", "pls"].contains(pathExtension.lowercased())
     }
 
-    func parsePlaylist(completion: @escaping (([KSPlayerResource]) -> Void)) {
+    func parsePlaylist(completion: @escaping (([(String, URL, [String: String])]) -> Void)) {
         URLSession.shared.dataTask(with: self) { data, _, _ in
             guard let data, let string = String(data: data, encoding: .utf8) else {
                 return
             }
-            let result = string.components(separatedBy: "#EXTINF:").compactMap { content -> KSPlayerResource? in
+            let result = string.components(separatedBy: "#EXTINF:").compactMap { content -> (String, URL, [String: String])? in
                 let array = content.split(separator: "\n")
                 guard array.count > 1, let url = URL(string: String(array[1])) else {
                     return nil
@@ -423,8 +423,7 @@ public extension URL {
                         extinf["duration"] = String(keyValue[0])
                     }
                 }
-                let logo = extinf["tvg-logo"].flatMap { URL(string: $0) }
-                return KSPlayerResource(url: url, name: String(name), cover: logo, extinf: extinf)
+                return (String(name), url, extinf)
             }
             completion(result)
         }.resume()

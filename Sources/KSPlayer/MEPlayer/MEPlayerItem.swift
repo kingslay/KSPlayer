@@ -7,6 +7,7 @@
 
 import AVFoundation
 import FFmpegKit
+import Libavcodec
 import Libavfilter
 import Libavformat
 

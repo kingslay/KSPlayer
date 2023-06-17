@@ -63,6 +63,10 @@ public class KSPlayerResource: Hashable {
     }
 }
 
+extension KSPlayerResource: Identifiable {
+    public var id: KSPlayerResource { self }
+}
+
 public class KSPlayerResourceDefinition: Hashable {
     public static func == (lhs: KSPlayerResourceDefinition, rhs: KSPlayerResourceDefinition) -> Bool {
         lhs.url == rhs.url
@@ -71,6 +75,9 @@ public class KSPlayerResourceDefinition: Hashable {
     public let url: URL
     public let definition: String
     public let options: KSOptions
+    public convenience init(url: URL) {
+        self.init(url: url, definition: url.lastPathComponent)
+    }
 
     /**
      Video recource item with defination name and specifying options
@@ -88,6 +95,10 @@ public class KSPlayerResourceDefinition: Hashable {
     public func hash(into hasher: inout Hasher) {
         hasher.combine(url)
     }
+}
+
+extension KSPlayerResourceDefinition: Identifiable {
+    public var id: KSPlayerResourceDefinition { self }
 }
 
 public struct KSNowPlayableMetadata {

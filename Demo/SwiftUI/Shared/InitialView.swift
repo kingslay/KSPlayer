@@ -2,10 +2,13 @@ import KSPlayer
 import SwiftUI
 struct InitialView: View {
     @EnvironmentObject private var appModel: APPModel
+    @Environment(\.openWindow) var openWindow
+//    @Environment(\.horizontalSizeClass) var horizontalSizeClass
+    private let columns = [GridItem(.adaptive(minimum: MoiveView.width))]
     init() {}
 
     var body: some View {
-        List {
+        HStack {
             Button {
                 appModel.openFileImport = true
             } label: {
@@ -24,28 +27,39 @@ struct InitialView: View {
                     Text("⇧⌘O")
                 }
             }
-            ForEach(appModel.playlist, id: \.self) { resource in
-                #if os(macOS)
-                Button {
-                    appModel.url = resource.definitions[0].url
-                } label: {
-                    Text(resource.name)
-                    Spacer()
-                }
-                #else
-                NavigationLink(resource.name, destination: KSVideoPlayerView(resource: resource))
-                #endif
-            }
         }
-        .onOpenURL { url in
-            appModel.url = url
+        ScrollView {
+            LazyVGrid(columns: columns) {
+                ForEach(appModel.playlist, id: \.self) { resource in
+                    NavigationLink(value: resource) {
+                        MoiveView(model: resource)
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
         }
     }
 }
 
-extension KSVideoPlayerView {
-    init(resource: KSPlayerResource) {
-        let definition = resource.definitions.first!
-        self.init(url: definition.url, options: definition.options)
+struct MoiveView: View {
+    #if os(iOS)
+    static let width = CGFloat(320)
+    #else
+    static let width = CGFloat(320)
+    #endif
+    let model: MovieModel
+    var body: some View {
+        VStack(alignment: .leading) {
+            AsyncImage(url: model.logo) { image in
+                image
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+            } placeholder: {
+                Color.gray
+            }.frame(width: MoiveView.width, height: MoiveView.width / 16 * 9)
+                .clipShape(RoundedRectangle(cornerRadius: 5))
+            Text(model.name)
+        }
+        .frame(width: MoiveView.width)
     }
 }

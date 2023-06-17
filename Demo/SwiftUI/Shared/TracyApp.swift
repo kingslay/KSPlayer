@@ -11,7 +11,7 @@ import KSPlayer
 import SwiftUI
 
 @main
-struct DemoApp: App {
+struct TracyApp: App {
     @StateObject var appModel = APPModel()
     init() {
         let arguments = ProcessInfo.processInfo.arguments.dropFirst()
@@ -32,67 +32,16 @@ struct DemoApp: App {
             }
         }
         if let urlString = filenames.first {
-            appModel.url = URL(fileURLWithPath: urlString)
-        }
-    }
-
-    @ViewBuilder
-    private var contentView: some View {
-        if let url = appModel.url {
-            KSVideoPlayerView(url: url, options: MEOptions())
-                .onDisappear {
-                    appModel.url = nil
-                }
-        } else {
-            //            HStack {
-            //                KSVideoPlayerView(resource: testObjects[0])
-            //                KSVideoPlayerView(resource: testObjects[1])
-            //            }
-            //
-            //            VideoPlayer(player: AVPlayer(url: URL(string: "https://bitmovin-a.akamaihd.net/content/dataset/multi-codec/hevc/stream_fmp4.m3u8")!))
-            //            AVContentView()
-            #if os(macOS)
-            InitialView()
-            #else
-            NavigationView {
-                InitialView()
-            }
-            #endif
+            appModel.open(url: URL(fileURLWithPath: urlString))
         }
     }
 
     var body: some Scene {
         WindowGroup {
-            contentView
-                .preferredColorScheme(.dark)
-                .background(Color.black)
-            #if !os(tvOS)
-                .onDrop(of: ["public.url", "public.file-url"], isTargeted: nil) { items -> Bool in
-                    guard let item = items.first, let identifier = item.registeredTypeIdentifiers.first else {
-                        return false
-                    }
-                    item.loadItem(forTypeIdentifier: identifier, options: nil) { urlData, _ in
-                        if let urlData = urlData as? Data {
-                            let url = NSURL(absoluteURLWithDataRepresentation: urlData, relativeTo: nil) as URL
-                            DispatchQueue.main.async {
-                                appModel.url = url
-                            }
-                        }
-                    }
-                    return true
-                }
-                .fileImporter(isPresented: $appModel.openFileImport, allowedContentTypes: [.movie, .audio, .data]) { result in
-                    guard let url = try? result.get() else {
-                        return
-                    }
-                    appModel.url = url
-                }
-            #endif
-                .sheet(isPresented: $appModel.openURLImport, content: {
-                    URLImportView()
-                })
+            ContentView()
                 .environmentObject(appModel)
         }
+
         #if !os(tvOS)
         .commands {
             #if os(macOS)
@@ -109,12 +58,30 @@ struct DemoApp: App {
             #endif
         }
         #endif
+        #if os(macOS)
+        .defaultSize(width: 1600, height: 900)
+        .defaultPosition(.center)
+        #endif
+        #if os(macOS)
+
+        Settings {
+//            SettingContainer()
+        }
+
+        MenuBarExtra {
+//            MenuBar()
+        } label: {
+            Image(systemName: "film.fill")
+        }
+        .menuBarExtraStyle(.menu)
+
+        #endif
     }
 }
 
 class APPModel: ObservableObject {
-    @Published var playlist = [KSPlayerResource]()
-    @Published var url: URL? = nil
+    @Published private(set) var playlist = [MovieModel]()
+    @Published var path = NavigationPath()
     @Published var openFileImport: Bool = false
     @Published var openURLImport: Bool = false
     init() {
@@ -131,7 +98,7 @@ class APPModel: ObservableObject {
 //        KSOptions.isLoopPlay = true
         #if os(macOS)
         for url in NSDocumentController.shared.recentDocumentURLs {
-            playlist.append(KSPlayerResource(url: url, name: url.lastPathComponent))
+            playlist.append(MovieModel(url: url))
         }
         #else
 
@@ -139,6 +106,22 @@ class APPModel: ObservableObject {
         #if DEBUG
         playlist.append(contentsOf: testObjects)
         #endif
+    }
+
+    func open(url: URL) {
+        if url.isPlaylist {
+            url.parsePlaylist { result in
+                DispatchQueue.main.async { [weak self] in
+                    guard let self else { return }
+                    let array = result.compactMap { name, url, extinf in
+                        MovieModel(url: url, name: name, extinf: extinf)
+                    }
+                    self.playlist.insert(contentsOf: array, at: 0)
+                }
+            }
+        } else {
+            path.append(MovieModel(url: url))
+        }
     }
 }
 
