@@ -44,6 +44,7 @@ struct SettingSubtitleView: View {
                 }
             }, format: .number)
         }.fixedSize()
+        #if !os(tvOS)
         ColorPicker("Color:", selection: Binding {
             Color(SubtitleModel.textColor)
         } set: { value in
@@ -54,7 +55,7 @@ struct SettingSubtitleView: View {
         } set: { value in
             SubtitleModel.textBackgroundColor = UIColor(value)
         })
-
+        #endif
         Picker("Align X:", selection: Binding {
             SubtitleModel.textXAlign
         } set: {

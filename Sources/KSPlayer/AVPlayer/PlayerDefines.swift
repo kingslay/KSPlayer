@@ -8,6 +8,7 @@
 import AVFoundation
 import CoreMedia
 import CoreServices
+import SwiftUI
 #if canImport(UIKit)
 import UIKit
 public extension UIScreen {
