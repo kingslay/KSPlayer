@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 52;
+	objectVersion = 54;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -22,6 +22,7 @@
 		AC9FB92129D94A7E0082E210 /* vp9.webm in Resources */ = {isa = PBXBuildFile; fileRef = AC9FB91F29D94A7E0082E210 /* vp9.webm */; };
 		AC9FB92229D94A7E0082E210 /* av1.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = AC9FB92029D94A7E0082E210 /* av1.mp4 */; };
 		ACA237132938B78B008916E3 /* dolby-digital-plus-channel.mkv in Resources */ = {isa = PBXBuildFile; fileRef = ACA237122938B78A008916E3 /* dolby-digital-plus-channel.mkv */; };
+		ACB965472A42EDCD00378A4C /* SettingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACB965462A42EDCD00378A4C /* SettingView.swift */; };
 		ACD2F772275F735C0006D16F /* KSPlayer in Frameworks */ = {isa = PBXBuildFile; productRef = ACD2F771275F735C0006D16F /* KSPlayer */; };
 		ACEA9FEB298BFC8800FBA74B /* TestURL.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACEA9FEA298BFC8800FBA74B /* TestURL.swift */; };
 		ACFC8D2F2A346D28009710BF /* hevc.mov in Resources */ = {isa = PBXBuildFile; fileRef = ACFC8D2E2A346D28009710BF /* hevc.mov */; };
@@ -47,6 +48,7 @@
 		AC9FB92029D94A7E0082E210 /* av1.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = av1.mp4; sourceTree = "<group>"; };
 		ACA237122938B78A008916E3 /* dolby-digital-plus-channel.mkv */ = {isa = PBXFileReference; lastKnownFileType = file; path = "dolby-digital-plus-channel.mkv"; sourceTree = "<group>"; };
 		ACADA07528EDC067001B76D1 /* TracyPlayer.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = TracyPlayer.entitlements; sourceTree = "<group>"; };
+		ACB965462A42EDCD00378A4C /* SettingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingView.swift; sourceTree = "<group>"; };
 		ACD2F747275F6E860006D16F /* KSPlayer */ = {isa = PBXFileReference; lastKnownFileType = folder; name = KSPlayer; path = ../..; sourceTree = "<group>"; };
 		ACE3619328EB689F00F234EB /* TracyPlayer-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = "TracyPlayer-Info.plist"; sourceTree = "<group>"; };
 		ACEA9FEA298BFC8800FBA74B /* TestURL.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestURL.swift; sourceTree = "<group>"; };
@@ -87,6 +89,7 @@
 				AC44E0FA29290CBC00617BD3 /* ContentView.swift */,
 				AC77DFB026402327001351AE /* TracyApp.swift */,
 				AC77DFB126402327001351AE /* URLImportView.swift */,
+				ACB965462A42EDCD00378A4C /* SettingView.swift */,
 				AC77DFB226402329001351AE /* Assets.xcassets */,
 				ACD2F77F275F9BEE0006D16F /* Resources */,
 			);
@@ -220,6 +223,7 @@
 				AC77DFC526402329001351AE /* URLImportView.swift in Sources */,
 				AC44E0FD29290CF800617BD3 /* InitialView.swift in Sources */,
 				ACEA9FEB298BFC8800FBA74B /* TestURL.swift in Sources */,
+				ACB965472A42EDCD00378A4C /* SettingView.swift in Sources */,
 				AC44E0FC29290CBC00617BD3 /* ContentView.swift in Sources */,
 				AC77DFC326402329001351AE /* TracyApp.swift in Sources */,
 			);

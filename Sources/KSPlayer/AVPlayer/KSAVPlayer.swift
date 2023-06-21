@@ -469,7 +469,7 @@ extension KSAVPlayer: MediaPlayerProtocol {
         }
     }
 
-    public func tracks(mediaType: AVMediaType) -> [MediaPlayerTrack] {
+    public func tracks(mediaType: AVFoundation.AVMediaType) -> [MediaPlayerTrack] {
         player.currentItem?.tracks.filter { $0.assetTrack?.mediaType == mediaType }.map { AVMediaPlayerTrack(track: $0) } ?? []
     }
 
@@ -479,7 +479,7 @@ extension KSAVPlayer: MediaPlayerProtocol {
     }
 }
 
-extension AVMediaType {
+extension AVFoundation.AVMediaType {
     var mediaCharacteristic: AVMediaCharacteristic {
         switch self {
         case .video:
@@ -505,7 +505,7 @@ class AVMediaPlayerTrack: MediaPlayerTrack {
     let naturalSize: CGSize
     let name: String
     let language: String?
-    let mediaType: AVMediaType
+    let mediaType: AVFoundation.AVMediaType
     let depth: Int32
     let fullRangeVideo: Bool
     let colorPrimaries: String?

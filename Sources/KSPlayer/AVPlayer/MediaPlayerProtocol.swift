@@ -92,6 +92,10 @@ public protocol MediaPlayerTrack: AnyObject, CustomStringConvertible {
     var fieldOrder: FFmpegFieldOrder { get }
 }
 
+// public extension MediaPlayerTrack: Identifiable {
+//    var id: Int32 { trackID }
+// }
+
 public enum MediaPlaybackState: Int {
     case idle
     case playing

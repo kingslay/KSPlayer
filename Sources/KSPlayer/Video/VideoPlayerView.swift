@@ -596,9 +596,9 @@ extension VideoPlayerView {
 
     /// change during playback
     public func updateSrt() {
-        subtitleLabel.textColor = srtControl.textColor
-        subtitleLabel.font = srtControl.textFont
-        subtitleBackView.backgroundColor = srtControl.textBackgroundColor
+        subtitleLabel.textColor = SubtitleModel.textColor
+        subtitleLabel.font = SubtitleModel.textFont
+        subtitleBackView.backgroundColor = SubtitleModel.textBackgroundColor
     }
 
     private func setupSrtControl() {

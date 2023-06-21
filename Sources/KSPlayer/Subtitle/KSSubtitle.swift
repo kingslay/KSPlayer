@@ -295,14 +295,32 @@ open class SubtitleModel: ObservableObject {
         }
     }
 
+    public static var textColor: UIColor = .white
+    public static var textBackgroundColor: UIColor = .clear
+    public static var textFont: UIFont = SubtitleModel.Size.standard.font
+    public static var textXAlign: TextAlignment = .center
+    public static var textYAlign: VerticalAlignment = .bottom
+    public static var textXMargin: Int = 0
+    public static var textYMargin: Int = 10
+    public static var edgeInsets: EdgeInsets {
+        var edgeInsets = EdgeInsets()
+        if SubtitleModel.textYAlign == .bottom {
+            edgeInsets.bottom = CGFloat(SubtitleModel.textYMargin)
+        } else if SubtitleModel.textYAlign == .top {
+            edgeInsets.top = CGFloat(SubtitleModel.textYMargin)
+        }
+        if SubtitleModel.textXAlign == .leading {
+            edgeInsets.leading = CGFloat(SubtitleModel.textXMargin)
+        } else if SubtitleModel.textXAlign == .trailing {
+            edgeInsets.trailing = CGFloat(SubtitleModel.textXMargin)
+        }
+        return edgeInsets
+    }
+
     private var subtitleDataSouces: [SubtitleDataSouce] = KSOptions.subtitleDataSouces
     public private(set) var subtitleInfos = [any SubtitleInfo]()
     @Published public var srtListCount: Int = 0
     @Published public private(set) var part: SubtitlePart?
-    @Published public var textFont: UIFont = SubtitleModel.Size.standard.font
-    @Published public var textColor: UIColor = .white
-    @Published public var textPositionFromBottom = 0
-    @Published public var textBackgroundColor: UIColor = .clear
     @Published public var delay = "0.0"
     public var url: URL? {
         didSet {

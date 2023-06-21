@@ -165,7 +165,7 @@ public class PlayerToolBar: UIStackView {
             pipButton.setImage(UIImage(systemName: "pip.exit"), for: .selected)
             playButton.setImage(UIImage(systemName: "play.fill"), for: .normal)
             playButton.setImage(UIImage(systemName: "pause.fill"), for: .selected)
-            srtButton.setImage(UIImage(systemName: "contextualmenu.and.cursorarrow"), for: .normal)
+            srtButton.setImage(UIImage(systemName: "captions.bubble"), for: .normal)
             definitionButton.setImage(UIImage(systemName: "arrow.up.right.video"), for: .normal)
             audioSwitchButton.setImage(UIImage(systemName: "waveform"), for: .normal)
             videoSwitchButton.setImage(UIImage(systemName: "video.badge.ellipsis"), for: .normal)

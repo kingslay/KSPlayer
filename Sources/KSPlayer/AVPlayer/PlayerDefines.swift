@@ -17,6 +17,7 @@ public extension UIScreen {
 }
 #else
 import AppKit
+import SwiftUI
 public typealias UIView = NSView
 public typealias UIScreen = NSScreen
 public extension NSScreen {
@@ -394,8 +395,8 @@ public extension URL {
     }
 
     func parsePlaylist(completion: @escaping (([(String, URL, [String: String])]) -> Void)) {
-        URLSession.shared.dataTask(with: self) { data, _, _ in
-            guard let data, let string = String(data: data, encoding: .utf8) else {
+        let handler: ((Data) -> Void) = { data in
+            guard let string = String(data: data, encoding: .utf8) else {
                 return
             }
             let result = string.components(separatedBy: "#EXTINF:").compactMap { content -> (String, URL, [String: String])? in
@@ -426,7 +427,20 @@ public extension URL {
                 return (String(name), url, extinf)
             }
             completion(result)
-        }.resume()
+        }
+        if isFileURL {
+            do {
+                let data = try Data(contentsOf: self)
+                handler(data)
+            } catch {}
+        } else {
+            URLSession.shared.dataTask(with: self) { data, _, _ in
+                guard let data else {
+                    return
+                }
+                handler(data)
+            }.resume()
+        }
     }
 }
 
@@ -483,6 +497,38 @@ public extension Int {
             } else {
                 return String(format: "%02d:%02d.%02d", min, sec, millisecond)
             }
+        }
+    }
+}
+
+extension TextAlignment: CustomStringConvertible {
+    public var description: String {
+        switch self {
+        case .leading:
+            return "Leading"
+        case .center:
+            return "Center"
+        case .trailing:
+            return "Trailing"
+        }
+    }
+}
+
+extension VerticalAlignment: Hashable, CustomStringConvertible {
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(description)
+    }
+
+    public var description: String {
+        switch self {
+        case .top:
+            return "Top"
+        case .center:
+            return "Center"
+        case .bottom:
+            return "Bottom"
+        default:
+            return ""
         }
     }
 }

@@ -1,5 +1,4 @@
 import AVFoundation
-import FFmpegKit
 @testable import KSPlayer
 import XCTest
 class AudioTest: XCTestCase {

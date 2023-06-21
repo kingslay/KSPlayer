@@ -11,9 +11,9 @@ struct ContentView: View {
         }
         .preferredColorScheme(.dark)
         .background(Color.black)
-        .sheet(isPresented: $appModel.openURLImport, content: {
+        .sheet(isPresented: $appModel.openURLImport) {
             URLImportView()
-        })
+        }
         .onOpenURL { url in
             appModel.open(url: url)
         }

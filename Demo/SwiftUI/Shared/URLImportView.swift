@@ -13,18 +13,21 @@ struct URLImportView: View {
     @EnvironmentObject private var appModel: APPModel
     @State private var username = ""
     @State private var password = ""
-    @State private var playURL: String = "https://iptv-org.github.io/iptv/index.nsfw.m3u"
+    @State private var playURL: String = ""
     var body: some View {
         List {
-            TextField("Please enter the URL here……", text: $playURL)
+            HStack {
+                TextField("Please enter the URL here……", text: $playURL)
+                Picker("iptv", selection: $playURL) {
+                    ForEach(appModel.iptv, id: \.self) {
+                        Text($0.name).tag($0.m3uURL)
+                    }
+                }.fixedSize()
+            }
             Section("HTTP Authentication") {
                 HStack {
-                    Text("Username")
-                    TextField("", text: $username).border(.gray)
-                }
-                HStack {
-                    Text("Password")
-                    TextField("", text: $password).border(.gray)
+                    TextField("Username", text: $username).border(.gray)
+                    SecureField("Password", text: $password).border(.gray)
                 }
             }
             HStack {

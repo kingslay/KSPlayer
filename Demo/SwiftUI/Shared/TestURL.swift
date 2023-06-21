@@ -72,7 +72,7 @@ class MovieModel: Hashable {
 }
 
 extension MovieModel: Identifiable {
-    var id: MovieModel { self }
+    var id: URL { url }
 }
 
 var testObjects: [MovieModel] = {

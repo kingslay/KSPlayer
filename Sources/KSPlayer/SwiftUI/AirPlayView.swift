@@ -22,6 +22,7 @@ public struct AirPlayView: UIViewRepresentable {
     public typealias NSViewType = AVRoutePickerView
     public func makeNSView(context _: Context) -> NSViewType {
         let routePickerView = AVRoutePickerView()
+        routePickerView.isRoutePickerButtonBordered = false
         return routePickerView
     }
 

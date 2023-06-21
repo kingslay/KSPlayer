@@ -7,33 +7,32 @@ struct InitialView: View {
     init() {}
 
     var body: some View {
-        HStack {
-            Button {
-                appModel.openFileImport = true
-            } label: {
-                HStack {
-                    Text("打开...")
-                    Spacer()
-                    Text("⌘O")
-                }
-            }
-            Button {
-                appModel.openURLImport = true
-            } label: {
-                HStack {
-                    Text("打开URL...")
-                    Spacer()
-                    Text("⇧⌘O")
-                }
-            }
-        }
         ScrollView {
             LazyVGrid(columns: columns) {
-                ForEach(appModel.playlist, id: \.self) { resource in
+                ForEach(appModel.filterParsePlaylist(), id: \.self) { resource in
                     NavigationLink(value: resource) {
                         MoiveView(model: resource)
                     }
                     .buttonStyle(.plain)
+                }
+            }
+        }
+        .searchable(text: $appModel.nameFilter)
+        .toolbar {
+            Button {
+                appModel.openFileImport = true
+            } label: {
+                Text("打开文件")
+            }
+            Button {
+                appModel.openURLImport = true
+            } label: {
+                Text("打开URL")
+            }
+            Picker("group filter", selection: $appModel.groupFilter) {
+                Text("All ").tag("")
+                ForEach(appModel.groups, id: \.self) { group in
+                    Text(group).tag(group)
                 }
             }
         }

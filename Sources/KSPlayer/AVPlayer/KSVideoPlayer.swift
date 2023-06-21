@@ -103,6 +103,8 @@ extension KSVideoPlayer: UIViewRepresentable {
 
         @Published public var isLoading = true
         public var subtitleModel = SubtitleModel()
+        @Published
+        public var timemodel = ControllerTimeModel()
         public var selectedAudioTrack: MediaPlayerTrack? {
             didSet {
                 if oldValue?.trackID != selectedAudioTrack?.trackID {
@@ -184,6 +186,8 @@ extension KSVideoPlayer.Coordinator: KSPlayerLayerDelegate {
             videoTracks = layer.player.tracks(mediaType: .video)
             audioTracks = layer.player.tracks(mediaType: .audio)
             subtitleModel.selectedSubtitleInfo = subtitleModel.subtitleInfos.first
+            selectedAudioTrack = audioTracks.first { $0.isEnabled }
+            selectedVideoTrack = videoTracks.first { $0.isEnabled }
             if let subtitleDataSouce = layer.player.subtitleDataSouce {
                 // 要延后增加内嵌字幕。因为有些内嵌字幕是放在视频流的。所以会比readyToPlay回调晚。
                 DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 1) { [weak self] in
@@ -203,6 +207,8 @@ extension KSVideoPlayer.Coordinator: KSPlayerLayerDelegate {
 
     public func player(layer: KSPlayerLayer, currentTime: TimeInterval, totalTime: TimeInterval) {
         onPlay?(currentTime, totalTime)
+        timemodel.currentTime = Int(currentTime)
+        timemodel.totalTime = Int(max(0, totalTime))
         subtitleModel.subtitle(currentTime: currentTime + layer.options.subtitleDelay)
     }
 
@@ -250,4 +256,13 @@ public extension KSVideoPlayer {
         return self
     }
     #endif
+}
+
+/// 这是一个频繁变化的model。View要少用这个
+public class ControllerTimeModel: ObservableObject {
+    // 改成int才不会频繁更新
+    @Published
+    public var currentTime = 0
+    @Published
+    public var totalTime = 1
 }
