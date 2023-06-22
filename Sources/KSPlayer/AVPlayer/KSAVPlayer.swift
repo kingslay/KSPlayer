@@ -181,6 +181,8 @@ public class KSAVPlayer {
 
     #if os(xrOS)
     public var allowsExternalPlayback = false
+    public var usesExternalPlaybackWhileExternalScreenIsActive = false
+    public let isExternalPlaybackActive = false
     #else
     public var allowsExternalPlayback: Bool {
         get {
@@ -190,7 +192,24 @@ public class KSAVPlayer {
             player.allowsExternalPlayback = newValue
         }
     }
+    #if os(macOS)
+    public var usesExternalPlaybackWhileExternalScreenIsActive = false
+    #else
+    public var usesExternalPlaybackWhileExternalScreenIsActive: Bool {
+        get {
+            player.usesExternalPlaybackWhileExternalScreenIsActive
+        }
+        set {
+            player.usesExternalPlaybackWhileExternalScreenIsActive = newValue
+        }
+    }
     #endif
+
+    public var isExternalPlaybackActive: Bool {
+        player.isExternalPlaybackActive
+    }
+    #endif
+    
     public required init(url: URL, options: KSOptions) {
         KSOptions.setAudioSession()
         urlAsset = AVURLAsset(url: url, options: options.avOptions)
@@ -341,30 +360,6 @@ extension KSAVPlayer: MediaPlayerProtocol {
     public var subtitleDataSouce: SubtitleDataSouce? { nil }
     public var isPlaying: Bool { player.rate > 0 ? true : playbackState == .playing }
     public var view: UIView? { playerView }
-
-    public var usesExternalPlaybackWhileExternalScreenIsActive: Bool {
-        get {
-            #if os(macOS) || os(xrOS)
-            return false
-            #else
-            return player.usesExternalPlaybackWhileExternalScreenIsActive
-            #endif
-        }
-        set {
-            #if !os(macOS) && !os(xrOS)
-            player.usesExternalPlaybackWhileExternalScreenIsActive = newValue
-            #endif
-        }
-    }
-
-    public var isExternalPlaybackActive: Bool {
-        #if os(xrOS)
-        return false
-        #else
-        return player.isExternalPlaybackActive
-        #endif
-    }
-
     public var currentPlaybackTime: TimeInterval {
         get {
             if shouldSeekTo > 0 {

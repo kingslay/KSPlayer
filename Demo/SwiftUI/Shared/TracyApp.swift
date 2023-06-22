@@ -54,7 +54,6 @@ struct TracyApp: App {
             }
             #endif
         }
-
         #if !os(tvOS)
         .commands {
             #if os(macOS)

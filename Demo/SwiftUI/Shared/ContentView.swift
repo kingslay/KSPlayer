@@ -7,6 +7,9 @@ struct ContentView: View {
             InitialView()
                 .navigationDestination(for: MovieModel.self) { model in
                     KSVideoPlayerView(model: model)
+                    #if !os(macOS)
+                        .toolbar(.hidden, for: .tabBar)
+                    #endif
                 }
         }
         .preferredColorScheme(.dark)

@@ -13,9 +13,6 @@ import MetalKit
 #endif
 public final class MetalPlayView: UIView {
     private let render = MetalRender()
-    #if !os(xrOS)
-    private let metalView = MTKView(frame: .zero, device: MetalRender.device)
-    #endif
     private var videoInfo: CMVideoFormatDescription?
     public private(set) var pixelBuffer: CVPixelBuffer?
     /// 用displayLink会导致锁屏无法draw，
@@ -27,19 +24,27 @@ public final class MetalPlayView: UIView {
     weak var renderSource: OutputRenderSourceDelegate?
     // AVSampleBufferAudioRenderer AVSampleBufferRenderSynchronizer AVSampleBufferDisplayLayer
     var displayView = AVSampleBufferDisplayView()
+    #if canImport(UIKit)
+    override public class var layerClass: AnyClass { CAMetalLayer.self }
+    #endif
+    var metalLayer: CAMetalLayer {
+        // swiftlint:disable force_cast
+        layer as! CAMetalLayer
+        // swiftlint:enable force_cast
+    }
 
     init(options: KSOptions) {
         self.options = options
         super.init(frame: .zero)
+        #if !canImport(UIKit)
+        layer = CAMetalLayer()
+        #endif
         #if os(macOS)
-        (metalView.layer as? CAMetalLayer)?.wantsExtendedDynamicRangeContent = true
+        metalLayer.wantsExtendedDynamicRangeContent = true
         #endif
-        #if !os(xrOS)
-        metalView.framebufferOnly = true
-        metalView.isPaused = true
-        metalView.isHidden = true
-        addSubview(metalView)
-        #endif
+        metalLayer.device = MetalRender.device
+        metalLayer.framebufferOnly = true
+        metalLayer.isHidden = true
         addSubview(displayView)
         displayLink.add(to: .main, forMode: .common)
         pause()
@@ -51,16 +56,10 @@ public final class MetalPlayView: UIView {
 
     func play() {
         displayLink.isPaused = false
-        #if !os(xrOS)
-        metalView.isPaused = false
-        #endif
     }
 
     func pause() {
         displayLink.isPaused = true
-        #if !os(xrOS)
-        metalView.isPaused = true
-        #endif
     }
 
     @available(*, unavailable)
@@ -83,9 +82,6 @@ public final class MetalPlayView: UIView {
 
     override public var contentMode: UIViewContentMode {
         didSet {
-            #if !os(xrOS)
-            metalView.contentMode = contentMode
-            #endif
             switch contentMode {
             case .scaleToFill:
                 displayView.displayLayer.videoGravity = .resize
@@ -119,11 +115,9 @@ public final class MetalPlayView: UIView {
 
     func clear() {
         if displayView.isHidden {
-            #if !os(xrOS)
-            if let drawable = metalView.currentDrawable, let renderPassDescriptor = metalView.currentRenderPassDescriptor {
-                render.clear(drawable: drawable, renderPassDescriptor: renderPassDescriptor)
+            if let drawable = metalLayer.nextDrawable() {
+                render.clear(drawable: drawable)
             }
-            #endif
         } else {
             displayView.displayLayer.flushAndRemoveImage()
         }
@@ -135,6 +129,78 @@ public final class MetalPlayView: UIView {
 
     public func readNextFrame() {
         draw(force: true)
+    }
+}
+
+extension MetalPlayView {
+    @objc private func draw(in _: Any) {
+        draw(force: false)
+    }
+
+    private func draw(force: Bool) {
+        autoreleasepool {
+            guard let frame = renderSource?.getVideoOutputRender(force: force) else {
+                return
+            }
+            pixelBuffer = frame.corePixelBuffer
+            guard let pixelBuffer else {
+                return
+            }
+            let cmtime = frame.cmtime
+            renderSource?.setVideo(time: cmtime)
+            let par = pixelBuffer.size
+            let sar = pixelBuffer.aspectRatio
+            if options.isUseDisplayLayer() {
+                if displayView.isHidden {
+                    displayView.isHidden = false
+                    metalLayer.isHidden = true
+                    if let drawable = metalLayer.nextDrawable() {
+                        render.clear(drawable: drawable)
+                    }
+                }
+                if let dar = options.customizeDar(sar: sar, par: par) {
+                    pixelBuffer.aspectRatio = CGSize(width: dar.width, height: dar.height * par.width / par.height)
+                }
+                set(pixelBuffer: pixelBuffer, time: cmtime)
+            } else {
+                if !displayView.isHidden {
+                    displayView.isHidden = true
+                    metalLayer.isHidden = false
+                    displayView.displayLayer.flushAndRemoveImage()
+                }
+                if options.display == .plane {
+                    if let dar = options.customizeDar(sar: sar, par: par) {
+                        metalLayer.drawableSize = CGSize(width: par.width, height: par.width * dar.height / dar.width)
+                    } else {
+                        metalLayer.drawableSize = CGSize(width: par.width, height: par.height * sar.height / sar.width)
+                    }
+                } else {
+                    metalLayer.drawableSize = KSOptions.sceneSize
+                }
+                metalLayer.pixelFormat = KSOptions.colorPixelFormat(bitDepth: pixelBuffer.bitDepth)
+                metalLayer.colorspace = pixelBuffer.colorspace
+                guard let drawable = metalLayer.nextDrawable() else {
+                    return
+                }
+                render.draw(pixelBuffer: pixelBuffer, display: options.display, drawable: drawable)
+            }
+        }
+    }
+
+    private func set(pixelBuffer: CVPixelBuffer, time _: CMTime) {
+        if videoInfo == nil || !CMVideoFormatDescriptionMatchesImageBuffer(videoInfo!, imageBuffer: pixelBuffer) {
+            if videoInfo != nil {
+                displayView.removeFromSuperview()
+                displayView = AVSampleBufferDisplayView()
+                addSubview(displayView)
+            }
+            let err = CMVideoFormatDescriptionCreateForImageBuffer(allocator: nil, imageBuffer: pixelBuffer, formatDescriptionOut: &videoInfo)
+            if err != noErr {
+                KSLog("Error at CMVideoFormatDescriptionCreateForImageBuffer \(err)")
+            }
+        }
+        guard let videoInfo else { return }
+        displayView.enqueue(imageBuffer: pixelBuffer, formatDescription: videoInfo)
     }
 }
 
@@ -189,82 +255,6 @@ class AVSampleBufferDisplayView: UIView {
             //                CMTimebaseSetTime(controlTimebase, time: time)
             //            }
         }
-    }
-}
-
-extension MetalPlayView {
-    @objc private func draw(in _: Any) {
-        draw(force: false)
-    }
-
-    private func draw(force: Bool) {
-        autoreleasepool {
-            guard let frame = renderSource?.getVideoOutputRender(force: force) else {
-                return
-            }
-            pixelBuffer = frame.corePixelBuffer
-            guard let pixelBuffer else {
-                return
-            }
-            let cmtime = frame.cmtime
-            renderSource?.setVideo(time: cmtime)
-            let par = pixelBuffer.size
-            let sar = pixelBuffer.aspectRatio
-            if options.isUseDisplayLayer() {
-                if displayView.isHidden {
-                    displayView.isHidden = false
-                    #if !os(xrOS)
-                    metalView.isHidden = true
-                    if let drawable = metalView.currentDrawable, let renderPassDescriptor = metalView.currentRenderPassDescriptor {
-                        render.clear(drawable: drawable, renderPassDescriptor: renderPassDescriptor)
-                    }
-                    #endif
-                }
-                if let dar = options.customizeDar(sar: sar, par: par) {
-                    pixelBuffer.aspectRatio = CGSize(width: dar.width, height: dar.height * par.width / par.height)
-                }
-                set(pixelBuffer: pixelBuffer, time: cmtime)
-            } else {
-                #if !os(xrOS)
-                if !displayView.isHidden {
-                    displayView.isHidden = true
-                    metalView.isHidden = false
-                    displayView.displayLayer.flushAndRemoveImage()
-                }
-                if options.display == .plane {
-                    if let dar = options.customizeDar(sar: sar, par: par) {
-                        metalView.drawableSize = CGSize(width: par.width, height: par.width * dar.height / dar.width)
-                    } else {
-                        metalView.drawableSize = CGSize(width: par.width, height: par.height * sar.height / sar.width)
-                    }
-                } else {
-                    metalView.drawableSize = KSOptions.sceneSize
-                }
-                (metalView.layer as? CAMetalLayer)?.pixelFormat = KSOptions.colorPixelFormat(bitDepth: pixelBuffer.bitDepth)
-                (metalView.layer as? CAMetalLayer)?.colorspace = pixelBuffer.colorspace
-                guard let drawable = metalView.currentDrawable else {
-                    return
-                }
-                render.draw(pixelBuffer: pixelBuffer, display: options.display, drawable: drawable)
-                #endif
-            }
-        }
-    }
-
-    private func set(pixelBuffer: CVPixelBuffer, time _: CMTime) {
-        if videoInfo == nil || !CMVideoFormatDescriptionMatchesImageBuffer(videoInfo!, imageBuffer: pixelBuffer) {
-            if videoInfo != nil {
-                displayView.removeFromSuperview()
-                displayView = AVSampleBufferDisplayView()
-                addSubview(displayView)
-            }
-            let err = CMVideoFormatDescriptionCreateForImageBuffer(allocator: nil, imageBuffer: pixelBuffer, formatDescriptionOut: &videoInfo)
-            if err != noErr {
-                KSLog("Error at CMVideoFormatDescriptionCreateForImageBuffer \(err)")
-            }
-        }
-        guard let videoInfo else { return }
-        displayView.enqueue(imageBuffer: pixelBuffer, formatDescription: videoInfo)
     }
 }
 

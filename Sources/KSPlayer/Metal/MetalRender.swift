@@ -60,7 +60,7 @@ class MetalRender {
         return buffer
     }()
 
-    func clear(drawable: MTLDrawable, renderPassDescriptor: MTLRenderPassDescriptor) {
+    func clear(drawable: MTLDrawable) {
         renderPassDescriptor.colorAttachments[0].clearColor = MTLClearColor(red: 0, green: 0, blue: 0, alpha: 0)
         renderPassDescriptor.colorAttachments[0].loadAction = .clear
         guard let commandBuffer = commandQueue?.makeCommandBuffer(),
