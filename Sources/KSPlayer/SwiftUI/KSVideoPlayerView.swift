@@ -337,6 +337,7 @@ struct VideoSubtitleView: View {
                 #if !os(tvOS)
                     .textSelection(.enabled)
                 #endif
+//                    .italic(SubtitleModel.textItalic)
                 if SubtitleModel.textYAlign == .top {
                     Spacer()
                 }

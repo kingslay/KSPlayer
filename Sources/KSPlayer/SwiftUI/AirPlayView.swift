@@ -29,3 +29,14 @@ public struct AirPlayView: UIViewRepresentable {
     public func updateNSView(_: NSViewType, context _: Context) {}
     #endif
 }
+
+public extension View {
+    @ViewBuilder
+    func `if`(_ condition: Bool, transform: (Self) -> some View) -> some View {
+        if condition {
+            transform(self)
+        } else {
+            self
+        }
+    }
+}

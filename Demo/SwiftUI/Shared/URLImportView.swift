@@ -15,23 +15,22 @@ struct URLImportView: View {
     @State private var password = ""
     @State private var playURL: String = ""
     var body: some View {
-        List {
-            HStack {
-                TextField("Please enter the URL here……", text: $playURL)
+        Form {
+            Section {
+                TextField("URL:", text: $playURL)
                 Picker("iptv", selection: $playURL) {
                     ForEach(appModel.iptv, id: \.self) {
                         Text($0.name).tag($0.m3uURL)
                     }
-                }.fixedSize()
+                }
             }
             Section("HTTP Authentication") {
                 HStack {
-                    TextField("Username", text: $username).border(.gray)
-                    SecureField("Password", text: $password).border(.gray)
+                    TextField("Username:", text: $username).border(.gray)
+                    SecureField("Password:", text: $password).border(.gray)
                 }
             }
-            HStack {
-                Spacer()
+            Section {
                 Button("Cancel") {
                     appModel.openURLImport = false
                 }
@@ -51,5 +50,6 @@ struct URLImportView: View {
                 }
             }
         }
+        .padding()
     }
 }

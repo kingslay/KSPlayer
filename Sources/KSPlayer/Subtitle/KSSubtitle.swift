@@ -264,32 +264,31 @@ open class SubtitleModel: ObservableObject {
         case smaller
         case standard
         case large
-
-        public var font: UIFont {
+        public var rawValue: CGFloat {
             switch self {
             case .smaller:
                 #if os(tvOS)
-                return .systemFont(ofSize: 30)
+                return 30
                 #elseif os(macOS)
-                return .systemFont(ofSize: 20)
+                return 20
                 #else
-                return .systemFont(ofSize: 12)
+                return 12
                 #endif
             case .standard:
                 #if os(tvOS)
-                return .systemFont(ofSize: 36)
+                return 36
                 #elseif os(macOS)
-                return .systemFont(ofSize: 26)
+                return 26
                 #else
-                return .systemFont(ofSize: 16)
+                return 16
                 #endif
             case .large:
                 #if os(tvOS)
-                return .systemFont(ofSize: 42)
+                return 42
                 #elseif os(macOS)
-                return .systemFont(ofSize: 32)
+                return 32
                 #else
-                return .systemFont(ofSize: 20)
+                return 20
                 #endif
             }
         }
@@ -297,7 +296,13 @@ open class SubtitleModel: ObservableObject {
 
     public static var textColor: UIColor = .white
     public static var textBackgroundColor: UIColor = .clear
-    public static var textFont: UIFont = SubtitleModel.Size.standard.font
+    public static var textFont: UIFont {
+        textBold ? .boldSystemFont(ofSize: textFontSize) : .systemFont(ofSize: textFontSize)
+    }
+
+    public static var textFontSize = SubtitleModel.Size.standard.rawValue
+    public static var textBold = false
+    public static var textItalic = false
     public static var textXAlign: TextAlignment = .center
     public static var textYAlign: VerticalAlignment = .bottom
     public static var textXMargin: Int = 0
