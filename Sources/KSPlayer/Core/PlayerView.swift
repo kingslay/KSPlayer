@@ -55,7 +55,7 @@ open class PlayerView: UIView, KSPlayerLayerDelegate, KSSliderDelegate {
         #if os(macOS)
         self.init(frame: .zero)
         #else
-        self.init(frame: UIScreen.main.bounds)
+        self.init(frame: CGRect(origin: .zero, size: KSOptions.sceneSize))
         #endif
     }
 

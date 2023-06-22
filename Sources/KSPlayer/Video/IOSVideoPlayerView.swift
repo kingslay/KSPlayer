@@ -22,7 +22,9 @@ open class IOSVideoPlayerView: VideoPlayerView {
     public var volumeViewSlider = UXSlider()
     public var backButton = UIButton()
     public var airplayStatusView: UIView = AirplayStatusView()
+    #if !os(xrOS)
     public var routeButton = AVRoutePickerView()
+    #endif
     private let routeDetector = AVRouteDetector()
     /// Image view to show video cover
     public var maskImageView = UIImageView()
@@ -59,8 +61,7 @@ open class IOSVideoPlayerView: VideoPlayerView {
         backButton.addTarget(self, action: #selector(onButtonPressed(_:)), for: .touchUpInside)
         backButton.tintColor = .white
         navigationBar.insertArrangedSubview(backButton, at: 0)
-        routeButton.isHidden = true
-        navigationBar.addArrangedSubview(routeButton)
+
         addSubview(airplayStatusView)
         volumeView.move(to: self)
         #if !targetEnvironment(macCatalyst)
@@ -69,7 +70,6 @@ open class IOSVideoPlayerView: VideoPlayerView {
             volumeViewSlider = first
         }
         #endif
-        routeButton.translatesAutoresizingMaskIntoConstraints = false
         backButton.translatesAutoresizingMaskIntoConstraints = false
         landscapeButton.translatesAutoresizingMaskIntoConstraints = false
         maskImageView.translatesAutoresizingMaskIntoConstraints = false
@@ -79,11 +79,18 @@ open class IOSVideoPlayerView: VideoPlayerView {
             maskImageView.bottomAnchor.constraint(equalTo: bottomAnchor),
             maskImageView.trailingAnchor.constraint(equalTo: trailingAnchor),
             backButton.widthAnchor.constraint(equalToConstant: 25),
-            routeButton.widthAnchor.constraint(equalToConstant: 25),
             landscapeButton.widthAnchor.constraint(equalToConstant: 30),
             airplayStatusView.centerXAnchor.constraint(equalTo: centerXAnchor),
             airplayStatusView.centerYAnchor.constraint(equalTo: centerYAnchor),
         ])
+        #if !os(xrOS)
+        routeButton.isHidden = true
+        navigationBar.addArrangedSubview(routeButton)
+        routeButton.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            routeButton.widthAnchor.constraint(equalToConstant: 25),
+        ])
+        #endif
         addNotification()
     }
 
@@ -92,7 +99,9 @@ open class IOSVideoPlayerView: VideoPlayerView {
         maskImageView.alpha = 1
         maskImageView.image = nil
         panGesture.isEnabled = false
+        #if !os(xrOS)
         routeButton.isHidden = !routeDetector.multipleRoutesDetected
+        #endif
     }
 
     override open func onButtonPressed(type: PlayerButtonType, button: UIButton) {
@@ -249,7 +258,9 @@ open class IOSVideoPlayerView: VideoPlayerView {
                     volumeViewSlider.value = tmpPanValue
                 }
             } else if KSOptions.enableBrightnessGestures {
+                #if !os(xrOS)
                 UIScreen.main.brightness += CGFloat(panValue(velocity: point, direction: direction, currentTime: Float(toolBar.currentTime), totalTime: Float(totalTime)))
+                #endif
             }
         } else {
             super.panGestureChanged(velocity: point, direction: direction)
@@ -291,7 +302,9 @@ extension IOSVideoPlayerView {
     }
 
     @objc private func routesAvailableDidChange(notification _: Notification) {
+        #if !os(xrOS)
         routeButton.isHidden = !routeDetector.multipleRoutesDetected
+        #endif
     }
 
     @objc private func orientationChanged(notification _: Notification) {

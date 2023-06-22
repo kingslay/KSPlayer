@@ -11,19 +11,23 @@ import CoreServices
 import SwiftUI
 #if canImport(UIKit)
 import UIKit
-public extension UIScreen {
-    static var size: CGSize {
-        main.bounds.size
+public extension KSOptions {
+    static var windowScene: UIWindowScene? {
+        UIApplication.shared.connectedScenes.first as? UIWindowScene
+    }
+
+    static var sceneSize: CGSize {
+        let window = windowScene?.windows.first
+        return window?.bounds.size ?? .zero
     }
 }
 #else
 import AppKit
 import SwiftUI
 public typealias UIView = NSView
-public typealias UIScreen = NSScreen
-public extension NSScreen {
-    static var size: CGSize {
-        main?.frame.size ?? .zero
+public extension KSOptions {
+    static var sceneSize: CGSize {
+        NSScreen.main?.frame.size ?? .zero
     }
 }
 #endif

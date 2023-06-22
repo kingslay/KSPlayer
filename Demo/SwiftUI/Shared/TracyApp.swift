@@ -187,7 +187,7 @@ struct M3UModel: Hashable {
 
 // struct AVContentView: View {
 //    var body: some View {
-//        StructAVPlayerView().frame(width: UIScreen.main.bounds.width, height: 400, alignment: .center)
+//        StructAVPlayerView().frame(width: UIScene.main.bounds.width, height: 400, alignment: .center)
 //    }
 // }
 //

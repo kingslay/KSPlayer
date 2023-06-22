@@ -244,7 +244,7 @@ extension KSMEPlayer: MediaPlayerProtocol {
     public var isPlaying: Bool { playbackState == .playing }
 
     public var naturalSize: CGSize {
-        options.display == .plane ? playerItem.naturalSize : UIScreen.size
+        options.display == .plane ? playerItem.naturalSize : KSOptions.sceneSize
     }
 
     public var isExternalPlaybackActive: Bool { false }

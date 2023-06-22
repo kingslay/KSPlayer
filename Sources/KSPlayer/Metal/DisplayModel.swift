@@ -134,7 +134,6 @@ private class SphereDisplayModel {
     let indexBuffer: MTLBuffer
     let posBuffer: MTLBuffer?
     let uvBuffer: MTLBuffer?
-
     fileprivate init() {
         let (indices, positions, uvs) = SphereDisplayModel.genSphere()
         let device = MetalRender.device
@@ -249,7 +248,7 @@ private class SphereDisplayModel {
 private class VRDisplayModel: SphereDisplayModel {
     private let modelViewProjectionMatrix: simd_float4x4
     override required init() {
-        let size = UIScreen.size
+        let size = KSOptions.sceneSize
         let aspect = Float(size.width / size.height)
         let projectionMatrix = simd_float4x4(perspective: Float.pi / 3, aspect: aspect, nearZ: 0.1, farZ: 400.0)
         let viewMatrix = simd_float4x4(lookAt: SIMD3<Float>.zero, center: [0, 0, -1000], up: [0, 1, 0])
@@ -270,7 +269,7 @@ private class VRBoxDisplayModel: SphereDisplayModel {
     private let modelViewProjectionMatrixLeft: simd_float4x4
     private let modelViewProjectionMatrixRight: simd_float4x4
     override required init() {
-        let size = UIScreen.size
+        let size = KSOptions.sceneSize
         let aspect = Float(size.width / size.height) / 2
         let viewMatrixLeft = simd_float4x4(lookAt: [-0.012, 0, 0], center: [0, 0, -1000], up: [0, 1, 0])
         let viewMatrixRight = simd_float4x4(lookAt: [0.012, 0, 0], center: [0, 0, -1000], up: [0, 1, 0])
@@ -282,7 +281,7 @@ private class VRBoxDisplayModel: SphereDisplayModel {
 
     override func set(encoder: MTLRenderCommandEncoder) {
         super.set(encoder: encoder)
-        let layerSize = UIScreen.size
+        let layerSize = KSOptions.sceneSize
         let width = Double(layerSize.width / 2)
         [(modelViewProjectionMatrixLeft, MTLViewport(originX: 0, originY: 0, width: width, height: Double(layerSize.height), znear: 0, zfar: 0)),
          (modelViewProjectionMatrixRight, MTLViewport(originX: width, originY: 0, width: width, height: Double(layerSize.height), znear: 0, zfar: 0))].forEach { modelViewProjectionMatrix, viewport in

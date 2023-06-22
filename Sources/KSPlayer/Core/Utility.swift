@@ -136,22 +136,31 @@ extension AVAsset {
         }
     }
 
-    private func ceateComposition(beginTime: TimeInterval, endTime: TimeInterval) throws -> AVMutableComposition {
+    private func ceateComposition(beginTime: TimeInterval, endTime: TimeInterval) async throws -> AVMutableComposition {
         let compositionM = AVMutableComposition()
         let audioTrackM = compositionM.addMutableTrack(withMediaType: .audio, preferredTrackID: kCMPersistentTrackID_Invalid)
         let videoTrackM = compositionM.addMutableTrack(withMediaType: .video, preferredTrackID: kCMPersistentTrackID_Invalid)
         let cutRange = CMTimeRange(start: beginTime, end: endTime)
+        #if os(xrOS)
+        if let assetAudioTrack = try await loadTracks(withMediaType: .audio).first {
+            try audioTrackM?.insertTimeRange(cutRange, of: assetAudioTrack, at: .zero)
+        }
+        if let assetVideoTrack = try await loadTracks(withMediaType: .video).first {
+            try videoTrackM?.insertTimeRange(cutRange, of: assetVideoTrack, at: .zero)
+        }
+        #else
         if let assetAudioTrack = tracks(withMediaType: .audio).first {
             try audioTrackM?.insertTimeRange(cutRange, of: assetAudioTrack, at: .zero)
         }
         if let assetVideoTrack = tracks(withMediaType: .video).first {
             try videoTrackM?.insertTimeRange(cutRange, of: assetVideoTrack, at: .zero)
         }
+        #endif
         return compositionM
     }
 
-    func ceateExportSession(beginTime: TimeInterval, endTime: TimeInterval) throws -> AVAssetExportSession? {
-        let compositionM = try ceateComposition(beginTime: beginTime, endTime: endTime)
+    func ceateExportSession(beginTime: TimeInterval, endTime: TimeInterval) async throws -> AVAssetExportSession? {
+        let compositionM = try await ceateComposition(beginTime: beginTime, endTime: endTime)
         guard let exportSession = AVAssetExportSession(asset: compositionM, presetName: "") else {
             return nil
         }
@@ -162,12 +171,10 @@ extension AVAsset {
 
     func exportMp4(beginTime: TimeInterval, endTime: TimeInterval, outputURL: URL, progress: @escaping (Double) -> Void, completion: @escaping (Result<URL, Error>) -> Void) throws {
         try FileManager.default.removeItem(at: outputURL)
-        guard let exportSession = try ceateExportSession(beginTime: beginTime, endTime: endTime) else { return }
-        exportSession.outputURL = outputURL
-        exportSession.exportAsynchronously { [weak exportSession] in
-            guard let exportSession else {
-                return
-            }
+        Task {
+            guard let exportSession = try await ceateExportSession(beginTime: beginTime, endTime: endTime) else { return }
+            exportSession.outputURL = outputURL
+            await exportSession.export()
             switch exportSession.status {
             case .exporting:
                 progress(Double(exportSession.progress))

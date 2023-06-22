@@ -86,6 +86,7 @@ public class KSAVPlayer {
     private var itemObservation: NSKeyValueObservation?
     private var loopCountObservation: NSKeyValueObservation?
     private var loopStatusObservation: NSKeyValueObservation?
+    private var mediaPlayerTracks = [AVMediaPlayerTrack]()
     private var error: Error? {
         didSet {
             if let error {
@@ -113,6 +114,7 @@ public class KSAVPlayer {
         _pipController as? KSPictureInPictureController
     }
 
+    public var naturalSize: CGSize = .zero
     @available(macOS 12.0, iOS 15.0, tvOS 15.0, *)
     public var playbackCoordinator: AVPlaybackCoordinator {
         playerView.player.playbackCoordinator
@@ -177,6 +179,18 @@ public class KSAVPlayer {
         }
     }
 
+    #if os(xrOS)
+    public var allowsExternalPlayback = false
+    #else
+    public var allowsExternalPlayback: Bool {
+        get {
+            player.allowsExternalPlayback
+        }
+        set {
+            player.allowsExternalPlayback = newValue
+        }
+    }
+    #endif
     public required init(url: URL, options: KSOptions) {
         KSOptions.setAudioSession()
         urlAsset = AVURLAsset(url: url, options: options.avOptions)
@@ -214,8 +228,15 @@ extension KSAVPlayer {
     private func updateStatus(item: AVPlayerItem) {
         if item.status == .readyToPlay {
             options.findTime = CACurrentMediaTime()
-            let videoTracks = item.tracks.filter { $0.assetTrack?.mediaType.rawValue == AVMediaType.video.rawValue }
-            if videoTracks.isEmpty || videoTracks.allSatisfy({ $0.assetTrack?.isPlayable == false }) {
+            mediaPlayerTracks = item.tracks.map {
+                AVMediaPlayerTrack(track: $0)
+            }
+            let playableVideo = mediaPlayerTracks.first {
+                $0.mediaType == .video && $0.isPlayable
+            }
+            if let playableVideo {
+                naturalSize = playableVideo.naturalSize
+            } else {
                 error = NSError(errorCode: .videoTracksUnplayable)
                 return
             }
@@ -320,34 +341,28 @@ extension KSAVPlayer: MediaPlayerProtocol {
     public var subtitleDataSouce: SubtitleDataSouce? { nil }
     public var isPlaying: Bool { player.rate > 0 ? true : playbackState == .playing }
     public var view: UIView? { playerView }
-    public var allowsExternalPlayback: Bool {
-        get {
-            player.allowsExternalPlayback
-        }
-        set {
-            player.allowsExternalPlayback = newValue
-        }
-    }
 
     public var usesExternalPlaybackWhileExternalScreenIsActive: Bool {
         get {
-            #if os(macOS)
+            #if os(macOS) || os(xrOS)
             return false
             #else
             return player.usesExternalPlaybackWhileExternalScreenIsActive
             #endif
         }
         set {
-            #if !os(macOS)
+            #if !os(macOS) && !os(xrOS)
             player.usesExternalPlaybackWhileExternalScreenIsActive = newValue
             #endif
         }
     }
 
-    public var isExternalPlaybackActive: Bool { player.isExternalPlaybackActive }
-
-    public var naturalSize: CGSize {
-        urlAsset.tracks(withMediaType: .video).first { $0.isEnabled }?.naturalSize ?? .zero
+    public var isExternalPlaybackActive: Bool {
+        #if os(xrOS)
+        return false
+        #else
+        return player.isExternalPlaybackActive
+        #endif
     }
 
     public var currentPlaybackTime: TimeInterval {
@@ -494,6 +509,10 @@ extension AVFoundation.AVMediaType {
     }
 }
 
+extension AVAssetTrack {
+    func toMediaPlayerTrack() {}
+}
+
 class AVMediaPlayerTrack: MediaPlayerTrack {
     let description: String
     private let track: AVPlayerItemTrack
@@ -515,6 +534,7 @@ class AVMediaPlayerTrack: MediaPlayerTrack {
     var dovi: DOVIDecoderConfigurationRecord?
     var audioStreamBasicDescription: AudioStreamBasicDescription?
     let fieldOrder: FFmpegFieldOrder = .unknown
+    var isPlayable: Bool
     var isEnabled: Bool {
         get {
             track.isEnabled
@@ -528,12 +548,25 @@ class AVMediaPlayerTrack: MediaPlayerTrack {
         self.track = track
         trackID = track.assetTrack?.trackID ?? 0
         mediaType = track.assetTrack?.mediaType ?? .video
+        let formatDescription: Any?
+        #if os(xrOS)
         name = track.assetTrack?.languageCode ?? ""
         language = track.assetTrack?.extendedLanguageTag
         nominalFrameRate = track.assetTrack?.nominalFrameRate ?? 24.0
         naturalSize = track.assetTrack?.naturalSize ?? .zero
         bitRate = Int64(track.assetTrack?.estimatedDataRate ?? 0)
-        if let formatDescription = track.assetTrack?.formatDescriptions.first {
+        isPlayable = false
+        formatDescription = track.assetTrack?.formatDescriptions.first
+        #else
+        name = track.assetTrack?.languageCode ?? ""
+        language = track.assetTrack?.extendedLanguageTag
+        nominalFrameRate = track.assetTrack?.nominalFrameRate ?? 24.0
+        naturalSize = track.assetTrack?.naturalSize ?? .zero
+        bitRate = Int64(track.assetTrack?.estimatedDataRate ?? 0)
+        isPlayable = track.assetTrack?.isPlayable ?? false
+        formatDescription = track.assetTrack?.formatDescriptions.first
+        #endif
+        if let formatDescription {
             // swiftlint:disable force_cast
             let desc = formatDescription as! CMFormatDescription
             // swiftlint:enable force_cast
@@ -555,7 +588,14 @@ class AVMediaPlayerTrack: MediaPlayerTrack {
             fullRangeVideo = false
             description = ""
         }
+        #if os(xrOS)
+        Task {
+            isPlayable = await (try? track.assetTrack?.load(.isPlayable)) ?? false
+        }
+        #endif
     }
+
+    func load() {}
 }
 
 public extension AVAsset {

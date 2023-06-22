@@ -13,7 +13,9 @@ import MetalKit
 #endif
 public final class MetalPlayView: UIView {
     private let render = MetalRender()
+    #if !os(xrOS)
     private let metalView = MTKView(frame: .zero, device: MetalRender.device)
+    #endif
     private var videoInfo: CMVideoFormatDescription?
     public private(set) var pixelBuffer: CVPixelBuffer?
     /// 用displayLink会导致锁屏无法draw，
@@ -32,10 +34,12 @@ public final class MetalPlayView: UIView {
         #if os(macOS)
         (metalView.layer as? CAMetalLayer)?.wantsExtendedDynamicRangeContent = true
         #endif
+        #if !os(xrOS)
         metalView.framebufferOnly = true
         metalView.isPaused = true
         metalView.isHidden = true
         addSubview(metalView)
+        #endif
         addSubview(displayView)
         displayLink.add(to: .main, forMode: .common)
         pause()
@@ -47,12 +51,16 @@ public final class MetalPlayView: UIView {
 
     func play() {
         displayLink.isPaused = false
+        #if !os(xrOS)
         metalView.isPaused = false
+        #endif
     }
 
     func pause() {
         displayLink.isPaused = true
+        #if !os(xrOS)
         metalView.isPaused = true
+        #endif
     }
 
     @available(*, unavailable)
@@ -62,21 +70,22 @@ public final class MetalPlayView: UIView {
 
     override public func didAddSubview(_ subview: UIView) {
         super.didAddSubview(subview)
-        if subview == displayView || subview == metalView {
-            subview.frame = frame
-            subview.translatesAutoresizingMaskIntoConstraints = false
-            NSLayoutConstraint.activate([
-                subview.leftAnchor.constraint(equalTo: leftAnchor),
-                subview.topAnchor.constraint(equalTo: topAnchor),
-                subview.centerXAnchor.constraint(equalTo: centerXAnchor),
-                subview.centerYAnchor.constraint(equalTo: centerYAnchor),
-            ])
-        }
+
+        subview.frame = frame
+        subview.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            subview.leftAnchor.constraint(equalTo: leftAnchor),
+            subview.topAnchor.constraint(equalTo: topAnchor),
+            subview.centerXAnchor.constraint(equalTo: centerXAnchor),
+            subview.centerYAnchor.constraint(equalTo: centerYAnchor),
+        ])
     }
 
     override public var contentMode: UIViewContentMode {
         didSet {
+            #if !os(xrOS)
             metalView.contentMode = contentMode
+            #endif
             switch contentMode {
             case .scaleToFill:
                 displayView.displayLayer.videoGravity = .resize
@@ -110,9 +119,11 @@ public final class MetalPlayView: UIView {
 
     func clear() {
         if displayView.isHidden {
+            #if !os(xrOS)
             if let drawable = metalView.currentDrawable, let renderPassDescriptor = metalView.currentRenderPassDescriptor {
                 render.clear(drawable: drawable, renderPassDescriptor: renderPassDescriptor)
             }
+            #endif
         } else {
             displayView.displayLayer.flushAndRemoveImage()
         }
@@ -202,16 +213,19 @@ extension MetalPlayView {
             if options.isUseDisplayLayer() {
                 if displayView.isHidden {
                     displayView.isHidden = false
+                    #if !os(xrOS)
                     metalView.isHidden = true
                     if let drawable = metalView.currentDrawable, let renderPassDescriptor = metalView.currentRenderPassDescriptor {
                         render.clear(drawable: drawable, renderPassDescriptor: renderPassDescriptor)
                     }
+                    #endif
                 }
                 if let dar = options.customizeDar(sar: sar, par: par) {
                     pixelBuffer.aspectRatio = CGSize(width: dar.width, height: dar.height * par.width / par.height)
                 }
                 set(pixelBuffer: pixelBuffer, time: cmtime)
             } else {
+                #if !os(xrOS)
                 if !displayView.isHidden {
                     displayView.isHidden = true
                     metalView.isHidden = false
@@ -224,7 +238,7 @@ extension MetalPlayView {
                         metalView.drawableSize = CGSize(width: par.width, height: par.height * sar.height / sar.width)
                     }
                 } else {
-                    metalView.drawableSize = UIScreen.size
+                    metalView.drawableSize = KSOptions.sceneSize
                 }
                 (metalView.layer as? CAMetalLayer)?.pixelFormat = KSOptions.colorPixelFormat(bitDepth: pixelBuffer.bitDepth)
                 (metalView.layer as? CAMetalLayer)?.colorspace = pixelBuffer.colorspace
@@ -232,6 +246,7 @@ extension MetalPlayView {
                     return
                 }
                 render.draw(pixelBuffer: pixelBuffer, display: options.display, drawable: drawable)
+                #endif
             }
         }
     }

@@ -188,7 +188,7 @@ struct VideoControllerView: View {
                 } label: {
                     Image(systemName: config.isScaleAspectFill ? "rectangle.arrowtriangle.2.inward" : "rectangle.arrowtriangle.2.outward")
                 }
-                #if !os(tvOS)
+                #if !os(tvOS) && !os(xrOS)
                 if config.playerLayer?.player.allowsExternalPlayback == true {
                     AirPlayView().fixedSize()
                 }

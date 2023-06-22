@@ -7,7 +7,7 @@
 
 import AVKit
 import SwiftUI
-
+#if !os(xrOS)
 public struct AirPlayView: UIViewRepresentable {
     #if canImport(UIKit)
     public typealias UIViewType = AVRoutePickerView
@@ -29,7 +29,7 @@ public struct AirPlayView: UIViewRepresentable {
     public func updateNSView(_: NSViewType, context _: Context) {}
     #endif
 }
-
+#endif
 public extension View {
     @ViewBuilder
     func `if`(_ condition: Bool, transform: (Self) -> some View) -> some View {
