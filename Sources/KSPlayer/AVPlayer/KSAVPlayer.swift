@@ -192,6 +192,7 @@ public class KSAVPlayer {
             player.allowsExternalPlayback = newValue
         }
     }
+
     #if os(macOS)
     public var usesExternalPlaybackWhileExternalScreenIsActive = false
     #else
@@ -209,7 +210,7 @@ public class KSAVPlayer {
         player.isExternalPlaybackActive
     }
     #endif
-    
+
     public required init(url: URL, options: KSOptions) {
         KSOptions.setAudioSession()
         urlAsset = AVURLAsset(url: url, options: options.avOptions)

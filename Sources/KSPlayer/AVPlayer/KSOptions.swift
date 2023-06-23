@@ -58,7 +58,7 @@ open class KSOptions {
     public var videoAdaptable = true
     public var videoFilters = [String]()
     public var syncDecodeVideo = false
-    public var hardwareDecode = true
+    public var hardwareDecode = KSOptions.hardwareDecode
     public var asynchronousDecompression = true
     public var videoDisable = false
     public var canStartPictureInPictureAutomaticallyFromInline = true
@@ -369,6 +369,7 @@ public extension KSOptions {
     static var isAutoPlay = false
     /// seek完是否自动播放
     static var isSeekedAutoPlay = true
+    static var hardwareDecode = true
     /// 日志级别
     static var logLevel = LogLevel.warning
     @available(macOS 11.0, iOS 14.0, watchOS 7.0, tvOS 14.0, *)

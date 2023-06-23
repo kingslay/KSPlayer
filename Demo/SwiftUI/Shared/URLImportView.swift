@@ -25,28 +25,28 @@ struct URLImportView: View {
                 }
             }
             Section("HTTP Authentication") {
-                HStack {
-                    TextField("Username:", text: $username).border(.gray)
-                    SecureField("Password:", text: $password).border(.gray)
-                }
+                TextField("Username:", text: $username)
+                SecureField("Password:", text: $password)
             }
             Section {
-                Button("Cancel") {
-                    appModel.openURLImport = false
-                }
-                Button("Done") {
-                    if var components = URLComponents(string: playURL.trimmingCharacters(in: NSMutableCharacterSet.whitespacesAndNewlines)) {
-                        if username.count > 0 {
-                            components.user = username
-                        }
-                        if password.count > 0 {
-                            components.password = password
-                        }
-                        if let url = components.url {
-                            appModel.open(url: url)
-                        }
+                HStack {
+                    Button("Cancel") {
+                        appModel.openURLImport = false
                     }
-                    appModel.openURLImport = false
+                    Button("Done") {
+                        if var components = URLComponents(string: playURL.trimmingCharacters(in: NSMutableCharacterSet.whitespacesAndNewlines)) {
+                            if username.count > 0 {
+                                components.user = username
+                            }
+                            if password.count > 0 {
+                                components.password = password
+                            }
+                            if let url = components.url {
+                                appModel.open(url: url)
+                            }
+                        }
+                        appModel.openURLImport = false
+                    }
                 }
             }
         }
