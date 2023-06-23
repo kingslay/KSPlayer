@@ -9,6 +9,8 @@ import AVKit
 import SwiftUI
 #if !os(xrOS)
 public struct AirPlayView: UIViewRepresentable {
+    public init() {}
+
     #if canImport(UIKit)
     public typealias UIViewType = AVRoutePickerView
     public func makeUIView(context _: Context) -> UIViewType {
