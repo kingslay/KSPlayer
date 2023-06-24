@@ -292,7 +292,15 @@ extension KSMEPlayer: MediaPlayerProtocol {
             seekTime = time
         }
         audioOutput.flush()
-        playerItem.seek(time: seekTime + playerItem.startTime, completion: completion)
+        playerItem.seek(time: seekTime + playerItem.startTime) { [weak self] result in
+            guard let self else { return }
+            if result {
+                if let controlTimebase = self.videoOutput?.displayView.displayLayer.controlTimebase {
+                    CMTimebaseSetTime(controlTimebase, time: CMTimeMake(value: Int64(self.currentPlaybackTime), timescale: 1))
+                }
+            }
+            completion(result)
+        }
     }
 
     public func prepareToPlay() {
@@ -396,7 +404,7 @@ extension KSMEPlayer: AVPictureInPictureSampleBufferPlaybackDelegate {
     }
 
     public func pictureInPictureControllerTimeRangeForPlayback(_: AVPictureInPictureController) -> CMTimeRange {
-        CMTimeRange(start: currentPlaybackTime, end: playableTime)
+        CMTimeRange(start: 0, end: duration)
     }
 
     public func pictureInPictureControllerIsPlaybackPaused(_: AVPictureInPictureController) -> Bool {
