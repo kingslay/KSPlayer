@@ -44,7 +44,6 @@ public final class MetalPlayView: UIView {
         #endif
         metalLayer.device = MetalRender.device
         metalLayer.framebufferOnly = true
-        metalLayer.isHidden = true
         addSubview(displayView)
         displayLink.add(to: .main, forMode: .common)
         pause()
@@ -153,7 +152,6 @@ extension MetalPlayView {
             if options.isUseDisplayLayer() {
                 if displayView.isHidden {
                     displayView.isHidden = false
-                    metalLayer.isHidden = true
                     if let drawable = metalLayer.nextDrawable() {
                         render.clear(drawable: drawable)
                     }
@@ -165,7 +163,6 @@ extension MetalPlayView {
             } else {
                 if !displayView.isHidden {
                     displayView.isHidden = true
-                    metalLayer.isHidden = false
                     displayView.displayLayer.flushAndRemoveImage()
                 }
                 if options.display == .plane {
