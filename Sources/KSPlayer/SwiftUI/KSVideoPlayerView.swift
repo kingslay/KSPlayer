@@ -64,7 +64,7 @@ public struct KSVideoPlayerView: View {
                     }
                 }
             #endif
-            #if !os(tvOS)
+            #if !os(tvOS) && !os(macOS)
                 .onTapGesture {
                 isMaskShow.toggle()
             }
@@ -74,7 +74,7 @@ public struct KSVideoPlayerView: View {
                     playerCoordinator.subtitleModel.addSubtitle(dataSouce: subtitleDataSouce)
                 }
                 #if os(macOS)
-                NSEvent.addLocalMonitorForEvents(matching: [.mouseEntered]) {
+                NSEvent.addLocalMonitorForEvents(matching: [.mouseEntered, .mouseMoved]) {
                     isMaskShow = true
                     return $0
                 }
