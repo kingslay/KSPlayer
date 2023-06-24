@@ -233,7 +233,7 @@ struct VideoControllerView: View {
                     Image(systemName: config.playerLayer?.isPipActive ?? false ? "pip.exit" : "pip.enter")
                 }
                 #if os(tvOS)
-                Image(systemName: "chevron.right.2")
+                Image(systemName: "ellipsis.circle")
                     .contextMenu {
                         VideoSettingView(config: config, subtitleModel: config.subtitleModel)
                     }
@@ -241,7 +241,7 @@ struct VideoControllerView: View {
                 Menu {
                     VideoSettingView(config: config, subtitleModel: config.subtitleModel)
                 } label: {
-                    Image(systemName: "chevron.right.2")
+                    Image(systemName: "ellipsis.circle")
                 }
                 .pickerStyle(.menu)
                 .menuIndicator(.hidden)
@@ -330,8 +330,8 @@ struct VideoSubtitleView: View {
                 Text(AttributedString(text))
                     .font(Font(SubtitleModel.textFont))
                     .shadow(color: .black.opacity(0.9), radius: 1, x: 1, y: 1)
-                    .foregroundColor(Color(SubtitleModel.textColor))
-                    .background(Color(SubtitleModel.textBackgroundColor))
+                    .foregroundColor(SubtitleModel.textColor)
+                    .background(SubtitleModel.textBackgroundColor)
                     .multilineTextAlignment(SubtitleModel.textXAlign)
                     .padding(SubtitleModel.edgeInsets)
                 #if !os(tvOS)

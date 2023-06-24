@@ -506,8 +506,21 @@ public extension Int {
     }
 }
 
-extension TextAlignment: CustomStringConvertible {
-    public var description: String {
+extension TextAlignment: RawRepresentable {
+    public typealias RawValue = String
+    public init?(rawValue: RawValue) {
+        if rawValue == "Leading" {
+            self = .leading
+        } else if rawValue == "Center" {
+            self = .center
+        } else if rawValue == "Trailing" {
+            self = .trailing
+        } else {
+            return nil
+        }
+    }
+
+    public var rawValue: RawValue {
         switch self {
         case .leading:
             return "Leading"
@@ -519,12 +532,21 @@ extension TextAlignment: CustomStringConvertible {
     }
 }
 
-extension VerticalAlignment: Hashable, CustomStringConvertible {
-    public func hash(into hasher: inout Hasher) {
-        hasher.combine(description)
+extension VerticalAlignment: Hashable, RawRepresentable {
+    public typealias RawValue = String
+    public init?(rawValue: RawValue) {
+        if rawValue == "Top" {
+            self = .top
+        } else if rawValue == "Center" {
+            self = .center
+        } else if rawValue == "Bottom" {
+            self = .bottom
+        } else {
+            return nil
+        }
     }
 
-    public var description: String {
+    public var rawValue: RawValue {
         switch self {
         case .top:
             return "Top"
@@ -533,6 +555,36 @@ extension VerticalAlignment: Hashable, CustomStringConvertible {
         case .bottom:
             return "Bottom"
         default:
+            return ""
+        }
+    }
+}
+
+extension Color: RawRepresentable {
+    public typealias RawValue = String
+    public init?(rawValue: RawValue) {
+        guard let data = Data(base64Encoded: rawValue) else {
+            self = .black
+            return
+        }
+
+        do {
+            let color = try NSKeyedUnarchiver.unarchiveTopLevelObjectWithData(data) as? UIColor ?? .black
+            self = Color(color)
+        } catch {
+            self = .black
+        }
+    }
+
+    public var rawValue: RawValue {
+        do {
+            if #available(macOS 11.0, iOS 14, tvOS 14, *) {
+                let data = try NSKeyedArchiver.archivedData(withRootObject: UIColor(self), requiringSecureCoding: false) as Data
+                return data.base64EncodedString()
+            } else {
+                return ""
+            }
+        } catch {
             return ""
         }
     }

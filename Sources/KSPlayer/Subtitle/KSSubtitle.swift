@@ -294,8 +294,8 @@ open class SubtitleModel: ObservableObject {
         }
     }
 
-    public static var textColor: UIColor = .white
-    public static var textBackgroundColor: UIColor = .clear
+    public static var textColor: Color = .white
+    public static var textBackgroundColor: Color = .clear
     public static var textFont: UIFont {
         textBold ? .boldSystemFont(ofSize: textFontSize) : .systemFont(ofSize: textFontSize)
     }
