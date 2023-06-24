@@ -405,6 +405,7 @@ public extension URL {
                 return
             }
             let result = string.components(separatedBy: "#EXTINF:").compactMap { content -> (String, URL, [String: String])? in
+                let content = content.replacingOccurrences(of: "\r\n", with: "\n")
                 let array = content.split(separator: "\n")
                 guard array.count > 1, let url = URL(string: String(array[1])) else {
                     return nil

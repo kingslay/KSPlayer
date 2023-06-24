@@ -163,8 +163,9 @@ class APPModel: ObservableObject {
         }
     }
 
-    private(set) var iptv: [M3UModel] = [
-        M3UModel(name: "All", m3uURL: "https://iptv-org.github.io/iptv/index.nsfw.m3u"),
+    private(set) var m3uModels: [M3UModel] = [
+        M3UModel(name: "YanG", m3uURL: "https://raw.githubusercontent.com/YanG-1989/m3u/main/Gather.m3u"),
+        M3UModel(name: "Iptv", m3uURL: "https://iptv-org.github.io/iptv/index.nsfw.m3u"),
         M3UModel(name: "China", m3uURL: "https://iptv-org.github.io/iptv/countries/cn.m3u"),
         M3UModel(name: "Hong Kong", m3uURL: "https://iptv-org.github.io/iptv/countries/hk.m3u"),
         M3UModel(name: "Taiwan", m3uURL: "https://iptv-org.github.io/iptv/countries/tw.m3u"),
@@ -173,7 +174,6 @@ class APPModel: ObservableObject {
         M3UModel(name: "Europe", m3uURL: "https://iptv-org.github.io/iptv/regions/eur.m3u"),
         M3UModel(name: "Education", m3uURL: "https://iptv-org.github.io/iptv/categories/education.m3u"),
         M3UModel(name: "Movies", m3uURL: "https://iptv-org.github.io/iptv/categories/movies.m3u"),
-//        M3UModel(name: "XXX", m3uURL: "https://iptv-org.github.io/iptv/categories/xxx.m3u"),
         M3UModel(name: "Chinese", m3uURL: "https://iptv-org.github.io/iptv/languages/zho.m3u"),
         M3UModel(name: "English", m3uURL: "https://iptv-org.github.io/iptv/languages/eng.m3u"),
     ]

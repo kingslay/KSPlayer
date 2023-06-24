@@ -248,9 +248,6 @@ class AVSampleBufferDisplayView: UIView {
                 //                        displayLayer.stopRequestingMediaData()
                 //                    }
             }
-            //            if let controlTimebase = displayLayer.controlTimebase {
-            //                CMTimebaseSetTime(controlTimebase, time: time)
-            //            }
         }
     }
 }

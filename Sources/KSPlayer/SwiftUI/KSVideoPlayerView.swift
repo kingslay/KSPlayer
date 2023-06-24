@@ -73,6 +73,16 @@ public struct KSVideoPlayerView: View {
                 if let subtitleDataSouce {
                     playerCoordinator.subtitleModel.addSubtitle(dataSouce: subtitleDataSouce)
                 }
+                #if os(macOS)
+                NSEvent.addLocalMonitorForEvents(matching: [.mouseEntered]) {
+                    isMaskShow = true
+                    return $0
+                }
+                NSEvent.addLocalMonitorForEvents(matching: [.mouseExited]) {
+                    isMaskShow = false
+                    return $0
+                }
+                #endif
             }
             .onDisappear {
                 if let playerLayer = playerCoordinator.playerLayer {

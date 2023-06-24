@@ -19,7 +19,7 @@ struct URLImportView: View {
             Section {
                 TextField("URL:", text: $playURL)
                 Picker("iptv", selection: $playURL) {
-                    ForEach(appModel.iptv, id: \.self) {
+                    ForEach(appModel.m3uModels, id: \.self) {
                         Text($0.name).tag($0.m3uURL)
                     }
                 }
@@ -33,6 +33,7 @@ struct URLImportView: View {
                     Button("Cancel") {
                         appModel.openURLImport = false
                     }
+                    Spacer()
                     Button("Done") {
                         if var components = URLComponents(string: playURL.trimmingCharacters(in: NSMutableCharacterSet.whitespacesAndNewlines)) {
                             if username.count > 0 {

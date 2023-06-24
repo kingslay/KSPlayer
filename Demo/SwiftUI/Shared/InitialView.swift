@@ -41,7 +41,7 @@ struct InitialView: View {
 
 struct MoiveView: View {
     #if os(iOS)
-    static let width = CGFloat(320)
+    static let width = KSOptions.sceneSize.width - 30
     #else
     static let width = CGFloat(320)
     #endif
