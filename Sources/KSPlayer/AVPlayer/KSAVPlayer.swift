@@ -383,7 +383,7 @@ extension KSAVPlayer: MediaPlayerProtocol {
         return event.numberOfBytesTransferred
     }
 
-    public func thumbnailImageAtCurrentTime() async -> UIImage? {
+    public func thumbnailImageAtCurrentTime() async -> CGImage? {
         guard let playerItem = player.currentItem, isReadyToPlay else {
             return nil
         }
@@ -602,47 +602,16 @@ public extension AVAsset {
         return imageGenerator
     }
 
-    func thumbnailImage(currentTime: CMTime, handler: @escaping (UIImage?) -> Void) {
+    func thumbnailImage(currentTime: CMTime, handler: @escaping (CGImage?) -> Void) {
         let imageGenerator = ceateImageGenerator()
         imageGenerator.requestedTimeToleranceBefore = .zero
         imageGenerator.requestedTimeToleranceAfter = .zero
         imageGenerator.generateCGImagesAsynchronously(forTimes: [NSValue(time: currentTime)]) { _, cgImage, _, _, _ in
             if let cgImage {
-                handler(UIImage(cgImage: cgImage))
+                handler(cgImage)
             } else {
                 handler(nil)
             }
-        }
-    }
-}
-
-extension CGImage {
-    static func combine(images: [(CGRect, CGImage)]) -> CGImage? {
-        if images.isEmpty {
-            return nil
-        }
-        if images.count == 1 {
-            return images[0].1
-        }
-        var width = 0
-        var height = 0
-        for (rect, _) in images {
-            width = max(width, Int(rect.maxX))
-            height = max(height, Int(rect.maxY))
-        }
-        let bitsPerComponent = 8
-        // RGBA(的bytes) * bitsPerComponent *width
-        let bytesPerRow = 4 * 8 * bitsPerComponent * width
-        return autoreleasepool {
-            let context = CGContext(data: nil, width: width, height: height, bitsPerComponent: bitsPerComponent, bytesPerRow: bytesPerRow, space: CGColorSpaceCreateDeviceRGB(), bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue)
-            guard let context else {
-                return nil
-            }
-            for (rect, cgImage) in images {
-                context.draw(cgImage, in: CGRect(x: rect.origin.x, y: CGFloat(height) - rect.maxY, width: rect.width, height: rect.height))
-            }
-            let cgImage = context.makeImage()
-            return cgImage
         }
     }
 }

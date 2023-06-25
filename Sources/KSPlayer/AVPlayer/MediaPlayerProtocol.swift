@@ -50,7 +50,7 @@ public protocol MediaPlayerProtocol: MediaPlayback {
     func pause()
     func enterBackground()
     func enterForeground()
-    func thumbnailImageAtCurrentTime() async -> UIImage?
+    func thumbnailImageAtCurrentTime() async -> CGImage?
     func tracks(mediaType: AVFoundation.AVMediaType) -> [MediaPlayerTrack]
     func select(track: MediaPlayerTrack)
 }

@@ -229,7 +229,7 @@ open class IOSVideoPlayerView: VideoPlayerView {
         Task {
             let image = await playerLayer?.player.thumbnailImageAtCurrentTime()
             if let image {
-                self.maskImageView.image = image
+                self.maskImageView.image = UIImage(cgImage: image)
                 self.maskImageView.alpha = 1
             }
             super.change(definitionIndex: definitionIndex)

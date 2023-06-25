@@ -118,6 +118,11 @@ class SubtitleDecode: DecodeProtocol {
         if images.count > 1 {
             origin = .zero
         }
-        return (origin, attributedString, CGImage.combine(images: images)?.image(quality: 0.2))
+        var image: UIImage?
+        // 用heic格式，那展示的时候会卡主线程。也不能用jpg，因为字幕需要有透明度。所以改成用tif
+        if let data = CGImage.combine(images: images)?.data(type: .tif, quality: 0.2) {
+            image = UIImage(data: data)
+        }
+        return (origin, attributedString, image)
     }
 }
