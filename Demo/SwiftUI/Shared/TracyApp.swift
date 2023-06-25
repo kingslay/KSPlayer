@@ -11,7 +11,7 @@ import KSPlayer
 import SwiftUI
 @main
 struct TracyApp: App {
-    @StateObject var appModel = APPModel()
+    let appModel = APPModel()
     init() {
         let arguments = ProcessInfo.processInfo.arguments.dropFirst()
         var dropNextArg = false
@@ -79,14 +79,12 @@ struct TracyApp: App {
         Settings {
             SettingView()
         }
-
-        MenuBarExtra {
+//        MenuBarExtra {
 //            MenuBar()
-        } label: {
-            Image(systemName: "film.fill")
-        }
-        .menuBarExtraStyle(.menu)
-
+//        } label: {
+//            Image(systemName: "film.fill")
+//        }
+//        .menuBarExtraStyle(.menu)
         #endif
     }
 }
@@ -111,13 +109,7 @@ class APPModel: ObservableObject {
         KSOptions.isAccurateSeek = true
 //        KSOptions.isUseAudioRenderer = true
 //        KSOptions.isLoopPlay = true
-        #if os(macOS)
-        for url in NSDocumentController.shared.recentDocumentURLs {
-            playlist.append(MovieModel(url: url))
-        }
-        #else
 
-        #endif
         #if DEBUG
         playlist.append(contentsOf: testObjects)
         #endif
@@ -150,7 +142,7 @@ class APPModel: ObservableObject {
         }
     }
 
-    func filterParsePlaylist() -> [MovieModel] {
+    @inline(__always) func filterParsePlaylist() -> [MovieModel] {
         playlist.filter { model in
             var isIncluded = true
             if nameFilter.count > 0 {

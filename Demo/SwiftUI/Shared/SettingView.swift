@@ -12,8 +12,8 @@ struct SettingView: View {
     var body: some View {
         NavigationView {
             List {
-                NavigationLink(destination: SettingSubtitleView()) {
-                    Label("Subtitle", systemImage: "captions.bubble")
+                NavigationLink(destination: SettingGeneralView()) {
+                    Label("General", systemImage: "switch.2")
                 }
                 NavigationLink(destination: SettingAudioView()) {
                     Label("Audio", systemImage: "waveform")
@@ -21,13 +21,22 @@ struct SettingView: View {
                 NavigationLink(destination: SettingVideoView()) {
                     Label("Video", systemImage: "play.rectangle.fill")
                 }
+                NavigationLink(destination: SettingSubtitleView()) {
+                    Label("Subtitle", systemImage: "captions.bubble")
+                }
                 NavigationLink(destination: SettingAdvancedView()) {
                     Label("Advanced", systemImage: "gearshape.2.fill")
                 }
-                NavigationLink(destination: Text("Utilities")) {
-                    Label("Utilities", systemImage: "wrench.adjustable.fill")
-                }
             }
+        }
+    }
+}
+
+struct SettingGeneralView: View {
+    @AppStorage("showRecentPlayList") private var showRecentPlayList = false
+    var body: some View {
+        Form {
+            Toggle("Show Recent Play List", isOn: $showRecentPlayList)
         }
     }
 }
@@ -37,9 +46,7 @@ struct SettingAudioView: View {
     init() {}
     var body: some View {
         Form {
-            Toggle(isOn: $isUseAudioRenderer) {
-                Text("Use Audio Renderer")
-            }
+            Toggle("Use Audio Renderer", isOn: $isUseAudioRenderer)
         }
         .onChange(of: isUseAudioRenderer) {
             KSOptions.isUseAudioRenderer = $0
@@ -51,47 +58,10 @@ struct SettingVideoView: View {
     @AppStorage("hardwareDecode") private var hardwareDecode = KSOptions.hardwareDecode
     var body: some View {
         Form {
-            Toggle(isOn: $hardwareDecode) {
-                Text("Hardware decoder")
-            }
+            Toggle("Hardware decoder", isOn: $hardwareDecode)
         }
         .onChange(of: hardwareDecode) {
             KSOptions.hardwareDecode = $0
-        }
-    }
-}
-
-struct SettingAdvancedView: View {
-    @AppStorage("preferredForwardBufferDuration") private var preferredForwardBufferDuration = KSOptions.preferredForwardBufferDuration
-    @AppStorage("maxBufferDuration") private var maxBufferDuration = KSOptions.maxBufferDuration
-    @AppStorage("isLoopPlay") private var isLoopPlay = KSOptions.isLoopPlay
-
-    var body: some View {
-        Form {
-            HStack {
-                #if os(iOS)
-                Text("Preferred Forward Buffer Duration:")
-                #endif
-                TextField("Preferred Forward Buffer Duration:", value: $preferredForwardBufferDuration, format: .number)
-            }
-            HStack {
-                #if os(iOS)
-                Text("Max Buffer Second:")
-                #endif
-                TextField("Max Buffer Second:", value: $maxBufferDuration, format: .number)
-            }
-            Toggle(isOn: $isLoopPlay) {
-                Text("Loop Play")
-            }
-        }
-        .onChange(of: preferredForwardBufferDuration) {
-            KSOptions.preferredForwardBufferDuration = $0
-        }
-        .onChange(of: maxBufferDuration) {
-            KSOptions.maxBufferDuration = $0
-        }
-        .onChange(of: isLoopPlay) {
-            KSOptions.isLoopPlay = $0
         }
     }
 }
@@ -116,12 +86,8 @@ struct SettingSubtitleView: View {
                     #endif
                     TextField("Fone Size:", value: $textFontSize, format: .number)
                 }
-                Toggle(isOn: $textBold) {
-                    Text("Bold")
-                }
-                Toggle(isOn: $textItalic) {
-                    Text("Italic")
-                }
+                Toggle("Bold", isOn: $textBold)
+                Toggle("Italic", isOn: $textItalic)
                 #if !os(tvOS)
                 ColorPicker("Color:", selection: $textColor)
                 ColorPicker("Background:", selection: $textBackgroundColor)
@@ -179,6 +145,39 @@ struct SettingSubtitleView: View {
         }
         .onChange(of: textYMargin) {
             SubtitleModel.textYMargin = $0
+        }
+    }
+}
+
+struct SettingAdvancedView: View {
+    @AppStorage("preferredForwardBufferDuration") private var preferredForwardBufferDuration = KSOptions.preferredForwardBufferDuration
+    @AppStorage("maxBufferDuration") private var maxBufferDuration = KSOptions.maxBufferDuration
+    @AppStorage("isLoopPlay") private var isLoopPlay = KSOptions.isLoopPlay
+
+    var body: some View {
+        Form {
+            HStack {
+                #if os(iOS)
+                Text("Preferred Forward Buffer Duration:")
+                #endif
+                TextField("Preferred Forward Buffer Duration:", value: $preferredForwardBufferDuration, format: .number)
+            }
+            HStack {
+                #if os(iOS)
+                Text("Max Buffer Second:")
+                #endif
+                TextField("Max Buffer Second:", value: $maxBufferDuration, format: .number)
+            }
+            Toggle("Loop Play", isOn: $isLoopPlay)
+        }
+        .onChange(of: preferredForwardBufferDuration) {
+            KSOptions.preferredForwardBufferDuration = $0
+        }
+        .onChange(of: maxBufferDuration) {
+            KSOptions.maxBufferDuration = $0
+        }
+        .onChange(of: isLoopPlay) {
+            KSOptions.isLoopPlay = $0
         }
     }
 }

@@ -101,7 +101,7 @@ extension KSVideoPlayer: UIViewRepresentable {
             }
         }
 
-        @Published public var isLoading = true
+        @Published public var state = KSPlayerState.prepareToPlay
         public var subtitleModel = SubtitleModel()
         @Published
         public var timemodel = ControllerTimeModel()
@@ -155,7 +155,6 @@ extension KSVideoPlayer: UIViewRepresentable {
                 playerLayer.set(url: url, options: options)
                 subtitleModel.url = url
                 playerLayer.delegate = self
-                isPlay = options.isAutoPlay
                 return playerLayer
             } else {
                 let playerLayer = KSPlayerLayer(url: url, options: options)
@@ -180,9 +179,7 @@ extension KSVideoPlayer: UIViewRepresentable {
 
 extension KSVideoPlayer.Coordinator: KSPlayerLayerDelegate {
     public func player(layer: KSPlayerLayer, state: KSPlayerState) {
-        if state == .prepareToPlay {
-            isPlay = layer.options.isAutoPlay
-        } else if state == .readyToPlay {
+        if state == .readyToPlay {
             videoTracks = layer.player.tracks(mediaType: .video)
             audioTracks = layer.player.tracks(mediaType: .audio)
             subtitleModel.selectedSubtitleInfo = subtitleModel.subtitleInfos.first
@@ -198,10 +195,9 @@ extension KSVideoPlayer.Coordinator: KSPlayerLayerDelegate {
                     }
                 }
             }
-        } else {
-            isLoading = state == .buffering
-            isPlay = state.isPlaying
         }
+        isPlay = state.isPlaying
+        self.state = state
         onStateChanged?(layer, state)
     }
 

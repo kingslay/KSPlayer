@@ -14,11 +14,21 @@ struct URLImportView: View {
     @State private var username = ""
     @State private var password = ""
     @State private var playURL: String = ""
+    @State private var rememberURL = false
+    @AppStorage("historyURLs") private var historyURLs = [URL]()
     var body: some View {
         Form {
             Section {
                 TextField("URL:", text: $playURL)
-                Picker("iptv", selection: $playURL) {
+                Toggle("Remember URL", isOn: $rememberURL)
+                if historyURLs.count > 0 {
+                    Picker("History URL", selection: $playURL) {
+                        ForEach(historyURLs, id: \.self) {
+                            Text($0.description).tag($0.description)
+                        }
+                    }
+                }
+                Picker("IPTV", selection: $playURL) {
                     ForEach(appModel.m3uModels, id: \.self) {
                         Text($0.name).tag($0.m3uURL)
                     }
@@ -43,6 +53,13 @@ struct URLImportView: View {
                                 components.password = password
                             }
                             if let url = components.url {
+                                if rememberURL {
+                                    historyURLs.append(url)
+                                    historyURLs.insert(url, at: 0)
+                                    if historyURLs.count > 20 {
+                                        historyURLs.removeLast()
+                                    }
+                                }
                                 appModel.open(url: url)
                             }
                         }

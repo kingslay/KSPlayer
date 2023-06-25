@@ -4,16 +4,49 @@ struct InitialView: View {
     @EnvironmentObject private var appModel: APPModel
 //    @Environment(\.horizontalSizeClass) var horizontalSizeClass
     private let columns = [GridItem(.adaptive(minimum: MoiveView.width))]
-    init() {}
+    private var recentDocumentURLs = [URL]()
+    init() {
+        #if os(macOS)
+        for url in NSDocumentController.shared.recentDocumentURLs {
+            recentDocumentURLs.append(url)
+        }
+        #endif
+    }
 
     var body: some View {
         ScrollView {
             LazyVGrid(columns: columns) {
-                ForEach(appModel.filterParsePlaylist(), id: \.self) { resource in
-                    NavigationLink(value: resource) {
-                        MoiveView(model: resource)
+                if recentDocumentURLs.count > 0 {
+                    Section {
+                        ForEach(recentDocumentURLs, id: \.self) { url in
+                            let mode = MovieModel(url: url)
+                            NavigationLink(value: mode) {
+                                MoiveView(model: mode)
+                            }
+                            .buttonStyle(.plain)
+                        }
+                    } header: {
+                        HStack {
+                            Text("Recent Document").font(.title)
+                            Spacer()
+                        }
+                        .padding(.horizontal)
                     }
-                    .buttonStyle(.plain)
+                }
+                let playlist = appModel.filterParsePlaylist()
+                Section {
+                    ForEach(playlist, id: \.self) { resource in
+                        NavigationLink(value: resource) {
+                            MoiveView(model: resource)
+                        }
+                        .buttonStyle(.plain)
+                    }
+                } header: {
+                    HStack {
+                        Text("Channels").font(.title)
+                        Spacer()
+                    }
+                    .padding()
                 }
             }
         }

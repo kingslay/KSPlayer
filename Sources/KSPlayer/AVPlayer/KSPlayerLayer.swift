@@ -50,7 +50,7 @@ public enum KSPlayerState: CustomStringConvertible {
         }
     }
 
-    public var isPlaying: Bool { self == .buffering || self == .bufferFinished }
+    public var isPlaying: Bool { self == .readyToPlay || self == .buffering || self == .bufferFinished }
 }
 
 public protocol KSPlayerLayerDelegate: AnyObject {
@@ -165,9 +165,10 @@ open class KSPlayerLayer: UIView {
     private var bufferedCount = 0
     private var shouldSeekTo: TimeInterval = 0
     private var startTime: TimeInterval = 0
-    public init(url: URL, options: KSOptions) {
+    public init(url: URL, options: KSOptions, delegate: KSPlayerLayerDelegate? = nil) {
         self.url = url
         self.options = options
+        self.delegate = delegate
         let firstPlayerType: MediaPlayerProtocol.Type
         if options.display != .plane {
             // AR模式只能用KSMEPlayer
@@ -216,8 +217,8 @@ open class KSPlayerLayer: UIView {
     public func set(url: URL, options: KSOptions) {
         self.options = options
         runInMainqueue {
-            self.url = url
             self.isAutoPlay = options.isAutoPlay
+            self.url = url
         }
     }
 
@@ -227,8 +228,8 @@ open class KSPlayerLayer: UIView {
         self.urls.append(contentsOf: urls)
         if let first = urls.first {
             runInMainqueue {
-                self.url = first
                 self.isAutoPlay = options.isAutoPlay
+                self.url = first
             }
         }
     }
@@ -447,7 +448,9 @@ extension KSPlayerLayer {
         bufferedCount = 0
         player.prepareToPlay()
         if isAutoPlay {
-            state = .buffering
+            DispatchQueue.main.async {
+                self.state = .buffering
+            }
         } else {
             state = .prepareToPlay
         }

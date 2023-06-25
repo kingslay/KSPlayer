@@ -203,7 +203,7 @@ struct VideoControllerView: View {
                     AirPlayView().fixedSize()
                 }
                 #endif
-                ProgressView().opacity(config.isLoading ? 1 : 0)
+                ProgressView().opacity(config.state == .buffering ? 1 : 0)
             }
             .font(.system(.title2))
             Spacer()
@@ -219,7 +219,7 @@ struct VideoControllerView: View {
                 Button {
                     config.isPlay.toggle()
                 } label: {
-                    Image(systemName: config.isPlay ? "pause.fill" : "play.fill")
+                    Image(systemName: config.state == .error ? "play.slash.fill" : (config.isPlay ? "pause.fill" : "play.fill"))
                 }
                 .padding(.horizontal)
                 #if !os(tvOS)
