@@ -45,18 +45,6 @@ open class VideoPlayerView: PlayerView {
     // 是否播放过
     private(set) var isPlayed = false
     private var cancellable: AnyCancellable?
-    private var embedSubtitleDataSouce: SubtitleDataSouce? {
-        didSet {
-            if oldValue !== embedSubtitleDataSouce {
-                if let embedSubtitleDataSouce {
-                    srtControl.addSubtitle(dataSouce: embedSubtitleDataSouce)
-                    if resource?.definitions[currentDefinition].options.autoSelectEmbedSubtitle ?? false, let first = embedSubtitleDataSouce.infos.first {
-                        srtControl.selectedSubtitleInfo = first
-                    }
-                }
-            }
-        }
-    }
 
     public private(set) var currentDefinition = 0 {
         didSet {
@@ -69,7 +57,6 @@ open class VideoPlayerView: PlayerView {
     public private(set) var resource: KSPlayerResource? {
         didSet {
             if let resource, oldValue !== resource {
-                srtControl.url = resource.definitions.first?.url
                 if let subtitleDataSouce = resource.subtitleDataSouce {
                     srtControl.addSubtitle(dataSouce: subtitleDataSouce)
                 }
@@ -91,13 +78,11 @@ open class VideoPlayerView: PlayerView {
     public var titleLabel = UILabel()
     public var subtitleLabel = UILabel()
     public var subtitleBackView = UIImageView()
-    private var subtitlePart: SubtitlePart?
     /// Activty Indector for loading
     public var loadingIndector: UIView & LoadingIndector = UIActivityIndicatorView(frame: CGRect(x: 0, y: 0, width: 30, height: 30))
     public var seekToView: UIView & SeekViewProtocol = SeekView()
     public var replayButton = UIButton()
     public var lockButton = UIButton()
-    public let srtControl = KSSubtitleController()
     public var isLock: Bool { lockButton.isSelected }
     open var isMaskShow = true {
         didSet {
@@ -252,12 +237,15 @@ open class VideoPlayerView: PlayerView {
     override open func player(layer: KSPlayerLayer, currentTime: TimeInterval, totalTime: TimeInterval) {
         guard !isSliderSliding else { return }
         super.player(layer: layer, currentTime: currentTime, totalTime: totalTime)
-        if let subtitle = srtControl.selectedSubtitleInfo {
-            showSubtile(from: subtitle, at: currentTime)
+        let time = currentTime + (resource?.definitions[currentDefinition].options.subtitleDelay ?? 0.0)
+        if let part = srtControl.subtitle(currentTime: time) {
+            subtitleBackView.image = part.image
+            subtitleLabel.attributedText = part.text
             subtitleBackView.isHidden = false
         } else {
             subtitleBackView.image = nil
             subtitleLabel.attributedText = nil
+            subtitleBackView.isHidden = true
         }
     }
 
@@ -266,7 +254,6 @@ open class VideoPlayerView: PlayerView {
         switch state {
         case .readyToPlay:
             toolBar.timeSlider.isPlayable = true
-            embedSubtitleDataSouce = layer.player.subtitleDataSouce
             toolBar.videoSwitchButton.isHidden = layer.player.tracks(mediaType: .video).count < 2
             toolBar.audioSwitchButton.isHidden = layer.player.tracks(mediaType: .audio).count < 2
             toolBar.srtButton.isHidden = srtControl.srtListCount == 0
@@ -294,7 +281,7 @@ open class VideoPlayerView: PlayerView {
                 replayButton.isSelected = true
             }
         case .prepareToPlay:
-            embedSubtitleDataSouce = nil
+            break
         }
     }
 
@@ -308,7 +295,6 @@ open class VideoPlayerView: PlayerView {
         replayButton.isHidden = false
         seekToView.isHidden = true
         isPlayed = false
-        embedSubtitleDataSouce = nil
         lockButton.isSelected = false
     }
 
@@ -361,11 +347,7 @@ open class VideoPlayerView: PlayerView {
     }
 
     @objc open func tapGestureAction(_: UITapGestureRecognizer) {
-        if srtControl.view.isHidden {
-            isMaskShow.toggle()
-        } else {
-            srtControl.view.isHidden = true
-        }
+        isMaskShow.toggle()
     }
 
     open func panGestureBegan(location _: CGPoint, direction: KSPanDirection) {
@@ -408,20 +390,6 @@ open class VideoPlayerView: PlayerView {
             isSliderSliding = false
             slider(value: Double(tmpPanValue), event: .touchUpInside)
             tmpPanValue = 0.0
-        }
-    }
-
-    open func showSubtile(from subtitle: KSSubtitleProtocol, at time: TimeInterval) {
-        let time = time + (resource?.definitions[currentDefinition].options.subtitleDelay ?? 0.0)
-        if let part = subtitle.search(for: time) {
-            subtitlePart = part
-            subtitleBackView.image = part.image
-            subtitleLabel.attributedText = part.text
-        } else {
-            if let subtitlePart, !(subtitlePart == time) {
-                subtitleBackView.image = nil
-                subtitleLabel.attributedText = nil
-            }
         }
     }
 }
@@ -627,32 +595,29 @@ extension VideoPlayerView {
     }
 
     /// change during playback
-    public func updateSrt(_ options: KSSRTOptions) {
-        subtitleLabel.textColor = options.textColor
-        subtitleLabel.font = options.size.font
-        subtitleBackView.backgroundColor = options.bacgroundColor
+    public func updateSrt() {
+        subtitleLabel.font = SubtitleModel.textFont
+        if #available(macOS 11.0, iOS 14, tvOS 14, *) {
+            subtitleLabel.textColor = UIColor(SubtitleModel.textColor)
+            subtitleBackView.backgroundColor = UIColor(SubtitleModel.textBackgroundColor)
+        }
     }
 
     private func setupSrtControl() {
         subtitleLabel.numberOfLines = 0
         subtitleLabel.textAlignment = .center
-        subtitleLabel.textColor = KSOptions.srtOptions.textColor
-        subtitleLabel.font = KSOptions.srtOptions.size.font
         subtitleLabel.backingLayer?.shadowColor = UIColor.black.cgColor
         subtitleLabel.backingLayer?.shadowOffset = CGSize(width: 1.0, height: 1.0)
         subtitleLabel.backingLayer?.shadowOpacity = 0.9
         subtitleLabel.backingLayer?.shadowRadius = 1.0
         subtitleLabel.backingLayer?.shouldRasterize = true
-        subtitleBackView.backgroundColor = KSOptions.srtOptions.bacgroundColor
+        updateSrt()
         subtitleBackView.cornerRadius = 2
         subtitleBackView.addSubview(subtitleLabel)
         subtitleBackView.isHidden = true
         addSubview(subtitleBackView)
-        addSubview(srtControl.view)
-        srtControl.view.isHidden = true
         subtitleBackView.translatesAutoresizingMaskIntoConstraints = false
         subtitleLabel.translatesAutoresizingMaskIntoConstraints = false
-        srtControl.view.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
             subtitleBackView.bottomAnchor.constraint(equalTo: safeBottomAnchor, constant: -5),
             subtitleBackView.centerXAnchor.constraint(equalTo: centerXAnchor),
@@ -661,10 +626,6 @@ extension VideoPlayerView {
             subtitleLabel.trailingAnchor.constraint(equalTo: subtitleBackView.trailingAnchor, constant: -10),
             subtitleLabel.topAnchor.constraint(equalTo: subtitleBackView.topAnchor, constant: 2),
             subtitleLabel.bottomAnchor.constraint(equalTo: subtitleBackView.bottomAnchor, constant: -2),
-            srtControl.view.topAnchor.constraint(equalTo: topAnchor),
-            srtControl.view.leadingAnchor.constraint(equalTo: leadingAnchor),
-            srtControl.view.bottomAnchor.constraint(equalTo: bottomAnchor),
-            srtControl.view.trailingAnchor.constraint(equalTo: trailingAnchor),
         ])
     }
 
@@ -915,9 +876,6 @@ public extension KSOptions {
     /// 播放内核选择策略 先使用firstPlayer，失败了自动切换到secondPlayer，播放内核有KSAVPlayer、KSMEPlayer两个选项
     /// 是否能后台播放视频
     static var canBackgroundPlay = false
-
-    /// Subtitle configuration
-    static var srtOptions: KSSRTOptions = .init()
 }
 
 extension UIView {

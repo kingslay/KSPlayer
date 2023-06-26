@@ -21,7 +21,6 @@ extension OSType {
             kCVPixelFormatType_32RGBA,
             kCVPixelFormatType_24BGR,
             kCVPixelFormatType_24RGB,
-            kCVPixelFormatType_16BE555,
             kCVPixelFormatType_16LE555,
             kCVPixelFormatType_16BE565,
             kCVPixelFormatType_16LE565,

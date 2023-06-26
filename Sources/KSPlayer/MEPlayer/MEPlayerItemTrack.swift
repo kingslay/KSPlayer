@@ -107,46 +107,43 @@ class SyncPlayerItemTrack<Frame: MEFrame>: PlayerItemTrackProtocol, CustomString
 
     fileprivate func doDecode(packet: Packet) {
         let decoder = decoderMap.value(for: packet.assetTrack.trackID, default: makeDecode(assetTrack: packet.assetTrack))
-        do {
-            try decoder.doDecode(packet: packet)
-            if options.decodeAudioTime == 0, mediaType == .audio {
-                options.decodeAudioTime = CACurrentMediaTime()
-            }
-            if options.decodeVideoTime == 0, mediaType == .video {
-                options.decodeVideoTime = CACurrentMediaTime()
-            }
-        } catch {
-            KSLog("Decoder did Failed : \(error)")
-            if decoder is VideoToolboxDecode {
-                decoder.shutdown()
-                decoderMap[packet.assetTrack.trackID] = FFmpegDecode(assetTrack: packet.assetTrack, options: options, delegate: self)
-                KSLog("VideoCodec switch to software decompression")
-                doDecode(packet: packet)
-            } else {
-                state = .failed
-            }
-        }
-    }
-}
-
-extension SyncPlayerItemTrack: DecodeResultDelegate {
-    func decodeResult(frame: MEFrame?) {
-        guard let frame else {
-            return
-        }
-        if state == .flush || state == .closed {
-            return
-        }
-        if seekTime > 0 {
-            let timestamp = frame.position + frame.duration
-            if timestamp <= 0 || frame.timebase.cmtime(for: timestamp).seconds < seekTime {
+        decoder.decodeFrame(from: packet) { [weak self] result in
+            guard let self else {
                 return
-            } else {
-                seekTime = 0.0
+            }
+            do {
+                let frame = try result.get()
+                if self.state == .flush || self.state == .closed {
+                    return
+                }
+                if self.seekTime > 0 {
+                    let timestamp = frame.position + frame.duration
+                    if timestamp <= 0 || frame.timebase.cmtime(for: timestamp).seconds < self.seekTime {
+                        return
+                    } else {
+                        self.seekTime = 0.0
+                    }
+                }
+                if let frame = frame as? Frame {
+                    self.outputRenderQueue.push(frame)
+                }
+            } catch {
+                KSLog("Decoder did Failed : \(error)")
+                if decoder is VideoToolboxDecode {
+                    decoder.shutdown()
+                    self.decoderMap[packet.assetTrack.trackID] = FFmpegDecode(assetTrack: packet.assetTrack, options: self.options)
+                    KSLog("VideoCodec switch to software decompression")
+                    self.doDecode(packet: packet)
+                } else {
+                    self.state = .failed
+                }
             }
         }
-        if let frame = frame as? Frame {
-            outputRenderQueue.push(frame)
+        if options.decodeAudioTime == 0, mediaType == .audio {
+            options.decodeAudioTime = CACurrentMediaTime()
+        }
+        if options.decodeVideoTime == 0, mediaType == .video {
+            options.decodeVideoTime = CACurrentMediaTime()
         }
     }
 }
@@ -266,29 +263,25 @@ public extension Dictionary {
 }
 
 protocol DecodeProtocol {
-    init(assetTrack: FFmpegAssetTrack, options: KSOptions, delegate: DecodeResultDelegate)
+    init(assetTrack: FFmpegAssetTrack, options: KSOptions)
     func decode()
-    func doDecode(packet: Packet) throws
+    func decodeFrame(from packet: Packet, completionHandler: @escaping (Result<MEFrame, Error>) -> Void)
     func doFlushCodec()
     func shutdown()
-}
-
-protocol DecodeResultDelegate: AnyObject {
-    func decodeResult(frame: MEFrame?)
 }
 
 extension SyncPlayerItemTrack {
     func makeDecode(assetTrack: FFmpegAssetTrack) -> DecodeProtocol {
         autoreleasepool {
             if mediaType == .subtitle {
-                return SubtitleDecode(assetTrack: assetTrack, options: options, delegate: self)
+                return SubtitleDecode(assetTrack: assetTrack, options: options)
             } else {
                 if mediaType == .video, options.asynchronousDecompression, options.hardwareDecode,
                    let session = DecompressionSession(codecpar: assetTrack.codecpar, options: options)
                 {
-                    return VideoToolboxDecode(assetTrack: assetTrack, options: options, session: session, delegate: self)
+                    return VideoToolboxDecode(assetTrack: assetTrack, options: options, session: session)
                 } else {
-                    return FFmpegDecode(assetTrack: assetTrack, options: options, delegate: self)
+                    return FFmpegDecode(assetTrack: assetTrack, options: options)
                 }
             }
         }

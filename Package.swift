@@ -9,7 +9,8 @@ let package = Package(
         // Products define the executables and libraries produced by a package, and make them visible to other packages.
         .library(
             name: "KSPlayer",
-//            type: .static,
+            // todo clang: warning: using sysroot for 'iPhoneSimulator' but targeting 'MacOSX' [-Wincompatible-sysroot]
+//            type: .dynamic,
             targets: ["KSPlayer"]
         ),
     ],
@@ -18,17 +19,7 @@ let package = Package(
         .target(
             name: "KSPlayer",
             dependencies: [.product(name: "FFmpegKit", package: "FFmpegKit")],
-            resources: [.process("Metal/Shaders.metal")],
-            linkerSettings: [
-                .linkedFramework("AudioToolbox"),
-                .linkedFramework("AVFoundation"),
-                .linkedFramework("CoreImage"),
-                .linkedFramework("CoreMedia"),
-                .linkedFramework("CoreVideo"),
-                .linkedFramework("MetalKit"),
-                .linkedFramework("Security"),
-                .linkedFramework("VideoToolbox"),
-            ]
+            resources: [.process("Metal/Shaders.metal")]
         ),
         .testTarget(
             name: "KSPlayerTests",

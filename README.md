@@ -3,7 +3,7 @@
 ![License](https://img.shields.io/badge/license-GPL-blue.svg)
 # KSPlayer 
 
-KSPlayer is a powerful media play framework foriOS, tvOS, macOS,Mac Catalyst, SwiftUI, Apple Silicon M1 .
+KSPlayer is a powerful media play framework foriOS, tvOS, macOS, xrOS, visionOS, Mac Catalyst, SwiftUI, Apple Silicon M1 .
 
 English | [简体中文](./README_CN.md)
 
@@ -29,7 +29,7 @@ English | [简体中文](./README_CN.md)
 
 ## Requirements
 
-- iOS 13 +,  macOS 10.15 +, tvOS 13 +
+- iOS 13 +,  macOS 10.15 +, tvOS 13 +, xrOS 1 +
 
 ## Demo
 

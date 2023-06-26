@@ -142,15 +142,13 @@ public extension NSView {
     }
 
     func layoutIfNeeded() {
-        backingLayer?.layoutIfNeeded()
+        layer?.layoutIfNeeded()
     }
 
     func centerRotate(byDegrees: Double) {
-        let degrees = CGFloat(-byDegrees)
-        if degrees != boundsRotation {
-            backingLayer?.anchorPoint = CGPoint(x: 0.5, y: 0.5)
-            rotate(byDegrees: degrees - boundsRotation)
-        }
+        layer?.position = center
+        layer?.anchorPoint = CGPoint(x: 0.5, y: 0.5)
+        layer?.setAffineTransform(CGAffineTransform(rotationAngle: CGFloat(Double.pi * byDegrees / 180.0)))
     }
 }
 

@@ -3,52 +3,34 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 52;
+	objectVersion = 54;
 	objects = {
 
 /* Begin PBXBuildFile section */
-		AC44E0FC29290CBC00617BD3 /* SecondView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC44E0FA29290CBC00617BD3 /* SecondView.swift */; };
-		AC44E0FD29290CF800617BD3 /* FirstView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC44E0F929290CBB00617BD3 /* FirstView.swift */; };
-		AC77DFC326402329001351AE /* DemoApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC77DFB026402327001351AE /* DemoApp.swift */; };
-		AC77DFC526402329001351AE /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC77DFB126402327001351AE /* ContentView.swift */; };
+		AC44E0FC29290CBC00617BD3 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC44E0FA29290CBC00617BD3 /* ContentView.swift */; };
+		AC44E0FD29290CF800617BD3 /* InitialView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC44E0F929290CBB00617BD3 /* InitialView.swift */; };
+		AC77DFC326402329001351AE /* TracyApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC77DFB026402327001351AE /* TracyApp.swift */; };
+		AC77DFC526402329001351AE /* URLImportView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC77DFB126402327001351AE /* URLImportView.swift */; };
 		AC77DFC726402329001351AE /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AC77DFB226402329001351AE /* Assets.xcassets */; };
-		AC84D8DE28ABBD0D00344154 /* vr.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = AC84D8D728ABBD0D00344154 /* vr.mp4 */; };
-		AC84D8E128ABBD0E00344154 /* subrip.mkv in Resources */ = {isa = PBXBuildFile; fileRef = AC84D8D828ABBD0D00344154 /* subrip.mkv */; };
-		AC84D8E428ABBD0E00344154 /* dvd_subtitle.mkv in Resources */ = {isa = PBXBuildFile; fileRef = AC84D8D928ABBD0D00344154 /* dvd_subtitle.mkv */; };
-		AC84D8E728ABBD0E00344154 /* h264.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = AC84D8DA28ABBD0D00344154 /* h264.mp4 */; };
-		AC84D8EA28ABBD0E00344154 /* mjpeg.flac in Resources */ = {isa = PBXBuildFile; fileRef = AC84D8DB28ABBD0D00344154 /* mjpeg.flac */; };
-		AC84D8ED28ABBD0E00344154 /* hevc.mkv in Resources */ = {isa = PBXBuildFile; fileRef = AC84D8DC28ABBD0D00344154 /* hevc.mkv */; };
-		AC84D8F028ABBD0E00344154 /* raw.h264 in Resources */ = {isa = PBXBuildFile; fileRef = AC84D8DD28ABBD0D00344154 /* raw.h264 */; };
-		AC9FB92129D94A7E0082E210 /* vp9.webm in Resources */ = {isa = PBXBuildFile; fileRef = AC9FB91F29D94A7E0082E210 /* vp9.webm */; };
-		AC9FB92229D94A7E0082E210 /* av1.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = AC9FB92029D94A7E0082E210 /* av1.mp4 */; };
-		ACA237132938B78B008916E3 /* dolby-digital-plus-channel.mkv in Resources */ = {isa = PBXBuildFile; fileRef = ACA237122938B78A008916E3 /* dolby-digital-plus-channel.mkv */; };
+		ACB965472A42EDCD00378A4C /* SettingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACB965462A42EDCD00378A4C /* SettingView.swift */; };
 		ACD2F772275F735C0006D16F /* KSPlayer in Frameworks */ = {isa = PBXBuildFile; productRef = ACD2F771275F735C0006D16F /* KSPlayer */; };
-		ACEA9FEB298BFC8800FBA74B /* TestURL.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACEA9FEA298BFC8800FBA74B /* TestURL.swift */; };
+		ACEA9FEB298BFC8800FBA74B /* MovieModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACEA9FEA298BFC8800FBA74B /* MovieModel.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		AC3CAD6228BB88A200AA1C2C /* AVDisplayCriteriaKS.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AVDisplayCriteriaKS.h; sourceTree = "<group>"; };
 		AC3CAD6328BB893500AA1C2C /* Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Bridging-Header.h"; sourceTree = "<group>"; };
-		AC44E0F929290CBB00617BD3 /* FirstView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FirstView.swift; sourceTree = "<group>"; };
-		AC44E0FA29290CBC00617BD3 /* SecondView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SecondView.swift; sourceTree = "<group>"; };
-		AC77DFB026402327001351AE /* DemoApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoApp.swift; sourceTree = "<group>"; };
-		AC77DFB126402327001351AE /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		AC44E0F929290CBB00617BD3 /* InitialView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InitialView.swift; sourceTree = "<group>"; };
+		AC44E0FA29290CBC00617BD3 /* ContentView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		AC77DFB026402327001351AE /* TracyApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TracyApp.swift; sourceTree = "<group>"; };
+		AC77DFB126402327001351AE /* URLImportView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = URLImportView.swift; sourceTree = "<group>"; };
 		AC77DFB226402329001351AE /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		AC77DFB726402329001351AE /* TracyPlayer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TracyPlayer.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		AC84D8D728ABBD0D00344154 /* vr.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = vr.mp4; sourceTree = "<group>"; };
-		AC84D8D828ABBD0D00344154 /* subrip.mkv */ = {isa = PBXFileReference; lastKnownFileType = file; path = subrip.mkv; sourceTree = "<group>"; };
-		AC84D8D928ABBD0D00344154 /* dvd_subtitle.mkv */ = {isa = PBXFileReference; lastKnownFileType = file; path = dvd_subtitle.mkv; sourceTree = "<group>"; };
-		AC84D8DA28ABBD0D00344154 /* h264.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = h264.mp4; sourceTree = "<group>"; };
-		AC84D8DB28ABBD0D00344154 /* mjpeg.flac */ = {isa = PBXFileReference; lastKnownFileType = file; path = mjpeg.flac; sourceTree = "<group>"; };
-		AC84D8DC28ABBD0D00344154 /* hevc.mkv */ = {isa = PBXFileReference; lastKnownFileType = file; path = hevc.mkv; sourceTree = "<group>"; };
-		AC84D8DD28ABBD0D00344154 /* raw.h264 */ = {isa = PBXFileReference; lastKnownFileType = file; path = raw.h264; sourceTree = "<group>"; };
-		AC9FB91F29D94A7E0082E210 /* vp9.webm */ = {isa = PBXFileReference; lastKnownFileType = file; path = vp9.webm; sourceTree = "<group>"; };
-		AC9FB92029D94A7E0082E210 /* av1.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = av1.mp4; sourceTree = "<group>"; };
-		ACA237122938B78A008916E3 /* dolby-digital-plus-channel.mkv */ = {isa = PBXFileReference; lastKnownFileType = file; path = "dolby-digital-plus-channel.mkv"; sourceTree = "<group>"; };
 		ACADA07528EDC067001B76D1 /* TracyPlayer.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = TracyPlayer.entitlements; sourceTree = "<group>"; };
+		ACB965462A42EDCD00378A4C /* SettingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingView.swift; sourceTree = "<group>"; };
 		ACD2F747275F6E860006D16F /* KSPlayer */ = {isa = PBXFileReference; lastKnownFileType = folder; name = KSPlayer; path = ../..; sourceTree = "<group>"; };
 		ACE3619328EB689F00F234EB /* TracyPlayer-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = "TracyPlayer-Info.plist"; sourceTree = "<group>"; };
-		ACEA9FEA298BFC8800FBA74B /* TestURL.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestURL.swift; sourceTree = "<group>"; };
+		ACEA9FEA298BFC8800FBA74B /* MovieModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MovieModel.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -80,11 +62,12 @@
 			children = (
 				AC3CAD6228BB88A200AA1C2C /* AVDisplayCriteriaKS.h */,
 				AC3CAD6328BB893500AA1C2C /* Bridging-Header.h */,
-				ACEA9FEA298BFC8800FBA74B /* TestURL.swift */,
-				AC44E0F929290CBB00617BD3 /* FirstView.swift */,
-				AC44E0FA29290CBC00617BD3 /* SecondView.swift */,
-				AC77DFB026402327001351AE /* DemoApp.swift */,
-				AC77DFB126402327001351AE /* ContentView.swift */,
+				ACEA9FEA298BFC8800FBA74B /* MovieModel.swift */,
+				AC44E0F929290CBB00617BD3 /* InitialView.swift */,
+				AC44E0FA29290CBC00617BD3 /* ContentView.swift */,
+				AC77DFB026402327001351AE /* TracyApp.swift */,
+				AC77DFB126402327001351AE /* URLImportView.swift */,
+				ACB965462A42EDCD00378A4C /* SettingView.swift */,
 				AC77DFB226402329001351AE /* Assets.xcassets */,
 				ACD2F77F275F9BEE0006D16F /* Resources */,
 			);
@@ -117,16 +100,6 @@
 		ACD2F77F275F9BEE0006D16F /* Resources */ = {
 			isa = PBXGroup;
 			children = (
-				ACA237122938B78A008916E3 /* dolby-digital-plus-channel.mkv */,
-				AC84D8D928ABBD0D00344154 /* dvd_subtitle.mkv */,
-				AC84D8DA28ABBD0D00344154 /* h264.mp4 */,
-				AC84D8DC28ABBD0D00344154 /* hevc.mkv */,
-				AC84D8DB28ABBD0D00344154 /* mjpeg.flac */,
-				AC84D8DD28ABBD0D00344154 /* raw.h264 */,
-				AC84D8D828ABBD0D00344154 /* subrip.mkv */,
-				AC84D8D728ABBD0D00344154 /* vr.mp4 */,
-				AC9FB92029D94A7E0082E210 /* av1.mp4 */,
-				AC9FB91F29D94A7E0082E210 /* vp9.webm */,
 			);
 			name = Resources;
 			path = ../../../Tests/KSPlayerTests/Resources;
@@ -192,17 +165,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				AC9FB92129D94A7E0082E210 /* vp9.webm in Resources */,
-				AC84D8EA28ABBD0E00344154 /* mjpeg.flac in Resources */,
-				AC9FB92229D94A7E0082E210 /* av1.mp4 in Resources */,
-				AC84D8DE28ABBD0D00344154 /* vr.mp4 in Resources */,
-				AC84D8E128ABBD0E00344154 /* subrip.mkv in Resources */,
-				AC84D8ED28ABBD0E00344154 /* hevc.mkv in Resources */,
 				AC77DFC726402329001351AE /* Assets.xcassets in Resources */,
-				AC84D8E728ABBD0E00344154 /* h264.mp4 in Resources */,
-				AC84D8F028ABBD0E00344154 /* raw.h264 in Resources */,
-				AC84D8E428ABBD0E00344154 /* dvd_subtitle.mkv in Resources */,
-				ACA237132938B78B008916E3 /* dolby-digital-plus-channel.mkv in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -213,11 +176,12 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				AC77DFC526402329001351AE /* ContentView.swift in Sources */,
-				AC44E0FD29290CF800617BD3 /* FirstView.swift in Sources */,
-				ACEA9FEB298BFC8800FBA74B /* TestURL.swift in Sources */,
-				AC44E0FC29290CBC00617BD3 /* SecondView.swift in Sources */,
-				AC77DFC326402329001351AE /* DemoApp.swift in Sources */,
+				AC77DFC526402329001351AE /* URLImportView.swift in Sources */,
+				AC44E0FD29290CF800617BD3 /* InitialView.swift in Sources */,
+				ACEA9FEB298BFC8800FBA74B /* MovieModel.swift in Sources */,
+				ACB965472A42EDCD00378A4C /* SettingView.swift in Sources */,
+				AC44E0FC29290CBC00617BD3 /* ContentView.swift in Sources */,
+				AC77DFC326402329001351AE /* TracyApp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -279,15 +243,15 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.video";
 				INFOPLIST_KEY_LSSupportsOpeningDocumentsInPlace = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
-				MACOSX_DEPLOYMENT_TARGET = 12.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_NAME = TracyPlayer;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
-				TVOS_DEPLOYMENT_TARGET = 15.0;
+				TVOS_DEPLOYMENT_TARGET = 16.0;
 			};
 			name = Debug;
 		};
@@ -340,14 +304,14 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.video";
 				INFOPLIST_KEY_LSSupportsOpeningDocumentsInPlace = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
-				MACOSX_DEPLOYMENT_TARGET = 12.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				PRODUCT_NAME = TracyPlayer;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
-				TVOS_DEPLOYMENT_TARGET = 15.0;
+				TVOS_DEPLOYMENT_TARGET = 16.0;
 			};
 			name = Release;
 		};
@@ -372,7 +336,7 @@
 				INFOPLIST_KEY_UIRequiresFullScreen = YES;
 				INFOPLIST_KEY_UIStatusBarStyle = UIStatusBarStyleDarkContent;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
-				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -381,12 +345,13 @@
 				PRODUCT_BUNDLE_IDENTIFIER = "kintan.demo-SPM";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				"PROVISIONING_PROFILE_SPECIFIER[sdk=macosx*]" = "";
-				SUPPORTED_PLATFORMS = "appletvos appletvsimulator iphoneos iphonesimulator macosx";
+				SUPPORTED_PLATFORMS = "appletvos appletvsimulator iphoneos iphonesimulator macosx xros xrsimulator";
 				SUPPORTS_MACCATALYST = YES;
 				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_OBJC_BRIDGING_HEADER = "Shared/Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2,3,6";
+				TARGETED_DEVICE_FAMILY = "1,2,3,6,7";
 			};
 			name = Debug;
 		};
@@ -411,7 +376,7 @@
 				INFOPLIST_KEY_UIRequiresFullScreen = YES;
 				INFOPLIST_KEY_UIStatusBarStyle = UIStatusBarStyleDarkContent;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
-				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -420,12 +385,13 @@
 				PRODUCT_BUNDLE_IDENTIFIER = "kintan.demo-SPM";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				"PROVISIONING_PROFILE_SPECIFIER[sdk=macosx*]" = "";
-				SUPPORTED_PLATFORMS = "appletvos appletvsimulator iphoneos iphonesimulator macosx";
+				SUPPORTED_PLATFORMS = "appletvos appletvsimulator iphoneos iphonesimulator macosx xros xrsimulator";
 				SUPPORTS_MACCATALYST = YES;
 				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_OBJC_BRIDGING_HEADER = "Shared/Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2,3,6";
+				TARGETED_DEVICE_FAMILY = "1,2,3,6,7";
 				VALIDATE_PRODUCT = YES;
 			};
 			name = Release;

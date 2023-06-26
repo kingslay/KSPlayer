@@ -50,8 +50,8 @@ extension KSVideoPlayer: UIViewRepresentable {
         return view
     }
 
-    public func updateUIView(_ uiView: UIViewType, context: Context) {
-        updateView(uiView, context: context)
+    public func updateUIView(_ view: UIViewType, context: Context) {
+        updateView(view, context: context)
     }
 
     public static func dismantleUIView(_: UIViewType, coordinator: Coordinator) {
@@ -67,18 +67,18 @@ extension KSVideoPlayer: UIViewRepresentable {
         context.coordinator.makeView(url: url, options: options)
     }
 
-    public func updateNSView(_ uiView: NSViewType, context: Context) {
-        updateView(uiView, context: context)
+    public func updateNSView(_ view: NSViewType, context: Context) {
+        updateView(view, context: context)
     }
 
-    public static func dismantleNSView(_: NSViewType, coordinator _: Coordinator) {}
+    public static func dismantleNSView(_ view: NSViewType, coordinator _: Coordinator) {
+        view.window?.contentAspectRatio = CGSize(width: 16, height: 9)
+    }
     #endif
 
     private func updateView(_ view: KSPlayerLayer, context: Context) {
         if view.url != url {
-            view.delegate = nil
-            view.set(url: url, options: options)
-            view.delegate = context.coordinator
+            _ = context.coordinator.makeView(url: url, options: options)
         }
     }
 
@@ -103,7 +103,10 @@ extension KSVideoPlayer: UIViewRepresentable {
             }
         }
 
-        @Published public var isLoading = true
+        @Published public var state = KSPlayerState.prepareToPlay
+        public var subtitleModel = SubtitleModel()
+        @Published
+        public var timemodel = ControllerTimeModel()
         public var selectedAudioTrack: MediaPlayerTrack? {
             didSet {
                 if oldValue?.trackID != selectedAudioTrack?.trackID {
@@ -124,7 +127,7 @@ extension KSVideoPlayer: UIViewRepresentable {
                         playerLayer?.player.select(track: track)
                         playerLayer?.options.videoDisable = false
                     } else {
-                        oldValue?.setIsEnabled(false)
+                        oldValue?.isEnabled = false
                         playerLayer?.options.videoDisable = true
                     }
                 }
@@ -150,12 +153,14 @@ extension KSVideoPlayer: UIViewRepresentable {
 
         public func makeView(url: URL, options: KSOptions) -> KSPlayerLayer {
             if let playerLayer {
+                playerLayer.delegate = nil
                 playerLayer.set(url: url, options: options)
+                subtitleModel.url = url
                 playerLayer.delegate = self
-                isPlay = options.isAutoPlay
                 return playerLayer
             } else {
                 let playerLayer = KSPlayerLayer(url: url, options: options)
+                subtitleModel.url = url
                 playerLayer.delegate = self
                 self.playerLayer = playerLayer
                 return playerLayer
@@ -176,20 +181,37 @@ extension KSVideoPlayer: UIViewRepresentable {
 
 extension KSVideoPlayer.Coordinator: KSPlayerLayerDelegate {
     public func player(layer: KSPlayerLayer, state: KSPlayerState) {
-        if state == .prepareToPlay {
-            isPlay = layer.options.isAutoPlay
-        } else if state == .readyToPlay {
+        if state == .readyToPlay {
+            #if os(macOS)
+            let naturalSize = layer.player.naturalSize
+            layer.player.view?.window?.contentAspectRatio = naturalSize
+            #endif
             videoTracks = layer.player.tracks(mediaType: .video)
             audioTracks = layer.player.tracks(mediaType: .audio)
-        } else {
-            isLoading = state == .buffering
-            isPlay = state.isPlaying
+            subtitleModel.selectedSubtitleInfo = subtitleModel.subtitleInfos.first
+            selectedAudioTrack = audioTracks.first { $0.isEnabled }
+            selectedVideoTrack = videoTracks.first { $0.isEnabled }
+            if let subtitleDataSouce = layer.player.subtitleDataSouce {
+                // 要延后增加内嵌字幕。因为有些内嵌字幕是放在视频流的。所以会比readyToPlay回调晚。
+                DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 1) { [weak self] in
+                    guard let self else { return }
+                    self.subtitleModel.addSubtitle(dataSouce: subtitleDataSouce)
+                    if self.subtitleModel.selectedSubtitleInfo == nil, layer.options.autoSelectEmbedSubtitle {
+                        self.subtitleModel.selectedSubtitleInfo = self.subtitleModel.subtitleInfos.first
+                    }
+                }
+            }
         }
+        isPlay = state.isPlaying
+        self.state = state
         onStateChanged?(layer, state)
     }
 
-    public func player(layer _: KSPlayerLayer, currentTime: TimeInterval, totalTime: TimeInterval) {
+    public func player(layer: KSPlayerLayer, currentTime: TimeInterval, totalTime: TimeInterval) {
         onPlay?(currentTime, totalTime)
+        timemodel.currentTime = Int(currentTime)
+        timemodel.totalTime = Int(max(0, totalTime))
+        subtitleModel.subtitle(currentTime: currentTime + layer.options.subtitleDelay)
     }
 
     public func player(layer: KSPlayerLayer, finish error: Error?) {
@@ -236,4 +258,13 @@ public extension KSVideoPlayer {
         return self
     }
     #endif
+}
+
+/// 这是一个频繁变化的model。View要少用这个
+public class ControllerTimeModel: ObservableObject {
+    // 改成int才不会频繁更新
+    @Published
+    public var currentTime = 0
+    @Published
+    public var totalTime = 1
 }

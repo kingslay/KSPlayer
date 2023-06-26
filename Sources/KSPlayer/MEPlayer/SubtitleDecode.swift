@@ -14,15 +14,13 @@ import UIKit
 import AppKit
 #endif
 class SubtitleDecode: DecodeProtocol {
-    private weak var delegate: DecodeResultDelegate?
     private let reg = AssParse.patternReg()
     private var codecContext: UnsafeMutablePointer<AVCodecContext>?
     private let scale = VideoSwresample(dstFormat: AV_PIX_FMT_ARGB)
     private var subtitle = AVSubtitle()
     private var startTime = TimeInterval(0)
     private var preSubtitleFrame: SubtitleFrame?
-    required init(assetTrack: FFmpegAssetTrack, options: KSOptions, delegate: DecodeResultDelegate) {
-        self.delegate = delegate
+    required init(assetTrack: FFmpegAssetTrack, options: KSOptions) {
         startTime = assetTrack.startTime
         do {
             codecContext = try assetTrack.ceateContext(options: options)
@@ -35,9 +33,8 @@ class SubtitleDecode: DecodeProtocol {
         preSubtitleFrame = nil
     }
 
-    func doDecode(packet: Packet) throws {
+    func decodeFrame(from packet: Packet, completionHandler: @escaping (Result<MEFrame, Error>) -> Void) {
         guard let codecContext else {
-            delegate?.decodeResult(frame: nil)
             return
         }
         var gotsubtitle = Int32(0)
@@ -70,7 +67,7 @@ class SubtitleDecode: DecodeProtocol {
                 preSubtitleFrame.part.end = frame.part.start
             }
             preSubtitleFrame = frame
-            delegate?.decodeResult(frame: frame)
+            completionHandler(.success(frame))
         }
         avsubtitle_free(&subtitle)
     }
@@ -121,6 +118,11 @@ class SubtitleDecode: DecodeProtocol {
         if images.count > 1 {
             origin = .zero
         }
-        return (origin, attributedString, CGImage.combine(images: images)?.image(quality: 0.2))
+        var image: UIImage?
+        // 用heic格式，那展示的时候会卡主线程。也不能用jpg，因为字幕需要有透明度。所以改成用tif
+        if let data = CGImage.combine(images: images)?.data(type: .tif, quality: 0.2) {
+            image = UIImage(data: data)
+        }
+        return (origin, attributedString, image)
     }
 }

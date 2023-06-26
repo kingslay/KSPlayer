@@ -3,15 +3,12 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 52;
+	objectVersion = 54;
 	objects = {
 
 /* Begin PBXBuildFile section */
 		4F8BF0EAD4FD485055852FBD /* Pods_demo_tvOS.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F227C20AECAAE8524D2F0F1D /* Pods_demo_tvOS.framework */; };
 		AC08611F20B69A1C00D801FC /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AC08611E20B69A1C00D801FC /* Assets.xcassets */; };
-		AC08612A20B69A1D00D801FC /* demo_tvOSTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC08612920B69A1D00D801FC /* demo_tvOSTests.swift */; };
-		AC08613520B69A1D00D801FC /* demo_tvOSUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC08613420B69A1D00D801FC /* demo_tvOSUITests.swift */; };
-		AC21D0E826D250D80007891C /* RootViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC21D0E726D250D80007891C /* RootViewController.swift */; };
 		AC368CA128A9E92F003BD454 /* h264.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = AC368C9A28A9E92E003BD454 /* h264.mp4 */; };
 		AC368CA228A9E92F003BD454 /* vr.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = AC368C9B28A9E92E003BD454 /* vr.mp4 */; };
 		AC368CA328A9E92F003BD454 /* hevc.mkv in Resources */ = {isa = PBXBuildFile; fileRef = AC368C9C28A9E92E003BD454 /* hevc.mkv */; };
@@ -24,25 +21,7 @@
 		AC3A420423D32DFE00B666A4 /* DetailViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC3A420023D32DFE00B666A4 /* DetailViewController.swift */; };
 		AC3A420523D32DFE00B666A4 /* AudioViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC3A420123D32DFE00B666A4 /* AudioViewController.swift */; };
 		AC80333224BA1B54002B3D40 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = AC80333124BA1B54002B3D40 /* Main.storyboard */; };
-		ACEA9FEF298BFDC900FBA74B /* TestURL.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACEA9FEE298BFDC900FBA74B /* TestURL.swift */; };
 /* End PBXBuildFile section */
-
-/* Begin PBXContainerItemProxy section */
-		AC08612620B69A1C00D801FC /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = AC08610C20B69A1C00D801FC /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = AC08611320B69A1C00D801FC;
-			remoteInfo = "demo-tvOS";
-		};
-		AC08613120B69A1D00D801FC /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = AC08610C20B69A1C00D801FC /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = AC08611320B69A1C00D801FC;
-			remoteInfo = "demo-tvOS";
-		};
-/* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
 		055202483CC6922E098C6565 /* Pods-demo-tvOS.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-demo-tvOS.debug.xcconfig"; path = "../Pods/Target Support Files/Pods-demo-tvOS/Pods-demo-tvOS.debug.xcconfig"; sourceTree = "<group>"; };
@@ -51,13 +30,6 @@
 		AC08611420B69A1C00D801FC /* demo-tvOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "demo-tvOS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		AC08611E20B69A1C00D801FC /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		AC08612020B69A1C00D801FC /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		AC08612520B69A1C00D801FC /* demo-tvOSTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "demo-tvOSTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
-		AC08612920B69A1D00D801FC /* demo_tvOSTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = demo_tvOSTests.swift; sourceTree = "<group>"; };
-		AC08612B20B69A1D00D801FC /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		AC08613020B69A1D00D801FC /* demo-tvOSUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "demo-tvOSUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
-		AC08613420B69A1D00D801FC /* demo_tvOSUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = demo_tvOSUITests.swift; sourceTree = "<group>"; };
-		AC08613620B69A1D00D801FC /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		AC21D0E726D250D80007891C /* RootViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = RootViewController.swift; path = "../../demo-iOS/demo-iOS/RootViewController.swift"; sourceTree = "<group>"; };
 		AC368C9A28A9E92E003BD454 /* h264.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = h264.mp4; sourceTree = "<group>"; };
 		AC368C9B28A9E92E003BD454 /* vr.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = vr.mp4; sourceTree = "<group>"; };
 		AC368C9C28A9E92E003BD454 /* hevc.mkv */ = {isa = PBXFileReference; lastKnownFileType = file; path = hevc.mkv; sourceTree = "<group>"; };
@@ -70,7 +42,6 @@
 		AC3A420023D32DFE00B666A4 /* DetailViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = DetailViewController.swift; path = "../../demo-iOS/demo-iOS/DetailViewController.swift"; sourceTree = "<group>"; };
 		AC3A420123D32DFE00B666A4 /* AudioViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = AudioViewController.swift; path = "../../demo-iOS/demo-iOS/AudioViewController.swift"; sourceTree = "<group>"; };
 		AC80333124BA1B54002B3D40 /* Main.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = Main.storyboard; sourceTree = "<group>"; };
-		ACEA9FEE298BFDC900FBA74B /* TestURL.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = TestURL.swift; path = ../../SwiftUI/Shared/TestURL.swift; sourceTree = "<group>"; };
 		D4B47B55C1204959E7C6D995 /* Pods-demo-tvOS.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-demo-tvOS.release.xcconfig"; path = "../Pods/Target Support Files/Pods-demo-tvOS/Pods-demo-tvOS.release.xcconfig"; sourceTree = "<group>"; };
 		F227C20AECAAE8524D2F0F1D /* Pods_demo_tvOS.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_demo_tvOS.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -84,20 +55,6 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		AC08612220B69A1C00D801FC /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		AC08612D20B69A1D00D801FC /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -105,8 +62,6 @@
 			isa = PBXGroup;
 			children = (
 				AC08611620B69A1C00D801FC /* demo-tvOS */,
-				AC08612820B69A1D00D801FC /* demo-tvOSTests */,
-				AC08613320B69A1D00D801FC /* demo-tvOSUITests */,
 				AC08611520B69A1C00D801FC /* Products */,
 				CF87FE6837F03B47FBE2E033 /* Pods */,
 				EF7E5CCE0EBCE2DEEC5EF789 /* Frameworks */,
@@ -117,8 +72,6 @@
 			isa = PBXGroup;
 			children = (
 				AC08611420B69A1C00D801FC /* demo-tvOS.app */,
-				AC08612520B69A1C00D801FC /* demo-tvOSTests.xctest */,
-				AC08613020B69A1D00D801FC /* demo-tvOSUITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -126,12 +79,10 @@
 		AC08611620B69A1C00D801FC /* demo-tvOS */ = {
 			isa = PBXGroup;
 			children = (
-				ACEA9FEE298BFDC900FBA74B /* TestURL.swift */,
 				AC3A41FF23D32DFE00B666A4 /* AppDelegate.swift */,
 				AC3A420123D32DFE00B666A4 /* AudioViewController.swift */,
 				AC3A420023D32DFE00B666A4 /* DetailViewController.swift */,
 				AC3A41FE23D32DFD00B666A4 /* MasterViewController.swift */,
-				AC21D0E726D250D80007891C /* RootViewController.swift */,
 				AC08611E20B69A1C00D801FC /* Assets.xcassets */,
 				AC80333124BA1B54002B3D40 /* Main.storyboard */,
 				AC08612020B69A1C00D801FC /* Info.plist */,
@@ -140,24 +91,6 @@
 				06D08BDB294DDA9900D919DB /* Bridging-Header.h */,
 			);
 			path = "demo-tvOS";
-			sourceTree = "<group>";
-		};
-		AC08612820B69A1D00D801FC /* demo-tvOSTests */ = {
-			isa = PBXGroup;
-			children = (
-				AC08612920B69A1D00D801FC /* demo_tvOSTests.swift */,
-				AC08612B20B69A1D00D801FC /* Info.plist */,
-			);
-			path = "demo-tvOSTests";
-			sourceTree = "<group>";
-		};
-		AC08613320B69A1D00D801FC /* demo-tvOSUITests */ = {
-			isa = PBXGroup;
-			children = (
-				AC08613420B69A1D00D801FC /* demo_tvOSUITests.swift */,
-				AC08613620B69A1D00D801FC /* Info.plist */,
-			);
-			path = "demo-tvOSUITests";
 			sourceTree = "<group>";
 		};
 		AC80332324BA1AE3002B3D40 /* Resources */ = {
@@ -214,65 +147,20 @@
 			productReference = AC08611420B69A1C00D801FC /* demo-tvOS.app */;
 			productType = "com.apple.product-type.application";
 		};
-		AC08612420B69A1C00D801FC /* demo-tvOSTests */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = AC08613C20B69A1D00D801FC /* Build configuration list for PBXNativeTarget "demo-tvOSTests" */;
-			buildPhases = (
-				AC08612120B69A1C00D801FC /* Sources */,
-				AC08612220B69A1C00D801FC /* Frameworks */,
-				AC08612320B69A1C00D801FC /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-				AC08612720B69A1C00D801FC /* PBXTargetDependency */,
-			);
-			name = "demo-tvOSTests";
-			productName = "demo-tvOSTests";
-			productReference = AC08612520B69A1C00D801FC /* demo-tvOSTests.xctest */;
-			productType = "com.apple.product-type.bundle.unit-test";
-		};
-		AC08612F20B69A1D00D801FC /* demo-tvOSUITests */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = AC08613F20B69A1D00D801FC /* Build configuration list for PBXNativeTarget "demo-tvOSUITests" */;
-			buildPhases = (
-				AC08612C20B69A1D00D801FC /* Sources */,
-				AC08612D20B69A1D00D801FC /* Frameworks */,
-				AC08612E20B69A1D00D801FC /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-				AC08613220B69A1D00D801FC /* PBXTargetDependency */,
-			);
-			name = "demo-tvOSUITests";
-			productName = "demo-tvOSUITests";
-			productReference = AC08613020B69A1D00D801FC /* demo-tvOSUITests.xctest */;
-			productType = "com.apple.product-type.bundle.ui-testing";
-		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
 		AC08610C20B69A1C00D801FC /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
+				BuildIndependentTargetsInParallel = YES;
 				LastSwiftUpdateCheck = 0930;
-				LastUpgradeCheck = 1330;
+				LastUpgradeCheck = 1500;
 				ORGANIZATIONNAME = kintan;
 				TargetAttributes = {
 					AC08611320B69A1C00D801FC = {
 						CreatedOnToolsVersion = 9.3.1;
 						LastSwiftMigration = 1130;
-					};
-					AC08612420B69A1C00D801FC = {
-						CreatedOnToolsVersion = 9.3.1;
-						LastSwiftMigration = 1020;
-						TestTargetID = AC08611320B69A1C00D801FC;
-					};
-					AC08612F20B69A1D00D801FC = {
-						CreatedOnToolsVersion = 9.3.1;
-						LastSwiftMigration = 1020;
-						TestTargetID = AC08611320B69A1C00D801FC;
 					};
 				};
 			};
@@ -290,8 +178,6 @@
 			projectRoot = "";
 			targets = (
 				AC08611320B69A1C00D801FC /* demo-tvOS */,
-				AC08612420B69A1C00D801FC /* demo-tvOSTests */,
-				AC08612F20B69A1D00D801FC /* demo-tvOSUITests */,
 			);
 		};
 /* End PBXProject section */
@@ -310,20 +196,6 @@
 				AC368CA528A9E92F003BD454 /* dvd_subtitle.mkv in Resources */,
 				AC08611F20B69A1C00D801FC /* Assets.xcassets in Resources */,
 				AC368CA628A9E92F003BD454 /* raw.h264 in Resources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		AC08612320B69A1C00D801FC /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		AC08612E20B69A1D00D801FC /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -372,51 +244,21 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				AC21D0E826D250D80007891C /* RootViewController.swift in Sources */,
 				AC3A420423D32DFE00B666A4 /* DetailViewController.swift in Sources */,
 				AC3A420523D32DFE00B666A4 /* AudioViewController.swift in Sources */,
 				AC3A420323D32DFE00B666A4 /* AppDelegate.swift in Sources */,
 				AC3A420223D32DFE00B666A4 /* MasterViewController.swift in Sources */,
-				ACEA9FEF298BFDC900FBA74B /* TestURL.swift in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		AC08612120B69A1C00D801FC /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				AC08612A20B69A1D00D801FC /* demo_tvOSTests.swift in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		AC08612C20B69A1D00D801FC /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				AC08613520B69A1D00D801FC /* demo_tvOSUITests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
-
-/* Begin PBXTargetDependency section */
-		AC08612720B69A1C00D801FC /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = AC08611320B69A1C00D801FC /* demo-tvOS */;
-			targetProxy = AC08612620B69A1C00D801FC /* PBXContainerItemProxy */;
-		};
-		AC08613220B69A1D00D801FC /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = AC08611320B69A1C00D801FC /* demo-tvOS */;
-			targetProxy = AC08613120B69A1D00D801FC /* PBXContainerItemProxy */;
-		};
-/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		AC08613720B69A1D00D801FC /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
@@ -477,6 +319,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
@@ -580,84 +423,6 @@
 			};
 			name = Release;
 		};
-		AC08613D20B69A1D00D801FC /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
-				BUNDLE_LOADER = "$(TEST_HOST)";
-				CODE_SIGN_STYLE = Automatic;
-				INFOPLIST_FILE = "demo-tvOSTests/Info.plist";
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@loader_path/Frameworks",
-				);
-				PRODUCT_BUNDLE_IDENTIFIER = "kintan.demo-tvOSTests";
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = 3;
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/demo-tvOS.app/demo-tvOS";
-			};
-			name = Debug;
-		};
-		AC08613E20B69A1D00D801FC /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
-				BUNDLE_LOADER = "$(TEST_HOST)";
-				CODE_SIGN_STYLE = Automatic;
-				INFOPLIST_FILE = "demo-tvOSTests/Info.plist";
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@loader_path/Frameworks",
-				);
-				PRODUCT_BUNDLE_IDENTIFIER = "kintan.demo-tvOSTests";
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = 3;
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/demo-tvOS.app/demo-tvOS";
-			};
-			name = Release;
-		};
-		AC08614020B69A1D00D801FC /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
-				CODE_SIGN_STYLE = Automatic;
-				INFOPLIST_FILE = "demo-tvOSUITests/Info.plist";
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@loader_path/Frameworks",
-				);
-				PRODUCT_BUNDLE_IDENTIFIER = "kintan.demo-tvOSUITests";
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = 3;
-				TEST_TARGET_NAME = "demo-tvOS";
-			};
-			name = Debug;
-		};
-		AC08614120B69A1D00D801FC /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
-				CODE_SIGN_STYLE = Automatic;
-				INFOPLIST_FILE = "demo-tvOSUITests/Info.plist";
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@loader_path/Frameworks",
-				);
-				PRODUCT_BUNDLE_IDENTIFIER = "kintan.demo-tvOSUITests";
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = 3;
-				TEST_TARGET_NAME = "demo-tvOS";
-			};
-			name = Release;
-		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -675,24 +440,6 @@
 			buildConfigurations = (
 				AC08613A20B69A1D00D801FC /* Debug */,
 				AC08613B20B69A1D00D801FC /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		AC08613C20B69A1D00D801FC /* Build configuration list for PBXNativeTarget "demo-tvOSTests" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				AC08613D20B69A1D00D801FC /* Debug */,
-				AC08613E20B69A1D00D801FC /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		AC08613F20B69A1D00D801FC /* Build configuration list for PBXNativeTarget "demo-tvOSUITests" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				AC08614020B69A1D00D801FC /* Debug */,
-				AC08614120B69A1D00D801FC /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

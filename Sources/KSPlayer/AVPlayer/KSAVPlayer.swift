@@ -86,6 +86,7 @@ public class KSAVPlayer {
     private var itemObservation: NSKeyValueObservation?
     private var loopCountObservation: NSKeyValueObservation?
     private var loopStatusObservation: NSKeyValueObservation?
+    private var mediaPlayerTracks = [AVMediaPlayerTrack]()
     private var error: Error? {
         didSet {
             if let error {
@@ -113,6 +114,7 @@ public class KSAVPlayer {
         _pipController as? KSPictureInPictureController
     }
 
+    public var naturalSize: CGSize = .zero
     @available(macOS 12.0, iOS 15.0, tvOS 15.0, *)
     public var playbackCoordinator: AVPlaybackCoordinator {
         playerView.player.playbackCoordinator
@@ -177,6 +179,38 @@ public class KSAVPlayer {
         }
     }
 
+    #if os(xrOS)
+    public var allowsExternalPlayback = false
+    public var usesExternalPlaybackWhileExternalScreenIsActive = false
+    public let isExternalPlaybackActive = false
+    #else
+    public var allowsExternalPlayback: Bool {
+        get {
+            player.allowsExternalPlayback
+        }
+        set {
+            player.allowsExternalPlayback = newValue
+        }
+    }
+
+    #if os(macOS)
+    public var usesExternalPlaybackWhileExternalScreenIsActive = false
+    #else
+    public var usesExternalPlaybackWhileExternalScreenIsActive: Bool {
+        get {
+            player.usesExternalPlaybackWhileExternalScreenIsActive
+        }
+        set {
+            player.usesExternalPlaybackWhileExternalScreenIsActive = newValue
+        }
+    }
+    #endif
+
+    public var isExternalPlaybackActive: Bool {
+        player.isExternalPlaybackActive
+    }
+    #endif
+
     public required init(url: URL, options: KSOptions) {
         KSOptions.setAudioSession()
         urlAsset = AVURLAsset(url: url, options: options.avOptions)
@@ -214,8 +248,15 @@ extension KSAVPlayer {
     private func updateStatus(item: AVPlayerItem) {
         if item.status == .readyToPlay {
             options.findTime = CACurrentMediaTime()
-            let videoTracks = item.tracks.filter { $0.assetTrack?.mediaType.rawValue == AVMediaType.video.rawValue }
-            if videoTracks.isEmpty || videoTracks.allSatisfy({ $0.assetTrack?.isPlayable == false }) {
+            mediaPlayerTracks = item.tracks.map {
+                AVMediaPlayerTrack(track: $0)
+            }
+            let playableVideo = mediaPlayerTracks.first {
+                $0.mediaType == .video && $0.isPlayable
+            }
+            if let playableVideo {
+                naturalSize = playableVideo.naturalSize
+            } else {
                 error = NSError(errorCode: .videoTracksUnplayable)
                 return
             }
@@ -320,36 +361,6 @@ extension KSAVPlayer: MediaPlayerProtocol {
     public var subtitleDataSouce: SubtitleDataSouce? { nil }
     public var isPlaying: Bool { player.rate > 0 ? true : playbackState == .playing }
     public var view: UIView? { playerView }
-    public var allowsExternalPlayback: Bool {
-        get {
-            player.allowsExternalPlayback
-        }
-        set {
-            player.allowsExternalPlayback = newValue
-        }
-    }
-
-    public var usesExternalPlaybackWhileExternalScreenIsActive: Bool {
-        get {
-            #if os(macOS)
-            return false
-            #else
-            return player.usesExternalPlaybackWhileExternalScreenIsActive
-            #endif
-        }
-        set {
-            #if !os(macOS)
-            player.usesExternalPlaybackWhileExternalScreenIsActive = newValue
-            #endif
-        }
-    }
-
-    public var isExternalPlaybackActive: Bool { player.isExternalPlaybackActive }
-
-    public var naturalSize: CGSize {
-        urlAsset.tracks(withMediaType: .video).first { $0.isEnabled }?.naturalSize ?? .zero
-    }
-
     public var currentPlaybackTime: TimeInterval {
         get {
             if shouldSeekTo > 0 {
@@ -372,7 +383,7 @@ extension KSAVPlayer: MediaPlayerProtocol {
         return event.numberOfBytesTransferred
     }
 
-    public func thumbnailImageAtCurrentTime() async -> UIImage? {
+    public func thumbnailImageAtCurrentTime() async -> CGImage? {
         guard let playerItem = player.currentItem, isReadyToPlay else {
             return nil
         }
@@ -469,17 +480,17 @@ extension KSAVPlayer: MediaPlayerProtocol {
         }
     }
 
-    public func tracks(mediaType: AVMediaType) -> [MediaPlayerTrack] {
+    public func tracks(mediaType: AVFoundation.AVMediaType) -> [MediaPlayerTrack] {
         player.currentItem?.tracks.filter { $0.assetTrack?.mediaType == mediaType }.map { AVMediaPlayerTrack(track: $0) } ?? []
     }
 
     public func select(track: MediaPlayerTrack) {
         player.currentItem?.tracks.filter { $0.assetTrack?.mediaType == track.mediaType }.forEach { $0.isEnabled = false }
-        track.setIsEnabled(true)
+        track.isEnabled = true
     }
 }
 
-extension AVMediaType {
+extension AVFoundation.AVMediaType {
     var mediaCharacteristic: AVMediaCharacteristic {
         switch self {
         case .video:
@@ -494,18 +505,22 @@ extension AVMediaType {
     }
 }
 
-struct AVMediaPlayerTrack: MediaPlayerTrack {
+extension AVAssetTrack {
+    func toMediaPlayerTrack() {}
+}
+
+class AVMediaPlayerTrack: MediaPlayerTrack {
     let description: String
     private let track: AVPlayerItemTrack
     let nominalFrameRate: Float
     let trackID: Int32
     let mediaSubType: CMFormatDescription.MediaSubType
-    let rotation: Double = 0
+    let rotation: Int16 = 0
     let bitRate: Int64
     let naturalSize: CGSize
     let name: String
     let language: String?
-    let mediaType: AVMediaType
+    let mediaType: AVFoundation.AVMediaType
     let depth: Int32
     let fullRangeVideo: Bool
     let colorPrimaries: String?
@@ -515,6 +530,7 @@ struct AVMediaPlayerTrack: MediaPlayerTrack {
     var dovi: DOVIDecoderConfigurationRecord?
     var audioStreamBasicDescription: AudioStreamBasicDescription?
     let fieldOrder: FFmpegFieldOrder = .unknown
+    var isPlayable: Bool
     var isEnabled: Bool {
         get {
             track.isEnabled
@@ -528,12 +544,25 @@ struct AVMediaPlayerTrack: MediaPlayerTrack {
         self.track = track
         trackID = track.assetTrack?.trackID ?? 0
         mediaType = track.assetTrack?.mediaType ?? .video
+        let formatDescription: Any?
+        #if os(xrOS)
         name = track.assetTrack?.languageCode ?? ""
         language = track.assetTrack?.extendedLanguageTag
         nominalFrameRate = track.assetTrack?.nominalFrameRate ?? 24.0
         naturalSize = track.assetTrack?.naturalSize ?? .zero
         bitRate = Int64(track.assetTrack?.estimatedDataRate ?? 0)
-        if let formatDescription = track.assetTrack?.formatDescriptions.first {
+        isPlayable = false
+        formatDescription = track.assetTrack?.formatDescriptions.first
+        #else
+        name = track.assetTrack?.languageCode ?? ""
+        language = track.assetTrack?.extendedLanguageTag
+        nominalFrameRate = track.assetTrack?.nominalFrameRate ?? 24.0
+        naturalSize = track.assetTrack?.naturalSize ?? .zero
+        bitRate = Int64(track.assetTrack?.estimatedDataRate ?? 0)
+        isPlayable = track.assetTrack?.isPlayable ?? false
+        formatDescription = track.assetTrack?.formatDescriptions.first
+        #endif
+        if let formatDescription {
             // swiftlint:disable force_cast
             let desc = formatDescription as! CMFormatDescription
             // swiftlint:enable force_cast
@@ -555,11 +584,14 @@ struct AVMediaPlayerTrack: MediaPlayerTrack {
             fullRangeVideo = false
             description = ""
         }
+        #if os(xrOS)
+        Task {
+            isPlayable = await (try? track.assetTrack?.load(.isPlayable)) ?? false
+        }
+        #endif
     }
 
-    func setIsEnabled(_ isEnabled: Bool) {
-        track.isEnabled = isEnabled
-    }
+    func load() {}
 }
 
 public extension AVAsset {
@@ -570,47 +602,16 @@ public extension AVAsset {
         return imageGenerator
     }
 
-    func thumbnailImage(currentTime: CMTime, handler: @escaping (UIImage?) -> Void) {
+    func thumbnailImage(currentTime: CMTime, handler: @escaping (CGImage?) -> Void) {
         let imageGenerator = ceateImageGenerator()
         imageGenerator.requestedTimeToleranceBefore = .zero
         imageGenerator.requestedTimeToleranceAfter = .zero
         imageGenerator.generateCGImagesAsynchronously(forTimes: [NSValue(time: currentTime)]) { _, cgImage, _, _, _ in
             if let cgImage {
-                handler(UIImage(cgImage: cgImage))
+                handler(cgImage)
             } else {
                 handler(nil)
             }
-        }
-    }
-}
-
-extension CGImage {
-    static func combine(images: [(CGRect, CGImage)]) -> CGImage? {
-        if images.isEmpty {
-            return nil
-        }
-        if images.count == 1 {
-            return images[0].1
-        }
-        var width = 0
-        var height = 0
-        for (rect, _) in images {
-            width = max(width, Int(rect.maxX))
-            height = max(height, Int(rect.maxY))
-        }
-        let bitsPerComponent = 8
-        // RGBA(的bytes) * bitsPerComponent *width
-        let bytesPerRow = 4 * 8 * bitsPerComponent * width
-        return autoreleasepool {
-            let context = CGContext(data: nil, width: width, height: height, bitsPerComponent: bitsPerComponent, bytesPerRow: bytesPerRow, space: CGColorSpaceCreateDeviceRGB(), bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue)
-            guard let context else {
-                return nil
-            }
-            for (rect, cgImage) in images {
-                context.draw(cgImage, in: CGRect(x: rect.origin.x, y: CGFloat(height) - rect.maxY, width: rect.width, height: rect.height))
-            }
-            let cgImage = context.makeImage()
-            return cgImage
         }
     }
 }

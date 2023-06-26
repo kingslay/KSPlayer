@@ -1,8 +1,8 @@
+import CoreMedia
 import FFmpegKit
 import Libavcodec
 import Libavfilter
 import Libavformat
-
 func toDictionary(_ native: OpaquePointer?) -> [String: String] {
     var dict = [String: String]()
     if let native {
@@ -283,7 +283,8 @@ extension AVPixelFormat {
         case AV_PIX_FMT_P010BE, AV_PIX_FMT_P010LE: return fullRange ? kCVPixelFormatType_420YpCbCr10BiPlanarFullRange : kCVPixelFormatType_420YpCbCr10BiPlanarVideoRange
         case AV_PIX_FMT_YUV420P10BE, AV_PIX_FMT_YUV420P10LE: return kCVPixelFormatType_420YpCbCr10BiPlanarVideoRange
         case AV_PIX_FMT_YUV420P: return kCVPixelFormatType_420YpCbCr8Planar
-        case AV_PIX_FMT_YUVJ420P: return kCVPixelFormatType_420YpCbCr8PlanarFullRange
+        //  AVSampleBufferDisplayLayer不能显示 kCVPixelFormatType_420YpCbCr8PlanarFullRange
+        case AV_PIX_FMT_YUVJ420P: return kCVPixelFormatType_420YpCbCr8BiPlanarFullRange
         case AV_PIX_FMT_NV16: return fullRange ? kCVPixelFormatType_422YpCbCr8BiPlanarFullRange : kCVPixelFormatType_422YpCbCr8BiPlanarVideoRange
         case AV_PIX_FMT_UYVY422: return kCVPixelFormatType_422YpCbCr8
         case AV_PIX_FMT_YUYV422: return kCVPixelFormatType_422YpCbCr8_yuvs

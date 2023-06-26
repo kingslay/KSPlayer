@@ -7,7 +7,7 @@
 import Foundation
 public class EmptySubtitleInfo: SubtitleInfo {
     public let subtitleID: String = ""
-
+    public var delay: TimeInterval = 0
     public let name = NSLocalizedString("no show subtitle", comment: "")
     public func search(for _: TimeInterval) -> SubtitlePart? {
         nil
@@ -20,12 +20,13 @@ public class URLSubtitleInfo: SubtitleInfo {
     private var subtitles: KSURLSubtitle?
 //    private let fetchSubtitleDetail: (((NSError?) -> Void) -> Void)?
     private var downloadURL: URL
+    public var delay: TimeInterval = 0
     public private(set) var name: String
     public let subtitleID: String
     public var comment: String?
     public var userInfo: NSMutableDictionary?
     public convenience init(url: URL) {
-        self.init(subtitleID: url.path, name: url.lastPathComponent, url: url)
+        self.init(subtitleID: url.absoluteString, name: url.lastPathComponent, url: url)
     }
 
     public init(subtitleID: String, name: String, url: URL) {
@@ -42,7 +43,14 @@ public class URLSubtitleInfo: SubtitleInfo {
                     filename.removeFirst(httpFileName.count)
                     self.name = filename
                 }
+                // 下载的临时文件要马上就用。不然可能会马上被清空
                 self.downloadURL = url
+                let subtitles = KSURLSubtitle()
+                do {
+                    try subtitles.parse(url: url)
+                } catch {}
+
+                self.subtitles = subtitles
             }.resume()
         }
     }
@@ -65,18 +73,11 @@ public class URLSubtitleInfo: SubtitleInfo {
     }
 }
 
-public protocol SubtitletoCache: AnyObject {
-    var cache: CacheDataSouce? { get set }
-}
-
-public extension SubtitletoCache {
-    func addCache(subtitleID: String, downloadURL: URL) {
-        cache?.addCache(subtitleID: subtitleID, downloadURL: downloadURL)
-    }
-}
-
 public protocol SubtitleDataSouce: AnyObject {
     var infos: [any SubtitleInfo] { get }
+}
+
+public protocol SearchSubtitleDataSouce: SubtitleDataSouce {
     func searchSubtitle(url: URL, completion: @escaping (() -> Void))
 }
 
@@ -84,13 +85,20 @@ extension KSOptions {
     static var subtitleDataSouces: [SubtitleDataSouce] = [DirectorySubtitleDataSouce(), ShooterSubtitleDataSouce()]
 }
 
-public class CacheDataSouce: SubtitleDataSouce {
+public extension SubtitleDataSouce {
+    func addCache(subtitleID: String, downloadURL: URL) {
+        CacheDataSouce.singleton.addCache(subtitleID: subtitleID, downloadURL: downloadURL)
+    }
+}
+
+public class CacheDataSouce: SearchSubtitleDataSouce {
+    public static let singleton = CacheDataSouce()
     public var infos = [any SubtitleInfo]()
     private let cacheFolder = (NSTemporaryDirectory() as NSString).appendingPathComponent("KSSubtitleCache")
     private var srtCacheInfoPath: String
     // 因为plist不能保存URL
     private var srtInfoCaches = [String: String]()
-    init() {
+    private init() {
         if !FileManager.default.fileExists(atPath: cacheFolder) {
             try? FileManager.default.createDirectory(atPath: cacheFolder, withIntermediateDirectories: true, attributes: nil)
         }
@@ -98,6 +106,7 @@ public class CacheDataSouce: SubtitleDataSouce {
     }
 
     public func searchSubtitle(url: URL, completion: @escaping (() -> Void)) {
+        infos.removeAll()
         srtCacheInfoPath = (cacheFolder as NSString).appendingPathComponent("KSSrtInfo_\(url.lastPathComponent).plist")
         if FileManager.default.fileExists(atPath: srtCacheInfoPath), let files = NSMutableDictionary(contentsOfFile: srtCacheInfoPath) as? [String: String] {
             srtInfoCaches = files.filter { FileManager.default.fileExists(atPath: $1) }
@@ -132,13 +141,9 @@ public class URLSubtitleDataSouce: SubtitleDataSouce {
     public init(urls: [URL]) {
         infos = urls.map { URLSubtitleInfo(url: $0) }
     }
-
-    public func searchSubtitle(url _: URL, completion: @escaping (() -> Void)) {
-        completion()
-    }
 }
 
-public class DirectorySubtitleDataSouce: SubtitleDataSouce {
+public class DirectorySubtitleDataSouce: SearchSubtitleDataSouce {
     public var infos = [any SubtitleInfo]()
     public init() {}
 
@@ -152,9 +157,10 @@ public class DirectorySubtitleDataSouce: SubtitleDataSouce {
     }
 }
 
-public class ShooterSubtitleDataSouce: SubtitleDataSouce {
+public class ShooterSubtitleDataSouce: SearchSubtitleDataSouce {
     public var infos = [any SubtitleInfo]()
     public func searchSubtitle(url: URL, completion: @escaping (() -> Void)) {
+        infos.removeAll()
         guard url.isFileURL, let url = URL(string: "https://www.shooter.cn/api/subapi.php")?
             .add(queryItems: ["format": "json", "pathinfo": url.path, "filehash": url.shooterFilehash])
         else {
@@ -168,11 +174,17 @@ public class ShooterSubtitleDataSouce: SubtitleDataSouce {
             }
             json.forEach { sub in
                 let filesDic = sub["Files"] as? [[String: String]]
-                filesDic?.forEach { dic in
+//                let desc = sub["Desc"] as? String ?? ""
+                let delay = TimeInterval(sub["Delay"] as? Int ?? 0) / 1000.0
+                let result = filesDic?.compactMap { dic in
                     if let string = dic["Link"], let url = URL(string: string) {
-                        self.infos.append(URLSubtitleInfo(url: url))
+                        let info = URLSubtitleInfo(url: url)
+                        info.delay = delay
+                        return info
                     }
-                }
+                    return nil
+                } ?? [URLSubtitleInfo]()
+                self.infos.append(contentsOf: result)
             }
             DispatchQueue.main.async(execute: completion)
         }.resume()
@@ -180,7 +192,7 @@ public class ShooterSubtitleDataSouce: SubtitleDataSouce {
 }
 
 extension URL {
-    var components: URLComponents? {
+    public var components: URLComponents? {
         URLComponents(url: self, resolvingAgainstBaseURL: true)
     }
 

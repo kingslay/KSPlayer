@@ -8,11 +8,10 @@
 import AVFoundation
 import CoreGraphics
 import CoreMedia
-import FFmpegKit
 import Libavcodec
 import Libswresample
 import Libswscale
-import VideoToolbox
+
 protocol Swresample {
     func transfer(avframe: UnsafeMutablePointer<AVFrame>) throws -> MEFrame
     func shutdown()
@@ -36,23 +35,22 @@ class VideoSwresample: Swresample {
         } else {
             frame.corePixelBuffer = transfer(frame: avframe.pointee)
         }
-        if let sideData = avframe.pointee.side_data?.pointee?.pointee {
-            if sideData.type == AV_FRAME_DATA_DOVI_RPU_BUFFER {
-                let rpuBuff = sideData.data.withMemoryRebound(to: [UInt8].self, capacity: 1) { $0 }
-
-            } else if sideData.type == AV_FRAME_DATA_DOVI_METADATA { // AVDOVIMetadata
-                let doviMeta = sideData.data.withMemoryRebound(to: AVDOVIMetadata.self, capacity: 1) { $0 }
-                let header = av_dovi_get_header(doviMeta)
-                let mapping = av_dovi_get_mapping(doviMeta)
-                let color = av_dovi_get_color(doviMeta)
-
-            } else if sideData.type == AV_FRAME_DATA_DYNAMIC_HDR_PLUS { // AVDynamicHDRPlus
-                let hdrPlus = sideData.data.withMemoryRebound(to: AVDynamicHDRPlus.self, capacity: 1) { $0 }.pointee
-
-            } else if sideData.type == AV_FRAME_DATA_DYNAMIC_HDR_VIVID { // AVDynamicHDRVivid
-                let hdrVivid = sideData.data.withMemoryRebound(to: AVDynamicHDRVivid.self, capacity: 1) { $0 }.pointee
-            }
-        }
+//        if let sideData = avframe.pointee.side_data?.pointee?.pointee {
+//            if sideData.type == AV_FRAME_DATA_DOVI_RPU_BUFFER {
+//                let rpuBuff = sideData.data.withMemoryRebound(to: [UInt8].self, capacity: 1) { $0 }
+//            } else if sideData.type == AV_FRAME_DATA_DOVI_METADATA { // AVDOVIMetadata
+//                let doviMeta = sideData.data.withMemoryRebound(to: AVDOVIMetadata.self, capacity: 1) { $0 }
+//                let header = av_dovi_get_header(doviMeta)
+//                let mapping = av_dovi_get_mapping(doviMeta)
+//                let color = av_dovi_get_color(doviMeta)
+//
+//            } else if sideData.type == AV_FRAME_DATA_DYNAMIC_HDR_PLUS { // AVDynamicHDRPlus
+//                let hdrPlus = sideData.data.withMemoryRebound(to: AVDynamicHDRPlus.self, capacity: 1) { $0 }.pointee
+//
+//            } else if sideData.type == AV_FRAME_DATA_DYNAMIC_HDR_VIVID { // AVDynamicHDRVivid
+//                let hdrVivid = sideData.data.withMemoryRebound(to: AVDynamicHDRVivid.self, capacity: 1) { $0 }.pointee
+//            }
+//        }
         if let pixelBuffer = frame.corePixelBuffer {
             pixelBuffer.colorspace = KSOptions.colorSpace(ycbcrMatrix: pixelBuffer.yCbCrMatrix, transferFunction: pixelBuffer.transferFunction)
         }
@@ -230,12 +228,12 @@ class AudioSwresample: Swresample {
     }
 }
 
-class AudioDescriptor: Equatable {
+public class AudioDescriptor: Equatable {
     static let defaultValue = AudioDescriptor()
-    fileprivate let sampleRate: Int32
+    public let sampleRate: Int32
     fileprivate let sampleFormat: AVSampleFormat
-    fileprivate var channel: AVChannelLayout
-    var channels: AVAudioChannelCount {
+    public fileprivate(set) var channel: AVChannelLayout
+    public var channels: AVAudioChannelCount {
         AVAudioChannelCount(channel.nb_channels)
     }
 
@@ -267,7 +265,7 @@ class AudioDescriptor: Equatable {
         sampleFormat = AVSampleFormat(rawValue: frame.format)
     }
 
-    static func == (lhs: AudioDescriptor, rhs: AudioDescriptor) -> Bool {
+    public static func == (lhs: AudioDescriptor, rhs: AudioDescriptor) -> Bool {
         lhs.sampleFormat == rhs.sampleFormat && lhs.sampleRate == rhs.sampleRate && lhs.channel == rhs.channel
     }
 

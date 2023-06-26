@@ -75,6 +75,7 @@ public protocol KSSubtitleProtocol {
 public protocol SubtitleInfo: KSSubtitleProtocol, AnyObject, Hashable, Identifiable {
     var subtitleID: String { get }
     var name: String { get }
+    var delay: TimeInterval { get set }
     //    var userInfo: NSMutableDictionary? { get set }
     //    var subtitleDataSouce: SubtitleDataSouce? { get set }
 //    var comment: String? { get }
@@ -259,14 +260,72 @@ extension Collection where Element: NumericComparable {
 }
 
 open class SubtitleModel: ObservableObject {
+    public enum Size {
+        case smaller
+        case standard
+        case large
+        public var rawValue: CGFloat {
+            switch self {
+            case .smaller:
+                #if os(tvOS)
+                return 30
+                #elseif os(macOS)
+                return 20
+                #else
+                return 12
+                #endif
+            case .standard:
+                #if os(tvOS)
+                return 36
+                #elseif os(macOS)
+                return 26
+                #else
+                return 16
+                #endif
+            case .large:
+                #if os(tvOS)
+                return 42
+                #elseif os(macOS)
+                return 32
+                #else
+                return 20
+                #endif
+            }
+        }
+    }
+
+    public static var textColor: Color = .white
+    public static var textBackgroundColor: Color = .clear
+    public static var textFont: UIFont {
+        textBold ? .boldSystemFont(ofSize: textFontSize) : .systemFont(ofSize: textFontSize)
+    }
+
+    public static var textFontSize = SubtitleModel.Size.standard.rawValue
+    public static var textBold = false
+    public static var textItalic = false
+    public static var textXAlign: TextAlignment = .center
+    public static var textYAlign: VerticalAlignment = .bottom
+    public static var textXMargin: Int = 0
+    public static var textYMargin: Int = 10
+    public static var edgeInsets: EdgeInsets {
+        var edgeInsets = EdgeInsets()
+        if SubtitleModel.textYAlign == .bottom {
+            edgeInsets.bottom = CGFloat(SubtitleModel.textYMargin)
+        } else if SubtitleModel.textYAlign == .top {
+            edgeInsets.top = CGFloat(SubtitleModel.textYMargin)
+        }
+        if SubtitleModel.textXAlign == .leading {
+            edgeInsets.leading = CGFloat(SubtitleModel.textXMargin)
+        } else if SubtitleModel.textXAlign == .trailing {
+            edgeInsets.trailing = CGFloat(SubtitleModel.textXMargin)
+        }
+        return edgeInsets
+    }
+
     private var subtitleDataSouces: [SubtitleDataSouce] = KSOptions.subtitleDataSouces
     public private(set) var subtitleInfos = [any SubtitleInfo]()
     @Published public var srtListCount: Int = 0
     @Published public private(set) var part: SubtitlePart?
-    @Published public var textFont: Font = .largeTitle
-    @Published public var textColor: Color = .white
-    @Published public var textPositionFromBottom = 0
-    @Published public var textBackgroundColor: Color = .clear
     @Published public var delay = "0.0"
     public var url: URL? {
         didSet {
@@ -296,8 +355,10 @@ open class SubtitleModel: ObservableObject {
         }
     }
 
-    public func subtitle(currentTime: TimeInterval) {
+    @discardableResult
+    public func subtitle(currentTime: TimeInterval) -> SubtitlePart? {
         if let subtile = selectedSubtitleInfo {
+            let currentTime = currentTime - subtile.delay
             if let part = subtile.search(for: currentTime) {
                 self.part = part
             } else {
@@ -308,14 +369,21 @@ open class SubtitleModel: ObservableObject {
         } else {
             part = nil
         }
+        return part
     }
 
     public func addSubtitle(dataSouce: SubtitleDataSouce) {
-        if let url {
-            dataSouce.searchSubtitle(url: url) { [weak self] in
-                dataSouce.infos.forEach { info in
-                    self?.addSubtitle(info: info)
+        if let dataSouce = dataSouce as? SearchSubtitleDataSouce {
+            if let url {
+                dataSouce.searchSubtitle(url: url) { [weak self] in
+                    dataSouce.infos.forEach { info in
+                        self?.addSubtitle(info: info)
+                    }
                 }
+            }
+        } else {
+            dataSouce.infos.forEach { info in
+                addSubtitle(info: info)
             }
         }
     }

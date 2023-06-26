@@ -6,10 +6,10 @@
 //
 
 import SwiftUI
-#if !os(tvOS)
+#if canImport(VisionKit)
 import VisionKit
 @MainActor
-@available(macOS 13.0, iOS 16.0, *)
+@available(iOS 16.0, macOS 13.0, macCatalyst 17.0, *)
 public struct LiveTextImage: UIViewRepresentable {
     public let uiImage: UIImage
     private let analyzer = ImageAnalyzer()

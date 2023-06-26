@@ -34,7 +34,7 @@ final class MotionSensor {
     }
 
     private init() {
-        switch UIApplication.shared.statusBarOrientation {
+        switch KSOptions.windowScene?.interfaceOrientation {
         case .landscapeRight:
             defaultRadiansY = -.pi / 2
         case .landscapeLeft:
@@ -63,7 +63,7 @@ final class MotionSensor {
         if var matrix = manager.deviceMotion.flatMap(simd_float4x4.init(motion:)) {
             matrix = matrix.transpose
             matrix *= worldToInertialReferenceFrame
-            orientation = UIApplication.shared.statusBarOrientation
+            orientation = KSOptions.windowScene?.interfaceOrientation ?? .portrait
             matrix = deviceToDisplay * matrix
             matrix = matrix.rotateY(radians: defaultRadiansY)
             return matrix

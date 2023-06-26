@@ -6,120 +6,31 @@
 //
 
 import AVFoundation
-import AVKit
 import CoreMedia
 import CoreServices
-import Libavformat
-
+import SwiftUI
 #if canImport(UIKit)
 import UIKit
-public extension UIScreen {
-    static var size: CGSize {
-        main.bounds.size
+public extension KSOptions {
+    static var windowScene: UIWindowScene? {
+        UIApplication.shared.connectedScenes.first as? UIWindowScene
+    }
+
+    static var sceneSize: CGSize {
+        let window = windowScene?.windows.first
+        return window?.bounds.size ?? .zero
     }
 }
 #else
 import AppKit
+import SwiftUI
 public typealias UIView = NSView
-public typealias UIScreen = NSScreen
-public extension NSScreen {
-    static var size: CGSize {
-        main?.frame.size ?? .zero
+public extension KSOptions {
+    static var sceneSize: CGSize {
+        NSScreen.main?.frame.size ?? .zero
     }
 }
 #endif
-
-public protocol MediaPlayback: AnyObject {
-    var duration: TimeInterval { get }
-    var naturalSize: CGSize { get }
-    var currentPlaybackTime: TimeInterval { get }
-    func prepareToPlay()
-    func shutdown()
-    func seek(time: TimeInterval, completion: @escaping ((Bool) -> Void))
-}
-
-public protocol MediaPlayerProtocol: MediaPlayback {
-    var delegate: MediaPlayerDelegate? { get set }
-    var view: UIView? { get }
-    var playableTime: TimeInterval { get }
-    var isReadyToPlay: Bool { get }
-    var playbackState: MediaPlaybackState { get }
-    var loadState: MediaLoadState { get }
-    var isPlaying: Bool { get }
-    var seekable: Bool { get }
-    //    var numberOfBytesTransferred: Int64 { get }
-    var isMuted: Bool { get set }
-    var allowsExternalPlayback: Bool { get set }
-    var usesExternalPlaybackWhileExternalScreenIsActive: Bool { get set }
-    var isExternalPlaybackActive: Bool { get }
-    var playbackRate: Float { get set }
-    var playbackVolume: Float { get set }
-    var contentMode: UIViewContentMode { get set }
-    var subtitleDataSouce: SubtitleDataSouce? { get }
-    @available(macOS 12.0, iOS 15.0, tvOS 15.0, *)
-    var playbackCoordinator: AVPlaybackCoordinator { get }
-    @available(tvOS 14.0, *)
-    var pipController: KSPictureInPictureController? { get }
-    init(url: URL, options: KSOptions)
-    func replace(url: URL, options: KSOptions)
-    func play()
-    func pause()
-    func enterBackground()
-    func enterForeground()
-    func thumbnailImageAtCurrentTime() async -> UIImage?
-    func tracks(mediaType: AVFoundation.AVMediaType) -> [MediaPlayerTrack]
-    func select(track: MediaPlayerTrack)
-}
-
-public extension MediaPlayerProtocol {
-    var nominalFrameRate: Float {
-        tracks(mediaType: .video).first { $0.isEnabled }?.nominalFrameRate ?? 0
-    }
-}
-
-public protocol MediaPlayerDelegate: AnyObject {
-    func readyToPlay(player: some MediaPlayerProtocol)
-    func changeLoadState(player: some MediaPlayerProtocol)
-    // 缓冲加载进度，0-100
-    func changeBuffering(player: some MediaPlayerProtocol, progress: Int)
-    func playBack(player: some MediaPlayerProtocol, loopCount: Int)
-    func finish(player: some MediaPlayerProtocol, error: Error?)
-}
-
-public protocol MediaPlayerTrack: CustomStringConvertible {
-    var trackID: Int32 { get }
-    var name: String { get }
-    var language: String? { get }
-    var mediaType: AVFoundation.AVMediaType { get }
-    var mediaSubType: CMFormatDescription.MediaSubType { get }
-    var nominalFrameRate: Float { get }
-    var rotation: Double { get }
-    var bitRate: Int64 { get }
-    var naturalSize: CGSize { get }
-    var isEnabled: Bool { get set }
-    var depth: Int32 { get }
-    var fullRangeVideo: Bool { get }
-    var colorPrimaries: String? { get }
-    var transferFunction: String? { get }
-    var yCbCrMatrix: String? { get }
-    var isImageSubtitle: Bool { get }
-    var audioStreamBasicDescription: AudioStreamBasicDescription? { get }
-    var dovi: DOVIDecoderConfigurationRecord? { get }
-    var fieldOrder: FFmpegFieldOrder { get }
-    func setIsEnabled(_ isEnabled: Bool)
-}
-
-// swiftlint:disable identifier_name
-public enum FFmpegFieldOrder: UInt8 {
-    case unknown = 0
-    case progressive
-    case tt // < Top coded_first, top displayed first
-    case bb // < Bottom coded first, bottom displayed first
-    case tb // < Top coded first, bottom displayed first
-    case bt // < Bottom coded first, top displayed first
-}
-
-// swiftlint:enable identifier_name
 
 // extension MediaPlayerTrack {
 //    static func == (lhs: Self, rhs: Self) -> Bool {
@@ -220,18 +131,6 @@ extension AVPlayer.HDRMode {
     }
 }
 #endif
-public struct DOVIDecoderConfigurationRecord {
-    // swiftlint:disable identifier_name
-    let dv_version_major: UInt8
-    let dv_version_minor: UInt8
-    let dv_profile: UInt8
-    let dv_level: UInt8
-    let rpu_present_flag: UInt8
-    let el_present_flag: UInt8
-    let bl_present_flag: UInt8
-    let dv_bl_signal_compatibility_id: UInt8
-    // swiftlint:enable identifier_name
-}
 
 public extension FourCharCode {
     var string: String {
@@ -269,295 +168,10 @@ public struct VideoAdaptationState {
     public internal(set) var loadedCount: Int = 0
 }
 
-open class KSOptions {
-    //    public static let shared = KSOptions()
-    /// 最低缓存视频时间
-    @Published public var preferredForwardBufferDuration = KSOptions.preferredForwardBufferDuration
-    /// 最大缓存视频时间
-    public var maxBufferDuration = KSOptions.maxBufferDuration
-    /// 是否开启秒开
-    public var isSecondOpen = KSOptions.isSecondOpen
-    /// 开启精确seek
-    public var isAccurateSeek = KSOptions.isAccurateSeek
-    /// Applies to short videos only
-    public var isLoopPlay = KSOptions.isLoopPlay
-    /// 是否自动播放，默认false
-    public var isAutoPlay = KSOptions.isAutoPlay
-    /// seek完是否自动播放
-    public var isSeekedAutoPlay = KSOptions.isSeekedAutoPlay
-    /*
-     AVSEEK_FLAG_BACKWARD: 1
-     AVSEEK_FLAG_BYTE: 2
-     AVSEEK_FLAG_ANY: 4
-     AVSEEK_FLAG_FRAME: 8
-     */
-    public var seekFlags = Int32(0)
-    // ffmpeg only cache http
-    public var cache = false
-    public var outputURL: URL?
-    public var display = DisplayEnum.plane
-    public var avOptions = [String: Any]()
-    public var formatContextOptions = [String: Any]()
-    public var decoderOptions = [String: Any]()
-    public var probesize: Int64?
-    public var maxAnalyzeDuration: Int64?
-    public var lowres = UInt8(0)
-    public var startPlayTime: TimeInterval?
-    // audio
-    public var audioDelay = 0.0 // s
-    public var audioFilters: String?
-    public var syncDecodeAudio = false
-    // sutile
-    public var autoSelectEmbedSubtitle = true
-    public var subtitleDelay = 0.0 // s
-    public var subtitleDisable = false
-    public var isSeekImageSubtitle = false
-    // video
-    public var autoDeInterlace = false
-    public var destinationDynamicRange: DynamicRange?
-    public var dropVideoFrame = true
-    public var videoAdaptable = true
-    public var videoFilters: String?
-    public var syncDecodeVideo = false
-    public var hardwareDecode = true
-    public var asynchronousDecompression = true
-    public var videoDisable = false
-    public var canStartPictureInPictureAutomaticallyFromInline = true
-    public internal(set) var formatName = ""
-    public internal(set) var prepareTime = 0.0
-    public internal(set) var dnsStartTime = 0.0
-    public internal(set) var tcpStartTime = 0.0
-    public internal(set) var tcpConnectedTime = 0.0
-    public internal(set) var openTime = 0.0
-    public internal(set) var findTime = 0.0
-    public internal(set) var readyTime = 0.0
-    public internal(set) var readAudioTime = 0.0
-    public internal(set) var readVideoTime = 0.0
-    public internal(set) var decodeAudioTime = 0.0
-    public internal(set) var decodeVideoTime = 0.0
-    var formatCtx: UnsafeMutablePointer<AVFormatContext>?
-    var audioFormat = AVAudioFormat(standardFormatWithSampleRate: 44100, channelLayout: AVAudioChannelLayout(layoutTag: kAudioChannelLayoutTag_Stereo)!)
-    public init() {
-        // 参数的配置可以参考protocols.texi 和 http.c
-        formatContextOptions["auto_convert"] = 0
-        formatContextOptions["fps_probe_size"] = 3
-        formatContextOptions["reconnect"] = 1
-        // 开启这个，纯ipv6地址会无法播放。
-//        formatContextOptions["reconnect_at_eof"] = 1
-        formatContextOptions["reconnect_streamed"] = 1
-        formatContextOptions["reconnect_on_network_error"] = 1
-
-        // There is total different meaning for 'listen_timeout' option in rtmp
-        // set 'listen_timeout' = -1 for rtmp、rtsp
-//        formatContextOptions["listen_timeout"] = 3
-        formatContextOptions["rw_timeout"] = 10_000_000
-        formatContextOptions["user_agent"] = "ksplayer"
-        decoderOptions["threads"] = "auto"
-        decoderOptions["refcounted_frames"] = "1"
-    }
-
-    /**
-     you can add http-header or other options which mentions in https://developer.apple.com/reference/avfoundation/avurlasset/initialization_options
-
-     to add http-header init options like this
-     ```
-     options.appendHeader(["Referer":"https:www.xxx.com"])
-     ```
-     */
-    public func appendHeader(_ header: [String: String]) {
-        var oldValue = avOptions["AVURLAssetHTTPHeaderFieldsKey"] as? [String: String] ?? [
-            String: String
-        ]()
-        oldValue.merge(header) { _, new in new }
-        avOptions["AVURLAssetHTTPHeaderFieldsKey"] = oldValue
-        var str = formatContextOptions["headers"] as? String ?? ""
-        for (key, value) in header {
-            str.append("\(key):\(value)\r\n")
-        }
-        formatContextOptions["headers"] = str
-    }
-
-    public func setCookie(_ cookies: [HTTPCookie]) {
-        avOptions[AVURLAssetHTTPCookiesKey] = cookies
-        let cookieStr = cookies.map { cookie in "\(cookie.name)=\(cookie.value)" }.joined(separator: "; ")
-        appendHeader(["Cookie": cookieStr])
-    }
-
-    // 缓冲算法函数
-    open func playable(capacitys: [CapacityProtocol], isFirst: Bool, isSeek: Bool) -> LoadingState {
-        let packetCount = capacitys.map(\.packetCount).min() ?? 0
-        let frameCount = capacitys.map(\.frameCount).min() ?? 0
-        let isEndOfFile = capacitys.allSatisfy(\.isEndOfFile)
-        let loadedTime = capacitys.map { TimeInterval($0.packetCount + $0.frameCount) / TimeInterval($0.fps) }.min() ?? 0
-        let progress = loadedTime * 100.0 / preferredForwardBufferDuration
-        let isPlayable = capacitys.allSatisfy { capacity in
-            if capacity.isEndOfFile && capacity.packetCount == 0 {
-                return true
-            }
-            guard capacity.frameCount >= capacity.frameMaxCount >> 2 else {
-                return false
-            }
-            if capacity.isEndOfFile {
-                return true
-            }
-            if (syncDecodeVideo && capacity.mediaType == .video) || (syncDecodeAudio && capacity.mediaType == .audio) {
-                return true
-            }
-            if isFirst || isSeek {
-                // 让纯音频能更快的打开
-                if capacity.mediaType == .audio || isSecondOpen {
-                    if isFirst {
-                        return true
-                    } else if isSeek, capacity.packetCount >= Int(capacity.fps) {
-                        return true
-                    }
-                }
-            }
-            return capacity.packetCount + capacity.frameCount >= Int(capacity.fps * Float(preferredForwardBufferDuration))
-        }
-        return LoadingState(loadedTime: loadedTime, progress: progress, packetCount: packetCount,
-                            frameCount: frameCount, isEndOfFile: isEndOfFile, isPlayable: isPlayable,
-                            isFirst: isFirst, isSeek: isSeek)
-    }
-
-    open func adaptable(state: VideoAdaptationState?) -> (Int64, Int64)? {
-        guard let state, let last = state.bitRateStates.last, CACurrentMediaTime() - last.time > maxBufferDuration / 2, let index = state.bitRates.firstIndex(of: last.bitRate) else {
-            return nil
-        }
-        let isUp = state.loadedCount > Int(Double(state.fps) * maxBufferDuration / 2)
-        if isUp != state.isPlayable {
-            return nil
-        }
-        if isUp {
-            if index < state.bitRates.endIndex - 1 {
-                return (last.bitRate, state.bitRates[index + 1])
-            }
-        } else {
-            if index > state.bitRates.startIndex {
-                return (last.bitRate, state.bitRates[index - 1])
-            }
-        }
-        return nil
-    }
-
-    ///  wanted video stream index, or nil for automatic selection
-    /// - Parameter : video bitRate
-    /// - Returns: The index of the bitRates
-    open func wantedVideo(bitRates _: [Int64]) -> Int? {
-        nil
-    }
-
-    /// wanted audio stream index, or nil for automatic selection
-    /// - Parameter :  audio bitRate and language
-    /// - Returns: The index of the infos
-    open func wantedAudio(infos _: [(bitRate: Int64, language: String?)]) -> Int? {
-        nil
-    }
-
-    open func videoFrameMaxCount(fps: Float) -> Int {
-        Int(ceil(fps)) >> 1
-    }
-
-    open func audioFrameMaxCount(fps _: Float, channels: Int) -> Int {
-        (16 * max(channels, 1)) >> 1
-    }
-
-    /// customize dar
-    /// - Parameters:
-    ///   - sar: SAR(Sample Aspect Ratio)
-    ///   - dar: PAR(Pixel Aspect Ratio)
-    /// - Returns: DAR(Display Aspect Ratio)
-    open func customizeDar(sar _: CGSize, par _: CGSize) -> CGSize? {
-        nil
-    }
-
-    open func isUseDisplayLayer() -> Bool {
-        display == .plane
-    }
-
-    private var idetTypeMap = [VideoInterlacingType: Int]()
-    @Published public var videoInterlacingType: VideoInterlacingType?
-    public enum VideoInterlacingType: String {
-        case tff
-        case bff
-        case progressive
-        case undetermined
-    }
-
-    open func io(log: String) {
-        if log.starts(with: "Original list of addresses"), dnsStartTime == 0 {
-            dnsStartTime = CACurrentMediaTime()
-        } else if log.starts(with: "Starting connection attempt to"), tcpStartTime == 0 {
-            tcpStartTime = CACurrentMediaTime()
-        } else if log.starts(with: "Successfully connected to"), tcpConnectedTime == 0 {
-            tcpConnectedTime = CACurrentMediaTime()
-        }
-    }
-
-    open func filter(log: String) {
-        if log.starts(with: "Repeated Field:") {
-            log.split(separator: ",").forEach { str in
-                let map = str.split(separator: ":")
-                if map.count >= 2 {
-                    if String(map[0].trimmingCharacters(in: .whitespaces)) == "Multi frame" {
-                        if let type = VideoInterlacingType(rawValue: map[1].trimmingCharacters(in: .whitespacesAndNewlines)) {
-                            idetTypeMap[type] = (idetTypeMap[type] ?? 0) + 1
-                            let tff = idetTypeMap[.tff] ?? 0
-                            let bff = idetTypeMap[.bff] ?? 0
-                            let progressive = idetTypeMap[.progressive] ?? 0
-                            let undetermined = idetTypeMap[.undetermined] ?? 0
-                            if progressive - tff - bff > 100 {
-                                videoInterlacingType = .progressive
-                                autoDeInterlace = false
-                            } else if bff - progressive > 100 {
-                                videoInterlacingType = .bff
-                                autoDeInterlace = false
-                            } else if tff - progressive > 100 {
-                                videoInterlacingType = .tff
-                                autoDeInterlace = false
-                            } else if undetermined - progressive - tff - bff > 100 {
-                                videoInterlacingType = .undetermined
-                                autoDeInterlace = false
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    /**
-            在创建解码器之前可以对KSOptions做一些处理。例如判断fieldOrder为tt或bb的话，那就自动加videofilters
-     */
-    open func process(assetTrack _: MediaPlayerTrack) {}
-
-    #if os(tvOS)
-    open func preferredDisplayCriteria(refreshRate _: Float, videoDynamicRange _: Int32) -> AVDisplayCriteria? {
-//        AVDisplayCriteria(refreshRate: refreshRate, videoDynamicRange: videoDynamicRange)
-        nil
-    }
-    #endif
-
-    func availableDynamicRange(_ cotentRange: DynamicRange?) -> DynamicRange? {
-        #if canImport(UIKit)
-        let availableHDRModes = AVPlayer.availableHDRModes
-        if let preferedDynamicRange = destinationDynamicRange {
-            // value of 0 indicates that no HDR modes are supported.
-            if availableHDRModes == AVPlayer.HDRMode(rawValue: 0) {
-                return .sdr
-            } else if availableHDRModes.contains(preferedDynamicRange.hdrMode) {
-                return preferedDynamicRange
-            } else if let cotentRange,
-                      availableHDRModes.contains(cotentRange.hdrMode)
-            {
-                return cotentRange
-            } else if preferedDynamicRange != .sdr { // trying update to HDR mode
-                return availableHDRModes.dynamicRange
-            }
-        }
-        #endif
-        return cotentRange
-    }
+public enum ClockProcessType {
+    case show
+    case drop
+    case seek
 }
 
 // 缓冲情况
@@ -581,7 +195,7 @@ public struct LoadingState {
     public let isSeek: Bool
 }
 
-public enum LogLevel: Int32 {
+public enum LogLevel: Int32, CustomStringConvertible {
     case panic = 0
     case fatal = 8
     case error = 16
@@ -590,77 +204,43 @@ public enum LogLevel: Int32 {
     case verbose = 40
     case debug = 48
     case trace = 56
-}
 
-public extension KSOptions {
-    static var firstPlayerType: MediaPlayerProtocol.Type = KSAVPlayer.self
-    static var secondPlayerType: MediaPlayerProtocol.Type?
-    /// 最低缓存视频时间
-    static var preferredForwardBufferDuration = 3.0
-    /// 最大缓存视频时间
-    static var maxBufferDuration = 30.0
-    /// 是否开启秒开
-    static var isSecondOpen = false
-    /// 开启精确seek
-    static var isAccurateSeek = false
-    /// Applies to short videos only
-    static var isLoopPlay = false
-    /// 是否自动播放，默认false
-    static var isAutoPlay = false
-    /// seek完是否自动播放
-    static var isSeekedAutoPlay = true
-    /// 日志级别
-    static var logLevel = LogLevel.warning
-    /// 日志输出方式
-    static var logFunctionPoint: (String, LogLevel) -> Void = { str, level in
-        if level.rawValue <= KSOptions.logLevel.rawValue {
-            print(str)
+    public var description: String {
+        switch self {
+        case .panic:
+            return "panic"
+        case .fatal:
+            return "fault"
+        case .error:
+            return "error"
+        case .warning:
+            return "warning"
+        case .info:
+            return "info"
+        case .verbose:
+            return "verbose"
+        case .debug:
+            return "debug"
+        case .trace:
+            return "trace"
         }
     }
-
-    internal static func deviceCpuCount() -> Int {
-        var ncpu = UInt(0)
-        var len: size_t = MemoryLayout.size(ofValue: ncpu)
-        sysctlbyname("hw.ncpu", &ncpu, &len, nil, 0)
-        return Int(ncpu)
-    }
-
-    internal static func setAudioSession() {
-        #if os(macOS)
-//        try? AVAudioSession.sharedInstance().setRouteSharingPolicy(.longFormAudio)
-        #else
-        let category = AVAudioSession.sharedInstance().category
-        if category != .playback, category != .playAndRecord {
-            try? AVAudioSession.sharedInstance().setCategory(.playback, mode: .default, policy: .longFormAudio)
-        }
-        try? AVAudioSession.sharedInstance().setMode(.moviePlayback)
-        try? AVAudioSession.sharedInstance().setActive(true)
-        if #available(tvOS 15.0, iOS 15.0, *) {
-            try? AVAudioSession.sharedInstance().setSupportsMultichannelContent(true)
-        }
-        #endif
-    }
-}
-
-public enum MediaPlaybackState: Int {
-    case idle
-    case playing
-    case paused
-    case seeking
-    case finished
-    case stopped
-}
-
-public enum MediaLoadState: Int {
-    case idle
-    case loading
-    case playable
 }
 
 @inline(__always) public func KSLog(_ message: CustomStringConvertible, logLevel: LogLevel = .warning, file: String = #file, function: String = #function, line: Int = #line) {
-    let fileName = (file as NSString).lastPathComponent
-    KSOptions.logFunctionPoint("KSPlayer: \(fileName):\(line) \(function) | \(message)", logLevel)
+    if logLevel.rawValue <= KSOptions.logLevel.rawValue {
+        let fileName = (file as NSString).lastPathComponent
+        print("logLevel: \(logLevel) KSPlayer: \(fileName):\(line) \(function) | \(message)")
+    }
 }
+
+//
+// @available(macOS 11.0, iOS 14.0, watchOS 7.0, tvOS 14.0, *)
+// @inline(__always) public func KSLog(level: LogLevel = .warning, _ message: OSLogMessage) {
+//    if level.rawValue <= KSOptions.logLevel.rawValue {
+//        KSOptions.logger.log(level: level.logType, message)
+//    }
+// }
 
 public let KSPlayerErrorDomain = "KSPlayerErrorDomain"
 
@@ -812,7 +392,61 @@ public extension URL {
     }
 
     var isSubtitle: Bool {
-        pathExtension == "srt" || pathExtension == "ass"
+        ["ass", "srt", "vtt"].contains(pathExtension.lowercased())
+    }
+
+    var isPlaylist: Bool {
+        ["cue", "m3u", "pls"].contains(pathExtension.lowercased())
+    }
+
+    func parsePlaylist(completion: @escaping (([(String, URL, [String: String])]) -> Void)) {
+        let handler: ((Data) -> Void) = { data in
+            guard let string = String(data: data, encoding: .utf8) else {
+                return
+            }
+            let result = string.components(separatedBy: "#EXTINF:").compactMap { content -> (String, URL, [String: String])? in
+                let content = content.replacingOccurrences(of: "\r\n", with: "\n")
+                let array = content.split(separator: "\n")
+                guard array.count > 1, let url = URL(string: String(array[1])) else {
+                    return nil
+                }
+                let infos = array[0].split(separator: ",")
+                guard infos.count > 1, let name = infos.last else {
+                    return nil
+                }
+                var extinf = [String: String]()
+                let tvgString: Substring
+                if infos.count > 2 {
+                    extinf["duration"] = String(infos[0])
+                    tvgString = infos[1]
+                } else {
+                    tvgString = infos[0]
+                }
+                tvgString.split(separator: " ").forEach { str in
+                    let keyValue = str.split(separator: "=")
+                    if keyValue.count == 2 {
+                        extinf[String(keyValue[0])] = keyValue[1].trimmingCharacters(in: CharacterSet(charactersIn: #"""#))
+                    } else {
+                        extinf["duration"] = String(keyValue[0])
+                    }
+                }
+                return (String(name), url, extinf)
+            }
+            completion(result)
+        }
+        if isFileURL {
+            do {
+                let data = try Data(contentsOf: self)
+                handler(data)
+            } catch {}
+        } else {
+            URLSession.shared.dataTask(with: self) { data, _, _ in
+                guard let data else {
+                    return
+                }
+                handler(data)
+            }.resume()
+        }
     }
 }
 
@@ -870,5 +504,186 @@ public extension Int {
                 return String(format: "%02d:%02d.%02d", min, sec, millisecond)
             }
         }
+    }
+}
+
+extension TextAlignment: RawRepresentable {
+    public typealias RawValue = String
+    public init?(rawValue: RawValue) {
+        if rawValue == "Leading" {
+            self = .leading
+        } else if rawValue == "Center" {
+            self = .center
+        } else if rawValue == "Trailing" {
+            self = .trailing
+        } else {
+            return nil
+        }
+    }
+
+    public var rawValue: RawValue {
+        switch self {
+        case .leading:
+            return "Leading"
+        case .center:
+            return "Center"
+        case .trailing:
+            return "Trailing"
+        }
+    }
+}
+
+extension VerticalAlignment: Hashable, RawRepresentable {
+    public typealias RawValue = String
+    public init?(rawValue: RawValue) {
+        if rawValue == "Top" {
+            self = .top
+        } else if rawValue == "Center" {
+            self = .center
+        } else if rawValue == "Bottom" {
+            self = .bottom
+        } else {
+            return nil
+        }
+    }
+
+    public var rawValue: RawValue {
+        switch self {
+        case .top:
+            return "Top"
+        case .center:
+            return "Center"
+        case .bottom:
+            return "Bottom"
+        default:
+            return ""
+        }
+    }
+}
+
+extension Color: RawRepresentable {
+    public typealias RawValue = String
+    public init?(rawValue: RawValue) {
+        guard let data = Data(base64Encoded: rawValue) else {
+            self = .black
+            return
+        }
+
+        do {
+            let color = try NSKeyedUnarchiver.unarchiveTopLevelObjectWithData(data) as? UIColor ?? .black
+            self = Color(color)
+        } catch {
+            self = .black
+        }
+    }
+
+    public var rawValue: RawValue {
+        do {
+            if #available(macOS 11.0, iOS 14, tvOS 14, *) {
+                let data = try NSKeyedArchiver.archivedData(withRootObject: UIColor(self), requiringSecureCoding: false) as Data
+                return data.base64EncodedString()
+            } else {
+                return ""
+            }
+        } catch {
+            return ""
+        }
+    }
+}
+
+extension Array: RawRepresentable where Element: Codable {
+    public init?(rawValue: String) {
+        guard let data = rawValue.data(using: .utf8),
+              let result = try? JSONDecoder().decode([Element].self, from: data)
+        else { return nil }
+        self = result
+    }
+
+    public var rawValue: String {
+        guard let data = try? JSONEncoder().encode(self),
+              let result = String(data: data, encoding: .utf8)
+        else {
+            return "[]"
+        }
+        return result
+    }
+}
+
+extension Date: RawRepresentable {
+    public typealias RawValue = String
+    public init?(rawValue: RawValue) {
+        guard let data = rawValue.data(using: .utf8),
+              let date = try? JSONDecoder().decode(Date.self, from: data)
+        else {
+            return nil
+        }
+        self = date
+    }
+
+    public var rawValue: RawValue {
+        guard let data = try? JSONEncoder().encode(self),
+              let result = String(data: data, encoding: .utf8)
+        else {
+            return ""
+        }
+        return result
+    }
+}
+
+extension CGImage {
+    static func combine(images: [(CGRect, CGImage)]) -> CGImage? {
+        if images.isEmpty {
+            return nil
+        }
+        if images.count == 1 {
+            return images[0].1
+        }
+        var width = 0
+        var height = 0
+        for (rect, _) in images {
+            width = max(width, Int(rect.maxX))
+            height = max(height, Int(rect.maxY))
+        }
+        let bitsPerComponent = 8
+        // RGBA(的bytes) * bitsPerComponent *width
+        let bytesPerRow = 4 * 8 * bitsPerComponent * width
+        return autoreleasepool {
+            let context = CGContext(data: nil, width: width, height: height, bitsPerComponent: bitsPerComponent, bytesPerRow: bytesPerRow, space: CGColorSpaceCreateDeviceRGB(), bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue)
+            guard let context else {
+                return nil
+            }
+//            context.clear(CGRect(origin: .zero, size: CGSize(width: width, height: height)))
+            for (rect, cgImage) in images {
+                context.draw(cgImage, in: CGRect(x: rect.origin.x, y: CGFloat(height) - rect.maxY, width: rect.width, height: rect.height))
+            }
+            let cgImage = context.makeImage()
+            return cgImage
+        }
+    }
+
+    func data(type: AVFileType, quality: CGFloat) -> Data? {
+        autoreleasepool {
+            guard let mutableData = CFDataCreateMutable(nil, 0),
+                  let destination = CGImageDestinationCreateWithData(mutableData, type.rawValue as CFString, 1, nil)
+            else {
+                return nil
+            }
+            CGImageDestinationAddImage(destination, self, [kCGImageDestinationLossyCompressionQuality: quality] as CFDictionary)
+            guard CGImageDestinationFinalize(destination) else {
+                return nil
+            }
+            return mutableData as Data
+        }
+    }
+
+    static func make(rgbData: UnsafePointer<UInt8>, linesize: Int, width: Int, height: Int, isAlpha: Bool = false) -> CGImage? {
+        let colorSpace = CGColorSpaceCreateDeviceRGB()
+        let bitmapInfo: CGBitmapInfo = isAlpha ? CGBitmapInfo(rawValue: CGImageAlphaInfo.last.rawValue) : CGBitmapInfo.byteOrderMask
+        guard let data = CFDataCreate(kCFAllocatorDefault, rgbData, linesize * height), let provider = CGDataProvider(data: data) else {
+            return nil
+        }
+        // swiftlint:disable line_length
+        return CGImage(width: width, height: height, bitsPerComponent: 8, bitsPerPixel: isAlpha ? 32 : 24, bytesPerRow: linesize, space: colorSpace, bitmapInfo: bitmapInfo, provider: provider, decode: nil, shouldInterpolate: false, intent: .defaultIntent)
+        // swiftlint:enable line_length
     }
 }

@@ -47,6 +47,7 @@ open class PlayerView: UIView, KSPlayerLayerDelegate, KSSliderDelegate {
 
     public weak var delegate: ControllerDelegate?
     public let toolBar = PlayerToolBar()
+    public let srtControl = SubtitleModel()
     // Closure fired when play time changed
     public var playTimeDidChange: ((TimeInterval, TimeInterval) -> Void)?
     public var backBlock: (() -> Void)?
@@ -54,7 +55,7 @@ open class PlayerView: UIView, KSPlayerLayerDelegate, KSSliderDelegate {
         #if os(macOS)
         self.init(frame: .zero)
         #else
-        self.init(frame: UIScreen.main.bounds)
+        self.init(frame: CGRect(origin: .zero, size: KSOptions.sceneSize))
         #endif
     }
 
@@ -145,6 +146,7 @@ open class PlayerView: UIView, KSPlayerLayerDelegate, KSSliderDelegate {
     }
 
     open func set(url: URL, options: KSOptions) {
+        srtControl.url = url
         toolBar.currentTime = 0
         totalTime = 0
         playerLayer = KSPlayerLayer(url: url, options: options)
@@ -168,6 +170,12 @@ open class PlayerView: UIView, KSPlayerLayerDelegate, KSSliderDelegate {
         if state == .readyToPlay {
             totalTime = layer.player.duration
             toolBar.isSeekable = layer.player.seekable
+            if let embedSubtitleDataSouce = layer.player.subtitleDataSouce {
+                srtControl.addSubtitle(dataSouce: embedSubtitleDataSouce)
+                if layer.options.autoSelectEmbedSubtitle, let first = embedSubtitleDataSouce.infos.first {
+                    srtControl.selectedSubtitleInfo = first
+                }
+            }
         } else if state == .playedToTheEnd || state == .paused || state == .error {
             toolBar.playButton.isSelected = false
         } else if state.isPlaying {

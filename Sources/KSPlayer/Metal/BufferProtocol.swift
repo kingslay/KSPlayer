@@ -6,13 +6,10 @@
 //
 
 import AVFoundation
-import CoreImage
 import CoreVideo
 import Foundation
-import Metal
 import simd
 import VideoToolbox
-
 #if canImport(UIKit)
 import UIKit
 #endif
@@ -140,38 +137,5 @@ extension CGSize {
         } else {
             return nil
         }
-    }
-}
-
-extension CGImage {
-    func image() -> UIImage? {
-        UIImage(cgImage: self)
-    }
-
-    func image(quality: CGFloat) -> UIImage? {
-        // 用heic格式，那展示的时候会卡主线程。也不能用jpg，因为字幕需要有透明度。所以改成用tif
-        autoreleasepool {
-            guard let mutableData = CFDataCreateMutable(nil, 0),
-                  let destination = CGImageDestinationCreateWithData(mutableData, AVFileType.tif.rawValue as CFString, 1, nil)
-            else {
-                return nil
-            }
-            CGImageDestinationAddImage(destination, self, [kCGImageDestinationLossyCompressionQuality: quality] as CFDictionary)
-            guard CGImageDestinationFinalize(destination) else {
-                return nil
-            }
-            return UIImage(data: mutableData as Data)
-        }
-    }
-
-    static func make(rgbData: UnsafePointer<UInt8>, linesize: Int, width: Int, height: Int, isAlpha: Bool = false) -> CGImage? {
-        let colorSpace = CGColorSpaceCreateDeviceRGB()
-        let bitmapInfo: CGBitmapInfo = isAlpha ? CGBitmapInfo(rawValue: CGImageAlphaInfo.last.rawValue) : CGBitmapInfo.byteOrderMask
-        guard let data = CFDataCreate(kCFAllocatorDefault, rgbData, linesize * height), let provider = CGDataProvider(data: data) else {
-            return nil
-        }
-        // swiftlint:disable line_length
-        return CGImage(width: width, height: height, bitsPerComponent: 8, bitsPerPixel: isAlpha ? 32 : 24, bytesPerRow: linesize, space: colorSpace, bitmapInfo: bitmapInfo, provider: provider, decode: nil, shouldInterpolate: false, intent: .defaultIntent)
-        // swiftlint:enable line_length
     }
 }

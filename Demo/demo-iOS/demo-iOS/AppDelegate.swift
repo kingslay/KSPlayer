@@ -91,3 +91,34 @@ class CustomVideoPlayerView: VideoPlayerView {
         }
     }
 }
+
+var testObjects: [KSPlayerResource] = {
+    var objects = [KSPlayerResource]()
+    for ext in ["mp4", "mkv", "mov", "h264", "flac", "webm"] {
+        guard let urls = Bundle.main.urls(forResourcesWithExtension: ext, subdirectory: nil) else {
+            continue
+        }
+        for url in urls {
+            let options = KSOptions()
+            if url.lastPathComponent == "h264.mp4" {
+                options.videoFilters = ["hflip", "vflip"]
+                options.hardwareDecode = false
+                options.startPlayTime = 13
+                #if os(macOS)
+                let moviesDirectory = try? FileManager.default.url(for: .moviesDirectory, in: .userDomainMask, appropriateFor: nil, create: false)
+                options.outputURL = moviesDirectory?.appendingPathComponent("recording.mov")
+                #endif
+            } else if url.lastPathComponent == "vr.mp4" {
+                options.display = .vr
+            } else if url.lastPathComponent == "mjpeg.flac" {
+                options.videoDisable = true
+                options.syncDecodeAudio = true
+            } else if url.lastPathComponent == "subrip.mkv" {
+                options.asynchronousDecompression = false
+                options.videoFilters.append("yadif_videotoolbox=mode=0:parity=auto:deint=1")
+            }
+            objects.append(KSPlayerResource(url: url, options: options, name: url.lastPathComponent))
+        }
+    }
+    return objects
+}()
