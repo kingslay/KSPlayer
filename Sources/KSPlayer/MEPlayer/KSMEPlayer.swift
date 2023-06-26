@@ -154,8 +154,8 @@ extension KSMEPlayer: MEPlayerDelegate {
         let fps = tracks(mediaType: .video).first { $0.isEnabled }.map(\.nominalFrameRate) ?? 24
         runInMainqueue { [weak self] in
             guard let self else { return }
-            self.audioOutput.prepare(audioFormat: options.audioFormat)
-            self.videoOutput?.prepare(fps: fps, startPlayTime: options.startPlayTime)
+            self.audioOutput.prepare(audioFormat: self.options.audioFormat)
+            self.videoOutput?.prepare(fps: fps, startPlayTime: self.options.startPlayTime)
             self.videoOutput?.play()
             self.delegate?.readyToPlay(player: self)
         }
