@@ -64,6 +64,13 @@ class MovieModel: Hashable {
         self.options = options
         self.extinf = extinf
         logo = extinf?["tvg-logo"].flatMap { URL(string: $0) }
+        // There is total different meaning for 'listen_timeout' option in rtmp
+        // set 'listen_timeout' = -1 for rtmp、rtsp
+        if url.absoluteString.starts(with: "rtmp") || url.absoluteString.starts(with: "rtsp") {
+            options.formatContextOptions["listen_timeout"] = -1
+        } else {
+            options.formatContextOptions["listen_timeout"] = 3
+        }
         #if DEBUG
         if url.lastPathComponent == "h264.mp4" {
             options.videoFilters = ["hflip", "vflip"]

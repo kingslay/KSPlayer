@@ -49,8 +49,11 @@ public final class MetalPlayView: UIView {
         pause()
     }
 
-    func prepare(fps: Float) {
+    func prepare(fps: Float, startPlayTime: TimeInterval = 0) {
         displayLink.preferredFramesPerSecond = Int(ceil(fps)) << 1
+        if let controlTimebase = displayView.displayLayer.controlTimebase, startPlayTime > 1 {
+            CMTimebaseSetTime(controlTimebase, time: CMTimeMake(value: Int64(startPlayTime), timescale: 1))
+        }
     }
 
     func play() {

@@ -10,6 +10,8 @@ import SwiftUI
 @available(iOS 15, tvOS 15, macOS 12, *)
 public struct KSVideoPlayerView: View {
     private let subtitleDataSouce: SubtitleDataSouce?
+    @State private var delayItem: DispatchWorkItem?
+    @State private var overView = false
     @StateObject private var playerCoordinator = KSVideoPlayer.Coordinator()
     @Environment(\.dismiss) private var dismiss
     public let options: KSOptions
@@ -23,9 +25,25 @@ public struct KSVideoPlayerView: View {
 
     @State var isMaskShow = true {
         didSet {
-            #if os(macOS)
-            isMaskShow ? NSCursor.unhide() : NSCursor.setHiddenUntilMouseMoves(true)
-            #endif
+            if isMaskShow != oldValue {
+                if isMaskShow {
+                    delayItem?.cancel()
+                    // 播放的时候才自动隐藏
+                    guard playerCoordinator.state == .bufferFinished else { return }
+                    delayItem = DispatchWorkItem {
+                        isMaskShow = false
+                    }
+                    DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + KSOptions.animateDelayTimeInterval,
+                                                  execute: delayItem!)
+                }
+                #if os(macOS)
+                isMaskShow ? NSCursor.unhide() : NSCursor.setHiddenUntilMouseMoves(true)
+//                NSApp.mainWindow?.standardWindowButton(.zoomButton)?.isHidden = !isMaskShow
+//                NSApp.mainWindow?.standardWindowButton(.closeButton)?.isHidden = !isMaskShow
+//                NSApp.mainWindow?.standardWindowButton(.miniaturizeButton)?.isHidden = !isMaskShow
+//                NSApp.mainWindow?.standardWindowButton(.closeButton)?.superview?.isHidden = !isMaskShow
+                #endif
+            }
         }
     }
 
@@ -43,13 +61,9 @@ public struct KSVideoPlayerView: View {
     public var body: some View {
         ZStack {
             KSVideoPlayer(coordinator: playerCoordinator, url: url, options: options)
-                .onStateChanged { playerLayer, state in
+                .onStateChanged { _, state in
                     if state == .bufferFinished {
-                        if isMaskShow {
-                            DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + KSOptions.animateDelayTimeInterval) {
-                                isMaskShow = playerLayer.state != .bufferFinished
-                            }
-                        }
+                        isMaskShow = false
                     } else {
                         isMaskShow = true
                     }
@@ -74,17 +88,20 @@ public struct KSVideoPlayerView: View {
                     playerCoordinator.subtitleModel.addSubtitle(dataSouce: subtitleDataSouce)
                 }
                 #if os(macOS)
-                NSEvent.addLocalMonitorForEvents(matching: [.mouseEntered, .mouseMoved]) {
-                    isMaskShow = true
-                    return $0
-                }
-                NSEvent.addLocalMonitorForEvents(matching: [.mouseExited]) {
-                    isMaskShow = false
+                NSApp.mainWindow?.titlebarAppearsTransparent = true
+                NSApp.mainWindow?.titleVisibility = .hidden
+                NSEvent.addLocalMonitorForEvents(matching: [.mouseMoved]) {
+                    isMaskShow = overView
                     return $0
                 }
                 #endif
             }
             .onDisappear {
+                delayItem?.cancel()
+                #if os(macOS)
+                NSApp.mainWindow?.titlebarAppearsTransparent = false
+                NSApp.mainWindow?.titleVisibility = .visible
+                #endif
                 if let playerLayer = playerCoordinator.playerLayer {
                     let key = "playtime_\(url)"
                     if playerLayer.player.duration > 0, playerLayer.player.currentPlaybackTime > 0, playerLayer.state != .playedToTheEnd {
@@ -98,7 +115,7 @@ public struct KSVideoPlayerView: View {
                     }
                 }
             }
-            .edgesIgnoringSafeArea(.all)
+            .ignoresSafeArea()
             VideoSubtitleView(model: playerCoordinator.subtitleModel)
             VStack {
                 Spacer()
@@ -149,9 +166,13 @@ public struct KSVideoPlayerView: View {
                 NSApplication.shared.keyWindow?.toggleFullScreen(self)
             }
         #else
-//            .navigationBarHidden(true)
+            .toolbar(isShow: isMaskShow)
         #endif
         #if !os(tvOS)
+        .onHover {
+            overView = $0
+            isMaskShow = overView
+        }
         .onDrop(of: ["public.file-url"], isTargeted: nil) { providers -> Bool in
             providers.first?.loadDataRepresentation(forTypeIdentifier: "public.file-url") { data, _ in
                 if let data, let path = NSString(data: data, encoding: 4), let url = URL(string: path as String) {
@@ -411,6 +432,15 @@ struct VideoSettingView: View {
             } label: {
                 Label("Sutitle", systemImage: "captions.bubble")
             }
+        }
+    }
+}
+
+extension View {
+    @ViewBuilder
+    func toolbar(isShow: Bool) -> some View {
+        if #available(iOS 16.0, macOS 13.0, tvOS 16.0, watchOS 9.0, *) {
+            toolbar(isShow ? .visible : .hidden, for: .automatic)
         }
     }
 }

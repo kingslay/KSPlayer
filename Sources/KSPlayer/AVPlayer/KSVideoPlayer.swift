@@ -50,8 +50,8 @@ extension KSVideoPlayer: UIViewRepresentable {
         return view
     }
 
-    public func updateUIView(_ uiView: UIViewType, context: Context) {
-        updateView(uiView, context: context)
+    public func updateUIView(_ view: UIViewType, context: Context) {
+        updateView(view, context: context)
     }
 
     public static func dismantleUIView(_: UIViewType, coordinator: Coordinator) {
@@ -67,11 +67,13 @@ extension KSVideoPlayer: UIViewRepresentable {
         context.coordinator.makeView(url: url, options: options)
     }
 
-    public func updateNSView(_ uiView: NSViewType, context: Context) {
-        updateView(uiView, context: context)
+    public func updateNSView(_ view: NSViewType, context: Context) {
+        updateView(view, context: context)
     }
 
-    public static func dismantleNSView(_: NSViewType, coordinator _: Coordinator) {}
+    public static func dismantleNSView(_ view: NSViewType, coordinator _: Coordinator) {
+        view.window?.contentAspectRatio = CGSize(width: 16, height: 9)
+    }
     #endif
 
     private func updateView(_ view: KSPlayerLayer, context: Context) {
@@ -180,6 +182,10 @@ extension KSVideoPlayer: UIViewRepresentable {
 extension KSVideoPlayer.Coordinator: KSPlayerLayerDelegate {
     public func player(layer: KSPlayerLayer, state: KSPlayerState) {
         if state == .readyToPlay {
+            #if os(macOS)
+            let naturalSize = layer.player.naturalSize
+            layer.player.view?.window?.contentAspectRatio = naturalSize
+            #endif
             videoTracks = layer.player.tracks(mediaType: .video)
             audioTracks = layer.player.tracks(mediaType: .audio)
             subtitleModel.selectedSubtitleInfo = subtitleModel.subtitleInfos.first

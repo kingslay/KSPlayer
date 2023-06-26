@@ -174,7 +174,7 @@ public class ShooterSubtitleDataSouce: SearchSubtitleDataSouce {
             }
             json.forEach { sub in
                 let filesDic = sub["Files"] as? [[String: String]]
-                let desc = sub["Desc"] as? String ?? ""
+//                let desc = sub["Desc"] as? String ?? ""
                 let delay = TimeInterval(sub["Delay"] as? Int ?? 0) / 1000.0
                 let result = filesDic?.compactMap { dic in
                     if let string = dic["Link"], let url = URL(string: string) {

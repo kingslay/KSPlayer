@@ -109,9 +109,12 @@ class APPModel: ObservableObject {
         KSOptions.isAccurateSeek = true
 //        KSOptions.isUseAudioRenderer = true
 //        KSOptions.isLoopPlay = true
-
         #if DEBUG
-        m3uModels.append(M3UModel(name: "Test", m3uURL: "https://raw.githubusercontent.com/kingslay/KSPlayer/develop/Tests/KSPlayerTests/test.m3u"))
+        let model = M3UModel(name: "Test", m3uURL: "https://raw.githubusercontent.com/kingslay/KSPlayer/develop/Tests/KSPlayerTests/test.m3u")
+        m3uModels.append(model)
+        if let url = URL(string: model.m3uURL) {
+            replaceM3U(url: url)
+        }
         #endif
     }
 
