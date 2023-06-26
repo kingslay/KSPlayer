@@ -64,6 +64,28 @@ class MovieModel: Hashable {
         self.options = options
         self.extinf = extinf
         logo = extinf?["tvg-logo"].flatMap { URL(string: $0) }
+        #if DEBUG
+        if url.lastPathComponent == "h264.mp4" {
+            options.videoFilters = ["hflip", "vflip"]
+            options.hardwareDecode = false
+            options.startPlayTime = 13
+        } else if url.lastPathComponent == "vr.mp4" {
+            options.display = .vr
+        } else if url.lastPathComponent == "mjpeg.flac" {
+            options.videoDisable = true
+            options.syncDecodeAudio = true
+        } else if url.lastPathComponent == "subrip.mkv" {
+            options.asynchronousDecompression = false
+            options.videoFilters.append("yadif_videotoolbox=mode=0:parity=auto:deint=1")
+        } else if url.lastPathComponent == "big_buck_bunny.mp4" {
+            options.startPlayTime = 25
+        } else if url.lastPathComponent == "bipbopall.m3u8" {
+            #if os(macOS)
+            let moviesDirectory = try? FileManager.default.url(for: .moviesDirectory, in: .userDomainMask, appropriateFor: nil, create: false)
+            options.outputURL = moviesDirectory?.appendingPathComponent("recording.mov")
+            #endif
+        }
+        #endif
     }
 
     public func hash(into hasher: inout Hasher) {
@@ -75,39 +97,7 @@ extension MovieModel: Identifiable {
     var id: URL { url }
 }
 
-var testObjects: [MovieModel] = {
-    var objects = [MovieModel]()
-    for ext in ["mp4", "mkv", "mov", "h264", "flac", "webm"] {
-        guard let urls = Bundle.main.urls(forResourcesWithExtension: ext, subdirectory: nil) else {
-            continue
-        }
-        for url in urls {
-            let options = MEOptions()
-            if url.lastPathComponent == "h264.mp4" {
-                options.videoFilters = ["hflip", "vflip"]
-                options.hardwareDecode = false
-                options.startPlayTime = 13
-                #if os(macOS)
-                let moviesDirectory = try? FileManager.default.url(for: .moviesDirectory, in: .userDomainMask, appropriateFor: nil, create: false)
-                options.outputURL = moviesDirectory?.appendingPathComponent("recording.mov")
-                #endif
-            } else if url.lastPathComponent == "vr.mp4" {
-                options.display = .vr
-            } else if url.lastPathComponent == "mjpeg.flac" {
-                options.videoDisable = true
-                options.syncDecodeAudio = true
-            } else if url.lastPathComponent == "subrip.mkv" {
-                options.asynchronousDecompression = false
-                options.videoFilters.append("yadif_videotoolbox=mode=0:parity=auto:deint=1")
-            }
-            objects.append(MovieModel(url: url, options: options))
-        }
-    }
-    return objects
-}()
-
-extension KSVideoPlayerView {
-    init(model: MovieModel) {
-        self.init(url: model.url, options: model.options)
-    }
+struct M3UModel: Hashable {
+    let name: String
+    let m3uURL: String
 }

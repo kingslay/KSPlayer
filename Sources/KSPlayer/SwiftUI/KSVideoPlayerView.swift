@@ -312,7 +312,7 @@ struct VideoSubtitleView: View {
                 Spacer()
                 GeometryReader { geometry in
                     let fitRect = image.fitRect(geometry.size)
-                    if #available(macOS 13.0, iOS 16.0, *) {
+                    if #available(iOS 16.0, macOS 13.0, macCatalyst 17.0, *) {
                         #if os(tvOS)
                         Image(uiImage: image)
                             .resizable()

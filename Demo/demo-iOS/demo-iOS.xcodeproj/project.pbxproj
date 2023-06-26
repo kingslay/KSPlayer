@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 52;
+	objectVersion = 54;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -12,7 +12,6 @@
 		AC08615620B69A4500D801FC /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AC08615520B69A4500D801FC /* Assets.xcassets */; };
 		AC08619620B69AB400D801FC /* DetailViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC08619420B69AB400D801FC /* DetailViewController.swift */; };
 		AC08619720B69AB400D801FC /* MasterViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC08619520B69AB400D801FC /* MasterViewController.swift */; };
-		AC21D0E626D226B40007891C /* RootViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC21D0E526D226B40007891C /* RootViewController.swift */; };
 		AC368C8128A7B2F0003BD454 /* dvd_subtitle.mkv in Resources */ = {isa = PBXBuildFile; fileRef = AC368C7A28A7B2EF003BD454 /* dvd_subtitle.mkv */; };
 		AC368C8228A7B2F0003BD454 /* h264.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = AC368C7B28A7B2EF003BD454 /* h264.mp4 */; };
 		AC368C8428A7B2F0003BD454 /* subrip.mkv in Resources */ = {isa = PBXBuildFile; fileRef = AC368C7D28A7B2EF003BD454 /* subrip.mkv */; };
@@ -23,7 +22,6 @@
 		AC458DE621DF830F00BD4CF9 /* AudioViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC458DE521DF830F00BD4CF9 /* AudioViewController.swift */; };
 		AC80332224BA1A2F002B3D40 /* hevc.mkv in Resources */ = {isa = PBXBuildFile; fileRef = AC80331E24BA1A2F002B3D40 /* hevc.mkv */; };
 		ACA2123E2756169900F58F75 /* raw.h264 in Resources */ = {isa = PBXBuildFile; fileRef = ACA2123D2756169900F58F75 /* raw.h264 */; };
-		ACEA9FED298BFDAD00FBA74B /* TestURL.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACEA9FEC298BFDAD00FBA74B /* TestURL.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -38,7 +36,6 @@
 		AC08619420B69AB400D801FC /* DetailViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DetailViewController.swift; sourceTree = "<group>"; };
 		AC08619520B69AB400D801FC /* MasterViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MasterViewController.swift; sourceTree = "<group>"; };
 		AC155F1223AFA9F40092D004 /* demo-iOS.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "demo-iOS.entitlements"; sourceTree = "<group>"; };
-		AC21D0E526D226B40007891C /* RootViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RootViewController.swift; sourceTree = "<group>"; };
 		AC368C7A28A7B2EF003BD454 /* dvd_subtitle.mkv */ = {isa = PBXFileReference; lastKnownFileType = file; path = dvd_subtitle.mkv; sourceTree = "<group>"; };
 		AC368C7B28A7B2EF003BD454 /* h264.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = h264.mp4; sourceTree = "<group>"; };
 		AC368C7D28A7B2EF003BD454 /* subrip.mkv */ = {isa = PBXFileReference; lastKnownFileType = file; path = subrip.mkv; sourceTree = "<group>"; };
@@ -51,7 +48,6 @@
 		AC7E04DB2414DA5E00B0F540 /* libxml2.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libxml2.tbd; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk/usr/lib/libxml2.tbd; sourceTree = DEVELOPER_DIR; };
 		AC80331E24BA1A2F002B3D40 /* hevc.mkv */ = {isa = PBXFileReference; lastKnownFileType = file; path = hevc.mkv; sourceTree = "<group>"; };
 		ACA2123D2756169900F58F75 /* raw.h264 */ = {isa = PBXFileReference; lastKnownFileType = file; path = raw.h264; sourceTree = "<group>"; };
-		ACEA9FEC298BFDAD00FBA74B /* TestURL.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = TestURL.swift; path = ../../SwiftUI/Shared/TestURL.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -97,10 +93,8 @@
 		AC08614D20B69A4500D801FC /* demo-iOS */ = {
 			isa = PBXGroup;
 			children = (
-				ACEA9FEC298BFDAD00FBA74B /* TestURL.swift */,
 				AC155F1223AFA9F40092D004 /* demo-iOS.entitlements */,
 				AC08614E20B69A4500D801FC /* AppDelegate.swift */,
-				AC21D0E526D226B40007891C /* RootViewController.swift */,
 				AC08619420B69AB400D801FC /* DetailViewController.swift */,
 				AC08619520B69AB400D801FC /* MasterViewController.swift */,
 				AC458DE521DF830F00BD4CF9 /* AudioViewController.swift */,
@@ -167,8 +161,9 @@
 		AC08614320B69A4500D801FC /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
+				BuildIndependentTargetsInParallel = YES;
 				LastSwiftUpdateCheck = 0930;
-				LastUpgradeCheck = 1420;
+				LastUpgradeCheck = 1500;
 				ORGANIZATIONNAME = kintan;
 				TargetAttributes = {
 					AC08614A20B69A4500D801FC = {
@@ -272,12 +267,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				AC21D0E626D226B40007891C /* RootViewController.swift in Sources */,
 				AC08619720B69AB400D801FC /* MasterViewController.swift in Sources */,
 				AC458DE621DF830F00BD4CF9 /* AudioViewController.swift in Sources */,
 				AC08619620B69AB400D801FC /* DetailViewController.swift in Sources */,
 				AC08614F20B69A4500D801FC /* AppDelegate.swift in Sources */,
-				ACEA9FED298BFDAD00FBA74B /* TestURL.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -299,6 +292,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
 				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
@@ -362,6 +356,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
 				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;

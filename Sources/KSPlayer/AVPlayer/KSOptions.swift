@@ -316,7 +316,7 @@ open class KSOptions {
             if delay > 2 {
                 videoClockDelayCount += 1
                 if videoClockDelayCount > 10 {
-                    KSLog("seek video track")
+                    KSLog("video delay seek video track")
                     return .seek
                 } else {
                     return .drop

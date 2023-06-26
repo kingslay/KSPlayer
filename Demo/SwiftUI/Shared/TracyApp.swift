@@ -111,7 +111,7 @@ class APPModel: ObservableObject {
 //        KSOptions.isLoopPlay = true
 
         #if DEBUG
-        playlist.append(contentsOf: testObjects)
+        m3uModels.append(M3UModel(name: "Test", m3uURL: "https://raw.githubusercontent.com/kingslay/KSPlayer/develop/Tests/KSPlayerTests/test.m3u"))
         #endif
     }
 
@@ -171,9 +171,10 @@ class APPModel: ObservableObject {
     ]
 }
 
-struct M3UModel: Hashable {
-    let name: String
-    let m3uURL: String
+extension KSVideoPlayerView {
+    init(model: MovieModel) {
+        self.init(url: model.url, options: model.options)
+    }
 }
 
 // struct AVContentView: View {
