@@ -194,15 +194,12 @@ extension KSSubtitle: KSSubtitleProtocol {
     }
 }
 
-class KSURLSubtitle: KSSubtitle {
-    private var url: URL?
+public class KSURLSubtitle: KSSubtitle {
     public var parses: [KSParseProtocol] = [SrtParse(), AssParse(), VTTParse()]
-
-    public func parse(url: URL, encoding: String.Encoding? = nil) throws {
-        self.url = url
+    public func parse(url: URL, encoding: String.Encoding? = nil) async throws {
         do {
             var string: String?
-            let srtData = try Data(contentsOf: url)
+            let srtData = try await url.data()
             let encodes = [encoding ?? String.Encoding.utf8,
                            String.Encoding(rawValue: CFStringConvertEncodingToNSStringEncoding(CFStringEncoding(CFStringEncodings.big5.rawValue))),
                            String.Encoding(rawValue: CFStringConvertEncodingToNSStringEncoding(CFStringEncoding(CFStringEncodings.GB_18030_2000.rawValue))),
@@ -230,9 +227,9 @@ class KSURLSubtitle: KSSubtitle {
         }
     }
 
-    public static func == (lhs: KSURLSubtitle, rhs: KSURLSubtitle) -> Bool {
-        lhs.url == rhs.url
-    }
+//    public static func == (lhs: KSURLSubtitle, rhs: KSURLSubtitle) -> Bool {
+//        lhs.url == rhs.url
+//    }
 }
 
 public protocol NumericComparable {
@@ -373,9 +370,10 @@ open class SubtitleModel: ObservableObject {
     public func addSubtitle(dataSouce: SubtitleDataSouce) {
         if let dataSouce = dataSouce as? SearchSubtitleDataSouce {
             if let url {
-                dataSouce.searchSubtitle(url: url) { [weak self] in
+                Task {
+                    try? await dataSouce.searchSubtitle(url: url)
                     dataSouce.infos.forEach { info in
-                        self?.addSubtitle(info: info)
+                        addSubtitle(info: info)
                     }
                 }
             }

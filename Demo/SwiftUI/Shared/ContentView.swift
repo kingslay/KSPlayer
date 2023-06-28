@@ -1,6 +1,25 @@
 import KSPlayer
 import SwiftUI
 struct ContentView: View {
+    var body: some View {
+        #if os(macOS)
+        HomeView()
+        #else
+        TabView {
+            HomeView()
+                .tabItem {
+                    Label("Home", systemImage: "house.fill")
+                }
+            SettingView()
+                .tabItem {
+                    Label("Setting", systemImage: "gear")
+                }
+        }
+        #endif
+    }
+}
+
+struct HomeView: View {
     @EnvironmentObject private var appModel: APPModel
     var body: some View {
         NavigationStack(path: $appModel.path) {
@@ -16,9 +35,6 @@ struct ContentView: View {
         .background(Color.black)
         .sheet(isPresented: $appModel.openURLImport) {
             URLImportView()
-        }
-        .onOpenURL { url in
-            appModel.open(url: url)
         }
         #if !os(tvOS)
         .onDrop(of: ["public.url", "public.file-url"], isTargeted: nil) { items -> Bool in

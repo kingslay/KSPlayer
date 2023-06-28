@@ -158,7 +158,10 @@ public struct KSVideoPlayerView: View {
         #if os(macOS)
             .navigationTitle(url.lastPathComponent)
             .onTapGesture(count: 2) {
-                NSApplication.shared.keyWindow?.toggleFullScreen(self)
+                NSApp.keyWindow?.toggleFullScreen(self)
+            }
+            .onExitCommand {
+                NSApp.keyWindow?.toggleFullScreen(self)
             }
         #else
             .toolbar(isShow: isMaskShow)
@@ -269,6 +272,7 @@ struct VideoControllerView: View {
                 } label: {
                     Image(systemName: "ellipsis.circle")
                 }
+                .keyboardShortcut("s", modifiers: [.command, .shift])
                 .pickerStyle(.menu)
                 .menuIndicator(.hidden)
                 .frame(width: 40)

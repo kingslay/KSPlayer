@@ -37,26 +37,14 @@ struct TracyApp: App {
 
     var body: some Scene {
         WindowGroup {
-            #if os(macOS)
             ContentView()
                 .environmentObject(appModel)
-            #else
-            TabView {
-                ContentView()
-                    .environmentObject(appModel)
-                    .tabItem {
-                        Label("Home", systemImage: "house.fill")
-                    }
-                SettingView()
-                    .tabItem {
-                        Label("Setting", systemImage: "gear")
-                    }
-            }
-            #endif
+                .onOpenURL { url in
+                    appModel.open(url: url)
+                }
         }
         #if !os(tvOS)
         .commands {
-            #if os(macOS)
             CommandGroup(before: .newItem) {
                 Button("Open") {
                     appModel.openFileImport = true
@@ -67,7 +55,6 @@ struct TracyApp: App {
                     appModel.openURLImport = true
                 }.keyboardShortcut("o", modifiers: [.command, .shift])
             }
-            #endif
         }
         #endif
         #if os(macOS)
@@ -109,6 +96,7 @@ class APPModel: ObservableObject {
         KSOptions.isAutoPlay = true
         KSOptions.isSecondOpen = true
         KSOptions.isAccurateSeek = true
+        KSOptions.subtitleDataSouces = [DirectorySubtitleDataSouce(), ShooterSubtitleDataSouce(), AssrtSubtitleDataSouce(token: "5IzWrb2J099vmA96ECQXwdRSe9xdoBUv")]
 //        KSOptions.isUseAudioRenderer = true
 //        KSOptions.isLoopPlay = true
         #if DEBUG
@@ -129,21 +117,19 @@ class APPModel: ObservableObject {
     }
 
     func replaceM3U(url: URL) {
-        url.parsePlaylist { result in
-            DispatchQueue.main.async { [weak self] in
-                guard let self else { return }
-                var groupSet = Set<String>()
-                let array = result.compactMap { name, url, extinf in
-                    let model = MovieModel(url: url, name: name, extinf: extinf)
-                    if let group = model.group {
-                        groupSet.insert(group)
-                    }
-                    return model
+        Task { @MainActor in
+            let result = try? await url.parsePlaylist()
+            var groupSet = Set<String>()
+            let array = result?.compactMap { name, url, extinf in
+                let model = MovieModel(url: url, name: name, extinf: extinf)
+                if let group = model.group {
+                    groupSet.insert(group)
                 }
-                self.playlist = array
-                self.groups = Array(groupSet)
-                self.groupFilter = ""
+                return model
             }
+            self.playlist = array ?? []
+            self.groups = Array(groupSet)
+            self.groupFilter = ""
         }
     }
 

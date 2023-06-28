@@ -396,7 +396,7 @@ public extension KSOptions {
     }
 }
 
-extension LogLevel {
+public extension LogLevel {
     var logType: OSLogType {
         switch self {
         case .panic, .fatal:
@@ -413,8 +413,26 @@ extension LogLevel {
     }
 }
 
-@inline(__always) public func KSLog(level: LogLevel = .warning, dso: UnsafeRawPointer = #dsohandle, _ message: StaticString, _ args: CVarArg...) {
+@inlinable public func KSLog(_ message: CustomStringConvertible, logLevel: LogLevel = .warning, file: String = #file, function: String = #function, line: Int = #line) {
+    if logLevel.rawValue <= KSOptions.logLevel.rawValue {
+        let fileName = (file as NSString).lastPathComponent
+        os_log(logLevel.logType, "logLevel: %@ %@:%d %@ | %@", logLevel.description, fileName, line, function, message.description)
+        //        print("logLevel: \(logLevel) KSPlayer: \(fileName):\(line) \(function) | \(message)")
+//        if #available(macOS 11.0, iOS 14.0, watchOS 7.0, tvOS 14.0, *) {
+//            KSOptions.logger.log(level: logLevel.logType, "\(message.description)")
+//        }
+    }
+}
+
+@inlinable public func KSLog(level: LogLevel = .warning, dso: UnsafeRawPointer = #dsohandle, _ message: StaticString, _ args: CVarArg...) {
     if level.rawValue <= KSOptions.logLevel.rawValue {
         os_log(level.logType, dso: dso, message, args)
     }
 }
+
+//@available(macOS 11.0, iOS 14.0, watchOS 7.0, tvOS 14.0, *)
+//@inlinable public func KSLog(level: LogLevel = .warning, _ message: OSLogMessage) {
+//    if level.rawValue <= KSOptions.logLevel.rawValue {
+//        KSOptions.logger.log(level: level.logType, message)
+//    }
+//}

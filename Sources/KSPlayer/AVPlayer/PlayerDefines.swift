@@ -9,6 +9,7 @@ import AVFoundation
 import CoreMedia
 import CoreServices
 import SwiftUI
+
 #if canImport(UIKit)
 import UIKit
 public extension KSOptions {
@@ -227,21 +228,6 @@ public enum LogLevel: Int32, CustomStringConvertible {
     }
 }
 
-@inline(__always) public func KSLog(_ message: CustomStringConvertible, logLevel: LogLevel = .warning, file: String = #file, function: String = #function, line: Int = #line) {
-    if logLevel.rawValue <= KSOptions.logLevel.rawValue {
-        let fileName = (file as NSString).lastPathComponent
-        print("logLevel: \(logLevel) KSPlayer: \(fileName):\(line) \(function) | \(message)")
-    }
-}
-
-//
-// @available(macOS 11.0, iOS 14.0, watchOS 7.0, tvOS 14.0, *)
-// @inline(__always) public func KSLog(level: LogLevel = .warning, _ message: OSLogMessage) {
-//    if level.rawValue <= KSOptions.logLevel.rawValue {
-//        KSOptions.logger.log(level: level.logType, message)
-//    }
-// }
-
 public let KSPlayerErrorDomain = "KSPlayerErrorDomain"
 
 public enum KSPlayerErrorCode: Int {
@@ -399,54 +385,63 @@ public extension URL {
         ["cue", "m3u", "pls"].contains(pathExtension.lowercased())
     }
 
-    func parsePlaylist(completion: @escaping (([(String, URL, [String: String])]) -> Void)) {
-        let handler: ((Data) -> Void) = { data in
-            guard let string = String(data: data, encoding: .utf8) else {
+    func parsePlaylist() async throws -> [(String, URL, [String: String])] {
+        guard let data = try? await data(), let string = String(data: data, encoding: .utf8) else {
+            return []
+        }
+        return string.components(separatedBy: "#EXTINF:").compactMap { content -> (String, URL, [String: String])? in
+            let content = content.replacingOccurrences(of: "\r\n", with: "\n")
+            let array = content.split(separator: "\n")
+            guard array.count > 1, let url = URL(string: String(array[1])) else {
+                return nil
+            }
+            let infos = array[0].split(separator: ",")
+            guard infos.count > 1, let name = infos.last else {
+                return nil
+            }
+            var extinf = [String: String]()
+            let tvgString: Substring
+            if infos.count > 2 {
+                extinf["duration"] = String(infos[0])
+                tvgString = infos[1]
+            } else {
+                tvgString = infos[0]
+            }
+            tvgString.split(separator: " ").forEach { str in
+                let keyValue = str.split(separator: "=")
+                if keyValue.count == 2 {
+                    extinf[String(keyValue[0])] = keyValue[1].trimmingCharacters(in: CharacterSet(charactersIn: #"""#))
+                } else {
+                    extinf["duration"] = String(keyValue[0])
+                }
+            }
+            return (String(name), url, extinf)
+        }
+    }
+
+    func data() async throws -> Data {
+        if isFileURL {
+            return try Data(contentsOf: self)
+        } else {
+            let (data, _) = try await URLSession.shared.data(from: self)
+            return data
+        }
+    }
+
+    func download(completion: @escaping ((String, URL) -> Void)) {
+        URLSession.shared.downloadTask(with: self) { url, response, _ in
+            guard let url, let response = response as? HTTPURLResponse else {
                 return
             }
-            let result = string.components(separatedBy: "#EXTINF:").compactMap { content -> (String, URL, [String: String])? in
-                let content = content.replacingOccurrences(of: "\r\n", with: "\n")
-                let array = content.split(separator: "\n")
-                guard array.count > 1, let url = URL(string: String(array[1])) else {
-                    return nil
-                }
-                let infos = array[0].split(separator: ",")
-                guard infos.count > 1, let name = infos.last else {
-                    return nil
-                }
-                var extinf = [String: String]()
-                let tvgString: Substring
-                if infos.count > 2 {
-                    extinf["duration"] = String(infos[0])
-                    tvgString = infos[1]
-                } else {
-                    tvgString = infos[0]
-                }
-                tvgString.split(separator: " ").forEach { str in
-                    let keyValue = str.split(separator: "=")
-                    if keyValue.count == 2 {
-                        extinf[String(keyValue[0])] = keyValue[1].trimmingCharacters(in: CharacterSet(charactersIn: #"""#))
-                    } else {
-                        extinf["duration"] = String(keyValue[0])
-                    }
-                }
-                return (String(name), url, extinf)
+            let httpFileName = "attachment; filename="
+            var filename = url.lastPathComponent
+            if var disposition = response.value(forHTTPHeaderField: "Content-Disposition"), disposition.hasPrefix(httpFileName) {
+                disposition.removeFirst(httpFileName.count)
+                filename = disposition
             }
-            completion(result)
-        }
-        if isFileURL {
-            do {
-                let data = try Data(contentsOf: self)
-                handler(data)
-            } catch {}
-        } else {
-            URLSession.shared.dataTask(with: self) { data, _, _ in
-                guard let data else {
-                    return
-                }
-                handler(data)
-            }.resume()
-        }
+            // 下载的临时文件要马上就用。不然可能会马上被清空
+            completion(filename, url)
+        }.resume()
     }
 }
 

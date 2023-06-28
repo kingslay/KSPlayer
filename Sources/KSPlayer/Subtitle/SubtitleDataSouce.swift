@@ -16,9 +16,7 @@ public class EmptySubtitleInfo: SubtitleInfo {
     public func subtitle(isEnabled _: Bool) {}
 }
 
-public class URLSubtitleInfo: SubtitleInfo {
-    private var subtitles: KSURLSubtitle?
-//    private let fetchSubtitleDetail: (((NSError?) -> Void) -> Void)?
+public class URLSubtitleInfo: KSURLSubtitle, SubtitleInfo {
     private var downloadURL: URL
     public var delay: TimeInterval = 0
     public private(set) var name: String
@@ -33,41 +31,26 @@ public class URLSubtitleInfo: SubtitleInfo {
         self.subtitleID = subtitleID
         self.name = name
         downloadURL = url
-        if !url.isFileURL {
-            URLSession.shared.downloadTask(with: url) { [weak self] url, response, _ in
-                guard let self, let url, let response = response as? HTTPURLResponse else {
+        super.init()
+        if !url.isFileURL, name.count == 0 {
+            url.download { [weak self] filename, tmpUrl in
+                guard let self else {
                     return
                 }
-                let httpFileName = "attachment; filename="
-                if var filename = response.value(forHTTPHeaderField: "Content-Disposition"), filename.hasPrefix(httpFileName) {
-                    filename.removeFirst(httpFileName.count)
-                    self.name = filename
-                }
-                // 下载的临时文件要马上就用。不然可能会马上被清空
-                self.downloadURL = url
-                let subtitles = KSURLSubtitle()
-                do {
-                    try subtitles.parse(url: url)
-                } catch {}
-
-                self.subtitles = subtitles
-            }.resume()
+                self.name = filename
+                self.downloadURL = tmpUrl
+                var fileURL = URL(fileURLWithPath: NSTemporaryDirectory())
+                fileURL.appendPathComponent(filename)
+                try? FileManager.default.moveItem(at: tmpUrl, to: fileURL)
+                self.downloadURL = fileURL
+            }
         }
     }
 
-    public func search(for time: TimeInterval) -> SubtitlePart? {
-        subtitles?.search(for: time)
-    }
-
     public func subtitle(isEnabled: Bool) {
-        if isEnabled, subtitles == nil {
-            DispatchQueue.global().async { [weak self] in
-                guard let self else { return }
-                do {
-                    let subtitles = KSURLSubtitle()
-                    try subtitles.parse(url: self.downloadURL)
-                    self.subtitles = subtitles
-                } catch {}
+        if isEnabled, parts.count == 0 {
+            Task {
+                try? await parse(url: downloadURL)
             }
         }
     }
@@ -78,11 +61,11 @@ public protocol SubtitleDataSouce: AnyObject {
 }
 
 public protocol SearchSubtitleDataSouce: SubtitleDataSouce {
-    func searchSubtitle(url: URL, completion: @escaping (() -> Void))
+    func searchSubtitle(url: URL) async throws
 }
 
-extension KSOptions {
-    static var subtitleDataSouces: [SubtitleDataSouce] = [DirectorySubtitleDataSouce(), ShooterSubtitleDataSouce()]
+public extension KSOptions {
+    static var subtitleDataSouces: [SubtitleDataSouce] = [DirectorySubtitleDataSouce()]
 }
 
 public extension SubtitleDataSouce {
@@ -105,7 +88,7 @@ public class CacheDataSouce: SearchSubtitleDataSouce {
         srtCacheInfoPath = (cacheFolder as NSString).appendingPathComponent("KSSrtInfo.plist")
     }
 
-    public func searchSubtitle(url: URL, completion: @escaping (() -> Void)) {
+    public func searchSubtitle(url: URL) async throws {
         infos.removeAll()
         srtCacheInfoPath = (cacheFolder as NSString).appendingPathComponent("KSSrtInfo_\(url.lastPathComponent).plist")
         if FileManager.default.fileExists(atPath: srtCacheInfoPath), let files = NSMutableDictionary(contentsOfFile: srtCacheInfoPath) as? [String: String] {
@@ -127,7 +110,6 @@ public class CacheDataSouce: SearchSubtitleDataSouce {
             srtInfoCaches = [String: String]()
             infos = []
         }
-        completion()
     }
 
     public func addCache(subtitleID: String, downloadURL: URL) {
@@ -147,19 +129,19 @@ public class DirectorySubtitleDataSouce: SearchSubtitleDataSouce {
     public var infos = [any SubtitleInfo]()
     public init() {}
 
-    public func searchSubtitle(url: URL, completion: @escaping (() -> Void)) {
+    public func searchSubtitle(url: URL) async throws {
         infos.removeAll()
         if url.isFileURL {
             let subtitleURLs: [URL] = (try? FileManager.default.contentsOfDirectory(at: url.deletingLastPathComponent(), includingPropertiesForKeys: nil).filter(\.isSubtitle)) ?? []
             infos.append(contentsOf: subtitleURLs.map { URLSubtitleInfo(url: $0) })
         }
-        completion()
     }
 }
 
 public class ShooterSubtitleDataSouce: SearchSubtitleDataSouce {
     public var infos = [any SubtitleInfo]()
-    public func searchSubtitle(url: URL, completion: @escaping (() -> Void)) {
+    public init() {}
+    public func searchSubtitle(url: URL) async throws {
         infos.removeAll()
         guard url.isFileURL, let url = URL(string: "https://www.shooter.cn/api/subapi.php")?
             .add(queryItems: ["format": "json", "pathinfo": url.path, "filehash": url.shooterFilehash])
@@ -168,26 +150,96 @@ public class ShooterSubtitleDataSouce: SearchSubtitleDataSouce {
         }
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
-        URLSession.shared.dataTask(with: request) { [weak self] data, _, _ in
-            guard let self, let data, let json = try? JSONSerialization.jsonObject(with: data) as? [[String: Any]] else {
-                return
-            }
-            json.forEach { sub in
-                let filesDic = sub["Files"] as? [[String: String]]
+        let (data, _) = try await URLSession.shared.data(for: request)
+        guard let json = try JSONSerialization.jsonObject(with: data) as? [[String: Any]] else {
+            return
+        }
+        json.forEach { sub in
+            let filesDic = sub["Files"] as? [[String: String]]
 //                let desc = sub["Desc"] as? String ?? ""
-                let delay = TimeInterval(sub["Delay"] as? Int ?? 0) / 1000.0
-                let result = filesDic?.compactMap { dic in
-                    if let string = dic["Link"], let url = URL(string: string) {
-                        let info = URLSubtitleInfo(url: url)
-                        info.delay = delay
-                        return info
-                    }
-                    return nil
-                } ?? [URLSubtitleInfo]()
-                self.infos.append(contentsOf: result)
+            let delay = TimeInterval(sub["Delay"] as? Int ?? 0) / 1000.0
+            let result = filesDic?.compactMap { dic in
+                if let string = dic["Link"], let url = URL(string: string) {
+                    let info = URLSubtitleInfo(subtitleID: string, name: "", url: url)
+                    info.delay = delay
+                    return info
+                }
+                return nil
+            } ?? [URLSubtitleInfo]()
+            self.infos.append(contentsOf: result)
+        }
+    }
+}
+
+public class AssrtSubtitleDataSouce: SearchSubtitleDataSouce {
+    private let token: String
+    public var infos = [any SubtitleInfo]()
+    public init(token: String) {
+        self.token = token
+    }
+
+    public func searchSubtitle(url: URL) async throws {
+        infos.removeAll()
+        var query = url.lastPathComponent
+        let nameArray = query.split(separator: ".")
+        if nameArray.count == 2 {
+            query = String(nameArray[0])
+        } else if nameArray.count > 2 {
+            query = nameArray.prefix(2).joined(separator: ".")
+        }
+        guard let searchApi = URL(string: "https://api.assrt.net/v1/sub/search")?.add(queryItems: ["q": query]) else {
+            return
+        }
+        var request = URLRequest(url: searchApi)
+        request.httpMethod = "POST"
+        request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        let (data, _) = try await URLSession.shared.data(for: request)
+        guard let json = try JSONSerialization.jsonObject(with: data) as? [String: Any] else {
+            return
+        }
+        guard let status = json["status"] as? Int, status == 0 else {
+            return
+        }
+        guard let subDict = json["sub"] as? [String: Any], let subArray = subDict["subs"] as? [[String: Any]] else {
+            return
+        }
+        for sub in subArray {
+            if let assrtSubID = sub["id"] as? Int {
+                try await infos.append(contentsOf: loadDetails(assrtSubID: String(assrtSubID)))
             }
-            DispatchQueue.main.async(execute: completion)
-        }.resume()
+        }
+    }
+
+    func loadDetails(assrtSubID: String) async throws -> [URLSubtitleInfo] {
+        var infos = [URLSubtitleInfo]()
+        guard let detailApi = URL(string: "https://api.assrt.net/v1/sub/detail")?.add(queryItems: ["id": assrtSubID]) else {
+            return infos
+        }
+        var request = URLRequest(url: detailApi)
+        request.httpMethod = "POST"
+        request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        let (data, _) = try await URLSession.shared.data(for: request)
+        guard let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else {
+            return infos
+        }
+        guard let status = json["status"] as? Int, status == 0 else {
+            return infos
+        }
+        guard let subDict = json["sub"] as? [String: Any], let subArray = subDict["subs"] as? [[String: Any]], let sub = subArray.first else {
+            return infos
+        }
+        if let fileList = sub["filelist"] as? [[String: String]] {
+            fileList.forEach { dic in
+                if let urlString = dic["url"], let filename = dic["f"], let url = URL(string: urlString) {
+                    let info = URLSubtitleInfo(subtitleID: urlString, name: filename, url: url)
+                    infos.append(info)
+                }
+            }
+        } else if let urlString = sub["url"] as? String, let filename = sub["filename"] as? String, let url = URL(string: urlString) {
+            let info = URLSubtitleInfo(subtitleID: urlString, name: filename, url: url)
+            infos.append(info)
+        }
+        return infos
     }
 }
 
