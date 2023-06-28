@@ -23,13 +23,13 @@ struct URLImportView: View {
                 Toggle("Remember URL", isOn: $rememberURL)
                 if historyURLs.count > 0 {
                     Picker("History URL", selection: $playURL) {
-                        ForEach(historyURLs, id: \.self) {
+                        ForEach(historyURLs) {
                             Text($0.description).tag($0.description)
                         }
                     }
                 }
                 Picker("IPTV", selection: $playURL) {
-                    ForEach(appModel.m3uModels, id: \.self) {
+                    ForEach(appModel.m3uModels) {
                         Text($0.name).tag($0.m3uURL)
                     }
                 }

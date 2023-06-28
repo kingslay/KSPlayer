@@ -95,12 +95,12 @@ struct SettingSubtitleView: View {
             }
             Section("Position") {
                 Picker("Align X:", selection: $textXAlign) {
-                    ForEach([TextAlignment.leading, .center, .trailing], id: \.self) { value in
+                    ForEach([TextAlignment.leading, .center, .trailing]) { value in
                         Text(value.rawValue).tag(value)
                     }
                 }
                 Picker("Align Y:", selection: $textYAlign) {
-                    ForEach([VerticalAlignment.top, .center, .bottom], id: \.self) { value in
+                    ForEach([VerticalAlignment.top, .center, .bottom]) { value in
                         Text(value.rawValue).tag(value)
                     }
                 }

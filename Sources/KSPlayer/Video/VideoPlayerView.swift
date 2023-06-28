@@ -56,7 +56,7 @@ open class VideoPlayerView: PlayerView {
 
     public private(set) var resource: KSPlayerResource? {
         didSet {
-            if let resource, oldValue !== resource {
+            if let resource, oldValue != resource {
                 if let subtitleDataSouce = resource.subtitleDataSouce {
                     srtControl.addSubtitle(dataSouce: subtitleDataSouce)
                 }
@@ -128,7 +128,6 @@ open class VideoPlayerView: PlayerView {
         super.init(frame: frame)
         setupUIComponents()
         cancellable = playerLayer?.$isPipActive.assign(to: \.isSelected, on: toolBar.pipButton)
-
         toolBar.onFocusUpdate = { [weak self] _ in
             self?.autoFadeOutViewWithAnimation()
         }
@@ -256,7 +255,7 @@ open class VideoPlayerView: PlayerView {
             toolBar.timeSlider.isPlayable = true
             toolBar.videoSwitchButton.isHidden = layer.player.tracks(mediaType: .video).count < 2
             toolBar.audioSwitchButton.isHidden = layer.player.tracks(mediaType: .audio).count < 2
-            toolBar.srtButton.isHidden = srtControl.srtListCount == 0
+            toolBar.srtButton.isHidden = srtControl.subtitleInfos.count == 0
             if #available(iOS 14.0, tvOS 15.0, *) {
                 buildMenusForButtons()
             }

@@ -44,3 +44,19 @@ struct ContentView: View {
         #endif
     }
 }
+
+extension KSVideoPlayerView {
+    init(model: MovieModel) {
+        let key = "playtime_\(model.url)"
+        model.options.startPlayTime = UserDefaults.standard.double(forKey: key)
+        self.init(url: model.url, options: model.options) { layer in
+            if let layer {
+                if layer.player.duration > 0, layer.player.currentPlaybackTime > 0, layer.state != .playedToTheEnd, layer.player.duration > layer.player.currentPlaybackTime + 120 {
+                    UserDefaults.standard.set(layer.player.currentPlaybackTime, forKey: key)
+                } else {
+                    UserDefaults.standard.removeObject(forKey: key)
+                }
+            }
+        }
+    }
+}

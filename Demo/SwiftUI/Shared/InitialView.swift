@@ -18,7 +18,7 @@ struct InitialView: View {
             LazyVGrid(columns: columns) {
                 if recentDocumentURLs.count > 0 {
                     Section {
-                        ForEach(recentDocumentURLs, id: \.self) { url in
+                        ForEach(recentDocumentURLs) { url in
                             let mode = MovieModel(url: url)
                             NavigationLink(value: mode) {
                                 MoiveView(model: mode)
@@ -35,7 +35,7 @@ struct InitialView: View {
                 }
                 let playlist = appModel.filterParsePlaylist()
                 Section {
-                    ForEach(playlist, id: \.self) { resource in
+                    ForEach(playlist) { resource in
                         NavigationLink(value: resource) {
                             MoiveView(model: resource)
                         }
@@ -64,7 +64,7 @@ struct InitialView: View {
             }
             Picker("group filter", selection: $appModel.groupFilter) {
                 Text("All ").tag("")
-                ForEach(appModel.groups, id: \.self) { group in
+                ForEach(appModel.groups) { group in
                     Text(group).tag(group)
                 }
             }

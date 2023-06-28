@@ -533,6 +533,10 @@ extension TextAlignment: RawRepresentable {
     }
 }
 
+extension TextAlignment: Identifiable {
+    public var id: Self { self }
+}
+
 extension VerticalAlignment: Hashable, RawRepresentable {
     public typealias RawValue = String
     public init?(rawValue: RawValue) {
@@ -559,6 +563,10 @@ extension VerticalAlignment: Hashable, RawRepresentable {
             return ""
         }
     }
+}
+
+extension VerticalAlignment: Identifiable {
+    public var id: Self { self }
 }
 
 extension Color: RawRepresentable {
@@ -686,4 +694,16 @@ extension CGImage {
         return CGImage(width: width, height: height, bitsPerComponent: 8, bitsPerPixel: isAlpha ? 32 : 24, bytesPerRow: linesize, space: colorSpace, bitmapInfo: bitmapInfo, provider: provider, decode: nil, shouldInterpolate: false, intent: .defaultIntent)
         // swiftlint:enable line_length
     }
+}
+
+extension URL: Identifiable {
+    public var id: Self { self }
+}
+
+extension String: Identifiable {
+    public var id: Self { self }
+}
+
+extension Float: Identifiable {
+    public var id: Self { self }
 }

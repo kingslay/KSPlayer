@@ -324,7 +324,6 @@ open class SubtitleModel: ObservableObject {
 
     private var subtitleDataSouces: [SubtitleDataSouce] = KSOptions.subtitleDataSouces
     public private(set) var subtitleInfos = [any SubtitleInfo]()
-    @Published public var srtListCount: Int = 0
     @Published public private(set) var part: SubtitlePart?
     @Published public var delay = "0.0"
     public var url: URL? {
@@ -351,7 +350,6 @@ open class SubtitleModel: ObservableObject {
     private func addSubtitle(info: any SubtitleInfo) {
         if subtitleInfos.first(where: { $0.subtitleID == info.subtitleID }) == nil {
             subtitleInfos.append(info)
-            srtListCount = subtitleInfos.count
         }
     }
 

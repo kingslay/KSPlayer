@@ -108,3 +108,7 @@ struct M3UModel: Hashable {
     let name: String
     let m3uURL: String
 }
+
+extension M3UModel: Identifiable {
+    var id: String { m3uURL }
+}

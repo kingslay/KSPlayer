@@ -18,7 +18,6 @@ open class IOSVideoPlayerView: VideoPlayerView {
     private weak var fullScreenDelegate: PlayerViewFullScreenDelegate?
     private var isVolume = false
     private let volumeView = BrightnessVolume()
-    private var cancellable: AnyCancellable?
     public var volumeViewSlider = UXSlider()
     public var backButton = UIButton()
     public var airplayStatusView: UIView = AirplayStatusView()
@@ -39,14 +38,6 @@ open class IOSVideoPlayerView: VideoPlayerView {
         super.customizeUIComponents()
         if UIDevice.current.userInterfaceIdiom == .phone {
             subtitleLabel.font = .systemFont(ofSize: 14)
-        }
-        cancellable = srtControl.$srtListCount.sink { [weak self] count in
-            guard let self, count > 0 else {
-                return
-            }
-            if self.landscapeButton.isSelected || UIDevice.current.userInterfaceIdiom == .pad {
-                self.toolBar.srtButton.isHidden = false
-            }
         }
         insertSubview(maskImageView, at: 0)
         maskImageView.contentMode = .scaleAspectFit
@@ -184,11 +175,11 @@ open class IOSVideoPlayerView: VideoPlayerView {
             topMaskView.isHidden = KSOptions.topBarShowInCase != .always
         }
         toolBar.playbackRateButton.isHidden = false
-        toolBar.srtButton.isHidden = srtControl.srtListCount == 0
+        toolBar.srtButton.isHidden = srtControl.subtitleInfos.count == 0
         if UIDevice.current.userInterfaceIdiom == .phone {
             if isLandscape {
                 landscapeButton.isHidden = true
-                toolBar.srtButton.isHidden = srtControl.srtListCount == 0
+                toolBar.srtButton.isHidden = srtControl.subtitleInfos.count == 0
             } else {
                 toolBar.srtButton.isHidden = true
                 if let image = maskImageView.image {

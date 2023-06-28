@@ -10,6 +10,7 @@ import SwiftUI
 @available(iOS 15, tvOS 15, macOS 12, *)
 public struct KSVideoPlayerView: View {
     private let subtitleDataSouce: SubtitleDataSouce?
+    private let onPlayerDisappear: ((KSPlayerLayer?) -> Void)?
     @State private var delayItem: DispatchWorkItem?
     @State private var overView = false
     @StateObject private var playerCoordinator = KSVideoPlayer.Coordinator()
@@ -47,15 +48,14 @@ public struct KSVideoPlayerView: View {
         }
     }
 
-    public init(url: URL, options: KSOptions, subtitleDataSouce: SubtitleDataSouce? = nil) {
+    public init(url: URL, options: KSOptions, subtitleDataSouce: SubtitleDataSouce? = nil, onPlayerDisappear: ((KSPlayerLayer?) -> Void)? = nil) {
         _url = .init(initialValue: url)
         #if os(macOS)
         NSDocumentController.shared.noteNewRecentDocumentURL(url)
         #endif
         self.options = options
-        let key = "playtime_\(url)"
-        options.startPlayTime = UserDefaults.standard.double(forKey: key)
         self.subtitleDataSouce = subtitleDataSouce
+        self.onPlayerDisappear = onPlayerDisappear
     }
 
     public var body: some View {
@@ -88,8 +88,8 @@ public struct KSVideoPlayerView: View {
                     playerCoordinator.subtitleModel.addSubtitle(dataSouce: subtitleDataSouce)
                 }
                 #if os(macOS)
-                NSApp.mainWindow?.titlebarAppearsTransparent = true
-                NSApp.mainWindow?.titleVisibility = .hidden
+                NSApp.windows.first?.titlebarAppearsTransparent = true
+                NSApp.windows.first?.titleVisibility = .hidden
                 NSEvent.addLocalMonitorForEvents(matching: [.mouseMoved]) {
                     isMaskShow = overView
                     return $0
@@ -99,16 +99,11 @@ public struct KSVideoPlayerView: View {
             .onDisappear {
                 delayItem?.cancel()
                 #if os(macOS)
-                NSApp.mainWindow?.titlebarAppearsTransparent = false
-                NSApp.mainWindow?.titleVisibility = .visible
+                NSApp.windows.first?.titlebarAppearsTransparent = false
+                NSApp.windows.first?.titleVisibility = .visible
                 #endif
+                onPlayerDisappear?(playerCoordinator.playerLayer)
                 if let playerLayer = playerCoordinator.playerLayer {
-                    let key = "playtime_\(url)"
-                    if playerLayer.player.duration > 0, playerLayer.player.currentPlaybackTime > 0, playerLayer.state != .playedToTheEnd {
-                        UserDefaults.standard.set(playerLayer.player.currentPlaybackTime, forKey: key)
-                    } else {
-                        UserDefaults.standard.removeObject(forKey: key)
-                    }
                     if !playerLayer.isPipActive {
                         playerLayer.pause()
                         playerCoordinator.playerLayer = nil
@@ -387,7 +382,7 @@ struct VideoSettingView: View {
         } set: { value in
             config.playerLayer?.player.playbackRate = value
         }) {
-            ForEach([Float(0.5), 1.0, 1.25, 1.5, 2.0], id: \.self) { value in
+            ForEach([Float(0.5), 1.0, 1.25, 1.5, 2.0]) { value in
                 Text(String(format: "%.2fx", value)).tag(value)
             }
         } label: {

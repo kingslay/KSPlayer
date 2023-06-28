@@ -73,6 +73,7 @@ struct TracyApp: App {
         #if os(macOS)
         .defaultSize(width: 1600, height: 900)
         .defaultPosition(.center)
+//        .windowStyle(appModel.hiddenTitleBar ? .hiddenTitleBar : .automatic)
         #endif
         #if os(macOS)
 
@@ -90,13 +91,14 @@ struct TracyApp: App {
 }
 
 class APPModel: ObservableObject {
+    private(set) var groups = [String]()
     @Published private(set) var playlist = [MovieModel]()
     @Published var nameFilter: String = ""
     @Published var groupFilter: String = ""
-    private(set) var groups = [String]()
     @Published var path = NavigationPath()
-    @Published var openFileImport: Bool = false
-    @Published var openURLImport: Bool = false
+    @Published var openFileImport = false
+    @Published var openURLImport = false
+    @Published var hiddenTitleBar = false
     init() {
         KSOptions.canBackgroundPlay = true
         #if DEBUG
@@ -172,12 +174,6 @@ class APPModel: ObservableObject {
         M3UModel(name: "Chinese", m3uURL: "https://iptv-org.github.io/iptv/languages/zho.m3u"),
         M3UModel(name: "English", m3uURL: "https://iptv-org.github.io/iptv/languages/eng.m3u"),
     ]
-}
-
-extension KSVideoPlayerView {
-    init(model: MovieModel) {
-        self.init(url: model.url, options: model.options)
-    }
 }
 
 // struct AVContentView: View {
