@@ -17,7 +17,7 @@
                BlueprintIdentifier = "AC77DFB626402329001351AE"
                BuildableName = "TracyPlayer.app"
                BlueprintName = "TracyPlayer"
-               ReferencedContainer = "container:SwiftUI.xcodeproj">
+               ReferencedContainer = "container:TracyPlayer.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -48,7 +48,7 @@
             BlueprintIdentifier = "AC77DFB626402329001351AE"
             BuildableName = "TracyPlayer.app"
             BlueprintName = "TracyPlayer"
-            ReferencedContainer = "container:SwiftUI.xcodeproj">
+            ReferencedContainer = "container:TracyPlayer.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </LaunchAction>
@@ -65,7 +65,7 @@
             BlueprintIdentifier = "AC77DFB626402329001351AE"
             BuildableName = "TracyPlayer.app"
             BlueprintName = "TracyPlayer"
-            ReferencedContainer = "container:SwiftUI.xcodeproj">
+            ReferencedContainer = "container:TracyPlayer.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>

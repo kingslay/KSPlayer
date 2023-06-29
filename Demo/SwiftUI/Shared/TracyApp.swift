@@ -11,12 +11,13 @@ import KSPlayer
 import SwiftUI
 @main
 struct TracyApp: App {
-    let appModel = APPModel()
+    private let appModel = APPModel()
     init() {
         let arguments = ProcessInfo.processInfo.arguments.dropFirst()
         var dropNextArg = false
         var playerArgs = [String]()
         var filenames = [String]()
+        KSLog("launch arguments \(arguments)")
         for argument in arguments {
             if dropNextArg {
                 dropNextArg = false
@@ -39,11 +40,12 @@ struct TracyApp: App {
         WindowGroup {
             ContentView()
                 .environmentObject(appModel)
-                .onOpenURL { url in
-                    appModel.open(url: url)
-                }
+            #if !os(tvOS)
+                .handlesExternalEvents(preferring: Set(arrayLiteral: "pause"), allowing: Set(arrayLiteral: "*"))
+            #endif
         }
         #if !os(tvOS)
+//        .handlesExternalEvents(matching: Set(arrayLiteral: "*"))
         .commands {
             CommandGroup(before: .newItem) {
                 Button("Open") {
@@ -60,10 +62,15 @@ struct TracyApp: App {
         #if os(macOS)
         .defaultSize(width: 1600, height: 900)
         .defaultPosition(.center)
-//        .windowStyle(appModel.hiddenTitleBar ? .hiddenTitleBar : .automatic)
         #endif
         #if os(macOS)
-
+        WindowGroup("player", for: URL.self) { $url in
+            if let url {
+                KSVideoPlayerView(url: url)
+            }
+        }
+        .windowStyle(.hiddenTitleBar)
+        .defaultPosition(.center)
         Settings {
             SettingView()
         }
@@ -79,6 +86,7 @@ struct TracyApp: App {
 
 class APPModel: ObservableObject {
     private(set) var groups = [String]()
+    @Published var openWindow: URL?
     @Published private(set) var playlist = [MovieModel]()
     @Published var nameFilter: String = ""
     @Published var groupFilter: String = ""
@@ -87,10 +95,20 @@ class APPModel: ObservableObject {
     @Published var openURLImport = false
     @Published var hiddenTitleBar = false
     init() {
-        KSOptions.canBackgroundPlay = true
-        #if DEBUG
-//        KSOptions.logLevel = .warning
+        #if !DEBUG
+        var fileHandle = FileHandle.standardOutput
+        if let logURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent("log.txt") {
+            if !FileManager.default.fileExists(atPath: logURL.path) {
+                FileManager.default.createFile(atPath: logURL.path, contents: nil)
+            }
+            if let handle = try? FileHandle(forWritingTo: logURL) {
+                fileHandle = handle
+                _ = try? fileHandle.seekToEnd()
+            }
+        }
+        KSOptions.logger = FileLog(fileHandle: fileHandle)
         #endif
+        KSOptions.canBackgroundPlay = true
         KSOptions.firstPlayerType = KSMEPlayer.self
         KSOptions.secondPlayerType = KSMEPlayer.self
         KSOptions.isAutoPlay = true
@@ -108,14 +126,6 @@ class APPModel: ObservableObject {
         #endif
     }
 
-    func open(url: URL) {
-        if url.isPlaylist {
-            replaceM3U(url: url)
-        } else {
-            path.append(MovieModel(url: url))
-        }
-    }
-
     func replaceM3U(url: URL) {
         Task { @MainActor in
             let result = try? await url.parsePlaylist()
@@ -130,6 +140,18 @@ class APPModel: ObservableObject {
             self.playlist = array ?? []
             self.groups = Array(groupSet)
             self.groupFilter = ""
+        }
+    }
+
+    func open(url: URL) {
+        if url.isPlaylist {
+            replaceM3U(url: url)
+        } else {
+            #if os(macOS)
+            openWindow = url
+            #else
+            path.append(url)
+            #endif
         }
     }
 

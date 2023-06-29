@@ -8,7 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		AC44E0FC29290CBC00617BD3 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC44E0FA29290CBC00617BD3 /* ContentView.swift */; };
-		AC44E0FD29290CF800617BD3 /* InitialView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC44E0F929290CBB00617BD3 /* InitialView.swift */; };
+		AC44E0FD29290CF800617BD3 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC44E0F929290CBB00617BD3 /* HomeView.swift */; };
 		AC77DFC326402329001351AE /* TracyApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC77DFB026402327001351AE /* TracyApp.swift */; };
 		AC77DFC526402329001351AE /* URLImportView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC77DFB126402327001351AE /* URLImportView.swift */; };
 		AC77DFC726402329001351AE /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AC77DFB226402329001351AE /* Assets.xcassets */; };
@@ -20,7 +20,7 @@
 /* Begin PBXFileReference section */
 		AC3CAD6228BB88A200AA1C2C /* AVDisplayCriteriaKS.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AVDisplayCriteriaKS.h; sourceTree = "<group>"; };
 		AC3CAD6328BB893500AA1C2C /* Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Bridging-Header.h"; sourceTree = "<group>"; };
-		AC44E0F929290CBB00617BD3 /* InitialView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InitialView.swift; sourceTree = "<group>"; };
+		AC44E0F929290CBB00617BD3 /* HomeView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
 		AC44E0FA29290CBC00617BD3 /* ContentView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		AC77DFB026402327001351AE /* TracyApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TracyApp.swift; sourceTree = "<group>"; };
 		AC77DFB126402327001351AE /* URLImportView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = URLImportView.swift; sourceTree = "<group>"; };
@@ -63,7 +63,7 @@
 				AC3CAD6228BB88A200AA1C2C /* AVDisplayCriteriaKS.h */,
 				AC3CAD6328BB893500AA1C2C /* Bridging-Header.h */,
 				ACEA9FEA298BFC8800FBA74B /* MovieModel.swift */,
-				AC44E0F929290CBB00617BD3 /* InitialView.swift */,
+				AC44E0F929290CBB00617BD3 /* HomeView.swift */,
 				AC44E0FA29290CBC00617BD3 /* ContentView.swift */,
 				AC77DFB026402327001351AE /* TracyApp.swift */,
 				AC77DFB126402327001351AE /* URLImportView.swift */,
@@ -142,7 +142,7 @@
 					};
 				};
 			};
-			buildConfigurationList = AC77DFAE26402327001351AE /* Build configuration list for PBXProject "SwiftUI" */;
+			buildConfigurationList = AC77DFAE26402327001351AE /* Build configuration list for PBXProject "TracyPlayer" */;
 			compatibilityVersion = "Xcode 9.3";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -177,7 +177,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				AC77DFC526402329001351AE /* URLImportView.swift in Sources */,
-				AC44E0FD29290CF800617BD3 /* InitialView.swift in Sources */,
+				AC44E0FD29290CF800617BD3 /* HomeView.swift in Sources */,
 				ACEA9FEB298BFC8800FBA74B /* MovieModel.swift in Sources */,
 				ACB965472A42EDCD00378A4C /* SettingView.swift in Sources */,
 				AC44E0FC29290CBC00617BD3 /* ContentView.swift in Sources */,
@@ -326,7 +326,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 10500;
+				CURRENT_PROJECT_VERSION = 20009;
 				DEVELOPMENT_TEAM = 3RVHT92X9D;
 				ENABLE_HARDENED_RUNTIME = YES;
 				"ENABLE_HARDENED_RUNTIME[sdk=macosx*]" = YES;
@@ -343,8 +343,8 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 2.0.8;
-				PRODUCT_BUNDLE_IDENTIFIER = "kintan.demo-SPM";
+				MARKETING_VERSION = 2.0.9;
+				PRODUCT_BUNDLE_IDENTIFIER = com.kintan.tracy;
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				"PROVISIONING_PROFILE_SPECIFIER[sdk=macosx*]" = "";
 				SUPPORTED_PLATFORMS = "appletvos appletvsimulator iphoneos iphonesimulator macosx xros xrsimulator";
@@ -368,7 +368,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 10500;
+				CURRENT_PROJECT_VERSION = 20009;
 				DEVELOPMENT_TEAM = 3RVHT92X9D;
 				ENABLE_HARDENED_RUNTIME = YES;
 				"ENABLE_HARDENED_RUNTIME[sdk=macosx*]" = YES;
@@ -385,8 +385,8 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 2.0.8;
-				PRODUCT_BUNDLE_IDENTIFIER = "kintan.demo-SPM";
+				MARKETING_VERSION = 2.0.9;
+				PRODUCT_BUNDLE_IDENTIFIER = com.kintan.tracy;
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				"PROVISIONING_PROFILE_SPECIFIER[sdk=macosx*]" = "";
 				SUPPORTED_PLATFORMS = "appletvos appletvsimulator iphoneos iphonesimulator macosx xros xrsimulator";
@@ -403,7 +403,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		AC77DFAE26402327001351AE /* Build configuration list for PBXProject "SwiftUI" */ = {
+		AC77DFAE26402327001351AE /* Build configuration list for PBXProject "TracyPlayer" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				AC77DFC926402329001351AE /* Debug */,

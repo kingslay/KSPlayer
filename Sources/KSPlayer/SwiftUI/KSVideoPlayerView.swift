@@ -88,8 +88,6 @@ public struct KSVideoPlayerView: View {
                     playerCoordinator.subtitleModel.addSubtitle(dataSouce: subtitleDataSouce)
                 }
                 #if os(macOS)
-                NSApp.windows.first?.titlebarAppearsTransparent = true
-                NSApp.windows.first?.titleVisibility = .hidden
                 NSEvent.addLocalMonitorForEvents(matching: [.mouseMoved]) {
                     isMaskShow = overView
                     return $0
@@ -98,10 +96,6 @@ public struct KSVideoPlayerView: View {
             }
             .onDisappear {
                 delayItem?.cancel()
-                #if os(macOS)
-                NSApp.windows.first?.titlebarAppearsTransparent = false
-                NSApp.windows.first?.titleVisibility = .visible
-                #endif
                 onPlayerDisappear?(playerCoordinator.playerLayer)
                 if let playerLayer = playerCoordinator.playerLayer {
                     if !playerLayer.isPipActive {
@@ -154,14 +148,15 @@ public struct KSVideoPlayerView: View {
             }
         }
         .preferredColorScheme(.dark)
+        .background(Color.black)
         .foregroundColor(.white)
         #if os(macOS)
             .navigationTitle(url.lastPathComponent)
             .onTapGesture(count: 2) {
-                NSApp.keyWindow?.toggleFullScreen(self)
+                NSApp.mainWindow?.toggleFullScreen(self)
             }
             .onExitCommand {
-                NSApp.keyWindow?.toggleFullScreen(self)
+                NSApp.mainWindow?.toggleFullScreen(self)
             }
         #else
             .toolbar(isShow: isMaskShow)
@@ -275,7 +270,6 @@ struct VideoControllerView: View {
                 .keyboardShortcut("s", modifiers: [.command, .shift])
                 .pickerStyle(.menu)
                 .menuIndicator(.hidden)
-                .frame(width: 40)
                 #endif
             }
             .font(.system(.title2))

@@ -1,6 +1,6 @@
 import KSPlayer
 import SwiftUI
-struct InitialView: View {
+struct HomeView: View {
     @EnvironmentObject private var appModel: APPModel
 //    @Environment(\.horizontalSizeClass) var horizontalSizeClass
     private let columns = [GridItem(.adaptive(minimum: MoiveView.width))]
@@ -19,11 +19,18 @@ struct InitialView: View {
                 if recentDocumentURLs.count > 0 {
                     Section {
                         ForEach(recentDocumentURLs) { url in
-                            let mode = MovieModel(url: url)
-                            NavigationLink(value: mode) {
-                                MoiveView(model: mode)
+                            let model = MovieModel(url: url)
+                            #if os(macOS)
+                            MoiveView(model: model)
+                                .onTapGesture {
+                                    appModel.open(url: model.url)
+                                }
+                            #else
+                            NavigationLink(value: model.url) {
+                                MoiveView(model: model)
                             }
                             .buttonStyle(.plain)
+                            #endif
                         }
                     } header: {
                         HStack {
@@ -35,11 +42,18 @@ struct InitialView: View {
                 }
                 let playlist = appModel.filterParsePlaylist()
                 Section {
-                    ForEach(playlist) { resource in
-                        NavigationLink(value: resource) {
-                            MoiveView(model: resource)
+                    ForEach(playlist) { model in
+                        #if os(macOS)
+                        MoiveView(model: model)
+                            .onTapGesture {
+                                appModel.open(url: model.url)
+                            }
+                        #else
+                        NavigationLink(value: model.url) {
+                            MoiveView(model: model)
                         }
                         .buttonStyle(.plain)
+                        #endif
                     }
                 } header: {
                     HStack {

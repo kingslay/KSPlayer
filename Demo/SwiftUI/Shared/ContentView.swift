@@ -1,40 +1,47 @@
 import KSPlayer
 import SwiftUI
 struct ContentView: View {
+    #if !os(tvOS)
+    @Environment(\.openWindow) private var openWindow
+    #endif
+    @EnvironmentObject private var appModel: APPModel
     var body: some View {
-        #if os(macOS)
-        HomeView()
-        #else
-        TabView {
+        Group {
+            #if os(macOS)
             HomeView()
+            #else
+            TabView {
+                NavigationStack(path: $appModel.path) {
+                    HomeView()
+                        .navigationDestination(for: URL.self) { url in
+                            KSVideoPlayerView(url: url)
+                            #if !os(macOS)
+                                .toolbar(.hidden, for: .tabBar)
+                            #endif
+                        }
+                }
                 .tabItem {
                     Label("Home", systemImage: "house.fill")
                 }
-            SettingView()
-                .tabItem {
-                    Label("Setting", systemImage: "gear")
-                }
+                SettingView()
+                    .tabItem {
+                        Label("Setting", systemImage: "gear")
+                    }
+            }
+            #endif
         }
-        #endif
-    }
-}
-
-struct HomeView: View {
-    @EnvironmentObject private var appModel: APPModel
-    var body: some View {
-        NavigationStack(path: $appModel.path) {
-            InitialView()
-                .navigationDestination(for: MovieModel.self) { model in
-                    KSVideoPlayerView(model: model)
-                    #if !os(macOS)
-                        .toolbar(.hidden, for: .tabBar)
-                    #endif
-                }
-        }
-        .preferredColorScheme(.dark)
         .background(Color.black)
+        .preferredColorScheme(.dark)
         .sheet(isPresented: $appModel.openURLImport) {
             URLImportView()
+        }
+        .onChange(of: appModel.openWindow) { url in
+            if let url {
+                #if !os(tvOS)
+                openWindow(value: url)
+                #endif
+                appModel.openWindow = nil
+            }
         }
         #if !os(tvOS)
         .onDrop(of: ["public.url", "public.file-url"], isTargeted: nil) { items -> Bool in
@@ -58,20 +65,16 @@ struct HomeView: View {
             appModel.open(url: url)
         }
         #endif
-    }
-}
-
-extension KSVideoPlayerView {
-    init(model: MovieModel) {
-        let key = "playtime_\(model.url)"
-        model.options.startPlayTime = UserDefaults.standard.double(forKey: key)
-        self.init(url: model.url, options: model.options) { layer in
-            if let layer {
-                if layer.player.duration > 0, layer.player.currentPlaybackTime > 0, layer.state != .playedToTheEnd, layer.player.duration > layer.player.currentPlaybackTime + 120 {
-                    UserDefaults.standard.set(layer.player.currentPlaybackTime, forKey: key)
-                } else {
-                    UserDefaults.standard.removeObject(forKey: key)
-                }
+        .onOpenURL { url in
+            KSLog("onOpenURL")
+            if url.isPlaylist {
+                appModel.replaceM3U(url: url)
+            } else {
+                #if os(macOS)
+                openWindow(value: url)
+                #else
+                appModel.path.append(MovieModel(url: url))
+                #endif
             }
         }
     }

@@ -196,38 +196,6 @@ public struct LoadingState {
     public let isSeek: Bool
 }
 
-public enum LogLevel: Int32, CustomStringConvertible {
-    case panic = 0
-    case fatal = 8
-    case error = 16
-    case warning = 24
-    case info = 32
-    case verbose = 40
-    case debug = 48
-    case trace = 56
-
-    public var description: String {
-        switch self {
-        case .panic:
-            return "panic"
-        case .fatal:
-            return "fault"
-        case .error:
-            return "error"
-        case .warning:
-            return "warning"
-        case .info:
-            return "info"
-        case .verbose:
-            return "verbose"
-        case .debug:
-            return "debug"
-        case .trace:
-            return "trace"
-        }
-    }
-}
-
 public let KSPlayerErrorDomain = "KSPlayerErrorDomain"
 
 public enum KSPlayerErrorCode: Int {
