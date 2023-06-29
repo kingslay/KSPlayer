@@ -9,6 +9,7 @@ import AVFoundation
 import CoreMedia
 import CoreServices
 import SwiftUI
+
 #if canImport(UIKit)
 import UIKit
 public extension KSOptions {
@@ -195,53 +196,6 @@ public struct LoadingState {
     public let isSeek: Bool
 }
 
-public enum LogLevel: Int32, CustomStringConvertible {
-    case panic = 0
-    case fatal = 8
-    case error = 16
-    case warning = 24
-    case info = 32
-    case verbose = 40
-    case debug = 48
-    case trace = 56
-
-    public var description: String {
-        switch self {
-        case .panic:
-            return "panic"
-        case .fatal:
-            return "fault"
-        case .error:
-            return "error"
-        case .warning:
-            return "warning"
-        case .info:
-            return "info"
-        case .verbose:
-            return "verbose"
-        case .debug:
-            return "debug"
-        case .trace:
-            return "trace"
-        }
-    }
-}
-
-@inline(__always) public func KSLog(_ message: CustomStringConvertible, logLevel: LogLevel = .warning, file: String = #file, function: String = #function, line: Int = #line) {
-    if logLevel.rawValue <= KSOptions.logLevel.rawValue {
-        let fileName = (file as NSString).lastPathComponent
-        print("logLevel: \(logLevel) KSPlayer: \(fileName):\(line) \(function) | \(message)")
-    }
-}
-
-//
-// @available(macOS 11.0, iOS 14.0, watchOS 7.0, tvOS 14.0, *)
-// @inline(__always) public func KSLog(level: LogLevel = .warning, _ message: OSLogMessage) {
-//    if level.rawValue <= KSOptions.logLevel.rawValue {
-//        KSOptions.logger.log(level: level.logType, message)
-//    }
-// }
-
 public let KSPlayerErrorDomain = "KSPlayerErrorDomain"
 
 public enum KSPlayerErrorCode: Int {
@@ -399,54 +353,63 @@ public extension URL {
         ["cue", "m3u", "pls"].contains(pathExtension.lowercased())
     }
 
-    func parsePlaylist(completion: @escaping (([(String, URL, [String: String])]) -> Void)) {
-        let handler: ((Data) -> Void) = { data in
-            guard let string = String(data: data, encoding: .utf8) else {
+    func parsePlaylist() async throws -> [(String, URL, [String: String])] {
+        guard let data = try? await data(), let string = String(data: data, encoding: .utf8) else {
+            return []
+        }
+        return string.components(separatedBy: "#EXTINF:").compactMap { content -> (String, URL, [String: String])? in
+            let content = content.replacingOccurrences(of: "\r\n", with: "\n")
+            let array = content.split(separator: "\n")
+            guard array.count > 1, let url = URL(string: String(array[1])) else {
+                return nil
+            }
+            let infos = array[0].split(separator: ",")
+            guard infos.count > 1, let name = infos.last else {
+                return nil
+            }
+            var extinf = [String: String]()
+            let tvgString: Substring
+            if infos.count > 2 {
+                extinf["duration"] = String(infos[0])
+                tvgString = infos[1]
+            } else {
+                tvgString = infos[0]
+            }
+            tvgString.split(separator: " ").forEach { str in
+                let keyValue = str.split(separator: "=")
+                if keyValue.count == 2 {
+                    extinf[String(keyValue[0])] = keyValue[1].trimmingCharacters(in: CharacterSet(charactersIn: #"""#))
+                } else {
+                    extinf["duration"] = String(keyValue[0])
+                }
+            }
+            return (String(name), url, extinf)
+        }
+    }
+
+    func data() async throws -> Data {
+        if isFileURL {
+            return try Data(contentsOf: self)
+        } else {
+            let (data, _) = try await URLSession.shared.data(from: self)
+            return data
+        }
+    }
+
+    func download(completion: @escaping ((String, URL) -> Void)) {
+        URLSession.shared.downloadTask(with: self) { url, response, _ in
+            guard let url, let response = response as? HTTPURLResponse else {
                 return
             }
-            let result = string.components(separatedBy: "#EXTINF:").compactMap { content -> (String, URL, [String: String])? in
-                let content = content.replacingOccurrences(of: "\r\n", with: "\n")
-                let array = content.split(separator: "\n")
-                guard array.count > 1, let url = URL(string: String(array[1])) else {
-                    return nil
-                }
-                let infos = array[0].split(separator: ",")
-                guard infos.count > 1, let name = infos.last else {
-                    return nil
-                }
-                var extinf = [String: String]()
-                let tvgString: Substring
-                if infos.count > 2 {
-                    extinf["duration"] = String(infos[0])
-                    tvgString = infos[1]
-                } else {
-                    tvgString = infos[0]
-                }
-                tvgString.split(separator: " ").forEach { str in
-                    let keyValue = str.split(separator: "=")
-                    if keyValue.count == 2 {
-                        extinf[String(keyValue[0])] = keyValue[1].trimmingCharacters(in: CharacterSet(charactersIn: #"""#))
-                    } else {
-                        extinf["duration"] = String(keyValue[0])
-                    }
-                }
-                return (String(name), url, extinf)
+            let httpFileName = "attachment; filename="
+            var filename = url.lastPathComponent
+            if var disposition = response.value(forHTTPHeaderField: "Content-Disposition"), disposition.hasPrefix(httpFileName) {
+                disposition.removeFirst(httpFileName.count)
+                filename = disposition
             }
-            completion(result)
-        }
-        if isFileURL {
-            do {
-                let data = try Data(contentsOf: self)
-                handler(data)
-            } catch {}
-        } else {
-            URLSession.shared.dataTask(with: self) { data, _, _ in
-                guard let data else {
-                    return
-                }
-                handler(data)
-            }.resume()
-        }
+            // 下载的临时文件要马上就用。不然可能会马上被清空
+            completion(filename, url)
+        }.resume()
     }
 }
 
@@ -533,6 +496,10 @@ extension TextAlignment: RawRepresentable {
     }
 }
 
+extension TextAlignment: Identifiable {
+    public var id: Self { self }
+}
+
 extension VerticalAlignment: Hashable, RawRepresentable {
     public typealias RawValue = String
     public init?(rawValue: RawValue) {
@@ -559,6 +526,10 @@ extension VerticalAlignment: Hashable, RawRepresentable {
             return ""
         }
     }
+}
+
+extension VerticalAlignment: Identifiable {
+    public var id: Self { self }
 }
 
 extension Color: RawRepresentable {
@@ -686,4 +657,16 @@ extension CGImage {
         return CGImage(width: width, height: height, bitsPerComponent: 8, bitsPerPixel: isAlpha ? 32 : 24, bytesPerRow: linesize, space: colorSpace, bitmapInfo: bitmapInfo, provider: provider, decode: nil, shouldInterpolate: false, intent: .defaultIntent)
         // swiftlint:enable line_length
     }
+}
+
+extension URL: Identifiable {
+    public var id: Self { self }
+}
+
+extension String: Identifiable {
+    public var id: Self { self }
+}
+
+extension Float: Identifiable {
+    public var id: Self { self }
 }

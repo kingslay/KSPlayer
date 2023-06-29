@@ -1,6 +1,6 @@
 import KSPlayer
 import SwiftUI
-struct InitialView: View {
+struct HomeView: View {
     @EnvironmentObject private var appModel: APPModel
 //    @Environment(\.horizontalSizeClass) var horizontalSizeClass
     private let columns = [GridItem(.adaptive(minimum: MoiveView.width))]
@@ -18,12 +18,19 @@ struct InitialView: View {
             LazyVGrid(columns: columns) {
                 if recentDocumentURLs.count > 0 {
                     Section {
-                        ForEach(recentDocumentURLs, id: \.self) { url in
-                            let mode = MovieModel(url: url)
-                            NavigationLink(value: mode) {
-                                MoiveView(model: mode)
+                        ForEach(recentDocumentURLs) { url in
+                            let model = MovieModel(url: url)
+                            #if os(macOS)
+                            MoiveView(model: model)
+                                .onTapGesture {
+                                    appModel.open(url: model.url)
+                                }
+                            #else
+                            NavigationLink(value: model.url) {
+                                MoiveView(model: model)
                             }
                             .buttonStyle(.plain)
+                            #endif
                         }
                     } header: {
                         HStack {
@@ -35,11 +42,18 @@ struct InitialView: View {
                 }
                 let playlist = appModel.filterParsePlaylist()
                 Section {
-                    ForEach(playlist, id: \.self) { resource in
-                        NavigationLink(value: resource) {
-                            MoiveView(model: resource)
+                    ForEach(playlist) { model in
+                        #if os(macOS)
+                        MoiveView(model: model)
+                            .onTapGesture {
+                                appModel.open(url: model.url)
+                            }
+                        #else
+                        NavigationLink(value: model.url) {
+                            MoiveView(model: model)
                         }
                         .buttonStyle(.plain)
+                        #endif
                     }
                 } header: {
                     HStack {
@@ -64,7 +78,7 @@ struct InitialView: View {
             }
             Picker("group filter", selection: $appModel.groupFilter) {
                 Text("All ").tag("")
-                ForEach(appModel.groups, id: \.self) { group in
+                ForEach(appModel.groups) { group in
                     Text(group).tag(group)
                 }
             }

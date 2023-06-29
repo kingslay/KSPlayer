@@ -25,14 +25,9 @@ class MEOptions: KSOptions {
     #endif
 }
 
-class MovieModel: Hashable {
-    public static func == (lhs: MovieModel, rhs: MovieModel) -> Bool {
-        lhs.url == rhs.url
-    }
-
+struct MovieModel: Codable, Hashable {
     public let name: String
     public let url: URL
-    public let options: KSOptions
     public let extinf: [String: String]?
     public let logo: URL?
     public var group: String? {
@@ -47,8 +42,15 @@ class MovieModel: Hashable {
         extinf?["tvg-language"]
     }
 
-    public convenience init(url: URL, options: KSOptions = MEOptions()) {
-        self.init(url: url, options: options, name: url.lastPathComponent)
+//    enum CodingKeys: CodingKey {
+//        case name
+//        case url
+//        case logo
+//        case extinf
+//    }
+
+    public init(url: URL) {
+        self.init(url: url, name: url.lastPathComponent)
     }
 
     /**
@@ -58,12 +60,32 @@ class MovieModel: Hashable {
      - parameter options:    specifying options for the initialization of the AVURLAsset
      - parameter name:       video name
      */
-    public init(url: URL, options: KSOptions = MEOptions(), name: String, extinf: [String: String]? = nil) {
+    public init(url: URL, name: String, extinf: [String: String]? = nil) {
         self.url = url
         self.name = name
-        self.options = options
         self.extinf = extinf
         logo = extinf?["tvg-logo"].flatMap { URL(string: $0) }
+    }
+}
+
+extension MovieModel: Identifiable {
+    var id: URL { url }
+}
+
+struct M3UModel: Hashable {
+    let name: String
+    let m3uURL: String
+}
+
+extension M3UModel: Identifiable {
+    var id: String { m3uURL }
+}
+
+extension KSVideoPlayerView {
+    init(url: URL) {
+        let options = MEOptions()
+        let key = "playtime_\(url)"
+        options.startPlayTime = UserDefaults.standard.double(forKey: key)
         // There is total different meaning for 'listen_timeout' option in rtmp
         // set 'listen_timeout' = -1 for rtmp、rtsp
         if url.absoluteString.starts(with: "rtmp") || url.absoluteString.starts(with: "rtsp") {
@@ -93,18 +115,14 @@ class MovieModel: Hashable {
             #endif
         }
         #endif
+        self.init(url: url, options: options) { layer in
+            if let layer {
+                if layer.player.duration > 0, layer.player.currentPlaybackTime > 0, layer.state != .playedToTheEnd, layer.player.duration > layer.player.currentPlaybackTime + 120 {
+                    UserDefaults.standard.set(layer.player.currentPlaybackTime, forKey: key)
+                } else {
+                    UserDefaults.standard.removeObject(forKey: key)
+                }
+            }
+        }
     }
-
-    public func hash(into hasher: inout Hasher) {
-        hasher.combine(url)
-    }
-}
-
-extension MovieModel: Identifiable {
-    var id: URL { url }
-}
-
-struct M3UModel: Hashable {
-    let name: String
-    let m3uURL: String
 }

@@ -10,14 +10,14 @@ import AVFoundation
 import Foundation
 import MediaPlayer
 
-public class KSPlayerResource: Hashable {
+public class KSPlayerResource: Equatable, Hashable {
     public static func == (lhs: KSPlayerResource, rhs: KSPlayerResource) -> Bool {
         lhs.definitions == rhs.definitions
     }
 
     public let name: String
-    public let cover: URL?
     public let definitions: [KSPlayerResourceDefinition]
+    public let cover: URL?
     public let subtitleDataSouce: SubtitleDataSouce?
     public var nowPlayingInfo: KSNowPlayableMetadata?
     public let extinf: [String: String]?
@@ -67,7 +67,7 @@ extension KSPlayerResource: Identifiable {
     public var id: KSPlayerResource { self }
 }
 
-public class KSPlayerResourceDefinition: Hashable {
+public struct KSPlayerResourceDefinition: Hashable {
     public static func == (lhs: KSPlayerResourceDefinition, rhs: KSPlayerResourceDefinition) -> Bool {
         lhs.url == rhs.url
     }
@@ -75,7 +75,7 @@ public class KSPlayerResourceDefinition: Hashable {
     public let url: URL
     public let definition: String
     public let options: KSOptions
-    public convenience init(url: URL) {
+    public init(url: URL) {
         self.init(url: url, definition: url.lastPathComponent)
     }
 
@@ -98,7 +98,7 @@ public class KSPlayerResourceDefinition: Hashable {
 }
 
 extension KSPlayerResourceDefinition: Identifiable {
-    public var id: KSPlayerResourceDefinition { self }
+    public var id: Self { self }
 }
 
 public struct KSNowPlayableMetadata {

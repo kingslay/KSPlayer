@@ -372,9 +372,7 @@ public extension KSOptions {
     static var hardwareDecode = true
     /// 日志级别
     static var logLevel = LogLevel.warning
-    @available(macOS 11.0, iOS 14.0, watchOS 7.0, tvOS 14.0, *)
-    static var logger = Logger()
-
+    static var logger: LogHandler = OSLog(lable: "KSPlayer")
     internal static func deviceCpuCount() -> Int {
         var ncpu = UInt(0)
         var len: size_t = MemoryLayout.size(ofValue: ncpu)
@@ -396,7 +394,39 @@ public extension KSOptions {
     }
 }
 
-extension LogLevel {
+public enum LogLevel: Int32, CustomStringConvertible {
+    case panic = 0
+    case fatal = 8
+    case error = 16
+    case warning = 24
+    case info = 32
+    case verbose = 40
+    case debug = 48
+    case trace = 56
+
+    public var description: String {
+        switch self {
+        case .panic:
+            return "panic"
+        case .fatal:
+            return "fault"
+        case .error:
+            return "error"
+        case .warning:
+            return "warning"
+        case .info:
+            return "info"
+        case .verbose:
+            return "verbose"
+        case .debug:
+            return "debug"
+        case .trace:
+            return "trace"
+        }
+    }
+}
+
+public extension LogLevel {
     var logType: OSLogType {
         switch self {
         case .panic, .fatal:
@@ -413,7 +443,45 @@ extension LogLevel {
     }
 }
 
-@inline(__always) public func KSLog(level: LogLevel = .warning, dso: UnsafeRawPointer = #dsohandle, _ message: StaticString, _ args: CVarArg...) {
+public protocol LogHandler {
+    func log(level: LogLevel, message: CustomStringConvertible, file: String, function: String, line: UInt)
+}
+
+public class OSLog: LogHandler {
+    private let label: String
+    public init(lable: String) {
+        label = lable
+    }
+
+    public func log(level: LogLevel, message: CustomStringConvertible, file: String, function: String, line: UInt) {
+        os_log(level.logType, "%@ %@: %@:%d %@ | %@", level.description, label, file, line, function, message.description)
+    }
+}
+
+public class FileLog: LogHandler {
+    private let fileHandle: FileHandle
+    private let formatter = DateFormatter()
+    public init(fileHandle: FileHandle) {
+        self.fileHandle = fileHandle
+        formatter.dateFormat = "MM-dd_HH:mm:ss"
+    }
+
+    public func log(level: LogLevel, message: CustomStringConvertible, file: String, function: String, line: UInt) {
+        let string = String(format: "%@ %@ %@:%d %@ | %@\n", formatter.string(from: Date()), level.description, file, line, function, message.description)
+        if let data = string.data(using: .utf8) {
+            fileHandle.write(data)
+        }
+    }
+}
+
+@inlinable public func KSLog(level: LogLevel = KSOptions.logLevel, _ message: @autoclosure () -> CustomStringConvertible, file: String = #file, function: String = #function, line: UInt = #line) {
+    if level.rawValue <= KSOptions.logLevel.rawValue {
+        let fileName = (file as NSString).lastPathComponent
+        KSOptions.logger.log(level: level, message: message(), file: fileName, function: function, line: line)
+    }
+}
+
+@inlinable public func KSLog(level: LogLevel = .warning, dso: UnsafeRawPointer = #dsohandle, _ message: StaticString, _ args: CVarArg...) {
     if level.rawValue <= KSOptions.logLevel.rawValue {
         os_log(level.logType, dso: dso, message, args)
     }
