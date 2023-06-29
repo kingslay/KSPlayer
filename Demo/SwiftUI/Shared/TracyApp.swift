@@ -114,6 +114,7 @@ class APPModel: ObservableObject {
         KSOptions.isAutoPlay = true
         KSOptions.isSecondOpen = true
         KSOptions.isAccurateSeek = true
+        KSOptions.isPipPopViewController = true
         KSOptions.subtitleDataSouces = [DirectorySubtitleDataSouce(), ShooterSubtitleDataSouce(), AssrtSubtitleDataSouce(token: "5IzWrb2J099vmA96ECQXwdRSe9xdoBUv")]
 //        KSOptions.isUseAudioRenderer = true
 //        KSOptions.isLoopPlay = true

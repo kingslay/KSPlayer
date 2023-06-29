@@ -370,6 +370,7 @@ public extension KSOptions {
     /// seek完是否自动播放
     static var isSeekedAutoPlay = true
     static var hardwareDecode = true
+    static var isPipPopViewController = false
     /// 日志级别
     static var logLevel = LogLevel.warning
     static var logger: LogHandler = OSLog(lable: "KSPlayer")
