@@ -129,9 +129,15 @@ extension UnsafeMutablePointer<AudioChannelLayout> {
     }
 }
 
+extension AudioChannelLayout: CustomStringConvertible {
+    public var description: String {
+        "AudioChannelLayoutTag: \(mChannelLayoutTag), mNumberChannelDescriptions: \(mNumberChannelDescriptions)"
+    }
+}
+
 extension AVAudioChannelLayout {
     func channelLayout() -> AVChannelLayout {
-        KSLog("KSOptions channelLayout: \(layout.pointee)")
+        KSLog("KSOptions channelLayout: \(layout.pointee.description)")
         var mask: UInt64?
         if layoutTag == kAudioChannelLayoutTag_UseChannelDescriptions {
             var newMask = UInt64(0)
