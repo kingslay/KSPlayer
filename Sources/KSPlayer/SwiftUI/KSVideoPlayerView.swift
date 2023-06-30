@@ -281,7 +281,11 @@ struct VideoControllerView: View {
         #if os(tvOS)
 //            .focusSection()
         .onPlayPauseCommand {
-            config.isPlay.toggle()
+            if config.state.isPlaying {
+                config.playerLayer?.pause()
+            } else {
+                config.playerLayer?.play()
+            }
         }
         #else
         .buttonStyle(.borderless)
