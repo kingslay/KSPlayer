@@ -83,14 +83,6 @@ extension KSVideoPlayer: UIViewRepresentable {
     }
 
     public final class Coordinator: ObservableObject {
-        @Published public var isPlay: Bool = false {
-            didSet {
-                if isPlay != oldValue {
-                    isPlay ? playerLayer?.play() : playerLayer?.pause()
-                }
-            }
-        }
-
         @Published public var isMuted: Bool = false {
             didSet {
                 playerLayer?.player.isMuted = isMuted
@@ -104,8 +96,7 @@ extension KSVideoPlayer: UIViewRepresentable {
         }
 
         @Published public var state = KSPlayerState.prepareToPlay
-        public var subtitleModel = SubtitleModel()
-        @Published
+        @Published public var subtitleModel = SubtitleModel()
         public var timemodel = ControllerTimeModel()
         public var selectedAudioTrack: MediaPlayerTrack? {
             didSet {
@@ -202,7 +193,6 @@ extension KSVideoPlayer.Coordinator: KSPlayerLayerDelegate {
                 }
             }
         }
-        isPlay = state.isPlaying
         self.state = state
         onStateChanged?(layer, state)
     }

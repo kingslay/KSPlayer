@@ -464,7 +464,7 @@ public class FileLog: LogHandler {
     private let formatter = DateFormatter()
     public init(fileHandle: FileHandle) {
         self.fileHandle = fileHandle
-        formatter.dateFormat = "MM-dd_HH:mm:ss"
+        formatter.dateFormat = "MM-dd HH:mm:ss.SSSSSS"
     }
 
     public func log(level: LogLevel, message: CustomStringConvertible, file: String, function: String, line: UInt) {

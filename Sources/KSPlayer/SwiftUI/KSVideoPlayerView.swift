@@ -231,9 +231,13 @@ struct VideoControllerView: View {
                 .keyboardShortcut(.leftArrow, modifiers: .none)
                 #endif
                 Button {
-                    config.isPlay.toggle()
+                    if config.state.isPlaying {
+                        config.playerLayer?.pause()
+                    } else {
+                        config.playerLayer?.play()
+                    }
                 } label: {
-                    Image(systemName: config.state == .error ? "play.slash.fill" : (config.isPlay ? "pause.fill" : "play.fill"))
+                    Image(systemName: config.state == .error ? "play.slash.fill" : (config.state.isPlaying ? "pause.fill" : "play.fill"))
                 }
                 .padding(.horizontal)
                 #if !os(tvOS)
@@ -301,7 +305,7 @@ struct VideoTimeShowView: View {
                     model.currentTime = Int(newValue)
                 }, in: 0 ... Double(model.totalTime)) { onEditingChanged in
                     if onEditingChanged {
-                        config.isPlay = false
+                        config.playerLayer?.pause()
                     } else {
                         config.seek(time: TimeInterval(model.currentTime))
                     }
