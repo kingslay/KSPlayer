@@ -199,8 +199,14 @@ extension KSVideoPlayer.Coordinator: KSPlayerLayerDelegate {
 
     public func player(layer: KSPlayerLayer, currentTime: TimeInterval, totalTime: TimeInterval) {
         onPlay?(currentTime, totalTime)
-        timemodel.currentTime = Int(currentTime)
-        timemodel.totalTime = Int(max(0, totalTime))
+        let current = Int(currentTime)
+        let total = Int(max(0, totalTime))
+        if timemodel.currentTime != current {
+            timemodel.currentTime = current
+        }
+        if timemodel.totalTime != total {
+            timemodel.totalTime = total
+        }
         subtitleModel.subtitle(currentTime: currentTime + layer.options.subtitleDelay)
     }
 
@@ -253,8 +259,6 @@ public extension KSVideoPlayer {
 /// 这是一个频繁变化的model。View要少用这个
 public class ControllerTimeModel: ObservableObject {
     // 改成int才不会频繁更新
-    @Published
-    public var currentTime = 0
-    @Published
-    public var totalTime = 1
+    @Published public var currentTime = 0
+    @Published public var totalTime = 1
 }

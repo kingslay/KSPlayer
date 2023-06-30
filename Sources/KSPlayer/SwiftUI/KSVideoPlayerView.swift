@@ -153,10 +153,10 @@ public struct KSVideoPlayerView: View {
         #if os(macOS)
             .navigationTitle(url.lastPathComponent)
             .onTapGesture(count: 2) {
-                NSApp.mainWindow?.toggleFullScreen(self)
+                playerCoordinator.playerLayer?.player.view?.window?.toggleFullScreen(nil)
             }
             .onExitCommand {
-                NSApp.mainWindow?.toggleFullScreen(self)
+                playerCoordinator.playerLayer?.player.view?.exitFullScreenMode()
             }
         #else
             .toolbar(isShow: isMaskShow)

@@ -11,7 +11,7 @@ import CoreGraphics
 import Foundation
 import SwiftUI
 
-public class SubtitlePart: CustomStringConvertible, NSMutableCopying, ObservableObject {
+public class SubtitlePart: CustomStringConvertible, NSMutableCopying {
     public let start: TimeInterval
     public var end: TimeInterval
     public var origin: CGPoint = .zero
@@ -122,22 +122,23 @@ extension KSSubtitle: KSSubtitleProtocol {
         var index = currentIndex
         if searchIndex(for: time) != nil {
             if currentIndex == index {
-                // swiftlint:disable force_cast
-                let copy = parts[currentIndex].mutableCopy() as! SubtitlePart
-                // swiftlint:enable force_cast
-                let text = copy.text
                 index = currentIndex + 1
-                while index < parts.count, parts[index] == time {
-                    if let otherText = parts[index].text {
-                        text?.append(NSAttributedString(string: "\n"))
-                        text?.append(otherText)
-                    }
-                    index += 1
+                if index < parts.count, parts[index] == time {
+                    // swiftlint:disable force_cast
+                    let copy = parts[currentIndex].mutableCopy() as! SubtitlePart
+                    // swiftlint:enable force_cast
+                    repeat {
+                        if let otherText = parts[index].text {
+                            copy.text?.append(NSAttributedString(string: "\n"))
+                            copy.text?.append(otherText)
+                        }
+                        copy.end = parts[index].end
+                        index += 1
+                    } while index < parts.count && parts[index] == time
+                    return copy
                 }
-                return copy
-            } else {
-                return parts[currentIndex]
             }
+            return parts[currentIndex]
         } else {
             return nil
         }
@@ -195,7 +196,6 @@ extension KSSubtitle: KSSubtitleProtocol {
 }
 
 public class KSURLSubtitle: KSSubtitle {
-    public var parses: [KSParseProtocol] = [SrtParse(), AssParse(), VTTParse()]
     public func parse(url: URL, encoding: String.Encoding? = nil) async throws {
         do {
             var string: String?
@@ -213,7 +213,7 @@ public class KSURLSubtitle: KSSubtitle {
             guard let subtitle = string else {
                 throw NSError(errorCode: .subtitleUnEncoding, userInfo: ["url": url.absoluteString])
             }
-            let parse = parses.first { $0.canParse(subtitle: subtitle) }
+            let parse = KSOptions.subtitleParses.first { $0.canParse(subtitle: subtitle) }
             if let parse {
                 parts = parse.parse(subtitle: subtitle)
                 if partsCount == 0 {
@@ -350,21 +350,29 @@ open class SubtitleModel: ObservableObject {
         }
     }
 
-    @discardableResult
-    public func subtitle(currentTime: TimeInterval) -> SubtitlePart? {
+    public func subtitle(currentTime: TimeInterval) -> Bool {
+        let newPart: SubtitlePart?
         if let subtile = selectedSubtitleInfo {
             let currentTime = currentTime - subtile.delay
             if let part = subtile.search(for: currentTime) {
-                self.part = part
+                newPart = part
             } else {
                 if let part, part.end > part.start, !(part == currentTime) {
-                    self.part = nil
+                    newPart = nil
+                } else {
+                    newPart = part
                 }
             }
         } else {
-            part = nil
+            newPart = nil
         }
-        return part
+        // swiftUI不会判断是否相等。所以需要这边判断下。
+        if newPart != part {
+            part = newPart
+            return true
+        } else {
+            return false
+        }
     }
 
     public func addSubtitle(dataSouce: SubtitleDataSouce) {

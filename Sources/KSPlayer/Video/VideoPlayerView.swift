@@ -237,14 +237,16 @@ open class VideoPlayerView: PlayerView {
         guard !isSliderSliding else { return }
         super.player(layer: layer, currentTime: currentTime, totalTime: totalTime)
         let time = currentTime + (resource?.definitions[currentDefinition].options.subtitleDelay ?? 0.0)
-        if let part = srtControl.subtitle(currentTime: time) {
-            subtitleBackView.image = part.image
-            subtitleLabel.attributedText = part.text
-            subtitleBackView.isHidden = false
-        } else {
-            subtitleBackView.image = nil
-            subtitleLabel.attributedText = nil
-            subtitleBackView.isHidden = true
+        if srtControl.subtitle(currentTime: time) {
+            if let part = srtControl.part {
+                subtitleBackView.image = part.image
+                subtitleLabel.attributedText = part.text
+                subtitleBackView.isHidden = false
+            } else {
+                subtitleBackView.image = nil
+                subtitleLabel.attributedText = nil
+                subtitleBackView.isHidden = true
+            }
         }
     }
 

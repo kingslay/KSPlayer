@@ -14,7 +14,7 @@ import UIKit
 import AppKit
 #endif
 class SubtitleDecode: DecodeProtocol {
-    private let reg = AssParse.patternReg()
+    private let reg = try? NSRegularExpression(pattern: "\\{[^}]+\\}", options: .caseInsensitive)
     private var codecContext: UnsafeMutablePointer<AVCodecContext>?
     private let scale = VideoSwresample(dstFormat: AV_PIX_FMT_ARGB)
     private var subtitle = AVSubtitle()
