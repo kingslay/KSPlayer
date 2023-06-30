@@ -54,8 +54,11 @@ struct URLImportView: View {
                             }
                             if let url = components.url {
                                 if rememberURL {
-                                    historyURLs.append(url)
-                                    historyURLs.insert(url, at: 0)
+                                    if let index = historyURLs.firstIndex(of: url) {
+                                        historyURLs.swapAt(index, historyURLs.startIndex)
+                                    } else {
+                                        historyURLs.insert(url, at: 0)
+                                    }
                                     if historyURLs.count > 20 {
                                         historyURLs.removeLast()
                                     }

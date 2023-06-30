@@ -71,7 +71,7 @@ extension MEFrame {
 public extension KSOptions {
     /// 开启VR模式的陀飞轮
     static var enableSensor = true
-    static var stackSize = 32768
+    static var stackSize = 65536
     static var isClearVideoWhereReplace = true
     /// true: AVSampleBufferAudioRenderer false: AVAudioEngine
     static var isUseAudioRenderer = false

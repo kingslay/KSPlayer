@@ -156,19 +156,6 @@ class APPModel: ObservableObject {
         }
     }
 
-    @inline(__always) func filterParsePlaylist() -> [MovieModel] {
-        playlist.filter { model in
-            var isIncluded = true
-            if nameFilter.count > 0 {
-                isIncluded = model.name.contains(nameFilter)
-            }
-            if groupFilter.count > 0 {
-                isIncluded = isIncluded && model.group == groupFilter
-            }
-            return isIncluded
-        }
-    }
-
     private(set) var m3uModels: [M3UModel] = [
         M3UModel(name: "YanG", m3uURL: "https://raw.githubusercontent.com/YanG-1989/m3u/main/Gather.m3u"),
         M3UModel(name: "Iptv", m3uURL: "https://iptv-org.github.io/iptv/index.nsfw.m3u"),

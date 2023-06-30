@@ -659,6 +659,11 @@ extension CGImage {
     }
 }
 
+public extension AVFileType {
+    static let png = AVFileType(kUTTypePNG as String)
+    static let jpeg2000 = AVFileType(kUTTypeJPEG2000 as String)
+}
+
 extension URL: Identifiable {
     public var id: Self { self }
 }

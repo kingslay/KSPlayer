@@ -19,18 +19,7 @@ struct HomeView: View {
                 if recentDocumentURLs.count > 0 {
                     Section {
                         ForEach(recentDocumentURLs) { url in
-                            let model = MovieModel(url: url)
-                            #if os(macOS)
-                            MoiveView(model: model)
-                                .onTapGesture {
-                                    appModel.open(url: model.url)
-                                }
-                            #else
-                            NavigationLink(value: model.url) {
-                                MoiveView(model: model)
-                            }
-                            .buttonStyle(.plain)
-                            #endif
+                            content(model: MovieModel(url: url))
                         }
                     } header: {
                         HStack {
@@ -40,20 +29,19 @@ struct HomeView: View {
                         .padding(.horizontal)
                     }
                 }
-                let playlist = appModel.filterParsePlaylist()
+                let playlist = appModel.playlist.filter { model in
+                    var isIncluded = true
+                    if appModel.nameFilter.count > 0 {
+                        isIncluded = model.name.contains(appModel.nameFilter)
+                    }
+                    if appModel.groupFilter.count > 0 {
+                        isIncluded = isIncluded && model.group == appModel.groupFilter
+                    }
+                    return isIncluded
+                }
                 Section {
                     ForEach(playlist) { model in
-                        #if os(macOS)
-                        MoiveView(model: model)
-                            .onTapGesture {
-                                appModel.open(url: model.url)
-                            }
-                        #else
-                        NavigationLink(value: model.url) {
-                            MoiveView(model: model)
-                        }
-                        .buttonStyle(.plain)
-                        #endif
+                        content(model: model)
                     }
                 } header: {
                     HStack {
@@ -83,6 +71,20 @@ struct HomeView: View {
                 }
             }
         }
+    }
+
+    private func content(model: MovieModel) -> some View {
+        #if os(macOS)
+        MoiveView(model: model)
+            .onTapGesture {
+                appModel.open(url: model.url)
+            }
+        #else
+        NavigationLink(value: model.url) {
+            MoiveView(model: model)
+        }
+        .buttonStyle(.plain)
+        #endif
     }
 }
 

@@ -326,23 +326,9 @@ struct VideoSubtitleView: View {
                 Spacer()
                 GeometryReader { geometry in
                     let fitRect = image.fitRect(geometry.size)
-                    if #available(iOS 16.0, macOS 13.0, macCatalyst 17.0, *) {
-                        #if os(tvOS)
-                        Image(uiImage: image)
-                            .resizable()
-                            .offset(CGSize(width: fitRect.origin.x, height: fitRect.origin.y))
-                            .frame(width: fitRect.size.width, height: fitRect.size.height)
-                        #else
-                        LiveTextImage(uiImage: image)
-                            .offset(CGSize(width: fitRect.origin.x, height: fitRect.origin.y))
-                            .frame(width: fitRect.size.width, height: fitRect.size.height)
-                        #endif
-                    } else {
-                        Image(uiImage: image)
-                            .resizable()
-                            .offset(CGSize(width: fitRect.origin.x, height: fitRect.origin.y))
-                            .frame(width: fitRect.size.width, height: fitRect.size.height)
-                    }
+                    imageView(image)
+                        .offset(CGSize(width: fitRect.origin.x, height: fitRect.origin.y))
+                        .frame(width: fitRect.size.width, height: fitRect.size.height)
                 }
                 .scaledToFit()
                 .padding()
@@ -366,6 +352,20 @@ struct VideoSubtitleView: View {
                     Spacer()
                 }
             }
+        }
+    }
+
+    private func imageView(_ image: UIImage) -> some View {
+        if #available(iOS 16.0, macOS 13.0, macCatalyst 17.0, *) {
+            #if os(tvOS)
+            return Image(uiImage: image)
+                .resizable()
+            #else
+            return LiveTextImage(uiImage: image)
+            #endif
+        } else {
+            return Image(uiImage: image)
+                .resizable()
         }
     }
 }

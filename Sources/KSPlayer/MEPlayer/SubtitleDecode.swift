@@ -119,8 +119,8 @@ class SubtitleDecode: DecodeProtocol {
             origin = .zero
         }
         var image: UIImage?
-        // 用heic格式，那展示的时候会卡主线程。也不能用jpg，因为字幕需要有透明度。所以改成用tif
-        if let data = CGImage.combine(images: images)?.data(type: .tif, quality: 0.2) {
+        // 因为字幕需要有透明度,所以不能用jpg；tif在iOS支持没有那么好，会有绿色背景； 用heic格式，展示的时候会卡主线程；所以最终用png。
+        if let data = CGImage.combine(images: images)?.data(type: .png, quality: 0.2) {
             image = UIImage(data: data)
         }
         return (origin, attributedString, image)
