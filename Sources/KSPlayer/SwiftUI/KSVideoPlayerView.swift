@@ -99,8 +99,7 @@ public struct KSVideoPlayerView: View {
                 onPlayerDisappear?(playerCoordinator.playerLayer)
                 if let playerLayer = playerCoordinator.playerLayer {
                     if !playerLayer.isPipActive {
-                        playerLayer.pause()
-                        playerCoordinator.playerLayer = nil
+                        playerCoordinator.resetPlayer()
                     }
                 }
             }
