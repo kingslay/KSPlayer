@@ -47,6 +47,8 @@ struct TracyApp: App {
         #if !os(tvOS)
 //        .handlesExternalEvents(matching: Set(arrayLiteral: "*"))
         .commands {
+            SidebarCommands()
+
             CommandGroup(before: .newItem) {
                 Button("Open") {
                     appModel.openFileImport = true
@@ -60,7 +62,7 @@ struct TracyApp: App {
         }
         #endif
         #if os(macOS)
-        .defaultSize(width: 1600, height: 900)
+        .defaultSize(width: 1120, height: 630)
         .defaultPosition(.center)
         #endif
         #if os(macOS)
@@ -88,12 +90,11 @@ class APPModel: ObservableObject {
     private(set) var groups = [String]()
     @Published var openWindow: URL?
     @Published private(set) var playlist = [MovieModel]()
-    @Published var nameFilter: String = ""
-    @Published var groupFilter: String = ""
     @Published var path = NavigationPath()
     @Published var openFileImport = false
     @Published var openURLImport = false
     @Published var hiddenTitleBar = false
+    @Published var favoritelist = [MovieModel]()
     init() {
         #if !DEBUG
         var fileHandle = FileHandle.standardOutput
@@ -140,7 +141,6 @@ class APPModel: ObservableObject {
             }
             self.playlist = array ?? []
             self.groups = Array(groupSet)
-            self.groupFilter = ""
         }
     }
 
@@ -154,6 +154,20 @@ class APPModel: ObservableObject {
             path.append(url)
             #endif
         }
+    }
+
+    func content(model: MovieModel) -> some View {
+        #if os(macOS)
+        MoiveView(model: model)
+            .onTapGesture {
+                self.open(url: model.url)
+            }
+        #else
+        NavigationLink(value: model.url) {
+            MoiveView(model: model)
+        }
+        .buttonStyle(.plain)
+        #endif
     }
 
     private(set) var m3uModels: [M3UModel] = [

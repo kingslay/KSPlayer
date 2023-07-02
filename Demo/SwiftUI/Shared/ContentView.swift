@@ -7,7 +7,28 @@ struct ContentView: View {
     @EnvironmentObject private var appModel: APPModel
     private var initialView: some View {
         #if os(macOS)
-        HomeView()
+        NavigationView {
+            List {
+                NavigationLink {
+                    HomeView()
+                } label: {
+                    Label("Home", systemImage: "house.fill")
+                }
+                NavigationLink {
+                    FavoriteView()
+                } label: {
+                    Label("Favorite", systemImage: "star.fill")
+                }
+            }
+        }.toolbar {
+            ToolbarItem(placement: .navigation) {
+                Button {
+                    NSApp.keyWindow?.firstResponder?.tryToPerform(#selector(NSSplitViewController.toggleSidebar(_:)), with: nil)
+                } label: {
+                    Image(systemName: "sidebar.leading")
+                }
+            }
+        }
         #else
         TabView {
             NavigationStack(path: $appModel.path) {
@@ -22,6 +43,12 @@ struct ContentView: View {
 
             .tabItem {
                 Label("Home", systemImage: "house.fill")
+            }
+            NavigationStack(path: $appModel.path) {
+                FavoriteView()
+            }
+            .tabItem {
+                Label("Favorite", systemImage: "star.fill")
             }
             SettingView()
                 .tabItem {

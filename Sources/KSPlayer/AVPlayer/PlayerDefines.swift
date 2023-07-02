@@ -26,6 +26,7 @@ public extension KSOptions {
 import AppKit
 import SwiftUI
 public typealias UIView = NSView
+public typealias UIPasteboard = NSPasteboard
 public extension KSOptions {
     static var sceneSize: CGSize {
         NSScreen.main?.frame.size ?? .zero

@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		AC43F6412A5172830026ECF2 /* FavoriteView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC43F6402A5172830026ECF2 /* FavoriteView.swift */; };
+		AC43F6442A51916F0026ECF2 /* Model.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = AC43F6422A51916F0026ECF2 /* Model.xcdatamodeld */; };
 		AC44E0FC29290CBC00617BD3 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC44E0FA29290CBC00617BD3 /* ContentView.swift */; };
 		AC44E0FD29290CF800617BD3 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC44E0F929290CBB00617BD3 /* HomeView.swift */; };
 		AC77DFC326402329001351AE /* TracyApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC77DFB026402327001351AE /* TracyApp.swift */; };
@@ -20,6 +22,8 @@
 /* Begin PBXFileReference section */
 		AC3CAD6228BB88A200AA1C2C /* AVDisplayCriteriaKS.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AVDisplayCriteriaKS.h; sourceTree = "<group>"; };
 		AC3CAD6328BB893500AA1C2C /* Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Bridging-Header.h"; sourceTree = "<group>"; };
+		AC43F6402A5172830026ECF2 /* FavoriteView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FavoriteView.swift; sourceTree = "<group>"; };
+		AC43F6432A51916F0026ECF2 /* Model.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = Model.xcdatamodel; sourceTree = "<group>"; };
 		AC44E0F929290CBB00617BD3 /* HomeView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
 		AC44E0FA29290CBC00617BD3 /* ContentView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		AC77DFB026402327001351AE /* TracyApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TracyApp.swift; sourceTree = "<group>"; };
@@ -65,11 +69,13 @@
 				ACEA9FEA298BFC8800FBA74B /* MovieModel.swift */,
 				AC44E0F929290CBB00617BD3 /* HomeView.swift */,
 				AC44E0FA29290CBC00617BD3 /* ContentView.swift */,
+				AC43F6402A5172830026ECF2 /* FavoriteView.swift */,
 				AC77DFB026402327001351AE /* TracyApp.swift */,
 				AC77DFB126402327001351AE /* URLImportView.swift */,
 				ACB965462A42EDCD00378A4C /* SettingView.swift */,
 				AC77DFB226402329001351AE /* Assets.xcassets */,
 				ACD2F77F275F9BEE0006D16F /* Resources */,
+				AC43F6422A51916F0026ECF2 /* Model.xcdatamodeld */,
 			);
 			path = Shared;
 			sourceTree = "<group>";
@@ -177,7 +183,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				AC77DFC526402329001351AE /* URLImportView.swift in Sources */,
+				AC43F6412A5172830026ECF2 /* FavoriteView.swift in Sources */,
 				AC44E0FD29290CF800617BD3 /* HomeView.swift in Sources */,
+				AC43F6442A51916F0026ECF2 /* Model.xcdatamodeld in Sources */,
 				ACEA9FEB298BFC8800FBA74B /* MovieModel.swift in Sources */,
 				ACB965472A42EDCD00378A4C /* SettingView.swift in Sources */,
 				AC44E0FC29290CBC00617BD3 /* ContentView.swift in Sources */,
@@ -429,6 +437,19 @@
 			productName = KSPlayer;
 		};
 /* End XCSwiftPackageProductDependency section */
+
+/* Begin XCVersionGroup section */
+		AC43F6422A51916F0026ECF2 /* Model.xcdatamodeld */ = {
+			isa = XCVersionGroup;
+			children = (
+				AC43F6432A51916F0026ECF2 /* Model.xcdatamodel */,
+			);
+			currentVersion = AC43F6432A51916F0026ECF2 /* Model.xcdatamodel */;
+			path = Model.xcdatamodeld;
+			sourceTree = "<group>";
+			versionGroupType = wrapper.xcdatamodel;
+		};
+/* End XCVersionGroup section */
 	};
 	rootObject = AC77DFAB26402327001351AE /* Project object */;
 }

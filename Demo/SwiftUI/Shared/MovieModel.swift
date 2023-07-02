@@ -28,6 +28,7 @@ class MEOptions: KSOptions {
 struct MovieModel: Codable, Hashable {
     public let name: String
     public let url: URL
+    public var isFavorite = false
     public let extinf: [String: String]?
     public let logo: URL?
     public var group: String? {

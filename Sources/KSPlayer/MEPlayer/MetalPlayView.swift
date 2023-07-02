@@ -250,6 +250,11 @@ class AVSampleBufferDisplayView: UIView {
             } else {
                 KSLog("not readyForMoreMediaData")
             }
+            if #available(macOS 11.0, iOS 14, tvOS 14, *) {
+                if displayLayer.requiresFlushToResumeDecoding {
+                    displayLayer.flush()
+                }
+            }
             if displayLayer.status == .failed {
                 displayLayer.flush()
                 //                    if let error = displayLayer.error as NSError?, error.code == -11847 {

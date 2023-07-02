@@ -7,7 +7,7 @@
 import AVFoundation
 import SwiftUI
 
-@available(iOS 15, tvOS 15, macOS 12, *)
+@available(iOS 16.0, macOS 13.0, tvOS 16.0, watchOS 9.0, *)
 public struct KSVideoPlayerView: View {
     private let subtitleDataSouce: SubtitleDataSouce?
     private let onPlayerDisappear: ((KSPlayerLayer?) -> Void)?
@@ -149,6 +149,8 @@ public struct KSVideoPlayerView: View {
         .preferredColorScheme(.dark)
         .background(Color.black)
         .foregroundColor(.white)
+        .persistentSystemOverlays(.hidden)
+        .toolbar(isMaskShow ? .visible : .hidden, for: .automatic)
         #if os(macOS)
             .navigationTitle(url.lastPathComponent)
             .onTapGesture(count: 2) {
@@ -163,7 +165,6 @@ public struct KSVideoPlayerView: View {
                 playerCoordinator.playerLayer?.player.view?.exitFullScreenMode()
             }
         #else
-            .toolbar(isShow: isMaskShow)
         #endif
         #if !os(tvOS)
         .onHover {
@@ -190,13 +191,6 @@ public struct KSVideoPlayerView: View {
                 playerCoordinator.subtitleModel.selectedSubtitleInfo = info
             }
         }
-    }
-}
-
-@available(iOS 15, tvOS 15, macOS 12, *)
-extension KSVideoPlayerView: Equatable {
-    public static func == (lhs: KSVideoPlayerView, rhs: KSVideoPlayerView) -> Bool {
-        lhs.url == rhs.url
     }
 }
 
@@ -329,7 +323,7 @@ extension EventModifiers {
     static let none = Self()
 }
 
-@available(iOS 15, tvOS 15, macOS 12, *)
+@available(iOS 16, tvOS 16, macOS 13, *)
 struct VideoSubtitleView: View {
     @ObservedObject fileprivate var model: SubtitleModel
     var body: some View {
@@ -356,10 +350,10 @@ struct VideoSubtitleView: View {
                     .background(SubtitleModel.textBackgroundColor)
                     .multilineTextAlignment(SubtitleModel.textXAlign)
                     .padding(SubtitleModel.edgeInsets)
+                    .italic(SubtitleModel.textItalic)
                 #if !os(tvOS)
                     .textSelection(.enabled)
                 #endif
-//                    .italic(SubtitleModel.textItalic)
                 if SubtitleModel.textYAlign == .top {
                     Spacer()
                 }
@@ -368,17 +362,12 @@ struct VideoSubtitleView: View {
     }
 
     private func imageView(_ image: UIImage) -> some View {
-        if #available(iOS 16.0, macOS 13.0, macCatalyst 17.0, *) {
-            #if os(tvOS)
-            return Image(uiImage: image)
-                .resizable()
-            #else
-            return LiveTextImage(uiImage: image)
-            #endif
-        } else {
-            return Image(uiImage: image)
-                .resizable()
-        }
+        #if os(tvOS)
+        return Image(uiImage: image)
+            .resizable()
+        #else
+        return LiveTextImage(uiImage: image)
+        #endif
     }
 }
 
@@ -441,16 +430,7 @@ struct VideoSettingView: View {
     }
 }
 
-extension View {
-    @ViewBuilder
-    func toolbar(isShow: Bool) -> some View {
-        if #available(iOS 16.0, macOS 13.0, tvOS 16.0, watchOS 9.0, *) {
-            toolbar(isShow ? .visible : .hidden, for: .automatic)
-        }
-    }
-}
-
-@available(iOS 15, tvOS 15, macOS 12, *)
+@available(iOS 16.0, macOS 13.0, tvOS 16.0, watchOS 9.0, *)
 struct KSVideoPlayerView_Previews: PreviewProvider {
     static var previews: some View {
         let url = URL(string: "http://clips.vorwaerts-gmbh.de/big_buck_bunny.mp4")!
