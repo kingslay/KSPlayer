@@ -53,9 +53,9 @@ extension KSVideoPlayer: UIViewRepresentable {
     public func updateUIView(_ view: UIViewType, context: Context) {
         updateView(view, context: context)
     }
+
     // iOS tvOS真机先调用onDisappear在调用dismantleUIView，但是模拟器就反过来了。
-    public static func dismantleUIView(_: UIViewType, coordinator: Coordinator) {
-    }
+    public static func dismantleUIView(_: UIViewType, coordinator _: Coordinator) {}
     #else
     public typealias NSViewType = KSPlayerLayer
     public func makeNSView(context: Context) -> NSViewType {
@@ -65,8 +65,9 @@ extension KSVideoPlayer: UIViewRepresentable {
     public func updateNSView(_ view: NSViewType, context: Context) {
         updateView(view, context: context)
     }
+
     // macOS先调用onDisappear在调用dismantleNSView
-    public static func dismantleNSView(_ view: NSViewType, coordinator: Coordinator) {
+    public static func dismantleNSView(_ view: NSViewType, coordinator _: Coordinator) {
         view.window?.contentAspectRatio = CGSize(width: 16, height: 9)
     }
     #endif

@@ -152,7 +152,12 @@ public struct KSVideoPlayerView: View {
         #if os(macOS)
             .navigationTitle(url.lastPathComponent)
             .onTapGesture(count: 2) {
-                playerCoordinator.playerLayer?.player.view?.window?.toggleFullScreen(nil)
+                guard let view = playerCoordinator.playerLayer?.player.view else {
+                    return
+                }
+                view.window?.toggleFullScreen(nil)
+                view.needsLayout = true
+                view.layoutSubtreeIfNeeded()
             }
             .onExitCommand {
                 playerCoordinator.playerLayer?.player.view?.exitFullScreenMode()

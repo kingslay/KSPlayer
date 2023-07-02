@@ -18,7 +18,7 @@ public final class MetalPlayView: UIView {
     /// 用displayLink会导致锁屏无法draw，
     /// 用DispatchSourceTimer的话，在播放4k视频的时候repeat的时间会变长,
     /// 用MTKView的draw(in:)也是不行，会卡顿
-    private lazy var displayLink: CADisplayLink = .init(target: self, selector: #selector(draw(in:)))
+    private var displayLink: CADisplayLink!
 //    private let timer = DispatchSource.makeTimerSource(queue: DispatchQueue.main)
     var options: KSOptions
     weak var renderSource: OutputRenderSourceDelegate?
@@ -39,13 +39,18 @@ public final class MetalPlayView: UIView {
         #if !canImport(UIKit)
         layer = CAMetalLayer()
         #endif
-        #if os(macOS)
-        metalLayer.wantsExtendedDynamicRangeContent = true
-        #endif
         metalLayer.device = MetalRender.device
         metalLayer.framebufferOnly = true
         addSubview(displayView)
-        displayLink.add(to: .main, forMode: .common)
+        #if os(macOS)
+        metalLayer.wantsExtendedDynamicRangeContent = true
+//        displayLink = CADisplayLink(block: renderFrame)
+        displayLink = CADisplayLink(target: self, selector: #selector(renderFrame))
+        displayLink.add(to: .current, forMode: .default)
+        #else
+        displayLink = CADisplayLink(target: self, selector: #selector(renderFrame))
+        displayLink.add(to: .current, forMode: .default)
+        #endif
         pause()
     }
 
@@ -71,14 +76,12 @@ public final class MetalPlayView: UIView {
 
     override public func didAddSubview(_ subview: UIView) {
         super.didAddSubview(subview)
-
-        subview.frame = frame
         subview.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
             subview.leftAnchor.constraint(equalTo: leftAnchor),
             subview.topAnchor.constraint(equalTo: topAnchor),
-            subview.centerXAnchor.constraint(equalTo: centerXAnchor),
-            subview.centerYAnchor.constraint(equalTo: centerYAnchor),
+            subview.bottomAnchor.constraint(equalTo: bottomAnchor),
+            subview.rightAnchor.constraint(equalTo: rightAnchor),
         ])
     }
 
@@ -135,7 +138,7 @@ public final class MetalPlayView: UIView {
 }
 
 extension MetalPlayView {
-    @objc private func draw(in _: Any) {
+    @objc private func renderFrame() {
         draw(force: false)
     }
 
@@ -244,6 +247,8 @@ class AVSampleBufferDisplayView: UIView {
             }
             if displayLayer.isReadyForMoreMediaData {
                 displayLayer.enqueue(sampleBuffer)
+            } else {
+                KSLog("not readyForMoreMediaData")
             }
             if displayLayer.status == .failed {
                 displayLayer.flush()
@@ -259,8 +264,6 @@ class AVSampleBufferDisplayView: UIView {
 import CoreVideo
 class CADisplayLink {
     private let displayLink: CVDisplayLink
-    private var target: AnyObject?
-    private let selector: Selector
     private var runloop: RunLoop?
     private var mode = RunLoop.Mode.default
     public var preferredFramesPerSecond = 60
@@ -293,23 +296,26 @@ class CADisplayLink {
         }
     }
 
-    public init(target: NSObject, selector sel: Selector) {
-        self.target = target
-        selector = sel
+    public init(target: NSObject, selector: Selector) {
         var displayLink: CVDisplayLink?
         CVDisplayLinkCreateWithCGDisplay(CGMainDisplayID(), &displayLink)
         self.displayLink = displayLink!
-        CVDisplayLinkSetOutputCallback(self.displayLink, { (_, _, _, _, _, userData: UnsafeMutableRawPointer?) -> CVReturn in
-            guard let userData else {
-                return kCVReturnError
-            }
-            let `self` = Unmanaged<CADisplayLink>.fromOpaque(userData).takeUnretainedValue()
-            guard let runloop = self.runloop, let target = self.target else {
-                return kCVReturnSuccess
-            }
-            runloop.perform(self.selector, target: target, argument: self, order: 0, modes: [self.mode])
+        CVDisplayLinkSetOutputHandler(self.displayLink) { [weak self] _, _, _, _, _ in
+            guard let self else { return kCVReturnSuccess }
+            self.runloop?.perform(selector, target: target, argument: self, order: 0, modes: [self.mode])
             return kCVReturnSuccess
-        }, Unmanaged.passUnretained(self).toOpaque())
+        }
+        CVDisplayLinkStart(self.displayLink)
+    }
+
+    public init(block: @escaping (() -> Void)) {
+        var displayLink: CVDisplayLink?
+        CVDisplayLinkCreateWithCGDisplay(CGMainDisplayID(), &displayLink)
+        self.displayLink = displayLink!
+        CVDisplayLinkSetOutputHandler(self.displayLink) { _, _, _, _, _ in
+            block()
+            return kCVReturnSuccess
+        }
         CVDisplayLinkStart(self.displayLink)
     }
 
@@ -321,7 +327,6 @@ class CADisplayLink {
     public func invalidate() {
         isPaused = true
         runloop = nil
-        target = nil
     }
 }
 #endif

@@ -310,10 +310,10 @@ open class KSPlayerLayer: UIView {
         if subview == player.view {
             subview.translatesAutoresizingMaskIntoConstraints = false
             NSLayoutConstraint.activate([
-                subview.widthAnchor.constraint(equalTo: widthAnchor),
-                subview.heightAnchor.constraint(equalTo: heightAnchor),
-                subview.centerXAnchor.constraint(equalTo: centerXAnchor),
-                subview.centerYAnchor.constraint(equalTo: centerYAnchor),
+                subview.leftAnchor.constraint(equalTo: leftAnchor),
+                subview.topAnchor.constraint(equalTo: topAnchor),
+                subview.bottomAnchor.constraint(equalTo: bottomAnchor),
+                subview.rightAnchor.constraint(equalTo: rightAnchor),
             ])
         }
     }
