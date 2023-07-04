@@ -313,8 +313,8 @@ open class KSOptions {
         let delay = audioTime - videoTime
         if delay > 0.4 {
             KSLog("video delay time: \(delay), audio time:\(audioTime), delay count:\(videoClockDelayCount)")
+            videoClockDelayCount += 1
             if delay > 2 {
-                videoClockDelayCount += 1
                 if videoClockDelayCount > 10 {
                     KSLog("video delay seek video track")
                     return .seek
@@ -322,7 +322,11 @@ open class KSOptions {
                     return .drop
                 }
             } else {
-                return .drop
+                if videoClockDelayCount % 2 == 0 {
+                    return .drop
+                } else {
+                    return .show
+                }
             }
         } else {
             videoClockDelayCount = 0
