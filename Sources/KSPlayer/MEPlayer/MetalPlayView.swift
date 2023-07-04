@@ -46,10 +46,10 @@ public final class MetalPlayView: UIView {
         metalLayer.wantsExtendedDynamicRangeContent = true
 //        displayLink = CADisplayLink(block: renderFrame)
         displayLink = CADisplayLink(target: self, selector: #selector(renderFrame))
-        displayLink.add(to: .current, forMode: .default)
+        displayLink.add(to: .main, forMode: .common)
         #else
         displayLink = CADisplayLink(target: self, selector: #selector(renderFrame))
-        displayLink.add(to: .current, forMode: .default)
+        displayLink.add(to: .main, forMode: .common)
         #endif
         pause()
     }
