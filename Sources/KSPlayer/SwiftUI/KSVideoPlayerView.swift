@@ -336,7 +336,8 @@ struct VideoSubtitleView: View {
                         .offset(CGSize(width: fitRect.origin.x, height: fitRect.origin.y))
                         .frame(width: fitRect.size.width, height: fitRect.size.height)
                 }
-                .scaledToFit()
+                // 不能加scaledToFit。不然的话图片的缩放比率会有问题。
+//                .scaledToFit()
                 .padding()
             }
             if let text = model.part?.text {

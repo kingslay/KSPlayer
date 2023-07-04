@@ -613,6 +613,7 @@ extension VideoPlayerView {
         subtitleLabel.backingLayer?.shadowRadius = 1.0
         subtitleLabel.backingLayer?.shouldRasterize = true
         updateSrt()
+        subtitleBackView.contentMode = .scaleAspectFit
         subtitleBackView.cornerRadius = 2
         subtitleBackView.addSubview(subtitleLabel)
         subtitleBackView.isHidden = true

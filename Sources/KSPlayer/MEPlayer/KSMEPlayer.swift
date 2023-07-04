@@ -404,7 +404,8 @@ extension KSMEPlayer: AVPictureInPictureSampleBufferPlaybackDelegate {
     }
 
     public func pictureInPictureControllerTimeRangeForPlayback(_: AVPictureInPictureController) -> CMTimeRange {
-        CMTimeRange(start: playerItem.startTime, end: duration)
+        let end = duration > 0 ? duration : Double.infinity
+        return CMTimeRange(start: 0, end: end)
     }
 
     public func pictureInPictureControllerIsPlaybackPaused(_: AVPictureInPictureController) -> Bool {
