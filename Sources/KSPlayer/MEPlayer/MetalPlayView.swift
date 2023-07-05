@@ -225,7 +225,7 @@ class MetalView: UIView {
             metalLayer.colorspace = colorspace
             #if !os(tvOS)
             if #available(iOS 16.0, *) {
-                if colorspace?.name != CGColorSpace.sRGB {
+                if let name = colorspace?.name, name != CGColorSpace.sRGB {
                     #if os(macOS)
                     metalLayer.wantsExtendedDynamicRangeContent = window?.screen?.maximumPotentialExtendedDynamicRangeColorComponentValue ?? 1.0 > 1.0
                     #else

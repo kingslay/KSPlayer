@@ -101,7 +101,7 @@ public extension KSOptions {
             }
 
         default:
-            return nil
+            return CGColorSpace(name: CGColorSpace.sRGB)
         }
     }
 
@@ -124,7 +124,7 @@ public extension KSOptions {
                 return CGColorSpace(name: CGColorSpace.itur_2020_PQ_EOTF)
             }
         default:
-            return nil
+            return CGColorSpace(name: CGColorSpace.sRGB)
         }
     }
 
