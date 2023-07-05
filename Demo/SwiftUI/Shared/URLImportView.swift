@@ -16,6 +16,7 @@ struct URLImportView: View {
     @State private var playURL: String = ""
     @State private var rememberURL = false
     @AppStorage("historyURLs") private var historyURLs = [URL]()
+    @Environment(\.dismiss) private var dismiss
     var body: some View {
         Form {
             Section {
@@ -28,11 +29,6 @@ struct URLImportView: View {
                         }
                     }
                 }
-                Picker("IPTV", selection: $playURL) {
-                    ForEach(appModel.m3uModels) {
-                        Text($0.name).tag($0.m3uURL)
-                    }
-                }
             }
             Section("HTTP Authentication") {
                 TextField("Username:", text: $username)
@@ -41,11 +37,13 @@ struct URLImportView: View {
             Section {
                 HStack {
                     Button("Cancel") {
-                        appModel.openURLImport = false
+                        dismiss()
                     }
                     Spacer()
                     Button("Done") {
-                        if var components = URLComponents(string: playURL.trimmingCharacters(in: NSMutableCharacterSet.whitespacesAndNewlines)) {
+                        dismiss()
+                        let urlString = playURL.trimmingCharacters(in: NSMutableCharacterSet.whitespacesAndNewlines)
+                        if urlString.count > 0, var components = URLComponents(string: urlString) {
                             if username.count > 0 {
                                 components.user = username
                             }
@@ -66,7 +64,6 @@ struct URLImportView: View {
                                 appModel.open(url: url)
                             }
                         }
-                        appModel.openURLImport = false
                     }
                 }
             }

@@ -10,13 +10,18 @@ import SwiftUI
 struct FavoriteView: View {
     @EnvironmentObject private var appModel: APPModel
     @State var nameFilter: String = ""
+    @FetchRequest(
+        sortDescriptors: [NSSortDescriptor(keyPath: \PlayModel.name, ascending: true)],
+        predicate: NSPredicate(format: "isFavorite == YES")
+    )
+    private var favoritelist: FetchedResults<PlayModel>
     var body: some View {
         ScrollView {
             LazyVGrid(columns: [GridItem(.adaptive(minimum: MoiveView.width))]) {
-                let playlist = appModel.favoritelist.filter { model in
+                let playlist = favoritelist.filter { model in
                     var isIncluded = true
                     if nameFilter.count > 0 {
-                        isIncluded = model.name.contains(nameFilter)
+                        isIncluded = model.name!.contains(nameFilter)
                     }
                     return isIncluded
                 }
@@ -25,6 +30,7 @@ struct FavoriteView: View {
                 }
             }
         }
+        .padding()
         .searchable(text: $nameFilter)
     }
 }

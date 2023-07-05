@@ -1,10 +1,15 @@
 import KSPlayer
 import SwiftUI
 struct HomeView: View {
-    @EnvironmentObject private var appModel: APPModel
-    @State var nameFilter: String = ""
-    @State var groupFilter: String = ""
+    @EnvironmentObject
+    private var appModel: APPModel
+    @State
+    private var nameFilter: String = ""
+    @State
+    private var groupFilter: String = ""
 //    @Environment(\.horizontalSizeClass) var horizontalSizeClass
+    @FetchRequest(fetchRequest: PlayModel.playTimeRequest)
+    private var historyModels: FetchedResults<PlayModel>
     private var recentDocumentURLs = [URL]()
     init() {
         #if os(macOS)
@@ -16,52 +21,58 @@ struct HomeView: View {
 
     var body: some View {
         ScrollView {
-            LazyVGrid(columns: [GridItem(.adaptive(minimum: MoiveView.width))]) {
-                Section {
-                    ForEach(recentDocumentURLs) { url in
-                        appModel.content(model: MovieModel(url: url))
+            Section {
+                ScrollView(.horizontal) {
+                    LazyHStack {
+                        ForEach(historyModels) { model in
+                            appModel.content(model: model)
+                        }
                     }
-                } header: {
-                    HStack {
-                        Text("Recent Document").font(.title)
-                        Spacer()
-                    }
-                    .padding(.horizontal)
                 }
-                let playlist = appModel.playlist.filter { model in
-                    var isIncluded = true
-                    if nameFilter.count > 0 {
-                        isIncluded = model.name.contains(nameFilter)
-                    }
-                    if groupFilter.count > 0 {
-                        isIncluded = isIncluded && model.group == groupFilter
-                    }
-                    return isIncluded
+            } header: {
+                HStack {
+                    Text("Recent Play").font(.title)
+                    Spacer()
                 }
-                Section {
+                .padding(.horizontal)
+            }
+            Section {
+                LazyVGrid(columns: [GridItem(.adaptive(minimum: MoiveView.width))]) {
+                    let playlist = appModel.playlist.filter { model in
+                        var isIncluded = true
+                        if nameFilter.count > 0 {
+                            isIncluded = model.name!.contains(nameFilter)
+                        }
+                        if groupFilter.count > 0 {
+                            isIncluded = isIncluded && model.group == groupFilter
+                        }
+                        return isIncluded
+                    }
                     ForEach(playlist) { model in
                         appModel.content(model: model)
                     }
-                } header: {
-                    HStack {
-                        Text("Channels").font(.title)
-                        Spacer()
-                    }
-                    .padding()
                 }
+
+            } header: {
+                HStack {
+                    Text("Channels").font(.title)
+                    Spacer()
+                }
+                .padding(.horizontal)
             }
         }
+        .padding()
         .searchable(text: $nameFilter)
         .toolbar {
             Button {
                 appModel.openFileImport = true
             } label: {
-                Text("打开文件")
+                Text("Open File")
             }
             Button {
                 appModel.openURLImport = true
             } label: {
-                Text("打开URL")
+                Text("Open URL")
             }
             Picker("group filter", selection: $groupFilter) {
                 Text("All ").tag("")
@@ -81,31 +92,39 @@ struct MoiveView: View {
     #else
     static let width = CGFloat(192)
     #endif
-    @State var model: MovieModel
-    
+    @ObservedObject var model: PlayModel
     var body: some View {
         VStack(alignment: .leading) {
             image
-            Text(model.name).lineLimit(1)
+            Text(model.name!).lineLimit(1)
         }
         .frame(width: MoiveView.width)
         .contextMenu {
             Button {
                 model.isFavorite.toggle()
+                do {
+                    try model.managedObjectContext?.save()
+                } catch {
+                    print(error)
+                }
             } label: {
                 Label(model.isFavorite ? "Cancel favorite" : "Favorite", systemImage: model.isFavorite ? "star" : "star.fill")
             }
+            #if !os(tvOS)
             Button {
                 #if os(macOS)
-                UIPasteboard.general.setString(model.url.path, forType: .URL)
+                UIPasteboard.general.clearContents()
+                UIPasteboard.general.setString(model.url!.description, forType: .string)
                 #else
-                UIPasteboard.general.setValue(model.url, forPasteboardType: "public.url")
+                UIPasteboard.general.setValue(model.url!, forPasteboardType: "public.url")
                 #endif
             } label: {
                 Label("Copy url", systemImage: "doc.on.doc.fill")
             }
+            #endif
         }
     }
+
     var image: some View {
         AsyncImage(url: model.logo) { image in
             image

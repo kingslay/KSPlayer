@@ -42,6 +42,26 @@ open class KSOptions {
     public var maxAnalyzeDuration: Int64?
     public var lowres = UInt8(0)
     public var startPlayTime: TimeInterval = 0
+    public var referer: String? {
+        didSet {
+            if let referer {
+                formatContextOptions["referer"] = "Referer: \(referer)"
+            } else {
+                formatContextOptions["referer"] = nil
+            }
+        }
+    }
+
+    public var userAgent: String? {
+        didSet {
+            if let userAgent {
+                formatContextOptions["user_agent"] = userAgent
+            } else {
+                formatContextOptions["user_agent"] = nil
+            }
+        }
+    }
+
     // audio
     public var audioDelay = 0.0 // s
     public var audioFilters = [String]()
@@ -91,7 +111,6 @@ open class KSOptions {
         // set 'listen_timeout' = -1 for rtmp、rtsp
 //        formatContextOptions["listen_timeout"] = 3
         formatContextOptions["rw_timeout"] = 10_000_000
-        formatContextOptions["user_agent"] = "ksplayer"
         decoderOptions["threads"] = "auto"
         decoderOptions["refcounted_frames"] = "1"
     }
@@ -489,5 +508,15 @@ public class FileLog: LogHandler {
 @inlinable public func KSLog(level: LogLevel = .warning, dso: UnsafeRawPointer = #dsohandle, _ message: StaticString, _ args: CVarArg...) {
     if level.rawValue <= KSOptions.logLevel.rawValue {
         os_log(level.logType, dso: dso, message, args)
+    }
+}
+
+public extension Array {
+    func toDictionary<Key: Hashable>(with selectKey: (Element) -> Key) -> [Key: Element] {
+        var dict = [Key: Element]()
+        for element in self {
+            dict[selectKey(element)] = element
+        }
+        return dict
     }
 }

@@ -409,7 +409,7 @@ extension MEPlayerItem {
     private func readThread() {
         if state == .opened {
             if options.startPlayTime > 0 {
-                currentPlaybackTime = options.startPlayTime
+                currentPlaybackTime = options.startPlayTime + startTime
                 state = .seeking
             } else {
                 state = .reading

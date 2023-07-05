@@ -358,10 +358,16 @@ public extension URL {
         guard let data = try? await data(), let string = String(data: data, encoding: .utf8) else {
             return []
         }
+        /*
+         #EXTINF:-1 tvg-id="ExampleTV.ua",Example TV (720p) [Not 24/7]
+         #EXTVLCOPT:http-referrer=http://example.com/
+         #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64)
+         http://example.com/stream.m3u8
+         */
         return string.components(separatedBy: "#EXTINF:").compactMap { content -> (String, URL, [String: String])? in
             let content = content.replacingOccurrences(of: "\r\n", with: "\n")
             let array = content.split(separator: "\n")
-            guard array.count > 1, let url = URL(string: String(array[1])) else {
+            guard array.count > 1, let last = array.last, let url = URL(string: String(last)) else {
                 return nil
             }
             let infos = array[0].split(separator: ",")
@@ -369,6 +375,16 @@ public extension URL {
                 return nil
             }
             var extinf = [String: String]()
+            let prefix = "#EXTVLCOPT:"
+            for i in 1 ..< (array.count - 1) {
+                let str = array[i]
+                if str.hasPrefix(prefix) {
+                    let keyValue = str.dropFirst(prefix.count).split(separator: "=")
+                    if keyValue.count == 2 {
+                        extinf[String(keyValue[0])] = String(keyValue[1])
+                    }
+                }
+            }
             let tvgString: Substring
             if infos.count > 2 {
                 extinf["duration"] = String(infos[0])

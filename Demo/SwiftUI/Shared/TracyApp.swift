@@ -40,6 +40,7 @@ struct TracyApp: App {
         WindowGroup {
             ContentView()
                 .environmentObject(appModel)
+                .environment(\.managedObjectContext, PersistenceController.shared.container.viewContext)
             #if !os(tvOS)
                 .handlesExternalEvents(preferring: Set(arrayLiteral: "pause"), allowing: Set(arrayLiteral: "*"))
             #endif
@@ -73,6 +74,13 @@ struct TracyApp: App {
         }
         .windowStyle(.hiddenTitleBar)
         .defaultPosition(.center)
+        WindowGroup("player", for: PlayModel.self) { $model in
+            if let model {
+                KSVideoPlayerView(model: model)
+            }
+        }
+        .windowStyle(.hiddenTitleBar)
+        .defaultPosition(.center)
         Settings {
             SettingView()
         }
@@ -88,13 +96,26 @@ struct TracyApp: App {
 
 class APPModel: ObservableObject {
     private(set) var groups = [String]()
-    @Published var openWindow: URL?
-    @Published private(set) var playlist = [MovieModel]()
+    @Published var openURL: URL?
+    @Published var openPlayModel: PlayModel?
+    @Published private(set) var playlist = [PlayModel]() {
+        didSet {
+            var groupSet = Set<String>()
+            playlist.forEach { model in
+                if let group = model.group {
+                    groupSet.insert(group)
+                }
+            }
+            groups = Array(groupSet)
+        }
+    }
+
     @Published var path = NavigationPath()
     @Published var openFileImport = false
     @Published var openURLImport = false
     @Published var hiddenTitleBar = false
-    @Published var favoritelist = [MovieModel]()
+    @AppStorage("activeM3UURL") private var activeM3UURL: URL?
+    @Published var activeM3UModel: M3UModel? = nil
     init() {
         #if !DEBUG
         var fileHandle = FileHandle.standardOutput
@@ -119,71 +140,73 @@ class APPModel: ObservableObject {
         KSOptions.subtitleDataSouces = [DirectorySubtitleDataSouce(), ShooterSubtitleDataSouce(), AssrtSubtitleDataSouce(token: "5IzWrb2J099vmA96ECQXwdRSe9xdoBUv")]
 //        KSOptions.isUseAudioRenderer = true
 //        KSOptions.isLoopPlay = true
-        #if DEBUG
-        let model = M3UModel(name: "Test", m3uURL: "https://raw.githubusercontent.com/kingslay/KSPlayer/develop/Tests/KSPlayerTests/test.m3u")
-        m3uModels.append(model)
-        if let url = URL(string: model.m3uURL) {
-            replaceM3U(url: url)
+        if let activeM3UURL {
+            let request = M3UModel.fetchRequest()
+            request.predicate = NSPredicate(format: "m3uURL == %@", activeM3UURL.description)
+            if let model = try? PersistenceController.shared.container.viewContext.fetch(request).first {
+                activeM3U(model: model)
+            }
         }
+        #if DEBUG
+//        if let testURL = URL(string: "https://raw.githubusercontent.com/kingslay/KSPlayer/develop/Tests/KSPlayerTests/test.m3u") {
+//            addM3U(url: testURL)
+//        }
         #endif
     }
 
-    func replaceM3U(url: URL) {
+    func addM3U(url: URL) {
+        let model = M3UModel(url: url)
+        activeM3U(model: model)
+    }
+
+    func activeM3U(model: M3UModel) {
+        activeM3UModel = model
+        activeM3UURL = model.m3uURL
         Task { @MainActor in
-            let result = try? await url.parsePlaylist()
-            var groupSet = Set<String>()
-            let array = result?.compactMap { name, url, extinf in
-                let model = MovieModel(url: url, name: name, extinf: extinf)
-                if let group = model.group {
-                    groupSet.insert(group)
-                }
-                return model
-            }
-            self.playlist = array ?? []
-            self.groups = Array(groupSet)
+            playlist = await model.parsePlaylist()
         }
     }
 
     func open(url: URL) {
         if url.isPlaylist {
-            replaceM3U(url: url)
+            addM3U(url: url)
         } else {
             #if os(macOS)
-            openWindow = url
+            openURL = url
             #else
             path.append(url)
             #endif
         }
     }
 
-    func content(model: MovieModel) -> some View {
+    func content(model: PlayModel) -> some View {
         #if os(macOS)
         MoiveView(model: model)
             .onTapGesture {
-                self.open(url: model.url)
+                self.openPlayModel = model
             }
         #else
-        NavigationLink(value: model.url) {
+        NavigationLink(value: model) {
             MoiveView(model: model)
         }
         .buttonStyle(.plain)
         #endif
     }
 
-    private(set) var m3uModels: [M3UModel] = [
-        M3UModel(name: "YanG", m3uURL: "https://raw.githubusercontent.com/YanG-1989/m3u/main/Gather.m3u"),
-        M3UModel(name: "Iptv", m3uURL: "https://iptv-org.github.io/iptv/index.nsfw.m3u"),
-        M3UModel(name: "China", m3uURL: "https://iptv-org.github.io/iptv/countries/cn.m3u"),
-        M3UModel(name: "Hong Kong", m3uURL: "https://iptv-org.github.io/iptv/countries/hk.m3u"),
-        M3UModel(name: "Taiwan", m3uURL: "https://iptv-org.github.io/iptv/countries/tw.m3u"),
-        M3UModel(name: "Americas", m3uURL: "https://iptv-org.github.io/iptv/regions/amer.m3u"),
-        M3UModel(name: "Asia", m3uURL: "https://iptv-org.github.io/iptv/regions/asia.m3u"),
-        M3UModel(name: "Europe", m3uURL: "https://iptv-org.github.io/iptv/regions/eur.m3u"),
-        M3UModel(name: "Education", m3uURL: "https://iptv-org.github.io/iptv/categories/education.m3u"),
-        M3UModel(name: "Movies", m3uURL: "https://iptv-org.github.io/iptv/categories/movies.m3u"),
-        M3UModel(name: "Chinese", m3uURL: "https://iptv-org.github.io/iptv/languages/zho.m3u"),
-        M3UModel(name: "English", m3uURL: "https://iptv-org.github.io/iptv/languages/eng.m3u"),
-    ]
+//    private(set) var m3uModels: [M3UModel] = [
+//        M3UModel(name: "YanG", m3uURL: "https://raw.githubusercontent.com/YanG-1989/m3u/main/Gather.m3u"),
+//        M3UModel(name: "Iptv-org", m3uURL: "https://iptv-org.github.io/iptv/index.m3u"),
+//        M3UModel(name: "China", m3uURL: "https://iptv-org.github.io/iptv/countries/cn.m3u"),
+//        M3UModel(name: "Hong Kong", m3uURL: "https://iptv-org.github.io/iptv/countries/hk.m3u"),
+//        M3UModel(name: "Taiwan", m3uURL: "https://iptv-org.github.io/iptv/countries/tw.m3u"),
+//        M3UModel(name: "Americas", m3uURL: "https://iptv-org.github.io/iptv/regions/amer.m3u"),
+//        M3UModel(name: "Asia", m3uURL: "https://iptv-org.github.io/iptv/regions/asia.m3u"),
+//        M3UModel(name: "Europe", m3uURL: "https://iptv-org.github.io/iptv/regions/eur.m3u"),
+//        M3UModel(name: "Education", m3uURL: "https://iptv-org.github.io/iptv/categories/education.m3u"),
+//        M3UModel(name: "Movies", m3uURL: "https://iptv-org.github.io/iptv/categories/movies.m3u"),
+//        M3UModel(name: "Chinese", m3uURL: "https://iptv-org.github.io/iptv/languages/zho.m3u"),
+//        M3UModel(name: "English", m3uURL: "https://iptv-org.github.io/iptv/languages/eng.m3u"),
+//    ]
 }
 
 // struct AVContentView: View {

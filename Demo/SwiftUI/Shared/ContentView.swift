@@ -19,6 +19,11 @@ struct ContentView: View {
                 } label: {
                     Label("Favorite", systemImage: "star.fill")
                 }
+                NavigationLink {
+                    FilesView()
+                } label: {
+                    Label("Files", systemImage: "folder.fill.badge.gearshape")
+                }
             }
         }.toolbar {
             ToolbarItem(placement: .navigation) {
@@ -39,6 +44,12 @@ struct ContentView: View {
                             .toolbar(.hidden, for: .tabBar)
                         #endif
                     }
+                    .navigationDestination(for: PlayModel.self) { model in
+                        KSVideoPlayerView(model: model)
+                        #if !os(macOS)
+                            .toolbar(.hidden, for: .tabBar)
+                        #endif
+                    }
             }
 
             .tabItem {
@@ -50,6 +61,10 @@ struct ContentView: View {
             .tabItem {
                 Label("Favorite", systemImage: "star.fill")
             }
+            FilesView()
+                .tabItem {
+                    Label("Files", systemImage: "folder.fill.badge.gearshape")
+                }
             SettingView()
                 .tabItem {
                     Label("Setting", systemImage: "gear")
@@ -65,12 +80,20 @@ struct ContentView: View {
             .sheet(isPresented: $appModel.openURLImport) {
                 URLImportView()
             }
-            .onChange(of: appModel.openWindow) { url in
+            .onChange(of: appModel.openURL) { url in
                 if let url {
                     #if !os(tvOS)
                     openWindow(value: url)
                     #endif
-                    appModel.openWindow = nil
+                    appModel.openURL = nil
+                }
+            }
+            .onChange(of: appModel.openPlayModel) { model in
+                if let model {
+                    #if !os(tvOS)
+                    openWindow(value: model)
+                    #endif
+                    appModel.openPlayModel = nil
                 }
             }
         #if !os(tvOS)
@@ -97,15 +120,7 @@ struct ContentView: View {
         #endif
             .onOpenURL { url in
                 KSLog("onOpenURL")
-                if url.isPlaylist {
-                    appModel.replaceM3U(url: url)
-                } else {
-                    #if os(macOS)
-                    openWindow(value: url)
-                    #else
-                    appModel.path.append(MovieModel(url: url))
-                    #endif
-                }
+                appModel.open(url: url)
             }
     }
 }

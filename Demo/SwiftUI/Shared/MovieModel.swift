@@ -5,6 +5,7 @@
 //  Created by kintan on 2023/2/2.
 //
 
+import CoreData
 import Foundation
 import KSPlayer
 
@@ -25,79 +26,111 @@ class MEOptions: KSOptions {
     #endif
 }
 
-struct MovieModel: Codable, Hashable {
-    public let name: String
-    public let url: URL
-    public var isFavorite = false
-    public let extinf: [String: String]?
-    public let logo: URL?
-    public var group: String? {
-        extinf?["group-title"]
+extension CodingUserInfoKey {
+    static let managedObjectContext = CodingUserInfoKey(rawValue: "managedObjectContext")!
+}
+
+@objc(PlayModel)
+public class PlayModel: MovieModel, Codable {
+    enum CodingKeys: String, CodingKey {
+        case name, url, httpReferer, httpUserAgent
     }
 
-    public var country: String? {
-        extinf?["tvg-country"]
+    public required convenience init(from decoder: Decoder) throws {
+        self.init(context: PersistenceController.shared.container.viewContext)
+        let values = try decoder.container(keyedBy: CodingKeys.self)
+        url = try values.decode(URL.self, forKey: .url)
+        name = try values.decode(String.self, forKey: .name)
+        httpReferer = try values.decode(String.self, forKey: .httpReferer)
+        httpUserAgent = try values.decode(String.self, forKey: .httpUserAgent)
     }
 
-    public var language: String? {
-        extinf?["tvg-language"]
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(url, forKey: .url)
+        try container.encode(name, forKey: .name)
+        try container.encode(httpReferer, forKey: .httpReferer)
+        try container.encode(httpUserAgent, forKey: .httpUserAgent)
     }
+}
 
-//    enum CodingKeys: CodingKey {
-//        case name
-//        case url
-//        case logo
-//        case extinf
-//    }
-
-    public init(url: URL) {
+extension PlayModel {
+    convenience init(url: URL) {
         self.init(url: url, name: url.lastPathComponent)
     }
 
-    /**
-     Video recource item with defination name and specifying options
-
-     - parameter url:        video url
-     - parameter options:    specifying options for the initialization of the AVURLAsset
-     - parameter name:       video name
-     */
-    public init(url: URL, name: String, extinf: [String: String]? = nil) {
-        self.url = url
+    convenience init(context: NSManagedObjectContext = PersistenceController.shared.container.viewContext, url: URL, name: String, extinf: [String: String]? = nil) {
+        self.init(context: context)
         self.name = name
-        self.extinf = extinf
+        self.url = url
         logo = extinf?["tvg-logo"].flatMap { URL(string: $0) }
+        language = extinf?["tvg-language"]
+        country = extinf?["tvg-country"]
+        group = extinf?["group-title"]
+        tvgID = extinf?["tvg-id"]
+        httpReferer = extinf?["http-referrer"] ?? extinf?["http-referer"]
+        httpUserAgent = extinf?["http-user-agent"]
     }
 }
 
-extension MovieModel: Identifiable {
-    var id: URL { url }
+extension M3UModel {
+    convenience init(url: URL) {
+        self.init(url: url, name: url.lastPathComponent)
+    }
+
+    convenience init(context: NSManagedObjectContext = PersistenceController.shared.container.viewContext, url: URL, name: String) {
+        self.init(context: context)
+        self.name = name
+        m3uURL = url
+        try? context.save()
+    }
+
+    func parsePlaylist() async -> [PlayModel] {
+        let request = NSFetchRequest<PlayModel>(entityName: "PlayModel")
+        request.predicate = NSPredicate(format: "m3uURL == %@", m3uURL!.description)
+        let dic = try? PersistenceController.shared.container.viewContext.fetch(request).toDictionary { $0.url }
+        let result = try? await m3uURL?.parsePlaylist()
+        let models = result?.compactMap { name, url, extinf -> PlayModel in
+            if let model = dic?[url] {
+                return model
+            } else {
+                let model = PlayModel(url: url, name: name, extinf: extinf)
+                model.m3uURL = self.m3uURL
+                try? model.managedObjectContext?.save()
+                return model
+            }
+        } ?? []
+        return models
+    }
 }
 
-struct M3UModel: Hashable {
-    let name: String
-    let m3uURL: String
-}
-
-extension M3UModel: Identifiable {
-    var id: String { m3uURL }
+extension PlayModel {
+    static var playTimeRequest: NSFetchRequest<PlayModel> {
+        let request = NSFetchRequest<PlayModel>(entityName: "PlayModel")
+        request.sortDescriptors = [
+            NSSortDescriptor(
+                keyPath: \PlayModel.playTime,
+                ascending: true
+            ),
+        ]
+        request.predicate = NSPredicate(format: "playTime != nil")
+        request.fetchLimit = 20
+        return request
+    }
 }
 
 extension KSVideoPlayerView {
     init(url: URL) {
+        self.init(model: PlayModel(url: url))
+    }
+
+    init(model: PlayModel) {
+        let url = model.url!
         let options = MEOptions()
-        let key = "playtime_\(url)"
-        options.startPlayTime = UserDefaults.standard.double(forKey: key)
-        // There is total different meaning for 'listen_timeout' option in rtmp
-        // set 'listen_timeout' = -1 for rtmp、rtsp
-        if url.absoluteString.starts(with: "rtmp") || url.absoluteString.starts(with: "rtsp") {
-            options.formatContextOptions["listen_timeout"] = -1
-        } else {
-            options.formatContextOptions["listen_timeout"] = 3
-        }
         #if DEBUG
         if url.lastPathComponent == "h264.mp4" {
-            options.videoFilters = ["hflip", "vflip"]
-            options.hardwareDecode = false
+//            options.videoFilters = ["hflip", "vflip"]
+//            options.hardwareDecode = false
             options.startPlayTime = 13
         } else if url.lastPathComponent == "vr.mp4" {
             options.display = .vr
@@ -116,13 +149,24 @@ extension KSVideoPlayerView {
             #endif
         }
         #endif
+        options.referer = model.httpReferer
+        options.userAgent = model.httpUserAgent
+        model.playTime = Date()
+        if model.duration > 0, model.current > 0, model.duration > model.current + 120 {
+            options.startPlayTime = TimeInterval(model.current)
+        }
+        // There is total different meaning for 'listen_timeout' option in rtmp
+        // set 'listen_timeout' = -1 for rtmp、rtsp
+        if url.absoluteString.starts(with: "rtmp") || url.absoluteString.starts(with: "rtsp") {
+            options.formatContextOptions["listen_timeout"] = -1
+        } else {
+            options.formatContextOptions["listen_timeout"] = 3
+        }
         self.init(url: url, options: options) { layer in
             if let layer {
-                if layer.player.duration > 0, layer.player.currentPlaybackTime > 0, layer.state != .playedToTheEnd, layer.player.duration > layer.player.currentPlaybackTime + 120 {
-                    UserDefaults.standard.set(layer.player.currentPlaybackTime, forKey: key)
-                } else {
-                    UserDefaults.standard.removeObject(forKey: key)
-                }
+                model.duration = Int16(layer.player.duration)
+                model.current = Int16(layer.player.currentPlaybackTime)
+                try? model.managedObjectContext?.save()
             }
         }
     }
