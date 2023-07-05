@@ -12,7 +12,6 @@ import CoreMedia
 import MetalKit
 #endif
 public final class MetalPlayView: UIView {
-    private let render = MetalRender()
     private var videoInfo: CMVideoFormatDescription?
     public private(set) var pixelBuffer: CVPixelBuffer?
     /// 用displayLink会导致锁屏无法draw，
@@ -24,33 +23,17 @@ public final class MetalPlayView: UIView {
     weak var renderSource: OutputRenderSourceDelegate?
     // AVSampleBufferAudioRenderer AVSampleBufferRenderSynchronizer AVSampleBufferDisplayLayer
     var displayView = AVSampleBufferDisplayView()
-    #if canImport(UIKit)
-    override public class var layerClass: AnyClass { CAMetalLayer.self }
-    #endif
-    var metalLayer: CAMetalLayer {
-        // swiftlint:disable force_cast
-        layer as! CAMetalLayer
-        // swiftlint:enable force_cast
-    }
-
+    private let metalView = MetalView()
     init(options: KSOptions) {
         self.options = options
         super.init(frame: .zero)
-        #if !canImport(UIKit)
-        layer = CAMetalLayer()
-        #endif
-        metalLayer.device = MetalRender.device
-        metalLayer.framebufferOnly = true
         addSubview(displayView)
-        #if os(macOS)
-        metalLayer.wantsExtendedDynamicRangeContent = true
-//        displayLink = CADisplayLink(block: renderFrame)
+        addSubview(metalView)
+        metalView.isHidden = true
+        //        displayLink = CADisplayLink(block: renderFrame)
         displayLink = CADisplayLink(target: self, selector: #selector(renderFrame))
+        // 一定要用common。不然在视频上面操作view的话，那就会卡顿了。
         displayLink.add(to: .main, forMode: .common)
-        #else
-        displayLink = CADisplayLink(target: self, selector: #selector(renderFrame))
-        displayLink.add(to: .main, forMode: .common)
-        #endif
         pause()
     }
 
@@ -87,6 +70,7 @@ public final class MetalPlayView: UIView {
 
     override public var contentMode: UIViewContentMode {
         didSet {
+            metalView.contentMode = contentMode
             switch contentMode {
             case .scaleToFill:
                 displayView.displayLayer.videoGravity = .resize
@@ -120,9 +104,7 @@ public final class MetalPlayView: UIView {
 
     func clear() {
         if displayView.isHidden {
-            if let drawable = metalLayer.nextDrawable() {
-                render.clear(drawable: drawable)
-            }
+            metalView.clear()
         } else {
             displayView.displayLayer.flushAndRemoveImage()
         }
@@ -158,9 +140,8 @@ extension MetalPlayView {
             if options.isUseDisplayLayer() {
                 if displayView.isHidden {
                     displayView.isHidden = false
-                    if let drawable = metalLayer.nextDrawable() {
-                        render.clear(drawable: drawable)
-                    }
+                    metalView.isHidden = true
+                    metalView.clear()
                 }
                 if let dar = options.customizeDar(sar: sar, par: par) {
                     pixelBuffer.aspectRatio = CGSize(width: dar.width, height: dar.height * par.width / par.height)
@@ -169,23 +150,20 @@ extension MetalPlayView {
             } else {
                 if !displayView.isHidden {
                     displayView.isHidden = true
+                    metalView.isHidden = false
                     displayView.displayLayer.flushAndRemoveImage()
                 }
+                let size: CGSize
                 if options.display == .plane {
                     if let dar = options.customizeDar(sar: sar, par: par) {
-                        metalLayer.drawableSize = CGSize(width: par.width, height: par.width * dar.height / dar.width)
+                        size = CGSize(width: par.width, height: par.width * dar.height / dar.width)
                     } else {
-                        metalLayer.drawableSize = CGSize(width: par.width, height: par.height * sar.height / sar.width)
+                        size = CGSize(width: par.width, height: par.height * sar.height / sar.width)
                     }
                 } else {
-                    metalLayer.drawableSize = KSOptions.sceneSize
+                    size = KSOptions.sceneSize
                 }
-                metalLayer.pixelFormat = KSOptions.colorPixelFormat(bitDepth: pixelBuffer.bitDepth)
-                metalLayer.colorspace = pixelBuffer.colorspace
-                guard let drawable = metalLayer.nextDrawable() else {
-                    return
-                }
-                render.draw(pixelBuffer: pixelBuffer, display: options.display, drawable: drawable)
+                metalView.draw(pixelBuffer: pixelBuffer, display: options.display, size: size)
             }
         }
     }
@@ -204,6 +182,65 @@ extension MetalPlayView {
         }
         guard let videoInfo else { return }
         displayView.enqueue(imageBuffer: pixelBuffer, formatDescription: videoInfo)
+    }
+}
+
+class MetalView: UIView {
+    private let render = MetalRender()
+    #if canImport(UIKit)
+    override public class var layerClass: AnyClass { CAMetalLayer.self }
+    #endif
+    var metalLayer: CAMetalLayer {
+        // swiftlint:disable force_cast
+        layer as! CAMetalLayer
+        // swiftlint:enable force_cast
+    }
+
+    init() {
+        super.init(frame: .zero)
+        #if !canImport(UIKit)
+        layer = CAMetalLayer()
+        #endif
+        metalLayer.device = MetalRender.device
+        metalLayer.framebufferOnly = true
+//        metalLayer.displaySyncEnabled = false
+    }
+
+    @available(*, unavailable)
+    required init?(coder _: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+
+    func clear() {
+        if let drawable = metalLayer.nextDrawable() {
+            render.clear(drawable: drawable)
+        }
+    }
+
+    func draw(pixelBuffer: CVPixelBuffer, display: DisplayEnum, size: CGSize) {
+        metalLayer.drawableSize = size
+        metalLayer.pixelFormat = KSOptions.colorPixelFormat(bitDepth: pixelBuffer.bitDepth)
+        let colorspace = pixelBuffer.colorspace
+        if metalLayer.colorspace != colorspace {
+            metalLayer.colorspace = colorspace
+            #if !os(tvOS)
+            if #available(iOS 16.0, *) {
+                if colorspace?.name != CGColorSpace.sRGB {
+                    #if os(macOS)
+                    metalLayer.wantsExtendedDynamicRangeContent = window?.screen?.maximumPotentialExtendedDynamicRangeColorComponentValue ?? 1.0 > 1.0
+                    #else
+                    metalLayer.wantsExtendedDynamicRangeContent = true
+                    #endif
+                } else {
+                    metalLayer.wantsExtendedDynamicRangeContent = false
+                }
+            }
+            #endif
+        }
+        guard let drawable = metalLayer.nextDrawable() else {
+            return
+        }
+        render.draw(pixelBuffer: pixelBuffer, display: display, drawable: drawable)
     }
 }
 
@@ -303,7 +340,7 @@ class CADisplayLink {
 
     public init(target: NSObject, selector: Selector) {
         var displayLink: CVDisplayLink?
-        CVDisplayLinkCreateWithCGDisplay(CGMainDisplayID(), &displayLink)
+        CVDisplayLinkCreateWithActiveCGDisplays(&displayLink)
         self.displayLink = displayLink!
         CVDisplayLinkSetOutputHandler(self.displayLink) { [weak self] _, _, _, _, _ in
             guard let self else { return kCVReturnSuccess }
@@ -315,7 +352,7 @@ class CADisplayLink {
 
     public init(block: @escaping (() -> Void)) {
         var displayLink: CVDisplayLink?
-        CVDisplayLinkCreateWithCGDisplay(CGMainDisplayID(), &displayLink)
+        CVDisplayLinkCreateWithActiveCGDisplays(&displayLink)
         self.displayLink = displayLink!
         CVDisplayLinkSetOutputHandler(self.displayLink) { _, _, _, _, _ in
             block()
