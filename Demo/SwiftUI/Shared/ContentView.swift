@@ -61,10 +61,12 @@ struct ContentView: View {
             .tabItem {
                 Label("Favorite", systemImage: "star.fill")
             }
-            FilesView()
-                .tabItem {
-                    Label("Files", systemImage: "folder.fill.badge.gearshape")
-                }
+            NavigationStack {
+                FilesView()
+            }
+            .tabItem {
+                Label("Files", systemImage: "folder.fill.badge.gearshape")
+            }
             SettingView()
                 .tabItem {
                     Label("Setting", systemImage: "gear")

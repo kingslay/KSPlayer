@@ -20,7 +20,8 @@ struct FilesView: View {
     @State
     private var nameFilter: String = ""
     var body: some View {
-        Form {
+//        ScrollView {
+        Section {
             Picker("m3u: ", selection: Binding<M3UModel?> {
                 appModel.activeM3UModel
             } set: { model in
@@ -28,12 +29,19 @@ struct FilesView: View {
                     appModel.activeM3U(model: model)
                 }
             }) {
-                ForEach(m3uModels) { model in
+                let models = m3uModels.filter { model in
+                    var isIncluded = true
+                    if nameFilter.count > 0 {
+                        isIncluded = model.name!.contains(nameFilter)
+                    }
+                    return isIncluded
+                }
+                ForEach(models) { model in
                     VStack(alignment: .leading) {
                         Text(model.name!)
                         Text(model.m3uURL!.description)
                     }
-//                    .frame(minWidth: 100, minHeight: 50)
+                    //                    .frame(minWidth: 100, minHeight: 50)
                     .contextMenu {
                         Button {
                             model.managedObjectContext?.delete(model)
@@ -58,9 +66,8 @@ struct FilesView: View {
             }
             .pickerStyle(.inline)
         }
-        .sheet(isPresented: $addM3U) {
-            M3UView()
-        }
+//        }
+        .searchable(text: $nameFilter)
         .toolbar {
             Button {
                 addM3U = true
@@ -68,7 +75,9 @@ struct FilesView: View {
                 Label("Add M3U", systemImage: "plus.app.fill")
             }
         }
-        .searchable(text: $nameFilter)
+        .sheet(isPresented: $addM3U) {
+            M3UView()
+        }
     }
 }
 
@@ -84,6 +93,7 @@ struct M3UView: View {
                 TextField("Name", text: $name)
             }
             Section {
+                Text("Links to playlists you add will be public. All people can see it. But only you can modify and delete")
                 HStack {
                     Button("Cancel") {
                         dismiss()

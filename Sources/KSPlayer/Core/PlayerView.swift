@@ -170,12 +170,6 @@ open class PlayerView: UIView, KSPlayerLayerDelegate, KSSliderDelegate {
         if state == .readyToPlay {
             totalTime = layer.player.duration
             toolBar.isSeekable = layer.player.seekable
-            if let embedSubtitleDataSouce = layer.player.subtitleDataSouce {
-                srtControl.addSubtitle(dataSouce: embedSubtitleDataSouce)
-                if layer.options.autoSelectEmbedSubtitle, let first = embedSubtitleDataSouce.infos.first {
-                    srtControl.selectedSubtitleInfo = first
-                }
-            }
         } else if state == .playedToTheEnd || state == .paused || state == .error {
             toolBar.playButton.isSelected = false
         } else if state.isPlaying {
