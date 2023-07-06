@@ -74,13 +74,9 @@ extension PlayModel {
 }
 
 extension M3UModel {
-    convenience init(url: URL) {
-        self.init(url: url, name: url.lastPathComponent)
-    }
-
-    convenience init(context: NSManagedObjectContext = PersistenceController.shared.container.viewContext, url: URL, name: String) {
+    convenience init(context: NSManagedObjectContext = PersistenceController.shared.container.viewContext, url: URL, name: String? = nil) {
         self.init(context: context)
-        self.name = name
+        self.name = name ?? url.lastPathComponent
         m3uURL = url
         try? context.save()
     }

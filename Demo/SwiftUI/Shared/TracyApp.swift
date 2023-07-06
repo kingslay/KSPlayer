@@ -115,7 +115,17 @@ class APPModel: ObservableObject {
     @Published var openURLImport = false
     @Published var hiddenTitleBar = false
     @AppStorage("activeM3UURL") private var activeM3UURL: URL?
-    @Published var activeM3UModel: M3UModel? = nil
+    @Published var activeM3UModel: M3UModel? = nil {
+        didSet {
+            if let activeM3UModel, activeM3UModel != oldValue {
+                activeM3UURL = activeM3UModel.m3uURL
+                Task { @MainActor in
+                    playlist = await activeM3UModel.parsePlaylist()
+                }
+            }
+        }
+    }
+
     init() {
         #if !DEBUG
         var fileHandle = FileHandle.standardOutput
@@ -144,27 +154,15 @@ class APPModel: ObservableObject {
             let request = M3UModel.fetchRequest()
             request.predicate = NSPredicate(format: "m3uURL == %@", activeM3UURL.description)
             if let model = try? PersistenceController.shared.container.viewContext.fetch(request).first {
-                activeM3U(model: model)
+                activeM3UModel = model
             }
         }
-        #if DEBUG
-//        if let testURL = URL(string: "https://raw.githubusercontent.com/kingslay/KSPlayer/develop/Tests/KSPlayerTests/test.m3u") {
-//            addM3U(url: testURL)
-//        }
-        #endif
     }
 
-    func addM3U(url: URL) {
-        let model = M3UModel(url: url)
-        activeM3U(model: model)
-    }
-
-    func activeM3U(model: M3UModel) {
-        activeM3UModel = model
-        activeM3UURL = model.m3uURL
-        Task { @MainActor in
-            playlist = await model.parsePlaylist()
-        }
+    func addM3U(url: URL, name: String? = nil) {
+        let request = M3UModel.fetchRequest()
+        request.predicate = NSPredicate(format: "m3uURL == %@", url.description)
+        activeM3UModel = try? PersistenceController.shared.container.viewContext.fetch(request).first ?? M3UModel(url: url, name: name)
     }
 
     func open(url: URL) {
@@ -206,6 +204,7 @@ class APPModel: ObservableObject {
 //        M3UModel(name: "Movies", m3uURL: "https://iptv-org.github.io/iptv/categories/movies.m3u"),
 //        M3UModel(name: "Chinese", m3uURL: "https://iptv-org.github.io/iptv/languages/zho.m3u"),
 //        M3UModel(name: "English", m3uURL: "https://iptv-org.github.io/iptv/languages/eng.m3u"),
+//    "https://raw.githubusercontent.com/kingslay/KSPlayer/develop/Tests/KSPlayerTests/test.m3u"
 //    ]
 }
 

@@ -66,7 +66,9 @@ struct PersistenceController {
         }
         container.viewContext.automaticallyMergesChangesFromParent = true
         container.viewContext.mergePolicy = NSMergeByPropertyObjectTrumpMergePolicy
-//        container.viewContext.mergePolicy = NSOverwriteMergePolicy
+//        #if DEBUG
+//        container.viewContext.mergePolicy = NSRollbackMergePolicy
+//        #endif
         do {
             try container.viewContext.setQueryGenerationFrom(.current)
         } catch {

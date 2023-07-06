@@ -20,53 +20,39 @@ struct FilesView: View {
     @State
     private var nameFilter: String = ""
     var body: some View {
-//        ScrollView {
-        Section {
-            Picker("m3u: ", selection: Binding<M3UModel?> {
-                appModel.activeM3UModel
-            } set: { model in
-                if let model {
-                    appModel.activeM3U(model: model)
-                }
-            }) {
-                let models = m3uModels.filter { model in
-                    var isIncluded = true
-                    if nameFilter.count > 0 {
-                        isIncluded = model.name!.contains(nameFilter)
-                    }
-                    return isIncluded
-                }
-                ForEach(models) { model in
-                    VStack(alignment: .leading) {
-                        Text(model.name!)
-                        Text(model.m3uURL!.description)
-                    }
-                    //                    .frame(minWidth: 100, minHeight: 50)
-                    .contextMenu {
-                        Button {
-                            model.managedObjectContext?.delete(model)
-                        } label: {
-                            Label("Delete", systemImage: "trash.fill")
-                        }
-                        #if !os(tvOS)
-                        Button {
-                            #if os(macOS)
-                            UIPasteboard.general.clearContents()
-                            UIPasteboard.general.setString(model.m3uURL!.description, forType: .string)
-                            #else
-                            UIPasteboard.general.setValue(model.m3uURL!, forPasteboardType: "public.url")
-                            #endif
-                        } label: {
-                            Label("Copy url", systemImage: "doc.on.doc.fill")
-                        }
-                        #endif
-                    }
-                    .tag(model as M3UModel?)
-                }
+        let models = m3uModels.filter { model in
+            var isIncluded = true
+            if nameFilter.count > 0 {
+                isIncluded = model.name!.contains(nameFilter)
             }
-            .pickerStyle(.inline)
+            return isIncluded
         }
-//        }
+        List(models, id: \.self, selection: $appModel.activeM3UModel) { model in
+            VStack(alignment: .leading) {
+                Text(model.name!).font(.title3)
+                Text(model.m3uURL!.description)
+            }
+            .contextMenu {
+                Button {
+                    model.managedObjectContext?.delete(model)
+                } label: {
+                    Label("Delete", systemImage: "trash.fill")
+                }
+                #if !os(tvOS)
+                Button {
+                    #if os(macOS)
+                    UIPasteboard.general.clearContents()
+                    UIPasteboard.general.setString(model.m3uURL!.description, forType: .string)
+                    #else
+                    UIPasteboard.general.setValue(model.m3uURL!, forPasteboardType: "public.url")
+                    #endif
+                } label: {
+                    Label("Copy url", systemImage: "doc.on.doc.fill")
+                }
+                #endif
+            }
+        }
+        .padding()
         .searchable(text: $nameFilter)
         .toolbar {
             Button {
@@ -101,13 +87,8 @@ struct M3UView: View {
                     Spacer()
                     Button("Done") {
                         if let url = URL(string: url.trimmingCharacters(in: NSMutableCharacterSet.whitespacesAndNewlines)) {
-                            let model: M3UModel
-                            if name.count > 0 {
-                                model = M3UModel(url: url, name: name)
-                            } else {
-                                model = M3UModel(url: url)
-                            }
-                            appModel.activeM3U(model: model)
+                            let name = name.trimmingCharacters(in: NSMutableCharacterSet.whitespacesAndNewlines)
+                            appModel.addM3U(url: url, name: name.count == 0 ? nil : name)
                         }
                         dismiss()
                     }
