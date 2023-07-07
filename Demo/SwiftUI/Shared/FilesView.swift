@@ -29,8 +29,12 @@ struct FilesView: View {
         }
         List(models, id: \.self, selection: $appModel.activeM3UModel) { model in
             VStack(alignment: .leading) {
-                Text(model.name!).font(.title3)
+                Text(model.name!)
+                    .font(.title2)
+                    .foregroundColor(.primary)
                 Text(model.m3uURL!.description)
+                    .font(.callout)
+                    .foregroundColor(.secondary)
             }
             .contextMenu {
                 Button {
@@ -52,7 +56,6 @@ struct FilesView: View {
                 #endif
             }
         }
-        .padding()
         .searchable(text: $nameFilter)
         .toolbar {
             Button {

@@ -38,10 +38,14 @@ struct PersistenceController {
         publicDesc.configuration = "public"
         publicDesc.cloudKitContainerOptions = NSPersistentCloudKitContainerOptions(containerIdentifier: "iCloud.com.kintan.tracy")
         publicDesc.cloudKitContainerOptions?.databaseScope = .public
+        publicDesc.setOption(true as NSObject, forKey: NSPersistentHistoryTrackingKey)
+        publicDesc.setOption(true as NSObject, forKey: NSPersistentStoreRemoteChangeNotificationPostOptionKey)
         let privateURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!.appendingPathComponent("private.sqlite")
         let privateDesc = NSPersistentStoreDescription(url: privateURL)
         privateDesc.configuration = "private"
         privateDesc.cloudKitContainerOptions = NSPersistentCloudKitContainerOptions(containerIdentifier: "iCloud.com.kintan.tracy")
+        privateDesc.setOption(true as NSObject, forKey: NSPersistentHistoryTrackingKey)
+        privateDesc.setOption(true as NSObject, forKey: NSPersistentStoreRemoteChangeNotificationPostOptionKey)
         container.persistentStoreDescriptions = [publicDesc, privateDesc]
         let persistentStoreCoordinator = container.persistentStoreCoordinator
         container.loadPersistentStores { storeDescription, error in

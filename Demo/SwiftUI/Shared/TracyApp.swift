@@ -151,11 +151,7 @@ class APPModel: ObservableObject {
 //        KSOptions.isUseAudioRenderer = true
 //        KSOptions.isLoopPlay = true
         if let activeM3UURL {
-            let request = M3UModel.fetchRequest()
-            request.predicate = NSPredicate(format: "m3uURL == %@", activeM3UURL.description)
-            if let model = try? PersistenceController.shared.container.viewContext.fetch(request).first {
-                activeM3UModel = model
-            }
+            addM3U(url: activeM3UURL)
         }
     }
 

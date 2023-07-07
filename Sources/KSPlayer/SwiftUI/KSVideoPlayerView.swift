@@ -39,10 +39,12 @@ public struct KSVideoPlayerView: View {
                 }
                 #if os(macOS)
                 isMaskShow ? NSCursor.unhide() : NSCursor.setHiddenUntilMouseMoves(true)
-//                NSApp.mainWindow?.standardWindowButton(.zoomButton)?.isHidden = !isMaskShow
-//                NSApp.mainWindow?.standardWindowButton(.closeButton)?.isHidden = !isMaskShow
-//                NSApp.mainWindow?.standardWindowButton(.miniaturizeButton)?.isHidden = !isMaskShow
-//                NSApp.mainWindow?.standardWindowButton(.closeButton)?.superview?.isHidden = !isMaskShow
+                if let window = playerCoordinator.playerLayer?.player.view?.window {
+                    window.standardWindowButton(.zoomButton)?.isHidden = !isMaskShow
+                    window.standardWindowButton(.closeButton)?.isHidden = !isMaskShow
+                    window.standardWindowButton(.miniaturizeButton)?.isHidden = !isMaskShow
+//                    window.standardWindowButton(.closeButton)?.superview?.isHidden = !isMaskShow
+                }
                 #endif
             }
         }
@@ -382,8 +384,10 @@ struct VideoSettingView: View {
         } set: { value in
             config.playerLayer?.player.playbackRate = value
         }) {
-            ForEach([Float(0.5), 1.0, 1.25, 1.5, 2.0]) { value in
-                Text(String(format: "%.2fx", value)).tag(value)
+            ForEach([0.5, 1.0, 1.25, 1.5, 2.0] as [Float]) { value in
+                // 需要有一个变量text。不然会自动帮忙加很多0
+                let text = "\(value) x"
+                Text(text).tag(value)
             }
         } label: {
             Label("Playback Speed", systemImage: "speedometer")

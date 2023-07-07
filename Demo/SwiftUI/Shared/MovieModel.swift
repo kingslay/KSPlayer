@@ -92,10 +92,10 @@ extension M3UModel {
             } else {
                 let model = PlayModel(url: url, name: name, extinf: extinf)
                 model.m3uURL = self.m3uURL
-                try? model.managedObjectContext?.save()
                 return model
             }
         } ?? []
+        try? PersistenceController.shared.container.viewContext.save()
         return models
     }
 }
@@ -106,7 +106,7 @@ extension PlayModel {
         request.sortDescriptors = [
             NSSortDescriptor(
                 keyPath: \PlayModel.playTime,
-                ascending: true
+                ascending: false
             ),
         ]
         request.predicate = NSPredicate(format: "playTime != nil")
@@ -161,7 +161,9 @@ extension KSVideoPlayerView {
         self.init(url: url, options: options) { layer in
             if let layer {
                 model.duration = Int16(layer.player.duration)
-                model.current = Int16(layer.player.currentPlaybackTime)
+                if model.duration > 0 {
+                    model.current = Int16(layer.player.currentPlaybackTime)
+                }
                 try? model.managedObjectContext?.save()
             }
         }
