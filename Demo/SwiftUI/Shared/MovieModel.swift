@@ -95,7 +95,9 @@ extension M3UModel {
                 return model
             }
         } ?? []
-        try? PersistenceController.shared.container.viewContext.save()
+        if count != Int16(models.count) {
+            count = Int16(models.count)
+        }
         return models
     }
 }

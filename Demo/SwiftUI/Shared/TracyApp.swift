@@ -110,6 +110,7 @@ class APPModel: ObservableObject {
         }
     }
 
+    var tabSelected: TabBarItem? = .Files
     @Published var path = NavigationPath()
     @Published var openFileImport = false
     @Published var openURLImport = false
@@ -121,6 +122,11 @@ class APPModel: ObservableObject {
                 activeM3UURL = activeM3UModel.m3uURL
                 Task { @MainActor in
                     playlist = await activeM3UModel.parsePlaylist()
+                    DispatchQueue.main.async {
+                        if PersistenceController.shared.container.viewContext.hasChanges {
+                            try? PersistenceController.shared.container.viewContext.save()
+                        }
+                    }
                 }
             }
         }
@@ -152,6 +158,7 @@ class APPModel: ObservableObject {
 //        KSOptions.isLoopPlay = true
         if let activeM3UURL {
             addM3U(url: activeM3UURL)
+            tabSelected = .Home
         }
     }
 

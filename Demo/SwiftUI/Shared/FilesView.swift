@@ -32,6 +32,9 @@ struct FilesView: View {
                 Text(model.name!)
                     .font(.title2)
                     .foregroundColor(.primary)
+                Text("total \(model.count) channels")
+                    .font(.callout)
+                    .foregroundColor(.secondary)
                 Text(model.m3uURL!.description)
                     .font(.callout)
                     .foregroundColor(.secondary)
@@ -83,19 +86,18 @@ struct M3UView: View {
             }
             Section {
                 Text("Links to playlists you add will be public. All people can see it. But only you can modify and delete")
-                HStack {
-                    Button("Cancel") {
-                        dismiss()
+                Button("Done") {
+                    if let url = URL(string: url.trimmingCharacters(in: NSMutableCharacterSet.whitespacesAndNewlines)) {
+                        let name = name.trimmingCharacters(in: NSMutableCharacterSet.whitespacesAndNewlines)
+                        appModel.addM3U(url: url, name: name.count == 0 ? nil : name)
                     }
-                    Spacer()
-                    Button("Done") {
-                        if let url = URL(string: url.trimmingCharacters(in: NSMutableCharacterSet.whitespacesAndNewlines)) {
-                            let name = name.trimmingCharacters(in: NSMutableCharacterSet.whitespacesAndNewlines)
-                            appModel.addM3U(url: url, name: name.count == 0 ? nil : name)
-                        }
-                        dismiss()
-                    }
+                    dismiss()
                 }
+                #if os(macOS)
+                Button("Cancel") {
+                    dismiss()
+                }
+                #endif
             }
         }.padding()
     }

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="21513" systemVersion="22F82" minimumToolsVersion="Automatic" sourceLanguage="Swift" usedWithCloudKit="YES" userDefinedModelVersionIdentifier="">
     <entity name="M3UModel" representedClassName="M3UModel" syncable="YES" codeGenerationType="class">
+        <attribute name="count" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
         <attribute name="m3uURL" optional="YES" attributeType="URI"/>
         <attribute name="name" attributeType="String" defaultValueString=""/>
     </entity>

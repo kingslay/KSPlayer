@@ -8,24 +8,28 @@ struct ContentView: View {
     private var initialView: some View {
         #if os(macOS)
         NavigationView {
-            List {
+            List(selection: $appModel.tabSelected) {
                 NavigationLink {
                     HomeView()
                 } label: {
                     Label("Home", systemImage: "house.fill")
                 }
+                .tag(TabBarItem.Home)
                 NavigationLink {
                     FavoriteView()
                 } label: {
                     Label("Favorite", systemImage: "star.fill")
                 }
+                .tag(TabBarItem.Favorite)
                 NavigationLink {
                     FilesView()
                 } label: {
                     Label("Files", systemImage: "folder.fill.badge.gearshape")
                 }
+                .tag(TabBarItem.Files)
             }
-        }.toolbar {
+        }
+        .toolbar {
             ToolbarItem(placement: .navigation) {
                 Button {
                     NSApp.keyWindow?.firstResponder?.tryToPerform(#selector(NSSplitViewController.toggleSidebar(_:)), with: nil)
@@ -35,7 +39,7 @@ struct ContentView: View {
             }
         }
         #else
-        TabView {
+        TabView(selection: $appModel.tabSelected) {
             NavigationStack(path: $appModel.path) {
                 HomeView()
                     .navigationDestination(for: URL.self) { url in
@@ -51,26 +55,29 @@ struct ContentView: View {
                         #endif
                     }
             }
-
             .tabItem {
                 Label("Home", systemImage: "house.fill")
             }
+            .tag(TabBarItem.Home)
             NavigationStack(path: $appModel.path) {
                 FavoriteView()
             }
             .tabItem {
                 Label("Favorite", systemImage: "star.fill")
             }
+            .tag(TabBarItem.Favorite)
             NavigationStack {
                 FilesView()
             }
             .tabItem {
                 Label("Files", systemImage: "folder.fill.badge.gearshape")
             }
+            .tag(TabBarItem.Files)
             SettingView()
                 .tabItem {
                     Label("Setting", systemImage: "gear")
                 }
+                .tag(TabBarItem.Setting)
         }
         #endif
     }
@@ -125,4 +132,11 @@ struct ContentView: View {
                 appModel.open(url: url)
             }
     }
+}
+
+enum TabBarItem: Int {
+    case Home
+    case Favorite
+    case Files
+    case Setting
 }
