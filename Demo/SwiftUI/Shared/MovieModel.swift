@@ -81,22 +81,35 @@ extension M3UModel {
         try? context.save()
     }
 
-    func parsePlaylist() async -> [PlayModel] {
+    func parsePlaylist(refresh: Bool = false) async -> [PlayModel] {
         let request = NSFetchRequest<PlayModel>(entityName: "PlayModel")
         request.predicate = NSPredicate(format: "m3uURL == %@", m3uURL!.description)
-        let dic = try? PersistenceController.shared.container.viewContext.fetch(request).toDictionary { $0.url }
+        let viewContext = PersistenceController.shared.container.viewContext
+        let array = (await viewContext.perform {
+            try? viewContext.fetch(request)
+        }) ?? []
+        let refresh = refresh || array.count == 0
+        guard refresh else {
+            return array
+        }
+        let dic = array.toDictionary { $0.url }
         let result = try? await m3uURL?.parsePlaylist()
         let models = result?.compactMap { name, url, extinf -> PlayModel in
-            if let model = dic?[url] {
+            if let model = dic[url] {
                 return model
             } else {
-                let model = PlayModel(url: url, name: name, extinf: extinf)
+                let model = PlayModel(context: viewContext, url: url, name: name, extinf: extinf)
                 model.m3uURL = self.m3uURL
                 return model
             }
         } ?? []
         if count != Int16(models.count) {
             count = Int16(models.count)
+        }
+        await viewContext.perform {
+            if viewContext.hasChanges {
+                try? viewContext.save()
+            }
         }
         return models
     }

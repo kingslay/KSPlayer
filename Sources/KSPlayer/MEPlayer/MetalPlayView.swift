@@ -238,6 +238,7 @@ class MetalView: UIView {
             #endif
         }
         guard let drawable = metalLayer.nextDrawable() else {
+            KSLog("not readyForMoreMediaData")
             return
         }
         render.draw(pixelBuffer: pixelBuffer, display: display, drawable: drawable)

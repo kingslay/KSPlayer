@@ -514,7 +514,7 @@ public class FileLog: LogHandler {
 public extension Array {
     func toDictionary<Key: Hashable>(with selectKey: (Element) -> Key) -> [Key: Element] {
         var dict = [Key: Element]()
-        for element in self {
+        forEach { element in
             dict[selectKey(element)] = element
         }
         return dict

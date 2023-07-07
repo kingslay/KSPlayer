@@ -122,11 +122,6 @@ class APPModel: ObservableObject {
                 activeM3UURL = activeM3UModel.m3uURL
                 Task { @MainActor in
                     playlist = await activeM3UModel.parsePlaylist()
-                    DispatchQueue.main.async {
-                        if PersistenceController.shared.container.viewContext.hasChanges {
-                            try? PersistenceController.shared.container.viewContext.save()
-                        }
-                    }
                 }
             }
         }

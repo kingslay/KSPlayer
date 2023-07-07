@@ -24,12 +24,17 @@ struct URLImportView: View {
                 Toggle("Remember URL", isOn: $rememberURL)
                 if historyURLs.count > 0 {
                     Picker("History URL", selection: $playURL) {
+                        Text("None").tag("")
                         ForEach(historyURLs) {
                             Text($0.description).tag($0.description)
                         }
                     }
+                    #if os(tvOS)
+                    .pickerStyle(.inline)
+                    #endif
                 }
             }
+              
             Section("HTTP Authentication") {
                 TextField("Username:", text: $username)
                 SecureField("Password:", text: $password)

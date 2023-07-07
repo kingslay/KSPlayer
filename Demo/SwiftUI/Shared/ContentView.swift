@@ -42,25 +42,15 @@ struct ContentView: View {
         TabView(selection: $appModel.tabSelected) {
             NavigationStack(path: $appModel.path) {
                 HomeView()
-                    .navigationDestination(for: URL.self) { url in
-                        KSVideoPlayerView(url: url)
-                        #if !os(macOS)
-                            .toolbar(.hidden, for: .tabBar)
-                        #endif
-                    }
-                    .navigationDestination(for: PlayModel.self) { model in
-                        KSVideoPlayerView(model: model)
-                        #if !os(macOS)
-                            .toolbar(.hidden, for: .tabBar)
-                        #endif
-                    }
+                    .navigationPlay()
             }
             .tabItem {
                 Label("Home", systemImage: "house.fill")
             }
             .tag(TabBarItem.Home)
-            NavigationStack(path: $appModel.path) {
+            NavigationStack {
                 FavoriteView()
+                    .navigationPlay()
             }
             .tabItem {
                 Label("Favorite", systemImage: "star.fill")
@@ -79,6 +69,7 @@ struct ContentView: View {
                 }
                 .tag(TabBarItem.Setting)
         }
+
         #endif
     }
 
@@ -139,4 +130,22 @@ enum TabBarItem: Int {
     case Favorite
     case Files
     case Setting
+}
+
+public extension View {
+    @ViewBuilder
+    func navigationPlay() -> some View {
+        navigationDestination(for: URL.self) { url in
+            KSVideoPlayerView(url: url)
+            #if !os(macOS)
+                .toolbar(.hidden, for: .tabBar)
+            #endif
+        }
+        .navigationDestination(for: PlayModel.self) { model in
+            KSVideoPlayerView(model: model)
+            #if !os(macOS)
+                .toolbar(.hidden, for: .tabBar)
+            #endif
+        }
+    }
 }

@@ -102,11 +102,7 @@ struct MoiveView: View {
         .contextMenu {
             Button {
                 model.isFavorite.toggle()
-                do {
-                    try model.managedObjectContext?.save()
-                } catch {
-                    print(error)
-                }
+                try? model.managedObjectContext?.save()
             } label: {
                 Label(model.isFavorite ? "Cancel favorite" : "Favorite", systemImage: model.isFavorite ? "star" : "star.fill")
             }

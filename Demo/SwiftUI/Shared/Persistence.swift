@@ -30,17 +30,19 @@ struct PersistenceController {
 
     init(inMemory: Bool = false) {
         container = NSPersistentCloudKitContainer(name: "Model")
+        let directory = container.persistentStoreDescriptions.first!.url!.deletingLastPathComponent()
+        KSLog("coreData directory \(directory)")
         if inMemory {
             container.persistentStoreDescriptions.first!.url = URL(fileURLWithPath: "/dev/null")
         }
-        let publicURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!.appendingPathComponent("public.sqlite")
+        let publicURL = directory.appendingPathComponent("public.sqlite")
         let publicDesc = NSPersistentStoreDescription(url: publicURL)
         publicDesc.configuration = "public"
         publicDesc.cloudKitContainerOptions = NSPersistentCloudKitContainerOptions(containerIdentifier: "iCloud.com.kintan.tracy")
         publicDesc.cloudKitContainerOptions?.databaseScope = .public
         publicDesc.setOption(true as NSObject, forKey: NSPersistentHistoryTrackingKey)
         publicDesc.setOption(true as NSObject, forKey: NSPersistentStoreRemoteChangeNotificationPostOptionKey)
-        let privateURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!.appendingPathComponent("private.sqlite")
+        let privateURL = directory.appendingPathComponent("private.sqlite")
         let privateDesc = NSPersistentStoreDescription(url: privateURL)
         privateDesc.configuration = "private"
         privateDesc.cloudKitContainerOptions = NSPersistentCloudKitContainerOptions(containerIdentifier: "iCloud.com.kintan.tracy")
