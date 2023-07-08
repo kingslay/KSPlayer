@@ -10,6 +10,7 @@ import Foundation
 import KSPlayer
 
 class MEOptions: KSOptions {
+    static var isUseDisplayLayer = true
     override func process(assetTrack: MediaPlayerTrack) {
         if assetTrack.mediaType == .video {
             if [FFmpegFieldOrder.bb, .bt, .tt, .tb].contains(assetTrack.fieldOrder) {
@@ -17,6 +18,10 @@ class MEOptions: KSOptions {
                 hardwareDecode = false
             }
         }
+    }
+
+    override func isUseDisplayLayer() -> Bool {
+        MEOptions.isUseDisplayLayer && display == .plane
     }
 
     #if os(tvOS)

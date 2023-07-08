@@ -56,12 +56,18 @@ struct SettingAudioView: View {
 
 struct SettingVideoView: View {
     @AppStorage("hardwareDecode") private var hardwareDecode = KSOptions.hardwareDecode
+    @AppStorage("isUseDisplayLayer") private var isUseDisplayLayer = MEOptions.isUseDisplayLayer
+
     var body: some View {
         Form {
             Toggle("Hardware decoder", isOn: $hardwareDecode)
+            Toggle("Use DisplayLayer", isOn: $isUseDisplayLayer)
         }
         .onChange(of: hardwareDecode) {
             KSOptions.hardwareDecode = $0
+        }
+        .onChange(of: isUseDisplayLayer) {
+            MEOptions.isUseDisplayLayer = $0
         }
     }
 }

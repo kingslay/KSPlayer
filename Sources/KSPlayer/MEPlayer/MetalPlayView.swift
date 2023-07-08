@@ -223,6 +223,7 @@ class MetalView: UIView {
         let colorspace = pixelBuffer.colorspace
         if metalLayer.colorspace != colorspace {
             metalLayer.colorspace = colorspace
+            KSLog("CAMetalLayer colorspace \(String(describing: colorspace))")
             #if !os(tvOS)
             if #available(iOS 16.0, *) {
                 if let name = colorspace?.name, name != CGColorSpace.sRGB {
@@ -234,6 +235,7 @@ class MetalView: UIView {
                 } else {
                     metalLayer.wantsExtendedDynamicRangeContent = false
                 }
+                KSLog("CAMetalLayer wantsExtendedDynamicRangeContent \(metalLayer.wantsExtendedDynamicRangeContent)")
             }
             #endif
         }
@@ -286,17 +288,19 @@ class AVSampleBufferDisplayView: UIView {
             if displayLayer.isReadyForMoreMediaData {
                 displayLayer.enqueue(sampleBuffer)
             } else {
-                KSLog("AVSampleBufferDisplayLayer not readyForMoreMediaData")
+                KSLog("AVSampleBufferDisplayLayer not readyForMoreMediaData. video time \(time), controlTime \(displayLayer.timebase.time) ")
                 if let controlTimebase = displayLayer.controlTimebase {
                     CMTimebaseSetTime(controlTimebase, time: time)
                 }
             }
             if #available(macOS 11.0, iOS 14, tvOS 14, *) {
                 if displayLayer.requiresFlushToResumeDecoding {
+                    KSLog("AVSampleBufferDisplayLayer requiresFlushToResumeDecoding so flush")
                     displayLayer.flush()
                 }
             }
             if displayLayer.status == .failed {
+                KSLog("AVSampleBufferDisplayLayer status failed so flush")
                 displayLayer.flush()
                 //                    if let error = displayLayer.error as NSError?, error.code == -11847 {
                 //                        displayLayer.stopRequestingMediaData()
