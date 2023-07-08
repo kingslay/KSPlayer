@@ -168,7 +168,7 @@ extension MetalPlayView {
         }
     }
 
-    private func set(pixelBuffer: CVPixelBuffer, time _: CMTime) {
+    private func set(pixelBuffer: CVPixelBuffer, time: CMTime) {
         if videoInfo == nil || !CMVideoFormatDescriptionMatchesImageBuffer(videoInfo!, imageBuffer: pixelBuffer) {
             if videoInfo != nil {
                 displayView.removeFromSuperview()
@@ -181,7 +181,7 @@ extension MetalPlayView {
             }
         }
         guard let videoInfo else { return }
-        displayView.enqueue(imageBuffer: pixelBuffer, formatDescription: videoInfo)
+        displayView.enqueue(imageBuffer: pixelBuffer, formatDescription: videoInfo, time: time)
     }
 }
 
@@ -238,7 +238,7 @@ class MetalView: UIView {
             #endif
         }
         guard let drawable = metalLayer.nextDrawable() else {
-            KSLog("not readyForMoreMediaData")
+            KSLog("CAMetalLayer not readyForMoreMediaData")
             return
         }
         render.draw(pixelBuffer: pixelBuffer, display: display, drawable: drawable)
@@ -274,7 +274,7 @@ class AVSampleBufferDisplayView: UIView {
         fatalError("init(coder:) has not been implemented")
     }
 
-    func enqueue(imageBuffer: CVPixelBuffer, formatDescription: CMVideoFormatDescription) {
+    func enqueue(imageBuffer: CVPixelBuffer, formatDescription: CMVideoFormatDescription, time: CMTime) {
         var timing = CMSampleTimingInfo(duration: .invalid, presentationTimeStamp: .zero, decodeTimeStamp: .invalid)
         //        var timing = CMSampleTimingInfo(duration: .invalid, presentationTimeStamp: time, decodeTimeStamp: .invalid)
         var sampleBuffer: CMSampleBuffer?
@@ -286,7 +286,10 @@ class AVSampleBufferDisplayView: UIView {
             if displayLayer.isReadyForMoreMediaData {
                 displayLayer.enqueue(sampleBuffer)
             } else {
-                KSLog("not readyForMoreMediaData")
+                KSLog("AVSampleBufferDisplayLayer not readyForMoreMediaData")
+                if let controlTimebase = displayLayer.controlTimebase {
+                    CMTimebaseSetTime(controlTimebase, time: time)
+                }
             }
             if #available(macOS 11.0, iOS 14, tvOS 14, *) {
                 if displayLayer.requiresFlushToResumeDecoding {
