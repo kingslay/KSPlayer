@@ -82,11 +82,11 @@ extension M3UModel {
     }
 
     func parsePlaylist(refresh: Bool = false) async -> [PlayModel] {
-        let request = NSFetchRequest<PlayModel>(entityName: "PlayModel")
-        request.predicate = NSPredicate(format: "m3uURL == %@", m3uURL!.description)
         let viewContext = managedObjectContext ?? PersistenceController.shared.container.viewContext
-        let array = await (viewContext.perform {
-            try? viewContext.fetch(request)
+        let array: [PlayModel] = await (viewContext.perform {
+            let request = NSFetchRequest<PlayModel>(entityName: "PlayModel")
+            request.predicate = NSPredicate(format: "m3uURL == %@", self.m3uURL!.description)
+            return try? viewContext.fetch(request)
         }) ?? []
         guard refresh || array.count == 0 else {
             return array
