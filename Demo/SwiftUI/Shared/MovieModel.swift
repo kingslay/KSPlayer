@@ -81,32 +81,35 @@ extension M3UModel {
         try? context.save()
     }
 
+    @MainActor
     func parsePlaylist(refresh: Bool = false) async -> [PlayModel] {
         let viewContext = managedObjectContext ?? PersistenceController.shared.container.viewContext
-        let array: [PlayModel] = await (viewContext.perform {
-            let request = NSFetchRequest<PlayModel>(entityName: "PlayModel")
-            request.predicate = NSPredicate(format: "m3uURL == %@", self.m3uURL!.description)
-            return try? viewContext.fetch(request)
-        }) ?? []
+        let request = NSFetchRequest<PlayModel>(entityName: "PlayModel")
+        request.predicate = NSPredicate(format: "m3uURL == %@", m3uURL!.description)
+        let array: [PlayModel] = (try? viewContext.fetch(request)) ?? []
         guard refresh || array.count == 0 else {
             return array
         }
-        let dic = array.toDictionary { $0.url }
+        let dic = array.toDictionary {
+            $0.m3uURL = nil
+            return $0.url
+        }
         let result = try? await m3uURL?.parsePlaylist()
         let models = result?.compactMap { name, url, extinf -> PlayModel in
             if let model = dic[url] {
+                model.m3uURL = m3uURL
                 return model
             } else {
                 let model = PlayModel(context: viewContext, url: url, name: name, extinf: extinf)
-                model.m3uURL = self.m3uURL
+                model.m3uURL = m3uURL
                 return model
             }
         } ?? []
         if count != Int16(models.count) {
             count = Int16(models.count)
         }
-        await viewContext.perform {
-            if viewContext.hasChanges {
+        if viewContext.hasChanges {
+            Task { @MainActor in
                 try? viewContext.save()
             }
         }
