@@ -88,13 +88,13 @@ struct MoiveView: View {
     #if os(iOS)
     static let width = min(KSOptions.sceneSize.width, KSOptions.sceneSize.height) / 2 - 20
     #elseif os(tvOS)
-    static let width = KSOptions.sceneSize.width / 4 - 30
+    static let width = KSOptions.sceneSize.width / 4 - 60
     #else
     static let width = CGFloat(192)
     #endif
     @ObservedObject var model: PlayModel
     var body: some View {
-        VStack(alignment: .leading) {
+        VStack {
             image
             Text(model.name!).lineLimit(1)
         }

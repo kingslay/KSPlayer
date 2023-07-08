@@ -14,7 +14,26 @@ struct PersistenceController {
     static var preview: PersistenceController = {
         let result = PersistenceController(inMemory: true)
         let viewContext = result.container.viewContext
-        for _ in 0 ..< 10 {}
+        var urls: [String] = [
+            "https://raw.githubusercontent.com/YanG-1989/m3u/main/Gather.m3u",
+            "https://iptv-org.github.io/iptv/index.m3u",
+            "https://iptv-org.github.io/iptv/countries/cn.m3u",
+            "https://iptv-org.github.io/iptv/countries/hk.m3u",
+            "https://iptv-org.github.io/iptv/countries/tw.m3u",
+            "https://iptv-org.github.io/iptv/regions/amer.m3u",
+            "https://iptv-org.github.io/iptv/regions/asia.m3u",
+            "https://iptv-org.github.io/iptv/regions/eur.m3u",
+            "https://iptv-org.github.io/iptv/categories/education.m3u",
+            "https://iptv-org.github.io/iptv/categories/movies.m3u",
+            "https://iptv-org.github.io/iptv/languages/zho.m3u",
+            "https://iptv-org.github.io/iptv/languages/eng.m3u",
+            "https://raw.githubusercontent.com/kingslay/KSPlayer/develop/Tests/KSPlayerTests/test.m3u",
+        ]
+        urls.forEach { str in
+            if let url = URL(string: str) {
+                _ = M3UModel(context: viewContext, url: url)
+            }
+        }
         do {
             try viewContext.save()
         } catch {
@@ -30,19 +49,23 @@ struct PersistenceController {
 
     init(inMemory: Bool = false) {
         container = NSPersistentCloudKitContainer(name: "Model")
-        let directory = container.persistentStoreDescriptions.first!.url!.deletingLastPathComponent()
-        KSLog("coreData directory \(directory)")
+        let publicURL: URL
+        let privateURL: URL
         if inMemory {
-            container.persistentStoreDescriptions.first!.url = URL(fileURLWithPath: "/dev/null")
+            publicURL = URL(fileURLWithPath: "/dev/null")
+            privateURL = URL(fileURLWithPath: "/dev/null")
+        } else {
+            let directory = container.persistentStoreDescriptions.first!.url!.deletingLastPathComponent()
+            KSLog("coreData directory \(directory)")
+            publicURL = directory.appendingPathComponent("public.sqlite")
+            privateURL = directory.appendingPathComponent("private.sqlite")
         }
-        let publicURL = directory.appendingPathComponent("public.sqlite")
         let publicDesc = NSPersistentStoreDescription(url: publicURL)
         publicDesc.configuration = "public"
         publicDesc.cloudKitContainerOptions = NSPersistentCloudKitContainerOptions(containerIdentifier: "iCloud.com.kintan.tracy")
         publicDesc.cloudKitContainerOptions?.databaseScope = .public
         publicDesc.setOption(true as NSObject, forKey: NSPersistentHistoryTrackingKey)
         publicDesc.setOption(true as NSObject, forKey: NSPersistentStoreRemoteChangeNotificationPostOptionKey)
-        let privateURL = directory.appendingPathComponent("private.sqlite")
         let privateDesc = NSPersistentStoreDescription(url: privateURL)
         privateDesc.configuration = "private"
         privateDesc.cloudKitContainerOptions = NSPersistentCloudKitContainerOptions(containerIdentifier: "iCloud.com.kintan.tracy")

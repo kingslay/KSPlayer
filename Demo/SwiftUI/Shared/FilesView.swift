@@ -45,6 +45,13 @@ struct FilesView: View {
                 } label: {
                     Label("Delete", systemImage: "trash.fill")
                 }
+                Button {
+                    Task {
+                        await _ = model.parsePlaylist(refresh: true)
+                    }
+                } label: {
+                    Label("Refresh", systemImage: "arrow.clockwise.circle")
+                }
                 #if !os(tvOS)
                 Button {
                     #if os(macOS)

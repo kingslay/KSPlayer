@@ -34,7 +34,7 @@ struct URLImportView: View {
                     #endif
                 }
             }
-              
+
             Section("HTTP Authentication") {
                 TextField("Username:", text: $username)
                 SecureField("Password:", text: $password)
