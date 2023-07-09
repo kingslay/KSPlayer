@@ -139,7 +139,10 @@ extension PlayModel {
 
 extension KSVideoPlayerView {
     init(url: URL) {
-        self.init(model: PlayModel(url: url))
+        let request = NSFetchRequest<PlayModel>(entityName: "PlayModel")
+        request.predicate = NSPredicate(format: "url == %@", url.description)
+        let model = (try? PersistenceController.shared.container.viewContext.fetch(request).first) ?? PlayModel(url: url)
+        self.init(model: model)
     }
 
     init(model: PlayModel) {
