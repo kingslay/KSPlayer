@@ -185,7 +185,7 @@ class APPModel: ObservableObject {
         NavigationLink(value: model) {
             MoiveView(model: model)
         }
-        .buttonStyle(.plain)
+        .buttonStyle(.automatic)
         #endif
     }
 }

@@ -77,6 +77,7 @@ struct ContentView: View {
         initialView
             .background(Color.black)
             .preferredColorScheme(.dark)
+            .accentColor(.white)
             .sheet(isPresented: $appModel.openURLImport) {
                 URLImportView()
             }
