@@ -144,13 +144,17 @@ open class KSOptions {
 
     // 缓冲算法函数
     open func playable(capacitys: [CapacityProtocol], isFirst: Bool, isSeek: Bool) -> LoadingState {
-        let packetCount = capacitys.map(\.packetCount).min() ?? 0
-        let frameCount = capacitys.map(\.frameCount).min() ?? 0
+        let packetCount = capacitys.map(\.packetCount).max() ?? 0
+        let frameCount = capacitys.map(\.frameCount).max() ?? 0
         let isEndOfFile = capacitys.allSatisfy(\.isEndOfFile)
         let loadedTime = capacitys.map { TimeInterval($0.packetCount + $0.frameCount) / TimeInterval($0.fps) }.min() ?? 0
         let progress = loadedTime * 100.0 / preferredForwardBufferDuration
         let isPlayable = capacitys.allSatisfy { capacity in
             if capacity.isEndOfFile && capacity.packetCount == 0 {
+                return true
+            }
+            // 处理视频轨道一致没有值的问题(纯音频)
+            if capacity.mediaType == .video && capacity.frameCount == 0 && capacity.packetCount == 0 {
                 return true
             }
             guard capacity.frameCount >= capacity.frameMaxCount >> 2 else {
