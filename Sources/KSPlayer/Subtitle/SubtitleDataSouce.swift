@@ -180,13 +180,7 @@ public class AssrtSubtitleDataSouce: SearchSubtitleDataSouce {
 
     public func searchSubtitle(url: URL) async throws {
         infos.removeAll()
-        var query = url.lastPathComponent
-        let nameArray = query.split(separator: ".")
-        if nameArray.count == 2 {
-            query = String(nameArray[0])
-        } else if nameArray.count > 2 {
-            query = nameArray.prefix(2).joined(separator: ".")
-        }
+        let query = url.deletingPathExtension().lastPathComponent
         guard let searchApi = URL(string: "https://api.assrt.net/v1/sub/search")?.add(queryItems: ["q": query]) else {
             return
         }

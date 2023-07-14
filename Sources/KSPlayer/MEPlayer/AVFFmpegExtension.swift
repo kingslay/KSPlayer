@@ -443,6 +443,9 @@ extension Dictionary where Key == String {
             } else if let dic = value as? Dictionary {
                 let string = dic.map { "\($0.0)=\($0.1)" }.joined(separator: "\r\n")
                 av_dict_set(&avOptions, key, string, 0)
+            } else if let array = value as? [String] {
+                let string = array.joined(separator: "+")
+                av_dict_set(&avOptions, key, string, 0)
             }
         }
         return avOptions

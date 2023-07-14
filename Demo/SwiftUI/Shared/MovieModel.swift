@@ -156,7 +156,7 @@ extension KSVideoPlayerView {
         } else if url.lastPathComponent == "vr.mp4" {
             options.display = .vr
         } else if url.lastPathComponent == "mjpeg.flac" {
-            options.videoDisable = true
+//            options.videoDisable = true
             options.syncDecodeAudio = true
         } else if url.lastPathComponent == "subrip.mkv" {
             options.asynchronousDecompression = false
@@ -180,6 +180,7 @@ extension KSVideoPlayerView {
         // set 'listen_timeout' = -1 for rtmp、rtsp
         if url.absoluteString.starts(with: "rtmp") || url.absoluteString.starts(with: "rtsp") {
             options.formatContextOptions["listen_timeout"] = -1
+            options.formatContextOptions["fflags"] = ["nobuffer", "autobsf"]
         } else {
             options.formatContextOptions["listen_timeout"] = 3
         }

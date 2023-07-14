@@ -92,6 +92,23 @@ class CustomVideoPlayerView: VideoPlayerView {
     }
 }
 
+class MEOptions: KSOptions {
+    override func process(assetTrack: MediaPlayerTrack) {
+        if assetTrack.mediaType == .video {
+            if [FFmpegFieldOrder.bb, .bt, .tt, .tb].contains(assetTrack.fieldOrder) {
+                videoFilters.append("yadif=mode=1:parity=-1:deint=0")
+                hardwareDecode = false
+            }
+        }
+    }
+
+    #if os(tvOS)
+    override open func preferredDisplayCriteria(refreshRate: Float, videoDynamicRange: Int32) -> AVDisplayCriteria? {
+        AVDisplayCriteria(refreshRate: refreshRate, videoDynamicRange: videoDynamicRange)
+    }
+    #endif
+}
+
 var testObjects: [KSPlayerResource] = {
     var objects = [KSPlayerResource]()
     for ext in ["mp4", "mkv", "mov", "h264", "flac", "webm"] {
@@ -99,7 +116,7 @@ var testObjects: [KSPlayerResource] = {
             continue
         }
         for url in urls {
-            let options = KSOptions()
+            let options = MEOptions()
             if url.lastPathComponent == "h264.mp4" {
                 options.videoFilters = ["hflip", "vflip"]
                 options.hardwareDecode = false
