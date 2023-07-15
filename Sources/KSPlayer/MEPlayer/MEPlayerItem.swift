@@ -710,8 +710,8 @@ extension MEPlayerItem: OutputRenderSourceDelegate {
             return
         }
         if isAudioStalled {
-            lastMediaTime = CACurrentMediaTime()
             currentPlaybackTime = time.seconds - options.audioDelay
+            lastMediaTime = CACurrentMediaTime()
         }
     }
 
@@ -732,13 +732,13 @@ extension MEPlayerItem: OutputRenderSourceDelegate {
         var desire: TimeInterval = 0
         let predicate: ((VideoVTBFrame) -> Bool)? = force ? nil : { [weak self] frame -> Bool in
             guard let self else { return true }
-            desire = self.currentPlaybackTime
-                + max(CACurrentMediaTime() - self.lastMediaTime, 0)
-                + self.options.audioDelay
+            desire = self.currentPlaybackTime + self.options.audioDelay
             #if !os(macOS)
             desire -= AVAudioSession.sharedInstance().outputLatency
             #endif
-            return frame.seconds <= desire
+            desire += max(CACurrentMediaTime() - self.lastMediaTime, 0)
+            let diff = frame.seconds - desire
+            return diff <= 1 / 120
         }
         let frame = videoTrack.getOutputRender(where: predicate)
         if let frame, !isAudioStalled {

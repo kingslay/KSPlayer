@@ -334,10 +334,15 @@ open class KSOptions {
 
     open func videoClockSync(audioTime: TimeInterval, videoTime: TimeInterval) -> ClockProcessType {
         let delay = audioTime - videoTime
+        #if DEBUG
+        if fabs(delay) > 1 / 60 {
+            print("audio video diff \(delay)")
+        }
+        #endif
         if delay > 0.04 {
             KSLog("video delay time: \(delay), audio time:\(audioTime), delay count:\(videoClockDelayCount)")
         }
-        if delay > 0.4 {
+        if delay > 0.1 {
             videoClockDelayCount += 1
             if delay > 2 {
                 if videoClockDelayCount > 10 {
