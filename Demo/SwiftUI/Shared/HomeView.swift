@@ -62,7 +62,6 @@ struct HomeView: View {
             }
         }
         .padding()
-        .searchable(text: $nameFilter)
         .toolbar {
             Button {
                 appModel.openFileImport = true
@@ -74,13 +73,20 @@ struct HomeView: View {
             } label: {
                 Text("Open URL")
             }
+
             Picker("group filter", selection: $groupFilter) {
                 Text("All ").tag("")
                 ForEach(appModel.groups) { group in
                     Text(group).tag(group)
                 }
             }
+            #if os(tvOS)
+//                    .pickerStyle(.menu)
+            #endif
         }
+        #if !os(tvOS)
+        .searchable(text: $nameFilter)
+        #endif
     }
 }
 

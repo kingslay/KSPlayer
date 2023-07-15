@@ -147,7 +147,7 @@ open class KSOptions {
         let packetCount = capacitys.map(\.packetCount).max() ?? 0
         let frameCount = capacitys.map(\.frameCount).max() ?? 0
         let isEndOfFile = capacitys.allSatisfy(\.isEndOfFile)
-        let loadedTime = capacitys.map { TimeInterval($0.packetCount + $0.frameCount) / TimeInterval($0.fps) }.min() ?? 0
+        let loadedTime = capacitys.map { TimeInterval($0.packetCount + $0.frameCount) / TimeInterval($0.fps) }.max() ?? 0
         let progress = loadedTime * 100.0 / preferredForwardBufferDuration
         let isPlayable = capacitys.allSatisfy { capacity in
             if capacity.isEndOfFile && capacity.packetCount == 0 {

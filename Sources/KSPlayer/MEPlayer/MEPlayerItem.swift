@@ -26,10 +26,11 @@ final class MEPlayerItem {
     private var seekingCompletionHandler: ((Bool) -> Void)?
     // 没有音频数据可以渲染
     private var isAudioStalled = true
-    private var videoMediaTime = CACurrentMediaTime()
+    private var lastMediaTime = CACurrentMediaTime()
     private var isFirst = true
     private var isSeek = false
     private var allPlayerItemTracks = [PlayerItemTrackProtocol]()
+    private var maxFrameDuration = 10.0
     private var videoAudioTracks: [CapacityProtocol] {
         var tracks = [CapacityProtocol]()
         if let audioTrack {
@@ -230,6 +231,7 @@ extension MEPlayerItem {
             avformat_close_input(&self.formatCtx)
             return
         }
+        maxFrameDuration = formatCtx.pointee.iformat.pointee.flags & AVFMT_TS_DISCONT != 0 ? 10.0 : 3600.0
         options.findTime = CACurrentMediaTime()
         options.formatName = String(cString: formatCtx.pointee.iformat.pointee.name)
         if formatCtx.pointee.start_time != Int64.min {
@@ -708,7 +710,7 @@ extension MEPlayerItem: OutputRenderSourceDelegate {
             return
         }
         if isAudioStalled {
-            videoMediaTime = CACurrentMediaTime()
+            lastMediaTime = CACurrentMediaTime()
             currentPlaybackTime = time.seconds - options.audioDelay
         }
     }
@@ -719,6 +721,7 @@ extension MEPlayerItem: OutputRenderSourceDelegate {
         }
         if !isAudioStalled {
             currentPlaybackTime = time.seconds
+            lastMediaTime = CACurrentMediaTime()
         }
     }
 
@@ -729,13 +732,12 @@ extension MEPlayerItem: OutputRenderSourceDelegate {
         var desire: TimeInterval = 0
         let predicate: ((VideoVTBFrame) -> Bool)? = force ? nil : { [weak self] frame -> Bool in
             guard let self else { return true }
-            desire = self.currentPlaybackTime + self.options.audioDelay
+            desire = self.currentPlaybackTime
+                + max(CACurrentMediaTime() - self.lastMediaTime, 0)
+                + self.options.audioDelay
             #if !os(macOS)
             desire -= AVAudioSession.sharedInstance().outputLatency
             #endif
-            if self.isAudioStalled {
-                desire += max(CACurrentMediaTime() - self.videoMediaTime, 0)
-            }
             return frame.seconds <= desire
         }
         let frame = videoTrack.getOutputRender(where: predicate)
