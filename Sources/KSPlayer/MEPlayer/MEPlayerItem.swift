@@ -739,7 +739,7 @@ extension MEPlayerItem: OutputRenderSourceDelegate {
             return videoTrack.getOutputRender(where: nil)
         case .dropNext:
             _ = videoTrack.getOutputRender(where: nil)
-            return nil
+            return videoTrack.getOutputRender(where: nil)
         case .seek:
             videoTrack.outputRenderQueue.flush()
             videoTrack.seekTime = currentPlaybackTime
