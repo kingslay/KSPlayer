@@ -174,6 +174,7 @@ public enum ClockProcessType {
     case remain
     case next
     case dropNext
+    case flush
     case seek
 }
 

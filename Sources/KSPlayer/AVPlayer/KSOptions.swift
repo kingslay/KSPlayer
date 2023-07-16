@@ -338,7 +338,9 @@ open class KSOptions {
         desire -= AVAudioSession.sharedInstance().outputLatency
         #endif
         let diff = video.positionTime + video.duration - desire
-        if diff >= 1 / 120 {
+        if diff > 10 {
+            return .next
+        } else if diff >= 1 / 120 {
             videoClockDelayCount = 0
             return .remain
         } else {
@@ -348,9 +350,12 @@ open class KSOptions {
             if diff < -0.1 {
                 videoClockDelayCount += 1
                 if diff < -2 {
+//                    if videoClockDelayCount % 100 == 0 {
+//                        KSLog("video delay seek video track")
+//                        return .seek
+//                    }
                     if videoClockDelayCount % 10 == 0 {
-                        KSLog("video delay seek video track")
-                        return .seek
+                        return .flush
                     } else {
                         return .next
                     }
