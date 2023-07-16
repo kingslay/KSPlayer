@@ -177,7 +177,9 @@ extension KSVideoPlayer.Coordinator: KSPlayerLayerDelegate {
         if state == .readyToPlay {
             #if os(macOS)
             let naturalSize = layer.player.naturalSize
-            layer.player.view?.window?.contentAspectRatio = naturalSize
+            if naturalSize.width > 0, naturalSize.height > 0 {
+                layer.player.view?.window?.contentAspectRatio = naturalSize
+            }
             #endif
             videoTracks = layer.player.tracks(mediaType: .video)
             audioTracks = layer.player.tracks(mediaType: .audio)
