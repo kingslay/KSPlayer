@@ -728,7 +728,7 @@ extension MEPlayerItem: OutputRenderSourceDelegate {
     }
 
     func getVideoOutputRender(force: Bool) -> VideoVTBFrame? {
-        guard let videoTrack else {
+        guard let videoTrack, videoTrack.frameCount > 0 else {
             return nil
         }
         let type = force ? .next : options.videoClockSync(main: mainClock(), video: videoClock)

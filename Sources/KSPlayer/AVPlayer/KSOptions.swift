@@ -333,7 +333,7 @@ open class KSOptions {
     }
 
     open func videoClockSync(main: KSClock, video: KSClock) -> ClockProcessType {
-        let desire = main.getTime() + audioDelay
+        var desire = main.getTime() + audioDelay
         #if !os(macOS)
         desire -= AVAudioSession.sharedInstance().outputLatency
         #endif
@@ -362,6 +362,7 @@ open class KSOptions {
                     }
                 }
             } else {
+//                print(CACurrentMediaTime()-video.lastMediaTime)
                 videoClockDelayCount = 0
                 return .next
             }
