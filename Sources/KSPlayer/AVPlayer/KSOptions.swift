@@ -349,22 +349,17 @@ open class KSOptions {
             }
             if diff < -0.1 {
                 videoClockDelayCount += 1
-                if diff < -2 {
-//                    if videoClockDelayCount % 100 == 0 {
-//                        KSLog("video delay seek video track")
-//                        return .seek
-//                    }
-                    if videoClockDelayCount % 10 == 0 {
-                        return .flush
-                    } else {
-                        return .next
-                    }
+                if diff < -8, videoClockDelayCount % 100 == 0 {
+                    KSLog("video delay seek video track")
+                    return .seek
+                }
+                if diff < -1, videoClockDelayCount % 10 == 0 {
+                    return .flush
+                }
+                if videoClockDelayCount % 2 == 0 {
+                    return .dropNext
                 } else {
-                    if videoClockDelayCount % 2 == 0 {
-                        return .dropNext
-                    } else {
-                        return .next
-                    }
+                    return .next
                 }
             } else {
 //                print(CACurrentMediaTime()-video.lastMediaTime)
