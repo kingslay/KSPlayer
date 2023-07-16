@@ -134,7 +134,6 @@ extension MetalPlayView {
                 return
             }
             let cmtime = frame.cmtime
-            renderSource?.setVideo(time: cmtime)
             let par = pixelBuffer.size
             let sar = pixelBuffer.aspectRatio
             if options.isUseDisplayLayer() {
@@ -165,6 +164,7 @@ extension MetalPlayView {
                 }
                 metalView.draw(pixelBuffer: pixelBuffer, display: options.display, size: size)
             }
+            renderSource?.setVideo(time: cmtime, duration: frame.timebase.cmtime(for: frame.duration))
         }
     }
 

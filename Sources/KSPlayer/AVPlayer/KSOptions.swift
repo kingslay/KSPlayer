@@ -332,35 +332,39 @@ open class KSOptions {
         audioFormat = audioDescriptor.audioFormat(channels: channels)
     }
 
-    open func videoClockSync(audioTime: TimeInterval, videoTime: TimeInterval) -> ClockProcessType {
-        let delay = audioTime - videoTime
-        #if DEBUG
-        if fabs(delay) > 1 / 60 {
-            print("audio video diff \(delay)")
-        }
+    open func videoClockSync(main: KSClock, video: KSClock) -> ClockProcessType {
+        let desire = main.getTime() + audioDelay
+        #if !os(macOS)
+        desire -= AVAudioSession.sharedInstance().outputLatency
         #endif
-        if delay > 0.04 {
-            KSLog("video delay time: \(delay), audio time:\(audioTime), delay count:\(videoClockDelayCount)")
-        }
-        if delay > 0.1 {
-            videoClockDelayCount += 1
-            if delay > 2 {
-                if videoClockDelayCount > 10 {
-                    KSLog("video delay seek video track")
-                    return .seek
+        let diff = video.positionTime + video.duration - desire
+        if diff >= 1 / 120 {
+            videoClockDelayCount = 0
+            return .remain
+        } else {
+            if diff < -0.04 {
+                KSLog("video delay=\(diff), clock=\(desire), delay count:\(videoClockDelayCount)")
+            }
+            if diff < -0.1 {
+                videoClockDelayCount += 1
+                if diff < -2 {
+                    if videoClockDelayCount > 10 {
+                        KSLog("video delay seek video track")
+                        return .seek
+                    } else {
+                        return .next
+                    }
                 } else {
-                    return .drop
+                    if videoClockDelayCount % 2 == 0 {
+                        return .dropNext
+                    } else {
+                        return .next
+                    }
                 }
             } else {
-                if videoClockDelayCount % 2 == 0 {
-                    return .drop
-                } else {
-                    return .show
-                }
+                videoClockDelayCount = 0
+                return .next
             }
-        } else {
-            videoClockDelayCount = 0
-            return .show
         }
     }
 
@@ -529,5 +533,19 @@ public extension Array {
             dict[selectKey(element)] = element
         }
         return dict
+    }
+}
+
+public class KSClock {
+    public private(set) var lastMediaTime = CACurrentMediaTime()
+    public internal(set) var duration = TimeInterval(0)
+    public internal(set) var positionTime = TimeInterval(0) {
+        didSet {
+            lastMediaTime = CACurrentMediaTime()
+        }
+    }
+
+    func getTime() -> TimeInterval {
+        positionTime + CACurrentMediaTime() - lastMediaTime
     }
 }
