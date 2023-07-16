@@ -348,7 +348,7 @@ open class KSOptions {
             if diff < -0.1 {
                 videoClockDelayCount += 1
                 if diff < -2 {
-                    if videoClockDelayCount > 10 {
+                    if videoClockDelayCount % 10 == 0 {
                         KSLog("video delay seek video track")
                         return .seek
                     } else {
