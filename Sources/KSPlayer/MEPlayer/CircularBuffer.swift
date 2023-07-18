@@ -18,9 +18,9 @@ public class CircularBuffer<Item: ObjectQueueItem> {
     private var destroyed = false
     @inline(__always) private var _count: Int { Int(tailIndex &- headIndex) }
     @inline(__always) public var count: Int {
-        condition.lock()
-        defer { condition.unlock() }
-        return _count
+//        condition.lock()
+//        defer { condition.unlock() }
+        Int(tailIndex &- headIndex)
     }
 
     public var maxCount: Int

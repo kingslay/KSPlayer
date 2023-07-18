@@ -85,8 +85,9 @@ final class MEPlayerItem {
         self?.codecDidChangeCapacity()
     }
 
-    private lazy var onceInitial: Void = {
-        avformat_network_init()
+    private static var onceInitial: Void = {
+        var result = SSL_library_init()
+        result = avformat_network_init()
         av_log_set_callback { ptr, level, format, args in
             guard let format else {
                 return
@@ -132,7 +133,7 @@ final class MEPlayerItem {
         operationQueue.name = "KSPlayer_" + String(describing: self).components(separatedBy: ".").last!
         operationQueue.maxConcurrentOperationCount = 1
         operationQueue.qualityOfService = .userInteractive
-        _ = onceInitial
+        _ = MEPlayerItem.onceInitial
     }
 
     func select(track: MediaPlayerTrack) {

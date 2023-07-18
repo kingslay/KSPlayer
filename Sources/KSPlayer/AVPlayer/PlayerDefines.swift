@@ -349,7 +349,7 @@ public extension URL {
     }
 
     var isSubtitle: Bool {
-        ["ass", "srt", "vtt"].contains(pathExtension.lowercased())
+        ["ass", "srt", "ssa", "vtt"].contains(pathExtension.lowercased())
     }
 
     var isPlaylist: Bool {

@@ -345,7 +345,7 @@ open class KSOptions {
             return .remain
         } else {
             if diff < -0.04 {
-                KSLog("video delay=\(diff), clock=\(desire), delay count:\(videoClockDelayCount)")
+                KSLog("video delay=\(diff), clock=\(desire), delay count=\(videoClockDelayCount)")
             }
             if diff < -0.1 {
                 videoClockDelayCount += 1
