@@ -91,6 +91,7 @@ extension M3UModel {
         let viewContext = managedObjectContext ?? PersistenceController.shared.container.viewContext
         let request = NSFetchRequest<PlayModel>(entityName: "PlayModel")
         request.predicate = NSPredicate(format: "m3uURL == %@", m3uURL!.description)
+        request.sortDescriptors = [NSSortDescriptor(key: "name", ascending: true)]
         let array: [PlayModel] = (try? viewContext.fetch(request)) ?? []
         guard refresh || array.count == 0 else {
             return array

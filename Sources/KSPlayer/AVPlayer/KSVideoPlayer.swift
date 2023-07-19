@@ -68,7 +68,7 @@ extension KSVideoPlayer: UIViewRepresentable {
 
     // macOS先调用onDisappear在调用dismantleNSView
     public static func dismantleNSView(_ view: NSViewType, coordinator _: Coordinator) {
-        view.window?.contentAspectRatio = CGSize(width: 16, height: 9)
+        view.window?.aspectRatio = CGSize(width: 16, height: 9)
     }
     #endif
 
@@ -177,8 +177,12 @@ extension KSVideoPlayer.Coordinator: KSPlayerLayerDelegate {
         if state == .readyToPlay {
             #if os(macOS)
             let naturalSize = layer.player.naturalSize
-            if naturalSize.width > 0, naturalSize.height > 0 {
-                layer.player.view?.window?.contentAspectRatio = naturalSize
+            if naturalSize.width > 0, naturalSize.height > 0, let window = layer.player.view?.window {
+                window.aspectRatio = naturalSize
+                var frame = window.frame
+                frame.size.height = frame.width * naturalSize.height / naturalSize.width
+                window.setFrame(frame, display: true)
+                window.display()
             }
             #endif
             videoTracks = layer.player.tracks(mediaType: .video)
