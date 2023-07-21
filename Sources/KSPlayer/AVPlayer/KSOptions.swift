@@ -42,6 +42,7 @@ open class KSOptions {
     public var maxAnalyzeDuration: Int64?
     public var lowres = UInt8(0)
     public var startPlayTime: TimeInterval = 0
+    public var startPlayRate: Float = 1.0
     public var referer: String? {
         didSet {
             if let referer {
