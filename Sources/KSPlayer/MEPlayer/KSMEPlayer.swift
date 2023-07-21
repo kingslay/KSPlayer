@@ -413,8 +413,11 @@ extension KSMEPlayer: AVPictureInPictureSampleBufferPlaybackDelegate {
     }
 
     public func pictureInPictureControllerTimeRangeForPlayback(_: AVPictureInPictureController) -> CMTimeRange {
-        let end = duration > 0 ? duration : Double.infinity
-        return CMTimeRange(start: 0, end: end)
+        // Handle live streams.
+        if duration == 0 {
+            return CMTimeRange(start: .negativeInfinity, duration: .positiveInfinity)
+        }
+        return CMTimeRange(start: 0, end: duration)
     }
 
     public func pictureInPictureControllerIsPlaybackPaused(_: AVPictureInPictureController) -> Bool {
