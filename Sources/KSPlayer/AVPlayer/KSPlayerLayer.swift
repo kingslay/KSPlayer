@@ -318,6 +318,18 @@ open class KSPlayerLayer: UIView {
 
 extension KSPlayerLayer: MediaPlayerDelegate {
     public func readyToPlay(player: some MediaPlayerProtocol) {
+        #if os(macOS)
+        if let window {
+            window.isMovableByWindowBackground = true
+            let naturalSize = player.naturalSize
+            if naturalSize.width > 0, naturalSize.height > 0 {
+                window.aspectRatio = naturalSize
+                var frame = window.frame
+                frame.size.height = frame.width * naturalSize.height / naturalSize.width
+                window.setFrame(frame, display: true)
+            }
+        }
+        #endif
         updateNowPlayingInfo()
         state = .readyToPlay
         for track in player.tracks(mediaType: .video) where track.isEnabled {

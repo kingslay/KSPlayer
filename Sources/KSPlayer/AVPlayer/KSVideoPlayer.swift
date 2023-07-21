@@ -185,15 +185,6 @@ extension KSVideoPlayer: UIViewRepresentable {
 extension KSVideoPlayer.Coordinator: KSPlayerLayerDelegate {
     public func player(layer: KSPlayerLayer, state: KSPlayerState) {
         if state == .readyToPlay {
-            #if os(macOS)
-            let naturalSize = layer.player.naturalSize
-            if naturalSize.width > 0, naturalSize.height > 0, let window = layer.player.view?.window {
-                window.aspectRatio = naturalSize
-                var frame = window.frame
-                frame.size.height = frame.width * naturalSize.height / naturalSize.width
-                window.setFrame(frame, display: true)
-            }
-            #endif
             playbackRate = layer.player.playbackRate
             videoTracks = layer.player.tracks(mediaType: .video)
             audioTracks = layer.player.tracks(mediaType: .audio)
