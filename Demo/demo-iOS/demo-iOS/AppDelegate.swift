@@ -93,7 +93,7 @@ class CustomVideoPlayerView: VideoPlayerView {
 }
 
 class MEOptions: KSOptions {
-    override func process(assetTrack: MediaPlayerTrack) {
+    override func process(assetTrack: some MediaPlayerTrack) {
         if assetTrack.mediaType == .video {
             if [FFmpegFieldOrder.bb, .bt, .tt, .tb].contains(assetTrack.fieldOrder) {
                 videoFilters.append("yadif=mode=1:parity=-1:deint=0")

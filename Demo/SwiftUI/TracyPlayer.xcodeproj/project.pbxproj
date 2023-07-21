@@ -18,6 +18,7 @@
 		AC77DFC726402329001351AE /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AC77DFB226402329001351AE /* Assets.xcassets */; };
 		ACB965472A42EDCD00378A4C /* SettingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACB965462A42EDCD00378A4C /* SettingView.swift */; };
 		ACD2F772275F735C0006D16F /* KSPlayer in Frameworks */ = {isa = PBXBuildFile; productRef = ACD2F771275F735C0006D16F /* KSPlayer */; };
+		ACD786492A6A8648004A0220 /* Defaults.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACD786482A6A8648004A0220 /* Defaults.swift */; };
 		ACEA9FEB298BFC8800FBA74B /* MovieModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACEA9FEA298BFC8800FBA74B /* MovieModel.swift */; };
 /* End PBXBuildFile section */
 
@@ -37,6 +38,7 @@
 		ACADA07528EDC067001B76D1 /* TracyPlayer.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = TracyPlayer.entitlements; sourceTree = "<group>"; };
 		ACB965462A42EDCD00378A4C /* SettingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingView.swift; sourceTree = "<group>"; };
 		ACD2F747275F6E860006D16F /* KSPlayer */ = {isa = PBXFileReference; lastKnownFileType = folder; name = KSPlayer; path = ../..; sourceTree = "<group>"; };
+		ACD786482A6A8648004A0220 /* Defaults.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Defaults.swift; sourceTree = "<group>"; };
 		ACE3619328EB689F00F234EB /* TracyPlayer-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = "TracyPlayer-Info.plist"; sourceTree = "<group>"; };
 		ACEA9FEA298BFC8800FBA74B /* MovieModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MovieModel.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -78,6 +80,7 @@
 				AC77DFB026402327001351AE /* TracyApp.swift */,
 				AC77DFB126402327001351AE /* URLImportView.swift */,
 				ACB965462A42EDCD00378A4C /* SettingView.swift */,
+				ACD786482A6A8648004A0220 /* Defaults.swift */,
 				AC43F6652A519D400026ECF2 /* Persistence.swift */,
 				AC77DFB226402329001351AE /* Assets.xcassets */,
 				ACD2F77F275F9BEE0006D16F /* Resources */,
@@ -198,6 +201,7 @@
 				ACB965472A42EDCD00378A4C /* SettingView.swift in Sources */,
 				AC44E0FC29290CBC00617BD3 /* ContentView.swift in Sources */,
 				AC77DFC326402329001351AE /* TracyApp.swift in Sources */,
+				ACD786492A6A8648004A0220 /* Defaults.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

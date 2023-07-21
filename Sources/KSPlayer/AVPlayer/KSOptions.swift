@@ -297,7 +297,7 @@ open class KSOptions {
     /**
             在创建解码器之前可以对KSOptions做一些处理。例如判断fieldOrder为tt或bb的话，那就自动加videofilters
      */
-    open func process(assetTrack _: MediaPlayerTrack) {}
+    open func process(assetTrack _: some MediaPlayerTrack) {}
 
     #if os(tvOS)
     open func preferredDisplayCriteria(refreshRate _: Float, videoDynamicRange _: Int32) -> AVDisplayCriteria? {

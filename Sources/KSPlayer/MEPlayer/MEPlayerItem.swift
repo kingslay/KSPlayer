@@ -136,7 +136,7 @@ final class MEPlayerItem {
         _ = MEPlayerItem.onceInitial
     }
 
-    func select(track: MediaPlayerTrack) {
+    func select(track: some MediaPlayerTrack) {
         if track.isEnabled {
             return
         }

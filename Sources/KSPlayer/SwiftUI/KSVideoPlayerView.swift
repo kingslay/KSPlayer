@@ -379,11 +379,7 @@ struct VideoSettingView: View {
     @ObservedObject fileprivate var config: KSVideoPlayer.Coordinator
     @ObservedObject fileprivate var subtitleModel: SubtitleModel
     var body: some View {
-        Picker(selection: Binding {
-            config.playerLayer?.player.playbackRate ?? 1.0
-        } set: { value in
-            config.playerLayer?.player.playbackRate = value
-        }) {
+        Picker(selection: $config.playbackRate) {
             ForEach([0.5, 1.0, 1.25, 1.5, 2.0] as [Float]) { value in
                 // 需要有一个变量text。不然会自动帮忙加很多0
                 let text = "\(value) x"

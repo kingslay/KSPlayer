@@ -79,20 +79,30 @@ extension KSVideoPlayer: UIViewRepresentable {
     }
 
     public final class Coordinator: ObservableObject {
-        @Published public var isMuted: Bool = false {
+        @Published
+        public var state = KSPlayerState.prepareToPlay
+        @Published
+        public var isMuted: Bool = false {
             didSet {
                 playerLayer?.player.isMuted = isMuted
             }
         }
 
-        @Published public var isScaleAspectFill = false {
+        @Published
+        public var isScaleAspectFill = false {
             didSet {
                 playerLayer?.player.contentMode = isScaleAspectFill ? .scaleAspectFill : .scaleAspectFit
             }
         }
 
-        @Published public var state = KSPlayerState.prepareToPlay
-        @Published public var subtitleModel = SubtitleModel()
+        @Published
+        public var playbackRate: Float = 1.0 {
+            didSet {
+                playerLayer?.player.playbackRate = playbackRate
+            }
+        }
+
+        public var subtitleModel = SubtitleModel()
         public var timemodel = ControllerTimeModel()
         public var selectedAudioTrack: MediaPlayerTrack? {
             didSet {
@@ -182,9 +192,9 @@ extension KSVideoPlayer.Coordinator: KSPlayerLayerDelegate {
                 var frame = window.frame
                 frame.size.height = frame.width * naturalSize.height / naturalSize.width
                 window.setFrame(frame, display: true)
-                window.display()
             }
             #endif
+            playbackRate = layer.player.playbackRate
             videoTracks = layer.player.tracks(mediaType: .video)
             audioTracks = layer.player.tracks(mediaType: .audio)
             subtitleModel.selectedSubtitleInfo = subtitleModel.subtitleInfos.first

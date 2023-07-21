@@ -92,9 +92,6 @@ open class KSPlayerLayer: UIView {
             player.playbackVolume = oldValue.playbackVolume
             player.delegate = self
             player.contentMode = .scaleAspectFit
-            if let view = player.view {
-                addSubview(view)
-            }
             prepareToPlay()
         }
     }
@@ -186,9 +183,6 @@ open class KSPlayerLayer: UIView {
         player.delegate = self
         player.contentMode = .scaleAspectFit
         prepareToPlay()
-        if let view = player.view {
-            addSubview(view)
-        }
         #if canImport(UIKit)
         NotificationCenter.default.addObserver(self, selector: #selector(enterBackground), name: UIApplication.didEnterBackgroundNotification, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(enterForeground), name: UIApplication.willEnterForegroundNotification, object: nil)
@@ -429,7 +423,7 @@ extension KSPlayerLayer: AVPictureInPictureControllerDelegate {
 
 extension KSPlayerLayer {
     #if os(tvOS)
-    private func setDisplayCriteria(track: MediaPlayerTrack) {
+    private func setDisplayCriteria(track: some MediaPlayerTrack) {
         guard let displayManager = UIApplication.shared.windows.first?.avDisplayManager,
               displayManager.isDisplayCriteriaMatchingEnabled,
               !displayManager.isDisplayModeSwitchInProgress
@@ -454,6 +448,9 @@ extension KSPlayerLayer {
             }
         } else {
             state = .prepareToPlay
+        }
+        if let view = player.view {
+            addSubview(view)
         }
     }
 

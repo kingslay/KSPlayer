@@ -7,6 +7,8 @@ struct HomeView: View {
     private var nameFilter: String = ""
     @State
     private var groupFilter: String = ""
+    @Default(\.showRecentPlayList)
+    private var showRecentPlayList
 //    @Environment(\.horizontalSizeClass) var horizontalSizeClass
     @FetchRequest(fetchRequest: PlayModel.playTimeRequest)
     private var historyModels: FetchedResults<PlayModel>
@@ -21,20 +23,22 @@ struct HomeView: View {
 
     var body: some View {
         ScrollView {
-            Section {
-                ScrollView(.horizontal) {
-                    LazyHStack {
-                        ForEach(historyModels) { model in
-                            appModel.content(model: model)
+            if showRecentPlayList {
+                Section {
+                    ScrollView(.horizontal) {
+                        LazyHStack {
+                            ForEach(historyModels) { model in
+                                appModel.content(model: model)
+                            }
                         }
                     }
+                } header: {
+                    HStack {
+                        Text("Recent Play").font(.title)
+                        Spacer()
+                    }
+                    .padding(.horizontal)
                 }
-            } header: {
-                HStack {
-                    Text("Recent Play").font(.title)
-                    Spacer()
-                }
-                .padding(.horizontal)
             }
             Section {
                 LazyVGrid(columns: [GridItem(.adaptive(minimum: MoiveView.width))]) {

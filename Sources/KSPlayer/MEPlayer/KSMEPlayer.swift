@@ -19,7 +19,7 @@ public class KSMEPlayer: NSObject {
     private let audioOutput: AudioPlayer & FrameOutput = KSOptions.isUseAudioRenderer ? AudioRendererPlayer() : AudioEnginePlayer()
     private var options: KSOptions
     private var bufferingCountDownTimer: Timer?
-    public let videoOutput: MetalPlayView?
+    public private(set) var videoOutput: MetalPlayView?
     public private(set) var bufferingProgress = 0 {
         didSet {
             delegate?.changeBuffering(player: self, progress: bufferingProgress)
@@ -151,7 +151,11 @@ extension KSMEPlayer: MEPlayerDelegate {
             $0 as? FFmpegAssetTrack
         }?.audioDescriptor ?? .defaultValue
         options.setAudioSession(audioDescriptor: audioDescriptor)
-        let fps = tracks(mediaType: .video).first { $0.isEnabled }.map(\.nominalFrameRate) ?? 24
+        let vidoeTracks = tracks(mediaType: .video)
+        if vidoeTracks.count == 0 {
+            videoOutput = nil
+        }
+        let fps = vidoeTracks.first { $0.isEnabled }.map(\.nominalFrameRate) ?? 24
         runInMainqueue { [weak self] in
             guard let self else { return }
             self.audioOutput.prepare(audioFormat: self.options.audioFormat)
@@ -256,6 +260,11 @@ extension KSMEPlayer: MediaPlayerProtocol {
         shutdown()
         playerItem.delegate = nil
         playerItem = MEPlayerItem(url: url, options: options)
+        if options.videoDisable {
+            videoOutput = nil
+        } else if videoOutput == nil {
+            videoOutput = MetalPlayView(options: options)
+        }
         self.options = options
         playerItem.delegate = self
         audioOutput.renderSource = playerItem
@@ -377,7 +386,7 @@ extension KSMEPlayer: MediaPlayerProtocol {
         }
     }
 
-    public func select(track: MediaPlayerTrack) {
+    public func select(track: some MediaPlayerTrack) {
         if track.mediaType == .video {
             let fps = tracks(mediaType: .video).first { $0.isEnabled }.map(\.nominalFrameRate) ?? 24
             if fps != track.nominalFrameRate {
