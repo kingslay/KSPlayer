@@ -7,69 +7,22 @@ struct ContentView: View {
     @EnvironmentObject private var appModel: APPModel
     private var initialView: some View {
         #if os(macOS)
-        NavigationView {
+        NavigationSplitView {
             List(selection: $appModel.tabSelected) {
-                NavigationLink {
-                    HomeView()
-                } label: {
-                    Label("Home", systemImage: "house.fill")
-                }
-                .tag(TabBarItem.Home)
-                NavigationLink {
-                    FavoriteView()
-                } label: {
-                    Label("Favorite", systemImage: "star.fill")
-                }
-                .tag(TabBarItem.Favorite)
-                NavigationLink {
-                    FilesView()
-                } label: {
-                    Label("Files", systemImage: "folder.fill.badge.gearshape")
-                }
-                .tag(TabBarItem.Files)
+                link(to: .Home)
+                link(to: .Favorite)
+                link(to: .Files)
             }
-        }
-        .toolbar {
-            ToolbarItem(placement: .navigation) {
-                Button {
-                    NSApp.keyWindow?.firstResponder?.tryToPerform(#selector(NSSplitViewController.toggleSidebar(_:)), with: nil)
-                } label: {
-                    Image(systemName: "sidebar.leading")
-                }
-            }
+        } detail: {
+            appModel.tabSelected.destination
         }
         #else
         TabView(selection: $appModel.tabSelected) {
-            NavigationStack(path: $appModel.path) {
-                HomeView()
-                    .navigationPlay()
-            }
-            .tabItem {
-                Label("Home", systemImage: "house.fill")
-            }
-            .tag(TabBarItem.Home)
-            NavigationStack {
-                FavoriteView()
-                    .navigationPlay()
-            }
-            .tabItem {
-                Label("Favorite", systemImage: "star.fill")
-            }
-            .tag(TabBarItem.Favorite)
-            NavigationStack {
-                FilesView()
-            }
-            .tabItem {
-                Label("Files", systemImage: "folder.fill.badge.gearshape")
-            }
-            .tag(TabBarItem.Files)
-            SettingView()
-                .tabItem {
-                    Label("Setting", systemImage: "gear")
-                }
-                .tag(TabBarItem.Setting)
+            tab(to: .Home)
+            tab(to: .Favorite)
+            tab(to: .Files)
+            tab(to: .Setting)
         }
-
         #endif
     }
 
@@ -124,6 +77,24 @@ struct ContentView: View {
                 appModel.open(url: url)
             }
     }
+
+    func link(to item: TabBarItem) -> some View {
+        NavigationLink(value: item) {
+            item.lable
+        }
+        .tag(item)
+    }
+
+    func tab(to item: TabBarItem) -> some View {
+        NavigationStack(path: $appModel.path) {
+            item.destination
+                .navigationPlay()
+        }
+        .tabItem {
+            item.lable
+        }
+        .tag(item)
+    }
 }
 
 enum TabBarItem: Int {
@@ -131,6 +102,32 @@ enum TabBarItem: Int {
     case Favorite
     case Files
     case Setting
+    var lable: Label<Text, Image> {
+        switch self {
+        case .Home:
+            return Label("Home", systemImage: "house.fill")
+        case .Favorite:
+            return Label("Favorite", systemImage: "star.fill")
+        case .Files:
+            return Label("Files", systemImage: "folder.fill.badge.gearshape")
+        case .Setting:
+            return Label("Setting", systemImage: "gear")
+        }
+    }
+
+    @ViewBuilder
+    var destination: some View {
+        switch self {
+        case .Home:
+            HomeView()
+        case .Favorite:
+            FavoriteView()
+        case .Files:
+            FilesView()
+        case .Setting:
+            SettingView()
+        }
+    }
 }
 
 public extension View {

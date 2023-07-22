@@ -12,14 +12,6 @@ struct HomeView: View {
 //    @Environment(\.horizontalSizeClass) var horizontalSizeClass
     @FetchRequest(fetchRequest: PlayModel.playTimeRequest)
     private var historyModels: FetchedResults<PlayModel>
-    private var recentDocumentURLs = [URL]()
-    init() {
-        #if os(macOS)
-        for url in NSDocumentController.shared.recentDocumentURLs {
-            recentDocumentURLs.append(url)
-        }
-        #endif
-    }
 
     var body: some View {
         ScrollView {

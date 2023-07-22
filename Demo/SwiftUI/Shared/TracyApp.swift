@@ -111,7 +111,7 @@ class APPModel: ObservableObject {
         }
     }
 
-    var tabSelected: TabBarItem? = .Files
+    @Published var tabSelected: TabBarItem = .Files
     @Published var path = NavigationPath()
     @Published var openFileImport = false
     @Published var openURLImport = false
