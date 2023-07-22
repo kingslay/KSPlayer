@@ -124,10 +124,14 @@ struct AddM3UView: View {
                     }
                     dismiss()
                 }
+                #if !os(tvOS)
+                .keyboardShortcut(.defaultAction)
+                #endif
                 #if os(macOS)
                 Button("Cancel") {
                     dismiss()
                 }
+                .keyboardShortcut(.cancelAction)
                 #endif
             }
         }.padding()

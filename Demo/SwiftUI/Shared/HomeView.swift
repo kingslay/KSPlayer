@@ -72,12 +72,17 @@ struct HomeView: View {
             } label: {
                 Text("Open File")
             }
+            #if !os(tvOS)
+            .keyboardShortcut("o")
+            #endif
             Button {
                 appModel.openURLImport = true
             } label: {
                 Text("Open URL")
             }
-
+            #if !os(tvOS)
+            .keyboardShortcut("o", modifiers: [.command, .shift])
+            #endif
             Picker("group filter", selection: $groupFilter) {
                 Text("All ").tag("")
                 ForEach(appModel.groups) { group in

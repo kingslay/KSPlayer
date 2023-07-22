@@ -268,7 +268,9 @@ struct VideoControllerView: View {
                 } label: {
                     Image(systemName: "ellipsis.circle")
                 }
+                #if !os(tvOS)
                 .keyboardShortcut("s", modifiers: [.command, .shift])
+                #endif
             }
             .font(.system(.title2))
         }
@@ -438,6 +440,7 @@ struct VideoSettingView: View {
                 Button("Done") {
                     dismiss()
                 }
+                .keyboardShortcut(.defaultAction)
             }
         #endif
     }

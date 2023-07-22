@@ -48,17 +48,17 @@ struct TracyApp: App {
         #if !os(tvOS)
 //        .handlesExternalEvents(matching: Set(arrayLiteral: "*"))
         .commands {
-            SidebarCommands()
-
             CommandGroup(before: .newItem) {
                 Button("Open") {
                     appModel.openFileImport = true
-                }.keyboardShortcut("o")
+                }
+                .keyboardShortcut("o")
             }
             CommandGroup(before: .newItem) {
                 Button("Open URL") {
                     appModel.openURLImport = true
-                }.keyboardShortcut("o", modifiers: [.command, .shift])
+                }
+                .keyboardShortcut("o", modifiers: [.command, .shift])
             }
         }
         #endif
