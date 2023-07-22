@@ -133,7 +133,10 @@ public class DirectorySubtitleDataSouce: SearchSubtitleDataSouce {
         infos.removeAll()
         if url.isFileURL {
             let subtitleURLs: [URL] = (try? FileManager.default.contentsOfDirectory(at: url.deletingLastPathComponent(), includingPropertiesForKeys: nil).filter(\.isSubtitle)) ?? []
-            infos.append(contentsOf: subtitleURLs.map { URLSubtitleInfo(url: $0) })
+            let contents = subtitleURLs.map { URLSubtitleInfo(url: $0) }.sorted { left, right in
+                left.name < right.name
+            }
+            infos.append(contentsOf: contents)
         }
     }
 }
