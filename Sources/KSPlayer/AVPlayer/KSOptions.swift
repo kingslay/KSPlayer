@@ -69,7 +69,6 @@ open class KSOptions {
     public var syncDecodeAudio = false
     // sutile
     public var autoSelectEmbedSubtitle = true
-    public var subtitleDelay = 0.0 // s
     public var subtitleDisable = false
     public var isSeekImageSubtitle = false
     // video

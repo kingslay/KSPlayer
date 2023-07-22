@@ -206,7 +206,7 @@ extension KSVideoPlayer.Coordinator: KSPlayerLayerDelegate {
         onStateChanged?(layer, state)
     }
 
-    public func player(layer: KSPlayerLayer, currentTime: TimeInterval, totalTime: TimeInterval) {
+    public func player(layer _: KSPlayerLayer, currentTime: TimeInterval, totalTime: TimeInterval) {
         onPlay?(currentTime, totalTime)
         let current = Int(currentTime)
         let total = Int(max(0, totalTime))
@@ -216,7 +216,7 @@ extension KSVideoPlayer.Coordinator: KSPlayerLayerDelegate {
         if timemodel.totalTime != total {
             timemodel.totalTime = total
         }
-        _ = subtitleModel.subtitle(currentTime: currentTime + layer.options.subtitleDelay)
+        _ = subtitleModel.subtitle(currentTime: currentTime)
     }
 
     public func player(layer: KSPlayerLayer, finish error: Error?) {

@@ -236,8 +236,7 @@ open class VideoPlayerView: PlayerView {
     override open func player(layer: KSPlayerLayer, currentTime: TimeInterval, totalTime: TimeInterval) {
         guard !isSliderSliding else { return }
         super.player(layer: layer, currentTime: currentTime, totalTime: totalTime)
-        let time = currentTime + (resource?.definitions[currentDefinition].options.subtitleDelay ?? 0.0)
-        if srtControl.subtitle(currentTime: time) {
+        if srtControl.subtitle(currentTime: currentTime) {
             if let part = srtControl.part {
                 subtitleBackView.image = part.image
                 subtitleLabel.attributedText = part.text

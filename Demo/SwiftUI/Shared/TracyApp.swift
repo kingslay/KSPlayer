@@ -77,6 +77,7 @@ struct TracyApp: App {
         WindowGroup("player", for: PlayModel.self) { $model in
             if let model {
                 KSVideoPlayerView(model: model)
+                    .navigationTitle(model.name!)
             }
         }
         .windowStyle(.hiddenTitleBar)

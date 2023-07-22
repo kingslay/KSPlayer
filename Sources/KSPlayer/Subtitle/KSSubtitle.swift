@@ -322,7 +322,7 @@ open class SubtitleModel: ObservableObject {
     private var subtitleDataSouces: [SubtitleDataSouce] = KSOptions.subtitleDataSouces
     public private(set) var subtitleInfos = [any SubtitleInfo]()
     @Published public private(set) var part: SubtitlePart?
-    @Published public var delay = "0.0"
+    public var subtitleDelay = 0.0 // s
     public var url: URL? {
         didSet {
             subtitleInfos.removeAll()
@@ -353,7 +353,7 @@ open class SubtitleModel: ObservableObject {
     public func subtitle(currentTime: TimeInterval) -> Bool {
         let newPart: SubtitlePart?
         if let subtile = selectedSubtitleInfo {
-            let currentTime = currentTime - subtile.delay
+            let currentTime = currentTime - subtile.delay + subtitleDelay
             if let part = subtile.search(for: currentTime) {
                 newPart = part
             } else {

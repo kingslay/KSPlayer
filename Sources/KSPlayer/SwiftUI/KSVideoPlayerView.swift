@@ -154,7 +154,6 @@ public struct KSVideoPlayerView: View {
         .persistentSystemOverlays(.hidden)
         .toolbar(isMaskShow ? .visible : .hidden, for: .automatic)
         #if os(macOS)
-            .navigationTitle(url.lastPathComponent)
             .onTapGesture(count: 2) {
                 guard let view = playerCoordinator.playerLayer?.player.view else {
                     return
@@ -166,7 +165,8 @@ public struct KSVideoPlayerView: View {
             .onExitCommand {
                 playerCoordinator.playerLayer?.player.view?.exitFullScreenMode()
             }
-        #else
+        #elseif os(iOS)
+            .navigationBarTitleDisplayMode(.inline)
         #endif
         #if !os(tvOS)
         .onHover {
@@ -198,7 +198,10 @@ public struct KSVideoPlayerView: View {
 
 @available(iOS 15, tvOS 15, macOS 12, *)
 struct VideoControllerView: View {
-    @ObservedObject fileprivate var config: KSVideoPlayer.Coordinator
+    @ObservedObject
+    fileprivate var config: KSVideoPlayer.Coordinator
+    @State
+    private var showVideoSetting = false
     public var body: some View {
         HStack {
             HStack {
@@ -260,23 +263,17 @@ struct VideoControllerView: View {
                 } label: {
                     Image(systemName: config.playerLayer?.isPipActive ?? false ? "pip.exit" : "pip.enter")
                 }
-                #if os(tvOS)
-                Image(systemName: "ellipsis.circle")
-                    .contextMenu {
-                        VideoSettingView(config: config, subtitleModel: config.subtitleModel)
-                    }
-                #else
-                Menu {
-                    VideoSettingView(config: config, subtitleModel: config.subtitleModel)
+                Button {
+                    showVideoSetting.toggle()
                 } label: {
                     Image(systemName: "ellipsis.circle")
                 }
                 .keyboardShortcut("s", modifiers: [.command, .shift])
-                .pickerStyle(.menu)
-                .menuIndicator(.hidden)
-                #endif
             }
             .font(.system(.title2))
+        }
+        .sheet(isPresented: $showVideoSetting) {
+            VideoSettingView(config: config, subtitleModel: config.subtitleModel)
         }
         #if os(tvOS)
 //            .focusSection()
@@ -376,58 +373,73 @@ struct VideoSubtitleView: View {
 
 @available(iOS 15, tvOS 15, macOS 12, *)
 struct VideoSettingView: View {
-    @ObservedObject fileprivate var config: KSVideoPlayer.Coordinator
-    @ObservedObject fileprivate var subtitleModel: SubtitleModel
+    @ObservedObject
+    fileprivate var config: KSVideoPlayer.Coordinator
+    @ObservedObject
+    fileprivate var subtitleModel: SubtitleModel
+    @Environment(\.dismiss)
+    private var dismiss
     var body: some View {
-        Picker(selection: $config.playbackRate) {
-            ForEach([0.5, 1.0, 1.25, 1.5, 2.0] as [Float]) { value in
-                // 需要有一个变量text。不然会自动帮忙加很多0
-                let text = "\(value) x"
-                Text(text).tag(value)
-            }
-        } label: {
-            Label("Playback Speed", systemImage: "speedometer")
-        }
-        if config.audioTracks.count > 0 {
-            Picker(selection: Binding {
-                config.selectedAudioTrack?.trackID
-            } set: { value in
-                config.selectedAudioTrack = config.audioTracks.first { $0.trackID == value }
-            }) {
-                ForEach(config.audioTracks, id: \.trackID) { track in
-                    Text(track.description).tag(track.trackID as Int32?)
+        Form {
+            Picker(selection: $config.playbackRate) {
+                ForEach([0.5, 1.0, 1.25, 1.5, 2.0] as [Float]) { value in
+                    // 需要有一个变量text。不然会自动帮忙加很多0
+                    let text = "\(value) x"
+                    Text(text).tag(value)
                 }
             } label: {
-                Label("Audio track", systemImage: "waveform")
+                Label("Playback Speed", systemImage: "speedometer")
             }
-        }
-        if config.videoTracks.count > 0 {
-            Picker(selection: Binding {
-                config.selectedVideoTrack?.trackID
-            } set: { value in
-                config.selectedVideoTrack = config.videoTracks.first { $0.trackID == value }
-            }) {
-                ForEach(config.videoTracks, id: \.trackID) { track in
-                    Text(track.description).tag(track.trackID as Int32?)
+            if config.audioTracks.count > 0 {
+                Picker(selection: Binding {
+                    config.selectedAudioTrack?.trackID
+                } set: { value in
+                    config.selectedAudioTrack = config.audioTracks.first { $0.trackID == value }
+                }) {
+                    ForEach(config.audioTracks, id: \.trackID) { track in
+                        Text(track.description).tag(track.trackID as Int32?)
+                    }
+                } label: {
+                    Label("Audio track", systemImage: "waveform")
                 }
-            } label: {
-                Label("Video track", systemImage: "video.fill")
             }
-        }
-        if config.subtitleModel.subtitleInfos.count > 0 {
-            Picker(selection: Binding {
-                subtitleModel.selectedSubtitleInfo?.subtitleID
-            } set: { value in
-                subtitleModel.selectedSubtitleInfo = subtitleModel.subtitleInfos.first { $0.subtitleID == value }
-            }) {
-                Text("Off").tag(nil as String?)
-                ForEach(subtitleModel.subtitleInfos, id: \.subtitleID) { track in
-                    Text(track.name).tag(track.subtitleID as String?)
+            if config.videoTracks.count > 0 {
+                Picker(selection: Binding {
+                    config.selectedVideoTrack?.trackID
+                } set: { value in
+                    config.selectedVideoTrack = config.videoTracks.first { $0.trackID == value }
+                }) {
+                    ForEach(config.videoTracks, id: \.trackID) { track in
+                        Text(track.description).tag(track.trackID as Int32?)
+                    }
+                } label: {
+                    Label("Video track", systemImage: "video.fill")
                 }
-            } label: {
-                Label("Sutitle", systemImage: "captions.bubble")
+            }
+            if config.subtitleModel.subtitleInfos.count > 0 {
+                Picker(selection: Binding {
+                    subtitleModel.selectedSubtitleInfo?.subtitleID
+                } set: { value in
+                    subtitleModel.selectedSubtitleInfo = subtitleModel.subtitleInfos.first { $0.subtitleID == value }
+                }) {
+                    Text("Off").tag(nil as String?)
+                    ForEach(subtitleModel.subtitleInfos, id: \.subtitleID) { track in
+                        Text(track.name).tag(track.subtitleID as String?)
+                    }
+                } label: {
+                    Label("Sutitle", systemImage: "captions.bubble")
+                }
+                TextField("Sutitle delay", value: $subtitleModel.subtitleDelay, format: .number)
             }
         }
+        .padding()
+        #if os(macOS)
+            .toolbar {
+                Button("Done") {
+                    dismiss()
+                }
+            }
+        #endif
     }
 }
 
