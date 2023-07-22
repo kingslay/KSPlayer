@@ -83,7 +83,7 @@ struct TracyApp: App {
         .windowStyle(.hiddenTitleBar)
         .defaultPosition(.center)
         Settings {
-            SettingView()
+            TabBarItem.Setting.destination
         }
 //        MenuBarExtra {
 //            MenuBar()
