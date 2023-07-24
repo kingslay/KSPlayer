@@ -93,7 +93,7 @@ extension M3UModel {
         request.predicate = NSPredicate(format: "m3uURL == %@", m3uURL!.description)
         request.sortDescriptors = [NSSortDescriptor(key: "name", ascending: true)]
         let array: [PlayModel] = (try? viewContext.fetch(request)) ?? []
-        guard refresh || array.count == 0 else {
+        guard refresh || array.isEmpty else {
             return array
         }
         let dic = array.toDictionary {

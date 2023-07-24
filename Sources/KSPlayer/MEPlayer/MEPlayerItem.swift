@@ -346,7 +346,7 @@ extension MEPlayerItem {
             let videos = assetTracks.filter { $0.mediaType == .video }
             let bitRates = videos.map(\.bitRate)
             let wantedStreamNb: Int32
-            if videos.count > 0, let index = options.wantedVideo(bitRates: bitRates) {
+            if !videos.isEmpty, let index = options.wantedVideo(bitRates: bitRates) {
                 wantedStreamNb = videos[index].trackID
             } else {
                 wantedStreamNb = -1
@@ -382,7 +382,7 @@ extension MEPlayerItem {
 
         let audios = assetTracks.filter { $0.mediaType == .audio }
         let wantedStreamNb: Int32
-        if audios.count > 0, let index = options.wantedAudio(infos: audios.map { ($0.bitRate, $0.language) }) {
+        if !audios.isEmpty, let index = options.wantedAudio(infos: audios.map { ($0.bitRate, $0.language) }) {
             wantedStreamNb = audios[index].trackID
         } else {
             wantedStreamNb = -1

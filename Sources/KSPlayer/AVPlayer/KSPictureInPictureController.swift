@@ -28,7 +28,7 @@ public class KSPictureInPictureController: AVPictureInPictureController {
             #if canImport(UIKit)
             if let viewController, let originalViewController {
                 if let nav = viewController as? UINavigationController,
-                   nav.viewControllers.count == 0 || (nav.viewControllers.count == 1 && nav.viewControllers[0] != originalViewController)
+                   nav.viewControllers.isEmpty || (nav.viewControllers.count == 1 && nav.viewControllers[0] != originalViewController)
                 {
                     nav.viewControllers = [originalViewController]
                 }

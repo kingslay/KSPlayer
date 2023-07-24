@@ -20,7 +20,7 @@ struct FavoriteView: View {
             LazyVGrid(columns: [GridItem(.adaptive(minimum: MoiveView.width))]) {
                 let playlist = favoritelist.filter { model in
                     var isIncluded = true
-                    if nameFilter.count > 0 {
+                    if !nameFilter.isEmpty {
                         isIncluded = model.name!.contains(nameFilter)
                     }
                     return isIncluded

@@ -392,7 +392,7 @@ struct VideoSettingView: View {
             } label: {
                 Label("Playback Speed", systemImage: "speedometer")
             }
-            if config.audioTracks.count > 0 {
+            if !config.audioTracks.isEmpty {
                 Picker(selection: Binding {
                     config.selectedAudioTrack?.trackID
                 } set: { value in
@@ -405,7 +405,7 @@ struct VideoSettingView: View {
                     Label("Audio track", systemImage: "waveform")
                 }
             }
-            if config.videoTracks.count > 0 {
+            if !config.videoTracks.isEmpty {
                 Picker(selection: Binding {
                     config.selectedVideoTrack?.trackID
                 } set: { value in
@@ -418,7 +418,7 @@ struct VideoSettingView: View {
                     Label("Video track", systemImage: "video.fill")
                 }
             }
-            if config.subtitleModel.subtitleInfos.count > 0 {
+            if !config.subtitleModel.subtitleInfos.isEmpty {
                 Picker(selection: Binding {
                     subtitleModel.selectedSubtitleInfo?.subtitleID
                 } set: { value in

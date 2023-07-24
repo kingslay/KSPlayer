@@ -78,7 +78,7 @@ class MEFilter {
             }
             filters = options.videoFilters.joined(separator: ",")
         }
-        guard filters.count > 0 else {
+        guard !filters.isEmpty else {
             return inputFrame
         }
         var params = AVBufferSrcParameters()

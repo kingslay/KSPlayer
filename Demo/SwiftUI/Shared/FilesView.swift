@@ -22,7 +22,7 @@ struct FilesView: View {
     var body: some View {
         let models = m3uModels.filter { model in
             var isIncluded = true
-            if nameFilter.count > 0 {
+            if !nameFilter.isEmpty {
                 isIncluded = model.name!.contains(nameFilter)
             }
             return isIncluded
@@ -120,7 +120,7 @@ struct AddM3UView: View {
                 Button("Done") {
                     if let url = URL(string: url.trimmingCharacters(in: NSMutableCharacterSet.whitespacesAndNewlines)) {
                         let name = name.trimmingCharacters(in: NSMutableCharacterSet.whitespacesAndNewlines)
-                        appModel.addM3U(url: url, name: name.count == 0 ? nil : name)
+                        appModel.addM3U(url: url, name: name.isEmpty ? nil : name)
                     }
                     dismiss()
                 }

@@ -152,7 +152,7 @@ extension KSMEPlayer: MEPlayerDelegate {
         }?.audioDescriptor ?? .defaultValue
         options.setAudioSession(audioDescriptor: audioDescriptor)
         let vidoeTracks = tracks(mediaType: .video)
-        if vidoeTracks.count == 0 {
+        if vidoeTracks.isEmpty {
             videoOutput = nil
         }
         let fps = vidoeTracks.first { $0.isEnabled }.map(\.nominalFrameRate) ?? 24

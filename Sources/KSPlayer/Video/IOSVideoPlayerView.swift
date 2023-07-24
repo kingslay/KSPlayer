@@ -155,7 +155,7 @@ open class IOSVideoPlayerView: VideoPlayerView {
             KSOptions.supportedInterfaceOrientations = .portrait
             presentingVC.dismiss(animated: true) {
                 self.originalSuperView?.addSubview(self)
-                if let constraints = self.originalframeConstraints, constraints.count > 0 {
+                if let constraints = self.originalframeConstraints, !constraints.isEmpty {
                     NSLayoutConstraint.activate(constraints)
                 } else {
                     self.translatesAutoresizingMaskIntoConstraints = true
@@ -177,11 +177,11 @@ open class IOSVideoPlayerView: VideoPlayerView {
             topMaskView.isHidden = KSOptions.topBarShowInCase != .always
         }
         toolBar.playbackRateButton.isHidden = false
-        toolBar.srtButton.isHidden = srtControl.subtitleInfos.count == 0
+        toolBar.srtButton.isHidden = srtControl.subtitleInfos.isEmpty
         if UIDevice.current.userInterfaceIdiom == .phone {
             if isLandscape {
                 landscapeButton.isHidden = true
-                toolBar.srtButton.isHidden = srtControl.subtitleInfos.count == 0
+                toolBar.srtButton.isHidden = srtControl.subtitleInfos.isEmpty
             } else {
                 toolBar.srtButton.isHidden = true
                 if let image = maskImageView.image {

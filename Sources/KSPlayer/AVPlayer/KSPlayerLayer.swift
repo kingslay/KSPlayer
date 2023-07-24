@@ -484,7 +484,7 @@ extension KSPlayerLayer {
                 }
             }
         }
-        if langs.count > 0 {
+        if !langs.isEmpty {
             MPRemoteCommandCenter.shared().enableLanguageOptionCommand.isEnabled = true
         }
         MPNowPlayingInfoCenter.default().nowPlayingInfo?[MPNowPlayingInfoPropertyAvailableLanguageOptions] = langs

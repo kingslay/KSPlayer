@@ -36,10 +36,10 @@ struct HomeView: View {
                 LazyVGrid(columns: [GridItem(.adaptive(minimum: MoiveView.width))]) {
                     let playlist = appModel.playlist.filter { model in
                         var isIncluded = true
-                        if nameFilter.count > 0 {
+                        if !nameFilter.isEmpty {
                             isIncluded = model.name!.contains(nameFilter)
                         }
-                        if groupFilter.count > 0 {
+                        if !groupFilter.isEmpty {
                             isIncluded = isIncluded && model.group == groupFilter
                         }
                         return isIncluded

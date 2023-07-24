@@ -141,9 +141,11 @@ public extension View {
         }
         .navigationDestination(for: PlayModel.self) { model in
             KSVideoPlayerView(model: model)
+            #if !os(tvOS)
                 .navigationTitle(model.name!)
+            #endif
             #if !os(macOS)
-                .toolbar(.hidden, for: .tabBar)
+            .toolbar(.hidden, for: .tabBar)
             #endif
         }
     }

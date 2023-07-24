@@ -22,7 +22,7 @@ struct URLImportView: View {
             Section {
                 TextField("URL:", text: $playURL)
                 Toggle("Remember URL", isOn: $rememberURL)
-                if historyURLs.count > 0 {
+                if !historyURLs.isEmpty {
                     Picker("History URL", selection: $playURL) {
                         Text("None").tag("")
                         ForEach(historyURLs) {
@@ -43,11 +43,11 @@ struct URLImportView: View {
                 Button("Done") {
                     dismiss()
                     let urlString = playURL.trimmingCharacters(in: NSMutableCharacterSet.whitespacesAndNewlines)
-                    if urlString.count > 0, var components = URLComponents(string: urlString) {
-                        if username.count > 0 {
+                    if !urlString.isEmpty, var components = URLComponents(string: urlString) {
+                        if !username.isEmpty {
                             components.user = username
                         }
-                        if password.count > 0 {
+                        if !password.isEmpty {
                             components.password = password
                         }
                         if let url = components.url {

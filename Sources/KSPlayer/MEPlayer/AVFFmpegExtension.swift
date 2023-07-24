@@ -238,6 +238,7 @@ extension AVPixelFormat {
         }
     }
 
+    // videotoolbox_best_pixel_format
     func bestPixelFormat() -> AVPixelFormat {
         if let desc = av_pix_fmt_desc_get(self) {
             if desc.pointee.flags & UInt64(AV_PIX_FMT_FLAG_ALPHA) != 0 {

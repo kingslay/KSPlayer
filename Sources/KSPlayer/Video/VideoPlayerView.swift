@@ -267,7 +267,7 @@ open class VideoPlayerView: PlayerView {
                     if self.srtControl.selectedSubtitleInfo == nil, layer.options.autoSelectEmbedSubtitle {
                         self.srtControl.selectedSubtitleInfo = self.srtControl.subtitleInfos.first
                     }
-                    self.toolBar.srtButton.isHidden = self.srtControl.subtitleInfos.count == 0
+                    self.toolBar.srtButton.isHidden = self.srtControl.subtitleInfos.isEmpty
                     if #available(iOS 14.0, tvOS 15.0, *) {
                         self.buildMenusForButtons()
                     }
@@ -512,7 +512,7 @@ public extension VideoPlayerView {
 
     private func changeSrt(button _: UIButton) {
         let availableSubtitles = srtControl.subtitleInfos
-        guard availableSubtitles.count > 0 else { return }
+        guard !availableSubtitles.isEmpty else { return }
 
         let alertController = UIAlertController(title: NSLocalizedString("subtitle", comment: ""),
                                                 message: nil,

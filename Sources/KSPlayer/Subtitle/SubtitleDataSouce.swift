@@ -32,7 +32,7 @@ public class URLSubtitleInfo: KSURLSubtitle, SubtitleInfo {
         self.name = name
         downloadURL = url
         super.init()
-        if !url.isFileURL, name.count == 0 {
+        if !url.isFileURL, name.isEmpty {
             url.download { [weak self] filename, tmpUrl in
                 guard let self else {
                     return
@@ -48,7 +48,7 @@ public class URLSubtitleInfo: KSURLSubtitle, SubtitleInfo {
     }
 
     public func subtitle(isEnabled: Bool) {
-        if isEnabled, parts.count == 0 {
+        if isEnabled, parts.isEmpty {
             Task {
                 try? await parse(url: downloadURL)
             }
