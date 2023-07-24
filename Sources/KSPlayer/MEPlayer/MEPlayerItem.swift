@@ -243,7 +243,8 @@ extension MEPlayerItem {
         if formatCtx.pointee.start_time != Int64.min {
             startTime = CMTime(value: formatCtx.pointee.start_time, timescale: AV_TIME_BASE).seconds
         }
-        mainClock().positionTime = startTime
+        videoClock.positionTime = startTime
+        audioClock.positionTime = startTime
         duration = TimeInterval(max(formatCtx.pointee.duration, 0) / Int64(AV_TIME_BASE))
         if duration > startTime {
             duration -= startTime
@@ -453,7 +454,7 @@ extension MEPlayerItem {
                     self.seekingCompletionHandler?(result >= 0)
                     self.seekingCompletionHandler = nil
                 }
-                mainClock().positionTime = time
+                audioClock.positionTime = time
                 videoClock.positionTime = time
                 videoClock.duration = 0
                 state = .reading

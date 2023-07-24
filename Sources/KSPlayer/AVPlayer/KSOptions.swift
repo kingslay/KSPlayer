@@ -537,7 +537,7 @@ public extension Array {
     }
 }
 
-public class KSClock {
+public struct KSClock {
     public private(set) var lastMediaTime = CACurrentMediaTime()
     public internal(set) var duration = TimeInterval(0)
     public internal(set) var positionTime = TimeInterval(0) {
