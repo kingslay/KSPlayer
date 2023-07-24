@@ -52,12 +52,17 @@ public class AudioRendererPlayer: AudioPlayer, FrameOutput {
     private let synchronizer = AVSampleBufferRenderSynchronizer()
     private let serializationQueue = DispatchQueue(label: "ks.player.serialization.queue")
     private var sampleSize = UInt32(MemoryLayout<Float>.size)
+    private var isInterleaved = true
+    private var sampleRate: CMTimeScale = 44100
     var isPaused: Bool {
         synchronizer.rate == 0
     }
 
     init() {
         synchronizer.addRenderer(renderer)
+        if #available(macOS 11.3, iOS 14.5, tvOS 14.5, *) {
+            synchronizer.delaysRateChangeUntilHasSufficientMediaData = false
+        }
 //        if #available(tvOS 15.0, iOS 15.0, macOS 12.0, *) {
 //            renderer.allowedAudioSpatializationFormats = .monoStereoAndMultichannel
 //        }
@@ -67,6 +72,8 @@ public class AudioRendererPlayer: AudioPlayer, FrameOutput {
         renderer.audioTimePitchAlgorithm = audioFormat.channelCount > 2 ? .spectral : .timeDomain
         sampleSize = audioFormat.sampleSize
         desc = audioFormat.formatDescription
+        isInterleaved = audioFormat.isInterleaved
+        sampleRate = CMTimeScale(audioFormat.sampleRate)
     }
 
     func play(time: TimeInterval) {
@@ -77,7 +84,7 @@ public class AudioRendererPlayer: AudioPlayer, FrameOutput {
             }
             self.request()
         }
-        periodicTimeObserver = synchronizer.addPeriodicTimeObserver(forInterval: CMTime(seconds: 0.1, preferredTimescale: 1000), queue: .main) { [weak self] _ in
+        periodicTimeObserver = synchronizer.addPeriodicTimeObserver(forInterval: CMTime(seconds: 1, preferredTimescale: sampleRate), queue: .main) { [weak self] _ in
             guard let self else {
                 return
             }
@@ -112,7 +119,9 @@ public class AudioRendererPlayer: AudioPlayer, FrameOutput {
                 continue
             }
             let n = render.data.count
-            let dataByteSize = Int(render.numberOfSamples * sampleSize * render.channels) / n
+            let sampleCount = CMItemCount(render.numberOfSamples)
+            let sstride = Int(sampleSize * render.channels) / n
+            let dataByteSize = sampleCount * sstride
             if dataByteSize > render.dataSize {
                 assertionFailure("dataByteSize: \(dataByteSize),render.dataSize: \(render.dataSize)")
             }
@@ -146,8 +155,20 @@ public class AudioRendererPlayer: AudioPlayer, FrameOutput {
                 }
             }
             var sampleBuffer: CMSampleBuffer?
-            let sampleCount = CMItemCount(render.numberOfSamples)
-            CMAudioSampleBufferCreateReadyWithPacketDescriptions(allocator: kCFAllocatorDefault, dataBuffer: outBlockListBuffer, formatDescription: desc, sampleCount: sampleCount, presentationTimeStamp: render.cmtime, packetDescriptions: nil, sampleBufferOut: &sampleBuffer)
+            // 因为sampleRate跟timescale没有对齐，所以导致杂音。所以要让duration为invalid
+//            let duration = CMTime(value: CMTimeValue(sampleCount), timescale: sampleRate)
+            let duration = CMTime.invalid
+            let timing = CMSampleTimingInfo(duration: duration, presentationTimeStamp: render.cmtime, decodeTimeStamp: .invalid)
+            let sampleSizeEntryCount: CMItemCount
+            let sampleSizeArray: [Int]?
+            if isInterleaved {
+                sampleSizeEntryCount = 1
+                sampleSizeArray = [sstride]
+            } else {
+                sampleSizeEntryCount = 0
+                sampleSizeArray = nil
+            }
+            CMSampleBufferCreateReady(allocator: kCFAllocatorDefault, dataBuffer: outBlockListBuffer, formatDescription: desc, sampleCount: sampleCount, sampleTimingEntryCount: 1, sampleTimingArray: [timing], sampleSizeEntryCount: sampleSizeEntryCount, sampleSizeArray: sampleSizeArray, sampleBufferOut: &sampleBuffer)
             guard let sampleBuffer else {
                 continue
             }
