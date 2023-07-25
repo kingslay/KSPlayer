@@ -43,6 +43,8 @@ open class KSOptions {
     public var lowres = UInt8(0)
     public var startPlayTime: TimeInterval = 0
     public var startPlayRate: Float = 1.0
+    public var registerRemoteControll: Bool = true//默认支持来自系统控制中心的控制
+
     public var referer: String? {
         didSet {
             if let referer {
