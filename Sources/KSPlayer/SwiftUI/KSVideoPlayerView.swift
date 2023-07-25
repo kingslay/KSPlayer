@@ -11,10 +11,16 @@ import SwiftUI
 public struct KSVideoPlayerView: View {
     private let subtitleDataSouce: SubtitleDataSouce?
     private let onPlayerDisappear: ((KSPlayerLayer?) -> Void)?
-    @State private var delayItem: DispatchWorkItem?
-    @State private var overView = false
-    @StateObject private var playerCoordinator = KSVideoPlayer.Coordinator()
-    @Environment(\.dismiss) private var dismiss
+    @State
+    private var delayItem: DispatchWorkItem?
+    @State
+    private var overView = false
+    @State
+    private var showDropDownMenu = false
+    @StateObject
+    private var playerCoordinator = KSVideoPlayer.Coordinator()
+    @Environment(\.dismiss)
+    private var dismiss
     public let options: KSOptions
     @State public var url: URL {
         didSet {
@@ -24,7 +30,8 @@ public struct KSVideoPlayerView: View {
         }
     }
 
-    @State var isMaskShow = true {
+    @State
+    private var isMaskShow = true {
         didSet {
             if isMaskShow != oldValue {
                 if isMaskShow {
@@ -80,7 +87,7 @@ public struct KSVideoPlayerView: View {
                     }
                 }
             #endif
-            #if !os(tvOS) && !os(macOS)
+            #if !os(macOS)
                 .onTapGesture {
                 isMaskShow.toggle()
             }
@@ -106,36 +113,22 @@ public struct KSVideoPlayerView: View {
                 }
             }
             .ignoresSafeArea()
+            #if os(tvOS)
+                .focusable()
+                .onPlayPauseCommand {
+                    if playerCoordinator.state.isPlaying {
+                        playerCoordinator.playerLayer?.pause()
+                    } else {
+                        playerCoordinator.playerLayer?.play()
+                    }
+                }
+            #endif
             VideoSubtitleView(model: playerCoordinator.subtitleModel)
             VStack {
                 Spacer()
                 VStack {
+                    #if !os(tvOS)
                     VideoControllerView(config: playerCoordinator)
-                    #if !os(iOS)
-                        .onMoveCommand { direction in
-                            isMaskShow = true
-                            #if os(macOS)
-                            switch direction {
-                            case .left:
-                                playerCoordinator.skip(interval: -15)
-                            case .right:
-                                playerCoordinator.skip(interval: 15)
-                            case .up:
-                                playerCoordinator.playerLayer?.player.playbackVolume += 1
-                            case .down:
-                                playerCoordinator.playerLayer?.player.playbackVolume -= 1
-                            @unknown default:
-                                break
-                            }
-                            #endif
-                        }
-                        .onExitCommand {
-                            if isMaskShow {
-                                isMaskShow = false
-                            } else {
-                                dismiss()
-                            }
-                        }
                     #endif
                     // 设置opacity为0，还是会去更新View。所以只能这样了
                     if isMaskShow {
@@ -147,26 +140,66 @@ public struct KSVideoPlayerView: View {
                 .clipShape(RoundedRectangle(cornerRadius: 5))
                 .opacity(isMaskShow ? 1 : 0)
             }
+            if showDropDownMenu {
+                VideoSettingView(config: playerCoordinator, subtitleModel: playerCoordinator.subtitleModel)
+                    .frame(width: KSOptions.sceneSize.width * 3 / 4, height: KSOptions.sceneSize.height / 2)
+                    .transition(
+                        AnyTransition.move(edge: .top).combined(with: .opacity)
+                    )
+            }
         }
         .preferredColorScheme(.dark)
         .background(Color.black)
         .foregroundColor(.white)
         .persistentSystemOverlays(.hidden)
         .toolbar(isMaskShow ? .visible : .hidden, for: .automatic)
-        #if os(macOS)
-            .onTapGesture(count: 2) {
-                guard let view = playerCoordinator.playerLayer?.player.view else {
-                    return
+        #if !os(iOS)
+            .onMoveCommand { direction in
+                isMaskShow = true
+                switch direction {
+                case .left:
+                    playerCoordinator.skip(interval: -15)
+                case .right:
+                    playerCoordinator.skip(interval: 15)
+                #if os(macOS)
+                case .up:
+                    playerCoordinator.playerLayer?.player.playbackVolume += 1
+                case .down:
+                    playerCoordinator.playerLayer?.player.playbackVolume -= 1
+                #else
+                case .up:
+                    showDropDownMenu = false
+                case .down:
+                    showDropDownMenu = true
+                #endif
+                @unknown default:
+                    break
                 }
-                view.window?.toggleFullScreen(nil)
-                view.needsLayout = true
-                view.layoutSubtreeIfNeeded()
             }
             .onExitCommand {
-                playerCoordinator.playerLayer?.player.view?.exitFullScreenMode()
+                if showDropDownMenu {
+                    showDropDownMenu = false
+                } else if isMaskShow {
+                    isMaskShow = false
+                } else {
+                    dismiss()
+                }
             }
+        #endif
+        #if os(macOS)
+        .onTapGesture(count: 2) {
+            guard let view = playerCoordinator.playerLayer?.player.view else {
+                return
+            }
+            view.window?.toggleFullScreen(nil)
+            view.needsLayout = true
+            view.layoutSubtreeIfNeeded()
+        }
+        .onExitCommand {
+            playerCoordinator.playerLayer?.player.view?.exitFullScreenMode()
+        }
         #elseif os(iOS)
-            .navigationBarTitleDisplayMode(.inline)
+        .navigationBarTitleDisplayMode(.inline)
         #endif
         #if !os(tvOS)
         .onHover {
@@ -204,89 +237,58 @@ struct VideoControllerView: View {
     private var showVideoSetting = false
     public var body: some View {
         HStack {
-            HStack {
-                Button {
-                    config.isMuted.toggle()
-                } label: {
-                    Image(systemName: config.isMuted ? "speaker.slash.fill" : "speaker.wave.2.fill")
-                }
-                Button {
-                    config.isScaleAspectFill.toggle()
-                } label: {
-                    Image(systemName: config.isScaleAspectFill ? "rectangle.arrowtriangle.2.inward" : "rectangle.arrowtriangle.2.outward")
-                }
-                #if !os(tvOS) && !os(xrOS)
-                if config.playerLayer?.player.allowsExternalPlayback == true {
-                    AirPlayView().fixedSize()
-                }
-                #endif
-                ProgressView().opacity(config.state == .buffering ? 1 : 0)
+            Button {
+                config.isMuted.toggle()
+            } label: {
+                Image(systemName: config.isMuted ? "speaker.slash.fill" : "speaker.wave.2.fill")
             }
-            .font(.system(.title2))
+            Button {
+                config.isScaleAspectFill.toggle()
+            } label: {
+                Image(systemName: config.isScaleAspectFill ? "rectangle.arrowtriangle.2.inward" : "rectangle.arrowtriangle.2.outward")
+            }
+            #if !os(tvOS) && !os(xrOS)
+            if config.playerLayer?.player.allowsExternalPlayback == true {
+                AirPlayView().fixedSize()
+            }
+            #endif
+            ProgressView().opacity(config.state == .buffering ? 1 : 0)
+
             Spacer()
-            HStack {
-                Button {
-                    config.skip(interval: -15)
-                } label: {
-                    Image(systemName: "gobackward.15")
+            Button {
+                if config.state.isPlaying {
+                    config.playerLayer?.pause()
+                } else {
+                    config.playerLayer?.play()
                 }
-                #if !os(tvOS)
-                .keyboardShortcut(.leftArrow, modifiers: .none)
-                #endif
-                Button {
-                    if config.state.isPlaying {
-                        config.playerLayer?.pause()
-                    } else {
-                        config.playerLayer?.play()
-                    }
-                } label: {
-                    Image(systemName: config.state == .error ? "play.slash.fill" : (config.state.isPlaying ? "pause.fill" : "play.fill"))
-                }
-                .padding(.horizontal)
-                #if !os(tvOS)
-                    .keyboardShortcut(.space, modifiers: .none)
-                #endif
-                Button {
-                    config.skip(interval: 15)
-                } label: {
-                    Image(systemName: "goforward.15")
-                }
-                #if !os(tvOS)
-                .keyboardShortcut(.rightArrow, modifiers: .none)
-                #endif
+            } label: {
+                Image(systemName: config.state == .error ? "play.slash.fill" : (config.state.isPlaying ? "pause.fill" : "play.fill"))
             }
+            .padding(.horizontal)
             .font(.system(.largeTitle))
+            #if !os(tvOS)
+                .keyboardShortcut(.space, modifiers: .none)
+            #endif
             Spacer()
-            HStack {
-                Button {
-                    config.playerLayer?.isPipActive.toggle()
-                } label: {
-                    Image(systemName: config.playerLayer?.isPipActive ?? false ? "pip.exit" : "pip.enter")
-                }
-                Button {
-                    showVideoSetting.toggle()
-                } label: {
-                    Image(systemName: "ellipsis.circle")
-                }
-                #if !os(tvOS)
-                .keyboardShortcut("s", modifiers: [.command, .shift])
-                #endif
+            Button {
+                config.playerLayer?.isPipActive.toggle()
+            } label: {
+                Image(systemName: config.playerLayer?.isPipActive ?? false ? "pip.exit" : "pip.enter")
             }
-            .font(.system(.title2))
+            Button {
+                showVideoSetting.toggle()
+            } label: {
+                Image(systemName: "ellipsis.circle")
+            }
+            #if !os(tvOS)
+            .keyboardShortcut("s", modifiers: [.command, .shift])
+            #endif
         }
+        .font(.system(.title2))
         .sheet(isPresented: $showVideoSetting) {
             VideoSettingView(config: config, subtitleModel: config.subtitleModel)
         }
-        #if os(tvOS)
-//            .focusSection()
-        .onPlayPauseCommand {
-            if config.state.isPlaying {
-                config.playerLayer?.pause()
-            } else {
-                config.playerLayer?.play()
-            }
-        }
-        #else
+        #if !os(tvOS)
         .buttonStyle(.borderless)
         #endif
     }
@@ -301,6 +303,14 @@ struct VideoTimeShowView: View {
             Text("Live Streaming")
         } else {
             HStack {
+                #if os(iOS)
+                Button {
+                    config.skip(interval: -15)
+                } label: {
+                    Image(systemName: "gobackward.15")
+                }
+                .keyboardShortcut(.leftArrow, modifiers: .none)
+                #endif
                 Text(model.currentTime.toString(for: .minOrHour)).font(.caption2.monospacedDigit())
                 Slider(value: Binding {
                     Double(model.currentTime)
@@ -315,7 +325,16 @@ struct VideoTimeShowView: View {
                 }
                 .frame(maxHeight: 20)
                 Text((model.totalTime).toString(for: .minOrHour)).font(.caption2.monospacedDigit())
+                #if os(iOS)
+                Button {
+                    config.skip(interval: 15)
+                } label: {
+                    Image(systemName: "goforward.15")
+                }
+                .keyboardShortcut(.rightArrow, modifiers: .none)
+                #endif
             }
+            .font(.system(.title2))
         }
     }
 }
