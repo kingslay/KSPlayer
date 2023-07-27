@@ -179,7 +179,7 @@ open class KSPlayerLayer: UIView {
         player.playbackRate = options.startPlayRate
         isAutoPlay = options.isAutoPlay
         super.init(frame: .zero)
-        if options.registerRemoteControll{
+        if options.registerRemoteControll {
             registerRemoteControllEvent()
         }
         player.delegate = self

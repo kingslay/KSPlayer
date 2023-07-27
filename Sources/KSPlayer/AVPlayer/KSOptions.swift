@@ -43,7 +43,7 @@ open class KSOptions {
     public var lowres = UInt8(0)
     public var startPlayTime: TimeInterval = 0
     public var startPlayRate: Float = 1.0
-    public var registerRemoteControll: Bool = true//默认支持来自系统控制中心的控制
+    public var registerRemoteControll: Bool = true // 默认支持来自系统控制中心的控制
 
     public var referer: String? {
         didSet {
@@ -223,8 +223,8 @@ open class KSOptions {
         Int(ceil(fps)) >> 1
     }
 
-    open func audioFrameMaxCount(fps _: Float, channels: Int) -> Int {
-        (16 * max(channels, 1)) >> 1
+    open func audioFrameMaxCount(fps: Float, channels: Int) -> Int {
+        (Int(fps) * max(channels, 1)) >> 2
     }
 
     /// customize dar
