@@ -114,7 +114,6 @@ public struct KSVideoPlayerView: View {
             }
             .ignoresSafeArea()
             #if os(tvOS)
-                .focusable()
                 .onPlayPauseCommand {
                     if playerCoordinator.state.isPlaying {
                         playerCoordinator.playerLayer?.pause()
@@ -126,6 +125,7 @@ public struct KSVideoPlayerView: View {
             VideoSubtitleView(model: playerCoordinator.subtitleModel)
             VStack {
                 Spacer()
+                ProgressView().opacity(playerCoordinator.state == .buffering ? 1 : 0)
                 VStack {
                     #if !os(tvOS)
                     VideoControllerView(config: playerCoordinator)
@@ -153,7 +153,10 @@ public struct KSVideoPlayerView: View {
         .foregroundColor(.white)
         .persistentSystemOverlays(.hidden)
         .toolbar(isMaskShow ? .visible : .hidden, for: .automatic)
-        #if !os(iOS)
+        #if os(iOS)
+            .navigationBarTitleDisplayMode(.inline)
+        #else
+            .focusable()
             .onMoveCommand { direction in
                 isMaskShow = true
                 switch direction {
@@ -198,8 +201,6 @@ public struct KSVideoPlayerView: View {
         .onExitCommand {
             playerCoordinator.playerLayer?.player.view?.exitFullScreenMode()
         }
-        #elseif os(iOS)
-        .navigationBarTitleDisplayMode(.inline)
         #endif
         #if !os(tvOS)
         .onHover {
@@ -252,9 +253,15 @@ struct VideoControllerView: View {
                 AirPlayView().fixedSize()
             }
             #endif
-            ProgressView().opacity(config.state == .buffering ? 1 : 0)
-
             Spacer()
+            Button {
+                config.skip(interval: -15)
+            } label: {
+                Image(systemName: "gobackward.15")
+            }
+            #if !os(tvOS)
+            .keyboardShortcut(.leftArrow, modifiers: .none)
+            #endif
             Button {
                 if config.state.isPlaying {
                     config.playerLayer?.pause()
@@ -268,6 +275,14 @@ struct VideoControllerView: View {
             .font(.system(.largeTitle))
             #if !os(tvOS)
                 .keyboardShortcut(.space, modifiers: .none)
+            #endif
+            Button {
+                config.skip(interval: 15)
+            } label: {
+                Image(systemName: "goforward.15")
+            }
+            #if !os(tvOS)
+            .keyboardShortcut(.rightArrow, modifiers: .none)
             #endif
             Spacer()
             Button {
@@ -303,14 +318,6 @@ struct VideoTimeShowView: View {
             Text("Live Streaming")
         } else {
             HStack {
-                #if os(iOS)
-                Button {
-                    config.skip(interval: -15)
-                } label: {
-                    Image(systemName: "gobackward.15")
-                }
-                .keyboardShortcut(.leftArrow, modifiers: .none)
-                #endif
                 Text(model.currentTime.toString(for: .minOrHour)).font(.caption2.monospacedDigit())
                 Slider(value: Binding {
                     Double(model.currentTime)
@@ -325,14 +332,6 @@ struct VideoTimeShowView: View {
                 }
                 .frame(maxHeight: 20)
                 Text((model.totalTime).toString(for: .minOrHour)).font(.caption2.monospacedDigit())
-                #if os(iOS)
-                Button {
-                    config.skip(interval: 15)
-                } label: {
-                    Image(systemName: "goforward.15")
-                }
-                .keyboardShortcut(.rightArrow, modifiers: .none)
-                #endif
             }
             .font(.system(.title2))
         }
