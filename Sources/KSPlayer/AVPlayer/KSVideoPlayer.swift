@@ -54,13 +54,8 @@ extension KSVideoPlayer: UIViewRepresentable {
         updateView(view, context: context)
     }
 
-    public static func dismantleUIView(_: UIViewType, coordinator: Coordinator) {
-        #if os(tvOS)
-        coordinator.playerLayer?.delegate = nil
-        coordinator.playerLayer?.pause()
-        coordinator.playerLayer = nil
-        #endif
-    }
+    // iOS tvOS真机先调用onDisappear在调用dismantleUIView，但是模拟器就反过来了。
+    public static func dismantleUIView(_: UIViewType, coordinator _: Coordinator) {}
     #else
     public typealias NSViewType = KSPlayerLayer
     public func makeNSView(context: Context) -> NSViewType {
@@ -71,8 +66,9 @@ extension KSVideoPlayer: UIViewRepresentable {
         updateView(view, context: context)
     }
 
+    // macOS先调用onDisappear在调用dismantleNSView
     public static func dismantleNSView(_ view: NSViewType, coordinator _: Coordinator) {
-        view.window?.contentAspectRatio = CGSize(width: 16, height: 9)
+        view.window?.aspectRatio = CGSize(width: 16, height: 9)
     }
     #endif
 
@@ -83,29 +79,30 @@ extension KSVideoPlayer: UIViewRepresentable {
     }
 
     public final class Coordinator: ObservableObject {
-        @Published public var isPlay: Bool = false {
-            didSet {
-                if isPlay != oldValue {
-                    isPlay ? playerLayer?.play() : playerLayer?.pause()
-                }
-            }
-        }
-
-        @Published public var isMuted: Bool = false {
+        @Published
+        public var state = KSPlayerState.prepareToPlay
+        @Published
+        public var isMuted: Bool = false {
             didSet {
                 playerLayer?.player.isMuted = isMuted
             }
         }
 
-        @Published public var isScaleAspectFill = false {
+        @Published
+        public var isScaleAspectFill = false {
             didSet {
                 playerLayer?.player.contentMode = isScaleAspectFill ? .scaleAspectFill : .scaleAspectFit
             }
         }
 
-        @Published public var state = KSPlayerState.prepareToPlay
-        public var subtitleModel = SubtitleModel()
         @Published
+        public var playbackRate: Float = 1.0 {
+            didSet {
+                playerLayer?.player.playbackRate = playbackRate
+            }
+        }
+
+        public var subtitleModel = SubtitleModel()
         public var timemodel = ControllerTimeModel()
         public var selectedAudioTrack: MediaPlayerTrack? {
             didSet {
@@ -167,6 +164,12 @@ extension KSVideoPlayer: UIViewRepresentable {
             }
         }
 
+        public func resetPlayer() {
+            playerLayer?.delegate = nil
+            playerLayer?.pause()
+            playerLayer = nil
+        }
+
         public func skip(interval: Int) {
             if let playerLayer {
                 seek(time: playerLayer.player.currentPlaybackTime + TimeInterval(interval))
@@ -182,10 +185,7 @@ extension KSVideoPlayer: UIViewRepresentable {
 extension KSVideoPlayer.Coordinator: KSPlayerLayerDelegate {
     public func player(layer: KSPlayerLayer, state: KSPlayerState) {
         if state == .readyToPlay {
-            #if os(macOS)
-            let naturalSize = layer.player.naturalSize
-            layer.player.view?.window?.contentAspectRatio = naturalSize
-            #endif
+            playbackRate = layer.player.playbackRate
             videoTracks = layer.player.tracks(mediaType: .video)
             audioTracks = layer.player.tracks(mediaType: .audio)
             subtitleModel.selectedSubtitleInfo = subtitleModel.subtitleInfos.first
@@ -202,16 +202,21 @@ extension KSVideoPlayer.Coordinator: KSPlayerLayerDelegate {
                 }
             }
         }
-        isPlay = state.isPlaying
         self.state = state
         onStateChanged?(layer, state)
     }
 
-    public func player(layer: KSPlayerLayer, currentTime: TimeInterval, totalTime: TimeInterval) {
+    public func player(layer _: KSPlayerLayer, currentTime: TimeInterval, totalTime: TimeInterval) {
         onPlay?(currentTime, totalTime)
-        timemodel.currentTime = Int(currentTime)
-        timemodel.totalTime = Int(max(0, totalTime))
-        subtitleModel.subtitle(currentTime: currentTime + layer.options.subtitleDelay)
+        let current = Int(currentTime)
+        let total = Int(max(0, totalTime))
+        if timemodel.currentTime != current {
+            timemodel.currentTime = current
+        }
+        if timemodel.totalTime != total {
+            timemodel.totalTime = total
+        }
+        _ = subtitleModel.subtitle(currentTime: currentTime)
     }
 
     public func player(layer: KSPlayerLayer, finish error: Error?) {
@@ -263,8 +268,6 @@ public extension KSVideoPlayer {
 /// 这是一个频繁变化的model。View要少用这个
 public class ControllerTimeModel: ObservableObject {
     // 改成int才不会频繁更新
-    @Published
-    public var currentTime = 0
-    @Published
-    public var totalTime = 1
+    @Published public var currentTime = 0
+    @Published public var totalTime = 1
 }

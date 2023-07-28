@@ -20,18 +20,21 @@ public class KSPictureInPictureController: AVPictureInPictureController {
     func stop(restoreUserInterface: Bool) {
         stopPictureInPicture()
         delegate = nil
+        guard KSOptions.isPipPopViewController else {
+            return
+        }
         KSPictureInPictureController.pipController = nil
         if restoreUserInterface {
             #if canImport(UIKit)
             if let viewController, let originalViewController {
                 if let nav = viewController as? UINavigationController,
-                   nav.viewControllers.count == 0 || (nav.viewControllers.count == 1 && nav.viewControllers[0] != originalViewController)
+                   nav.viewControllers.isEmpty || (nav.viewControllers.count == 1 && nav.viewControllers[0] != originalViewController)
                 {
                     nav.viewControllers = [originalViewController]
                 }
                 if let navigationController {
                     var viewControllers = navigationController.viewControllers
-                    if let last = viewControllers.last, type(of: last) == type(of: viewController) {
+                    if viewControllers.count > 1, let last = viewControllers.last, type(of: last) == type(of: viewController) {
                         viewControllers[viewControllers.count - 1] = viewController
                         navigationController.viewControllers = viewControllers
                     }
@@ -53,6 +56,9 @@ public class KSPictureInPictureController: AVPictureInPictureController {
     func start(view: KSPlayerLayer) {
         startPictureInPicture()
         delegate = view
+        guard KSOptions.isPipPopViewController else {
+            return
+        }
         self.view = view
         #if canImport(UIKit)
         if let viewController = view.viewController {

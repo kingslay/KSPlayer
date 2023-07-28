@@ -12,13 +12,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     private lazy var openURLWindow = OpenURLWindowController()
     private var window = MainWindow()
 
-    func applicationWillFinishLaunching(_: Notification) {
-//        NSAppleEventManager.shared().setEventHandler(self, andSelector: #selector(handleURLEvent(event:withReplyEvent:)), forEventClass: AEEventClass(kInternetEventClass), andEventID: AEEventID(kAEGetURL))
-
-        // handle arguments
-//        let arguments = ProcessInfo.processInfo.arguments.dropFirst()
-//        guard arguments.count > 0 else { return }
-    }
+    func applicationWillFinishLaunching(_: Notification) {}
 
     func applicationDidFinishLaunching(_: Notification) {
         NSApplication.shared.servicesProvider = self

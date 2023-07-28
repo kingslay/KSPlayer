@@ -1,110 +1,141 @@
 import KSPlayer
 import SwiftUI
 struct HomeView: View {
-    @EnvironmentObject private var appModel: APPModel
+    @EnvironmentObject
+    private var appModel: APPModel
+    @State
+    private var nameFilter: String = ""
+    @State
+    private var groupFilter: String = ""
+    @Default(\.showRecentPlayList)
+    private var showRecentPlayList
 //    @Environment(\.horizontalSizeClass) var horizontalSizeClass
-    private let columns = [GridItem(.adaptive(minimum: MoiveView.width))]
-    private var recentDocumentURLs = [URL]()
-    init() {
-        #if os(macOS)
-        for url in NSDocumentController.shared.recentDocumentURLs {
-            recentDocumentURLs.append(url)
-        }
-        #endif
-    }
+    @FetchRequest(fetchRequest: PlayModel.playTimeRequest)
+    private var historyModels: FetchedResults<PlayModel>
 
     var body: some View {
         ScrollView {
-            LazyVGrid(columns: columns) {
-                if recentDocumentURLs.count > 0 {
-                    Section {
-                        ForEach(recentDocumentURLs) { url in
-                            let model = MovieModel(url: url)
-                            #if os(macOS)
-                            MoiveView(model: model)
-                                .onTapGesture {
-                                    appModel.open(url: model.url)
-                                }
-                            #else
-                            NavigationLink(value: model.url) {
-                                MoiveView(model: model)
-                            }
-                            .buttonStyle(.plain)
-                            #endif
-                        }
-                    } header: {
-                        HStack {
-                            Text("Recent Document").font(.title)
-                            Spacer()
-                        }
-                        .padding(.horizontal)
-                    }
-                }
-                let playlist = appModel.filterParsePlaylist()
+            if showRecentPlayList {
                 Section {
-                    ForEach(playlist) { model in
-                        #if os(macOS)
-                        MoiveView(model: model)
-                            .onTapGesture {
-                                appModel.open(url: model.url)
+                    ScrollView(.horizontal) {
+                        LazyHStack {
+                            ForEach(historyModels) { model in
+                                appModel.content(model: model)
                             }
-                        #else
-                        NavigationLink(value: model.url) {
-                            MoiveView(model: model)
                         }
-                        .buttonStyle(.plain)
-                        #endif
                     }
                 } header: {
                     HStack {
-                        Text("Channels").font(.title)
+                        Text("Recent Play").font(.title)
                         Spacer()
                     }
-                    .padding()
+                    .padding(.horizontal)
                 }
             }
+            Section {
+                LazyVGrid(columns: [GridItem(.adaptive(minimum: MoiveView.width))]) {
+                    let playlist = appModel.playlist.filter { model in
+                        var isIncluded = true
+                        if !nameFilter.isEmpty {
+                            isIncluded = model.name!.contains(nameFilter)
+                        }
+                        if !groupFilter.isEmpty {
+                            isIncluded = isIncluded && model.group == groupFilter
+                        }
+                        return isIncluded
+                    }
+                    ForEach(playlist) { model in
+                        appModel.content(model: model)
+                    }
+                }
+
+            } header: {
+                HStack {
+                    Text("Channels").font(.title)
+                    Spacer()
+                }
+                .padding(.horizontal)
+            }
         }
-        .searchable(text: $appModel.nameFilter)
+        .padding()
         .toolbar {
             Button {
                 appModel.openFileImport = true
             } label: {
-                Text("打开文件")
+                Text("Open File")
             }
+            #if !os(tvOS)
+            .keyboardShortcut("o")
+            #endif
             Button {
                 appModel.openURLImport = true
             } label: {
-                Text("打开URL")
+                Text("Open URL")
             }
-            Picker("group filter", selection: $appModel.groupFilter) {
+            #if !os(tvOS)
+            .keyboardShortcut("o", modifiers: [.command, .shift])
+            #endif
+            Picker("group filter", selection: $groupFilter) {
                 Text("All ").tag("")
                 ForEach(appModel.groups) { group in
                     Text(group).tag(group)
                 }
             }
+            #if os(tvOS)
+//                    .pickerStyle(.menu)
+            #endif
         }
+        #if !os(tvOS)
+        .searchable(text: $nameFilter)
+        #endif
     }
 }
 
 struct MoiveView: View {
     #if os(iOS)
-    static let width = KSOptions.sceneSize.width - 30
+    static let width = min(KSOptions.sceneSize.width, KSOptions.sceneSize.height) / 2 - 20
+    #elseif os(tvOS)
+    static let width = KSOptions.sceneSize.width / 4 - 150
     #else
-    static let width = CGFloat(320)
+    static let width = CGFloat(192)
     #endif
-    let model: MovieModel
+    @ObservedObject var model: PlayModel
     var body: some View {
-        VStack(alignment: .leading) {
-            AsyncImage(url: model.logo) { image in
-                image
-                    .resizable()
-                    .aspectRatio(contentMode: .fit)
-            } placeholder: {
-                Color.gray
-            }.frame(width: MoiveView.width, height: MoiveView.width / 16 * 9)
-                .clipShape(RoundedRectangle(cornerRadius: 5))
-            Text(model.name)
+        VStack {
+            image
+            Text(model.name!).lineLimit(1)
         }
         .frame(width: MoiveView.width)
+        .contextMenu {
+            Button {
+                model.isFavorite.toggle()
+                try? model.managedObjectContext?.save()
+            } label: {
+                Label(model.isFavorite ? "Cancel favorite" : "Favorite", systemImage: model.isFavorite ? "star" : "star.fill")
+            }
+            #if !os(tvOS)
+            Button {
+                #if os(macOS)
+                UIPasteboard.general.clearContents()
+                UIPasteboard.general.setString(model.url!.description, forType: .string)
+                #else
+                UIPasteboard.general.setValue(model.url!, forPasteboardType: "public.url")
+                #endif
+            } label: {
+                Label("Copy url", systemImage: "doc.on.doc.fill")
+            }
+            #endif
+        }
+    }
+
+    var image: some View {
+        AsyncImage(url: model.logo) { image in
+            image
+                .resizable()
+                .aspectRatio(contentMode: .fit)
+        } placeholder: {
+            Color.gray
+        }.frame(width: MoiveView.width, height: MoiveView.width / 16 * 9)
+            .clipShape(RoundedRectangle(cornerRadius: 5))
     }
 }

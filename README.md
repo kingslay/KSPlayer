@@ -1,5 +1,5 @@
 ![Build Status](https://img.shields.io/badge/build-%20passing%20-blue.svg)
-![Platform](https://img.shields.io/badge/Platform-%20iOS%20macOS%20tvOS%20-blue.svg)
+![Platform](https://img.shields.io/badge/Platform-%20iOS%20macOS%20tvOS%20visionOS%20-blue.svg)
 ![License](https://img.shields.io/badge/license-GPL-blue.svg)
 # KSPlayer 
 

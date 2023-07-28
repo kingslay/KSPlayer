@@ -9,20 +9,6 @@
 import AppKit
 import KSPlayer
 
-class MeOptions: KSOptions {
-    override func customizeDar(sar _: CGSize, par _: CGSize) -> CGSize? {
-//        let rate = sar.width * par.height / (sar.height * par.height)
-//        if rate < 5 / 4 {
-//            return CGSize(width: 5, height: 4)
-//        } else if rate < 4 / 3 {
-//            return CGSize(width: 4, height: 3)
-//        } else if rate < 16 / 9 {
-//            return CGSize(width: 16, height: 9)
-//        }
-        nil
-    }
-}
-
 class ViewController: NSViewController {
     private let playerView = MacVideoPlayerView()
     var url: URL? {
@@ -39,7 +25,6 @@ class ViewController: NSViewController {
 
     init() {
         super.init(nibName: nil, bundle: nil)
-//        self.url = URL(fileURLWithPath: Bundle.main.path(forResource: "567082ac3ae39699f68de4fd2b7444b1e045515a", ofType: "MP4")!)
     }
 
     @available(*, unavailable)

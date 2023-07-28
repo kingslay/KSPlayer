@@ -8,14 +8,15 @@ import Foundation
 
 public protocol KSParseProtocol {
     func canParse(subtitle: String) -> Bool
+    static func parse(scanner: Scanner, reg: NSRegularExpression?) -> SubtitlePart?
     func parse(subtitle: String) -> [SubtitlePart]
 }
 
-public extension KSParseProtocol {
-    static func patternReg() -> NSRegularExpression? {
-        try? NSRegularExpression(pattern: "\\{[^}]+\\}", options: .caseInsensitive)
-    }
+public extension KSOptions {
+    static var subtitleParses: [KSParseProtocol] = [SrtParse(), AssParse(), VTTParse()]
+}
 
+public extension KSParseProtocol {
     /// 把字符串时间转为对应的秒
     /// - Parameter fromStr: srt 00:02:52,184 ass0:30:11.56 vtt:00:00.430
     /// - Returns: 秒
@@ -37,6 +38,39 @@ public extension KSParseProtocol {
         let millisecond = scanner.scanDouble() ?? 0.0
         return (hour * 3600.0) + (min * 60.0) + sec + (millisecond / 1000.0)
     }
+
+    func parse(subtitle: String) -> [SubtitlePart] {
+        let reg = try? NSRegularExpression(pattern: "\\{[^}]+\\}", options: .caseInsensitive)
+        var groups = [SubtitlePart]()
+        let subtitle = subtitle.replacingOccurrences(of: "\r\n\r\n", with: "\n\n")
+        let scanner = Scanner(string: subtitle)
+        while !scanner.isAtEnd {
+            if let group = Self.parse(scanner: scanner, reg: reg) {
+                groups.append(group)
+            }
+        }
+        // 归并排序才是稳定排序。系统默认是快排
+        groups = groups.mergeSortBottomUp { $0 < $1 }
+        // 有的中文字幕和英文字幕分为两个group，所以要合并下
+        if var preGroup = groups.first {
+            var newGroups = [SubtitlePart]()
+            for i in 1 ..< groups.count {
+                let group = groups[i]
+                if preGroup == group {
+                    if let text = group.text {
+                        preGroup.text?.append(NSAttributedString(string: "\n"))
+                        preGroup.text?.append(text)
+                    }
+                } else {
+                    newGroups.append(preGroup)
+                    preGroup = group
+                }
+            }
+            newGroups.append(preGroup)
+            groups = newGroups
+        }
+        return groups
+    }
 }
 
 public class AssParse: KSParseProtocol {
@@ -46,7 +80,7 @@ public class AssParse: KSParseProtocol {
 
     // Dialogue: 0,0:12:37.73,0:12:38.83,Aki Default,,0,0,0,,{\be8}原来如此
     // 875,,Default,NTP,0000,0000,0000,!Effect,- 你们两个别冲这么快\\N- 我会取消所有行程尽快赶过去
-    public class func parse(scanner: Scanner, reg: NSRegularExpression?) -> SubtitlePart? {
+    public static func parse(scanner: Scanner, reg: NSRegularExpression?) -> SubtitlePart? {
         let isDialogue = scanner.scanString("Dialogue") != nil
         let start: TimeInterval
         let end: TimeInterval
@@ -84,37 +118,6 @@ public class AssParse: KSParseProtocol {
         }
         return SubtitlePart(start, end, text)
     }
-
-    public func parse(subtitle: String) -> [SubtitlePart] {
-        let reg = AssParse.patternReg()
-        var groups = [SubtitlePart]()
-        let scanner = Scanner(string: subtitle)
-        while !scanner.isAtEnd {
-            if let group = AssParse.parse(scanner: scanner, reg: reg) {
-                groups.append(group)
-            }
-        }
-        // 归并排序才是稳定排序。系统默认是快排
-        groups = groups.mergeSortBottomUp { $0 < $1 }
-        if var preGroup = groups.first {
-            var newGroups = [SubtitlePart]()
-            for i in 1 ..< groups.count {
-                let group = groups[i]
-                if preGroup == group {
-                    if let text = group.text {
-                        preGroup.text?.append(NSAttributedString(string: "\n"))
-                        preGroup.text?.append(text)
-                    }
-                } else {
-                    newGroups.append(preGroup)
-                    preGroup = group
-                }
-            }
-            newGroups.append(preGroup)
-            groups = newGroups
-        }
-        return groups
-    }
 }
 
 public class VTTParse: KSParseProtocol {
@@ -126,7 +129,7 @@ public class VTTParse: KSParseProtocol {
      00:00.430 --> 00:03.380
      简中封装 by Q66
      */
-    public class func parse(scanner: Scanner, reg: NSRegularExpression?) -> SubtitlePart? {
+    public static func parse(scanner: Scanner, reg: NSRegularExpression?) -> SubtitlePart? {
         _ = scanner.scanUpToString("\n\n")
         let startString = scanner.scanUpToString(" --> ")
         // skip spaces and newlines by default.
@@ -138,22 +141,9 @@ public class VTTParse: KSParseProtocol {
             if let reg {
                 text = reg.stringByReplacingMatches(in: text, range: NSRange(location: 0, length: text.count), withTemplate: "")
             }
-            return SubtitlePart(AssParse.parseDuration(startString), AssParse.parseDuration(endString), text)
+            return SubtitlePart(parseDuration(startString), parseDuration(endString), text)
         }
         return nil
-    }
-
-    public func parse(subtitle: String) -> [SubtitlePart] {
-        let reg = AssParse.patternReg()
-        var groups = [SubtitlePart]()
-        let subtitle = subtitle.replacingOccurrences(of: "\r\n\r\n", with: "\n\n\n")
-        let scanner = Scanner(string: subtitle)
-        while !scanner.isAtEnd {
-            if let group = VTTParse.parse(scanner: scanner, reg: reg) {
-                groups.append(group)
-            }
-        }
-        return groups
     }
 }
 
@@ -167,7 +157,7 @@ public class SrtParse: KSParseProtocol {
      00:02:52,184 --> 00:02:53,617
      {\an4}慢慢来
      */
-    public class func parse(scanner: Scanner, reg: NSRegularExpression?) -> SubtitlePart? {
+    public static func parse(scanner: Scanner, reg: NSRegularExpression?) -> SubtitlePart? {
         _ = scanner.scanUpToCharacters(from: .newlines)
         let startString = scanner.scanUpToString(" --> ")
         // skip spaces and newlines by default.
@@ -179,22 +169,9 @@ public class SrtParse: KSParseProtocol {
             if let reg {
                 text = reg.stringByReplacingMatches(in: text, range: NSRange(location: 0, length: text.count), withTemplate: "")
             }
-            return SubtitlePart(AssParse.parseDuration(startString), AssParse.parseDuration(endString), text)
+            return SubtitlePart(parseDuration(startString), parseDuration(endString), text)
         }
         return nil
-    }
-
-    public func parse(subtitle: String) -> [SubtitlePart] {
-        let reg = AssParse.patternReg()
-        var groups = [SubtitlePart]()
-        let subtitle = subtitle.replacingOccurrences(of: "\r\n\r\n", with: "\n\n")
-        let scanner = Scanner(string: subtitle)
-        while !scanner.isAtEnd {
-            if let group = SrtParse.parse(scanner: scanner, reg: reg) {
-                groups.append(group)
-            }
-        }
-        return groups
     }
 }
 

@@ -238,6 +238,7 @@ extension AVPixelFormat {
         }
     }
 
+    // videotoolbox_best_pixel_format
     func bestPixelFormat() -> AVPixelFormat {
         if let desc = av_pix_fmt_desc_get(self) {
             if desc.pointee.flags & UInt64(AV_PIX_FMT_FLAG_ALPHA) != 0 {
@@ -442,6 +443,9 @@ extension Dictionary where Key == String {
                 av_dict_set(&avOptions, key, string, 0)
             } else if let dic = value as? Dictionary {
                 let string = dic.map { "\($0.0)=\($0.1)" }.joined(separator: "\r\n")
+                av_dict_set(&avOptions, key, string, 0)
+            } else if let array = value as? [String] {
+                let string = array.joined(separator: "+")
                 av_dict_set(&avOptions, key, string, 0)
             }
         }

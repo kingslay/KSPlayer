@@ -28,8 +28,8 @@ enum MESourceState {
 protocol OutputRenderSourceDelegate: AnyObject {
     func getVideoOutputRender(force: Bool) -> VideoVTBFrame?
     func getAudioOutputRender() -> AudioFrame?
-    func setVideo(time: CMTime)
     func setAudio(time: CMTime)
+    func setVideo(time: CMTime, duration: CMTime)
 }
 
 protocol CodecCapacityDelegate: AnyObject {
@@ -71,7 +71,7 @@ extension MEFrame {
 public extension KSOptions {
     /// 开启VR模式的陀飞轮
     static var enableSensor = true
-    static var stackSize = 32768
+    static var stackSize = 65536
     static var isClearVideoWhereReplace = true
     /// true: AVSampleBufferAudioRenderer false: AVAudioEngine
     static var isUseAudioRenderer = false
@@ -85,8 +85,10 @@ public extension KSOptions {
             if transferFunction == kCVImageBufferTransferFunction_SMPTE_ST_2084_PQ {
                 if #available(macOS 11.0, iOS 14.0, tvOS 14.0, *) {
                     return CGColorSpace(name: CGColorSpace.itur_2100_PQ)
+                } else if #available(macOS 10.15.4, iOS 13.4, tvOS 13.4, *) {
+                    return CGColorSpace(name: CGColorSpace.itur_2020_PQ)
                 } else {
-                    return CGColorSpace(name: CGColorSpace.itur_2020)
+                    return CGColorSpace(name: CGColorSpace.itur_2020_PQ_EOTF)
                 }
             } else if transferFunction == kCVImageBufferTransferFunction_ITU_R_2100_HLG {
                 if #available(macOS 11.0, iOS 14.0, tvOS 14.0, *) {
@@ -99,7 +101,30 @@ public extension KSOptions {
             }
 
         default:
-            return nil
+            return CGColorSpace(name: CGColorSpace.sRGB)
+        }
+    }
+
+    static func colorSpace(colorPrimaries: CFString?) -> CGColorSpace? {
+        switch colorPrimaries {
+        case kCVImageBufferColorPrimaries_ITU_R_709_2:
+            return CGColorSpace(name: CGColorSpace.sRGB)
+        case kCVImageBufferColorPrimaries_DCI_P3:
+            if #available(macOS 10.15.4, iOS 13.4, tvOS 13.4, *) {
+                return CGColorSpace(name: CGColorSpace.displayP3_PQ)
+            } else {
+                return CGColorSpace(name: CGColorSpace.displayP3_PQ_EOTF)
+            }
+        case kCVImageBufferColorPrimaries_ITU_R_2020:
+            if #available(macOS 11.0, iOS 14.0, tvOS 14.0, *) {
+                return CGColorSpace(name: CGColorSpace.itur_2100_PQ)
+            } else if #available(macOS 10.15.4, iOS 13.4, tvOS 13.4, *) {
+                return CGColorSpace(name: CGColorSpace.itur_2020_PQ)
+            } else {
+                return CGColorSpace(name: CGColorSpace.itur_2020_PQ_EOTF)
+            }
+        default:
+            return CGColorSpace(name: CGColorSpace.sRGB)
         }
     }
 

@@ -87,6 +87,7 @@ class VideoSwresample: Swresample {
             pbuf.aspectRatio = frame.sample_aspect_ratio.size
             pbuf.yCbCrMatrix = frame.colorspace.ycbcrMatrix
             pbuf.colorPrimaries = frame.color_primaries.colorPrimaries
+            // vt_pixbuf_set_colorspace
             if let transferFunction = frame.color_trc.transferFunction {
                 pbuf.transferFunction = transferFunction
                 if transferFunction == kCVImageBufferTransferFunction_UseGamma {

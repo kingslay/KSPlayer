@@ -484,7 +484,7 @@ extension KSAVPlayer: MediaPlayerProtocol {
         player.currentItem?.tracks.filter { $0.assetTrack?.mediaType == mediaType }.map { AVMediaPlayerTrack(track: $0) } ?? []
     }
 
-    public func select(track: MediaPlayerTrack) {
+    public func select(track: some MediaPlayerTrack) {
         player.currentItem?.tracks.filter { $0.assetTrack?.mediaType == track.mediaType }.forEach { $0.isEnabled = false }
         track.isEnabled = true
     }

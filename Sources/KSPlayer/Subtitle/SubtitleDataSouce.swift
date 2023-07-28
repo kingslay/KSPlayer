@@ -32,7 +32,7 @@ public class URLSubtitleInfo: KSURLSubtitle, SubtitleInfo {
         self.name = name
         downloadURL = url
         super.init()
-        if !url.isFileURL, name.count == 0 {
+        if !url.isFileURL, name.isEmpty {
             url.download { [weak self] filename, tmpUrl in
                 guard let self else {
                     return
@@ -48,7 +48,7 @@ public class URLSubtitleInfo: KSURLSubtitle, SubtitleInfo {
     }
 
     public func subtitle(isEnabled: Bool) {
-        if isEnabled, parts.count == 0 {
+        if isEnabled, parts.isEmpty {
             Task {
                 try? await parse(url: downloadURL)
             }
@@ -133,7 +133,10 @@ public class DirectorySubtitleDataSouce: SearchSubtitleDataSouce {
         infos.removeAll()
         if url.isFileURL {
             let subtitleURLs: [URL] = (try? FileManager.default.contentsOfDirectory(at: url.deletingLastPathComponent(), includingPropertiesForKeys: nil).filter(\.isSubtitle)) ?? []
-            infos.append(contentsOf: subtitleURLs.map { URLSubtitleInfo(url: $0) })
+            let contents = subtitleURLs.map { URLSubtitleInfo(url: $0) }.sorted { left, right in
+                left.name < right.name
+            }
+            infos.append(contentsOf: contents)
         }
     }
 }
@@ -180,13 +183,7 @@ public class AssrtSubtitleDataSouce: SearchSubtitleDataSouce {
 
     public func searchSubtitle(url: URL) async throws {
         infos.removeAll()
-        var query = url.lastPathComponent
-        let nameArray = query.split(separator: ".")
-        if nameArray.count == 2 {
-            query = String(nameArray[0])
-        } else if nameArray.count > 2 {
-            query = nameArray.prefix(2).joined(separator: ".")
-        }
+        let query = url.deletingPathExtension().lastPathComponent
         guard let searchApi = URL(string: "https://api.assrt.net/v1/sub/search")?.add(queryItems: ["q": query]) else {
             return
         }

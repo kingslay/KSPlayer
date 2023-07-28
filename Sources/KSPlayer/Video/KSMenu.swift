@@ -10,115 +10,55 @@ import UIKit
 #else
 import AppKit
 #endif
-@available(tvOS 15.0, *)
-public enum KSMenuBuilder {
-    static func definitionsMenu(from resource: KSPlayerResource?,
-                                selected definition: Int,
-                                completition handler: @escaping (Int) -> Void) -> UIMenu?
-    {
-        guard let resource, resource.definitions.count > 1 else {
+
+extension UIMenu {
+    func updateActionState(actionTitle: String? = nil) -> UIMenu {
+        children.forEach { action in
+            guard let action = action as? UIAction else {
+                return
+            }
+            action.state = action.title == actionTitle ? .on : .off
+        }
+        return self
+    }
+
+    @available(tvOS 15.0, *)
+    convenience init?<U>(title: String, current: U?, list: [U], addDisabled: Bool = false, titleFunc: (U) -> String, completition: @escaping (String, U?) -> Void) {
+        if list.count < (addDisabled ? 1 : 2) {
             return nil
         }
-        var actions = [UIAction]()
-        resource.definitions.enumerated().forEach { index, currentDefinition in
-            let definitionItem = UIAction(title: currentDefinition.definition) { item in
-                handler(index)
-                actions.forEach { action in
-                    action.state = item.title == action.title ? .on : .off
-                }
-            }
-            if index == definition {
-                definitionItem.state = .on
-            }
-            actions.append(definitionItem)
-        }
-        return UIMenu(title: NSLocalizedString("select video quality", comment: ""), children: actions)
-    }
-
-    static func playbackRateMenu(_ currentRate: Double,
-                                 speeds: [Double] = [0.75, 1.0, 1.25, 1.5, 2.0],
-                                 completition handler: @escaping (Double) -> Void) -> UIMenu
-    {
-        var actions = [UIAction]()
-        speeds.forEach { rate in
-            let title = "\(rate) x"
-            let rateItem = UIAction(title: title) { item in
-                handler(rate)
-                actions.forEach { action in
-                    action.state = item.title == action.title ? .on : .off
-                }
-            }
-            if currentRate == rate {
-                rateItem.state = .on
-            }
-            actions.append(rateItem)
-        }
-        return UIMenu(title: NSLocalizedString("speed", comment: ""), children: actions)
-    }
-
-    static func audioVideoChangeMenu(_ currentTrack: MediaPlayerTrack?,
-                                     availableTracks: [MediaPlayerTrack],
-                                     completition handler: @escaping (MediaPlayerTrack) -> Void) -> UIMenu?
-    {
-        guard let currentTrack, availableTracks.count > 1 else {
-            return nil
-        }
-        let title = NSLocalizedString(currentTrack.mediaType == .audio ? "switch audio" : "switch video", comment: "")
-        var actions = [UIAction]()
-        availableTracks.forEach { track in
-            var title = track.name
-            if track.mediaType == .video {
-                title += " \(track.naturalSize.width)x\(track.naturalSize.height)"
+        var actions = list.map { value in
+            let item = UIAction(title: titleFunc(value)) { item in
+                completition(item.title, value)
             }
 
-            let tracksItem = UIAction(title: title) { item in
-                handler(track)
-                actions.forEach { action in
-                    action.state = item.title == action.title ? .on : .off
-                }
+            if let current, titleFunc(value) == titleFunc(current) {
+                item.state = .on
             }
-
-            if track.isEnabled {
-                tracksItem.state = .on
-            }
-            actions.append(tracksItem)
+            return item
         }
-        return UIMenu(title: title, children: actions)
-    }
-
-    static func srtChangeMenu(_ currentSub: (any SubtitleInfo)?,
-                              availableSubtitles: [any SubtitleInfo],
-                              completition handler: @escaping ((any SubtitleInfo)?) -> Void) -> UIMenu?
-    {
-        guard availableSubtitles.count > 0 else { return nil }
-        var actions = [UIAction]()
-        let subtitleItem = UIAction(title: "Disabled") { item in
-            handler(nil)
-            actions.forEach { action in
-                action.state = item.title == action.title ? .on : .off
-            }
-        }
-        if currentSub == nil {
-            subtitleItem.state = .on
+        if addDisabled {
+            actions.insert(UIAction(title: "Disabled") { item in
+                completition(item.title, nil)
+            }, at: 0)
         }
 
-        actions.append(subtitleItem)
-        availableSubtitles.forEach { srt in
-            let subtitleItem = UIAction(title: srt.name) { item in
-                handler(srt)
-                actions.forEach { action in
-                    action.state = item.title == action.title ? .on : .off
-                }
-            }
-            if srt.subtitleID == currentSub?.subtitleID {
-                subtitleItem.state = .on
-            }
-            actions.append(subtitleItem)
-        }
-
-        return UIMenu(title: NSLocalizedString("subtitle", comment: ""), children: actions)
+        self.init(title: title, children: actions)
     }
 }
+
+#if !os(tvOS)
+extension UIButton {
+    @available(iOS 14.0, *)
+    func setMenu<U>(title: String, current: U?, list: [U], addDisabled: Bool = false, titleFunc: (U) -> String, completition handler: @escaping (U?) -> Void) {
+        menu = UIMenu(title: title, current: current, list: list, addDisabled: addDisabled, titleFunc: titleFunc) { [weak self] title, value in
+            guard let self else { return }
+            handler(value)
+            self.menu = self.menu?.updateActionState(actionTitle: title)
+        }
+    }
+}
+#endif
 
 #if canImport(UIKit)
 
@@ -145,6 +85,10 @@ public final class UIAction: NSMenuItem {
 }
 
 extension UIMenu {
+    var children: [NSMenuItem] {
+        items
+    }
+
     convenience init(title: String, children: [UIAction]) {
         self.init(title: title)
         for item in children {

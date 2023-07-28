@@ -42,13 +42,35 @@ open class KSOptions {
     public var maxAnalyzeDuration: Int64?
     public var lowres = UInt8(0)
     public var startPlayTime: TimeInterval = 0
+    public var startPlayRate: Float = 1.0
+    public var registerRemoteControll: Bool = true // 默认支持来自系统控制中心的控制
+
+    public var referer: String? {
+        didSet {
+            if let referer {
+                formatContextOptions["referer"] = "Referer: \(referer)"
+            } else {
+                formatContextOptions["referer"] = nil
+            }
+        }
+    }
+
+    public var userAgent: String? {
+        didSet {
+            if let userAgent {
+                formatContextOptions["user_agent"] = userAgent
+            } else {
+                formatContextOptions["user_agent"] = nil
+            }
+        }
+    }
+
     // audio
     public var audioDelay = 0.0 // s
     public var audioFilters = [String]()
     public var syncDecodeAudio = false
     // sutile
     public var autoSelectEmbedSubtitle = true
-    public var subtitleDelay = 0.0 // s
     public var subtitleDisable = false
     public var isSeekImageSubtitle = false
     // video
@@ -91,7 +113,6 @@ open class KSOptions {
         // set 'listen_timeout' = -1 for rtmp、rtsp
 //        formatContextOptions["listen_timeout"] = 3
         formatContextOptions["rw_timeout"] = 10_000_000
-        formatContextOptions["user_agent"] = "ksplayer"
         decoderOptions["threads"] = "auto"
         decoderOptions["refcounted_frames"] = "1"
     }
@@ -125,13 +146,17 @@ open class KSOptions {
 
     // 缓冲算法函数
     open func playable(capacitys: [CapacityProtocol], isFirst: Bool, isSeek: Bool) -> LoadingState {
-        let packetCount = capacitys.map(\.packetCount).min() ?? 0
-        let frameCount = capacitys.map(\.frameCount).min() ?? 0
+        let packetCount = capacitys.map(\.packetCount).max() ?? 0
+        let frameCount = capacitys.map(\.frameCount).max() ?? 0
         let isEndOfFile = capacitys.allSatisfy(\.isEndOfFile)
-        let loadedTime = capacitys.map { TimeInterval($0.packetCount + $0.frameCount) / TimeInterval($0.fps) }.min() ?? 0
+        let loadedTime = capacitys.map { TimeInterval($0.packetCount + $0.frameCount) / TimeInterval($0.fps) }.max() ?? 0
         let progress = loadedTime * 100.0 / preferredForwardBufferDuration
         let isPlayable = capacitys.allSatisfy { capacity in
             if capacity.isEndOfFile && capacity.packetCount == 0 {
+                return true
+            }
+            // 处理视频轨道一致没有值的问题(纯音频)
+            if capacity.mediaType == .video && capacity.frameCount == 0 && capacity.packetCount == 0 {
                 return true
             }
             guard capacity.frameCount >= capacity.frameMaxCount >> 2 else {
@@ -198,8 +223,8 @@ open class KSOptions {
         Int(ceil(fps)) >> 1
     }
 
-    open func audioFrameMaxCount(fps _: Float, channels: Int) -> Int {
-        (16 * max(channels, 1)) >> 1
+    open func audioFrameMaxCount(fps: Float, channels: Int) -> Int {
+        (Int(fps) * max(channels, 1)) >> 2
     }
 
     /// customize dar
@@ -273,7 +298,7 @@ open class KSOptions {
     /**
             在创建解码器之前可以对KSOptions做一些处理。例如判断fieldOrder为tt或bb的话，那就自动加videofilters
      */
-    open func process(assetTrack _: MediaPlayerTrack) {}
+    open func process(assetTrack _: some MediaPlayerTrack) {}
 
     #if os(tvOS)
     open func preferredDisplayCriteria(refreshRate _: Float, videoDynamicRange _: Int32) -> AVDisplayCriteria? {
@@ -309,24 +334,40 @@ open class KSOptions {
         audioFormat = audioDescriptor.audioFormat(channels: channels)
     }
 
-    open func videoClockSync(audioTime: TimeInterval, videoTime: TimeInterval) -> ClockProcessType {
-        let delay = audioTime - videoTime
-        if delay > 0.4 {
-            KSLog("video delay time: \(delay), audio time:\(audioTime), delay count:\(videoClockDelayCount)")
-            if delay > 2 {
+    open func videoClockSync(main: KSClock, video: KSClock) -> ClockProcessType {
+        var desire = main.getTime() + audioDelay
+        #if !os(macOS)
+        desire -= AVAudioSession.sharedInstance().outputLatency
+        #endif
+        let diff = video.positionTime + video.duration - desire
+        if diff > 10 || diff < -10 {
+            return .next
+        } else if diff >= 1 / 120 {
+            videoClockDelayCount = 0
+            return .remain
+        } else {
+            if diff < -0.04 {
+                KSLog("video delay=\(diff), clock=\(desire), delay count=\(videoClockDelayCount)")
+            }
+            if diff < -0.1 {
                 videoClockDelayCount += 1
-                if videoClockDelayCount > 10 {
+                if diff < -8, videoClockDelayCount % 100 == 0 {
                     KSLog("video delay seek video track")
                     return .seek
+                }
+                if diff < -1, videoClockDelayCount % 10 == 0 {
+                    return .flush
+                }
+                if videoClockDelayCount % 2 == 0 {
+                    return .dropNext
                 } else {
-                    return .drop
+                    return .next
                 }
             } else {
-                return .drop
+//                print(CACurrentMediaTime()-video.lastMediaTime)
+                videoClockDelayCount = 0
+                return .next
             }
-        } else {
-            videoClockDelayCount = 0
-            return .show
         }
     }
 
@@ -370,6 +411,7 @@ public extension KSOptions {
     /// seek完是否自动播放
     static var isSeekedAutoPlay = true
     static var hardwareDecode = true
+    static var isPipPopViewController = false
     /// 日志级别
     static var logLevel = LogLevel.warning
     static var logger: LogHandler = OSLog(lable: "KSPlayer")
@@ -463,7 +505,7 @@ public class FileLog: LogHandler {
     private let formatter = DateFormatter()
     public init(fileHandle: FileHandle) {
         self.fileHandle = fileHandle
-        formatter.dateFormat = "MM-dd_HH:mm:ss"
+        formatter.dateFormat = "MM-dd HH:mm:ss.SSSSSS"
     }
 
     public func log(level: LogLevel, message: CustomStringConvertible, file: String, function: String, line: UInt) {
@@ -484,5 +526,29 @@ public class FileLog: LogHandler {
 @inlinable public func KSLog(level: LogLevel = .warning, dso: UnsafeRawPointer = #dsohandle, _ message: StaticString, _ args: CVarArg...) {
     if level.rawValue <= KSOptions.logLevel.rawValue {
         os_log(level.logType, dso: dso, message, args)
+    }
+}
+
+public extension Array {
+    func toDictionary<Key: Hashable>(with selectKey: (Element) -> Key) -> [Key: Element] {
+        var dict = [Key: Element]()
+        forEach { element in
+            dict[selectKey(element)] = element
+        }
+        return dict
+    }
+}
+
+public struct KSClock {
+    public private(set) var lastMediaTime = CACurrentMediaTime()
+    public internal(set) var duration = TimeInterval(0)
+    public internal(set) var positionTime = TimeInterval(0) {
+        didSet {
+            lastMediaTime = CACurrentMediaTime()
+        }
+    }
+
+    func getTime() -> TimeInterval {
+        positionTime + CACurrentMediaTime() - lastMediaTime
     }
 }

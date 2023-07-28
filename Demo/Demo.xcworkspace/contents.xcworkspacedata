@@ -2,7 +2,7 @@
 <Workspace
    version = "1.0">
    <FileRef
-      location = "group:/Users/kintan/Documents/Github/KSPlayer/Demo/SwiftUI/TracyPlayer.xcodeproj">
+      location = "group:SwiftUI/TracyPlayer.xcodeproj">
    </FileRef>
    <FileRef
       location = "group:demo-iOS/demo-iOS.xcodeproj">

@@ -33,7 +33,8 @@ struct SettingView: View {
 }
 
 struct SettingGeneralView: View {
-    @AppStorage("showRecentPlayList") private var showRecentPlayList = false
+    @Default(\.showRecentPlayList)
+    private var showRecentPlayList
     var body: some View {
         Form {
             Toggle("Show Recent Play List", isOn: $showRecentPlayList)
@@ -42,40 +43,49 @@ struct SettingGeneralView: View {
 }
 
 struct SettingAudioView: View {
-    @AppStorage("isUseAudioRenderer") private var isUseAudioRenderer = KSOptions.isUseAudioRenderer
+    @Default(\.isUseAudioRenderer)
+    private var isUseAudioRenderer
     init() {}
     var body: some View {
         Form {
             Toggle("Use Audio Renderer", isOn: $isUseAudioRenderer)
         }
-        .onChange(of: isUseAudioRenderer) {
-            KSOptions.isUseAudioRenderer = $0
-        }
     }
 }
 
 struct SettingVideoView: View {
-    @AppStorage("hardwareDecode") private var hardwareDecode = KSOptions.hardwareDecode
+    @Default(\.hardwareDecode)
+    private var hardwareDecode
+    @Default(\.isUseDisplayLayer)
+    private var isUseDisplayLayer
+
     var body: some View {
         Form {
             Toggle("Hardware decoder", isOn: $hardwareDecode)
-        }
-        .onChange(of: hardwareDecode) {
-            KSOptions.hardwareDecode = $0
+            Toggle("Use DisplayLayer", isOn: $isUseDisplayLayer)
         }
     }
 }
 
 struct SettingSubtitleView: View {
-    @AppStorage("textFontSize") private var textFontSize = SubtitleModel.textFontSize
-    @AppStorage("textBold") private var textBold = SubtitleModel.textBold
-    @AppStorage("textItalic") private var textItalic = SubtitleModel.textItalic
-    @AppStorage("textColor") private var textColor = SubtitleModel.textColor
-    @AppStorage("textBackgroundColor") private var textBackgroundColor = SubtitleModel.textBackgroundColor
-    @AppStorage("textXAlign") private var textXAlign = SubtitleModel.textXAlign
-    @AppStorage("textYAlign") private var textYAlign = SubtitleModel.textYAlign
-    @AppStorage("textXMargin") private var textXMargin = SubtitleModel.textXMargin
-    @AppStorage("textYMargin") private var textYMargin = SubtitleModel.textYMargin
+    @Default(\.textFontSize)
+    private var textFontSize
+    @Default(\.textItalic)
+    private var textBold
+    @Default(\.textItalic)
+    private var textItalic
+    @Default(\.textColor)
+    private var textColor
+    @Default(\.textBackgroundColor)
+    private var textBackgroundColor
+    @Default(\.textXAlign)
+    private var textXAlign
+    @Default(\.textYAlign)
+    private var textYAlign
+    @Default(\.textXMargin)
+    private var textXMargin
+    @Default(\.textYMargin)
+    private var textYMargin
 
     var body: some View {
         Form {
@@ -119,41 +129,28 @@ struct SettingSubtitleView: View {
             }
         }
         .padding()
-        .onChange(of: textFontSize) {
-            SubtitleModel.textFontSize = $0
-        }
-        .onChange(of: textBold) {
-            SubtitleModel.textBold = $0
-        }
-        .onChange(of: textItalic) {
-            SubtitleModel.textItalic = $0
-        }
-        .onChange(of: textColor) {
-            SubtitleModel.textColor = $0
-        }
-        .onChange(of: textBackgroundColor) {
-            SubtitleModel.textBackgroundColor = $0
-        }
-        .onChange(of: textXAlign) {
-            SubtitleModel.textXAlign = $0
-        }
-        .onChange(of: textYAlign) {
-            SubtitleModel.textYAlign = $0
-        }
-        .onChange(of: textXMargin) {
-            SubtitleModel.textXMargin = $0
-        }
-        .onChange(of: textYMargin) {
-            SubtitleModel.textYMargin = $0
-        }
     }
 }
 
 struct SettingAdvancedView: View {
-    @AppStorage("preferredForwardBufferDuration") private var preferredForwardBufferDuration = KSOptions.preferredForwardBufferDuration
-    @AppStorage("maxBufferDuration") private var maxBufferDuration = KSOptions.maxBufferDuration
-    @AppStorage("isLoopPlay") private var isLoopPlay = KSOptions.isLoopPlay
-
+    @Default(\.preferredForwardBufferDuration)
+    private var preferredForwardBufferDuration
+    @Default(\.maxBufferDuration)
+    private var maxBufferDuration
+    @Default(\.isLoopPlay)
+    private var isLoopPlay
+    @Default(\.canBackgroundPlay)
+    private var canBackgroundPlay
+    @Default(\.isAutoPlay)
+    private var isAutoPlay
+    @Default(\.isSecondOpen)
+    private var isSecondOpen
+    @Default(\.isAccurateSeek)
+    private var isAccurateSeek
+    @Default(\.isPipPopViewController)
+    private var isPipPopViewController
+//    @Default(\.isLoopPlay)
+//    private var isLoopPlay
     var body: some View {
         Form {
             HStack {
@@ -169,15 +166,11 @@ struct SettingAdvancedView: View {
                 TextField("Max Buffer Second:", value: $maxBufferDuration, format: .number)
             }
             Toggle("Loop Play", isOn: $isLoopPlay)
-        }
-        .onChange(of: preferredForwardBufferDuration) {
-            KSOptions.preferredForwardBufferDuration = $0
-        }
-        .onChange(of: maxBufferDuration) {
-            KSOptions.maxBufferDuration = $0
-        }
-        .onChange(of: isLoopPlay) {
-            KSOptions.isLoopPlay = $0
+            Toggle("Can Background Play", isOn: $canBackgroundPlay)
+            Toggle("Auto Play", isOn: $isAutoPlay)
+            Toggle("Fast Open Video", isOn: $isSecondOpen)
+            Toggle("Fast Seek Video", isOn: $isAccurateSeek)
+            Toggle("Picture In Picture Inline", isOn: $isPipPopViewController)
         }
     }
 }
