@@ -21,6 +21,8 @@ public struct KSVideoPlayerView: View {
     private var playerCoordinator = KSVideoPlayer.Coordinator()
     @Environment(\.dismiss)
     private var dismiss
+    @FocusState
+    private var dropdownFocused: Bool
     public let options: KSOptions
     @State public var url: URL {
         didSet {
@@ -87,39 +89,102 @@ public struct KSVideoPlayerView: View {
                     }
                 }
             #endif
-            #if !os(macOS)
-                .onTapGesture {
-                isMaskShow.toggle()
+                .onAppear {
+                    if let subtitleDataSouce {
+                        playerCoordinator.subtitleModel.addSubtitle(dataSouce: subtitleDataSouce)
+                    }
+                    #if os(macOS)
+                    NSEvent.addLocalMonitorForEvents(matching: [.mouseMoved]) {
+                        isMaskShow = overView
+                        return $0
+                    }
+                    #endif
+                }
+                .onDisappear {
+                    delayItem?.cancel()
+                    onPlayerDisappear?(playerCoordinator.playerLayer)
+                }
+                .ignoresSafeArea()
+            //        .onKeyPress(.leftArrow) {
+            //            playerCoordinator.skip(interval: -15)
+            //            return .handled
+            //        }
+            //        .onKeyPress(.rightArrow) {
+            //            playerCoordinator.skip(interval: 15)
+            //            return .handled
+            //        }
+            #if os(iOS)
+            .navigationBarTitleDisplayMode(.inline)
+            #else
+            .focusable()
+            .onMoveCommand { direction in
+                switch direction {
+                case .left:
+                    playerCoordinator.skip(interval: -15)
+                case .right:
+                    playerCoordinator.skip(interval: 15)
+                #if os(macOS)
+                case .up:
+                    playerCoordinator.playerLayer?.player.playbackVolume += 1
+                case .down:
+                    playerCoordinator.playerLayer?.player.playbackVolume -= 1
+                #else
+                case .up:
+                    showDropDownMenu = false
+                case .down:
+                    showDropDownMenu = true
+                #endif
+                @unknown default:
+                    break
+                }
             }
             #endif
-            .onAppear {
-                if let subtitleDataSouce {
-                    playerCoordinator.subtitleModel.addSubtitle(dataSouce: subtitleDataSouce)
+            #if os(macOS)
+            .onTapGesture(count: 2) {
+                guard let view = playerCoordinator.playerLayer?.player.view else {
+                    return
                 }
-                #if os(macOS)
-                NSEvent.addLocalMonitorForEvents(matching: [.mouseMoved]) {
-                    isMaskShow = overView
-                    return $0
-                }
-                #endif
+                view.window?.toggleFullScreen(nil)
+                view.needsLayout = true
+                view.layoutSubtreeIfNeeded()
             }
-            .onDisappear {
-                delayItem?.cancel()
-                onPlayerDisappear?(playerCoordinator.playerLayer)
-                if let playerLayer = playerCoordinator.playerLayer {
-                    if !playerLayer.isPipActive {
-                        playerCoordinator.resetPlayer()
-                    }
-                }
+            .onExitCommand {
+                playerCoordinator.playerLayer?.player.view?.exitFullScreenMode()
             }
-            .ignoresSafeArea()
+            #else
+            .onTapGesture {
+                    isMaskShow.toggle()
+                }
+            #endif
             #if os(tvOS)
-                .onPlayPauseCommand {
-                    if playerCoordinator.state.isPlaying {
-                        playerCoordinator.playerLayer?.pause()
-                    } else {
-                        playerCoordinator.playerLayer?.play()
+            .onPlayPauseCommand {
+                if playerCoordinator.state.isPlaying {
+                    playerCoordinator.playerLayer?.pause()
+                } else {
+                    playerCoordinator.playerLayer?.play()
+                }
+            }
+            .onExitCommand {
+                if showDropDownMenu {
+                    showDropDownMenu = false
+                } else if isMaskShow {
+                    isMaskShow = false
+                } else {
+                    dismiss()
+                }
+            }
+            #else
+            .onHover {
+                    overView = $0
+                    isMaskShow = overView
+                }
+                .onDrop(of: ["public.file-url"], isTargeted: nil) { providers -> Bool in
+                    providers.first?.loadDataRepresentation(forTypeIdentifier: "public.file-url") { data, _ in
+                        if let data, let path = NSString(data: data, encoding: 4), let url = URL(string: path as String) {
+                            openURL(url)
+                        }
                     }
+                    return true
                 }
             #endif
             VideoSubtitleView(model: playerCoordinator.subtitleModel)
@@ -142,80 +207,23 @@ public struct KSVideoPlayerView: View {
             }
             if showDropDownMenu {
                 VideoSettingView(config: playerCoordinator, subtitleModel: playerCoordinator.subtitleModel)
-                    .frame(width: KSOptions.sceneSize.width * 3 / 4, height: KSOptions.sceneSize.height / 2)
-                    .transition(
-                        AnyTransition.move(edge: .top).combined(with: .opacity)
-                    )
+                    .frame(width: KSOptions.sceneSize.width * 3 / 4)
+                    .focused($dropdownFocused)
+                    .onAppear {
+                        dropdownFocused = true
+                    }
+                #if !os(iOS)
+                    .onExitCommand {
+                        showDropDownMenu = false
+                    }
+                #endif
             }
         }
         .preferredColorScheme(.dark)
         .background(Color.black)
-        .foregroundColor(.white)
+        .tint(.white)
         .persistentSystemOverlays(.hidden)
         .toolbar(isMaskShow ? .visible : .hidden, for: .automatic)
-        #if os(iOS)
-            .navigationBarTitleDisplayMode(.inline)
-        #else
-            .focusable()
-            .onMoveCommand { direction in
-                isMaskShow = true
-                switch direction {
-                case .left:
-                    playerCoordinator.skip(interval: -15)
-                case .right:
-                    playerCoordinator.skip(interval: 15)
-                #if os(macOS)
-                case .up:
-                    playerCoordinator.playerLayer?.player.playbackVolume += 1
-                case .down:
-                    playerCoordinator.playerLayer?.player.playbackVolume -= 1
-                #else
-                case .up:
-                    showDropDownMenu = false
-                case .down:
-                    showDropDownMenu = true
-                #endif
-                @unknown default:
-                    break
-                }
-            }
-            .onExitCommand {
-                if showDropDownMenu {
-                    showDropDownMenu = false
-                } else if isMaskShow {
-                    isMaskShow = false
-                } else {
-                    dismiss()
-                }
-            }
-        #endif
-        #if os(macOS)
-        .onTapGesture(count: 2) {
-            guard let view = playerCoordinator.playerLayer?.player.view else {
-                return
-            }
-            view.window?.toggleFullScreen(nil)
-            view.needsLayout = true
-            view.layoutSubtreeIfNeeded()
-        }
-        .onExitCommand {
-            playerCoordinator.playerLayer?.player.view?.exitFullScreenMode()
-        }
-        #endif
-        #if !os(tvOS)
-        .onHover {
-            overView = $0
-            isMaskShow = overView
-        }
-        .onDrop(of: ["public.file-url"], isTargeted: nil) { providers -> Bool in
-            providers.first?.loadDataRepresentation(forTypeIdentifier: "public.file-url") { data, _ in
-                if let data, let path = NSString(data: data, encoding: 4), let url = URL(string: path as String) {
-                    openURL(url)
-                }
-            }
-            return true
-        }
-        #endif
     }
 
     public func openURL(_ url: URL) {
