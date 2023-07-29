@@ -70,9 +70,9 @@ struct TracyApp: App {
         WindowGroup("player", for: URL.self) { $url in
             if let url {
                 KSVideoPlayerView(url: url)
+                    .navigationTitle(url.lastPathComponent)
             }
         }
-        .windowStyle(.hiddenTitleBar)
         .defaultPosition(.center)
         WindowGroup("player", for: PlayModel.self) { $model in
             if let model {
@@ -80,7 +80,6 @@ struct TracyApp: App {
                     .navigationTitle(model.name!)
             }
         }
-        .windowStyle(.hiddenTitleBar)
         .defaultPosition(.center)
         Settings {
             TabBarItem.Setting.destination
