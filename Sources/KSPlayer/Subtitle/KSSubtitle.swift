@@ -353,7 +353,7 @@ open class SubtitleModel: ObservableObject {
     public func subtitle(currentTime: TimeInterval) -> Bool {
         let newPart: SubtitlePart?
         if let subtile = selectedSubtitleInfo {
-            let currentTime = currentTime - subtile.delay + subtitleDelay
+            let currentTime = currentTime - subtile.delay - subtitleDelay
             if let part = subtile.search(for: currentTime) {
                 newPart = part
             } else {

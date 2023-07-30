@@ -168,8 +168,7 @@ public protocol PlayerControllerDelegate: class {
     public var cache = false
     public var outputURL: URL?
     public var display = DisplayEnum.plane
-    public var audioDelay = 0.0 // s
-    public var subtitleDelay = 0.0 // s
+    public var videoDelay = 0.0 // s
     public var videoDisable = false
     public var audioFilters: String?
     public var videoFilters: String?

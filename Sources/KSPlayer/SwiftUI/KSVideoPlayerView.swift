@@ -378,10 +378,10 @@ struct VideoSubtitleView: View {
                     .font(Font(SubtitleModel.textFont))
                     .shadow(color: .black.opacity(0.9), radius: 1, x: 1, y: 1)
                     .foregroundColor(SubtitleModel.textColor)
-                    .background(SubtitleModel.textBackgroundColor)
                     .multilineTextAlignment(SubtitleModel.textXAlign)
                     .padding(SubtitleModel.edgeInsets)
                     .italic(SubtitleModel.textItalic)
+                    .background(SubtitleModel.textBackgroundColor)
                 #if !os(tvOS)
                     .textSelection(.enabled)
                 #endif

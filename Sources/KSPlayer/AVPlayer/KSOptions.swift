@@ -66,7 +66,6 @@ open class KSOptions {
     }
 
     // audio
-    public var audioDelay = 0.0 // s
     public var audioFilters = [String]()
     public var syncDecodeAudio = false
     // sutile
@@ -74,6 +73,7 @@ open class KSOptions {
     public var subtitleDisable = false
     public var isSeekImageSubtitle = false
     // video
+    public var videoDelay = 0.0 // s
     public var autoDeInterlace = false
     public var autoRotate = true
     public var destinationDynamicRange: DynamicRange?
@@ -335,7 +335,7 @@ open class KSOptions {
     }
 
     open func videoClockSync(main: KSClock, video: KSClock) -> ClockProcessType {
-        var desire = main.getTime() + audioDelay
+        var desire = main.getTime() - videoDelay
         #if !os(macOS)
         desire -= AVAudioSession.sharedInstance().outputLatency
         #endif
