@@ -99,7 +99,7 @@ final class MEPlayerItem {
             }
             if let ptr {
                 let avclass = ptr.assumingMemoryBound(to: UnsafePointer<AVClass>.self).pointee
-                if avclass.pointee.category == AV_CLASS_CATEGORY_NA, avclass == &ffurl_context_class {
+                if avclass == &ffurl_context_class {
                     let context = ptr.assumingMemoryBound(to: URLContext.self).pointee
                     if let opaque = context.interrupt_callback.opaque {
                         let playerItem = Unmanaged<MEPlayerItem>.fromOpaque(opaque).takeUnretainedValue()
