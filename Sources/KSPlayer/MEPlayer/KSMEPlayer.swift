@@ -501,6 +501,14 @@ extension KSMEPlayer: AVPlaybackCoordinatorPlaybackControlDelegate {
     }
 }
 
+extension KSMEPlayer: DisplayLayerDelegate {
+    public func change(displayLayer: AVSampleBufferDisplayLayer) {
+        if #available(iOS 15.0, tvOS 15.0, macOS 12.0, *) {
+            pipController?.contentSource = AVPictureInPictureController.ContentSource(sampleBufferDisplayLayer: displayLayer, playbackDelegate: self)
+        }
+    }
+}
+
 // MARK: - public functions
 
 public extension KSMEPlayer {

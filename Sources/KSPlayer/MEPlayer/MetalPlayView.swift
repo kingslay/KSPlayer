@@ -11,6 +11,11 @@ import CoreMedia
 #if canImport(MetalKit)
 import MetalKit
 #endif
+
+public protocol DisplayLayerDelegate: NSObjectProtocol {
+    func change(displayLayer: AVSampleBufferDisplayLayer)
+}
+
 public final class MetalPlayView: UIView {
     private var videoInfo: CMVideoFormatDescription?
     public private(set) var pixelBuffer: CVPixelBuffer?
@@ -22,10 +27,17 @@ public final class MetalPlayView: UIView {
     var options: KSOptions
     weak var renderSource: OutputRenderSourceDelegate?
     // AVSampleBufferAudioRenderer AVSampleBufferRenderSynchronizer AVSampleBufferDisplayLayer
-    var displayView = AVSampleBufferDisplayView()
+    var displayView = AVSampleBufferDisplayView() {
+        didSet {
+            displayLayerDelegate?.change(displayLayer: displayView.displayLayer)
+        }
+    }
+
     private let metalView = MetalView()
-    init(options: KSOptions) {
+    public weak var displayLayerDelegate: DisplayLayerDelegate?
+    init(options: KSOptions, displayLayerDelegate: DisplayLayerDelegate? = nil) {
         self.options = options
+        self.displayLayerDelegate = displayLayerDelegate
         super.init(frame: .zero)
         addSubview(displayView)
         addSubview(metalView)
