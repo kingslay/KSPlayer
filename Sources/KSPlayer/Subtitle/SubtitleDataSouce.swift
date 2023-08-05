@@ -16,13 +16,14 @@ public class EmptySubtitleInfo: SubtitleInfo {
     public func subtitle(isEnabled _: Bool) {}
 }
 
-public class URLSubtitleInfo: KSURLSubtitle, SubtitleInfo {
+public class URLSubtitleInfo: KSSubtitle, SubtitleInfo {
     private var downloadURL: URL
     public var delay: TimeInterval = 0
     public private(set) var name: String
     public let subtitleID: String
     public var comment: String?
     public var userInfo: NSMutableDictionary?
+    private let userAgent: String?
     public convenience init(url: URL) {
         self.init(subtitleID: url.absoluteString, name: url.lastPathComponent, url: url)
     }
@@ -30,6 +31,7 @@ public class URLSubtitleInfo: KSURLSubtitle, SubtitleInfo {
     public init(subtitleID: String, name: String, url: URL, userAgent: String? = nil) {
         self.subtitleID = subtitleID
         self.name = name
+        self.userAgent = userAgent
         downloadURL = url
         super.init()
         if !url.isFileURL, name.isEmpty {
@@ -50,7 +52,7 @@ public class URLSubtitleInfo: KSURLSubtitle, SubtitleInfo {
     public func subtitle(isEnabled: Bool) {
         if isEnabled, parts.isEmpty {
             Task {
-                try? await parse(url: downloadURL)
+                try? await parse(url: downloadURL, userAgent: userAgent)
             }
         }
     }

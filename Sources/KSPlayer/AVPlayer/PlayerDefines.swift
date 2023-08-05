@@ -406,11 +406,15 @@ public extension URL {
         }
     }
 
-    func data() async throws -> Data {
+    func data(userAgent: String? = nil) async throws -> Data {
         if isFileURL {
             return try Data(contentsOf: self)
         } else {
-            let (data, _) = try await URLSession.shared.data(from: self)
+            var request = URLRequest(url: self)
+            if let userAgent {
+                request.addValue(userAgent, forHTTPHeaderField: "User-Agent")
+            }
+            let (data, _) = try await URLSession.shared.data(for: request)
             return data
         }
     }
@@ -424,16 +428,21 @@ public extension URL {
             guard let url, let response = response as? HTTPURLResponse else {
                 return
             }
-            let httpFileName = "attachment; filename="
-            var filename = url.lastPathComponent
-            if var disposition = response.value(forHTTPHeaderField: "Content-Disposition"), disposition.hasPrefix(httpFileName) {
-                disposition.removeFirst(httpFileName.count)
-                filename = disposition
-            }
             // 下载的临时文件要马上就用。不然可能会马上被清空
-            completion(filename, url)
+            completion(response.filename ?? url.lastPathComponent, url)
         }
         task.resume()
+    }
+}
+
+extension HTTPURLResponse {
+    var filename: String? {
+        let httpFileName = "attachment; filename="
+        if var disposition = value(forHTTPHeaderField: "Content-Disposition"), disposition.hasPrefix(httpFileName) {
+            disposition.removeFirst(httpFileName.count)
+            return disposition
+        }
+        return nil
     }
 }
 
