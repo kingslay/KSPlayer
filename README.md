@@ -125,18 +125,19 @@ playerView.set(resource: asset)
 #### Listening status change
 
 ```swift
-//Listen to when the play time changes
+// Listen to play time change
 playerView.playTimeDidChange = { (currentTime: TimeInterval, totalTime: TimeInterval) in
     print("playTimeDidChange currentTime: \(currentTime) totalTime: \(totalTime)")
 }
-///协议方式
+
+// Delegates
 public protocol PlayerControllerDelegate: class {
     func playerController(state: KSPlayerState)
     func playerController(currentTime: TimeInterval, totalTime: TimeInterval)
     func playerController(finish error: Error?)
     func playerController(maskShow: Bool)
     func playerController(action: PlayerButtonType)
-    // bufferedCount: 0代表首次加载
+    // `bufferedCount: 0` indicates first time loading
     func playerController(bufferedCount: Int, consumeTime: TimeInterval)
 }
 ```
@@ -154,7 +155,7 @@ public protocol PlayerControllerDelegate: class {
   
       override func onButtonPressed(type: PlayerButtonType, button: UIButton) {
           if type == .landscape {
-              // xx
+              // Your own button press behaviour here
           } else {
               super.onButtonPressed(type: type, button: button)
           }
