@@ -155,7 +155,7 @@ public protocol PlayerControllerDelegate: class {
   
       override func onButtonPressed(type: PlayerButtonType, button: UIButton) {
           if type == .landscape {
-              // xx
+              // Your own button press behaviour here
           } else {
               super.onButtonPressed(type: type, button: button)
           }
