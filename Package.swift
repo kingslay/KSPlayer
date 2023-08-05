@@ -33,9 +33,9 @@ let package = Package(
 var ffmpegKitPath = FileManager.default.currentDirectoryPath + "/FFmpegKit"
 if !FileManager.default.fileExists(atPath: ffmpegKitPath), let url = URL(string: #file) {
     let path = url.deletingLastPathComponent().path
-    ffmpegKitPath = path + "/FFmpegKit"
-    if !FileManager.default.fileExists(atPath: ffmpegKitPath) {
-        ffmpegKitPath = path + "/../FFmpegKit"
+    // 解决用xcode引入spm的时候，依赖关系出错的问题
+    if !path.contains("/checkouts/") {
+        ffmpegKitPath = path + "/FFmpegKit"
     }
 }
 
