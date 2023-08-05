@@ -27,13 +27,13 @@ public class URLSubtitleInfo: KSURLSubtitle, SubtitleInfo {
         self.init(subtitleID: url.absoluteString, name: url.lastPathComponent, url: url)
     }
 
-    public init(subtitleID: String, name: String, url: URL) {
+    public init(subtitleID: String, name: String, url: URL, userAgent: String? = nil) {
         self.subtitleID = subtitleID
         self.name = name
         downloadURL = url
         super.init()
         if !url.isFileURL, name.isEmpty {
-            url.download { [weak self] filename, tmpUrl in
+            url.download(userAgent: userAgent) { [weak self] filename, tmpUrl in
                 guard let self else {
                     return
                 }

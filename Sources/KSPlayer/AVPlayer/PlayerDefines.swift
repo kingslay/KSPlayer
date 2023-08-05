@@ -415,8 +415,12 @@ public extension URL {
         }
     }
 
-    func download(completion: @escaping ((String, URL) -> Void)) {
-        URLSession.shared.downloadTask(with: self) { url, response, _ in
+    func download(userAgent: String? = nil, completion: @escaping ((String, URL) -> Void)) {
+        var request = URLRequest(url: self)
+        if let userAgent {
+            request.addValue(userAgent, forHTTPHeaderField: "User-Agent")
+        }
+        let task = URLSession.shared.downloadTask(with: request) { url, response, _ in
             guard let url, let response = response as? HTTPURLResponse else {
                 return
             }
@@ -428,7 +432,8 @@ public extension URL {
             }
             // 下载的临时文件要马上就用。不然可能会马上被清空
             completion(filename, url)
-        }.resume()
+        }
+        task.resume()
     }
 }
 
