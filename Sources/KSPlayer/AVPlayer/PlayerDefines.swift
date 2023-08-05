@@ -425,11 +425,11 @@ public extension URL {
             request.addValue(userAgent, forHTTPHeaderField: "User-Agent")
         }
         let task = URLSession.shared.downloadTask(with: request) { url, response, _ in
-            guard let url, let response = response as? HTTPURLResponse else {
+            guard let url, let response else {
                 return
             }
             // 下载的临时文件要马上就用。不然可能会马上被清空
-            completion(response.filename ?? url.lastPathComponent, url)
+            completion(response.suggestedFilename ?? url.lastPathComponent, url)
         }
         task.resume()
     }
