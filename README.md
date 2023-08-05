@@ -137,7 +137,7 @@ public protocol PlayerControllerDelegate: class {
     func playerController(finish error: Error?)
     func playerController(maskShow: Bool)
     func playerController(action: PlayerButtonType)
-    /// `bufferedCount` `0` indicates first time loading
+    // `bufferedCount: 0` indicates first time loading
     func playerController(bufferedCount: Int, consumeTime: TimeInterval)
 }
 ```
