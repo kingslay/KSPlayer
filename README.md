@@ -254,11 +254,9 @@ Become a sponsor through [GitHub Sponsors](https://github.com/sponsors/kingslay/
 
 Your user icon or company logo shows up this with a link to your home page. 
 
-[UnknownCoder807](https://github.com/UnknownCoder807)
-
-[skrew](https://github.com/skrew)
-
 [Kimentanm](https://github.com/Kimentanm)
+
+[nakiostudio](https://github.com/nakiostudio)
 
 ## Communication
 
