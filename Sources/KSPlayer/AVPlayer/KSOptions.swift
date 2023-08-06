@@ -312,17 +312,21 @@ open class KSOptions {
         let channels = AVAudioChannelCount(2)
 //        try? AVAudioSession.sharedInstance().setRouteSharingPolicy(.longFormAudio)
         #else
+        let maximumOutputNumberOfChannels = AVAudioChannelCount(AVAudioSession.sharedInstance().maximumOutputNumberOfChannels)
+        KSLog("channelLayout maximumOutputNumberOfChannels: \(maximumOutputNumberOfChannels)")
         KSOptions.setAudioSession()
         let isSpatialAudioEnabled: Bool
         if #available(tvOS 15.0, iOS 15.0, *) {
             isSpatialAudioEnabled = AVAudioSession.sharedInstance().currentRoute.outputs.contains { $0.isSpatialAudioEnabled }
-            try? AVAudioSession.sharedInstance().setSupportsMultichannelContent(isSpatialAudioEnabled)
+//            try? AVAudioSession.sharedInstance().setSupportsMultichannelContent(isSpatialAudioEnabled)
+            try? AVAudioSession.sharedInstance().setSupportsMultichannelContent(true)
         } else {
             isSpatialAudioEnabled = false
         }
+        KSLog("channelLayout isSpatialAudioEnabled: \(isSpatialAudioEnabled)")
         var channels = audioDescriptor.channels
         if channels > 2 {
-            let minChannels = min(AVAudioChannelCount(AVAudioSession.sharedInstance().maximumOutputNumberOfChannels), channels)
+            let minChannels = min(maximumOutputNumberOfChannels, channels)
             try? AVAudioSession.sharedInstance().setPreferredOutputNumberOfChannels(Int(minChannels))
             if !isSpatialAudioEnabled {
                 channels = AVAudioChannelCount(AVAudioSession.sharedInstance().preferredOutputNumberOfChannels)
@@ -330,6 +334,7 @@ open class KSOptions {
         } else {
             try? AVAudioSession.sharedInstance().setPreferredOutputNumberOfChannels(2)
         }
+        KSLog("channelLayout preferredOutputNumberOfChannels: \(AVAudioSession.sharedInstance().preferredOutputNumberOfChannels)")
         #endif
         audioFormat = audioDescriptor.audioFormat(channels: channels)
     }

@@ -150,6 +150,7 @@ public final class AudioEnginePlayer: AudioPlayer, FrameOutput {
             self?.audioPlayerShouldInputData(ioData: UnsafeMutableAudioBufferListPointer(audioBufferList), numberOfFrames: frameCount)
             return noErr
         }
+
         engine.attach(sourceNode)
         engine.attach(dynamicsProcessor)
         engine.attach(timePitch)
