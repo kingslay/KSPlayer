@@ -189,7 +189,7 @@ class AudioSwresample: Swresample {
         outInterleaved = audioFormat.isInterleaved
         outSampleRate = UInt32(audioFormat.sampleRate)
         outChannel = audioFormat.channelLayout?.channelLayout() ?? AVChannelLayout.defaultValue
-        KSLog("out channelLayout: \(outChannel)")
+        KSLog("[audio] out channelLayout: \(outChannel)")
         _ = setup(descriptor: descriptor)
     }
 
