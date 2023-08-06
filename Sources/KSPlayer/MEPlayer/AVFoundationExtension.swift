@@ -70,16 +70,16 @@ extension AudioUnit {
         AudioUnitGetProperty(self, kAudioUnitProperty_AudioChannelLayout, kAudioUnitScope_Output, 0, data, &size)
         let layout = data.bindMemory(to: AudioChannelLayout.self, capacity: 1)
         let tag = layout.pointee.mChannelLayoutTag
-        KSLog("audio unit channelLayout tag: \(tag)")
+        KSLog("[audio] unit tag: \(tag)")
         if tag == kAudioChannelLayoutTag_UseChannelDescriptions {
-            KSLog("audio unit channelLayout channelDescriptions: \(layout.channelDescriptions)")
+            KSLog("[audio] unit channelDescriptions: \(layout.channelDescriptions)")
             return layout
         }
         if tag == kAudioChannelLayoutTag_UseChannelBitmap {
             return layout.pointee.mChannelBitmap.channelLayout
         } else {
             let layout = tag.channelLayout
-            KSLog("audio unit channelLayout channelDescriptions: \(layout.channelDescriptions)")
+            KSLog("[audio] unit channelDescriptions: \(layout.channelDescriptions)")
             return layout
         }
     }
@@ -137,15 +137,15 @@ extension AudioChannelLayout: CustomStringConvertible {
 
 extension AVAudioChannelLayout {
     func channelLayout() -> AVChannelLayout {
-        KSLog("KSOptions channelLayout: \(layout.pointee.description)")
+        KSLog("[audio] channelLayout: \(layout.pointee.description)")
         var mask: UInt64?
         if layoutTag == kAudioChannelLayoutTag_UseChannelDescriptions {
             var newMask = UInt64(0)
             layout.channelDescriptions.forEach { description in
                 let label = description.mChannelLabel
-                KSLog("KSOptions channelLayout label: \(label)")
+                KSLog("[audio] label: \(label)")
                 let channel = label.avChannel.rawValue
-                KSLog("KSOptions channelLayout avChannel: \(channel)")
+                KSLog("[audio] avChannel: \(channel)")
                 if channel >= 0 {
                     newMask |= 1 << channel
                 }
@@ -163,7 +163,7 @@ extension AVAudioChannelLayout {
         } else {
             av_channel_layout_default(&outChannel, Int32(channelCount))
         }
-        KSLog("out channelLayout mask: \(outChannel.u.mask) nb_channels: \(outChannel.nb_channels)")
+        KSLog("[audio] out mask: \(outChannel.u.mask) nb_channels: \(outChannel.nb_channels)")
         return outChannel
     }
 }

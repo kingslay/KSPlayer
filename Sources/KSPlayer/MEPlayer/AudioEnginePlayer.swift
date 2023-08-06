@@ -138,10 +138,10 @@ public final class AudioEnginePlayer: AudioPlayer, FrameOutput {
         engine.stop()
         engine.reset()
         sampleSize = audioFormat.sampleSize
-        KSLog("outputFormat channelLayout AudioFormat: \(audioFormat)")
+        KSLog("[audio] outputFormat AudioFormat: \(audioFormat)")
         if let channelLayout = audioFormat.channelLayout {
-            KSLog("outputFormat channelLayout tag: \(channelLayout.layoutTag)")
-            KSLog("outputFormat channelLayout channelDescriptions: \(channelLayout.layout.channelDescriptions)")
+            KSLog("[audio] outputFormat tag: \(channelLayout.layoutTag)")
+            KSLog("[audio] outputFormat channelDescriptions: \(channelLayout.layout.channelDescriptions)")
         }
         //        engine.attach(nbandEQ)
         //        engine.attach(distortion)

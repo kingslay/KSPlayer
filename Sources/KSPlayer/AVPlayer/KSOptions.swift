@@ -313,7 +313,7 @@ open class KSOptions {
 //        try? AVAudioSession.sharedInstance().setRouteSharingPolicy(.longFormAudio)
         #else
         let maximumOutputNumberOfChannels = AVAudioChannelCount(AVAudioSession.sharedInstance().maximumOutputNumberOfChannels)
-        KSLog("channelLayout maximumOutputNumberOfChannels: \(maximumOutputNumberOfChannels)")
+        KSLog("[audio] maximumOutputNumberOfChannels: \(maximumOutputNumberOfChannels)")
         KSOptions.setAudioSession()
         let isSpatialAudioEnabled: Bool
         if #available(tvOS 15.0, iOS 15.0, *) {
@@ -323,7 +323,7 @@ open class KSOptions {
         } else {
             isSpatialAudioEnabled = false
         }
-        KSLog("channelLayout isSpatialAudioEnabled: \(isSpatialAudioEnabled)")
+        KSLog("[audio] isSpatialAudioEnabled: \(isSpatialAudioEnabled)")
         var channels = audioDescriptor.channels
         if channels > 2 {
             let minChannels = min(maximumOutputNumberOfChannels, channels)
@@ -334,7 +334,7 @@ open class KSOptions {
         } else {
             try? AVAudioSession.sharedInstance().setPreferredOutputNumberOfChannels(2)
         }
-        KSLog("channelLayout preferredOutputNumberOfChannels: \(AVAudioSession.sharedInstance().preferredOutputNumberOfChannels)")
+        KSLog("[audio] preferredOutputNumberOfChannels: \(AVAudioSession.sharedInstance().preferredOutputNumberOfChannels)")
         #endif
         audioFormat = audioDescriptor.audioFormat(channels: channels)
     }
@@ -352,12 +352,12 @@ open class KSOptions {
             return .remain
         } else {
             if diff < -0.04 {
-                KSLog("video delay=\(diff), clock=\(desire), delay count=\(videoClockDelayCount)")
+                KSLog("[video] video delay=\(diff), clock=\(desire), delay count=\(videoClockDelayCount)")
             }
             if diff < -0.1 {
                 videoClockDelayCount += 1
                 if diff < -8, videoClockDelayCount % 100 == 0 {
-                    KSLog("video delay seek video track")
+                    KSLog("[video] video delay seek video track")
                     return .seek
                 }
                 if diff < -1, videoClockDelayCount % 10 == 0 {
