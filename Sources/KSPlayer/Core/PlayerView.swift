@@ -33,7 +33,7 @@ public protocol PlayerControllerDelegate: AnyObject {
     func playerController(finish error: Error?)
     func playerController(maskShow: Bool)
     func playerController(action: PlayerButtonType)
-    // bufferedCount: 0代表首次加载
+    // `bufferedCount: 0` indicates first time loading
     func playerController(bufferedCount: Int, consumeTime: TimeInterval)
 }
 
@@ -48,7 +48,7 @@ open class PlayerView: UIView, KSPlayerLayerDelegate, KSSliderDelegate {
     public weak var delegate: ControllerDelegate?
     public let toolBar = PlayerToolBar()
     public let srtControl = SubtitleModel()
-    // Closure fired when play time changed
+    // Listen to play time change
     public var playTimeDidChange: ((TimeInterval, TimeInterval) -> Void)?
     public var backBlock: (() -> Void)?
     public convenience init() {

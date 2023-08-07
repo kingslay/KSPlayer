@@ -9,9 +9,9 @@ import AVFoundation
 import OSLog
 
 open class KSOptions {
-    //    public static let shared = KSOptions()
     /// 最低缓存视频时间
-    @Published public var preferredForwardBufferDuration = KSOptions.preferredForwardBufferDuration
+    @Published
+    public var preferredForwardBufferDuration = KSOptions.preferredForwardBufferDuration
     /// 最大缓存视频时间
     public var maxBufferDuration = KSOptions.maxBufferDuration
     /// 是否开启秒开
@@ -34,7 +34,6 @@ open class KSOptions {
     // ffmpeg only cache http
     public var cache = false
     public var outputURL: URL?
-    public var display = DisplayEnum.plane
     public var avOptions = [String: Any]()
     public var formatContextOptions = [String: Any]()
     public var decoderOptions = [String: Any]()
@@ -44,7 +43,6 @@ open class KSOptions {
     public var startPlayTime: TimeInterval = 0
     public var startPlayRate: Float = 1.0
     public var registerRemoteControll: Bool = true // 默认支持来自系统控制中心的控制
-
     public var referer: String? {
         didSet {
             if let referer {
@@ -73,6 +71,7 @@ open class KSOptions {
     public var subtitleDisable = false
     public var isSeekImageSubtitle = false
     // video
+    public var display = DisplayEnum.plane
     public var videoDelay = 0.0 // s
     public var autoDeInterlace = false
     public var autoRotate = true

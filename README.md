@@ -3,7 +3,7 @@
 ![License](https://img.shields.io/badge/license-GPL-blue.svg)
 # KSPlayer 
 
-KSPlayer is a powerful media play framework foriOS, tvOS, macOS, xrOS, visionOS, Mac Catalyst, SwiftUI, Apple Silicon M1 .
+KSPlayer is a powerful media play framework for iOS, tvOS, macOS, xrOS, visionOS, Mac Catalyst, SwiftUI, Apple Silicon M1 .
 
 English | [简体中文](./README_CN.md)
 
@@ -15,17 +15,16 @@ English | [简体中文](./README_CN.md)
 
 ## Features
 
-- iOS, tvOS, macOS,Mac Catalyst, Apple Silicon M1, SwiftUI.
-- Multiple audio/video tracks.
-- H.264/H.265 hardware accelerator.
-- 4k/HDR
-- text subtitle/Closed Captions/image subtitle(dvbsub/dvdsub/pgssub)
-- Picture in Picture
-- Record video
-- De-interlace auto detect
-- Spatial Audio 
-- 360° panorama video.
-- selectable subtitle
+- [x] iOS, tvOS, macOS, visionOS, Mac Catalyst, Apple Silicon M1, SwiftUI.
+- [x] Multiple audio/video tracks.
+- [x] hardware accelerator.
+- [x] 4k/HDR
+- [x] text subtitle/Closed Captions/image subtitle(dvbsub/dvdsub/pgssub)
+- [x] Picture in Picture
+- [x] Record video
+- [x] De-interlace auto detect
+- [x] Spatial Audio 
+- [x] 360° panorama video.
 
 ## Requirements
 
@@ -187,9 +186,9 @@ public protocol PlayerControllerDelegate: class {
 
   ```swift
   open class KSOptions {
-    //    public static let shared = KSOptions()
     /// 最低缓存视频时间
-    @Published public var preferredForwardBufferDuration = KSOptions.preferredForwardBufferDuration
+    @Published
+    public var preferredForwardBufferDuration = KSOptions.preferredForwardBufferDuration
     /// 最大缓存视频时间
     public var maxBufferDuration = KSOptions.maxBufferDuration
     /// 是否开启秒开
@@ -208,29 +207,41 @@ public protocol PlayerControllerDelegate: class {
      AVSEEK_FLAG_ANY: 4
      AVSEEK_FLAG_FRAME: 8
      */
-    public var seekFlags = Int32(1)
+    public var seekFlags = Int32(0)
     // ffmpeg only cache http
     public var cache = false
     public var outputURL: URL?
     public var display = DisplayEnum.plane
-    public var videoDelay = 0.0 // s
-    public var videoDisable = false
-    public var audioFilters: String?
-    public var videoFilters: String?
-    public var subtitleDisable = false
-    public var videoAdaptable = true
-    public var syncDecodeAudio = false
-    public var syncDecodeVideo = false
     public var avOptions = [String: Any]()
     public var formatContextOptions = [String: Any]()
-    public var hardwareDecode = true
     public var decoderOptions = [String: Any]()
     public var probesize: Int64?
     public var maxAnalyzeDuration: Int64?
     public var lowres = UInt8(0)
+    public var startPlayTime: TimeInterval = 0
+    public var startPlayRate: Float = 1.0
+    public var registerRemoteControll: Bool = true // 默认支持来自系统控制中心的控制
+    public var referer: String?
+    public var userAgent: String?
+      // audio
+    public var audioFilters = [String]()
+    public var syncDecodeAudio = false
+    // sutile
     public var autoSelectEmbedSubtitle = true
-    public var asynchronousDecompression = false
+    public var subtitleDisable = false
+    public var isSeekImageSubtitle = false
+    // video
+    public var videoDelay = 0.0 // s
     public var autoDeInterlace = false
+    public var autoRotate = true
+    public var destinationDynamicRange: DynamicRange?
+    public var videoAdaptable = true
+    public var videoFilters = [String]()
+    public var syncDecodeVideo = false
+    public var hardwareDecode = KSOptions.hardwareDecode
+    public var asynchronousDecompression = true
+    public var videoDisable = false
+    public var canStartPictureInPictureAutomaticallyFromInline = true
   }
 
   ```
@@ -254,9 +265,7 @@ Become a sponsor through [GitHub Sponsors](https://github.com/sponsors/kingslay/
 
 Your user icon or company logo shows up this with a link to your home page. 
 
-[Kimentanm](https://github.com/Kimentanm)
-
-[nakiostudio](https://github.com/nakiostudio)
+[UnknownCoder807](https://github.com/UnknownCoder807)   [skrew](https://github.com/skrew)   [Kimentanm](https://github.com/Kimentanm)   [nakiostudio](https://github.com/nakiostudio)   
 
 ## Communication
 
