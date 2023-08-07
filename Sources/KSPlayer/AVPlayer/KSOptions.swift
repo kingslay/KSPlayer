@@ -318,8 +318,7 @@ open class KSOptions {
         let isSpatialAudioEnabled: Bool
         if #available(tvOS 15.0, iOS 15.0, *) {
             isSpatialAudioEnabled = AVAudioSession.sharedInstance().currentRoute.outputs.contains { $0.isSpatialAudioEnabled }
-//            try? AVAudioSession.sharedInstance().setSupportsMultichannelContent(isSpatialAudioEnabled)
-            try? AVAudioSession.sharedInstance().setSupportsMultichannelContent(true)
+            try? AVAudioSession.sharedInstance().setSupportsMultichannelContent(isSpatialAudioEnabled)
         } else {
             isSpatialAudioEnabled = false
         }
