@@ -38,3 +38,12 @@ jobs:
           submodules: 'true'
       - name: Build
         run: swift build --sdk `xcrun -sdk appletvsimulator -show-sdk-path` -Xswiftc -target -Xswiftc x86_64-apple-tvos13.0-simulator
+  # buidXROS:
+  #   name: buidXROS
+  #   runs-on: macos-13
+  #   steps:
+  #     - uses: actions/checkout@main
+  #       with:
+  #         submodules: 'true'
+  #     - name: Build
+  #       run: swift build --sdk `xcrun -sdk xrsimulator -show-sdk-path` -Xswiftc -target -Xswiftc x86_64-apple-xros1.0-simulator

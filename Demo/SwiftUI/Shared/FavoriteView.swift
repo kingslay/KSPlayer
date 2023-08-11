@@ -8,8 +8,10 @@
 import SwiftUI
 
 struct FavoriteView: View {
-    @EnvironmentObject private var appModel: APPModel
-    @State var nameFilter: String = ""
+    @EnvironmentObject
+    private var appModel: APPModel
+    @State
+    private var nameFilter: String = ""
     @FetchRequest(
         sortDescriptors: [NSSortDescriptor(keyPath: \PlayModel.name, ascending: true)],
         predicate: NSPredicate(format: "isFavorite == YES")

@@ -108,7 +108,7 @@ public struct KSVideoPlayerView: View {
                     onPlayerDisappear?(playerCoordinator.playerLayer)
                 }
                 .ignoresSafeArea()
-            #if os(iOS)
+            #if os(iOS) || os(xrOS)
                 .navigationBarTitleDisplayMode(.inline)
             #else
                 .focusable()
@@ -159,7 +159,7 @@ public struct KSVideoPlayerView: View {
                     .onAppear {
                         dropdownFocused = true
                     }
-                #if !os(iOS)
+                #if os(macOS) || os(tvOS)
                     .onExitCommand {
                         showDropDownMenu = false
                     }
@@ -393,11 +393,16 @@ struct VideoSubtitleView: View {
     }
 
     private func imageView(_ image: UIImage) -> some View {
-        #if os(tvOS)
+        #if canImport(VisionKit)
+        if #available(iOS 16.0, macOS 13.0, macCatalyst 17.0, *) {
+            return LiveTextImage(uiImage: image)
+        } else {
+            return Image(uiImage: image)
+                .resizable()
+        }
+        #else
         return Image(uiImage: image)
             .resizable()
-        #else
-        return LiveTextImage(uiImage: image)
         #endif
     }
 }

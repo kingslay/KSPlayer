@@ -172,6 +172,7 @@ open class VideoPlayerView: PlayerView {
         topMaskView.gradientLayer.colors = [UIColor.black.withAlphaComponent(0.5).cgColor, UIColor.clear.cgColor]
         #endif
         bottomMaskView.gradientLayer.colors = topMaskView.gradientLayer.colors
+        topMaskView.isHidden = KSOptions.topBarShowInCase != .always
         topMaskView.gradientLayer.startPoint = .zero
         topMaskView.gradientLayer.endPoint = CGPoint(x: 0, y: 1)
         bottomMaskView.gradientLayer.startPoint = CGPoint(x: 0, y: 1)

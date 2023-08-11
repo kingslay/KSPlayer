@@ -33,6 +33,7 @@ open class KSOptions {
     public var seekFlags = Int32(0)
     // ffmpeg only cache http
     public var cache = false
+    //  record stream
     public var outputURL: URL?
     public var avOptions = [String: Any]()
     public var formatContextOptions = [String: Any]()

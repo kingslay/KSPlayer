@@ -24,7 +24,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UISplitViewControllerDele
         KSOptions.isSecondOpen = true
         KSOptions.isAccurateSeek = true
 //        KSOptions.isLoopPlay = true
-        if UIDevice.current.userInterfaceIdiom == .phone || UIDevice.current.userInterfaceIdiom == .tv {
+        if UIDevice.current.userInterfaceIdiom == .phone {
+            window.rootViewController = UINavigationController(rootViewController: RootViewController())
+        } else if UIDevice.current.userInterfaceIdiom == .tv {
             window.rootViewController = UINavigationController(rootViewController: MasterViewController())
         } else {
             let splitViewController = UISplitViewController()
