@@ -24,7 +24,8 @@ public struct KSVideoPlayerView: View {
     @FocusState
     private var dropdownFocused: Bool
     public let options: KSOptions
-    @State public var url: URL {
+    @State
+    public var url: URL {
         didSet {
             #if os(macOS)
             NSDocumentController.shared.noteNewRecentDocumentURL(url)
@@ -322,8 +323,10 @@ struct VideoControllerView: View {
 
 @available(iOS 15, tvOS 15, macOS 12, *)
 struct VideoTimeShowView: View {
-    @ObservedObject fileprivate var config: KSVideoPlayer.Coordinator
-    @ObservedObject fileprivate var model: ControllerTimeModel
+    @ObservedObject
+    fileprivate var config: KSVideoPlayer.Coordinator
+    @ObservedObject
+    fileprivate var model: ControllerTimeModel
     public var body: some View {
         if config.timemodel.totalTime == 0 {
             Text("Live Streaming")

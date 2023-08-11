@@ -447,6 +447,9 @@ extension MEPlayerItem {
                 if state == .closed {
                     break
                 }
+                if time != seekTime {
+                    continue
+                }
                 isSeek = true
                 allPlayerItemTracks.forEach { $0.seek(time: time) }
                 DispatchQueue.main.async { [weak self] in
@@ -637,6 +640,9 @@ extension MEPlayerItem: MediaPlayback {
             state = .seeking
             seekingCompletionHandler = completion
             read()
+        } else if state == .seeking {
+            seekTime = time
+            seekingCompletionHandler = completion
         }
         isAudioStalled = audioTrack == nil
     }
