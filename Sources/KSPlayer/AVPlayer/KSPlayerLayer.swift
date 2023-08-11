@@ -334,6 +334,13 @@ extension KSPlayerLayer: MediaPlayerDelegate {
         #endif
         updateNowPlayingInfo()
         state = .readyToPlay
+        #if os(iOS)
+        if #available(iOS 14.2, *) {
+            if options.canStartPictureInPictureAutomaticallyFromInline {
+                player.pipController?.canStartPictureInPictureAutomaticallyFromInline = true
+            }
+        }
+        #endif
         for track in player.tracks(mediaType: .video) where track.isEnabled {
             #if os(tvOS)
             setDisplayCriteria(track: track)
