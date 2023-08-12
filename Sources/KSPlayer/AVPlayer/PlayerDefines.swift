@@ -369,12 +369,18 @@ public extension URL {
         return string.components(separatedBy: "#EXTINF:").compactMap { content -> (String, URL, [String: String])? in
             let content = content.replacingOccurrences(of: "\r\n", with: "\n")
             let array = content.split(separator: "\n")
-            guard array.count > 1, let last = array.last, let url = URL(string: String(last)) else {
+            guard array.count > 1, let last = array.last, var url = URL(string: String(last)) else {
                 return nil
             }
+            if url.path.hasPrefix("./") {
+                url = self.deletingLastPathComponent().appendingPathComponent(url.path).standardized
+            }
             let infos = array[0].split(separator: ",")
-            guard infos.count > 1, let name = infos.last else {
-                return nil
+            let name: String
+            if infos.count > 1, let last = infos.last {
+                name = String(last)
+            } else {
+                name = url.lastPathComponent
             }
             var extinf = [String: String]()
             let prefix = "#EXTVLCOPT:"
@@ -402,7 +408,7 @@ public extension URL {
                     extinf["duration"] = String(keyValue[0])
                 }
             }
-            return (String(name), url, extinf)
+            return (name, url, extinf)
         }
     }
 

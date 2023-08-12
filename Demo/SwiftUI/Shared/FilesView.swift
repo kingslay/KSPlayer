@@ -18,6 +18,8 @@ struct FilesView: View {
     @State
     private var addM3U = false
     @State
+    private var openFileImport = false
+    @State
     private var nameFilter: String = ""
     var body: some View {
         let models = m3uModels.filter { model in
@@ -39,14 +41,33 @@ struct FilesView: View {
         .searchable(text: $nameFilter)
         .toolbar {
             Button {
+                openFileImport = true
+            } label: {
+                Label("Add Local M3U", systemImage: "plus.rectangle.on.folder.fill")
+            }
+            #if !os(tvOS)
+            .keyboardShortcut("o")
+            #endif
+            Button {
                 addM3U = true
             } label: {
-                Label("Add M3U", systemImage: "plus.app.fill")
+                Label("Add Remote M3U", systemImage: "plus.app.fill")
             }
+            #if !os(tvOS)
+            .keyboardShortcut("o", modifiers: [.command, .shift])
+            #endif
         }
         .sheet(isPresented: $addM3U) {
             AddM3UView()
         }
+        #if !os(tvOS)
+        .fileImporter(isPresented: $openFileImport, allowedContentTypes: [.data]) { result in
+            guard let url = try? result.get() else {
+                return
+            }
+            appModel.addM3U(url: url)
+        }
+        #endif
     }
 
     private func cellView(model: M3UModel) -> some View {
