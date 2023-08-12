@@ -317,7 +317,7 @@ open class KSOptions {
         let maximumOutputNumberOfChannels = AVAudioChannelCount(AVAudioSession.sharedInstance().maximumOutputNumberOfChannels)
         KSLog("[audio] maximumOutputNumberOfChannels: \(maximumOutputNumberOfChannels)")
         KSOptions.setAudioSession()
-        let isSpatialAudioEnabled = KSOptions.isSpatialAudioEnabled
+        let isSpatialAudioEnabled = KSOptions.isSpatialAudioEnabled()
         KSLog("[audio] isSpatialAudioEnabled: \(isSpatialAudioEnabled)")
         var channels = audioDescriptor.channels
         if channels > 2 {
