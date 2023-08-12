@@ -16,7 +16,7 @@ import AppKit
 public class KSMEPlayer: NSObject {
     private var loopCount = 1
     private var playerItem: MEPlayerItem
-    private let audioOutput: AudioPlayer & FrameOutput = KSOptions.isUseAudioRenderer ? AudioRendererPlayer() : AudioEnginePlayer()
+    private let audioOutput: AudioPlayer & FrameOutput
     private var options: KSOptions
     private var bufferingCountDownTimer: Timer?
     public private(set) var videoOutput: MetalPlayView?
@@ -91,6 +91,7 @@ public class KSMEPlayer: NSObject {
 
     public required init(url: URL, options: KSOptions) {
         playerItem = MEPlayerItem(url: url, options: options)
+        audioOutput = options.isUseAudioRenderer ? AudioRendererPlayer() : AudioEnginePlayer()
         if options.videoDisable {
             videoOutput = nil
         } else {

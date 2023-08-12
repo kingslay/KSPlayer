@@ -67,6 +67,8 @@ open class KSOptions {
     // audio
     public var audioFilters = [String]()
     public var syncDecodeAudio = false
+    /// true: AVSampleBufferAudioRenderer false: AVAudioEngine
+    public var isUseAudioRenderer = KSOptions.isUseAudioRenderer
     // sutile
     public var autoSelectEmbedSubtitle = true
     public var subtitleDisable = false
@@ -315,13 +317,7 @@ open class KSOptions {
         let maximumOutputNumberOfChannels = AVAudioChannelCount(AVAudioSession.sharedInstance().maximumOutputNumberOfChannels)
         KSLog("[audio] maximumOutputNumberOfChannels: \(maximumOutputNumberOfChannels)")
         KSOptions.setAudioSession()
-        let isSpatialAudioEnabled: Bool
-        if #available(tvOS 15.0, iOS 15.0, *) {
-            isSpatialAudioEnabled = AVAudioSession.sharedInstance().currentRoute.outputs.contains { $0.isSpatialAudioEnabled }
-            try? AVAudioSession.sharedInstance().setSupportsMultichannelContent(isSpatialAudioEnabled)
-        } else {
-            isSpatialAudioEnabled = false
-        }
+        let isSpatialAudioEnabled = KSOptions.isSpatialAudioEnabled
         KSLog("[audio] isSpatialAudioEnabled: \(isSpatialAudioEnabled)")
         var channels = audioDescriptor.channels
         if channels > 2 {
@@ -335,7 +331,7 @@ open class KSOptions {
         }
         KSLog("[audio] preferredOutputNumberOfChannels: \(AVAudioSession.sharedInstance().preferredOutputNumberOfChannels)")
         #endif
-        audioFormat = audioDescriptor.audioFormat(channels: channels)
+        audioFormat = audioDescriptor.audioFormat(channels: channels, isUseAudioRenderer: isUseAudioRenderer)
     }
 
     open func videoClockSync(main: KSClock, video: KSClock) -> ClockProcessType {
@@ -438,6 +434,18 @@ public extension KSOptions {
         try? AVAudioSession.sharedInstance().setActive(true)
         #endif
     }
+
+    #if !os(macOS)
+    static func isSpatialAudioEnabled() -> Bool {
+        if #available(tvOS 15.0, iOS 15.0, *) {
+            let isSpatialAudioEnabled = AVAudioSession.sharedInstance().currentRoute.outputs.contains { $0.isSpatialAudioEnabled }
+            try? AVAudioSession.sharedInstance().setSupportsMultichannelContent(isSpatialAudioEnabled)
+            return isSpatialAudioEnabled
+        } else {
+            return false
+        }
+    }
+    #endif
 }
 
 public enum LogLevel: Int32, CustomStringConvertible {

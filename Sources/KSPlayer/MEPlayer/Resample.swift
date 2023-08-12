@@ -270,7 +270,7 @@ public class AudioDescriptor: Equatable {
         lhs.sampleFormat == rhs.sampleFormat && lhs.sampleRate == rhs.sampleRate && lhs.channel == rhs.channel
     }
 
-    func audioFormat(channels: AVAudioChannelCount) -> AVAudioFormat {
+    func audioFormat(channels: AVAudioChannelCount, isUseAudioRenderer: Bool) -> AVAudioFormat {
         var outChannel = channel
         if channels != self.channels {
             outChannel = AVChannelLayout()
@@ -309,7 +309,7 @@ public class AudioDescriptor: Equatable {
         }
         // todo reason: '[[busArray objectAtIndexedSubscript:(NSUInteger)element] setFormat:format error:&nsErr]: returned false,
         commonFormat = .pcmFormatFloat32
-        interleaved = KSOptions.isUseAudioRenderer
+        interleaved = isUseAudioRenderer
         return AVAudioFormat(commonFormat: commonFormat, sampleRate: Double(sampleRate), interleaved: interleaved, channelLayout: AVAudioChannelLayout(layoutTag: outChannel.layoutTag)!)
 //        AVAudioChannelLayout(layout: outChannel.layoutTag.channelLayout)
     }
