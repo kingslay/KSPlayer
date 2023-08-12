@@ -49,7 +49,7 @@ public struct KSVideoPlayerView: View {
                 }
                 #if os(macOS)
                 isMaskShow ? NSCursor.unhide() : NSCursor.setHiddenUntilMouseMoves(true)
-                if let window = playerCoordinator.playerLayer?.player.view?.window {
+                if let window = playerCoordinator.playerLayer?.window {
                     if !window.styleMask.contains(.fullScreen) {
                         window.standardWindowButton(.closeButton)?.superview?.superview?.isHidden = !isMaskShow
                         //                    window.standardWindowButton(.zoomButton)?.isHidden = !isMaskShow
@@ -182,7 +182,7 @@ public struct KSVideoPlayerView: View {
         //        }
         #if os(macOS)
         .onTapGesture(count: 2) {
-            guard let view = playerCoordinator.playerLayer?.player.view else {
+            guard let view = playerCoordinator.playerLayer else {
                 return
             }
             view.window?.toggleFullScreen(nil)
@@ -190,7 +190,7 @@ public struct KSVideoPlayerView: View {
             view.layoutSubtreeIfNeeded()
         }
         .onExitCommand {
-            playerCoordinator.playerLayer?.player.view?.exitFullScreenMode()
+            playerCoordinator.playerLayer?.exitFullScreenMode()
         }
         #else
         .onTapGesture {
