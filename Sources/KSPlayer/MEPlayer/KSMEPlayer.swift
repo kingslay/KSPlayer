@@ -396,7 +396,7 @@ extension KSMEPlayer: MediaPlayerProtocol {
                 $0 as? FFmpegAssetTrack
             }?.audioDescriptor ?? .defaultValue
             if let assetTrack = track as? FFmpegAssetTrack, assetTrack.audioDescriptor != audioDescriptor {
-                options.setAudioSession(audioDescriptor: audioDescriptor)
+                options.setAudioSession(audioDescriptor: assetTrack.audioDescriptor)
                 audioOutput.prepare(audioFormat: options.audioFormat)
             }
         }
