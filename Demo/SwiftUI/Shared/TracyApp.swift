@@ -14,7 +14,6 @@ import SwiftUI
 struct TracyApp: App {
     private let appModel = APPModel()
     init() {
-        let mpv = mpv_create()
         let arguments = ProcessInfo.processInfo.arguments.dropFirst()
         var dropNextArg = false
         var playerArgs = [String]()
