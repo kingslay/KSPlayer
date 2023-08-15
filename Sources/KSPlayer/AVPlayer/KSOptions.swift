@@ -100,7 +100,6 @@ open class KSOptions {
     public internal(set) var readVideoTime = 0.0
     public internal(set) var decodeAudioTime = 0.0
     public internal(set) var decodeVideoTime = 0.0
-    var audioFormat = AVAudioFormat(standardFormatWithSampleRate: 44100, channelLayout: AVAudioChannelLayout(layoutTag: kAudioChannelLayoutTag_Stereo)!)
     public init() {
         // 参数的配置可以参考protocols.texi 和 http.c
         formatContextOptions["auto_convert"] = 0
@@ -331,7 +330,7 @@ open class KSOptions {
         }
         KSLog("[audio] preferredOutputNumberOfChannels: \(AVAudioSession.sharedInstance().preferredOutputNumberOfChannels)")
         #endif
-        audioFormat = audioDescriptor.audioFormat(channels: channels, isUseAudioRenderer: isUseAudioRenderer)
+        audioDescriptor.audioFormat(channels: channels, isUseAudioRenderer: isUseAudioRenderer)
     }
 
     open func videoClockSync(main: KSClock, video: KSClock) -> ClockProcessType {

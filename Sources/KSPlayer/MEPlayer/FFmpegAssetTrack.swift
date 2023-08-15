@@ -44,6 +44,9 @@ public class FFmpegAssetTrack: MediaPlayerTrack {
         if let value = metadata["variant_bitrate"] ?? metadata["BPS"], let bitRate = Int64(value) {
             self.bitRate = bitRate
         }
+        if bitRate > 0 {
+            description += ", \(bitRate)BPS"
+        }
         if stream.pointee.side_data?.pointee.type == AV_PKT_DATA_DOVI_CONF {
             dovi = stream.pointee.side_data?.pointee.data.withMemoryRebound(to: DOVIDecoderConfigurationRecord.self, capacity: 1) { $0 }.pointee
         }
@@ -106,7 +109,6 @@ public class FFmpegAssetTrack: MediaPlayerTrack {
                 description += " (\(String(cString: profile.pointee.name)))"
             }
         }
-        description += ", \(bitRate)BPS"
         let sar = codecpar.sample_aspect_ratio.size
         naturalSize = CGSize(width: Int(codecpar.width), height: Int(CGFloat(codecpar.height) * sar.height / sar.width))
         fieldOrder = FFmpegFieldOrder(rawValue: UInt8(codecpar.field_order.rawValue)) ?? .unknown
@@ -136,6 +138,9 @@ public class FFmpegAssetTrack: MediaPlayerTrack {
             audioStreamBasicDescription = nil
         } else {
             return nil
+        }
+        if codecpar.bits_per_raw_sample != 0 {
+            description += ", (\(codecpar.bits_per_raw_sample) bit)"
         }
         isImageSubtitle = [AV_CODEC_ID_DVD_SUBTITLE, AV_CODEC_ID_DVB_SUBTITLE, AV_CODEC_ID_DVB_TELETEXT, AV_CODEC_ID_HDMV_PGS_SUBTITLE].contains(codecpar.codec_id)
         self.description = description

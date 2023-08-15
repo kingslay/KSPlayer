@@ -156,7 +156,7 @@ extension KSMEPlayer: MEPlayerDelegate {
         let fps = vidoeTracks.first { $0.isEnabled }.map(\.nominalFrameRate) ?? 24
         runInMainqueue { [weak self] in
             guard let self else { return }
-            self.audioOutput.prepare(audioFormat: self.options.audioFormat)
+            self.audioOutput.prepare(audioFormat: audioDescriptor.audioFormat)
             self.videoOutput?.prepare(fps: fps, startPlayTime: self.options.startPlayTime)
             self.videoOutput?.play()
             self.delegate?.readyToPlay(player: self)
@@ -392,12 +392,14 @@ extension KSMEPlayer: MediaPlayerProtocol {
             }
         }
         if track.mediaType == .audio {
-            let audioDescriptor = tracks(mediaType: .audio).first { $0.isEnabled }.flatMap {
-                $0 as? FFmpegAssetTrack
-            }?.audioDescriptor ?? .defaultValue
-            if let assetTrack = track as? FFmpegAssetTrack, assetTrack.audioDescriptor != audioDescriptor {
+            if let assetTrack = track as? FFmpegAssetTrack {
                 options.setAudioSession(audioDescriptor: assetTrack.audioDescriptor)
-                audioOutput.prepare(audioFormat: options.audioFormat)
+                let audioDescriptor = tracks(mediaType: .audio).first { $0.isEnabled }.flatMap {
+                    $0 as? FFmpegAssetTrack
+                }?.audioDescriptor ?? .defaultValue
+                if assetTrack.audioDescriptor.audioFormat != audioDescriptor.audioFormat {
+                    audioOutput.prepare(audioFormat: assetTrack.audioDescriptor.audioFormat)
+                }
             }
         }
         playerItem.select(track: track)
