@@ -1,5 +1,5 @@
 //
-//  MainWindowController.swift
+//  MainWindow.swift
 //  demo-macOS
 //
 //  Created by kintan on 2018/10/29.

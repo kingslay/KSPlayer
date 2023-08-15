@@ -20,7 +20,8 @@ let package = Package(
         // Targets are the basic building blocks of a package. A target can define a module or a test suite.
         .target(
             name: "KSPlayer",
-            dependencies: [.product(name: "FFmpegKit", package: "FFmpegKit")],
+            dependencies: [.product(name: "FFmpegKit", package: "FFmpegKit"),
+                           .product(name: "Libmpv", package: "FFmpegKit")],
             resources: [.process("Metal/Shaders.metal")]
         ),
         .testTarget(

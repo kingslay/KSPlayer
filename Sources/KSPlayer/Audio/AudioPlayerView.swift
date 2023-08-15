@@ -1,5 +1,5 @@
 //
-//  AudioPlayerController.swift
+//  AudioPlayerView.swift
 //  VoiceNote
 //
 //  Created by kintan on 2018/8/16.

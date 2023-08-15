@@ -1,5 +1,5 @@
 //
-//  SWScale.swift
+//  Resample.swift
 //  KSPlayer-iOS
 //
 //  Created by wangjinbian on 2020/1/27.

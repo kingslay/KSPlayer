@@ -1,5 +1,5 @@
 //
-//  File.swift
+//  Utility.swift
 //  KSPlayer
 //
 //  Created by kintan on 2018/3/9.

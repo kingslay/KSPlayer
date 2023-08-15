@@ -1,5 +1,5 @@
 //
-//  demo_SPMApp.swift
+//  TracyApp.swift
 //  Shared
 //
 //  Created by kintan on 2021/5/3.
@@ -8,11 +8,14 @@
 import AVFoundation
 import AVKit
 import KSPlayer
+import Libmpv
 import SwiftUI
+
 @main
 struct TracyApp: App {
     private let appModel = APPModel()
     init() {
+        let mpv = mpv_create()
         let arguments = ProcessInfo.processInfo.arguments.dropFirst()
         var dropNextArg = false
         var playerArgs = [String]()
