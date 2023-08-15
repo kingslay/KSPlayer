@@ -8,7 +8,6 @@
 import AVFoundation
 import AVKit
 import KSPlayer
-import Libmpv
 import SwiftUI
 
 @main
