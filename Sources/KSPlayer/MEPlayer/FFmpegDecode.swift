@@ -30,7 +30,7 @@ class FFmpegDecode: DecodeProtocol {
         if assetTrack.mediaType == .video {
             swresample = VideoSwresample()
         } else {
-            swresample = AudioSwresample(audioDescriptor: assetTrack.audioDescriptor)
+            swresample = AudioSwresample(audioDescriptor: assetTrack.audioDescriptor!)
         }
     }
 

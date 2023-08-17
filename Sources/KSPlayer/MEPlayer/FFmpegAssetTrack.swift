@@ -30,7 +30,7 @@ public class FFmpegAssetTrack: MediaPlayerTrack {
     public let isImageSubtitle: Bool
     public var delay: TimeInterval = 0
     private var stream: UnsafeMutablePointer<AVStream>?
-    let audioDescriptor: AudioDescriptor
+    let audioDescriptor: AudioDescriptor?
     var startTime = TimeInterval(0)
     var codecpar: AVCodecParameters
     var timebase: Timebase = .defaultValue
@@ -99,7 +99,6 @@ public class FFmpegAssetTrack: MediaPlayerTrack {
         colorPrimaries = codecpar.color_primaries.colorPrimaries as String?
         transferFunction = codecpar.color_trc.transferFunction as String?
         yCbCrMatrix = codecpar.color_space.ycbcrMatrix as String?
-        audioDescriptor = AudioDescriptor(codecpar: codecpar)
         // codec_tag byte order is LSB first
         mediaSubType = codecpar.codec_tag == 0 ? codecpar.codec_id.mediaSubType : CMFormatDescription.MediaSubType(rawValue: codecpar.codec_tag.bigEndian)
         var description = ""
@@ -114,6 +113,7 @@ public class FFmpegAssetTrack: MediaPlayerTrack {
         fieldOrder = FFmpegFieldOrder(rawValue: UInt8(codecpar.field_order.rawValue)) ?? .unknown
         if codecpar.codec_type == AVMEDIA_TYPE_AUDIO {
             mediaType = .audio
+            audioDescriptor = AudioDescriptor(codecpar: codecpar)
             let layout = codecpar.ch_layout
             let channelsPerFrame = UInt32(layout.nb_channels)
             let sampleFormat = AVSampleFormat(codecpar.format)
@@ -127,6 +127,7 @@ public class FFmpegAssetTrack: MediaPlayerTrack {
                 description += ", \(fmt)"
             }
         } else if codecpar.codec_type == AVMEDIA_TYPE_VIDEO {
+            audioDescriptor = nil
             mediaType = .video
             audioStreamBasicDescription = nil
             if let name = av_get_pix_fmt_name(AVPixelFormat(rawValue: codecpar.format)) {
@@ -136,6 +137,7 @@ public class FFmpegAssetTrack: MediaPlayerTrack {
         } else if codecpar.codec_type == AVMEDIA_TYPE_SUBTITLE {
             mediaType = .subtitle
             audioStreamBasicDescription = nil
+            audioDescriptor = nil
         } else {
             return nil
         }

@@ -13,7 +13,7 @@ class MEOptions: KSOptions {
     override func process(assetTrack: some MediaPlayerTrack) {
         if assetTrack.mediaType == .video {
             if [FFmpegFieldOrder.bb, .bt, .tt, .tb].contains(assetTrack.fieldOrder) {
-                videoFilters.append("yadif=mode=1:parity=-1:deint=0")
+                videoFilters.append("yadif=mode=0:parity=-1:deint=1")
                 hardwareDecode = false
             }
         }
@@ -160,7 +160,7 @@ extension KSVideoPlayerView {
             options.syncDecodeAudio = true
         } else if url.lastPathComponent == "subrip.mkv" {
             options.asynchronousDecompression = false
-            options.videoFilters.append("yadif_videotoolbox=mode=0:parity=auto:deint=1")
+            options.videoFilters.append("yadif_videotoolbox=mode=0:parity=-1:deint=1")
         } else if url.lastPathComponent == "big_buck_bunny.mp4" {
             options.startPlayTime = 25
         } else if url.lastPathComponent == "bipbopall.m3u8" {

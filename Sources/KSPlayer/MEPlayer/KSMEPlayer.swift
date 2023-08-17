@@ -110,6 +110,7 @@ public class KSMEPlayer: NSObject {
     }
 
     deinit {
+        NotificationCenter.default.removeObserver(self)
         videoOutput?.invalidate()
         playerItem.shutdown()
     }
@@ -392,13 +393,15 @@ extension KSMEPlayer: MediaPlayerProtocol {
             }
         }
         if track.mediaType == .audio {
-            if let assetTrack = track as? FFmpegAssetTrack {
-                options.setAudioSession(audioDescriptor: assetTrack.audioDescriptor)
-                let audioDescriptor = tracks(mediaType: .audio).first { $0.isEnabled }.flatMap {
+            if let audioDescriptor = (track as? FFmpegAssetTrack)?.audioDescriptor {
+                let oldAudioDescriptor = tracks(mediaType: .audio).first { $0.isEnabled }.flatMap {
                     $0 as? FFmpegAssetTrack
                 }?.audioDescriptor ?? .defaultValue
-                if assetTrack.audioDescriptor.audioFormat != audioDescriptor.audioFormat {
-                    audioOutput.prepare(audioFormat: assetTrack.audioDescriptor.audioFormat)
+                if audioDescriptor != oldAudioDescriptor {
+                    options.setAudioSession(audioDescriptor: audioDescriptor)
+                    if audioDescriptor.audioFormat != oldAudioDescriptor.audioFormat {
+                        audioOutput.prepare(audioFormat: audioDescriptor.audioFormat)
+                    }
                 }
             }
         }

@@ -196,12 +196,12 @@ class AudioSwresample: Swresample {
     }
 
     func transfer(avframe: UnsafeMutablePointer<AVFrame>) throws -> MEFrame {
-        let descriptor = AudioDescriptor(frame: avframe.pointee)
-        if !(self.descriptor == descriptor) {
-            if setup(descriptor: descriptor) {
-                self.descriptor = descriptor
+        let newDescriptor = AudioDescriptor(frame: avframe.pointee)
+        if !(descriptor == newDescriptor) {
+            if setup(descriptor: newDescriptor) {
+                descriptor = newDescriptor
             } else {
-                throw NSError(errorCode: .auidoSwrInit, userInfo: ["outChannel": descriptor.outChannel, "inChannel": descriptor.channel])
+                throw NSError(errorCode: .auidoSwrInit, userInfo: ["outChannel": newDescriptor.outChannel, "inChannel": newDescriptor.channel])
             }
         }
         let numberOfSamples = avframe.pointee.nb_samples
@@ -224,10 +224,10 @@ class AudioSwresample: Swresample {
 public class AudioDescriptor: Equatable {
     static let defaultValue = AudioDescriptor()
     public let sampleRate: Int32
-    var audioFormat = AVAudioFormat(standardFormatWithSampleRate: 44100, channelLayout: AVAudioChannelLayout(layoutTag: kAudioChannelLayoutTag_Stereo)!)
     fileprivate let sampleFormat: AVSampleFormat
     fileprivate var channel: AVChannelLayout
     fileprivate var outChannel: AVChannelLayout
+    var audioFormat = AVAudioFormat(standardFormatWithSampleRate: 44100, channelLayout: AVAudioChannelLayout(layoutTag: kAudioChannelLayoutTag_Stereo)!)
     public var channels: AVAudioChannelCount {
         AVAudioChannelCount(channel.nb_channels)
     }
@@ -269,7 +269,6 @@ public class AudioDescriptor: Equatable {
 
     public func audioFormat(channels: AVAudioChannelCount, isUseAudioRenderer: Bool) {
         if channels != self.channels {
-            outChannel = AVChannelLayout()
             av_channel_layout_default(&outChannel, Int32(channels))
         }
         KSLog("[audio] out channelLayout: \(outChannel)")
