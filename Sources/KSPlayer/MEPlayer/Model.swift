@@ -29,7 +29,7 @@ protocol OutputRenderSourceDelegate: AnyObject {
     func getVideoOutputRender(force: Bool) -> VideoVTBFrame?
     func getAudioOutputRender() -> AudioFrame?
     func setAudio(time: CMTime)
-    func setVideo(time: CMTime, duration: CMTime)
+    func setVideo(time: CMTime)
 }
 
 protocol CodecCapacityDelegate: AnyObject {
