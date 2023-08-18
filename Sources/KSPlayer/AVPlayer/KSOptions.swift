@@ -322,7 +322,7 @@ open class KSOptions {
         if channels > 2 {
             let minChannels = min(maximumOutputNumberOfChannels, channels)
             try? AVAudioSession.sharedInstance().setPreferredOutputNumberOfChannels(Int(minChannels))
-            if !isSpatialAudioEnabled {
+            if !(isUseAudioRenderer && isSpatialAudioEnabled) {
                 channels = AVAudioChannelCount(AVAudioSession.sharedInstance().preferredOutputNumberOfChannels)
             }
         } else {
