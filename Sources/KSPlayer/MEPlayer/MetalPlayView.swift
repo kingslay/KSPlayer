@@ -176,7 +176,7 @@ extension MetalPlayView {
                 }
                 metalView.draw(pixelBuffer: pixelBuffer, display: options.display, size: size)
             }
-            renderSource?.setVideo(time: cmtime, duration: frame.timebase.cmtime(for: frame.duration))
+            renderSource?.setVideo(time: cmtime)
         }
     }
 
