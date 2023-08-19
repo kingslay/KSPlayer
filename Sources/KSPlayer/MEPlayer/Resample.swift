@@ -198,6 +198,7 @@ class AudioSwresample: Swresample {
     func transfer(avframe: UnsafeMutablePointer<AVFrame>) throws -> MEFrame {
         let newDescriptor = AudioDescriptor(frame: avframe.pointee)
         if !(descriptor == newDescriptor) {
+            newDescriptor.audioFormat(channels: descriptor.audioFormat.channelCount, isUseAudioRenderer: descriptor.audioFormat.isInterleaved)
             if setup(descriptor: newDescriptor) {
                 descriptor = newDescriptor
             } else {

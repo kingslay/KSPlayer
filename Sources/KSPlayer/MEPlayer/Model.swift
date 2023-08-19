@@ -226,6 +226,7 @@ final class AudioFrame: MEFrame {
 
 final class VideoVTBFrame: MEFrame {
     var timebase = Timebase.defaultValue
+    // 交叉视频的duration会不准，直接减半了
     var duration: Int64 = 0
     var position: Int64 = 0
     var size: Int32 = 0
