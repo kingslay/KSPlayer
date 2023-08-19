@@ -50,7 +50,13 @@ public final class MetalPlayView: UIView {
     }
 
     func prepare(fps: Float, startPlayTime: TimeInterval = 0) {
-        displayLink.preferredFramesPerSecond = Int(ceil(fps)) << 1
+        let preferredFramesPerSecond = Int(ceil(fps))
+        displayLink.preferredFramesPerSecond = preferredFramesPerSecond << 1
+        #if os(iOS)
+        if #available(iOS 15.0, tvOS 15.0, *) {
+            displayLink.preferredFrameRateRange = CAFrameRateRange(minimum: Float(preferredFramesPerSecond), maximum: Float(preferredFramesPerSecond << 1))
+        }
+        #endif
         if let controlTimebase = displayView.displayLayer.controlTimebase, startPlayTime > 1 {
             CMTimebaseSetTime(controlTimebase, time: CMTimeMake(value: Int64(startPlayTime), timescale: 1))
         }
