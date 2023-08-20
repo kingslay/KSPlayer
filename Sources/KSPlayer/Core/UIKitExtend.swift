@@ -165,7 +165,7 @@ public typealias UXSlider = UISlider
 #endif
 
 public typealias UIViewContentMode = UIView.ContentMode
-internal extension UIButton {
+extension UIButton {
     func fillImage() {
         contentMode = .scaleAspectFill
         contentHorizontalAlignment = .fill

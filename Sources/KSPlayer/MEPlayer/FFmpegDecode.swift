@@ -1,5 +1,5 @@
 //
-//  VideoPlayerItemTrack.swift
+//  FFmpegDecode.swift
 //  KSPlayer
 //
 //  Created by kintan on 2018/3/9.
@@ -30,7 +30,7 @@ class FFmpegDecode: DecodeProtocol {
         if assetTrack.mediaType == .video {
             swresample = VideoSwresample()
         } else {
-            swresample = AudioSwresample(audioDescriptor: assetTrack.audioDescriptor, audioFormat: options.audioFormat)
+            swresample = AudioSwresample(audioDescriptor: assetTrack.audioDescriptor!)
         }
     }
 

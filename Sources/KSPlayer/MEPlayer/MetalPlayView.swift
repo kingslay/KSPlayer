@@ -11,6 +11,11 @@ import CoreMedia
 #if canImport(MetalKit)
 import MetalKit
 #endif
+
+public protocol DisplayLayerDelegate: NSObjectProtocol {
+    func change(displayLayer: AVSampleBufferDisplayLayer)
+}
+
 public final class MetalPlayView: UIView {
     private var videoInfo: CMVideoFormatDescription?
     public private(set) var pixelBuffer: CVPixelBuffer?
@@ -22,10 +27,17 @@ public final class MetalPlayView: UIView {
     var options: KSOptions
     weak var renderSource: OutputRenderSourceDelegate?
     // AVSampleBufferAudioRenderer AVSampleBufferRenderSynchronizer AVSampleBufferDisplayLayer
-    var displayView = AVSampleBufferDisplayView()
+    var displayView = AVSampleBufferDisplayView() {
+        didSet {
+            displayLayerDelegate?.change(displayLayer: displayView.displayLayer)
+        }
+    }
+
     private let metalView = MetalView()
-    init(options: KSOptions) {
+    public weak var displayLayerDelegate: DisplayLayerDelegate?
+    init(options: KSOptions, displayLayerDelegate: DisplayLayerDelegate? = nil) {
         self.options = options
+        self.displayLayerDelegate = displayLayerDelegate
         super.init(frame: .zero)
         addSubview(displayView)
         addSubview(metalView)
@@ -38,7 +50,13 @@ public final class MetalPlayView: UIView {
     }
 
     func prepare(fps: Float, startPlayTime: TimeInterval = 0) {
-        displayLink.preferredFramesPerSecond = Int(ceil(fps)) << 1
+        let preferredFramesPerSecond = Int(ceil(fps))
+        displayLink.preferredFramesPerSecond = preferredFramesPerSecond << 1
+        #if os(iOS)
+        if #available(iOS 15.0, tvOS 15.0, *) {
+            displayLink.preferredFrameRateRange = CAFrameRateRange(minimum: Float(preferredFramesPerSecond), maximum: Float(preferredFramesPerSecond << 1))
+        }
+        #endif
         if let controlTimebase = displayView.displayLayer.controlTimebase, startPlayTime > 1 {
             CMTimebaseSetTime(controlTimebase, time: CMTimeMake(value: Int64(startPlayTime), timescale: 1))
         }
@@ -164,7 +182,7 @@ extension MetalPlayView {
                 }
                 metalView.draw(pixelBuffer: pixelBuffer, display: options.display, size: size)
             }
-            renderSource?.setVideo(time: cmtime, duration: frame.timebase.cmtime(for: frame.duration))
+            renderSource?.setVideo(time: cmtime)
         }
     }
 
@@ -223,7 +241,7 @@ class MetalView: UIView {
         let colorspace = pixelBuffer.colorspace
         if metalLayer.colorspace != colorspace {
             metalLayer.colorspace = colorspace
-            KSLog("CAMetalLayer colorspace \(String(describing: colorspace))")
+            KSLog("[video] CAMetalLayer colorspace \(String(describing: colorspace))")
             #if !os(tvOS)
             if #available(iOS 16.0, *) {
                 if let name = colorspace?.name, name != CGColorSpace.sRGB {
@@ -235,12 +253,12 @@ class MetalView: UIView {
                 } else {
                     metalLayer.wantsExtendedDynamicRangeContent = false
                 }
-                KSLog("CAMetalLayer wantsExtendedDynamicRangeContent \(metalLayer.wantsExtendedDynamicRangeContent)")
+                KSLog("[video] CAMetalLayer wantsExtendedDynamicRangeContent \(metalLayer.wantsExtendedDynamicRangeContent)")
             }
             #endif
         }
         guard let drawable = metalLayer.nextDrawable() else {
-            KSLog("CAMetalLayer not readyForMoreMediaData")
+            KSLog("[video] CAMetalLayer not readyForMoreMediaData")
             return
         }
         render.draw(pixelBuffer: pixelBuffer, display: display, drawable: drawable)
@@ -288,19 +306,19 @@ class AVSampleBufferDisplayView: UIView {
             if displayLayer.isReadyForMoreMediaData {
                 displayLayer.enqueue(sampleBuffer)
             } else {
-                KSLog("AVSampleBufferDisplayLayer not readyForMoreMediaData. video time \(time), controlTime \(displayLayer.timebase.time) ")
+                KSLog("[video] AVSampleBufferDisplayLayer not readyForMoreMediaData. video time \(time), controlTime \(displayLayer.timebase.time) ")
                 if let controlTimebase = displayLayer.controlTimebase {
                     CMTimebaseSetTime(controlTimebase, time: time)
                 }
             }
             if #available(macOS 11.0, iOS 14, tvOS 14, *) {
                 if displayLayer.requiresFlushToResumeDecoding {
-                    KSLog("AVSampleBufferDisplayLayer requiresFlushToResumeDecoding so flush")
+                    KSLog("[video] AVSampleBufferDisplayLayer requiresFlushToResumeDecoding so flush")
                     displayLayer.flush()
                 }
             }
             if displayLayer.status == .failed {
-                KSLog("AVSampleBufferDisplayLayer status failed so flush")
+                KSLog("[video] AVSampleBufferDisplayLayer status failed so flush")
                 displayLayer.flush()
                 //                    if let error = displayLayer.error as NSError?, error.code == -11847 {
                 //                        displayLayer.stopRequestingMediaData()

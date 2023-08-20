@@ -62,7 +62,7 @@ struct HomeView: View {
             Button {
                 appModel.openFileImport = true
             } label: {
-                Text("Open File")
+                Label("Open File", systemImage: "plus.rectangle.on.folder.fill")
             }
             #if !os(tvOS)
             .keyboardShortcut("o")
@@ -70,7 +70,7 @@ struct HomeView: View {
             Button {
                 appModel.openURLImport = true
             } label: {
-                Text("Open URL")
+                Label("Open URL", systemImage: "plus.app.fill")
             }
             #if !os(tvOS)
             .keyboardShortcut("o", modifiers: [.command, .shift])

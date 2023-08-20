@@ -10,7 +10,7 @@ import AVFoundation
 import KSPlayer
 import UIKit
 
-@UIApplicationMain
+@main
 class AppDelegate: UIResponder, UIApplicationDelegate, UISplitViewControllerDelegate {
     var window: UIWindow?
     func application(_: UIApplication, didFinishLaunchingWithOptions _: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
@@ -24,7 +24,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UISplitViewControllerDele
         KSOptions.isSecondOpen = true
         KSOptions.isAccurateSeek = true
 //        KSOptions.isLoopPlay = true
-        if UIDevice.current.userInterfaceIdiom == .phone || UIDevice.current.userInterfaceIdiom == .tv {
+        if UIDevice.current.userInterfaceIdiom == .phone {
+            window.rootViewController = UINavigationController(rootViewController: RootViewController())
+        } else if UIDevice.current.userInterfaceIdiom == .tv {
             window.rootViewController = UINavigationController(rootViewController: MasterViewController())
         } else {
             let splitViewController = UISplitViewController()
@@ -96,7 +98,7 @@ class MEOptions: KSOptions {
     override func process(assetTrack: some MediaPlayerTrack) {
         if assetTrack.mediaType == .video {
             if [FFmpegFieldOrder.bb, .bt, .tt, .tb].contains(assetTrack.fieldOrder) {
-                videoFilters.append("yadif=mode=1:parity=-1:deint=0")
+                videoFilters.append("yadif=mode=1:parity=-1:deint=1")
                 hardwareDecode = false
             }
         }
@@ -132,7 +134,7 @@ var testObjects: [KSPlayerResource] = {
                 options.syncDecodeAudio = true
             } else if url.lastPathComponent == "subrip.mkv" {
                 options.asynchronousDecompression = false
-                options.videoFilters.append("yadif_videotoolbox=mode=0:parity=auto:deint=1")
+                options.videoFilters.append("yadif_videotoolbox=mode=0:parity=-1:deint=1")
             }
             objects.append(KSPlayerResource(url: url, options: options, name: url.lastPathComponent))
         }

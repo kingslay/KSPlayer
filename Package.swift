@@ -4,7 +4,9 @@ import PackageDescription
 let package = Package(
     name: "KSPlayer",
     defaultLocalization: "en",
-    platforms: [.macOS(.v10_15), .iOS(.v13), .tvOS(.v13)],
+    platforms: [.macOS(.v10_15), .iOS(.v13), .tvOS(.v13),
+//        .visionOS(.v1),
+    ],
     products: [
         // Products define the executables and libraries produced by a package, and make them visible to other packages.
         .library(
@@ -18,7 +20,9 @@ let package = Package(
         // Targets are the basic building blocks of a package. A target can define a module or a test suite.
         .target(
             name: "KSPlayer",
-            dependencies: [.product(name: "FFmpegKit", package: "FFmpegKit")],
+            dependencies: [
+                .product(name: "FFmpegKit", package: "FFmpegKit"),
+            ],
             resources: [.process("Metal/Shaders.metal")]
         ),
         .testTarget(
@@ -31,9 +35,9 @@ let package = Package(
 var ffmpegKitPath = FileManager.default.currentDirectoryPath + "/FFmpegKit"
 if !FileManager.default.fileExists(atPath: ffmpegKitPath), let url = URL(string: #file) {
     let path = url.deletingLastPathComponent().path
-    ffmpegKitPath = path + "/FFmpegKit"
-    if !FileManager.default.fileExists(atPath: ffmpegKitPath) {
-        ffmpegKitPath = path + "/../FFmpegKit"
+    // 解决用xcode引入spm的时候，依赖关系出错的问题
+    if !path.contains("/checkouts/") {
+        ffmpegKitPath = path + "/FFmpegKit"
     }
 }
 

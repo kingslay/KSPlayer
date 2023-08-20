@@ -1,5 +1,5 @@
 //
-//  Packet.swift
+//  Model.swift
 //  KSPlayer
 //
 //  Created by kintan on 2018/3/9.
@@ -29,7 +29,7 @@ protocol OutputRenderSourceDelegate: AnyObject {
     func getVideoOutputRender(force: Bool) -> VideoVTBFrame?
     func getAudioOutputRender() -> AudioFrame?
     func setAudio(time: CMTime)
-    func setVideo(time: CMTime, duration: CMTime)
+    func setVideo(time: CMTime)
 }
 
 protocol CodecCapacityDelegate: AnyObject {
@@ -74,6 +74,7 @@ public extension KSOptions {
     static var stackSize = 65536
     static var isClearVideoWhereReplace = true
     /// true: AVSampleBufferAudioRenderer false: AVAudioEngine
+//    static var isUseAudioRenderer = KSOptions.isSpatialAudioEnabled
     static var isUseAudioRenderer = false
     static func colorSpace(ycbcrMatrix: CFString?, transferFunction: CFString?) -> CGColorSpace? {
         switch ycbcrMatrix {
@@ -225,6 +226,7 @@ final class AudioFrame: MEFrame {
 
 final class VideoVTBFrame: MEFrame {
     var timebase = Timebase.defaultValue
+    // 交叉视频的duration会不准，直接减半了
     var duration: Int64 = 0
     var position: Int64 = 0
     var size: Int32 = 0

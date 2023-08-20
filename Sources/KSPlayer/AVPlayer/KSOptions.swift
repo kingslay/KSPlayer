@@ -9,9 +9,9 @@ import AVFoundation
 import OSLog
 
 open class KSOptions {
-    //    public static let shared = KSOptions()
     /// 最低缓存视频时间
-    @Published public var preferredForwardBufferDuration = KSOptions.preferredForwardBufferDuration
+    @Published
+    public var preferredForwardBufferDuration = KSOptions.preferredForwardBufferDuration
     /// 最大缓存视频时间
     public var maxBufferDuration = KSOptions.maxBufferDuration
     /// 是否开启秒开
@@ -33,8 +33,8 @@ open class KSOptions {
     public var seekFlags = Int32(0)
     // ffmpeg only cache http
     public var cache = false
+    //  record stream
     public var outputURL: URL?
-    public var display = DisplayEnum.plane
     public var avOptions = [String: Any]()
     public var formatContextOptions = [String: Any]()
     public var decoderOptions = [String: Any]()
@@ -44,7 +44,6 @@ open class KSOptions {
     public var startPlayTime: TimeInterval = 0
     public var startPlayRate: Float = 1.0
     public var registerRemoteControll: Bool = true // 默认支持来自系统控制中心的控制
-
     public var referer: String? {
         didSet {
             if let referer {
@@ -66,14 +65,17 @@ open class KSOptions {
     }
 
     // audio
-    public var audioDelay = 0.0 // s
     public var audioFilters = [String]()
     public var syncDecodeAudio = false
+    /// true: AVSampleBufferAudioRenderer false: AVAudioEngine
+    public var isUseAudioRenderer = KSOptions.isUseAudioRenderer
     // sutile
     public var autoSelectEmbedSubtitle = true
     public var subtitleDisable = false
     public var isSeekImageSubtitle = false
     // video
+    public var display = DisplayEnum.plane
+    public var videoDelay = 0.0 // s
     public var autoDeInterlace = false
     public var autoRotate = true
     public var destinationDynamicRange: DynamicRange?
@@ -98,7 +100,6 @@ open class KSOptions {
     public internal(set) var readVideoTime = 0.0
     public internal(set) var decodeAudioTime = 0.0
     public internal(set) var decodeVideoTime = 0.0
-    var audioFormat = AVAudioFormat(standardFormatWithSampleRate: 44100, channelLayout: AVAudioChannelLayout(layoutTag: kAudioChannelLayoutTag_Stereo)!)
     public init() {
         // 参数的配置可以参考protocols.texi 和 http.c
         formatContextOptions["auto_convert"] = 0
@@ -312,47 +313,47 @@ open class KSOptions {
         let channels = AVAudioChannelCount(2)
 //        try? AVAudioSession.sharedInstance().setRouteSharingPolicy(.longFormAudio)
         #else
+        let maximumOutputNumberOfChannels = AVAudioChannelCount(AVAudioSession.sharedInstance().maximumOutputNumberOfChannels)
+        KSLog("[audio] maximumOutputNumberOfChannels: \(maximumOutputNumberOfChannels)")
         KSOptions.setAudioSession()
-        let isSpatialAudioEnabled: Bool
-        if #available(tvOS 15.0, iOS 15.0, *) {
-            isSpatialAudioEnabled = AVAudioSession.sharedInstance().currentRoute.outputs.contains { $0.isSpatialAudioEnabled }
-            try? AVAudioSession.sharedInstance().setSupportsMultichannelContent(isSpatialAudioEnabled)
-        } else {
-            isSpatialAudioEnabled = false
-        }
+        let isSpatialAudioEnabled = KSOptions.isSpatialAudioEnabled()
+        KSLog("[audio] isSpatialAudioEnabled: \(isSpatialAudioEnabled)")
         var channels = audioDescriptor.channels
         if channels > 2 {
-            let minChannels = min(AVAudioChannelCount(AVAudioSession.sharedInstance().maximumOutputNumberOfChannels), channels)
+            let minChannels = min(maximumOutputNumberOfChannels, channels)
             try? AVAudioSession.sharedInstance().setPreferredOutputNumberOfChannels(Int(minChannels))
-            if !isSpatialAudioEnabled {
+            if !(isUseAudioRenderer && isSpatialAudioEnabled) {
                 channels = AVAudioChannelCount(AVAudioSession.sharedInstance().preferredOutputNumberOfChannels)
             }
         } else {
             try? AVAudioSession.sharedInstance().setPreferredOutputNumberOfChannels(2)
         }
+        KSLog("[audio] preferredOutputNumberOfChannels: \(AVAudioSession.sharedInstance().preferredOutputNumberOfChannels)")
         #endif
-        audioFormat = audioDescriptor.audioFormat(channels: channels)
+        audioDescriptor.audioFormat(channels: channels, isUseAudioRenderer: isUseAudioRenderer)
     }
 
-    open func videoClockSync(main: KSClock, video: KSClock) -> ClockProcessType {
-        var desire = main.getTime() + audioDelay
+//    private var lastMediaTime = CACurrentMediaTime()
+    open func videoClockSync(main: KSClock, nextVideoTime: TimeInterval) -> ClockProcessType {
+        var desire = main.getTime() - videoDelay
         #if !os(macOS)
         desire -= AVAudioSession.sharedInstance().outputLatency
         #endif
-        let diff = video.positionTime + video.duration - desire
+        let diff = nextVideoTime - desire
+//        print("[video] video diff \(diff) audio \(main.positionTime) interval \(CACurrentMediaTime() - main.lastMediaTime) render interval \(CACurrentMediaTime() - lastMediaTime)")
         if diff > 10 || diff < -10 {
             return .next
-        } else if diff >= 1 / 120 {
+        } else if diff > 1 / 120 {
             videoClockDelayCount = 0
             return .remain
         } else {
             if diff < -0.04 {
-                KSLog("video delay=\(diff), clock=\(desire), delay count=\(videoClockDelayCount)")
+                KSLog("[video] video delay=\(diff), clock=\(desire), delay count=\(videoClockDelayCount)")
             }
             if diff < -0.1 {
                 videoClockDelayCount += 1
                 if diff < -8, videoClockDelayCount % 100 == 0 {
-                    KSLog("video delay seek video track")
+                    KSLog("[video] video delay seek video track")
                     return .seek
                 }
                 if diff < -1, videoClockDelayCount % 10 == 0 {
@@ -364,8 +365,9 @@ open class KSOptions {
                     return .next
                 }
             } else {
-//                print(CACurrentMediaTime()-video.lastMediaTime)
                 videoClockDelayCount = 0
+//                print("[video] video interval \(CACurrentMediaTime() - lastMediaTime)")
+//                lastMediaTime = CACurrentMediaTime()
                 return .next
             }
         }
@@ -434,6 +436,18 @@ public extension KSOptions {
         try? AVAudioSession.sharedInstance().setActive(true)
         #endif
     }
+
+    #if !os(macOS)
+    static func isSpatialAudioEnabled() -> Bool {
+        if #available(tvOS 15.0, iOS 15.0, *) {
+            let isSpatialAudioEnabled = AVAudioSession.sharedInstance().currentRoute.outputs.contains { $0.isSpatialAudioEnabled }
+            try? AVAudioSession.sharedInstance().setSupportsMultichannelContent(isSpatialAudioEnabled)
+            return isSpatialAudioEnabled
+        } else {
+            return false
+        }
+    }
+    #endif
 }
 
 public enum LogLevel: Int32, CustomStringConvertible {
@@ -541,7 +555,6 @@ public extension Array {
 
 public struct KSClock {
     public private(set) var lastMediaTime = CACurrentMediaTime()
-    public internal(set) var duration = TimeInterval(0)
     public internal(set) var positionTime = TimeInterval(0) {
         didSet {
             lastMediaTime = CACurrentMediaTime()

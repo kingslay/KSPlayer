@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 54;
+	objectVersion = 53;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -22,6 +22,7 @@
 		AC458DE621DF830F00BD4CF9 /* AudioViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC458DE521DF830F00BD4CF9 /* AudioViewController.swift */; };
 		AC80332224BA1A2F002B3D40 /* hevc.mkv in Resources */ = {isa = PBXBuildFile; fileRef = AC80331E24BA1A2F002B3D40 /* hevc.mkv */; };
 		ACA2123E2756169900F58F75 /* raw.h264 in Resources */ = {isa = PBXBuildFile; fileRef = ACA2123D2756169900F58F75 /* raw.h264 */; };
+		ACE8052D2A83B92800690A9B /* RootViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACE8052C2A83B92800690A9B /* RootViewController.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -48,6 +49,7 @@
 		AC7E04DB2414DA5E00B0F540 /* libxml2.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libxml2.tbd; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk/usr/lib/libxml2.tbd; sourceTree = DEVELOPER_DIR; };
 		AC80331E24BA1A2F002B3D40 /* hevc.mkv */ = {isa = PBXFileReference; lastKnownFileType = file; path = hevc.mkv; sourceTree = "<group>"; };
 		ACA2123D2756169900F58F75 /* raw.h264 */ = {isa = PBXFileReference; lastKnownFileType = file; path = raw.h264; sourceTree = "<group>"; };
+		ACE8052C2A83B92800690A9B /* RootViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RootViewController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -95,6 +97,7 @@
 			children = (
 				AC155F1223AFA9F40092D004 /* demo-iOS.entitlements */,
 				AC08614E20B69A4500D801FC /* AppDelegate.swift */,
+				ACE8052C2A83B92800690A9B /* RootViewController.swift */,
 				AC08619420B69AB400D801FC /* DetailViewController.swift */,
 				AC08619520B69AB400D801FC /* MasterViewController.swift */,
 				AC458DE521DF830F00BD4CF9 /* AudioViewController.swift */,
@@ -267,6 +270,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				ACE8052D2A83B92800690A9B /* RootViewController.swift in Sources */,
 				AC08619720B69AB400D801FC /* MasterViewController.swift in Sources */,
 				AC458DE621DF830F00BD4CF9 /* AudioViewController.swift in Sources */,
 				AC08619620B69AB400D801FC /* DetailViewController.swift in Sources */,

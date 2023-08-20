@@ -99,7 +99,7 @@ final class MEPlayerItem {
             }
             if let ptr {
                 let avclass = ptr.assumingMemoryBound(to: UnsafePointer<AVClass>.self).pointee
-                if avclass.pointee.category == AV_CLASS_CATEGORY_NA, avclass == &ffurl_context_class {
+                if avclass == &ffurl_context_class {
                     let context = ptr.assumingMemoryBound(to: URLContext.self).pointee
                     if let opaque = context.interrupt_callback.opaque {
                         let playerItem = Unmanaged<MEPlayerItem>.fromOpaque(opaque).takeUnretainedValue()
@@ -447,6 +447,9 @@ extension MEPlayerItem {
                 if state == .closed {
                     break
                 }
+                if time != seekTime {
+                    continue
+                }
                 isSeek = true
                 allPlayerItemTracks.forEach { $0.seek(time: time) }
                 DispatchQueue.main.async { [weak self] in
@@ -456,7 +459,6 @@ extension MEPlayerItem {
                 }
                 audioClock.positionTime = time
                 videoClock.positionTime = time
-                videoClock.duration = 0
                 state = .reading
 
             } else if state == .reading {
@@ -637,6 +639,9 @@ extension MEPlayerItem: MediaPlayback {
             state = .seeking
             seekingCompletionHandler = completion
             read()
+        } else if state == .seeking {
+            seekTime = time
+            seekingCompletionHandler = completion
         }
         isAudioStalled = audioTrack == nil
     }
@@ -720,9 +725,8 @@ extension MEPlayerItem: OutputRenderSourceDelegate {
         isAudioStalled ? videoClock : audioClock
     }
 
-    func setVideo(time: CMTime, duration: CMTime) {
+    func setVideo(time: CMTime) {
         videoClock.positionTime = time.seconds
-        videoClock.duration = duration.seconds
     }
 
     func setAudio(time: CMTime) {
@@ -730,26 +734,30 @@ extension MEPlayerItem: OutputRenderSourceDelegate {
     }
 
     func getVideoOutputRender(force: Bool) -> VideoVTBFrame? {
-        guard let videoTrack, videoTrack.frameCount > 0 else {
+        guard let videoTrack else {
             return nil
         }
-        let type = force ? .next : options.videoClockSync(main: mainClock(), video: videoClock)
+        var type: ClockProcessType = force ? .next : .remain
+        let predicate: ((VideoVTBFrame) -> Bool)? = force ? nil : { [weak self] frame -> Bool in
+            guard let self else { return true }
+            type = self.options.videoClockSync(main: self.mainClock(), nextVideoTime: frame.seconds)
+            return type != .remain
+        }
+        let frame = videoTrack.getOutputRender(where: predicate)
         switch type {
         case .remain:
-            return nil
+            break
         case .next:
-            return videoTrack.getOutputRender(where: nil)
+            break
         case .dropNext:
             _ = videoTrack.getOutputRender(where: nil)
-            return videoTrack.getOutputRender(where: nil)
         case .flush:
             videoTrack.outputRenderQueue.flush()
-            return nil
         case .seek:
             videoTrack.outputRenderQueue.flush()
             videoTrack.seekTime = currentPlaybackTime
-            return nil
         }
+        return frame
     }
 
     func getAudioOutputRender() -> AudioFrame? {

@@ -1,5 +1,5 @@
 //
-//  AudioOutput.swift
+//  AudioEnginePlayer.swift
 //  KSPlayer
 //
 //  Created by kintan on 2018/3/11.
@@ -138,10 +138,10 @@ public final class AudioEnginePlayer: AudioPlayer, FrameOutput {
         engine.stop()
         engine.reset()
         sampleSize = audioFormat.sampleSize
-        KSLog("outputFormat channelLayout AudioFormat: \(audioFormat)")
+        KSLog("[audio] outputFormat AudioFormat: \(audioFormat)")
         if let channelLayout = audioFormat.channelLayout {
-            KSLog("outputFormat channelLayout tag: \(channelLayout.layoutTag)")
-            KSLog("outputFormat channelLayout channelDescriptions: \(channelLayout.layout.channelDescriptions)")
+            KSLog("[audio] outputFormat tag: \(channelLayout.layoutTag)")
+            KSLog("[audio] outputFormat channelDescriptions: \(channelLayout.layout.channelDescriptions)")
         }
         //        engine.attach(nbandEQ)
         //        engine.attach(distortion)
@@ -150,10 +150,15 @@ public final class AudioEnginePlayer: AudioPlayer, FrameOutput {
             self?.audioPlayerShouldInputData(ioData: UnsafeMutableAudioBufferListPointer(audioBufferList), numberOfFrames: frameCount)
             return noErr
         }
+
         engine.attach(sourceNode)
         engine.attach(dynamicsProcessor)
         engine.attach(timePitch)
-        engine.connect(nodes: [sourceNode, dynamicsProcessor, timePitch, engine.mainMixerNode], format: audioFormat)
+        var nodes = [sourceNode, dynamicsProcessor, timePitch, engine.mainMixerNode]
+        if audioFormat.channelCount > 2 {
+            nodes.append(engine.outputNode)
+        }
+        engine.connect(nodes: nodes, format: audioFormat)
         if let audioUnit = engine.outputNode.audioUnit {
             addRenderNotify(audioUnit: audioUnit)
         }

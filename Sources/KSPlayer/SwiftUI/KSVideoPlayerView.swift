@@ -21,8 +21,11 @@ public struct KSVideoPlayerView: View {
     private var playerCoordinator = KSVideoPlayer.Coordinator()
     @Environment(\.dismiss)
     private var dismiss
+    @FocusState
+    private var dropdownFocused: Bool
     public let options: KSOptions
-    @State public var url: URL {
+    @State
+    public var url: URL {
         didSet {
             #if os(macOS)
             NSDocumentController.shared.noteNewRecentDocumentURL(url)
@@ -46,11 +49,14 @@ public struct KSVideoPlayerView: View {
                 }
                 #if os(macOS)
                 isMaskShow ? NSCursor.unhide() : NSCursor.setHiddenUntilMouseMoves(true)
-                if let window = playerCoordinator.playerLayer?.player.view?.window {
-                    window.standardWindowButton(.zoomButton)?.isHidden = !isMaskShow
-                    window.standardWindowButton(.closeButton)?.isHidden = !isMaskShow
-                    window.standardWindowButton(.miniaturizeButton)?.isHidden = !isMaskShow
-//                    window.standardWindowButton(.closeButton)?.superview?.isHidden = !isMaskShow
+                if let window = playerCoordinator.playerLayer?.window {
+                    if !window.styleMask.contains(.fullScreen) {
+                        window.standardWindowButton(.closeButton)?.superview?.superview?.isHidden = !isMaskShow
+                        //                    window.standardWindowButton(.zoomButton)?.isHidden = !isMaskShow
+                        //                    window.standardWindowButton(.closeButton)?.isHidden = !isMaskShow
+                        //                    window.standardWindowButton(.miniaturizeButton)?.isHidden = !isMaskShow
+                        //                    window.titleVisibility = isMaskShow ? .visible : .hidden
+                    }
                 }
                 #endif
             }
@@ -87,38 +93,45 @@ public struct KSVideoPlayerView: View {
                     }
                 }
             #endif
-            #if !os(macOS)
-                .onTapGesture {
-                isMaskShow.toggle()
-            }
-            #endif
-            .onAppear {
-                if let subtitleDataSouce {
-                    playerCoordinator.subtitleModel.addSubtitle(dataSouce: subtitleDataSouce)
-                }
-                #if os(macOS)
-                NSEvent.addLocalMonitorForEvents(matching: [.mouseMoved]) {
-                    isMaskShow = overView
-                    return $0
-                }
-                #endif
-            }
-            .onDisappear {
-                delayItem?.cancel()
-                onPlayerDisappear?(playerCoordinator.playerLayer)
-                if let playerLayer = playerCoordinator.playerLayer {
-                    if !playerLayer.isPipActive {
-                        playerCoordinator.resetPlayer()
+                .onAppear {
+                    if let subtitleDataSouce {
+                        playerCoordinator.subtitleModel.addSubtitle(dataSouce: subtitleDataSouce)
                     }
+                    #if os(macOS)
+                    NSEvent.addLocalMonitorForEvents(matching: [.mouseMoved]) {
+                        isMaskShow = overView
+                        return $0
+                    }
+                    #endif
                 }
-            }
-            .ignoresSafeArea()
-            #if os(tvOS)
-                .onPlayPauseCommand {
-                    if playerCoordinator.state.isPlaying {
-                        playerCoordinator.playerLayer?.pause()
-                    } else {
-                        playerCoordinator.playerLayer?.play()
+                .onDisappear {
+                    delayItem?.cancel()
+                    onPlayerDisappear?(playerCoordinator.playerLayer)
+                }
+                .ignoresSafeArea()
+            #if os(iOS) || os(xrOS)
+                .navigationBarTitleDisplayMode(.inline)
+            #else
+                .focusable()
+                .onMoveCommand { direction in
+                    switch direction {
+                    case .left:
+                        playerCoordinator.skip(interval: -15)
+                    case .right:
+                        playerCoordinator.skip(interval: 15)
+                    #if os(macOS)
+                    case .up:
+                        playerCoordinator.playerLayer?.player.playbackVolume += 1
+                    case .down:
+                        playerCoordinator.playerLayer?.player.playbackVolume -= 1
+                    #else
+                    case .up:
+                        showDropDownMenu = false
+                    case .down:
+                        showDropDownMenu = true
+                    #endif
+                    @unknown default:
+                        break
                     }
                 }
             #endif
@@ -142,56 +155,34 @@ public struct KSVideoPlayerView: View {
             }
             if showDropDownMenu {
                 VideoSettingView(config: playerCoordinator, subtitleModel: playerCoordinator.subtitleModel)
-                    .frame(width: KSOptions.sceneSize.width * 3 / 4, height: KSOptions.sceneSize.height / 2)
-                    .transition(
-                        AnyTransition.move(edge: .top).combined(with: .opacity)
-                    )
+                    .frame(width: KSOptions.sceneSize.width * 3 / 4)
+                    .focused($dropdownFocused)
+                    .onAppear {
+                        dropdownFocused = true
+                    }
+                #if os(macOS) || os(tvOS)
+                    .onExitCommand {
+                        showDropDownMenu = false
+                    }
+                #endif
             }
         }
         .preferredColorScheme(.dark)
         .background(Color.black)
-        .foregroundColor(.white)
+        .tint(.white)
         .persistentSystemOverlays(.hidden)
         .toolbar(isMaskShow ? .visible : .hidden, for: .automatic)
-        #if os(iOS)
-            .navigationBarTitleDisplayMode(.inline)
-        #else
-            .focusable()
-            .onMoveCommand { direction in
-                isMaskShow = true
-                switch direction {
-                case .left:
-                    playerCoordinator.skip(interval: -15)
-                case .right:
-                    playerCoordinator.skip(interval: 15)
-                #if os(macOS)
-                case .up:
-                    playerCoordinator.playerLayer?.player.playbackVolume += 1
-                case .down:
-                    playerCoordinator.playerLayer?.player.playbackVolume -= 1
-                #else
-                case .up:
-                    showDropDownMenu = false
-                case .down:
-                    showDropDownMenu = true
-                #endif
-                @unknown default:
-                    break
-                }
-            }
-            .onExitCommand {
-                if showDropDownMenu {
-                    showDropDownMenu = false
-                } else if isMaskShow {
-                    isMaskShow = false
-                } else {
-                    dismiss()
-                }
-            }
-        #endif
+        //        .onKeyPress(.leftArrow) {
+        //            playerCoordinator.skip(interval: -15)
+        //            return .handled
+        //        }
+        //        .onKeyPress(.rightArrow) {
+        //            playerCoordinator.skip(interval: 15)
+        //            return .handled
+        //        }
         #if os(macOS)
         .onTapGesture(count: 2) {
-            guard let view = playerCoordinator.playerLayer?.player.view else {
+            guard let view = playerCoordinator.playerLayer else {
                 return
             }
             view.window?.toggleFullScreen(nil)
@@ -199,22 +190,43 @@ public struct KSVideoPlayerView: View {
             view.layoutSubtreeIfNeeded()
         }
         .onExitCommand {
-            playerCoordinator.playerLayer?.player.view?.exitFullScreenMode()
+            playerCoordinator.playerLayer?.exitFullScreenMode()
         }
-        #endif
-        #if !os(tvOS)
-        .onHover {
-            overView = $0
-            isMaskShow = overView
-        }
-        .onDrop(of: ["public.file-url"], isTargeted: nil) { providers -> Bool in
-            providers.first?.loadDataRepresentation(forTypeIdentifier: "public.file-url") { data, _ in
-                if let data, let path = NSString(data: data, encoding: 4), let url = URL(string: path as String) {
-                    openURL(url)
-                }
+        #else
+        .onTapGesture {
+                isMaskShow.toggle()
             }
-            return true
+        #endif
+        #if os(tvOS)
+        .onPlayPauseCommand {
+            if playerCoordinator.state.isPlaying {
+                playerCoordinator.playerLayer?.pause()
+            } else {
+                playerCoordinator.playerLayer?.play()
+            }
         }
+        .onExitCommand {
+            if showDropDownMenu {
+                showDropDownMenu = false
+            } else if isMaskShow {
+                isMaskShow = false
+            } else {
+                dismiss()
+            }
+        }
+        #else
+        .onHover {
+                overView = $0
+                isMaskShow = overView
+            }
+            .onDrop(of: ["public.file-url"], isTargeted: nil) { providers -> Bool in
+                providers.first?.loadDataRepresentation(forTypeIdentifier: "public.file-url") { data, _ in
+                    if let data, let path = NSString(data: data, encoding: 4), let url = URL(string: path as String) {
+                        openURL(url)
+                    }
+                }
+                return true
+            }
         #endif
     }
 
@@ -311,8 +323,10 @@ struct VideoControllerView: View {
 
 @available(iOS 15, tvOS 15, macOS 12, *)
 struct VideoTimeShowView: View {
-    @ObservedObject fileprivate var config: KSVideoPlayer.Coordinator
-    @ObservedObject fileprivate var model: ControllerTimeModel
+    @ObservedObject
+    fileprivate var config: KSVideoPlayer.Coordinator
+    @ObservedObject
+    fileprivate var model: ControllerTimeModel
     public var body: some View {
         if config.timemodel.totalTime == 0 {
             Text("Live Streaming")
@@ -367,10 +381,10 @@ struct VideoSubtitleView: View {
                     .font(Font(SubtitleModel.textFont))
                     .shadow(color: .black.opacity(0.9), radius: 1, x: 1, y: 1)
                     .foregroundColor(SubtitleModel.textColor)
-                    .background(SubtitleModel.textBackgroundColor)
                     .multilineTextAlignment(SubtitleModel.textXAlign)
                     .padding(SubtitleModel.edgeInsets)
                     .italic(SubtitleModel.textItalic)
+                    .background(SubtitleModel.textBackgroundColor)
                 #if !os(tvOS)
                     .textSelection(.enabled)
                 #endif
@@ -382,11 +396,16 @@ struct VideoSubtitleView: View {
     }
 
     private func imageView(_ image: UIImage) -> some View {
-        #if os(tvOS)
+        #if canImport(VisionKit)
+        if #available(iOS 16.0, macOS 13.0, macCatalyst 17.0, *) {
+            return LiveTextImage(uiImage: image)
+        } else {
+            return Image(uiImage: image)
+                .resizable()
+        }
+        #else
         return Image(uiImage: image)
             .resizable()
-        #else
-        return LiveTextImage(uiImage: image)
         #endif
     }
 }

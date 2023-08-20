@@ -30,7 +30,7 @@ public class FFmpegAssetTrack: MediaPlayerTrack {
     public let isImageSubtitle: Bool
     public var delay: TimeInterval = 0
     private var stream: UnsafeMutablePointer<AVStream>?
-    let audioDescriptor: AudioDescriptor
+    let audioDescriptor: AudioDescriptor?
     var startTime = TimeInterval(0)
     var codecpar: AVCodecParameters
     var timebase: Timebase = .defaultValue
@@ -43,6 +43,9 @@ public class FFmpegAssetTrack: MediaPlayerTrack {
         let metadata = toDictionary(stream.pointee.metadata)
         if let value = metadata["variant_bitrate"] ?? metadata["BPS"], let bitRate = Int64(value) {
             self.bitRate = bitRate
+        }
+        if bitRate > 0 {
+            description += ", \(bitRate)BPS"
         }
         if stream.pointee.side_data?.pointee.type == AV_PKT_DATA_DOVI_CONF {
             dovi = stream.pointee.side_data?.pointee.data.withMemoryRebound(to: DOVIDecoderConfigurationRecord.self, capacity: 1) { $0 }.pointee
@@ -96,7 +99,6 @@ public class FFmpegAssetTrack: MediaPlayerTrack {
         colorPrimaries = codecpar.color_primaries.colorPrimaries as String?
         transferFunction = codecpar.color_trc.transferFunction as String?
         yCbCrMatrix = codecpar.color_space.ycbcrMatrix as String?
-        audioDescriptor = AudioDescriptor(codecpar: codecpar)
         // codec_tag byte order is LSB first
         mediaSubType = codecpar.codec_tag == 0 ? codecpar.codec_id.mediaSubType : CMFormatDescription.MediaSubType(rawValue: codecpar.codec_tag.bigEndian)
         var description = ""
@@ -106,12 +108,12 @@ public class FFmpegAssetTrack: MediaPlayerTrack {
                 description += " (\(String(cString: profile.pointee.name)))"
             }
         }
-        description += ", \(bitRate)BPS"
         let sar = codecpar.sample_aspect_ratio.size
         naturalSize = CGSize(width: Int(codecpar.width), height: Int(CGFloat(codecpar.height) * sar.height / sar.width))
         fieldOrder = FFmpegFieldOrder(rawValue: UInt8(codecpar.field_order.rawValue)) ?? .unknown
         if codecpar.codec_type == AVMEDIA_TYPE_AUDIO {
             mediaType = .audio
+            audioDescriptor = AudioDescriptor(codecpar: codecpar)
             let layout = codecpar.ch_layout
             let channelsPerFrame = UInt32(layout.nb_channels)
             let sampleFormat = AVSampleFormat(codecpar.format)
@@ -125,6 +127,7 @@ public class FFmpegAssetTrack: MediaPlayerTrack {
                 description += ", \(fmt)"
             }
         } else if codecpar.codec_type == AVMEDIA_TYPE_VIDEO {
+            audioDescriptor = nil
             mediaType = .video
             audioStreamBasicDescription = nil
             if let name = av_get_pix_fmt_name(AVPixelFormat(rawValue: codecpar.format)) {
@@ -134,8 +137,12 @@ public class FFmpegAssetTrack: MediaPlayerTrack {
         } else if codecpar.codec_type == AVMEDIA_TYPE_SUBTITLE {
             mediaType = .subtitle
             audioStreamBasicDescription = nil
+            audioDescriptor = nil
         } else {
             return nil
+        }
+        if codecpar.bits_per_raw_sample != 0 {
+            description += ", (\(codecpar.bits_per_raw_sample) bit)"
         }
         isImageSubtitle = [AV_CODEC_ID_DVD_SUBTITLE, AV_CODEC_ID_DVB_SUBTITLE, AV_CODEC_ID_DVB_TELETEXT, AV_CODEC_ID_HDMV_PGS_SUBTITLE].contains(codecpar.codec_id)
         self.description = description

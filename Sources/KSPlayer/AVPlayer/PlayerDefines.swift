@@ -1,5 +1,5 @@
 //
-//  File.swift
+//  PlayerDefines.swift
 //  KSPlayer
 //
 //  Created by kintan on 2018/3/9.
@@ -369,12 +369,18 @@ public extension URL {
         return string.components(separatedBy: "#EXTINF:").compactMap { content -> (String, URL, [String: String])? in
             let content = content.replacingOccurrences(of: "\r\n", with: "\n")
             let array = content.split(separator: "\n")
-            guard array.count > 1, let last = array.last, let url = URL(string: String(last)) else {
+            guard array.count > 1, let last = array.last, var url = URL(string: String(last)) else {
                 return nil
             }
+            if url.path.hasPrefix("./") {
+                url = self.deletingLastPathComponent().appendingPathComponent(url.path).standardized
+            }
             let infos = array[0].split(separator: ",")
-            guard infos.count > 1, let name = infos.last else {
-                return nil
+            let name: String
+            if infos.count > 1, let last = infos.last {
+                name = String(last)
+            } else {
+                name = url.lastPathComponent
             }
             var extinf = [String: String]()
             let prefix = "#EXTVLCOPT:"
@@ -402,33 +408,47 @@ public extension URL {
                     extinf["duration"] = String(keyValue[0])
                 }
             }
-            return (String(name), url, extinf)
+            return (name, url, extinf)
         }
     }
 
-    func data() async throws -> Data {
+    func data(userAgent: String? = nil) async throws -> Data {
         if isFileURL {
             return try Data(contentsOf: self)
         } else {
-            let (data, _) = try await URLSession.shared.data(from: self)
+            var request = URLRequest(url: self)
+            if let userAgent {
+                request.addValue(userAgent, forHTTPHeaderField: "User-Agent")
+            }
+            let (data, _) = try await URLSession.shared.data(for: request)
             return data
         }
     }
 
-    func download(completion: @escaping ((String, URL) -> Void)) {
-        URLSession.shared.downloadTask(with: self) { url, response, _ in
-            guard let url, let response = response as? HTTPURLResponse else {
+    func download(userAgent: String? = nil, completion: @escaping ((String, URL) -> Void)) {
+        var request = URLRequest(url: self)
+        if let userAgent {
+            request.addValue(userAgent, forHTTPHeaderField: "User-Agent")
+        }
+        let task = URLSession.shared.downloadTask(with: request) { url, response, _ in
+            guard let url, let response else {
                 return
             }
-            let httpFileName = "attachment; filename="
-            var filename = url.lastPathComponent
-            if var disposition = response.value(forHTTPHeaderField: "Content-Disposition"), disposition.hasPrefix(httpFileName) {
-                disposition.removeFirst(httpFileName.count)
-                filename = disposition
-            }
             // 下载的临时文件要马上就用。不然可能会马上被清空
-            completion(filename, url)
-        }.resume()
+            completion(response.suggestedFilename ?? url.lastPathComponent, url)
+        }
+        task.resume()
+    }
+}
+
+extension HTTPURLResponse {
+    var filename: String? {
+        let httpFileName = "attachment; filename="
+        if var disposition = value(forHTTPHeaderField: "Content-Disposition"), disposition.hasPrefix(httpFileName) {
+            disposition.removeFirst(httpFileName.count)
+            return disposition
+        }
+        return nil
     }
 }
 

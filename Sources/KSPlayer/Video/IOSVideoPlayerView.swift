@@ -129,6 +129,9 @@ open class IOSVideoPlayerView: VideoPlayerView {
             }
             originalSuperView = superview
             originalframeConstraints = frameConstraints
+            if let originalframeConstraints {
+                NSLayoutConstraint.deactivate(originalframeConstraints)
+            }
             originalFrame = frame
             originalOrientations = viewController.supportedInterfaceOrientations
             let fullVC = PlayerFullScreenViewController(isHorizonal: isHorizonal)
@@ -152,7 +155,9 @@ open class IOSVideoPlayerView: VideoPlayerView {
                 return
             }
             let presentingVC = viewController.presentingViewController ?? viewController
-            KSOptions.supportedInterfaceOrientations = .portrait
+            if let originalOrientations {
+                KSOptions.supportedInterfaceOrientations = originalOrientations
+            }
             presentingVC.dismiss(animated: true) {
                 self.originalSuperView?.addSubview(self)
                 if let constraints = self.originalframeConstraints, !constraints.isEmpty {
@@ -160,9 +165,6 @@ open class IOSVideoPlayerView: VideoPlayerView {
                 } else {
                     self.translatesAutoresizingMaskIntoConstraints = true
                     self.frame = self.originalFrame
-                }
-                if let originalOrientations = self.originalOrientations {
-                    KSOptions.supportedInterfaceOrientations = originalOrientations
                 }
             }
         }

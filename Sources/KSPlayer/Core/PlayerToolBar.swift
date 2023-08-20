@@ -1,5 +1,5 @@
 //
-//  ChooseButton.swift
+//  PlayerToolBar.swift
 //  Pods
 //
 //  Created by kintan on 16/5/21.
@@ -56,7 +56,7 @@ public class PlayerToolBar: UIStackView {
         }
     }
 
-    internal lazy var startDateTimeInteral: TimeInterval = {
+    lazy var startDateTimeInteral: TimeInterval = {
         let date = Date()
         let calendar = Calendar.current
         let components = calendar.dateComponents([.year, .month, .day], from: date)
@@ -64,7 +64,7 @@ public class PlayerToolBar: UIStackView {
         return startDate?.timeIntervalSince1970 ?? 0
     }()
 
-    internal var todayInterval: TimeInterval {
+    var todayInterval: TimeInterval {
         Date().timeIntervalSince1970 - startDateTimeInteral
     }
 

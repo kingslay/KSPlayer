@@ -1,5 +1,5 @@
 //
-//  PlayerController.swift
+//  PlayerView.swift
 //  VoiceNote
 //
 //  Created by kintan on 2018/8/16.
@@ -33,7 +33,7 @@ public protocol PlayerControllerDelegate: AnyObject {
     func playerController(finish error: Error?)
     func playerController(maskShow: Bool)
     func playerController(action: PlayerButtonType)
-    // bufferedCount: 0代表首次加载
+    // `bufferedCount: 0` indicates first time loading
     func playerController(bufferedCount: Int, consumeTime: TimeInterval)
 }
 
@@ -48,7 +48,7 @@ open class PlayerView: UIView, KSPlayerLayerDelegate, KSSliderDelegate {
     public weak var delegate: ControllerDelegate?
     public let toolBar = PlayerToolBar()
     public let srtControl = SubtitleModel()
-    // Closure fired when play time changed
+    // Listen to play time change
     public var playTimeDidChange: ((TimeInterval, TimeInterval) -> Void)?
     public var backBlock: (() -> Void)?
     public convenience init() {
@@ -130,6 +130,7 @@ open class PlayerView: UIView, KSPlayerLayerDelegate, KSSliderDelegate {
     open func play() {
         becomeFirstResponder()
         playerLayer?.play()
+        toolBar.playButton.isSelected = true
     }
 
     open func pause() {
@@ -172,8 +173,6 @@ open class PlayerView: UIView, KSPlayerLayerDelegate, KSSliderDelegate {
             toolBar.isSeekable = layer.player.seekable
         } else if state == .playedToTheEnd || state == .paused || state == .error {
             toolBar.playButton.isSelected = false
-        } else if state.isPlaying {
-            toolBar.playButton.isSelected = true
         }
     }
 

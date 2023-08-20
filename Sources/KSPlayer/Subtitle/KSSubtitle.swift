@@ -195,35 +195,35 @@ extension KSSubtitle: KSSubtitleProtocol {
     }
 }
 
-public class KSURLSubtitle: KSSubtitle {
-    public func parse(url: URL, encoding: String.Encoding? = nil) async throws {
-        do {
-            var string: String?
-            let srtData = try await url.data()
-            let encodes = [encoding ?? String.Encoding.utf8,
-                           String.Encoding(rawValue: CFStringConvertEncodingToNSStringEncoding(CFStringEncoding(CFStringEncodings.big5.rawValue))),
-                           String.Encoding(rawValue: CFStringConvertEncodingToNSStringEncoding(CFStringEncoding(CFStringEncodings.GB_18030_2000.rawValue))),
-                           String.Encoding.unicode]
-            for encode in encodes {
-                string = String(data: srtData, encoding: encode)
-                if string != nil {
-                    break
-                }
+public extension KSSubtitle {
+    func parse(url: URL, userAgent: String? = nil, encoding: String.Encoding? = nil) async throws {
+        let data = try await url.data(userAgent: userAgent)
+        try parse(data: data, encoding: encoding)
+    }
+
+    func parse(data: Data, encoding: String.Encoding? = nil) throws {
+        var string: String?
+        let encodes = [encoding ?? String.Encoding.utf8,
+                       String.Encoding(rawValue: CFStringConvertEncodingToNSStringEncoding(CFStringEncoding(CFStringEncodings.big5.rawValue))),
+                       String.Encoding(rawValue: CFStringConvertEncodingToNSStringEncoding(CFStringEncoding(CFStringEncodings.GB_18030_2000.rawValue))),
+                       String.Encoding.unicode]
+        for encode in encodes {
+            string = String(data: data, encoding: encode)
+            if string != nil {
+                break
             }
-            guard let subtitle = string else {
-                throw NSError(errorCode: .subtitleUnEncoding, userInfo: ["url": url.absoluteString])
+        }
+        guard let subtitle = string else {
+            throw NSError(errorCode: .subtitleUnEncoding)
+        }
+        let parse = KSOptions.subtitleParses.first { $0.canParse(subtitle: subtitle) }
+        if let parse {
+            parts = parse.parse(subtitle: subtitle)
+            if partsCount == 0 {
+                throw NSError(errorCode: .subtitleUnParse)
             }
-            let parse = KSOptions.subtitleParses.first { $0.canParse(subtitle: subtitle) }
-            if let parse {
-                parts = parse.parse(subtitle: subtitle)
-                if partsCount == 0 {
-                    throw NSError(errorCode: .subtitleUnParse, userInfo: ["url": url.absoluteString])
-                }
-            } else {
-                throw NSError(errorCode: .subtitleFormatUnSupport, userInfo: ["url": url.absoluteString])
-            }
-        } catch {
-            throw NSError(errorCode: .subtitleUnEncoding, userInfo: ["url": url.absoluteString])
+        } else {
+            throw NSError(errorCode: .subtitleFormatUnSupport)
         }
     }
 
@@ -335,16 +335,13 @@ open class SubtitleModel: ObservableObject {
     @Published public var selectedSubtitleInfo: (any SubtitleInfo)? {
         didSet {
             oldValue?.subtitle(isEnabled: false)
-            if let selectedSubtitleInfo {
-                addSubtitle(info: selectedSubtitleInfo)
-                selectedSubtitleInfo.subtitle(isEnabled: true)
-            }
+            selectedSubtitleInfo?.subtitle(isEnabled: true)
         }
     }
 
     public init() {}
 
-    private func addSubtitle(info: any SubtitleInfo) {
+    public func addSubtitle(info: any SubtitleInfo) {
         if subtitleInfos.first(where: { $0.subtitleID == info.subtitleID }) == nil {
             subtitleInfos.append(info)
         }
@@ -353,7 +350,7 @@ open class SubtitleModel: ObservableObject {
     public func subtitle(currentTime: TimeInterval) -> Bool {
         let newPart: SubtitlePart?
         if let subtile = selectedSubtitleInfo {
-            let currentTime = currentTime - subtile.delay + subtitleDelay
+            let currentTime = currentTime - subtile.delay - subtitleDelay
             if let part = subtile.search(for: currentTime) {
                 newPart = part
             } else {

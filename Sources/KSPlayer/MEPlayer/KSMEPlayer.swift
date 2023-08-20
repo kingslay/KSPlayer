@@ -1,5 +1,5 @@
 //
-//  File.swift
+//  KSMEPlayer.swift
 //  KSPlayer
 //
 //  Created by kintan on 2018/3/9.
@@ -16,7 +16,7 @@ import AppKit
 public class KSMEPlayer: NSObject {
     private var loopCount = 1
     private var playerItem: MEPlayerItem
-    private let audioOutput: AudioPlayer & FrameOutput = KSOptions.isUseAudioRenderer ? AudioRendererPlayer() : AudioEnginePlayer()
+    private let audioOutput: AudioPlayer & FrameOutput
     private var options: KSOptions
     private var bufferingCountDownTimer: Timer?
     public private(set) var videoOutput: MetalPlayView?
@@ -30,9 +30,6 @@ public class KSMEPlayer: NSObject {
         if #available(iOS 15.0, tvOS 15.0, macOS 12.0, *), let videoOutput {
             let contentSource = AVPictureInPictureController.ContentSource(sampleBufferDisplayLayer: videoOutput.displayView.displayLayer, playbackDelegate: self)
             let pip = KSPictureInPictureController(contentSource: contentSource)
-            #if os(iOS)
-            pip.canStartPictureInPictureAutomaticallyFromInline = options.canStartPictureInPictureAutomaticallyFromInline
-            #endif
             return pip
         } else {
             return nil
@@ -94,6 +91,7 @@ public class KSMEPlayer: NSObject {
 
     public required init(url: URL, options: KSOptions) {
         playerItem = MEPlayerItem(url: url, options: options)
+        audioOutput = options.isUseAudioRenderer ? AudioRendererPlayer() : AudioEnginePlayer()
         if options.videoDisable {
             videoOutput = nil
         } else {
@@ -112,6 +110,7 @@ public class KSMEPlayer: NSObject {
     }
 
     deinit {
+        NotificationCenter.default.removeObserver(self)
         videoOutput?.invalidate()
         playerItem.shutdown()
     }
@@ -158,7 +157,7 @@ extension KSMEPlayer: MEPlayerDelegate {
         let fps = vidoeTracks.first { $0.isEnabled }.map(\.nominalFrameRate) ?? 24
         runInMainqueue { [weak self] in
             guard let self else { return }
-            self.audioOutput.prepare(audioFormat: self.options.audioFormat)
+            self.audioOutput.prepare(audioFormat: audioDescriptor.audioFormat)
             self.videoOutput?.prepare(fps: fps, startPlayTime: self.options.startPlayTime)
             self.videoOutput?.play()
             self.delegate?.readyToPlay(player: self)
@@ -394,12 +393,16 @@ extension KSMEPlayer: MediaPlayerProtocol {
             }
         }
         if track.mediaType == .audio {
-            let audioDescriptor = tracks(mediaType: .audio).first { $0.isEnabled }.flatMap {
-                $0 as? FFmpegAssetTrack
-            }?.audioDescriptor ?? .defaultValue
-            if let assetTrack = track as? FFmpegAssetTrack, assetTrack.audioDescriptor != audioDescriptor {
-                options.setAudioSession(audioDescriptor: audioDescriptor)
-                audioOutput.prepare(audioFormat: options.audioFormat)
+            if let audioDescriptor = (track as? FFmpegAssetTrack)?.audioDescriptor {
+                let oldAudioDescriptor = tracks(mediaType: .audio).first { $0.isEnabled }.flatMap {
+                    $0 as? FFmpegAssetTrack
+                }?.audioDescriptor ?? .defaultValue
+                if audioDescriptor != oldAudioDescriptor {
+                    options.setAudioSession(audioDescriptor: audioDescriptor)
+                    if audioDescriptor.audioFormat != oldAudioDescriptor.audioFormat {
+                        audioOutput.prepare(audioFormat: audioDescriptor.audioFormat)
+                    }
+                }
             }
         }
         playerItem.select(track: track)
@@ -497,6 +500,14 @@ extension KSMEPlayer: AVPlaybackCoordinatorPlaybackControlDelegate {
             self.bufferingCountDownTimer = Timer(timeInterval: countDown, repeats: false) { _ in
                 completionHandler()
             }
+        }
+    }
+}
+
+extension KSMEPlayer: DisplayLayerDelegate {
+    public func change(displayLayer: AVSampleBufferDisplayLayer) {
+        if #available(iOS 15.0, tvOS 15.0, macOS 12.0, *) {
+            pipController?.contentSource = AVPictureInPictureController.ContentSource(sampleBufferDisplayLayer: displayLayer, playbackDelegate: self)
         }
     }
 }
