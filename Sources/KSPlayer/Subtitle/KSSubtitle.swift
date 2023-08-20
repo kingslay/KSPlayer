@@ -335,16 +335,13 @@ open class SubtitleModel: ObservableObject {
     @Published public var selectedSubtitleInfo: (any SubtitleInfo)? {
         didSet {
             oldValue?.subtitle(isEnabled: false)
-            if let selectedSubtitleInfo {
-                addSubtitle(info: selectedSubtitleInfo)
-                selectedSubtitleInfo.subtitle(isEnabled: true)
-            }
+            selectedSubtitleInfo?.subtitle(isEnabled: true)
         }
     }
 
     public init() {}
 
-    private func addSubtitle(info: any SubtitleInfo) {
+    public func addSubtitle(info: any SubtitleInfo) {
         if subtitleInfos.first(where: { $0.subtitleID == info.subtitleID }) == nil {
             subtitleInfos.append(info)
         }
