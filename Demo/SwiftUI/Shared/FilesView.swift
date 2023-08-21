@@ -29,6 +29,11 @@ struct FilesView: View {
             }
             return isIncluded
         }
+        #if os(tvOS)
+        HStack {
+            toolbarView
+        }
+        #endif
         List(models, id: \.self, selection: $appModel.activeM3UModel) { model in
             #if os(tvOS)
             NavigationLink(value: model) {
@@ -39,7 +44,24 @@ struct FilesView: View {
             #endif
         }
         .searchable(text: $nameFilter)
+        .sheet(isPresented: $addM3U) {
+            AddM3UView()
+        }
+        #if !os(tvOS)
         .toolbar {
+            toolbarView
+        }
+        .fileImporter(isPresented: $openFileImport, allowedContentTypes: [.data]) { result in
+            guard let url = try? result.get() else {
+                return
+            }
+            appModel.addM3U(url: url)
+        }
+        #endif
+    }
+
+    private var toolbarView: some View {
+        Group {
             Button {
                 openFileImport = true
             } label: {
@@ -57,17 +79,7 @@ struct FilesView: View {
             .keyboardShortcut("o", modifiers: [.command, .shift])
             #endif
         }
-        .sheet(isPresented: $addM3U) {
-            AddM3UView()
-        }
-        #if !os(tvOS)
-        .fileImporter(isPresented: $openFileImport, allowedContentTypes: [.data]) { result in
-            guard let url = try? result.get() else {
-                return
-            }
-            appModel.addM3U(url: url)
-        }
-        #endif
+        .labelStyle(.titleAndIcon)
     }
 
     private func cellView(model: M3UModel) -> some View {

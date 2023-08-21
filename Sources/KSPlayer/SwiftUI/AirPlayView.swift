@@ -41,4 +41,8 @@ public extension View {
             self
         }
     }
+
+    func modifier(@ViewBuilder transform: (Self) -> some View) -> some View {
+        transform(self)
+    }
 }

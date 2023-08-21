@@ -86,8 +86,7 @@ final class MEPlayerItem {
     }
 
     private static var onceInitial: Void = {
-        var result = SSL_library_init()
-        result = avformat_network_init()
+        var result = avformat_network_init()
         av_log_set_callback { ptr, level, format, args in
             guard let format else {
                 return
