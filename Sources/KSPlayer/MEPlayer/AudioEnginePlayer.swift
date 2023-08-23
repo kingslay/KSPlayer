@@ -158,7 +158,7 @@ public final class AudioEnginePlayer: AudioPlayer, FrameOutput {
         if audioFormat.channelCount > 2 {
             nodes.append(engine.outputNode)
         }
-        engine.connect(nodes: nodes, format: audioFormat)
+        engine.connect(nodes: nodes, format: nil)
         if let audioUnit = engine.outputNode.audioUnit {
             addRenderNotify(audioUnit: audioUnit)
         }
