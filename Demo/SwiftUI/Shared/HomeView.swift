@@ -15,6 +15,11 @@ struct HomeView: View {
 
     var body: some View {
         ScrollView {
+            #if os(tvOS)
+            HStack {
+                toolbarView
+            }
+            #endif
             if showRecentPlayList {
                 Section {
                     ScrollView(.horizontal) {
@@ -31,6 +36,7 @@ struct HomeView: View {
                     }
                     .padding(.horizontal)
                 }
+                .padding()
             }
             Section {
                 LazyVGrid(columns: [GridItem(.adaptive(minimum: MoiveView.width))]) {
@@ -56,9 +62,18 @@ struct HomeView: View {
                 }
                 .padding(.horizontal)
             }
+            .padding()
         }
-        .padding()
-        .toolbar {
+        .searchable(text: $nameFilter)
+        #if !os(tvOS)
+            .toolbar {
+                toolbarView
+            }
+        #endif
+    }
+
+    private var toolbarView: some View {
+        Group {
             Button {
                 appModel.openFileImport = true
             } label: {
@@ -75,6 +90,7 @@ struct HomeView: View {
             #if !os(tvOS)
             .keyboardShortcut("o", modifiers: [.command, .shift])
             #endif
+
             Picker("group filter", selection: $groupFilter) {
                 Text("All ").tag("")
                 ForEach(appModel.groups) { group in
@@ -82,12 +98,10 @@ struct HomeView: View {
                 }
             }
             #if os(tvOS)
-//                    .pickerStyle(.menu)
+            .pickerStyle(.navigationLink)
             #endif
         }
-        #if !os(tvOS)
-        .searchable(text: $nameFilter)
-        #endif
+        .labelStyle(.titleAndIcon)
     }
 }
 
