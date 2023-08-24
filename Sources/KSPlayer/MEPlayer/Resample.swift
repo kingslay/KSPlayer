@@ -304,9 +304,9 @@ public class AudioDescriptor: Equatable {
             commonFormat = .pcmFormatFloat32
             interleaved = false
         }
-        // todo reason: '[[busArray objectAtIndexedSubscript:(NSUInteger)element] setFormat:format error:&nsErr]: returned false,
-//        commonFormat = .pcmFormatFloat32
-        interleaved = isUseAudioRenderer
+        if isUseAudioRenderer {
+            interleaved = isUseAudioRenderer
+        }
         audioFormat = AVAudioFormat(commonFormat: commonFormat, sampleRate: Double(sampleRate), interleaved: interleaved, channelLayout: AVAudioChannelLayout(layoutTag: outChannel.layoutTag)!)
 //        AVAudioChannelLayout(layout: outChannel.layoutTag.channelLayout)
     }
