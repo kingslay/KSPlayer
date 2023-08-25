@@ -172,10 +172,12 @@ class APPModel: ObservableObject {
 
     func content(model: PlayModel) -> some View {
         #if os(macOS)
-        MoiveView(model: model)
-            .onTapGesture {
-                self.openPlayModel = model
-            }
+        Button {
+            self.openPlayModel = model
+        } label: {
+            MoiveView(model: model)
+        }
+        .buttonStyle(.borderless)
         #else
         NavigationLink(value: model) {
             MoiveView(model: model)
