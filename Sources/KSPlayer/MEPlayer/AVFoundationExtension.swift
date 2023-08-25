@@ -187,7 +187,20 @@ extension AVAudioFormat {
     }
 
     var sampleSize: UInt32 {
-        UInt32(av_get_bytes_per_sample(sampleFormat))
+        switch commonFormat {
+        case .pcmFormatFloat32:
+            return isInterleaved ? channelCount * 4 : 4
+        case .pcmFormatFloat64:
+            return isInterleaved ? channelCount * 8 : 8
+        case .pcmFormatInt16:
+            return isInterleaved ? channelCount * 2 : 2
+        case .pcmFormatInt32:
+            return isInterleaved ? channelCount * 4 : 4
+        case .otherFormat:
+            return isInterleaved ? channelCount * 4 : channelCount * 4
+        @unknown default:
+            return isInterleaved ? channelCount * 4 : channelCount * 4
+        }
     }
 
     func toPCMBuffer(frame: AudioFrame) -> AVAudioPCMBuffer? {

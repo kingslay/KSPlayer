@@ -29,6 +29,8 @@ struct SettingView: View {
                 }
             }
         }
+        .preferredColorScheme(.dark)
+        .background(Color.black)
     }
 }
 

@@ -73,7 +73,7 @@ struct PersistenceController {
         privateDesc.setOption(true as NSObject, forKey: NSPersistentHistoryTrackingKey)
         privateDesc.setOption(true as NSObject, forKey: NSPersistentStoreRemoteChangeNotificationPostOptionKey)
         container.persistentStoreDescriptions = [publicDesc, privateDesc]
-        let persistentStoreCoordinator = container.persistentStoreCoordinator
+//        let persistentStoreCoordinator = container.persistentStoreCoordinator
         container.loadPersistentStores { storeDescription, error in
             if let error = error as NSError? {
                 // Replace this implementation with code to handle the error appropriately.

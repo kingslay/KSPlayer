@@ -38,6 +38,11 @@ pod install
 ```
 - Open Demo/Demo.xcworkspace with Xcode.
 
+
+## Testflight
+
+https://testflight.apple.com/join/eNmYbmZN
+
 ## Quick Start
 
 #### CocoaPods

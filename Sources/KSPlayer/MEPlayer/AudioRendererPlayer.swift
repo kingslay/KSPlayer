@@ -84,11 +84,11 @@ public class AudioRendererPlayer: AudioPlayer, FrameOutput {
             }
             self.request()
         }
-        periodicTimeObserver = synchronizer.addPeriodicTimeObserver(forInterval: CMTime(seconds: 1, preferredTimescale: sampleRate), queue: .main) { [weak self] _ in
+        periodicTimeObserver = synchronizer.addPeriodicTimeObserver(forInterval: CMTime(seconds: 1, preferredTimescale: sampleRate), queue: .main) { [weak self] time in
             guard let self else {
                 return
             }
-            self.renderSource?.setAudio(time: self.synchronizer.currentTime())
+            self.renderSource?.setAudio(time: time)
         }
     }
 
@@ -120,8 +120,7 @@ public class AudioRendererPlayer: AudioPlayer, FrameOutput {
             }
             let n = render.data.count
             let sampleCount = CMItemCount(render.numberOfSamples)
-            let sstride = Int(sampleSize * render.channels) / n
-            let dataByteSize = sampleCount * sstride
+            let dataByteSize = sampleCount * Int(sampleSize)
             if dataByteSize > render.dataSize {
                 assertionFailure("dataByteSize: \(dataByteSize),render.dataSize: \(render.dataSize)")
             }
@@ -163,7 +162,7 @@ public class AudioRendererPlayer: AudioPlayer, FrameOutput {
             let sampleSizeArray: [Int]?
             if isInterleaved {
                 sampleSizeEntryCount = 1
-                sampleSizeArray = [sstride]
+                sampleSizeArray = [Int(sampleSize)]
             } else {
                 sampleSizeEntryCount = 0
                 sampleSizeArray = nil

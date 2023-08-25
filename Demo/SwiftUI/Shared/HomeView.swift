@@ -6,7 +6,7 @@ struct HomeView: View {
     @State
     private var nameFilter: String = ""
     @State
-    private var groupFilter: String = ""
+    private var groupFilter: String?
     @Default(\.showRecentPlayList)
     private var showRecentPlayList
 //    @Environment(\.horizontalSizeClass) var horizontalSizeClass
@@ -45,7 +45,7 @@ struct HomeView: View {
                         if !nameFilter.isEmpty {
                             isIncluded = model.name!.contains(nameFilter)
                         }
-                        if !groupFilter.isEmpty {
+                        if let groupFilter {
                             isIncluded = isIncluded && model.group == groupFilter
                         }
                         return isIncluded
@@ -92,9 +92,9 @@ struct HomeView: View {
             #endif
 
             Picker("group filter", selection: $groupFilter) {
-                Text("All ").tag("")
+                Text("All").tag(nil as String?)
                 ForEach(appModel.groups) { group in
-                    Text(group).tag(group)
+                    Text(group).tag(group as String?)
                 }
             }
             #if os(tvOS)
@@ -106,13 +106,20 @@ struct HomeView: View {
 }
 
 struct MoiveView: View {
-    #if os(iOS)
-    static let width = min(KSOptions.sceneSize.width, KSOptions.sceneSize.height) / 2 - 20
-    #elseif os(tvOS)
-    static let width = KSOptions.sceneSize.width / 4 - 150
-    #else
-    static let width = CGFloat(192)
-    #endif
+    static let width: CGFloat = {
+        #if os(iOS)
+        if UIDevice.current.userInterfaceIdiom == .pad {
+            return min(KSOptions.sceneSize.width, KSOptions.sceneSize.height) / 3 - 20
+        } else {
+            return min(KSOptions.sceneSize.width, KSOptions.sceneSize.height) / 2 - 20
+        }
+        #elseif os(tvOS)
+        return KSOptions.sceneSize.width / 4 - 150
+        #else
+        return CGFloat(192)
+        #endif
+    }()
+
     @ObservedObject var model: PlayModel
     var body: some View {
         VStack {
