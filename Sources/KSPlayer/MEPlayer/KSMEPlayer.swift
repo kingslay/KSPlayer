@@ -104,9 +104,9 @@ public class KSMEPlayer: NSObject {
         videoOutput?.renderSource = playerItem
         #if !os(macOS)
         NotificationCenter.default.addObserver(self, selector: #selector(audioRouteChange), name: AVAudioSession.routeChangeNotification, object: AVAudioSession.sharedInstance())
-//        if #available(tvOS 15.0, iOS 15.0, *) {
-//            NotificationCenter.default.addObserver(self, selector: #selector(spatialCapabilityChange), name: AVAudioSession.spatialPlaybackCapabilitiesChangedNotification, object: nil)
-//        }
+        if #available(tvOS 15.0, iOS 15.0, *) {
+            NotificationCenter.default.addObserver(self, selector: #selector(spatialCapabilityChange), name: AVAudioSession.spatialPlaybackCapabilitiesChangedNotification, object: nil)
+        }
         #endif
     }
 
@@ -135,6 +135,20 @@ private extension KSMEPlayer {
         }
     }
 
+    @objc private func spatialCapabilityChange(notification _: Notification) {
+        let audioDescriptor = tracks(mediaType: .audio).first { $0.isEnabled }.flatMap {
+            $0 as? FFmpegAssetTrack
+        }?.audioDescriptor
+        if let audioDescriptor {
+            let audioFormat = audioDescriptor.audioFormat
+            options.setAudioSession(audioDescriptor: audioDescriptor)
+            if audioDescriptor.audioFormat != audioFormat {
+                audioOutput.prepare(audioFormat: audioDescriptor.audioFormat)
+            }
+        }
+    }
+
+    #if !os(macOS)
     @objc private func audioRouteChange(notification: Notification) {
         guard let reason = notification.userInfo?[AVAudioSessionRouteChangeReasonKey] as? UInt else {
             return
@@ -145,10 +159,17 @@ private extension KSMEPlayer {
         }
         let audioDescriptor = tracks(mediaType: .audio).first { $0.isEnabled }.flatMap {
             $0 as? FFmpegAssetTrack
-        }?.audioDescriptor ?? .defaultValue
-        options.setAudioSession(audioDescriptor: audioDescriptor)
+        }?.audioDescriptor
+        if let audioDescriptor {
+            let audioFormat = audioDescriptor.audioFormat
+            options.setAudioSession(audioDescriptor: audioDescriptor)
+            if audioDescriptor.audioFormat != audioFormat {
+                audioOutput.prepare(audioFormat: audioDescriptor.audioFormat)
+            }
+        }
         audioOutput.flush()
     }
+    #endif
 }
 
 extension KSMEPlayer: MEPlayerDelegate {
