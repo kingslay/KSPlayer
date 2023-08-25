@@ -179,8 +179,10 @@ typealias SwrContext = OpaquePointer
 class AudioSwresample: Swresample {
     private var swrContext: SwrContext?
     private var descriptor: AudioDescriptor
+    private var outChannel: AVChannelLayout
     init(audioDescriptor: AudioDescriptor) {
         descriptor = audioDescriptor
+        outChannel = audioDescriptor.outChannel
         _ = setup(descriptor: descriptor)
     }
 
@@ -191,13 +193,14 @@ class AudioSwresample: Swresample {
             shutdown()
             return false
         } else {
+            outChannel = descriptor.outChannel
             return true
         }
     }
 
     func transfer(avframe: UnsafeMutablePointer<AVFrame>) throws -> MEFrame {
         let newDescriptor = AudioDescriptor(frame: avframe.pointee)
-        if !(descriptor == newDescriptor) {
+        if !(descriptor == newDescriptor) || outChannel != descriptor.outChannel {
             newDescriptor.audioFormat(channels: descriptor.audioFormat.channelCount, isUseAudioRenderer: descriptor.audioFormat.isInterleaved)
             if setup(descriptor: newDescriptor) {
                 descriptor = newDescriptor
