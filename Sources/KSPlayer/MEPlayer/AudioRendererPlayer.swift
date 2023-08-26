@@ -102,7 +102,9 @@ public class AudioRendererPlayer: AudioPlayer, FrameOutput {
         }
     }
 
-    func flush() {}
+    func flush() {
+        renderer.flush()
+    }
 
     private func request() {
         guard let desc else {
