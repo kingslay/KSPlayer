@@ -147,7 +147,7 @@ public final class AudioEnginePlayer: AudioPlayer, FrameOutput {
     }
 
     func ceateSourceNode(audioFormat: AVAudioFormat) {
-        if sourceNode?.outputFormat(forBus: 0) == audioFormat {
+        if sourceNode?.inputFormat(forBus: 0) == audioFormat {
             return
         }
         sampleSize = audioFormat.sampleSize

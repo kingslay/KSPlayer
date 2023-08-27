@@ -140,7 +140,6 @@ private extension KSMEPlayer {
             $0 as? FFmpegAssetTrack
         }?.audioDescriptor
         if let audioDescriptor {
-            let audioFormat = audioDescriptor.audioFormat
             audioDescriptor.setAudioSession(isUseAudioRenderer: options.isUseAudioRenderer)
         }
     }
@@ -158,7 +157,6 @@ private extension KSMEPlayer {
             $0 as? FFmpegAssetTrack
         }?.audioDescriptor
         if let audioDescriptor {
-            let audioFormat = audioDescriptor.audioFormat
             audioDescriptor.setAudioSession(isUseAudioRenderer: options.isUseAudioRenderer)
         }
         audioOutput.flush()
@@ -170,10 +168,6 @@ extension KSMEPlayer: MEPlayerDelegate {
     func sourceDidOpened() {
         isReadyToPlay = true
         options.readyTime = CACurrentMediaTime()
-        let audioDescriptor = tracks(mediaType: .audio).first { $0.isEnabled }.flatMap {
-            $0 as? FFmpegAssetTrack
-        }?.audioDescriptor ?? .defaultValue
-        audioDescriptor.setAudioSession(isUseAudioRenderer: options.isUseAudioRenderer)
         let vidoeTracks = tracks(mediaType: .video)
         if vidoeTracks.isEmpty {
             videoOutput = nil
@@ -413,16 +407,6 @@ extension KSMEPlayer: MediaPlayerProtocol {
             let fps = tracks(mediaType: .video).first { $0.isEnabled }.map(\.nominalFrameRate) ?? 24
             if fps != track.nominalFrameRate {
                 videoOutput?.prepare(fps: fps)
-            }
-        }
-        if track.mediaType == .audio {
-            if let audioDescriptor = (track as? FFmpegAssetTrack)?.audioDescriptor {
-                let oldAudioDescriptor = tracks(mediaType: .audio).first { $0.isEnabled }.flatMap {
-                    $0 as? FFmpegAssetTrack
-                }?.audioDescriptor ?? .defaultValue
-                if audioDescriptor != oldAudioDescriptor {
-                    audioDescriptor.setAudioSession(isUseAudioRenderer: options.isUseAudioRenderer)
-                }
             }
         }
         playerItem.select(track: track)
