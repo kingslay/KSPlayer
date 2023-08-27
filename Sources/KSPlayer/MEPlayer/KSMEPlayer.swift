@@ -141,10 +141,7 @@ private extension KSMEPlayer {
         }?.audioDescriptor
         if let audioDescriptor {
             let audioFormat = audioDescriptor.audioFormat
-            options.setAudioSession(audioDescriptor: audioDescriptor)
-            if audioDescriptor.audioFormat != audioFormat {
-                audioOutput.prepare(audioFormat: audioDescriptor.audioFormat)
-            }
+            audioDescriptor.setAudioSession(isUseAudioRenderer: options.isUseAudioRenderer)
         }
     }
 
@@ -162,10 +159,7 @@ private extension KSMEPlayer {
         }?.audioDescriptor
         if let audioDescriptor {
             let audioFormat = audioDescriptor.audioFormat
-            options.setAudioSession(audioDescriptor: audioDescriptor)
-            if audioDescriptor.audioFormat != audioFormat {
-                audioOutput.prepare(audioFormat: audioDescriptor.audioFormat)
-            }
+            audioDescriptor.setAudioSession(isUseAudioRenderer: options.isUseAudioRenderer)
         }
         audioOutput.flush()
     }
@@ -179,7 +173,7 @@ extension KSMEPlayer: MEPlayerDelegate {
         let audioDescriptor = tracks(mediaType: .audio).first { $0.isEnabled }.flatMap {
             $0 as? FFmpegAssetTrack
         }?.audioDescriptor ?? .defaultValue
-        options.setAudioSession(audioDescriptor: audioDescriptor)
+        audioDescriptor.setAudioSession(isUseAudioRenderer: options.isUseAudioRenderer)
         let vidoeTracks = tracks(mediaType: .video)
         if vidoeTracks.isEmpty {
             videoOutput = nil
@@ -187,7 +181,6 @@ extension KSMEPlayer: MEPlayerDelegate {
         let fps = vidoeTracks.first { $0.isEnabled }.map(\.nominalFrameRate) ?? 24
         runInMainqueue { [weak self] in
             guard let self else { return }
-            self.audioOutput.prepare(audioFormat: audioDescriptor.audioFormat)
             self.videoOutput?.prepare(fps: fps, startPlayTime: self.options.startPlayTime)
             self.videoOutput?.play()
             self.delegate?.readyToPlay(player: self)
@@ -428,10 +421,7 @@ extension KSMEPlayer: MediaPlayerProtocol {
                     $0 as? FFmpegAssetTrack
                 }?.audioDescriptor ?? .defaultValue
                 if audioDescriptor != oldAudioDescriptor {
-                    options.setAudioSession(audioDescriptor: audioDescriptor)
-                    if audioDescriptor.audioFormat != oldAudioDescriptor.audioFormat {
-                        audioOutput.prepare(audioFormat: audioDescriptor.audioFormat)
-                    }
+                    audioDescriptor.setAudioSession(isUseAudioRenderer: options.isUseAudioRenderer)
                 }
             }
         }

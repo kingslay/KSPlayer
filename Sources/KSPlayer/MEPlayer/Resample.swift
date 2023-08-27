@@ -201,7 +201,7 @@ class AudioSwresample: Swresample {
     func transfer(avframe: UnsafeMutablePointer<AVFrame>) throws -> MEFrame {
         let newDescriptor = AudioDescriptor(frame: avframe.pointee)
         if !(descriptor == newDescriptor) || outChannel != descriptor.outChannel {
-            newDescriptor.audioFormat(channels: descriptor.audioFormat.channelCount, isUseAudioRenderer: descriptor.audioFormat.isInterleaved)
+            newDescriptor.setAudioSession(isUseAudioRenderer: descriptor.audioFormat.isInterleaved)
             if setup(descriptor: newDescriptor) {
                 descriptor = newDescriptor
             } else {
@@ -215,7 +215,7 @@ class AudioSwresample: Swresample {
         var bufferSize = [Int32(0)]
         // 返回值是有乘以声道，所以不用返回值
         _ = av_samples_get_buffer_size(&bufferSize, channels, outSamples, descriptor.audioFormat.sampleFormat, 1)
-        let frame = AudioFrame(bufferSize: bufferSize[0], channels: UInt32(channels), count: Int(descriptor.audioFormat.isInterleaved ? 1 : channels))
+        let frame = AudioFrame(dataSize: Int(bufferSize[0]), audioFormat: descriptor.audioFormat)
         frame.numberOfSamples = UInt32(swr_convert(swrContext, &frame.data, outSamples, &frameBuffer, numberOfSamples))
         return frame
     }
@@ -271,7 +271,7 @@ public class AudioDescriptor: Equatable {
         lhs.sampleFormat == rhs.sampleFormat && lhs.sampleRate == rhs.sampleRate && lhs.channel == rhs.channel
     }
 
-    public func audioFormat(channels: AVAudioChannelCount, isUseAudioRenderer: Bool) {
+    private func audioFormat(channels: AVAudioChannelCount, isUseAudioRenderer: Bool) {
         if channels != self.channels {
             av_channel_layout_default(&outChannel, Int32(channels))
         }
@@ -312,5 +312,14 @@ public class AudioDescriptor: Equatable {
         }
         audioFormat = AVAudioFormat(commonFormat: commonFormat, sampleRate: Double(sampleRate), interleaved: interleaved, channelLayout: AVAudioChannelLayout(layoutTag: outChannel.layoutTag)!)
 //        AVAudioChannelLayout(layout: outChannel.layoutTag.channelLayout)
+    }
+
+    public func setAudioSession(isUseAudioRenderer: Bool) {
+        #if os(macOS)
+        let channels = AVAudioChannelCount(2)
+        #else
+        let channels = KSOptions.outputNumberOfChannels(channels: channels, isUseAudioRenderer: isUseAudioRenderer)
+        #endif
+        audioFormat(channels: channels, isUseAudioRenderer: isUseAudioRenderer)
     }
 }

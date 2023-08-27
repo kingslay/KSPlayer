@@ -48,12 +48,8 @@ public class AudioRendererPlayer: AudioPlayer, FrameOutput {
     weak var renderSource: OutputRenderSourceDelegate?
     private var periodicTimeObserver: Any?
     private let renderer = AVSampleBufferAudioRenderer()
-    private var desc: CMAudioFormatDescription?
     private let synchronizer = AVSampleBufferRenderSynchronizer()
     private let serializationQueue = DispatchQueue(label: "ks.player.serialization.queue")
-    private var sampleSize = UInt32(MemoryLayout<Float>.size)
-    private var isInterleaved = true
-    private var sampleRate: CMTimeScale = 44100
     var isPaused: Bool {
         synchronizer.rate == 0
     }
@@ -68,14 +64,6 @@ public class AudioRendererPlayer: AudioPlayer, FrameOutput {
 //        }
     }
 
-    func prepare(audioFormat: AVAudioFormat) {
-        renderer.audioTimePitchAlgorithm = audioFormat.channelCount > 2 ? .spectral : .timeDomain
-        sampleSize = audioFormat.sampleSize
-        desc = audioFormat.formatDescription
-        isInterleaved = audioFormat.isInterleaved
-        sampleRate = CMTimeScale(audioFormat.sampleRate)
-    }
-
     func play(time: TimeInterval) {
         synchronizer.setRate(playbackRate, time: CMTime(seconds: time))
         renderer.requestMediaDataWhenReady(on: serializationQueue) { [weak self] in
@@ -84,7 +72,7 @@ public class AudioRendererPlayer: AudioPlayer, FrameOutput {
             }
             self.request()
         }
-        periodicTimeObserver = synchronizer.addPeriodicTimeObserver(forInterval: CMTime(seconds: 1, preferredTimescale: sampleRate), queue: .main) { [weak self] time in
+        periodicTimeObserver = synchronizer.addPeriodicTimeObserver(forInterval: CMTime(seconds: 1, preferredTimescale: 10), queue: .main) { [weak self] time in
             guard let self else {
                 return
             }
@@ -107,19 +95,20 @@ public class AudioRendererPlayer: AudioPlayer, FrameOutput {
     }
 
     private func request() {
-        guard let desc else {
-            return
-        }
-
         while renderer.isReadyForMoreMediaData, !isPaused {
             guard let render = renderSource?.getAudioOutputRender() else {
                 break
             }
+            let audioFormat = render.audioFormat
             var outBlockListBuffer: CMBlockBuffer?
             CMBlockBufferCreateEmpty(allocator: kCFAllocatorDefault, capacity: 0, flags: 0, blockBufferOut: &outBlockListBuffer)
             guard let outBlockListBuffer else {
                 continue
             }
+            renderer.audioTimePitchAlgorithm = audioFormat.channelCount > 2 ? .spectral : .timeDomain
+            let sampleSize = audioFormat.sampleSize
+            let desc = audioFormat.formatDescription
+            let isInterleaved = audioFormat.isInterleaved
             let n = render.data.count
             let sampleCount = CMItemCount(render.numberOfSamples)
             let dataByteSize = sampleCount * Int(sampleSize)

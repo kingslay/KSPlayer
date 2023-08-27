@@ -308,31 +308,6 @@ open class KSOptions {
     }
     #endif
 
-    open func setAudioSession(audioDescriptor: AudioDescriptor) {
-        #if os(macOS)
-        let channels = AVAudioChannelCount(2)
-//        try? AVAudioSession.sharedInstance().setRouteSharingPolicy(.longFormAudio)
-        #else
-        let maximumOutputNumberOfChannels = AVAudioChannelCount(AVAudioSession.sharedInstance().maximumOutputNumberOfChannels)
-        KSLog("[audio] maximumOutputNumberOfChannels: \(maximumOutputNumberOfChannels)")
-        KSOptions.setAudioSession()
-        let isSpatialAudioEnabled = KSOptions.isSpatialAudioEnabled()
-        KSLog("[audio] isSpatialAudioEnabled: \(isSpatialAudioEnabled)")
-        var channels = audioDescriptor.channels
-        if channels > 2 {
-            let minChannels = min(maximumOutputNumberOfChannels, channels)
-            try? AVAudioSession.sharedInstance().setPreferredOutputNumberOfChannels(Int(minChannels))
-            if !(isUseAudioRenderer && isSpatialAudioEnabled) {
-                channels = AVAudioChannelCount(AVAudioSession.sharedInstance().preferredOutputNumberOfChannels)
-            }
-        } else {
-            try? AVAudioSession.sharedInstance().setPreferredOutputNumberOfChannels(2)
-        }
-        KSLog("[audio] preferredOutputNumberOfChannels: \(AVAudioSession.sharedInstance().preferredOutputNumberOfChannels)")
-        #endif
-        audioDescriptor.audioFormat(channels: channels, isUseAudioRenderer: isUseAudioRenderer)
-    }
-
 //    private var lastMediaTime = CACurrentMediaTime()
     open func videoClockSync(main: KSClock, nextVideoTime: TimeInterval) -> ClockProcessType {
         var desire = main.getTime() - videoDelay
@@ -446,6 +421,27 @@ public extension KSOptions {
         } else {
             return false
         }
+    }
+
+    static func outputNumberOfChannels(channels: AVAudioChannelCount, isUseAudioRenderer: Bool) -> AVAudioChannelCount {
+        let maximumOutputNumberOfChannels = AVAudioChannelCount(AVAudioSession.sharedInstance().maximumOutputNumberOfChannels)
+        KSLog("[audio] maximumOutputNumberOfChannels: \(maximumOutputNumberOfChannels)")
+        setAudioSession()
+        let isSpatialAudioEnabled = isSpatialAudioEnabled()
+        KSLog("[audio] isSpatialAudioEnabled: \(isSpatialAudioEnabled)")
+        KSLog("[audio] isUseAudioRenderer: \(isUseAudioRenderer)")
+        var channels = channels
+        if channels > 2 {
+            let minChannels = min(maximumOutputNumberOfChannels, channels)
+            try? AVAudioSession.sharedInstance().setPreferredOutputNumberOfChannels(Int(minChannels))
+            if !(isUseAudioRenderer && isSpatialAudioEnabled) {
+                channels = AVAudioChannelCount(AVAudioSession.sharedInstance().preferredOutputNumberOfChannels)
+            }
+        } else {
+            try? AVAudioSession.sharedInstance().setPreferredOutputNumberOfChannels(2)
+        }
+        KSLog("[audio] preferredOutputNumberOfChannels: \(AVAudioSession.sharedInstance().preferredOutputNumberOfChannels)")
+        return channels
     }
     #endif
 }

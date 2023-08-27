@@ -43,7 +43,6 @@ class FFmpegDecode: DecodeProtocol {
             if result == 0, let avframe = coreFrame {
                 do {
                     var frame = try swresample.transfer(avframe: filter.filter(options: options, inputFrame: avframe, hwFramesCtx: codecContext.pointee.hw_frames_ctx))
-
                     frame.timebase = packet.assetTrack.timebase
 //                frame.timebase = Timebase(avframe.pointee.time_base)
                     frame.size = avframe.pointee.pkt_size
