@@ -199,19 +199,20 @@ final class SubtitleFrame: MEFrame {
 }
 
 final class AudioFrame: MEFrame {
+    let dataSize: Int
+    let audioFormat: AVAudioFormat
     var timebase = Timebase.defaultValue
     var duration: Int64 = 0
     var position: Int64 = 0
     var size: Int32 = 0
     var numberOfSamples: UInt32 = 0
-    let channels: UInt32
-    let dataSize: Int
     var data: [UnsafeMutablePointer<UInt8>?]
-    public init(bufferSize: Int32, channels: UInt32, count: Int) {
-        self.channels = channels
-        dataSize = Int(bufferSize)
+    public init(dataSize: Int, audioFormat: AVAudioFormat) {
+        self.dataSize = dataSize
+        self.audioFormat = audioFormat
+        let count = audioFormat.isInterleaved ? 1 : audioFormat.channelCount
         data = (0 ..< count).map { _ in
-            UnsafeMutablePointer<UInt8>.allocate(capacity: Int(bufferSize))
+            UnsafeMutablePointer<UInt8>.allocate(capacity: dataSize)
         }
     }
 

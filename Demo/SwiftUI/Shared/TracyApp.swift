@@ -111,7 +111,7 @@ class APPModel: ObservableObject {
         }
     }
 
-    @Published var tabSelected: TabBarItem = .Files
+    @Published var tabSelected: TabBarItem = .Home
     @Published var path = NavigationPath()
     @Published var openFileImport = false
     @Published var openURLImport = false
@@ -148,7 +148,6 @@ class APPModel: ObservableObject {
         KSOptions.subtitleDataSouces = [DirectorySubtitleDataSouce(), ShooterSubtitleDataSouce(), AssrtSubtitleDataSouce(token: "5IzWrb2J099vmA96ECQXwdRSe9xdoBUv")]
         if let activeM3UURL {
             addM3U(url: activeM3UURL)
-            tabSelected = .Home
         }
     }
 

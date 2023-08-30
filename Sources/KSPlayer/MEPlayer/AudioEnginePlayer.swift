@@ -17,7 +17,6 @@ protocol AudioPlayer: AnyObject {
     var threshold: Float { get set }
     var expansionRatio: Float { get set }
     var overallGain: Float { get set }
-    func prepare(audioFormat: AVAudioFormat)
     func play(time: TimeInterval)
     func pause()
     func flush()
@@ -80,12 +79,14 @@ public final class AudioEnginePlayer: AudioPlayer, FrameOutput {
     }
 
     private let engine = AVAudioEngine()
+    private var sourceNode: AVAudioSourceNode?
 
 //    private let reverb = AVAudioUnitReverb()
 //    private let nbandEQ = AVAudioUnitEQ()
 //    private let distortion = AVAudioUnitDistortion()
 //    private let delay = AVAudioUnitDelay()
     private let timePitch = AVAudioUnitTimePitch()
+    private var sampleSize = UInt32(MemoryLayout<Float>.size)
     private let dynamicsProcessor = AVAudioUnitEffect(audioComponentDescription:
         AudioComponentDescription(componentType: kAudioUnitType_Effect,
                                   componentSubType: kAudioUnitSubType_DynamicsProcessor,
@@ -93,7 +94,6 @@ public final class AudioEnginePlayer: AudioPlayer, FrameOutput {
                                   componentFlags: 0,
                                   componentFlagsMask: 0))
     private var currentRenderReadOffset = UInt32(0)
-    private var sampleSize = UInt32(MemoryLayout<Float>.size)
     weak var renderSource: OutputRenderSourceDelegate?
     private var currentRender: AudioFrame? {
         didSet {
@@ -134,35 +134,40 @@ public final class AudioEnginePlayer: AudioPlayer, FrameOutput {
         }
     }
 
-    func prepare(audioFormat: AVAudioFormat) {
-        engine.stop()
-        engine.reset()
+    init() {
+        engine.attach(dynamicsProcessor)
+        engine.attach(timePitch)
+        let nodes = [dynamicsProcessor, timePitch, engine.mainMixerNode]
+        engine.connect(nodes: nodes, format: nil)
+        if let audioUnit = engine.outputNode.audioUnit {
+            addRenderNotify(audioUnit: audioUnit)
+        }
+        ceateSourceNode(audioFormat: AVAudioFormat(standardFormatWithSampleRate: 44100, channelLayout: AVAudioChannelLayout(layoutTag: kAudioChannelLayoutTag_Stereo)!))
+        engine.prepare()
+    }
+
+    func ceateSourceNode(audioFormat: AVAudioFormat) {
+        if sourceNode?.inputFormat(forBus: 0) == audioFormat {
+            return
+        }
+        sourceNode = AVAudioSourceNode(format: audioFormat) { [weak self] _, _, frameCount, audioBufferList in
+            self?.audioPlayerShouldInputData(ioData: UnsafeMutableAudioBufferListPointer(audioBufferList), numberOfFrames: frameCount)
+            return noErr
+        }
+        guard let sourceNode else {
+            return
+        }
         sampleSize = audioFormat.sampleSize
         KSLog("[audio] outputFormat AudioFormat: \(audioFormat)")
         if let channelLayout = audioFormat.channelLayout {
             KSLog("[audio] outputFormat tag: \(channelLayout.layoutTag)")
             KSLog("[audio] outputFormat channelDescriptions: \(channelLayout.layout.channelDescriptions)")
         }
-        //        engine.attach(nbandEQ)
-        //        engine.attach(distortion)
-        //        engine.attach(delay)
-        let sourceNode = AVAudioSourceNode(format: audioFormat) { [weak self] _, _, frameCount, audioBufferList in
-            self?.audioPlayerShouldInputData(ioData: UnsafeMutableAudioBufferListPointer(audioBufferList), numberOfFrames: frameCount)
-            return noErr
-        }
-
         engine.attach(sourceNode)
-        engine.attach(dynamicsProcessor)
-        engine.attach(timePitch)
-        var nodes = [sourceNode, dynamicsProcessor, timePitch, engine.mainMixerNode]
+        engine.connect(sourceNode, to: dynamicsProcessor, format: nil)
         if audioFormat.channelCount > 2 {
-            nodes.append(engine.outputNode)
+            engine.connect(engine.mainMixerNode, to: engine.outputNode, format: nil)
         }
-        engine.connect(nodes: nodes, format: nil)
-        if let audioUnit = engine.outputNode.audioUnit {
-            addRenderNotify(audioUnit: audioUnit)
-        }
-        engine.prepare()
     }
 
     func play(time _: TimeInterval) {
@@ -225,6 +230,15 @@ public final class AudioEnginePlayer: AudioPlayer, FrameOutput {
             guard residueLinesize > 0 else {
                 self.currentRender = nil
                 continue
+            }
+            if sourceNode?.inputFormat(forBus: 0) != currentRender.audioFormat {
+                runInMainqueue { [weak self] in
+                    guard let self else {
+                        return
+                    }
+                    self.ceateSourceNode(audioFormat: currentRender.audioFormat)
+                }
+                return
             }
             let framesToCopy = min(numberOfSamples, residueLinesize)
             let bytesToCopy = Int(framesToCopy * sampleSize)

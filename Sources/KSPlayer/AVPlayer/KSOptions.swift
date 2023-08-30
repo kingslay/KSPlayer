@@ -108,8 +108,8 @@ open class KSOptions {
         // 开启这个，纯ipv6地址会无法播放。
 //        formatContextOptions["reconnect_at_eof"] = 1
         formatContextOptions["reconnect_streamed"] = 1
-        formatContextOptions["reconnect_on_network_error"] = 1
-
+        // 开启这个，会导致tcp Failed to resolve hostname 还会一直重试
+//        formatContextOptions["reconnect_on_network_error"] = 1
         // There is total different meaning for 'listen_timeout' option in rtmp
         // set 'listen_timeout' = -1 for rtmp、rtsp
 //        formatContextOptions["listen_timeout"] = 3
@@ -308,31 +308,6 @@ open class KSOptions {
     }
     #endif
 
-    open func setAudioSession(audioDescriptor: AudioDescriptor) {
-        #if os(macOS)
-        let channels = AVAudioChannelCount(2)
-//        try? AVAudioSession.sharedInstance().setRouteSharingPolicy(.longFormAudio)
-        #else
-        let maximumOutputNumberOfChannels = AVAudioChannelCount(AVAudioSession.sharedInstance().maximumOutputNumberOfChannels)
-        KSLog("[audio] maximumOutputNumberOfChannels: \(maximumOutputNumberOfChannels)")
-        KSOptions.setAudioSession()
-        let isSpatialAudioEnabled = KSOptions.isSpatialAudioEnabled()
-        KSLog("[audio] isSpatialAudioEnabled: \(isSpatialAudioEnabled)")
-        var channels = audioDescriptor.channels
-        if channels > 2 {
-            let minChannels = min(maximumOutputNumberOfChannels, channels)
-            try? AVAudioSession.sharedInstance().setPreferredOutputNumberOfChannels(Int(minChannels))
-            if !(isUseAudioRenderer && isSpatialAudioEnabled) {
-                channels = AVAudioChannelCount(AVAudioSession.sharedInstance().preferredOutputNumberOfChannels)
-            }
-        } else {
-            try? AVAudioSession.sharedInstance().setPreferredOutputNumberOfChannels(2)
-        }
-        KSLog("[audio] preferredOutputNumberOfChannels: \(AVAudioSession.sharedInstance().preferredOutputNumberOfChannels)")
-        #endif
-        audioDescriptor.audioFormat(channels: channels, isUseAudioRenderer: isUseAudioRenderer)
-    }
-
 //    private var lastMediaTime = CACurrentMediaTime()
     open func videoClockSync(main: KSClock, nextVideoTime: TimeInterval) -> ClockProcessType {
         var desire = main.getTime() - videoDelay
@@ -446,6 +421,27 @@ public extension KSOptions {
         } else {
             return false
         }
+    }
+
+    static func outputNumberOfChannels(channels: AVAudioChannelCount, isUseAudioRenderer: Bool) -> AVAudioChannelCount {
+        let maximumOutputNumberOfChannels = AVAudioChannelCount(AVAudioSession.sharedInstance().maximumOutputNumberOfChannels)
+        KSLog("[audio] maximumOutputNumberOfChannels: \(maximumOutputNumberOfChannels)")
+        setAudioSession()
+        let isSpatialAudioEnabled = isSpatialAudioEnabled()
+        KSLog("[audio] isSpatialAudioEnabled: \(isSpatialAudioEnabled)")
+        KSLog("[audio] isUseAudioRenderer: \(isUseAudioRenderer)")
+        var channels = channels
+        if channels > 2 {
+            let minChannels = min(maximumOutputNumberOfChannels, channels)
+            try? AVAudioSession.sharedInstance().setPreferredOutputNumberOfChannels(Int(minChannels))
+            if !(isUseAudioRenderer && isSpatialAudioEnabled) {
+                channels = AVAudioChannelCount(AVAudioSession.sharedInstance().preferredOutputNumberOfChannels)
+            }
+        } else {
+            try? AVAudioSession.sharedInstance().setPreferredOutputNumberOfChannels(2)
+        }
+        KSLog("[audio] preferredOutputNumberOfChannels: \(AVAudioSession.sharedInstance().preferredOutputNumberOfChannels)")
+        return channels
     }
     #endif
 }

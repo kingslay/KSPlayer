@@ -136,15 +136,8 @@ private extension KSMEPlayer {
     }
 
     @objc private func spatialCapabilityChange(notification _: Notification) {
-        let audioDescriptor = tracks(mediaType: .audio).first { $0.isEnabled }.flatMap {
-            $0 as? FFmpegAssetTrack
-        }?.audioDescriptor
-        if let audioDescriptor {
-            let audioFormat = audioDescriptor.audioFormat
-            options.setAudioSession(audioDescriptor: audioDescriptor)
-            if audioDescriptor.audioFormat != audioFormat {
-                audioOutput.prepare(audioFormat: audioDescriptor.audioFormat)
-            }
+        tracks(mediaType: .audio).forEach { track in
+            (track as? FFmpegAssetTrack)?.audioDescriptor?.setAudioSession(isUseAudioRenderer: options.isUseAudioRenderer)
         }
     }
 
@@ -157,15 +150,8 @@ private extension KSMEPlayer {
         guard routeChangeReason == .newDeviceAvailable || routeChangeReason == .oldDeviceUnavailable else {
             return
         }
-        let audioDescriptor = tracks(mediaType: .audio).first { $0.isEnabled }.flatMap {
-            $0 as? FFmpegAssetTrack
-        }?.audioDescriptor
-        if let audioDescriptor {
-            let audioFormat = audioDescriptor.audioFormat
-            options.setAudioSession(audioDescriptor: audioDescriptor)
-            if audioDescriptor.audioFormat != audioFormat {
-                audioOutput.prepare(audioFormat: audioDescriptor.audioFormat)
-            }
+        tracks(mediaType: .audio).forEach { track in
+            (track as? FFmpegAssetTrack)?.audioDescriptor?.setAudioSession(isUseAudioRenderer: options.isUseAudioRenderer)
         }
         audioOutput.flush()
     }
@@ -176,10 +162,6 @@ extension KSMEPlayer: MEPlayerDelegate {
     func sourceDidOpened() {
         isReadyToPlay = true
         options.readyTime = CACurrentMediaTime()
-        let audioDescriptor = tracks(mediaType: .audio).first { $0.isEnabled }.flatMap {
-            $0 as? FFmpegAssetTrack
-        }?.audioDescriptor ?? .defaultValue
-        options.setAudioSession(audioDescriptor: audioDescriptor)
         let vidoeTracks = tracks(mediaType: .video)
         if vidoeTracks.isEmpty {
             videoOutput = nil
@@ -187,7 +169,6 @@ extension KSMEPlayer: MEPlayerDelegate {
         let fps = vidoeTracks.first { $0.isEnabled }.map(\.nominalFrameRate) ?? 24
         runInMainqueue { [weak self] in
             guard let self else { return }
-            self.audioOutput.prepare(audioFormat: audioDescriptor.audioFormat)
             self.videoOutput?.prepare(fps: fps, startPlayTime: self.options.startPlayTime)
             self.videoOutput?.play()
             self.delegate?.readyToPlay(player: self)
@@ -315,6 +296,8 @@ extension KSMEPlayer: MediaPlayerProtocol {
 
     public var duration: TimeInterval { playerItem.duration }
 
+    public var fileSize: Double { playerItem.fileSize }
+
     public var seekable: Bool { playerItem.seekable }
 
     public func seek(time: TimeInterval, completion: @escaping ((Bool) -> Void)) {
@@ -420,19 +403,6 @@ extension KSMEPlayer: MediaPlayerProtocol {
             let fps = tracks(mediaType: .video).first { $0.isEnabled }.map(\.nominalFrameRate) ?? 24
             if fps != track.nominalFrameRate {
                 videoOutput?.prepare(fps: fps)
-            }
-        }
-        if track.mediaType == .audio {
-            if let audioDescriptor = (track as? FFmpegAssetTrack)?.audioDescriptor {
-                let oldAudioDescriptor = tracks(mediaType: .audio).first { $0.isEnabled }.flatMap {
-                    $0 as? FFmpegAssetTrack
-                }?.audioDescriptor ?? .defaultValue
-                if audioDescriptor != oldAudioDescriptor {
-                    options.setAudioSession(audioDescriptor: audioDescriptor)
-                    if audioDescriptor.audioFormat != oldAudioDescriptor.audioFormat {
-                        audioOutput.prepare(audioFormat: audioDescriptor.audioFormat)
-                    }
-                }
             }
         }
         playerItem.select(track: track)

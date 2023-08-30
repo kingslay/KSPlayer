@@ -54,6 +54,7 @@ final class MEPlayerItem {
     private var seekTime = TimeInterval(0)
     private(set) var startTime = TimeInterval(0)
     private(set) var duration: TimeInterval = 0
+    private(set) var fileSize: Double = 0
     private(set) var naturalSize = CGSize.zero
     private var error: NSError? {
         didSet {
@@ -244,10 +245,11 @@ extension MEPlayerItem {
         }
         videoClock.positionTime = startTime
         audioClock.positionTime = startTime
-        duration = TimeInterval(max(formatCtx.pointee.duration, 0) / Int64(AV_TIME_BASE))
+        duration = TimeInterval(max(formatCtx.pointee.duration, 0) * 100 / Int64(AV_TIME_BASE)) / 100.0
         if duration > startTime {
             duration -= startTime
         }
+        fileSize = Double(formatCtx.pointee.bit_rate) * duration / 8
         createCodec(formatCtx: formatCtx)
         if let outputURL = options.outputURL {
             openOutput(url: outputURL)
