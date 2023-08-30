@@ -296,6 +296,8 @@ extension KSMEPlayer: MediaPlayerProtocol {
 
     public var duration: TimeInterval { playerItem.duration }
 
+    public var fileSize: Double { playerItem.fileSize }
+
     public var seekable: Bool { playerItem.seekable }
 
     public func seek(time: TimeInterval, completion: @escaping ((Bool) -> Void)) {

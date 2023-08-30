@@ -11,31 +11,36 @@ import Libavformat
 public class FFmpegAssetTrack: MediaPlayerTrack {
     public private(set) var trackID: Int32 = 0
     public var name: String = ""
+    public let mediaSubType: CMFormatDescription.MediaSubType
     public private(set) var language: String?
     public private(set) var nominalFrameRate: Float = 0
     public private(set) var bitRate: Int64 = 0
-    public private(set) var rotation: Int16 = 0
     public private(set) var description: String
     public let mediaType: AVFoundation.AVMediaType
+    public let formatName: String?
+    private var stream: UnsafeMutablePointer<AVStream>?
+    var startTime = TimeInterval(0)
+    var codecpar: AVCodecParameters
+    var timebase: Timebase = .defaultValue
+    // audio
+    public let audioStreamBasicDescription: AudioStreamBasicDescription?
+    public let audioDescriptor: AudioDescriptor?
+    // subtitle
+    public let isImageSubtitle: Bool
+    public var delay: TimeInterval = 0
+    var subtitle: SyncPlayerItemTrack<SubtitleFrame>?
+    // video
+    public private(set) var rotation: Int16 = 0
     public let naturalSize: CGSize
     public let depth: Int32
     public let fullRangeVideo: Bool
     public let colorPrimaries: String?
     public let transferFunction: String?
     public let yCbCrMatrix: String?
-    public let mediaSubType: CMFormatDescription.MediaSubType
     public var dovi: DOVIDecoderConfigurationRecord?
-    public let audioStreamBasicDescription: AudioStreamBasicDescription?
     public let fieldOrder: FFmpegFieldOrder
-    public let isImageSubtitle: Bool
-    public var delay: TimeInterval = 0
-    private var stream: UnsafeMutablePointer<AVStream>?
-    let audioDescriptor: AudioDescriptor?
-    var startTime = TimeInterval(0)
-    var codecpar: AVCodecParameters
-    var timebase: Timebase = .defaultValue
-    var subtitle: SyncPlayerItemTrack<SubtitleFrame>?
     var closedCaptionsTrack: FFmpegAssetTrack?
+
     convenience init?(stream: UnsafeMutablePointer<AVStream>) {
         let codecpar = stream.pointee.codecpar.pointee
         self.init(codecpar: codecpar)
@@ -122,24 +127,31 @@ public class FFmpegAssetTrack: MediaPlayerTrack {
             audioStreamBasicDescription = AudioStreamBasicDescription(mSampleRate: Float64(codecpar.sample_rate), mFormatID: codecpar.codec_id.mediaSubType.rawValue, mFormatFlags: formatFlags, mBytesPerPacket: bytesPerSample * channelsPerFrame, mFramesPerPacket: 1, mBytesPerFrame: bytesPerSample * channelsPerFrame, mChannelsPerFrame: channelsPerFrame, mBitsPerChannel: bytesPerSample * 8, mReserved: 0)
             description += ", \(codecpar.sample_rate)Hz"
             description += ", \(codecpar.ch_layout.description)"
-            if let name = av_get_sample_fmt_name(AVSampleFormat(rawValue: codecpar.format)) {
-                let fmt = String(cString: name)
-                description += ", \(fmt)"
+            if let name = av_get_sample_fmt_name(sampleFormat) {
+                formatName = String(cString: name)
+            } else {
+                formatName = nil
             }
         } else if codecpar.codec_type == AVMEDIA_TYPE_VIDEO {
             audioDescriptor = nil
             mediaType = .video
             audioStreamBasicDescription = nil
-            if let name = av_get_pix_fmt_name(AVPixelFormat(rawValue: codecpar.format)) {
-                description += ", \(String(cString: name))"
+            if let name = av_get_pix_fmt_name(format) {
+                formatName = String(cString: name)
+            } else {
+                formatName = nil
             }
             description += ", \(Int(naturalSize.width))x\(Int(naturalSize.height))"
         } else if codecpar.codec_type == AVMEDIA_TYPE_SUBTITLE {
             mediaType = .subtitle
             audioStreamBasicDescription = nil
             audioDescriptor = nil
+            formatName = nil
         } else {
             return nil
+        }
+        if let formatName {
+            description += ", \(formatName)"
         }
         if codecpar.bits_per_raw_sample != 0 {
             description += ", (\(codecpar.bits_per_raw_sample) bit)"

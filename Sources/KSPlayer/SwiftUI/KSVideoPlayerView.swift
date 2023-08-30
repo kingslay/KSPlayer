@@ -470,6 +470,9 @@ struct VideoSettingView: View {
                 }
                 TextField("Sutitle delay", value: $subtitleModel.subtitleDelay, format: .number)
             }
+            if let fileSize = config.playerLayer?.player.fileSize, fileSize > 0 {
+                Text("File Size \(String(format: "%.1f", fileSize / 1_000_000))MB")
+            }
         }
         .padding()
         #if os(macOS)
