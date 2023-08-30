@@ -108,8 +108,8 @@ open class KSOptions {
         // 开启这个，纯ipv6地址会无法播放。
 //        formatContextOptions["reconnect_at_eof"] = 1
         formatContextOptions["reconnect_streamed"] = 1
-        formatContextOptions["reconnect_on_network_error"] = 1
-
+        // 开启这个，会导致tcp Failed to resolve hostname 还会一直重试
+//        formatContextOptions["reconnect_on_network_error"] = 1
         // There is total different meaning for 'listen_timeout' option in rtmp
         // set 'listen_timeout' = -1 for rtmp、rtsp
 //        formatContextOptions["listen_timeout"] = 3

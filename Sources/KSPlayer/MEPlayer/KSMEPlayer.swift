@@ -136,11 +136,8 @@ private extension KSMEPlayer {
     }
 
     @objc private func spatialCapabilityChange(notification _: Notification) {
-        let audioDescriptor = tracks(mediaType: .audio).first { $0.isEnabled }.flatMap {
-            $0 as? FFmpegAssetTrack
-        }?.audioDescriptor
-        if let audioDescriptor {
-            audioDescriptor.setAudioSession(isUseAudioRenderer: options.isUseAudioRenderer)
+        tracks(mediaType: .audio).forEach { track in
+            (track as? FFmpegAssetTrack)?.audioDescriptor?.setAudioSession(isUseAudioRenderer: options.isUseAudioRenderer)
         }
     }
 
@@ -153,11 +150,8 @@ private extension KSMEPlayer {
         guard routeChangeReason == .newDeviceAvailable || routeChangeReason == .oldDeviceUnavailable else {
             return
         }
-        let audioDescriptor = tracks(mediaType: .audio).first { $0.isEnabled }.flatMap {
-            $0 as? FFmpegAssetTrack
-        }?.audioDescriptor
-        if let audioDescriptor {
-            audioDescriptor.setAudioSession(isUseAudioRenderer: options.isUseAudioRenderer)
+        tracks(mediaType: .audio).forEach { track in
+            (track as? FFmpegAssetTrack)?.audioDescriptor?.setAudioSession(isUseAudioRenderer: options.isUseAudioRenderer)
         }
         audioOutput.flush()
     }

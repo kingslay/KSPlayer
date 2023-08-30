@@ -150,18 +150,18 @@ public final class AudioEnginePlayer: AudioPlayer, FrameOutput {
         if sourceNode?.inputFormat(forBus: 0) == audioFormat {
             return
         }
-        sampleSize = audioFormat.sampleSize
-        KSLog("[audio] outputFormat AudioFormat: \(audioFormat)")
-        if let channelLayout = audioFormat.channelLayout {
-            KSLog("[audio] outputFormat tag: \(channelLayout.layoutTag)")
-            KSLog("[audio] outputFormat channelDescriptions: \(channelLayout.layout.channelDescriptions)")
-        }
         sourceNode = AVAudioSourceNode(format: audioFormat) { [weak self] _, _, frameCount, audioBufferList in
             self?.audioPlayerShouldInputData(ioData: UnsafeMutableAudioBufferListPointer(audioBufferList), numberOfFrames: frameCount)
             return noErr
         }
         guard let sourceNode else {
             return
+        }
+        sampleSize = audioFormat.sampleSize
+        KSLog("[audio] outputFormat AudioFormat: \(audioFormat)")
+        if let channelLayout = audioFormat.channelLayout {
+            KSLog("[audio] outputFormat tag: \(channelLayout.layoutTag)")
+            KSLog("[audio] outputFormat channelDescriptions: \(channelLayout.layout.channelDescriptions)")
         }
         engine.attach(sourceNode)
         engine.connect(sourceNode, to: dynamicsProcessor, format: nil)
