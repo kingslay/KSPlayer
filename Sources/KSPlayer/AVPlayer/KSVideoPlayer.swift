@@ -139,6 +139,7 @@ extension KSVideoPlayer: UIViewRepresentable {
             didSet {
                 oldValue?.delegate = nil
                 oldValue?.pause()
+                subtitleModel.url = nil
                 selectedAudioTrack = nil
                 selectedVideoTrack = nil
                 audioTracks.removeAll()
