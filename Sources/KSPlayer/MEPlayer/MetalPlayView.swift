@@ -35,9 +35,8 @@ public final class MetalPlayView: UIView {
 
     private let metalView = MetalView()
     public weak var displayLayerDelegate: DisplayLayerDelegate?
-    init(options: KSOptions, displayLayerDelegate: DisplayLayerDelegate? = nil) {
+    init(options: KSOptions) {
         self.options = options
-        self.displayLayerDelegate = displayLayerDelegate
         super.init(frame: .zero)
         addSubview(displayView)
         addSubview(metalView)
@@ -135,6 +134,10 @@ public final class MetalPlayView: UIView {
     public func readNextFrame() {
         draw(force: true)
     }
+
+//    deinit {
+//        print()
+//    }
 }
 
 extension MetalPlayView {
@@ -395,6 +398,9 @@ class CADisplayLink {
     public func invalidate() {
         isPaused = true
         runloop = nil
+        CVDisplayLinkSetOutputHandler(displayLink) { _, _, _, _, _ in
+            kCVReturnError
+        }
     }
 }
 #endif
