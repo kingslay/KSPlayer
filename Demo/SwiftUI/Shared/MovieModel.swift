@@ -110,8 +110,8 @@ extension M3UModel {
                 return model
             }
         } ?? []
-        if count != Int16(models.count) {
-            count = Int16(models.count)
+        if count != Int32(models.count) {
+            count = Int32(models.count)
         }
         if viewContext.hasChanges {
             Task { @MainActor in

@@ -19,7 +19,15 @@ public class KSMEPlayer: NSObject {
     private let audioOutput: AudioPlayer & FrameOutput
     private var options: KSOptions
     private var bufferingCountDownTimer: Timer?
-    public private(set) var videoOutput: MetalPlayView?
+    public private(set) var videoOutput: MetalPlayView? {
+        didSet {
+            oldValue?.invalidate()
+            runInMainqueue {
+                oldValue?.removeFromSuperview()
+            }
+        }
+    }
+
     public private(set) var bufferingProgress = 0 {
         didSet {
             delegate?.changeBuffering(player: self, progress: bufferingProgress)
@@ -102,6 +110,7 @@ public class KSMEPlayer: NSObject {
         playerItem.delegate = self
         audioOutput.renderSource = playerItem
         videoOutput?.renderSource = playerItem
+        videoOutput?.displayLayerDelegate = self
         #if !os(macOS)
         NotificationCenter.default.addObserver(self, selector: #selector(audioRouteChange), name: AVAudioSession.routeChangeNotification, object: AVAudioSession.sharedInstance())
         if #available(tvOS 15.0, iOS 15.0, *) {
@@ -274,6 +283,7 @@ extension KSMEPlayer: MediaPlayerProtocol {
             videoOutput = nil
         } else if videoOutput == nil {
             videoOutput = MetalPlayView(options: options)
+            videoOutput?.displayLayerDelegate = self
         }
         self.options = options
         playerItem.delegate = self

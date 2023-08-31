@@ -321,7 +321,8 @@ open class SubtitleModel: ObservableObject {
 
     private var subtitleDataSouces: [SubtitleDataSouce] = KSOptions.subtitleDataSouces
     public private(set) var subtitleInfos = [any SubtitleInfo]()
-    @Published public private(set) var part: SubtitlePart?
+    @Published
+    public private(set) var part: SubtitlePart?
     public var subtitleDelay = 0.0 // s
     public var url: URL? {
         didSet {
@@ -329,10 +330,15 @@ open class SubtitleModel: ObservableObject {
             subtitleDataSouces.forEach { datasouce in
                 addSubtitle(dataSouce: datasouce)
             }
+            DispatchQueue.main.async { [weak self] in
+                self?.part = nil
+                self?.selectedSubtitleInfo = nil
+            }
         }
     }
 
-    @Published public var selectedSubtitleInfo: (any SubtitleInfo)? {
+    @Published
+    public var selectedSubtitleInfo: (any SubtitleInfo)? {
         didSet {
             oldValue?.subtitle(isEnabled: false)
             selectedSubtitleInfo?.subtitle(isEnabled: true)

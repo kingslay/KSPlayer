@@ -28,7 +28,7 @@ public class FFmpegAssetTrack: MediaPlayerTrack {
     // subtitle
     public let isImageSubtitle: Bool
     public var delay: TimeInterval = 0
-    var subtitle: SyncPlayerItemTrack<SubtitleFrame>?
+    weak var subtitle: SyncPlayerItemTrack<SubtitleFrame>?
     // video
     public private(set) var rotation: Int16 = 0
     public let naturalSize: CGSize
