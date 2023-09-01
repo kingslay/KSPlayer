@@ -357,59 +357,59 @@ public extension URL {
     }
 
     func parsePlaylist() async throws -> [(String, URL, [String: String])] {
-        guard let data = try? await data(), let string = String(data: data, encoding: .utf8) else {
+        guard let data = try? await data(), var string = String(data: data, encoding: .utf8) else {
             return []
         }
-        /*
-         #EXTINF:-1 tvg-id="ExampleTV.ua",Example TV (720p) [Not 24/7]
-         #EXTVLCOPT:http-referrer=http://example.com/
-         #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64)
-         http://example.com/stream.m3u8
-         */
-        return string.components(separatedBy: "#EXTINF:").compactMap { content -> (String, URL, [String: String])? in
-            let content = content.replacingOccurrences(of: "\r\n", with: "\n")
-            let array = content.split(separator: "\n")
-            guard array.count > 1, let last = array.last, var url = URL(string: String(last)) else {
-                return nil
+        string = string.replacingOccurrences(of: "\r\n", with: "\n")
+        let scanner = Scanner(string: string)
+        var entrys = [(String, URL, [String: String])]()
+        _ = scanner.scanString("#EXTM3U")
+        while !scanner.isAtEnd {
+            if let entry = parseM3U(scanner: scanner) {
+                entrys.append(entry)
             }
-            if url.path.hasPrefix("./") {
-                url = self.deletingLastPathComponent().appendingPathComponent(url.path).standardized
-            }
-            let infos = array[0].split(separator: ",")
-            let name: String
-            if infos.count > 1, let last = infos.last {
-                name = String(last)
-            } else {
-                name = url.lastPathComponent
-            }
-            var extinf = [String: String]()
-            let prefix = "#EXTVLCOPT:"
-            for i in 1 ..< (array.count - 1) {
-                let str = array[i]
-                if str.hasPrefix(prefix) {
-                    let keyValue = str.dropFirst(prefix.count).split(separator: "=")
-                    if keyValue.count == 2 {
-                        extinf[String(keyValue[0])] = String(keyValue[1])
-                    }
-                }
-            }
-            let tvgString: Substring
-            if infos.count > 2 {
-                extinf["duration"] = String(infos[0])
-                tvgString = infos[1]
-            } else {
-                tvgString = infos[0]
-            }
-            tvgString.split(separator: " ").forEach { str in
-                let keyValue = str.split(separator: "=")
-                if keyValue.count == 2 {
-                    extinf[String(keyValue[0])] = keyValue[1].trimmingCharacters(in: CharacterSet(charactersIn: #"""#))
-                } else {
-                    extinf["duration"] = String(keyValue[0])
-                }
-            }
-            return (name, url, extinf)
         }
+        return entrys
+    }
+
+    /*
+     #EXTINF:-1 tvg-id="ExampleTV.ua" tvg-logo="https://image.com" group-title="test test", Example TV (720p) [Not 24/7]
+     #EXTVLCOPT:http-referrer=http://example.com/
+     #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64)
+     http://example.com/stream.m3u8
+     */
+    private func parseM3U(scanner: Scanner) -> (String, URL, [String: String])? {
+        _ = scanner.scanString("#EXTINF:")
+        var extinf = [String: String]()
+        if let duration = scanner.scanDouble() {
+            extinf["duration"] = String(duration)
+        }
+        while scanner.scanString(",") == nil {
+            let key = scanner.scanUpToString("=")
+            _ = scanner.scanString("=\"")
+            let value = scanner.scanUpToString("\"")
+            _ = scanner.scanString("\"")
+            if let key, let value {
+                extinf[key] = value
+            }
+        }
+        let title = scanner.scanUpToString("\n")
+        if scanner.scanString("#EXTVLCOPT:") != nil {
+            let key = scanner.scanUpToString("=")
+            _ = scanner.scanString("=")
+            let value = scanner.scanUpToString("\n")
+            if let key, let value {
+                extinf[key] = value
+            }
+        }
+        let urlString = scanner.scanUpToString("\n")
+        if let urlString, var url = URL(string: urlString) {
+            if url.path.hasPrefix("./") {
+                url = deletingLastPathComponent().appendingPathComponent(url.path).standardized
+            }
+            return (title ?? url.lastPathComponent, url, extinf)
+        }
+        return nil
     }
 
     func data(userAgent: String? = nil) async throws -> Data {

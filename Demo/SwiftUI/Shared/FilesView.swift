@@ -138,8 +138,15 @@ struct M3UView: View {
 }
 
 struct AddM3UView: View {
-    @State private var url = ""
-    @State private var name = ""
+    #if DEBUG && targetEnvironment(simulator) && os(tvOS)
+    @State
+    private var url = "https://raw.githubusercontent.com/kingslay/KSPlayer/develop/Tests/KSPlayerTests/test.m3u"
+    #else
+    @State
+    private var url = ""
+    #endif
+    @State
+    private var name = ""
     @EnvironmentObject private var appModel: APPModel
     @Environment(\.dismiss) private var dismiss
     var body: some View {

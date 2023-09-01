@@ -215,6 +215,10 @@ extension AVAudioFormat {
         }
         return pcmBuffer
     }
+
+    func isChannelEqual(_ object: AVAudioFormat) -> Bool {
+        sampleRate == object.sampleRate && channelCount == object.channelCount && commonFormat == object.commonFormat && sampleRate == object.sampleRate && isInterleaved == object.isInterleaved
+    }
 }
 
 let layoutMapTuple =

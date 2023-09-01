@@ -17,7 +17,8 @@ public struct KSVideoPlayerView: View {
     private var overView = false
     @State
     private var showDropDownMenu = false
-    private let playerCoordinator = KSVideoPlayer.Coordinator()
+    @StateObject
+    private var playerCoordinator = KSVideoPlayer.Coordinator()
     @Environment(\.dismiss)
     private var dismiss
     @FocusState

@@ -145,6 +145,7 @@ private extension KSMEPlayer {
     }
 
     @objc private func spatialCapabilityChange(notification _: Notification) {
+        KSLog("[audio] spatialCapabilityChange")
         tracks(mediaType: .audio).forEach { track in
             (track as? FFmpegAssetTrack)?.audioDescriptor?.setAudioSession(isUseAudioRenderer: options.isUseAudioRenderer)
         }
@@ -152,6 +153,7 @@ private extension KSMEPlayer {
 
     #if !os(macOS)
     @objc private func audioRouteChange(notification: Notification) {
+        KSLog("[audio] audioRouteChange")
         guard let reason = notification.userInfo?[AVAudioSessionRouteChangeReasonKey] as? UInt else {
             return
         }
@@ -517,7 +519,10 @@ extension KSMEPlayer: AVPlaybackCoordinatorPlaybackControlDelegate {
 extension KSMEPlayer: DisplayLayerDelegate {
     public func change(displayLayer: AVSampleBufferDisplayLayer) {
         if #available(iOS 15.0, tvOS 15.0, macOS 12.0, *) {
-            pipController?.contentSource = AVPictureInPictureController.ContentSource(sampleBufferDisplayLayer: displayLayer, playbackDelegate: self)
+            let contentSource = AVPictureInPictureController.ContentSource(sampleBufferDisplayLayer: displayLayer, playbackDelegate: self)
+            _pipController = KSPictureInPictureController(contentSource: contentSource)
+            // 更改contentSource会直接crash
+//            pipController?.contentSource = contentSource
         }
     }
 }

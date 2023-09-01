@@ -435,11 +435,12 @@ public extension KSOptions {
             let minChannels = min(maximumOutputNumberOfChannels, channels)
             try? AVAudioSession.sharedInstance().setPreferredOutputNumberOfChannels(Int(minChannels))
             if !(isUseAudioRenderer && isSpatialAudioEnabled) {
-                channels = AVAudioChannelCount(AVAudioSession.sharedInstance().preferredOutputNumberOfChannels)
+                channels = AVAudioChannelCount(AVAudioSession.sharedInstance().outputNumberOfChannels)
             }
         } else {
             try? AVAudioSession.sharedInstance().setPreferredOutputNumberOfChannels(2)
         }
+        KSLog("[audio] outputNumberOfChannels: \(AVAudioSession.sharedInstance().outputNumberOfChannels)")
         KSLog("[audio] preferredOutputNumberOfChannels: \(AVAudioSession.sharedInstance().preferredOutputNumberOfChannels)")
         return channels
     }
@@ -524,6 +525,10 @@ public class FileLog: LogHandler {
             fileHandle.write(data)
         }
     }
+}
+
+@inlinable public func KSLog(_ error: @autoclosure () -> Error) {
+    KSLog(level: .error, error().localizedDescription)
 }
 
 @inlinable public func KSLog(level: LogLevel = KSOptions.logLevel, _ message: @autoclosure () -> CustomStringConvertible, file: String = #file, function: String = #function, line: UInt = #line) {
