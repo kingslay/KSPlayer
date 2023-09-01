@@ -147,6 +147,10 @@ public final class AudioEnginePlayer: AudioPlayer, FrameOutput {
         if sourceNode?.inputFormat(forBus: 0) == audioFormat {
             return
         }
+        let isPaused = isPaused
+        if !isPaused {
+            pause()
+        }
         engine.reset()
         sourceNode = AVAudioSourceNode(format: audioFormat) { [weak self] _, _, frameCount, audioBufferList in
             self?.audioPlayerShouldInputData(ioData: UnsafeMutableAudioBufferListPointer(audioBufferList), numberOfFrames: frameCount)
@@ -169,6 +173,9 @@ public final class AudioEnginePlayer: AudioPlayer, FrameOutput {
         // 一定要传入format，这样多音轨音响才不会有问题。
         engine.connect(nodes: nodes, format: audioFormat)
         engine.prepare()
+        if !isPaused {
+            play(time: 0)
+        }
     }
 
     func play(time _: TimeInterval) {
