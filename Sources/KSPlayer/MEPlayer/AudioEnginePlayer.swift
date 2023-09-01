@@ -142,6 +142,12 @@ public final class AudioEnginePlayer: AudioPlayer, FrameOutput {
         if sourceNode?.inputFormat(forBus: 0) == audioFormat {
             return
         }
+        KSLog("[audio] old sourceNode inputFormat: \(sourceNode?.inputFormat(forBus: 0))")
+        KSLog("[audio] outputFormat AudioFormat: \(audioFormat)")
+        if let channelLayout = audioFormat.channelLayout {
+            KSLog("[audio] outputFormat tag: \(channelLayout.layoutTag)")
+            KSLog("[audio] outputFormat channelDescriptions: \(channelLayout.layout.channelDescriptions)")
+        }
         engine.stop()
         engine.reset()
         sourceNode = AVAudioSourceNode(format: audioFormat) { [weak self] _, _, frameCount, audioBufferList in
@@ -151,12 +157,8 @@ public final class AudioEnginePlayer: AudioPlayer, FrameOutput {
         guard let sourceNode else {
             return
         }
+        KSLog("[audio] new sourceNode inputFormat: \(sourceNode.inputFormat(forBus: 0))")
         sampleSize = audioFormat.sampleSize
-        KSLog("[audio] outputFormat AudioFormat: \(audioFormat)")
-        if let channelLayout = audioFormat.channelLayout {
-            KSLog("[audio] outputFormat tag: \(channelLayout.layoutTag)")
-            KSLog("[audio] outputFormat channelDescriptions: \(channelLayout.layout.channelDescriptions)")
-        }
         engine.attach(sourceNode)
         engine.attach(dynamicsProcessor)
         engine.attach(timePitch)
