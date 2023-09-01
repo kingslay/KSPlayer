@@ -137,8 +137,6 @@ public final class AudioEnginePlayer: AudioPlayer, FrameOutput {
     init() {
         engine.attach(dynamicsProcessor)
         engine.attach(timePitch)
-        let nodes = [dynamicsProcessor, timePitch, engine.mainMixerNode]
-        engine.connect(nodes: nodes, format: nil)
         if let audioUnit = engine.outputNode.audioUnit {
             addRenderNotify(audioUnit: audioUnit)
         }
@@ -164,11 +162,12 @@ public final class AudioEnginePlayer: AudioPlayer, FrameOutput {
             KSLog("[audio] outputFormat channelDescriptions: \(channelLayout.layout.channelDescriptions)")
         }
         engine.attach(sourceNode)
-        // 一定要传入format，这样多音轨音响才不会有问题。
-        engine.connect(sourceNode, to: dynamicsProcessor, format: audioFormat)
+        var nodes = [sourceNode, dynamicsProcessor, timePitch, engine.mainMixerNode]
         if audioFormat.channelCount > 2 {
-            engine.connect(engine.mainMixerNode, to: engine.outputNode, format: audioFormat)
+            nodes.append(engine.outputNode)
         }
+        // 一定要传入format，这样多音轨音响才不会有问题。
+        engine.connect(nodes: nodes, format: audioFormat)
         engine.prepare()
     }
 
