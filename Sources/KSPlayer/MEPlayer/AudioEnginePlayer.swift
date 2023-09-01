@@ -166,7 +166,7 @@ public final class AudioEnginePlayer: AudioPlayer, FrameOutput {
         engine.attach(sourceNode)
         engine.connect(sourceNode, to: dynamicsProcessor, format: nil)
         if audioFormat.channelCount > 2 {
-            engine.connect(engine.mainMixerNode, to: engine.outputNode, format: nil)
+            engine.connect(engine.mainMixerNode, to: engine.outputNode, format: audioFormat)
         }
     }
 
