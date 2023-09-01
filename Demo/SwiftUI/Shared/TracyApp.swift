@@ -107,7 +107,7 @@ class APPModel: ObservableObject {
                     groupSet.insert(group)
                 }
             }
-            groups = Array(groupSet)
+            groups = Array(groupSet).sorted()
         }
     }
 

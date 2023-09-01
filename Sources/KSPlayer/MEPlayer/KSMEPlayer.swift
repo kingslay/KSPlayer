@@ -145,6 +145,7 @@ private extension KSMEPlayer {
     }
 
     @objc private func spatialCapabilityChange(notification _: Notification) {
+        KSLog("[audio] spatialCapabilityChange")
         tracks(mediaType: .audio).forEach { track in
             (track as? FFmpegAssetTrack)?.audioDescriptor?.setAudioSession(isUseAudioRenderer: options.isUseAudioRenderer)
         }
@@ -152,6 +153,7 @@ private extension KSMEPlayer {
 
     #if !os(macOS)
     @objc private func audioRouteChange(notification: Notification) {
+        KSLog("[audio] audioRouteChange")
         guard let reason = notification.userInfo?[AVAudioSessionRouteChangeReasonKey] as? UInt else {
             return
         }
