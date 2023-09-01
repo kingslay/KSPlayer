@@ -171,12 +171,20 @@ public final class AudioEnginePlayer: AudioPlayer, FrameOutput {
         // 一定要传入format，这样多音轨音响才不会有问题。
         engine.connect(nodes: nodes, format: audioFormat)
         engine.prepare()
-        try? engine.start()
+        do {
+            try engine.start()
+        } catch {
+            KSLog(error)
+        }
     }
 
     func play(time _: TimeInterval) {
         if !engine.isRunning {
-            try? engine.start()
+            do {
+                try engine.start()
+            } catch {
+                KSLog(error)
+            }
         }
     }
 
