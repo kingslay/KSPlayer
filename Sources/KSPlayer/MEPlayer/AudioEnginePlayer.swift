@@ -150,6 +150,7 @@ public final class AudioEnginePlayer: AudioPlayer, FrameOutput {
         if sourceNode?.inputFormat(forBus: 0) == audioFormat {
             return
         }
+        engine.reset()
         sourceNode = AVAudioSourceNode(format: audioFormat) { [weak self] _, _, frameCount, audioBufferList in
             self?.audioPlayerShouldInputData(ioData: UnsafeMutableAudioBufferListPointer(audioBufferList), numberOfFrames: frameCount)
             return noErr
@@ -167,7 +168,6 @@ public final class AudioEnginePlayer: AudioPlayer, FrameOutput {
         // 一定要传入format，这样多音轨音响才不会有问题。
         engine.connect(sourceNode, to: dynamicsProcessor, format: audioFormat)
         if audioFormat.channelCount > 2 {
-            // 一定要传入format，这样多音轨音响才不会有问题。
             engine.connect(engine.mainMixerNode, to: engine.outputNode, format: audioFormat)
         }
     }
