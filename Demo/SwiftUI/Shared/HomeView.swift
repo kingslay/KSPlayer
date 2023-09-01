@@ -64,11 +64,12 @@ struct HomeView: View {
             }
             .padding()
         }
-        .searchable(text: $nameFilter)
         #if !os(tvOS)
-            .toolbar {
-                toolbarView
-            }
+        // tvos如果加searchable。那就会导致滚动错乱，所以只能去掉了
+        .searchable(text: $nameFilter)
+        .toolbar {
+            toolbarView
+        }
         #endif
     }
 
