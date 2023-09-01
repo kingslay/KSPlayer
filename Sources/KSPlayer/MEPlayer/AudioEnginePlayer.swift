@@ -135,14 +135,18 @@ public final class AudioEnginePlayer: AudioPlayer, FrameOutput {
     }
 
     init() {
+        engine.attach(dynamicsProcessor)
+        engine.attach(timePitch)
+        if let audioUnit = engine.outputNode.audioUnit {
+            addRenderNotify(audioUnit: audioUnit)
+        }
         ceateSourceNode(audioFormat: AVAudioFormat(standardFormatWithSampleRate: 44100, channelLayout: AVAudioChannelLayout(layoutTag: kAudioChannelLayoutTag_Stereo)!))
     }
 
     func ceateSourceNode(audioFormat: AVAudioFormat) {
-        if sourceNode?.inputFormat(forBus: 0) == audioFormat {
+        if sourceNode?.inputFormat(forBus: 0).isChannelEqual(audioFormat) ?? false {
             return
         }
-        KSLog("[audio] old sourceNode inputFormat: \(sourceNode?.inputFormat(forBus: 0))")
         KSLog("[audio] outputFormat AudioFormat: \(audioFormat)")
         if let channelLayout = audioFormat.channelLayout {
             KSLog("[audio] outputFormat tag: \(channelLayout.layoutTag)")
@@ -160,20 +164,14 @@ public final class AudioEnginePlayer: AudioPlayer, FrameOutput {
         KSLog("[audio] new sourceNode inputFormat: \(sourceNode.inputFormat(forBus: 0))")
         sampleSize = audioFormat.sampleSize
         engine.attach(sourceNode)
-        engine.attach(dynamicsProcessor)
-        engine.attach(timePitch)
         var nodes = [sourceNode, dynamicsProcessor, timePitch, engine.mainMixerNode]
         if audioFormat.channelCount > 2 {
             nodes.append(engine.outputNode)
         }
         // 一定要传入format，这样多音轨音响才不会有问题。
         engine.connect(nodes: nodes, format: audioFormat)
-        if let audioUnit = engine.outputNode.audioUnit {
-            addRenderNotify(audioUnit: audioUnit)
-        }
         engine.prepare()
         try? engine.start()
-        KSLog("[audio] after prepare and start sourceNode inputFormat: \(sourceNode.inputFormat(forBus: 0))")
     }
 
     func play(time _: TimeInterval) {
@@ -237,7 +235,7 @@ public final class AudioEnginePlayer: AudioPlayer, FrameOutput {
                 self.currentRender = nil
                 continue
             }
-            if sourceNode?.inputFormat(forBus: 0) != currentRender.audioFormat {
+            if !(sourceNode?.inputFormat(forBus: 0).isChannelEqual(currentRender.audioFormat) ?? false) {
                 runInMainqueue { [weak self] in
                     guard let self else {
                         return
