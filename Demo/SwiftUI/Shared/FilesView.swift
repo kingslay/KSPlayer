@@ -140,7 +140,7 @@ struct M3UView: View {
 struct AddM3UView: View {
     #if DEBUG && targetEnvironment(simulator) && os(tvOS)
     @State
-    private var url = "https://raw.githubusercontent.com/YanG-1989/m3u/main/Gather.m3u"
+    private var url = "https://raw.githubusercontent.com/kingslay/KSPlayer/develop/Tests/KSPlayerTests/test.m3u"
     #else
     @State
     private var url = ""

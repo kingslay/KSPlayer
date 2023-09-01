@@ -135,11 +135,6 @@ public final class AudioEnginePlayer: AudioPlayer, FrameOutput {
     }
 
     init() {
-        engine.attach(dynamicsProcessor)
-        engine.attach(timePitch)
-        if let audioUnit = engine.outputNode.audioUnit {
-            addRenderNotify(audioUnit: audioUnit)
-        }
         ceateSourceNode(audioFormat: AVAudioFormat(standardFormatWithSampleRate: 44100, channelLayout: AVAudioChannelLayout(layoutTag: kAudioChannelLayoutTag_Stereo)!))
     }
 
@@ -163,12 +158,17 @@ public final class AudioEnginePlayer: AudioPlayer, FrameOutput {
             KSLog("[audio] outputFormat channelDescriptions: \(channelLayout.layout.channelDescriptions)")
         }
         engine.attach(sourceNode)
+        engine.attach(dynamicsProcessor)
+        engine.attach(timePitch)
         var nodes = [sourceNode, dynamicsProcessor, timePitch, engine.mainMixerNode]
         if audioFormat.channelCount > 2 {
             nodes.append(engine.outputNode)
         }
         // 一定要传入format，这样多音轨音响才不会有问题。
         engine.connect(nodes: nodes, format: audioFormat)
+        if let audioUnit = engine.outputNode.audioUnit {
+            addRenderNotify(audioUnit: audioUnit)
+        }
         engine.prepare()
         try? engine.start()
     }
