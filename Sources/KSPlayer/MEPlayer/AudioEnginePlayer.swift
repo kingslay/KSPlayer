@@ -173,6 +173,7 @@ public final class AudioEnginePlayer: AudioPlayer, FrameOutput {
         }
         engine.prepare()
         try? engine.start()
+        KSLog("[audio] after prepare and start sourceNode inputFormat: \(sourceNode.inputFormat(forBus: 0))")
     }
 
     func play(time _: TimeInterval) {
