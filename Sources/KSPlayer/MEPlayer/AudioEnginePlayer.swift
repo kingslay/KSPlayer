@@ -143,7 +143,6 @@ public final class AudioEnginePlayer: AudioPlayer, FrameOutput {
             addRenderNotify(audioUnit: audioUnit)
         }
         ceateSourceNode(audioFormat: AVAudioFormat(standardFormatWithSampleRate: 44100, channelLayout: AVAudioChannelLayout(layoutTag: kAudioChannelLayoutTag_Stereo)!))
-        engine.prepare()
     }
 
     func ceateSourceNode(audioFormat: AVAudioFormat) {
@@ -170,6 +169,7 @@ public final class AudioEnginePlayer: AudioPlayer, FrameOutput {
         if audioFormat.channelCount > 2 {
             engine.connect(engine.mainMixerNode, to: engine.outputNode, format: audioFormat)
         }
+        engine.prepare()
     }
 
     func play(time _: TimeInterval) {
