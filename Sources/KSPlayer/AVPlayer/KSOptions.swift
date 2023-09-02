@@ -435,7 +435,11 @@ public extension KSOptions {
             let minChannels = min(maximumOutputNumberOfChannels, channels)
             try? AVAudioSession.sharedInstance().setPreferredOutputNumberOfChannels(Int(minChannels))
             if !(isUseAudioRenderer && isSpatialAudioEnabled) {
-                channels = AVAudioChannelCount(AVAudioSession.sharedInstance().outputNumberOfChannels)
+                let maxRouteChannelsCount = AVAudioSession.sharedInstance().currentRoute.outputs.compactMap {
+                    $0.channels?.count
+                }.max() ?? 2
+                KSLog("[audio] currentRoute max channels: \(maxRouteChannelsCount)")
+                channels = AVAudioChannelCount(min(AVAudioSession.sharedInstance().outputNumberOfChannels, maxRouteChannelsCount))
             }
         } else {
             try? AVAudioSession.sharedInstance().setPreferredOutputNumberOfChannels(2)
