@@ -527,8 +527,8 @@ public class FileLog: LogHandler {
     }
 }
 
-@inlinable public func KSLog(_ error: @autoclosure () -> Error) {
-    KSLog(level: .error, error().localizedDescription)
+@inlinable public func KSLog(_ error: @autoclosure () -> Error, file: String = #file, function: String = #function, line: UInt = #line) {
+    KSLog(level: .error, error().localizedDescription, file: file, function: function, line: line)
 }
 
 @inlinable public func KSLog(level: LogLevel = KSOptions.logLevel, _ message: @autoclosure () -> CustomStringConvertible, file: String = #file, function: String = #function, line: UInt = #line) {
