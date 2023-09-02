@@ -169,7 +169,7 @@ final class Packet: ObjectQueueItem {
     var duration: Int64 = 0
     var position: Int64 = 0
     var size: Int32 = 0
-    weak var assetTrack: FFmpegAssetTrack!
+    var assetTrack: FFmpegAssetTrack!
     private(set) var corePacket = av_packet_alloc()
     func fill() {
         guard let corePacket else {

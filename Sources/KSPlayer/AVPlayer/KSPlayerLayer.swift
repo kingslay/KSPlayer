@@ -234,6 +234,9 @@ open class KSPlayerLayer: UIView {
     open func play() {
         UIApplication.shared.isIdleTimerDisabled = true
         isAutoPlay = true
+        if state == .error {
+            player.prepareToPlay()
+        }
         if player.isReadyToPlay {
             if state == .playedToTheEnd {
                 Task {
@@ -248,10 +251,6 @@ open class KSPlayerLayer: UIView {
                 player.play()
             }
             timer.fireDate = Date.distantPast
-        } else {
-            if state == .error {
-                player.prepareToPlay()
-            }
         }
         state = player.loadState == .playable ? .bufferFinished : .buffering
         MPNowPlayingInfoCenter.default().playbackState = .playing
