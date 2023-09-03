@@ -138,7 +138,9 @@ public struct KSVideoPlayerView: View {
             VideoSubtitleView(model: playerCoordinator.subtitleModel)
             VStack {
                 Spacer()
-                ProgressView().opacity(playerCoordinator.state == .buffering ? 1 : 0)
+                ProgressView()
+                    .background(.black.opacity(0.2))
+                    .opacity(playerCoordinator.state == .buffering ? 1 : 0)
                 VStack {
                     #if !os(tvOS)
                     VideoControllerView(config: playerCoordinator)

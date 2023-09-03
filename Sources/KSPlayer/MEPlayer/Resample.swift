@@ -275,6 +275,13 @@ public class AudioDescriptor: Equatable {
         if channels != self.channels {
             av_channel_layout_default(&outChannel, Int32(channels))
         }
+        let layoutTag: AudioChannelLayoutTag
+        if let tag = outChannel.layoutTag {
+            layoutTag = tag
+        } else {
+            av_channel_layout_default(&outChannel, Int32(channels))
+            layoutTag = outChannel.layoutTag!
+        }
         KSLog("[audio] out channelLayout: \(outChannel)")
         var commonFormat: AVAudioCommonFormat
         var interleaved: Bool
@@ -309,7 +316,7 @@ public class AudioDescriptor: Equatable {
         }
         interleaved = isUseAudioRenderer
         commonFormat = .pcmFormatFloat32
-        audioFormat = AVAudioFormat(commonFormat: commonFormat, sampleRate: Double(sampleRate), interleaved: interleaved, channelLayout: AVAudioChannelLayout(layoutTag: outChannel.layoutTag)!)
+        audioFormat = AVAudioFormat(commonFormat: commonFormat, sampleRate: Double(sampleRate), interleaved: interleaved, channelLayout: AVAudioChannelLayout(layoutTag: layoutTag)!)
 //        AVAudioChannelLayout(layout: outChannel.layoutTag.channelLayout)
     }
 
