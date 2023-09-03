@@ -103,10 +103,6 @@ public final class AudioEnginePlayer: AudioPlayer, FrameOutput {
         }
     }
 
-    var isPaused: Bool {
-        engine.isRunning
-    }
-
     var playbackRate: Float {
         get {
             timePitch.rate
@@ -152,6 +148,7 @@ public final class AudioEnginePlayer: AudioPlayer, FrameOutput {
             KSLog("[audio] outputFormat tag: \(channelLayout.layoutTag)")
             KSLog("[audio] outputFormat channelDescriptions: \(channelLayout.layout.channelDescriptions)")
         }
+        let isRunning = engine.isRunning
         engine.stop()
         engine.reset()
         sourceNode = AVAudioSourceNode(format: audioFormat) { [weak self] _, _, frameCount, audioBufferList in
@@ -171,10 +168,12 @@ public final class AudioEnginePlayer: AudioPlayer, FrameOutput {
         // 一定要传入format，这样多音轨音响才不会有问题。
         engine.connect(nodes: nodes, format: audioFormat)
         engine.prepare()
-        do {
-            try engine.start()
-        } catch {
-            KSLog(error)
+        if isRunning {
+            do {
+                try engine.start()
+            } catch {
+                KSLog(error)
+            }
         }
     }
 
