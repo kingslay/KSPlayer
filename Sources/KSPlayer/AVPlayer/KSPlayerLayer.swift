@@ -480,6 +480,12 @@ extension KSPlayerLayer {
         } else {
             MPNowPlayingInfoCenter.default().nowPlayingInfo?[MPMediaItemPropertyPlaybackDuration] = player.duration
         }
+        if MPNowPlayingInfoCenter.default().nowPlayingInfo?[MPMediaItemPropertyTitle] == nil, let title = player.metadata["title"] {
+            MPNowPlayingInfoCenter.default().nowPlayingInfo?[MPMediaItemPropertyTitle] = title
+        }
+        if MPNowPlayingInfoCenter.default().nowPlayingInfo?[MPMediaItemPropertyArtist] == nil, let artist = player.metadata["artist"] {
+            MPNowPlayingInfoCenter.default().nowPlayingInfo?[MPMediaItemPropertyArtist] = artist
+        }
         var current: [MPNowPlayingInfoLanguageOption] = []
         var langs: [MPNowPlayingInfoLanguageOptionGroup] = []
         for track in player.tracks(mediaType: .audio) {

@@ -110,6 +110,7 @@ public class KSAVPlayer {
     }
 
     public var naturalSize: CGSize = .zero
+    public var metadata = [String: String]()
     @available(macOS 12.0, iOS 15.0, tvOS 15.0, *)
     public var playbackCoordinator: AVPlaybackCoordinator {
         playerView.player.playbackCoordinator

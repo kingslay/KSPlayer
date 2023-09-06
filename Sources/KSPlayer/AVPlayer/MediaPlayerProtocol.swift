@@ -16,6 +16,7 @@ import AppKit
 public protocol MediaPlayback: AnyObject {
     var duration: TimeInterval { get }
     var fileSize: Double { get }
+    var metadata: [String: String] { get }
     var naturalSize: CGSize { get }
     var currentPlaybackTime: TimeInterval { get }
     func prepareToPlay()

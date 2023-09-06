@@ -81,16 +81,6 @@ struct FilesView: View {
         }
         .labelStyle(.titleAndIcon)
     }
-
-    private func cellView(model: M3UModel) -> some View {
-        #if os(tvOS)
-        NavigationLink(value: model) {
-            M3UView(model: model)
-        }
-        #else
-        M3UView(model: model)
-        #endif
-    }
 }
 
 struct M3UView: View {
