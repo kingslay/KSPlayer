@@ -203,19 +203,6 @@ extension AVAudioFormat {
         }
     }
 
-    func toPCMBuffer(frame: AudioFrame) -> AVAudioPCMBuffer? {
-        guard let pcmBuffer = AVAudioPCMBuffer(pcmFormat: self, frameCapacity: UInt32(frame.dataSize) / streamDescription.pointee.mBytesPerFrame) else {
-            return nil
-        }
-        pcmBuffer.frameLength = pcmBuffer.frameCapacity
-        for i in 0 ..< min(Int(pcmBuffer.format.channelCount), frame.data.count) {
-            frame.data[i]?.withMemoryRebound(to: Float.self, capacity: Int(pcmBuffer.frameCapacity)) { srcFloatsForChannel in
-                pcmBuffer.floatChannelData?[i].assign(from: srcFloatsForChannel, count: Int(pcmBuffer.frameCapacity))
-            }
-        }
-        return pcmBuffer
-    }
-
     func isChannelEqual(_ object: AVAudioFormat) -> Bool {
         sampleRate == object.sampleRate && channelCount == object.channelCount && commonFormat == object.commonFormat && sampleRate == object.sampleRate && isInterleaved == object.isInterleaved
     }

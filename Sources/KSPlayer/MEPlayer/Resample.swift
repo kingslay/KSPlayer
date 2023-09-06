@@ -315,7 +315,9 @@ public class AudioDescriptor: Equatable {
             interleaved = false
         }
         interleaved = isUseAudioRenderer
-        commonFormat = .pcmFormatFloat32
+        if !interleaved {
+            commonFormat = .pcmFormatFloat32
+        }
         audioFormat = AVAudioFormat(commonFormat: commonFormat, sampleRate: Double(sampleRate), interleaved: interleaved, channelLayout: AVAudioChannelLayout(layoutTag: layoutTag)!)
 //        AVAudioChannelLayout(layout: outChannel.layoutTag.channelLayout)
     }

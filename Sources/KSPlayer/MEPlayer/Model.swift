@@ -216,12 +216,121 @@ final class AudioFrame: MEFrame {
         }
     }
 
+    init(array: [AudioFrame]) {
+        audioFormat = array[0].audioFormat
+        timebase = array[0].timebase
+        position = array[0].position
+        var dataSize = 0
+        for frame in array {
+            duration += frame.duration
+            dataSize += frame.dataSize
+            size += frame.size
+            numberOfSamples += frame.numberOfSamples
+        }
+        self.dataSize = dataSize
+        let count = audioFormat.isInterleaved ? 1 : audioFormat.channelCount
+        data = (0 ..< count).map { _ in
+            UnsafeMutablePointer<UInt8>.allocate(capacity: dataSize)
+        }
+        var offset = 0
+        for frame in array {
+            for i in 0 ..< data.count {
+                data[i]?.advanced(by: offset).initialize(from: frame.data[i]!, count: frame.dataSize)
+            }
+            offset += frame.dataSize
+        }
+    }
+
     deinit {
         for i in 0 ..< data.count {
             data[i]?.deinitialize(count: dataSize)
             data[i]?.deallocate()
         }
         data.removeAll()
+    }
+
+    func toPCMBuffer() -> AVAudioPCMBuffer? {
+        guard let pcmBuffer = AVAudioPCMBuffer(pcmFormat: audioFormat, frameCapacity: numberOfSamples) else {
+            return nil
+        }
+        pcmBuffer.frameLength = pcmBuffer.frameCapacity
+        let capacity = Int(pcmBuffer.frameCapacity)
+        for i in 0 ..< min(Int(pcmBuffer.format.channelCount), data.count) {
+            switch audioFormat.commonFormat {
+            case .pcmFormatInt16:
+                data[i]?.withMemoryRebound(to: Int16.self, capacity: capacity) { src in
+                    pcmBuffer.int16ChannelData?[i].assign(from: src, count: capacity)
+                }
+            case .pcmFormatInt32:
+                data[i]?.withMemoryRebound(to: Int32.self, capacity: capacity) { src in
+                    pcmBuffer.int32ChannelData?[i].assign(from: src, count: capacity)
+                }
+            default:
+                data[i]?.withMemoryRebound(to: Float.self, capacity: capacity) { src in
+                    pcmBuffer.floatChannelData?[i].assign(from: src, count: capacity)
+                }
+            }
+        }
+        return pcmBuffer
+    }
+
+    func toCMSampleBuffer() -> CMSampleBuffer? {
+        var outBlockListBuffer: CMBlockBuffer?
+        CMBlockBufferCreateEmpty(allocator: kCFAllocatorDefault, capacity: UInt32(data.count), flags: 0, blockBufferOut: &outBlockListBuffer)
+        guard let outBlockListBuffer else {
+            return nil
+        }
+        let sampleSize = Int(audioFormat.sampleSize)
+        let sampleCount = CMItemCount(numberOfSamples)
+        let dataByteSize = sampleCount * sampleSize
+        if dataByteSize > dataSize {
+            assertionFailure("dataByteSize: \(dataByteSize),render.dataSize: \(dataSize)")
+        }
+        for i in 0 ..< data.count {
+            var outBlockBuffer: CMBlockBuffer?
+            CMBlockBufferCreateWithMemoryBlock(
+                allocator: kCFAllocatorDefault,
+                memoryBlock: nil,
+                blockLength: dataByteSize,
+                blockAllocator: kCFAllocatorDefault,
+                customBlockSource: nil,
+                offsetToData: 0,
+                dataLength: dataByteSize,
+                flags: kCMBlockBufferAssureMemoryNowFlag,
+                blockBufferOut: &outBlockBuffer
+            )
+            if let outBlockBuffer {
+                CMBlockBufferReplaceDataBytes(
+                    with: data[i]!,
+                    blockBuffer: outBlockBuffer,
+                    offsetIntoDestination: 0,
+                    dataLength: dataByteSize
+                )
+                CMBlockBufferAppendBufferReference(
+                    outBlockListBuffer,
+                    targetBBuf: outBlockBuffer,
+                    offsetToData: 0,
+                    dataLength: CMBlockBufferGetDataLength(outBlockBuffer),
+                    flags: 0
+                )
+            }
+        }
+        var sampleBuffer: CMSampleBuffer?
+        // 因为sampleRate跟timescale没有对齐，所以导致杂音。所以要让duration为invalid
+//        let duration = CMTime(value: CMTimeValue(sampleCount), timescale: CMTimeScale(audioFormat.sampleRate))
+        let duration = CMTime.invalid
+        let timing = CMSampleTimingInfo(duration: duration, presentationTimeStamp: cmtime, decodeTimeStamp: .invalid)
+        let sampleSizeEntryCount: CMItemCount
+        let sampleSizeArray: [Int]?
+        if audioFormat.isInterleaved {
+            sampleSizeEntryCount = 1
+            sampleSizeArray = [sampleSize]
+        } else {
+            sampleSizeEntryCount = 0
+            sampleSizeArray = nil
+        }
+        CMSampleBufferCreateReady(allocator: kCFAllocatorDefault, dataBuffer: outBlockListBuffer, formatDescription: audioFormat.formatDescription, sampleCount: sampleCount, sampleTimingEntryCount: 1, sampleTimingArray: [timing], sampleSizeEntryCount: sampleSizeEntryCount, sampleSizeArray: sampleSizeArray, sampleBufferOut: &sampleBuffer)
+        return sampleBuffer
     }
 }
 

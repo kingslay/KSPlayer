@@ -75,7 +75,7 @@ public class FFmpegAssetTrack: MediaPlayerTrack {
         } else if frameRate.den > 0, frameRate.num > 0 {
             nominalFrameRate = Float(frameRate.num) / Float(frameRate.den)
         } else {
-            nominalFrameRate = mediaType == .audio ? 44 : 24
+            nominalFrameRate = mediaType == .audio ? Float(codecpar.sample_rate / 1000) : 24
         }
         if codecpar.codec_type == AVMEDIA_TYPE_VIDEO {
             description += ", \(nominalFrameRate) fps"
