@@ -10,6 +10,11 @@ import Foundation
 import KSPlayer
 class MEOptions: KSOptions {
     static var isUseDisplayLayer = true
+    override init() {
+        super.init()
+        formatContextOptions["reconnect_on_network_error"] = 1
+    }
+
     override func process(assetTrack: some MediaPlayerTrack) {
         if assetTrack.mediaType == .video {
             if [FFmpegFieldOrder.bb, .bt, .tt, .tb].contains(assetTrack.fieldOrder) {

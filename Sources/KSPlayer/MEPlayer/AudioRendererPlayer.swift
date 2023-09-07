@@ -83,7 +83,6 @@ public class AudioRendererPlayer: AudioPlayer, FrameOutput {
     func pause() {
         synchronizer.rate = 0
         renderer.stopRequestingMediaData()
-        renderer.flush()
         if let periodicTimeObserver {
             synchronizer.removeTimeObserver(periodicTimeObserver)
             self.periodicTimeObserver = nil
@@ -96,73 +95,25 @@ public class AudioRendererPlayer: AudioPlayer, FrameOutput {
 
     private func request() {
         while renderer.isReadyForMoreMediaData, !isPaused {
-            guard let render = renderSource?.getAudioOutputRender() else {
+            guard var render = renderSource?.getAudioOutputRender() else {
                 break
             }
-            let audioFormat = render.audioFormat
-            var outBlockListBuffer: CMBlockBuffer?
-            CMBlockBufferCreateEmpty(allocator: kCFAllocatorDefault, capacity: 0, flags: 0, blockBufferOut: &outBlockListBuffer)
-            guard let outBlockListBuffer else {
-                continue
-            }
-            renderer.audioTimePitchAlgorithm = audioFormat.channelCount > 2 ? .spectral : .timeDomain
-            let sampleSize = audioFormat.sampleSize
-            let desc = audioFormat.formatDescription
-            let isInterleaved = audioFormat.isInterleaved
-            let n = render.data.count
-            let sampleCount = CMItemCount(render.numberOfSamples)
-            let dataByteSize = sampleCount * Int(sampleSize)
-            if dataByteSize > render.dataSize {
-                assertionFailure("dataByteSize: \(dataByteSize),render.dataSize: \(render.dataSize)")
-            }
-            for i in 0 ..< n {
-                var outBlockBuffer: CMBlockBuffer?
-                CMBlockBufferCreateWithMemoryBlock(
-                    allocator: kCFAllocatorDefault,
-                    memoryBlock: nil,
-                    blockLength: dataByteSize,
-                    blockAllocator: kCFAllocatorDefault,
-                    customBlockSource: nil,
-                    offsetToData: 0,
-                    dataLength: dataByteSize,
-                    flags: kCMBlockBufferAssureMemoryNowFlag,
-                    blockBufferOut: &outBlockBuffer
-                )
-                if let outBlockBuffer {
-                    CMBlockBufferReplaceDataBytes(
-                        with: render.data[i]!,
-                        blockBuffer: outBlockBuffer,
-                        offsetIntoDestination: 0,
-                        dataLength: dataByteSize
-                    )
-                    CMBlockBufferAppendBufferReference(
-                        outBlockListBuffer,
-                        targetBBuf: outBlockBuffer,
-                        offsetToData: 0,
-                        dataLength: CMBlockBufferGetDataLength(outBlockBuffer),
-                        flags: 0
-                    )
+            var array = [render]
+            let loopCount = Int32(render.audioFormat.sampleRate) / 20 / Int32(render.numberOfSamples) - 1
+            if loopCount > 0 {
+                for _ in 0 ..< loopCount {
+                    if let render = renderSource?.getAudioOutputRender() {
+                        array.append(render)
+                    }
                 }
             }
-            var sampleBuffer: CMSampleBuffer?
-            // 因为sampleRate跟timescale没有对齐，所以导致杂音。所以要让duration为invalid
-//            let duration = CMTime(value: CMTimeValue(sampleCount), timescale: sampleRate)
-            let duration = CMTime.invalid
-            let timing = CMSampleTimingInfo(duration: duration, presentationTimeStamp: render.cmtime, decodeTimeStamp: .invalid)
-            let sampleSizeEntryCount: CMItemCount
-            let sampleSizeArray: [Int]?
-            if isInterleaved {
-                sampleSizeEntryCount = 1
-                sampleSizeArray = [Int(sampleSize)]
-            } else {
-                sampleSizeEntryCount = 0
-                sampleSizeArray = nil
+            if array.count > 1 {
+                render = AudioFrame(array: array)
             }
-            CMSampleBufferCreateReady(allocator: kCFAllocatorDefault, dataBuffer: outBlockListBuffer, formatDescription: desc, sampleCount: sampleCount, sampleTimingEntryCount: 1, sampleTimingArray: [timing], sampleSizeEntryCount: sampleSizeEntryCount, sampleSizeArray: sampleSizeArray, sampleBufferOut: &sampleBuffer)
-            guard let sampleBuffer else {
-                continue
+            if let sampleBuffer = render.toCMSampleBuffer() {
+                renderer.audioTimePitchAlgorithm = render.audioFormat.channelCount > 2 ? .spectral : .timeDomain
+                renderer.enqueue(sampleBuffer)
             }
-            renderer.enqueue(sampleBuffer)
         }
     }
 }
