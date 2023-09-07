@@ -83,7 +83,6 @@ public class AudioRendererPlayer: AudioPlayer, FrameOutput {
     func pause() {
         synchronizer.rate = 0
         renderer.stopRequestingMediaData()
-        renderer.flush()
         if let periodicTimeObserver {
             synchronizer.removeTimeObserver(periodicTimeObserver)
             self.periodicTimeObserver = nil
@@ -100,7 +99,7 @@ public class AudioRendererPlayer: AudioPlayer, FrameOutput {
                 break
             }
             var array = [render]
-            let loopCount = render.timebase.den * 2 / render.timebase.num / Int32(render.numberOfSamples) - 1
+            let loopCount = Int32(render.audioFormat.sampleRate) / 20 / Int32(render.numberOfSamples) - 1
             if loopCount > 0 {
                 for _ in 0 ..< loopCount {
                     if let render = renderSource?.getAudioOutputRender() {
