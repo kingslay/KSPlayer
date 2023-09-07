@@ -20,6 +20,7 @@ class SubtitleDecode: DecodeProtocol {
     private var subtitle = AVSubtitle()
     private var startTime = TimeInterval(0)
     private var preSubtitleFrame: SubtitleFrame?
+    private let assParse = AssParse()
     required init(assetTrack: FFmpegAssetTrack, options: KSOptions) {
         startTime = assetTrack.startTime
         do {
@@ -103,7 +104,7 @@ class SubtitleDecode: DecodeProtocol {
                 attributedString?.append(NSAttributedString(string: String(cString: text)))
             } else if let ass = rect.ass {
                 let scanner = Scanner(string: String(cString: ass))
-                if let group = AssParse.parse(scanner: scanner, reg: reg), let text = group.text {
+                if let group = assParse.parse(scanner: scanner, reg: reg), let text = group.text {
                     if attributedString == nil {
                         attributedString = NSMutableAttributedString()
                     }

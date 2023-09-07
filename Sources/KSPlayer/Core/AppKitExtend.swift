@@ -20,6 +20,7 @@ public typealias UIGestureRecognizer = NSGestureRecognizer
 public typealias UIGestureRecognizerDelegate = NSGestureRecognizerDelegate
 public typealias UIViewContentMode = ContentMode
 public typealias UIFont = NSFont
+public typealias UIFontDescriptor = NSFontDescriptor
 public typealias UIControl = NSControl
 public typealias UITextField = NSTextField
 public typealias UIImageView = NSImageView
@@ -32,6 +33,10 @@ public typealias UITableViewDataSource = NSTableViewDataSource
 public typealias UITouch = NSTouch
 public typealias UIEvent = NSEvent
 public typealias UIButton = KSButton
+public extension UIFontDescriptor.SymbolicTraits {
+    static var traitItalic = italic
+    static var traitBold = bold
+}
 
 extension NSScreen {
     var scale: CGFloat {

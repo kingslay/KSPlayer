@@ -76,6 +76,23 @@ extension String {
 }
 
 public extension UIColor {
+    convenience init?(assColor: String) {
+        var colorString = assColor
+        // 移除颜色字符串中的前缀 &H 和后缀 &
+        if colorString.hasPrefix("&H") {
+            colorString = String(colorString.dropFirst(2))
+        }
+        if colorString.hasSuffix("&") {
+            colorString = String(colorString.dropLast())
+        }
+        if let hexValue = Scanner(string: colorString).scanInt(representation: .hexadecimal) {
+            let alpha = CGFloat((hexValue >> 24) & 0xFF)
+            self.init(hex: hexValue, alpha: 1 - (alpha / 255))
+        } else {
+            return nil
+        }
+    }
+
     convenience init(hex: Int, alpha: CGFloat = 1) {
         let red = CGFloat((hex >> 16) & 0xFF)
         let green = CGFloat((hex >> 8) & 0xFF)
