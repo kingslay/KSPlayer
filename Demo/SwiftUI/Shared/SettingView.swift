@@ -58,12 +58,15 @@ struct SettingAudioView: View {
 struct SettingVideoView: View {
     @Default(\.hardwareDecode)
     private var hardwareDecode
+    @Default(\.asynchronousDecompression)
+    private var asynchronousDecompression
     @Default(\.isUseDisplayLayer)
     private var isUseDisplayLayer
 
     var body: some View {
         Form {
             Toggle("Hardware decoder", isOn: $hardwareDecode)
+            Toggle("Asynchronous Decompression", isOn: $asynchronousDecompression)
             Toggle("Use DisplayLayer", isOn: $isUseDisplayLayer)
         }
     }

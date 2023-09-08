@@ -17,9 +17,17 @@ public class Defaults: ObservableObject {
         }
     }
 
-    @AppStorage("hardwareDecode") public var hardwareDecode = KSOptions.hardwareDecode {
+    @AppStorage("hardwareDecode")
+    public var hardwareDecode = KSOptions.hardwareDecode {
         didSet {
             KSOptions.hardwareDecode = hardwareDecode
+        }
+    }
+
+    @AppStorage("asynchronousDecompression")
+    public var asynchronousDecompression = KSOptions.asynchronousDecompression {
+        didSet {
+            KSOptions.asynchronousDecompression = asynchronousDecompression
         }
     }
 
