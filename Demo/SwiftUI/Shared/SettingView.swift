@@ -75,7 +75,7 @@ struct SettingVideoView: View {
 struct SettingSubtitleView: View {
     @Default(\.textFontSize)
     private var textFontSize
-    @Default(\.textItalic)
+    @Default(\.textBold)
     private var textBold
     @Default(\.textItalic)
     private var textItalic

@@ -376,21 +376,23 @@ struct VideoSubtitleView: View {
                 .padding()
             }
             if let text = model.part?.text {
-                if SubtitleModel.textYAlign == .bottom {
+                let textYAlign = model.part?.textYAlign ?? SubtitleModel.textYAlign
+                let textXAlign = model.part?.textXAlign ?? SubtitleModel.textXAlign
+                if textYAlign == .bottom || textYAlign == .center {
                     Spacer()
                 }
                 Text(AttributedString(text))
                     .font(Font(SubtitleModel.textFont))
                     .shadow(color: .black.opacity(0.9), radius: 1, x: 1, y: 1)
                     .foregroundColor(SubtitleModel.textColor)
-                    .multilineTextAlignment(SubtitleModel.textXAlign)
+                    .multilineTextAlignment(textXAlign)
                     .padding(SubtitleModel.edgeInsets)
                     .italic(SubtitleModel.textItalic)
                     .background(SubtitleModel.textBackgroundColor)
                 #if !os(tvOS)
                     .textSelection(.enabled)
                 #endif
-                if SubtitleModel.textYAlign == .top {
+                if textYAlign == .top || textYAlign == .center {
                     Spacer()
                 }
             }

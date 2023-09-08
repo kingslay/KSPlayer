@@ -5,6 +5,7 @@
 //  Created by kintan on 2018/8/7.
 //
 import Foundation
+import SwiftUI
 #if !canImport(UIKit)
 import AppKit
 #else
@@ -16,7 +17,7 @@ public protocol KSParseProtocol {
 }
 
 public extension KSOptions {
-    static var subtitleParses: [KSParseProtocol] = [SrtParse(), AssParse(), VTTParse()]
+    static var subtitleParses: [KSParseProtocol] = [AssParse(), VTTParse(), SrtParse()]
 }
 
 extension String {
@@ -78,10 +79,10 @@ public extension KSParseProtocol {
 
 public class AssParse: KSParseProtocol {
     private let reg = try? NSRegularExpression(pattern: "\\{[^}]+\\}", options: .caseInsensitive)
-    private var styleMap = [String: [NSAttributedString.Key: Any]]()
+    private var styleMap = [String: ASSStyle]()
     private var eventKeys = ["Layer", "Start", "End", "Style", "Name", "MarginL", "MarginR", "MarginV", "Effect", "Text"]
     public func canParse(scanner: Scanner) -> Bool {
-        guard scanner.scanString("[Script Info]") != nil else {
+        guard scanner.scanUpToCharacters(from: .newlines)?.hasSuffix("[Script Info]") ?? false else {
             return false
         }
         while scanner.scanString("Format:") == nil {
@@ -143,8 +144,10 @@ public class AssParse: KSParseProtocol {
             }
         }
         var attributes: [NSAttributedString.Key: Any]?
-        if let style = dic["Style"] {
-            attributes = styleMap[style]
+        var textYAlign: VerticalAlignment?
+        if let style = dic["Style"], let assStyle = styleMap[style] {
+            attributes = assStyle.attrs
+            textYAlign = assStyle.textYAlign
         }
         guard var text = dic["Text"] else {
             return nil
@@ -153,15 +156,26 @@ public class AssParse: KSParseProtocol {
         if let reg {
             text = reg.stringByReplacingMatches(in: text, range: NSRange(location: 0, length: text.count), withTemplate: "")
         }
-        return SubtitlePart(start, end, attributedString: NSMutableAttributedString(string: text, attributes: attributes))
+        let part = SubtitlePart(start, end, attributedString: NSMutableAttributedString(string: text, attributes: attributes))
+        part.textYAlign = textYAlign
+        return part
     }
 }
 
+public struct ASSStyle {
+    let attrs: [NSAttributedString.Key: Any]
+    let textYAlign: VerticalAlignment
+    let textXAlign: TextAlignment
+}
+
 public extension [String: String] {
-    func parseASSStyle() -> [NSAttributedString.Key: Any] {
+    func parseASSStyle() -> ASSStyle {
         var attributes: [NSAttributedString.Key: Any] = [:]
+        var textYAlign = VerticalAlignment.bottom
+        var textXAlign = TextAlignment.center
         if let fontName = self["Fontname"], let fontSize = self["Fontsize"].flatMap(Double.init) {
-            var fontDescriptor = UIFontDescriptor(name: fontName, size: fontSize)
+            var font = UIFont(name: fontName, size: fontSize) ?? UIFont.systemFont(ofSize: fontSize)
+            var fontDescriptor = font.fontDescriptor
             var fontTraits: UIFontDescriptor.SymbolicTraits = []
             if self["Bold"] == "-1" {
                 fontTraits.insert(.traitBold)
@@ -179,7 +193,7 @@ public extension [String: String] {
                 #endif
                 fontDescriptor = fontDescriptor.withMatrix(matrix)
             }
-            let font = UIFont(descriptor: fontDescriptor, size: fontSize) ?? UIFont.systemFont(ofSize: fontSize)
+            font = UIFont(descriptor: fontDescriptor, size: fontSize) ?? font
             attributes[.font] = font
         }
         // 创建字体样式
@@ -215,25 +229,29 @@ public extension [String: String] {
         let paragraphStyle = NSMutableParagraphStyle()
         switch self["Alignment"] {
         case "1":
-            paragraphStyle.alignment = .left
+            textXAlign = .leading
         case "2":
-            paragraphStyle.alignment = .center
+            textXAlign = .center
         case "3":
-            paragraphStyle.alignment = .right
+            textXAlign = .trailing
         case "4":
-            paragraphStyle.alignment = .left
+            textYAlign = .center
+            textXAlign = .leading
         case "5":
-            paragraphStyle.alignment = .center
+            textYAlign = .center
         case "6":
-            paragraphStyle.alignment = .right
+            textYAlign = .center
+            textXAlign = .trailing
         case "7":
-            paragraphStyle.alignment = .left
+            textYAlign = .top
+            textXAlign = .leading
         case "8":
-            paragraphStyle.alignment = .center
+            textYAlign = .top
         case "9":
-            paragraphStyle.alignment = .right
+            textYAlign = .top
+            textXAlign = .trailing
         default:
-            paragraphStyle.alignment = .center
+            break
         }
         if let marginL = self["MarginL"].flatMap(Double.init) {
             paragraphStyle.headIndent = CGFloat(marginL)
@@ -257,14 +275,14 @@ public extension [String: String] {
             shadow.shadowColor = UIColor(assColor: assColor)
             attributes[.shadow] = shadow
         }
-        return attributes
+        return ASSStyle(attrs: attributes, textYAlign: textYAlign, textXAlign: textXAlign)
     }
 }
 
 public class VTTParse: KSParseProtocol {
     private let reg = try? NSRegularExpression(pattern: "\\{[^}]+\\}", options: .caseInsensitive)
     public func canParse(scanner: Scanner) -> Bool {
-        scanner.scanString("WEBVTT") != nil
+        scanner.scanUpToCharacters(from: .newlines)?.hasSuffix("WEBVTT") ?? false
     }
 
     /**
@@ -292,7 +310,7 @@ public class VTTParse: KSParseProtocol {
 public class SrtParse: KSParseProtocol {
     private let reg = try? NSRegularExpression(pattern: "\\{[^}]+\\}", options: .caseInsensitive)
     public func canParse(scanner: Scanner) -> Bool {
-        scanner.scanString("WEBVTT") == nil && scanner.string.contains(" --> ")
+        scanner.string.contains(" --> ")
     }
 
     /**

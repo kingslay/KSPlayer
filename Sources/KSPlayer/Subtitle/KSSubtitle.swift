@@ -17,6 +17,8 @@ public class SubtitlePart: CustomStringConvertible, NSMutableCopying {
     public var origin: CGPoint = .zero
     public let text: NSMutableAttributedString?
     public var image: UIImage?
+    public var textYAlign: VerticalAlignment?
+    public var textXAlign: TextAlignment?
     public var description: String {
         "Subtile Group ==========\nstart: \(start)\nend:\(end)\ntext:\(String(describing: text))"
     }
@@ -213,11 +215,10 @@ public extension KSSubtitle {
                 break
             }
         }
-        guard var subtitle = string else {
+        guard let subtitle = string else {
             throw NSError(errorCode: .subtitleUnEncoding)
         }
-        subtitle = subtitle.replacingOccurrences(of: "\r\n\r\n", with: "\n\n")
-        let scanner = Scanner(string: subtitle)
+        let scanner = Scanner(string: String(subtitle.replacingOccurrences(of: "\r\n\r\n", with: "\n\n")))
         let parse = KSOptions.subtitleParses.first { $0.canParse(scanner: scanner) }
         if let parse {
             parts = parse.parse(scanner: scanner)
