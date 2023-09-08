@@ -213,12 +213,14 @@ public extension KSSubtitle {
                 break
             }
         }
-        guard let subtitle = string else {
+        guard var subtitle = string else {
             throw NSError(errorCode: .subtitleUnEncoding)
         }
-        let parse = KSOptions.subtitleParses.first { $0.canParse(subtitle: subtitle) }
+        subtitle = subtitle.replacingOccurrences(of: "\r\n\r\n", with: "\n\n")
+        let scanner = Scanner(string: subtitle)
+        let parse = KSOptions.subtitleParses.first { $0.canParse(scanner: scanner) }
         if let parse {
-            parts = parse.parse(subtitle: subtitle)
+            parts = parse.parse(scanner: scanner)
             if partsCount == 0 {
                 throw NSError(errorCode: .subtitleUnParse)
             }

@@ -14,7 +14,6 @@ import UIKit
 import AppKit
 #endif
 class SubtitleDecode: DecodeProtocol {
-    private let reg = try? NSRegularExpression(pattern: "\\{[^}]+\\}", options: .caseInsensitive)
     private var codecContext: UnsafeMutablePointer<AVCodecContext>?
     private let scale = VideoSwresample(dstFormat: AV_PIX_FMT_ARGB)
     private var subtitle = AVSubtitle()
@@ -25,6 +24,10 @@ class SubtitleDecode: DecodeProtocol {
         startTime = assetTrack.startTime
         do {
             codecContext = try assetTrack.ceateContext(options: options)
+            if let pointer = codecContext?.pointee.subtitle_header {
+                let subtitleHeader = String(cString: pointer)
+                _ = assParse.canParse(scanner: Scanner(string: subtitleHeader))
+            }
         } catch {
             KSLog(error as CustomStringConvertible)
         }
@@ -104,7 +107,7 @@ class SubtitleDecode: DecodeProtocol {
                 attributedString?.append(NSAttributedString(string: String(cString: text)))
             } else if let ass = rect.ass {
                 let scanner = Scanner(string: String(cString: ass))
-                if let group = assParse.parse(scanner: scanner, reg: reg), let text = group.text {
+                if let group = assParse.parsePart(scanner: scanner), let text = group.text {
                     if attributedString == nil {
                         attributedString = NSMutableAttributedString()
                     }

@@ -11,9 +11,8 @@ import AppKit
 import UIKit
 #endif
 public protocol KSParseProtocol {
-    func canParse(subtitle: String) -> Bool
-    func parse(scanner: Scanner, reg: NSRegularExpression?) -> SubtitlePart?
-    func parse(subtitle: String) -> [SubtitlePart]
+    func canParse(scanner: Scanner) -> Bool
+    func parsePart(scanner: Scanner) -> SubtitlePart?
 }
 
 public extension KSOptions {
@@ -45,13 +44,11 @@ extension String {
 }
 
 public extension KSParseProtocol {
-    func parse(subtitle: String) -> [SubtitlePart] {
-        let reg = try? NSRegularExpression(pattern: "\\{[^}]+\\}", options: .caseInsensitive)
+    func parse(scanner: Scanner) -> [SubtitlePart] {
         var groups = [SubtitlePart]()
-        let subtitle = subtitle.replacingOccurrences(of: "\r\n\r\n", with: "\n\n")
-        let scanner = Scanner(string: subtitle)
+
         while !scanner.isAtEnd {
-            if let group = parse(scanner: scanner, reg: reg) {
+            if let group = parsePart(scanner: scanner) {
                 groups.append(group)
             }
         }
@@ -80,62 +77,20 @@ public extension KSParseProtocol {
 }
 
 public class AssParse: KSParseProtocol {
+    private let reg = try? NSRegularExpression(pattern: "\\{[^}]+\\}", options: .caseInsensitive)
     private var styleMap = [String: [NSAttributedString.Key: Any]]()
-    public func canParse(subtitle: String) -> Bool {
-        subtitle.contains("[Script Info]")
-    }
-
-    // Dialogue: 0,0:12:37.73,0:12:38.83,Aki Default,,0,0,0,,{\be8}原来如此
-    // 875,,Default,NTP,0000,0000,0000,!Effect,- 你们两个别冲这么快\\N- 我会取消所有行程尽快赶过去
-    public func parse(scanner: Scanner, reg: NSRegularExpression?) -> SubtitlePart? {
-        let isDialogue = scanner.scanString("Dialogue") != nil
-        let start: TimeInterval
-        let end: TimeInterval
-        var attributes: [NSAttributedString.Key: Any]?
-        if isDialogue {
-            _ = scanner.scanUpToString(",")
-            _ = scanner.scanString(",")
-            let startString = scanner.scanUpToString(",")
-            _ = scanner.scanString(",")
-            let endString = scanner.scanUpToString(",")
-            _ = scanner.scanString(",")
-            if let style = scanner.scanUpToString(",") {
-                _ = scanner.scanString(",")
-                attributes = styleMap[style]
-            }
-            (0 ..< 5).forEach { _ in
-                _ = scanner.scanUpToString(",")
-                _ = scanner.scanString(",")
-            }
-            if let startString, let endString {
-                start = startString.parseDuration()
-                end = endString.parseDuration()
-            } else {
-                return nil
-            }
-        } else {
-            if scanner.scanString("Format:") != nil {
-                parseStyle(scanner: scanner)
-            } else {
-                _ = scanner.scanUpToCharacters(from: .newlines)
-            }
-            return nil
+    private var eventKeys = ["Layer", "Start", "End", "Style", "Name", "MarginL", "MarginR", "MarginV", "Effect", "Text"]
+    public func canParse(scanner: Scanner) -> Bool {
+        guard scanner.scanString("[Script Info]") != nil else {
+            return false
         }
-        guard var text = scanner.scanUpToCharacters(from: .newlines) else {
-            return nil
+        while scanner.scanString("Format:") == nil {
+            _ = scanner.scanUpToCharacters(from: .newlines)
         }
-        text = text.replacingOccurrences(of: "\\N", with: "\n")
-        if let reg {
-            text = reg.stringByReplacingMatches(in: text, range: NSRange(location: 0, length: text.count), withTemplate: "")
+        guard var keys = scanner.scanUpToCharacters(from: .newlines)?.components(separatedBy: ",") else {
+            return false
         }
-        return SubtitlePart(start, end, attributedString: NSMutableAttributedString(string: text, attributes: attributes))
-    }
-
-    public func parseStyle(scanner: Scanner) {
-        _ = scanner.scanString("Format: ")
-        guard let keys = scanner.scanUpToCharacters(from: .newlines)?.components(separatedBy: ",") else {
-            return
-        }
+        keys = keys.map { $0.trimmingCharacters(in: .whitespaces) }
         while scanner.scanString("Style:") != nil {
             _ = scanner.scanString("Format: ")
             guard let values = scanner.scanUpToCharacters(from: .newlines)?.components(separatedBy: ",") else {
@@ -143,10 +98,62 @@ public class AssParse: KSParseProtocol {
             }
             var dic = [String: String]()
             for i in 1 ..< keys.count {
-                dic[keys[i].trimmingCharacters(in: .whitespaces)] = values[i]
+                dic[keys[i]] = values[i]
             }
             styleMap[values[0]] = dic.parseASSStyle()
         }
+        _ = scanner.scanString("[Events]")
+        if scanner.scanString("Format: ") != nil {
+            guard let keys = scanner.scanUpToCharacters(from: .newlines)?.components(separatedBy: ",") else {
+                return false
+            }
+            eventKeys = keys.map { $0.trimmingCharacters(in: .whitespaces) }
+        }
+        return true
+    }
+
+    // Dialogue: 0,0:12:37.73,0:12:38.83,Aki Default,,0,0,0,,{\be8}原来如此
+    // ffmpeg 软解的字幕
+    // 875,,Default,NTP,0000,0000,0000,!Effect,- 你们两个别冲这么快\\N- 我会取消所有行程尽快赶过去
+    public func parsePart(scanner: Scanner) -> SubtitlePart? {
+        let isDialogue = scanner.scanString("Dialogue") != nil
+        var dic = [String: String]()
+        for i in 0 ..< eventKeys.count {
+            if !isDialogue, i == 1 {
+                continue
+            }
+            if i == eventKeys.count - 1 {
+                dic[eventKeys[i]] = scanner.scanUpToCharacters(from: .newlines)
+            } else {
+                dic[eventKeys[i]] = scanner.scanUpToString(",")
+                _ = scanner.scanString(",")
+            }
+        }
+        let start: TimeInterval
+        let end: TimeInterval
+        if let startString = dic["Start"], let endString = dic["End"] {
+            start = startString.parseDuration()
+            end = endString.parseDuration()
+        } else {
+            if isDialogue {
+                return nil
+            } else {
+                start = 0
+                end = 0
+            }
+        }
+        var attributes: [NSAttributedString.Key: Any]?
+        if let style = dic["Style"] {
+            attributes = styleMap[style]
+        }
+        guard var text = dic["Text"] else {
+            return nil
+        }
+        text = text.replacingOccurrences(of: "\\N", with: "\n")
+        if let reg {
+            text = reg.stringByReplacingMatches(in: text, range: NSRange(location: 0, length: text.count), withTemplate: "")
+        }
+        return SubtitlePart(start, end, attributedString: NSMutableAttributedString(string: text, attributes: attributes))
     }
 }
 
@@ -156,14 +163,14 @@ public extension [String: String] {
         if let fontName = self["Fontname"], let fontSize = self["Fontsize"].flatMap(Double.init) {
             var fontDescriptor = UIFontDescriptor(name: fontName, size: fontSize)
             var fontTraits: UIFontDescriptor.SymbolicTraits = []
-            if self["Bold"] == "1" {
+            if self["Bold"] == "-1" {
                 fontTraits.insert(.traitBold)
             }
-            if self["Italic"] == "1" {
+            if self["Italic"] == "-1" {
                 fontTraits.insert(.traitItalic)
             }
             fontDescriptor = fontDescriptor.withSymbolicTraits(fontTraits) ?? fontDescriptor
-            if let degrees = self["Angle"].flatMap(Double.init) {
+            if let degrees = self["Angle"].flatMap(Double.init), degrees != 0 {
                 let radians = CGFloat(degrees * .pi / 180.0)
                 #if !canImport(UIKit)
                 let matrix = AffineTransform(rotationByRadians: radians)
@@ -172,7 +179,7 @@ public extension [String: String] {
                 #endif
                 fontDescriptor = fontDescriptor.withMatrix(matrix)
             }
-            let font = UIFont(descriptor: fontDescriptor, size: fontSize)
+            let font = UIFont(descriptor: fontDescriptor, size: fontSize) ?? UIFont.systemFont(ofSize: fontSize)
             attributes[.font] = font
         }
         // 创建字体样式
@@ -182,14 +189,11 @@ public extension [String: String] {
         if let assColor = self["OutlineColour"] {
             attributes[.strokeColor] = UIColor(assColor: assColor)
         }
-        if let assColor = self["BackColour"] {
-            attributes[.backgroundColor] = UIColor(assColor: assColor)
-        }
 
-        if self["Underline"] == "1" {
+        if self["Underline"] == "-1" {
             attributes[.underlineStyle] = NSUnderlineStyle.single.rawValue
         }
-        if self["StrikeOut"] == "1" {
+        if self["StrikeOut"] == "-1" {
             attributes[.strikethroughStyle] = NSUnderlineStyle.single.rawValue
         }
 
@@ -211,11 +215,25 @@ public extension [String: String] {
         let paragraphStyle = NSMutableParagraphStyle()
         switch self["Alignment"] {
         case "1":
-            paragraphStyle.alignment = .center
+            paragraphStyle.alignment = .left
         case "2":
+            paragraphStyle.alignment = .center
+        case "3":
+            paragraphStyle.alignment = .right
+        case "4":
+            paragraphStyle.alignment = .left
+        case "5":
+            paragraphStyle.alignment = .center
+        case "6":
+            paragraphStyle.alignment = .right
+        case "7":
+            paragraphStyle.alignment = .left
+        case "8":
+            paragraphStyle.alignment = .center
+        case "9":
             paragraphStyle.alignment = .right
         default:
-            paragraphStyle.alignment = .left
+            paragraphStyle.alignment = .center
         }
         if let marginL = self["MarginL"].flatMap(Double.init) {
             paragraphStyle.headIndent = CGFloat(marginL)
@@ -227,13 +245,16 @@ public extension [String: String] {
             paragraphStyle.paragraphSpacing = CGFloat(marginV)
         }
         attributes[.paragraphStyle] = paragraphStyle
-        if let shadowOffset = self["Shadow"].flatMap(Double.init),
+
+        if let assColor = self["BackColour"],
+           let shadowOffset = self["Shadow"].flatMap(Double.init),
            let shadowBlur = self["Outline"].flatMap(Double.init),
            shadowOffset != 0.0 || shadowBlur != 0.0
         {
             let shadow = NSShadow()
             shadow.shadowOffset = CGSize(width: CGFloat(shadowOffset), height: CGFloat(shadowOffset))
             shadow.shadowBlurRadius = CGFloat(shadowBlur)
+            shadow.shadowColor = UIColor(assColor: assColor)
             attributes[.shadow] = shadow
         }
         return attributes
@@ -241,15 +262,16 @@ public extension [String: String] {
 }
 
 public class VTTParse: KSParseProtocol {
-    public func canParse(subtitle: String) -> Bool {
-        subtitle.contains(" --> ") && subtitle.contains("WEBVTT")
+    private let reg = try? NSRegularExpression(pattern: "\\{[^}]+\\}", options: .caseInsensitive)
+    public func canParse(scanner: Scanner) -> Bool {
+        scanner.scanString("WEBVTT") != nil
     }
 
     /**
      00:00.430 --> 00:03.380
      简中封装 by Q66
      */
-    public func parse(scanner: Scanner, reg: NSRegularExpression?) -> SubtitlePart? {
+    public func parsePart(scanner: Scanner) -> SubtitlePart? {
         _ = scanner.scanUpToString("\n\n")
         let startString = scanner.scanUpToString(" --> ")
         // skip spaces and newlines by default.
@@ -268,8 +290,9 @@ public class VTTParse: KSParseProtocol {
 }
 
 public class SrtParse: KSParseProtocol {
-    public func canParse(subtitle: String) -> Bool {
-        subtitle.contains(" --> ") && !subtitle.contains("WEBVTT")
+    private let reg = try? NSRegularExpression(pattern: "\\{[^}]+\\}", options: .caseInsensitive)
+    public func canParse(scanner: Scanner) -> Bool {
+        scanner.scanString("WEBVTT") == nil && scanner.string.contains(" --> ")
     }
 
     /**
@@ -277,7 +300,7 @@ public class SrtParse: KSParseProtocol {
      00:02:52,184 --> 00:02:53,617
      {\an4}慢慢来
      */
-    public func parse(scanner: Scanner, reg: NSRegularExpression?) -> SubtitlePart? {
+    public func parsePart(scanner: Scanner) -> SubtitlePart? {
         _ = scanner.scanUpToCharacters(from: .newlines)
         let startString = scanner.scanUpToString(" --> ")
         // skip spaces and newlines by default.
