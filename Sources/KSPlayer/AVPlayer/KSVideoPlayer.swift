@@ -164,6 +164,9 @@ extension KSVideoPlayer: UIViewRepresentable {
 
         public func makeView(url: URL, options: KSOptions) -> KSPlayerLayer {
             if let playerLayer {
+                if playerLayer.url == url {
+                    return playerLayer
+                }
                 playerLayer.delegate = nil
                 playerLayer.set(url: url, options: options)
                 subtitleModel.url = url

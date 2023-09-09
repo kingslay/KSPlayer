@@ -189,7 +189,7 @@ extension KSVideoPlayerView {
         } else {
             options.formatContextOptions["listen_timeout"] = 3
         }
-        self.init(url: url, options: options) { layer in
+        self.init(url: url, options: options, title: model.name) { layer in
             if let layer {
                 model.duration = Int16(layer.player.duration)
                 if model.duration > 0 {

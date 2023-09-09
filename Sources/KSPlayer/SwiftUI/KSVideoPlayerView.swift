@@ -5,12 +5,15 @@
 //  Created by kintan on 2022/1/29.
 //
 import AVFoundation
+import MediaPlayer
 import SwiftUI
 
 @available(iOS 16.0, macOS 13.0, tvOS 16.0, watchOS 9.0, *)
 public struct KSVideoPlayerView: View {
     private let subtitleDataSouce: SubtitleDataSouce?
     private let onPlayerDisappear: ((KSPlayerLayer?) -> Void)?
+    @State
+    private var title: String
     @State
     private var delayItem: DispatchWorkItem?
     @State
@@ -63,8 +66,9 @@ public struct KSVideoPlayerView: View {
         }
     }
 
-    public init(url: URL, options: KSOptions, subtitleDataSouce: SubtitleDataSouce? = nil, onPlayerDisappear: ((KSPlayerLayer?) -> Void)? = nil) {
+    public init(url: URL, options: KSOptions, title: String? = nil, subtitleDataSouce: SubtitleDataSouce? = nil, onPlayerDisappear: ((KSPlayerLayer?) -> Void)? = nil) {
         _url = .init(initialValue: url)
+        _title = .init(initialValue: title ?? url.lastPathComponent)
         #if os(macOS)
         NSDocumentController.shared.noteNewRecentDocumentURL(url)
         #endif
@@ -76,8 +80,12 @@ public struct KSVideoPlayerView: View {
     public var body: some View {
         ZStack {
             KSVideoPlayer(coordinator: playerCoordinator, url: url, options: options)
-                .onStateChanged { _, state in
-                    if state == .bufferFinished {
+                .onStateChanged { playerLayer, state in
+                    if state == .readyToPlay {
+                        if let _title = playerLayer.player.metadata["title"] {
+                            title = _title
+                        }
+                    } else if state == .bufferFinished {
                         isMaskShow = false
                     } else {
                         isMaskShow = true
@@ -217,7 +225,8 @@ public struct KSVideoPlayerView: View {
             }
         }
         #else
-        .onHover {
+        .navigationTitle(title)
+            .onHover {
                 overView = $0
                 isMaskShow = overView
             }

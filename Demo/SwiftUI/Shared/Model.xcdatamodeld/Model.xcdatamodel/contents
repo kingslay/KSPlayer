@@ -23,7 +23,7 @@
         <attribute name="isFavorite" attributeType="Boolean" defaultValueString="NO" usesScalarValueType="YES"/>
         <attribute name="playTime" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
     </entity>
-    <configuration name="private" usedWithCloudKit="YES">
+    <configuration name="private">
         <memberEntity name="PlayModel"/>
     </configuration>
     <configuration name="public" usedWithCloudKit="YES">

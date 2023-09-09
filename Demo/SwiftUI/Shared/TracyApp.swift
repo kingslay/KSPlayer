@@ -71,14 +71,12 @@ struct TracyApp: App {
         WindowGroup("player", for: URL.self) { $url in
             if let url {
                 KSVideoPlayerView(url: url)
-                    .navigationTitle(url.lastPathComponent)
             }
         }
         .defaultPosition(.center)
         WindowGroup("player", for: PlayModel.self) { $model in
             if let model {
                 KSVideoPlayerView(model: model)
-                    .navigationTitle(model.name!)
             }
         }
         .defaultPosition(.center)
