@@ -10,7 +10,8 @@ import SwiftUI
 
 struct FilesView: View {
     @FetchRequest(
-        sortDescriptors: [NSSortDescriptor(keyPath: \M3UModel.name, ascending: true)]
+        sortDescriptors: [NSSortDescriptor(keyPath: \M3UModel.name, ascending: true)],
+        predicate: NSPredicate(format: "m3uURL != nil && name != nil")
     )
     private var m3uModels: FetchedResults<M3UModel>
     @EnvironmentObject
@@ -88,13 +89,13 @@ struct M3UView: View {
     var model: M3UModel
     var body: some View {
         VStack(alignment: .leading) {
-            Text(model.name!)
+            Text(model.name ?? "")
                 .font(.title2)
                 .foregroundColor(.primary)
             Text("total \(model.count) channels")
                 .font(.callout)
                 .foregroundColor(.secondary)
-            Text(model.m3uURL!.description)
+            Text(model.m3uURL?.description ?? "")
                 .font(.callout)
                 .foregroundColor(.secondary)
         }

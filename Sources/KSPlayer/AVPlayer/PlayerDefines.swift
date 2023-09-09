@@ -363,7 +363,9 @@ public extension URL {
         string = string.replacingOccurrences(of: "\r\n", with: "\n")
         let scanner = Scanner(string: string)
         var entrys = [(String, URL, [String: String])]()
-        _ = scanner.scanString("#EXTM3U")
+        guard scanner.scanString("#EXTM3U") != nil else {
+            return []
+        }
         while !scanner.isAtEnd {
             if let entry = parseM3U(scanner: scanner) {
                 entrys.append(entry)

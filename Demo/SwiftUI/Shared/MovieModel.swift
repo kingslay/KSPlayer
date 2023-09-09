@@ -87,7 +87,6 @@ extension M3UModel {
         self.init(context: context)
         self.name = name ?? url.lastPathComponent
         m3uURL = url
-        try? context.save()
     }
 
     func parsePlaylist(refresh: Bool = false) async -> [PlayModel] {
@@ -108,14 +107,19 @@ extension M3UModel {
         guard refresh || array.isEmpty else {
             return array
         }
-        let result = try? await m3uURL.parsePlaylist()
+        guard let result = try? await m3uURL.parsePlaylist(), result.count > 0 else {
+            await viewContext.perform {
+                viewContext.delete(self)
+            }
+            return []
+        }
         return await viewContext.perform {
             let dic = array.toDictionary {
                 $0.m3uURL = nil
                 return $0.url
             }
 
-            let models = result?.compactMap { name, url, extinf -> PlayModel in
+            let models = result.compactMap { name, url, extinf -> PlayModel in
                 if let model = dic[url] {
                     model.m3uURL = self.m3uURL
                     return model
@@ -124,7 +128,7 @@ extension M3UModel {
                     model.m3uURL = self.m3uURL
                     return model
                 }
-            } ?? []
+            }
             if self.count != Int32(models.count) {
                 self.count = Int32(models.count)
             }
