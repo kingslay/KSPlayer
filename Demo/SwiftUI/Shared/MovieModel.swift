@@ -89,7 +89,7 @@ extension M3UModel {
         m3uURL = url
     }
 
-    func parsePlaylist(refresh: Bool = false) async -> [PlayModel] {
+    func parsePlaylist(refresh: Bool = false) async throws -> [PlayModel] {
         let viewContext = managedObjectContext ?? PersistenceController.shared.viewContext
         let m3uURL = await viewContext.perform {
             self.m3uURL
@@ -107,7 +107,8 @@ extension M3UModel {
         guard refresh || array.isEmpty else {
             return array
         }
-        guard let result = try? await m3uURL.parsePlaylist(), result.count > 0 else {
+        let result = try await m3uURL.parsePlaylist()
+        guard result.count > 0 else {
             await viewContext.perform {
                 viewContext.delete(self)
             }

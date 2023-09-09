@@ -357,7 +357,8 @@ public extension URL {
     }
 
     func parsePlaylist() async throws -> [(String, URL, [String: String])] {
-        guard let data = try? await data(), var string = String(data: data, encoding: .utf8) else {
+        let data = try await data()
+        guard var string = String(data: data, encoding: .utf8) else {
             return []
         }
         string = string.replacingOccurrences(of: "\r\n", with: "\n")

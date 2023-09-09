@@ -107,7 +107,7 @@ struct M3UView: View {
             }
             Button {
                 Task {
-                    await _ = model.parsePlaylist(refresh: true)
+                    try? await _ = model.parsePlaylist(refresh: true)
                 }
             } label: {
                 Label("Refresh", systemImage: "arrow.clockwise.circle")
