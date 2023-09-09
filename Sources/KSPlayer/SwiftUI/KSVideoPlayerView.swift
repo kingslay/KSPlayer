@@ -227,8 +227,8 @@ public struct KSVideoPlayerView: View {
         #else
         .navigationTitle(title)
             .onHover {
+                isMaskShow = $0
                 overView = $0
-                isMaskShow = overView
             }
             .onDrop(of: ["public.file-url"], isTargeted: nil) { providers -> Bool in
                 providers.first?.loadDataRepresentation(forTypeIdentifier: "public.file-url") { data, _ in

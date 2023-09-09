@@ -47,9 +47,11 @@ struct PersistenceController {
     }()
 
     let container: NSPersistentCloudKitContainer
-
+    let viewContext: NSManagedObjectContext
     init(inMemory: Bool = false) {
         container = NSPersistentCloudKitContainer(name: "Model")
+        viewContext = container.viewContext
+//        viewContext = container.newBackgroundContext()
         let publicURL: URL
         let privateURL: URL
         if inMemory {
@@ -94,15 +96,18 @@ struct PersistenceController {
 //                }
             }
         }
-        container.viewContext.automaticallyMergesChangesFromParent = true
-        container.viewContext.mergePolicy = NSMergeByPropertyObjectTrumpMergePolicy
+        let viewContext = container.newBackgroundContext()
+        viewContext.automaticallyMergesChangesFromParent = true
+        viewContext.mergePolicy = NSMergeByPropertyObjectTrumpMergePolicy
 //        #if DEBUG
 //        container.viewContext.mergePolicy = NSRollbackMergePolicy
 //        #endif
-        do {
-            try container.viewContext.setQueryGenerationFrom(.current)
-        } catch {
-            fatalError("Failed to pin viewContext to the current generation:\(error)")
+        viewContext.perform {
+            do {
+                try viewContext.setQueryGenerationFrom(.current)
+            } catch {
+                fatalError("Failed to pin viewContext to the current generation:\(error)")
+            }
         }
     }
 }

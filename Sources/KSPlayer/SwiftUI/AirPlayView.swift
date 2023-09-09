@@ -48,6 +48,15 @@ public extension View {
     }
 
     @ViewBuilder
+    func `if`(_ condition: @autoclosure () -> Bool, if ifTransform: (Self) -> some View, else elseTransform: (Self) -> some View) -> some View {
+        if condition() {
+            ifTransform(self)
+        } else {
+            elseTransform(self)
+        }
+    }
+
+    @ViewBuilder
     func ifLet<T: Any>(_ optionalValue: T?, transform: (Self, T) -> some View) -> some View {
         if let value = optionalValue {
             transform(self, value)

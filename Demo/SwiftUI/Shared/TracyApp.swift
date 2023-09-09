@@ -41,7 +41,7 @@ struct TracyApp: App {
         WindowGroup {
             ContentView()
                 .environmentObject(appModel)
-                .environment(\.managedObjectContext, PersistenceController.shared.container.viewContext)
+                .environment(\.managedObjectContext, PersistenceController.shared.viewContext)
             #if !os(tvOS)
                 .handlesExternalEvents(preferring: Set(arrayLiteral: "pause"), allowing: Set(arrayLiteral: "*"))
             #endif
@@ -152,7 +152,10 @@ class APPModel: ObservableObject {
     func addM3U(url: URL, name: String? = nil) {
         let request = M3UModel.fetchRequest()
         request.predicate = NSPredicate(format: "m3uURL == %@", url.description)
-        activeM3UModel = try? PersistenceController.shared.container.viewContext.fetch(request).first ?? M3UModel(url: url, name: name)
+        let context = PersistenceController.shared.viewContext
+        context.perform {
+            self.activeM3UModel = try? context.fetch(request).first ?? M3UModel(context: context, url: url, name: name)
+        }
     }
 
     func open(url: URL) {
