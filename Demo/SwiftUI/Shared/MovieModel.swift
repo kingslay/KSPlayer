@@ -72,13 +72,38 @@ extension PlayModel {
         self.init(context: context)
         self.name = name
         self.url = url
-        logo = extinf?["tvg-logo"].flatMap { URL(string: $0) }
-        language = extinf?["tvg-language"]
-        country = extinf?["tvg-country"]
-        group = extinf?["group-title"]
-        tvgID = extinf?["tvg-id"]
-        httpReferer = extinf?["http-referrer"] ?? extinf?["http-referer"]
-        httpUserAgent = extinf?["http-user-agent"]
+        setExt(info: extinf)
+    }
+
+    func setExt(info: [String: String]? = nil) {
+        let logo = info?["tvg-logo"].flatMap { URL(string: $0) }
+        if logo != self.logo {
+            self.logo = logo
+        }
+        let language = info?["tvg-language"]
+        if language != self.language {
+            self.language = language
+        }
+        let country = info?["tvg-country"]
+        if country != self.country {
+            self.country = country
+        }
+        let group = info?["group-title"]
+        if group != self.group {
+            self.group = group
+        }
+        let tvgID = info?["tvg-id"]
+        if tvgID != self.tvgID {
+            self.tvgID = tvgID
+        }
+        let httpReferer = info?["http-referrer"] ?? info?["http-referer"]
+        if httpReferer != self.httpReferer {
+            self.httpReferer = httpReferer
+        }
+        let httpUserAgent = info?["http-user-agent"]
+        if httpUserAgent != self.httpUserAgent {
+            self.httpUserAgent = httpUserAgent
+        }
     }
 }
 
@@ -115,14 +140,16 @@ extension M3UModel {
             return []
         }
         return await viewContext.perform {
-            let dic = array.toDictionary {
-                $0.m3uURL = nil
-                return $0.url
+            var dic = array.toDictionary {
+                $0.url
             }
-
-            let models = result.compactMap { name, url, extinf -> PlayModel in
+            let models = result.map { name, url, extinf -> PlayModel in
                 if let model = dic[url] {
-                    model.m3uURL = self.m3uURL
+                    dic.removeValue(forKey: url)
+                    if name != model.name {
+                        model.name = name
+                    }
+                    model.setExt(info: extinf)
                     return model
                 } else {
                     let model = PlayModel(context: viewContext, url: url, name: name, extinf: extinf)
@@ -133,9 +160,12 @@ extension M3UModel {
             if self.count != Int32(models.count) {
                 self.count = Int32(models.count)
             }
-            if viewContext.hasChanges {
-                Task { @MainActor in
+            viewContext.perform {
+                if viewContext.hasChanges {
                     try? viewContext.save()
+                    for model in dic.values {
+                        viewContext.delete(model)
+                    }
                 }
             }
             return models

@@ -17,8 +17,6 @@ public struct KSVideoPlayerView: View {
     @State
     private var delayItem: DispatchWorkItem?
     @State
-    private var overView = false
-    @State
     private var showDropDownMenu = false
     @StateObject
     private var playerCoordinator = KSVideoPlayer.Coordinator()
@@ -105,15 +103,17 @@ public struct KSVideoPlayerView: View {
                     if let subtitleDataSouce {
                         playerCoordinator.subtitleModel.addSubtitle(dataSouce: subtitleDataSouce)
                     }
-                    #if os(macOS)
-                    NSEvent.addLocalMonitorForEvents(matching: [.mouseMoved]) {
-                        isMaskShow = overView
-                        return $0
-                    }
-                    #endif
+                    // 不要加这个，不然playerCoordinator无法释放，也可以在onDisappear调用removeMonitor释放
+//                    #if os(macOS)
+//                    NSEvent.addLocalMonitorForEvents(matching: [.mouseMoved]) {
+//                        isMaskShow = overView
+//                        return $0
+//                    }
+//                    #endif
                 }
                 .onDisappear {
                     delayItem?.cancel()
+                    delayItem = nil
                     onPlayerDisappear?(playerCoordinator.playerLayer)
                 }
                 .ignoresSafeArea()
@@ -228,7 +228,6 @@ public struct KSVideoPlayerView: View {
         .navigationTitle(title)
             .onHover {
                 isMaskShow = $0
-                overView = $0
             }
             .onDrop(of: ["public.file-url"], isTargeted: nil) { providers -> Bool in
                 providers.first?.loadDataRepresentation(forTypeIdentifier: "public.file-url") { data, _ in

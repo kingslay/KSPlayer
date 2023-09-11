@@ -182,6 +182,13 @@ extension KSVideoPlayer: UIViewRepresentable {
         }
 
         public func resetPlayer() {
+            onStateChanged = nil
+            onPlay = nil
+            onFinish = nil
+            onBufferChanged = nil
+            #if canImport(UIKit)
+            onSwipe = nil
+            #endif
             playerLayer = nil
         }
 
