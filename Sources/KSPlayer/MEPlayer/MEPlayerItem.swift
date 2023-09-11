@@ -375,7 +375,7 @@ extension MEPlayerItem {
                 track.delegate = self
                 allPlayerItemTracks.append(track)
                 videoTrack = track
-                if videos.count > 1, options.videoAdaptable {
+                if videos.filter({ $0.bitRate > 0 }).count > 1, options.videoAdaptable {
                     let bitRateState = VideoAdaptationState.BitRateState(bitRate: first.bitRate, time: CACurrentMediaTime())
                     videoAdaptation = VideoAdaptationState(bitRates: bitRates.sorted(by: <), duration: duration, fps: first.nominalFrameRate, bitRateStates: [bitRateState])
                 }
