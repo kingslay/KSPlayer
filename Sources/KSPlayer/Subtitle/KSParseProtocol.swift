@@ -165,14 +165,6 @@ public extension [String: String] {
         if let fontName = self["Fontname"], let fontSize = self["Fontsize"].flatMap(Double.init) {
             var font = UIFont(name: fontName, size: fontSize) ?? UIFont.systemFont(ofSize: fontSize)
             var fontDescriptor = font.fontDescriptor
-            var fontTraits: UIFontDescriptor.SymbolicTraits = []
-            if self["Bold"] == "-1" {
-                fontTraits.insert(.traitBold)
-            }
-            if self["Italic"] == "-1" {
-                fontTraits.insert(.traitItalic)
-            }
-            fontDescriptor = fontDescriptor.withSymbolicTraits(fontTraits) ?? fontDescriptor
             if let degrees = self["Angle"].flatMap(Double.init), degrees != 0 {
                 let radians = CGFloat(degrees * .pi / 180.0)
                 #if !canImport(UIKit)
@@ -189,30 +181,47 @@ public extension [String: String] {
         if let assColor = self["PrimaryColour"] {
             attributes[.foregroundColor] = UIColor(assColor: assColor)
         }
-        if let assColor = self["OutlineColour"] {
-            attributes[.strokeColor] = UIColor(assColor: assColor)
+        if self["Bold"] == "1" {
+            attributes[.expansion] = 1
         }
-
-        if self["Underline"] == "-1" {
+        if self["Italic"] == "1" {
+            attributes[.obliqueness] = 1
+        }
+        if self["Underline"] == "1" {
             attributes[.underlineStyle] = NSUnderlineStyle.single.rawValue
         }
-        if self["StrikeOut"] == "-1" {
+        if self["StrikeOut"] == "1" {
             attributes[.strikethroughStyle] = NSUnderlineStyle.single.rawValue
         }
 
-        if let scaleX = self["ScaleX"].flatMap(Double.init) {
-            attributes[.expansion] = scaleX / 100.0
+        if let scaleX = self["ScaleX"].flatMap(Double.init), scaleX != 100 {
+//            attributes[.expansion] = scaleX / 100.0
         }
-        if let scaleY = self["ScaleY"].flatMap(Double.init) {
-            attributes[.baselineOffset] = scaleY - 100.0
+        if let scaleY = self["ScaleY"].flatMap(Double.init), scaleY != 100 {
+//            attributes[.baselineOffset] = scaleY - 100.0
         }
 
         if let spacing = self["Spacing"].flatMap(Double.init) {
-            attributes[.kern] = CGFloat(spacing)
+//            attributes[.kern] = CGFloat(spacing)
         }
 
         if self["BorderStyle"] == "1" {
-            attributes[.strokeWidth] = -2.0
+            if let strokeWidth = self["Outline"].flatMap(Double.init), strokeWidth > 0 {
+                attributes[.strokeWidth] = strokeWidth
+                if let assColor = self["OutlineColour"] {
+                    attributes[.strokeColor] = UIColor(assColor: assColor)
+                }
+            }
+            if let assColor = self["BackColour"],
+               let shadowOffset = self["Shadow"].flatMap(Double.init),
+               shadowOffset > 0
+            {
+                let shadow = NSShadow()
+                shadow.shadowOffset = CGSize(width: CGFloat(shadowOffset), height: CGFloat(shadowOffset))
+                shadow.shadowBlurRadius = shadowOffset
+                shadow.shadowColor = UIColor(assColor: assColor)
+                attributes[.shadow] = shadow
+            }
         }
         switch self["Alignment"] {
         case "1":
@@ -248,18 +257,6 @@ public extension [String: String] {
         }
         if let marginV = self["MarginV"].flatMap(Double.init) {
             textPosition.verticalMargin = CGFloat(marginV)
-        }
-
-        if let assColor = self["BackColour"],
-           let shadowOffset = self["Shadow"].flatMap(Double.init),
-           let shadowBlur = self["Outline"].flatMap(Double.init),
-           shadowOffset != 0.0 || shadowBlur != 0.0
-        {
-            let shadow = NSShadow()
-            shadow.shadowOffset = CGSize(width: CGFloat(shadowOffset), height: CGFloat(shadowOffset))
-            shadow.shadowBlurRadius = CGFloat(shadowBlur)
-            shadow.shadowColor = UIColor(assColor: assColor)
-            attributes[.shadow] = shadow
         }
         return ASSStyle(attrs: attributes, textPosition: textPosition)
     }

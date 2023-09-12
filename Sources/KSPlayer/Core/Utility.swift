@@ -85,9 +85,12 @@ public extension UIColor {
         if colorString.hasSuffix("&") {
             colorString = String(colorString.dropLast())
         }
-        if let hexValue = Scanner(string: colorString).scanInt(representation: .hexadecimal) {
-            let alpha = CGFloat((hexValue >> 24) & 0xFF)
-            self.init(hex: hexValue, alpha: 1 - (alpha / 255))
+        if let hex = Scanner(string: colorString).scanInt(representation: .hexadecimal) {
+            let red = CGFloat((hex >> 24) & 0xFF)
+            let green = CGFloat((hex >> 16) & 0xFF)
+            let blue = CGFloat((hex >> 8) & 0xFF)
+            let alpha = 1 - (CGFloat(hex & 0xFF) / 255)
+            self.init(red: red / 255.0, green: green / 255.0, blue: blue / 255.0, alpha: alpha)
         } else {
             return nil
         }

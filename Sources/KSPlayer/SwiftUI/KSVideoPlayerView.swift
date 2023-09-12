@@ -413,16 +413,18 @@ fileprivate extension SubtitlePart {
                     Spacer()
                 }
                 Text(AttributedString(text))
-                    .font(Font(SubtitleModel.textFont))
-                    .shadow(color: .black.opacity(0.9), radius: 1, x: 1, y: 1)
-                    .foregroundColor(SubtitleModel.textColor)
+                    .if(self.textPosition == nil) {
+                        $0.font(Font(SubtitleModel.textFont))
+                            .shadow(color: .black.opacity(0.9), radius: 1, x: 1, y: 1)
+                            .foregroundColor(SubtitleModel.textColor)
+                            .italic(SubtitleModel.textItalic)
+                            .background(SubtitleModel.textBackgroundColor)
+                    }
                     .multilineTextAlignment(.center)
                     .alignmentGuide(textPosition.horizontalAlign) {
                         $0[.leading]
                     }
                     .padding(textPosition.edgeInsets)
-                    .italic(SubtitleModel.textItalic)
-                    .background(SubtitleModel.textBackgroundColor)
                 #if !os(tvOS)
                     .textSelection(.enabled)
                 #endif
