@@ -69,6 +69,7 @@ struct ContentView: View {
                 guard let url = try? result.get() else {
                     return
                 }
+                _ = url.startAccessingSecurityScopedResource()
                 appModel.open(url: url)
             }
         #endif
