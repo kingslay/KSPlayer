@@ -376,6 +376,20 @@ struct VideoSubtitleView: View {
             }
         }
     }
+
+    fileprivate static func imageView(_ image: UIImage) -> some View {
+        #if canImport(VisionKit)
+        if #available(iOS 16.0, macOS 13.0, macCatalyst 17.0, *) {
+            return LiveTextImage(uiImage: image)
+        } else {
+            return Image(uiImage: image)
+                .resizable()
+        }
+        #else
+        return Image(uiImage: image)
+            .resizable()
+        #endif
+    }
 }
 
 fileprivate extension SubtitlePart {
@@ -386,7 +400,7 @@ fileprivate extension SubtitlePart {
                 Spacer()
                 GeometryReader { geometry in
                     let fitRect = image.fitRect(geometry.size)
-                    image.imageView()
+                    VideoSubtitleView.imageView(image)
                         .offset(CGSize(width: fitRect.origin.x, height: fitRect.origin.y))
                         .frame(width: fitRect.size.width, height: fitRect.size.height)
                 }
