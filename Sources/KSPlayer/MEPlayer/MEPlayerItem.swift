@@ -346,7 +346,9 @@ extension MEPlayerItem {
         var videoIndex: Int32 = -1
         if !options.videoDisable {
             let videos = assetTracks.filter { $0.mediaType == .video }
-            let bitRates = videos.map(\.bitRate)
+            let bitRates = videos.map(\.bitRate).filter {
+                $0 > 0
+            }
             let wantedStreamNb: Int32
             if !videos.isEmpty, let index = options.wantedVideo(bitRates: bitRates) {
                 wantedStreamNb = videos[index].trackID
@@ -375,7 +377,7 @@ extension MEPlayerItem {
                 track.delegate = self
                 allPlayerItemTracks.append(track)
                 videoTrack = track
-                if videos.filter({ $0.bitRate > 0 }).count > 1, options.videoAdaptable {
+                if bitRates.count > 1, options.videoAdaptable {
                     let bitRateState = VideoAdaptationState.BitRateState(bitRate: first.bitRate, time: CACurrentMediaTime())
                     videoAdaptation = VideoAdaptationState(bitRates: bitRates.sorted(by: <), duration: duration, fps: first.nominalFrameRate, bitRateStates: [bitRateState])
                 }
@@ -484,12 +486,13 @@ extension MEPlayerItem {
                 let index = Int(corePacket.pointee.stream_index)
                 if let outputIndex = streamMapping[index],
                    let inputTb = formatCtx.pointee.streams[index]?.pointee.time_base,
-                   let outputTb = outputFormatCtx.pointee.streams[outputIndex]?.pointee.time_base
+                   let outputTb = outputFormatCtx.pointee.streams[outputIndex]?.pointee.time_base,
+                   let outputPacket
                 {
                     av_packet_ref(outputPacket, corePacket)
-                    outputPacket?.pointee.stream_index = Int32(outputIndex)
+                    outputPacket.pointee.stream_index = Int32(outputIndex)
                     av_packet_rescale_ts(outputPacket, inputTb, outputTb)
-                    outputPacket?.pointee.pos = -1
+                    outputPacket.pointee.pos = -1
                     let ret = av_interleaved_write_frame(outputFormatCtx, outputPacket)
                     if ret < 0 {
                         KSLog("can not av_interleaved_write_frame")

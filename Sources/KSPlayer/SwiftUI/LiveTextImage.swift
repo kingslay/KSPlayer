@@ -79,6 +79,20 @@ public extension UIImage {
         let newSize = size * zoom
         return CGRect(origin: CGPoint(x: (fitSize.width - newSize.width) / 2, y: fitSize.height - newSize.height), size: newSize)
     }
+
+    func imageView() -> some View {
+        #if canImport(VisionKit)
+        if #available(iOS 16.0, macOS 13.0, macCatalyst 17.0, *) {
+            return LiveTextImage(uiImage: self)
+        } else {
+            return Image(uiImage: self)
+                .resizable()
+        }
+        #else
+        return Image(uiImage: self)
+            .resizable()
+        #endif
+    }
 }
 
 class LiveTextImageView: UIImageView {

@@ -55,24 +55,6 @@ public extension KSParseProtocol {
         }
         // 归并排序才是稳定排序。系统默认是快排
         groups = groups.mergeSortBottomUp { $0 < $1 }
-        // 有的中文字幕和英文字幕分为两个group，所以要合并下
-        if var preGroup = groups.first {
-            var newGroups = [SubtitlePart]()
-            for i in 1 ..< groups.count {
-                let group = groups[i]
-                if preGroup == group {
-                    if let text = group.text {
-                        preGroup.text?.append(NSAttributedString(string: "\n"))
-                        preGroup.text?.append(text)
-                    }
-                } else {
-                    newGroups.append(preGroup)
-                    preGroup = group
-                }
-            }
-            newGroups.append(preGroup)
-            groups = newGroups
-        }
         return groups
     }
 }
@@ -144,10 +126,19 @@ public class AssParse: KSParseProtocol {
             }
         }
         var attributes: [NSAttributedString.Key: Any]?
-        var textYAlign: VerticalAlignment?
+        var textPosition: TextPosition?
         if let style = dic["Style"], let assStyle = styleMap[style] {
             attributes = assStyle.attrs
-            textYAlign = assStyle.textYAlign
+            textPosition = assStyle.textPosition
+            if let marginL = dic["MarginL"].flatMap(Double.init), marginL != 0 {
+                textPosition?.leftMargin = CGFloat(marginL)
+            }
+            if let marginR = dic["MarginR"].flatMap(Double.init), marginR != 0 {
+                textPosition?.rightMargin = CGFloat(marginR)
+            }
+            if let marginV = dic["MarginV"].flatMap(Double.init), marginV != 0 {
+                textPosition?.verticalMargin = CGFloat(marginV)
+            }
         }
         guard var text = dic["Text"] else {
             return nil
@@ -156,23 +147,21 @@ public class AssParse: KSParseProtocol {
         if let reg {
             text = reg.stringByReplacingMatches(in: text, range: NSRange(location: 0, length: text.count), withTemplate: "")
         }
-        let part = SubtitlePart(start, end, attributedString: NSMutableAttributedString(string: text, attributes: attributes))
-        part.textYAlign = textYAlign
+        let part = SubtitlePart(start, end, attributedString: NSAttributedString(string: text, attributes: attributes))
+        part.textPosition = textPosition
         return part
     }
 }
 
 public struct ASSStyle {
     let attrs: [NSAttributedString.Key: Any]
-    let textYAlign: VerticalAlignment
-    let textXAlign: TextAlignment
+    let textPosition: TextPosition
 }
 
 public extension [String: String] {
     func parseASSStyle() -> ASSStyle {
         var attributes: [NSAttributedString.Key: Any] = [:]
-        var textYAlign = VerticalAlignment.bottom
-        var textXAlign = TextAlignment.center
+        var textPosition = TextPosition()
         if let fontName = self["Fontname"], let fontSize = self["Fontsize"].flatMap(Double.init) {
             var font = UIFont(name: fontName, size: fontSize) ?? UIFont.systemFont(ofSize: fontSize)
             var fontDescriptor = font.fontDescriptor
@@ -225,44 +214,41 @@ public extension [String: String] {
         if self["BorderStyle"] == "1" {
             attributes[.strokeWidth] = -2.0
         }
-        // 设置段落样式
-        let paragraphStyle = NSMutableParagraphStyle()
         switch self["Alignment"] {
         case "1":
-            textXAlign = .leading
+            textPosition.horizontalAlign = .leading
         case "2":
-            textXAlign = .center
+            textPosition.horizontalAlign = .center
         case "3":
-            textXAlign = .trailing
+            textPosition.horizontalAlign = .trailing
         case "4":
-            textYAlign = .center
-            textXAlign = .leading
+            textPosition.verticalAlign = .center
+            textPosition.horizontalAlign = .leading
         case "5":
-            textYAlign = .center
+            textPosition.verticalAlign = .center
         case "6":
-            textYAlign = .center
-            textXAlign = .trailing
+            textPosition.verticalAlign = .center
+            textPosition.horizontalAlign = .trailing
         case "7":
-            textYAlign = .top
-            textXAlign = .leading
+            textPosition.verticalAlign = .top
+            textPosition.horizontalAlign = .leading
         case "8":
-            textYAlign = .top
+            textPosition.verticalAlign = .top
         case "9":
-            textYAlign = .top
-            textXAlign = .trailing
+            textPosition.verticalAlign = .top
+            textPosition.horizontalAlign = .trailing
         default:
             break
         }
         if let marginL = self["MarginL"].flatMap(Double.init) {
-            paragraphStyle.headIndent = CGFloat(marginL)
+            textPosition.leftMargin = CGFloat(marginL)
         }
         if let marginR = self["MarginR"].flatMap(Double.init) {
-            paragraphStyle.tailIndent = CGFloat(marginR)
+            textPosition.rightMargin = CGFloat(marginR)
         }
         if let marginV = self["MarginV"].flatMap(Double.init) {
-            paragraphStyle.paragraphSpacing = CGFloat(marginV)
+            textPosition.verticalMargin = CGFloat(marginV)
         }
-        attributes[.paragraphStyle] = paragraphStyle
 
         if let assColor = self["BackColour"],
            let shadowOffset = self["Shadow"].flatMap(Double.init),
@@ -275,7 +261,7 @@ public extension [String: String] {
             shadow.shadowColor = UIColor(assColor: assColor)
             attributes[.shadow] = shadow
         }
-        return ASSStyle(attrs: attributes, textYAlign: textYAlign, textXAlign: textXAlign)
+        return ASSStyle(attrs: attributes, textPosition: textPosition)
     }
 }
 

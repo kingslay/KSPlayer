@@ -80,7 +80,7 @@ public class FFmpegAssetTrack: MediaPlayerTrack {
                 if frameSize < 1 {
                     frameSize = timebase.den / timebase.num
                 }
-                nominalFrameRate = Float(codecpar.sample_rate / frameSize)
+                nominalFrameRate = max(Float(codecpar.sample_rate / frameSize), 44)
             } else {
                 nominalFrameRate = 24
             }
@@ -97,6 +97,9 @@ public class FFmpegAssetTrack: MediaPlayerTrack {
             name = value
         } else {
             name = language ?? mediaType.rawValue
+        }
+        if mediaType == .subtitle {
+            name += "(Embed)"
         }
         description = name + ", " + description
         //        var buf = [Int8](repeating: 0, count: 256)

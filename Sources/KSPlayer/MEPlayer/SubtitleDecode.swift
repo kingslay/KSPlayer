@@ -46,7 +46,7 @@ class SubtitleDecode: DecodeProtocol {
         if gotsubtitle == 0 {
             return
         }
-        let (origin, attributedString, image) = text(subtitle: subtitle)
+        let parts = text(subtitle: subtitle)
         let position = packet.position
         var start = packet.assetTrack.timebase.cmtime(for: position).seconds + TimeInterval(subtitle.start_display_time) / 1000.0
         if start >= startTime {
@@ -56,17 +56,11 @@ class SubtitleDecode: DecodeProtocol {
         if duration == 0 {
             duration = packet.assetTrack.timebase.cmtime(for: packet.duration).seconds
         }
-        let part = SubtitlePart(start, start + duration, attributedString: attributedString)
-        part.image = image
-        part.origin = origin
-        let frame = SubtitleFrame(part: part, timebase: packet.assetTrack.timebase)
-        frame.position = position
-        if let preSubtitleFrame, preSubtitleFrame.part == part {
-            if let attributedString {
-                preSubtitleFrame.part.text?.append(NSAttributedString(string: "\n"))
-                preSubtitleFrame.part.text?.append(attributedString)
-            }
-        } else {
+        for part in parts {
+            part.start = start
+            part.end = start + duration
+            let frame = SubtitleFrame(part: part, timebase: packet.assetTrack.timebase)
+            frame.position = position
             if let preSubtitleFrame, preSubtitleFrame.part.end == preSubtitleFrame.part.start {
                 preSubtitleFrame.part.end = frame.part.start
             }
@@ -89,10 +83,11 @@ class SubtitleDecode: DecodeProtocol {
         }
     }
 
-    private func text(subtitle: AVSubtitle) -> (CGPoint, NSMutableAttributedString?, UIImage?) {
-        var attributedString: NSMutableAttributedString?
+    private func text(subtitle: AVSubtitle) -> [SubtitlePart] {
+        var parts = [SubtitlePart]()
         var images = [(CGRect, CGImage)]()
         var origin: CGPoint = .zero
+        var attributedString: NSMutableAttributedString?
         for i in 0 ..< Int(subtitle.num_rects) {
             guard let rect = subtitle.rects[i]?.pointee else {
                 continue
@@ -107,11 +102,8 @@ class SubtitleDecode: DecodeProtocol {
                 attributedString?.append(NSAttributedString(string: String(cString: text)))
             } else if let ass = rect.ass {
                 let scanner = Scanner(string: String(cString: ass))
-                if let group = assParse.parsePart(scanner: scanner), let text = group.text {
-                    if attributedString == nil {
-                        attributedString = NSMutableAttributedString()
-                    }
-                    attributedString?.append(text)
+                if let group = assParse.parsePart(scanner: scanner) {
+                    parts.append(group)
                 }
             } else if rect.type == SUBTITLE_BITMAP {
                 if let image = scale.transfer(format: AV_PIX_FMT_PAL8, width: rect.w, height: rect.h, data: Array(tuple: rect.data), linesize: Array(tuple: rect.linesize))?.cgImage() {
@@ -119,14 +111,23 @@ class SubtitleDecode: DecodeProtocol {
                 }
             }
         }
-        if images.count > 1 {
-            origin = .zero
+        if images.count > 0 {
+            let part = SubtitlePart(0, 0, attributedString: nil)
+            if images.count > 1 {
+                origin = .zero
+            }
+            var image: UIImage?
+            // 因为字幕需要有透明度,所以不能用jpg；tif在iOS支持没有那么好，会有绿色背景； 用heic格式，展示的时候会卡主线程；所以最终用png。
+            if let data = CGImage.combine(images: images)?.data(type: .png, quality: 0.2) {
+                image = UIImage(data: data)
+            }
+            part.image = image
+            part.origin = origin
+            parts.append(part)
         }
-        var image: UIImage?
-        // 因为字幕需要有透明度,所以不能用jpg；tif在iOS支持没有那么好，会有绿色背景； 用heic格式，展示的时候会卡主线程；所以最终用png。
-        if let data = CGImage.combine(images: images)?.data(type: .png, quality: 0.2) {
-            image = UIImage(data: data)
+        if let attributedString {
+            parts.append(SubtitlePart(0, 0, attributedString: attributedString))
         }
-        return (origin, attributedString, image)
+        return parts
     }
 }

@@ -542,6 +542,38 @@ extension TextAlignment: Identifiable {
     public var id: Self { self }
 }
 
+extension HorizontalAlignment: Hashable, RawRepresentable {
+    public typealias RawValue = String
+    public init?(rawValue: RawValue) {
+        if rawValue == "Leading" {
+            self = .leading
+        } else if rawValue == "Center" {
+            self = .center
+        } else if rawValue == "Trailing" {
+            self = .trailing
+        } else {
+            return nil
+        }
+    }
+
+    public var rawValue: RawValue {
+        switch self {
+        case .leading:
+            return "Leading"
+        case .center:
+            return "Center"
+        case .trailing:
+            return "Trailing"
+        default:
+            return ""
+        }
+    }
+}
+
+extension HorizontalAlignment: Identifiable {
+    public var id: Self { self }
+}
+
 extension VerticalAlignment: Hashable, RawRepresentable {
     public typealias RawValue = String
     public init?(rawValue: RawValue) {

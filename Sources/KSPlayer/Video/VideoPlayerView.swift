@@ -238,7 +238,7 @@ open class VideoPlayerView: PlayerView {
         guard !isSliderSliding else { return }
         super.player(layer: layer, currentTime: currentTime, totalTime: totalTime)
         if srtControl.subtitle(currentTime: currentTime) {
-            if let part = srtControl.part {
+            if let part = srtControl.parts.first {
                 subtitleBackView.image = part.image
                 subtitleLabel.attributedText = part.text
                 subtitleBackView.isHidden = false
