@@ -64,7 +64,7 @@ public class AssParse: KSParseProtocol {
     private var styleMap = [String: ASSStyle]()
     private var eventKeys = ["Layer", "Start", "End", "Style", "Name", "MarginL", "MarginR", "MarginV", "Effect", "Text"]
     public func canParse(scanner: Scanner) -> Bool {
-        guard scanner.scanUpToCharacters(from: .newlines)?.hasSuffix("[Script Info]") ?? false else {
+        guard scanner.scanString("[Script Info]") != nil else {
             return false
         }
         while scanner.scanString("Format:") == nil {
@@ -268,7 +268,7 @@ public extension [String: String] {
 public class VTTParse: KSParseProtocol {
     private let reg = try? NSRegularExpression(pattern: "\\{[^}]+\\}", options: .caseInsensitive)
     public func canParse(scanner: Scanner) -> Bool {
-        scanner.scanUpToCharacters(from: .newlines)?.hasSuffix("WEBVTT") ?? false
+        scanner.scanString("WEBVTT") != nil
     }
 
     /**
