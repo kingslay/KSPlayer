@@ -519,6 +519,7 @@ public struct PlatformView<Content: View>: View {
         #if os(tvOS)
         ScrollView {
             content()
+                .padding()
         }
         .pickerStyle(.navigationLink)
         #else
