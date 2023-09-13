@@ -357,13 +357,16 @@ public extension URL {
     }
 
     func parsePlaylist() async throws -> [(String, URL, [String: String])] {
-        guard let data = try? await data(), var string = String(data: data, encoding: .utf8) else {
+        let data = try await data()
+        guard var string = String(data: data, encoding: .utf8) else {
             return []
         }
         string = string.replacingOccurrences(of: "\r\n", with: "\n")
         let scanner = Scanner(string: string)
         var entrys = [(String, URL, [String: String])]()
-        _ = scanner.scanString("#EXTM3U")
+        guard scanner.scanString("#EXTM3U") != nil else {
+            return []
+        }
         while !scanner.isAtEnd {
             if let entry = parseM3U(scanner: scanner) {
                 entrys.append(entry)
@@ -536,6 +539,38 @@ extension TextAlignment: RawRepresentable {
 }
 
 extension TextAlignment: Identifiable {
+    public var id: Self { self }
+}
+
+extension HorizontalAlignment: Hashable, RawRepresentable {
+    public typealias RawValue = String
+    public init?(rawValue: RawValue) {
+        if rawValue == "Leading" {
+            self = .leading
+        } else if rawValue == "Center" {
+            self = .center
+        } else if rawValue == "Trailing" {
+            self = .trailing
+        } else {
+            return nil
+        }
+    }
+
+    public var rawValue: RawValue {
+        switch self {
+        case .leading:
+            return "Leading"
+        case .center:
+            return "Center"
+        case .trailing:
+            return "Trailing"
+        default:
+            return ""
+        }
+    }
+}
+
+extension HorizontalAlignment: Identifiable {
     public var id: Self { self }
 }
 

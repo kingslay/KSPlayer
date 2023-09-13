@@ -384,7 +384,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1.1.1.1;
-				DEVELOPMENT_TEAM = KBU9Z89QAQ;
+				DEVELOPMENT_TEAM = 3RVHT92X9D;
 				INFOPLIST_FILE = "demo-tvOS/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",

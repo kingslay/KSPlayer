@@ -164,6 +164,9 @@ extension KSVideoPlayer: UIViewRepresentable {
 
         public func makeView(url: URL, options: KSOptions) -> KSPlayerLayer {
             if let playerLayer {
+                if playerLayer.url == url {
+                    return playerLayer
+                }
                 playerLayer.delegate = nil
                 playerLayer.set(url: url, options: options)
                 subtitleModel.url = url
@@ -179,6 +182,13 @@ extension KSVideoPlayer: UIViewRepresentable {
         }
 
         public func resetPlayer() {
+            onStateChanged = nil
+            onPlay = nil
+            onFinish = nil
+            onBufferChanged = nil
+            #if canImport(UIKit)
+            onSwipe = nil
+            #endif
             playerLayer = nil
         }
 
@@ -209,7 +219,7 @@ extension KSVideoPlayer.Coordinator: KSPlayerLayerDelegate {
                     guard let self else { return }
                     self.subtitleModel.addSubtitle(dataSouce: subtitleDataSouce)
                     if self.subtitleModel.selectedSubtitleInfo == nil, layer.options.autoSelectEmbedSubtitle {
-                        self.subtitleModel.selectedSubtitleInfo = self.subtitleModel.subtitleInfos.first
+                        self.subtitleModel.selectedSubtitleInfo = subtitleDataSouce.infos.first
                     }
                 }
             }

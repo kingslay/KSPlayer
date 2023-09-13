@@ -58,12 +58,15 @@ struct SettingAudioView: View {
 struct SettingVideoView: View {
     @Default(\.hardwareDecode)
     private var hardwareDecode
+    @Default(\.asynchronousDecompression)
+    private var asynchronousDecompression
     @Default(\.isUseDisplayLayer)
     private var isUseDisplayLayer
 
     var body: some View {
         Form {
             Toggle("Hardware decoder", isOn: $hardwareDecode)
+            Toggle("Asynchronous Decompression", isOn: $asynchronousDecompression)
             Toggle("Use DisplayLayer", isOn: $isUseDisplayLayer)
         }
     }
@@ -72,7 +75,7 @@ struct SettingVideoView: View {
 struct SettingSubtitleView: View {
     @Default(\.textFontSize)
     private var textFontSize
-    @Default(\.textItalic)
+    @Default(\.textBold)
     private var textBold
     @Default(\.textItalic)
     private var textItalic
@@ -80,15 +83,16 @@ struct SettingSubtitleView: View {
     private var textColor
     @Default(\.textBackgroundColor)
     private var textBackgroundColor
-    @Default(\.textXAlign)
-    private var textXAlign
-    @Default(\.textYAlign)
-    private var textYAlign
-    @Default(\.textXMargin)
-    private var textXMargin
-    @Default(\.textYMargin)
-    private var textYMargin
-
+    @Default(\.verticalAlign)
+    private var verticalAlign
+    @Default(\.horizontalAlign)
+    private var horizontalAlign
+    @Default(\.leftMargin)
+    private var leftMargin
+    @Default(\.rightMargin)
+    private var rightMargin
+    @Default(\.verticalMargin)
+    private var verticalMargin
     var body: some View {
         Form {
             Section("Position") {
@@ -106,27 +110,33 @@ struct SettingSubtitleView: View {
                 #endif
             }
             Section("Position") {
-                Picker("Align X:", selection: $textXAlign) {
-                    ForEach([TextAlignment.leading, .center, .trailing]) { value in
+                Picker("Align X:", selection: $horizontalAlign) {
+                    ForEach([HorizontalAlignment.leading, .center, .trailing]) { value in
                         Text(value.rawValue).tag(value)
                     }
                 }
-                Picker("Align Y:", selection: $textYAlign) {
+                Picker("Align Y:", selection: $verticalAlign) {
                     ForEach([VerticalAlignment.top, .center, .bottom]) { value in
                         Text(value.rawValue).tag(value)
                     }
                 }
                 HStack {
                     #if os(iOS)
-                    Text("Margin X:")
+                    Text("Margin Left:")
                     #endif
-                    TextField("Margin X:", value: $textXMargin, format: .number)
+                    TextField("Margin Left:", value: $leftMargin, format: .number)
                 }
                 HStack {
                     #if os(iOS)
-                    Text("Margin Y:")
+                    Text("Margin Right:")
                     #endif
-                    TextField("Margin Y:", value: $textYMargin, format: .number)
+                    TextField("Margin Right:", value: $rightMargin, format: .number)
+                }
+                HStack {
+                    #if os(iOS)
+                    Text("Margin Vertical:")
+                    #endif
+                    TextField("Margin Vertical:", value: $verticalMargin, format: .number)
                 }
             }
         }

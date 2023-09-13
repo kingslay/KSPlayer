@@ -33,16 +33,44 @@ public struct AirPlayView: UIViewRepresentable {
 }
 #endif
 public extension View {
+    /// Applies the given transform if the given condition evaluates to `true`.
+    /// - Parameters:
+    ///   - condition: The condition to evaluate.
+    ///   - transform: The transform to apply to the source `View`.
+    /// - Returns: Either the original `View` or the modified `View` if the condition is `true`.
     @ViewBuilder
-    func `if`(_ condition: Bool, transform: (Self) -> some View) -> some View {
-        if condition {
+    func `if`(_ condition: @autoclosure () -> Bool, transform: (Self) -> some View) -> some View {
+        if condition() {
             transform(self)
         } else {
             self
         }
     }
 
-    func modifier(@ViewBuilder transform: (Self) -> some View) -> some View {
-        transform(self)
+    @ViewBuilder
+    func `if`(_ condition: @autoclosure () -> Bool, if ifTransform: (Self) -> some View, else elseTransform: (Self) -> some View) -> some View {
+        if condition() {
+            ifTransform(self)
+        } else {
+            elseTransform(self)
+        }
+    }
+
+    @ViewBuilder
+    func ifLet<T: Any>(_ optionalValue: T?, transform: (Self, T) -> some View) -> some View {
+        if let value = optionalValue {
+            transform(self, value)
+        } else {
+            self
+        }
+    }
+}
+
+extension Bool {
+    static var iOS16: Bool {
+        guard #available(iOS 16, *) else {
+            return true
+        }
+        return false
     }
 }

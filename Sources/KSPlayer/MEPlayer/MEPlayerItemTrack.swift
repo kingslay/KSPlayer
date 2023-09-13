@@ -70,6 +70,8 @@ class SyncPlayerItemTrack<Frame: MEFrame>: PlayerItemTrackProtocol, CustomString
     func seek(time: TimeInterval) {
         if options.isAccurateSeek {
             seekTime = time
+        } else {
+            seekTime = 0
         }
         isEndOfFile = false
         state = .flush

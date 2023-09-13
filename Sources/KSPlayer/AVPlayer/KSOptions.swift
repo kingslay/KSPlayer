@@ -83,7 +83,7 @@ open class KSOptions {
     public var videoFilters = [String]()
     public var syncDecodeVideo = false
     public var hardwareDecode = KSOptions.hardwareDecode
-    public var asynchronousDecompression = true
+    public var asynchronousDecompression = KSOptions.asynchronousDecompression
     public var videoDisable = false
     public var canStartPictureInPictureAutomaticallyFromInline = true
     private var videoClockDelayCount = 0
@@ -388,6 +388,7 @@ public extension KSOptions {
     /// seek完是否自动播放
     static var isSeekedAutoPlay = true
     static var hardwareDecode = true
+    static var asynchronousDecompression = true
     static var isPipPopViewController = false
     /// 日志级别
     static var logLevel = LogLevel.warning

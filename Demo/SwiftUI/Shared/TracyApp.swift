@@ -41,7 +41,7 @@ struct TracyApp: App {
         WindowGroup {
             ContentView()
                 .environmentObject(appModel)
-                .environment(\.managedObjectContext, PersistenceController.shared.container.viewContext)
+                .environment(\.managedObjectContext, PersistenceController.shared.viewContext)
             #if !os(tvOS)
                 .handlesExternalEvents(preferring: Set(arrayLiteral: "pause"), allowing: Set(arrayLiteral: "*"))
             #endif
@@ -71,14 +71,12 @@ struct TracyApp: App {
         WindowGroup("player", for: URL.self) { $url in
             if let url {
                 KSVideoPlayerView(url: url)
-                    .navigationTitle(url.lastPathComponent)
             }
         }
         .defaultPosition(.center)
         WindowGroup("player", for: PlayModel.self) { $model in
             if let model {
                 KSVideoPlayerView(model: model)
-                    .navigationTitle(model.name!)
             }
         }
         .defaultPosition(.center)
@@ -122,7 +120,9 @@ class APPModel: ObservableObject {
             if let activeM3UModel, activeM3UModel != oldValue {
                 activeM3UURL = activeM3UModel.m3uURL
                 Task { @MainActor in
-                    playlist = await activeM3UModel.parsePlaylist()
+                    if let list = try? await activeM3UModel.parsePlaylist() {
+                        playlist = list
+                    }
                 }
             }
         }
@@ -154,7 +154,10 @@ class APPModel: ObservableObject {
     func addM3U(url: URL, name: String? = nil) {
         let request = M3UModel.fetchRequest()
         request.predicate = NSPredicate(format: "m3uURL == %@", url.description)
-        activeM3UModel = try? PersistenceController.shared.container.viewContext.fetch(request).first ?? M3UModel(url: url, name: name)
+        let context = PersistenceController.shared.viewContext
+        context.perform {
+            self.activeM3UModel = try? context.fetch(request).first ?? M3UModel(context: context, url: url, name: name)
+        }
     }
 
     func open(url: URL) {

@@ -188,7 +188,9 @@ public final class AudioEnginePlayer: AudioPlayer, FrameOutput {
     }
 
     func pause() {
-        engine.pause()
+        if engine.isRunning {
+            engine.pause()
+        }
     }
 
     func flush() {

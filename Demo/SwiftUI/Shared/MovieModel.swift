@@ -46,7 +46,7 @@ public class PlayModel: MovieModel, Codable {
     }
 
     public required convenience init(from decoder: Decoder) throws {
-        self.init(context: PersistenceController.shared.container.viewContext)
+        self.init(context: PersistenceController.shared.viewContext)
         let values = try decoder.container(keyedBy: CodingKeys.self)
         url = try values.decode(URL.self, forKey: .url)
         name = try values.decode(String.self, forKey: .name)
@@ -64,66 +64,112 @@ public class PlayModel: MovieModel, Codable {
 }
 
 extension PlayModel {
-    convenience init(url: URL) {
-        self.init(url: url, name: url.lastPathComponent)
+    convenience init(context: NSManagedObjectContext = PersistenceController.shared.viewContext, url: URL) {
+        self.init(context: context, url: url, name: url.lastPathComponent)
     }
 
-    convenience init(context: NSManagedObjectContext = PersistenceController.shared.container.viewContext, url: URL, name: String, extinf: [String: String]? = nil) {
+    convenience init(context: NSManagedObjectContext = PersistenceController.shared.viewContext, url: URL, name: String, extinf: [String: String]? = nil) {
         self.init(context: context)
         self.name = name
         self.url = url
-        logo = extinf?["tvg-logo"].flatMap { URL(string: $0) }
-        language = extinf?["tvg-language"]
-        country = extinf?["tvg-country"]
-        group = extinf?["group-title"]
-        tvgID = extinf?["tvg-id"]
-        httpReferer = extinf?["http-referrer"] ?? extinf?["http-referer"]
-        httpUserAgent = extinf?["http-user-agent"]
+        setExt(info: extinf)
+    }
+
+    func setExt(info: [String: String]? = nil) {
+        let logo = info?["tvg-logo"].flatMap { URL(string: $0) }
+        if logo != self.logo {
+            self.logo = logo
+        }
+        let language = info?["tvg-language"]
+        if language != self.language {
+            self.language = language
+        }
+        let country = info?["tvg-country"]
+        if country != self.country {
+            self.country = country
+        }
+        let group = info?["group-title"]
+        if group != self.group {
+            self.group = group
+        }
+        let tvgID = info?["tvg-id"]
+        if tvgID != self.tvgID {
+            self.tvgID = tvgID
+        }
+        let httpReferer = info?["http-referrer"] ?? info?["http-referer"]
+        if httpReferer != self.httpReferer {
+            self.httpReferer = httpReferer
+        }
+        let httpUserAgent = info?["http-user-agent"]
+        if httpUserAgent != self.httpUserAgent {
+            self.httpUserAgent = httpUserAgent
+        }
     }
 }
 
 extension M3UModel {
-    convenience init(context: NSManagedObjectContext = PersistenceController.shared.container.viewContext, url: URL, name: String? = nil) {
+    convenience init(context: NSManagedObjectContext = PersistenceController.shared.viewContext, url: URL, name: String? = nil) {
         self.init(context: context)
         self.name = name ?? url.lastPathComponent
         m3uURL = url
-        try? context.save()
     }
 
-    @MainActor
-    func parsePlaylist(refresh: Bool = false) async -> [PlayModel] {
-        let viewContext = managedObjectContext ?? PersistenceController.shared.container.viewContext
-        let request = NSFetchRequest<PlayModel>(entityName: "PlayModel")
-        request.predicate = NSPredicate(format: "m3uURL == %@", m3uURL!.description)
-        request.sortDescriptors = [NSSortDescriptor(key: "name", ascending: true)]
-        let array: [PlayModel] = (try? viewContext.fetch(request)) ?? []
+    func parsePlaylist(refresh: Bool = false) async throws -> [PlayModel] {
+        let viewContext = managedObjectContext ?? PersistenceController.shared.viewContext
+        let m3uURL = await viewContext.perform {
+            self.m3uURL
+        }
+        guard let m3uURL else {
+            return []
+        }
+        let array: [PlayModel] = await viewContext.perform {
+            let request = NSFetchRequest<PlayModel>(entityName: "PlayModel")
+            request.predicate = NSPredicate(format: "m3uURL == %@", m3uURL.description)
+            request.sortDescriptors = [NSSortDescriptor(key: "name", ascending: true)]
+            return (try? viewContext.fetch(request)) ?? []
+        }
+
         guard refresh || array.isEmpty else {
             return array
         }
-        let dic = array.toDictionary {
-            $0.m3uURL = nil
-            return $0.url
-        }
-        let result = try? await m3uURL?.parsePlaylist()
-        let models = result?.compactMap { name, url, extinf -> PlayModel in
-            if let model = dic[url] {
-                model.m3uURL = m3uURL
-                return model
-            } else {
-                let model = PlayModel(context: viewContext, url: url, name: name, extinf: extinf)
-                model.m3uURL = m3uURL
-                return model
+        let result = try await m3uURL.parsePlaylist()
+        guard result.count > 0 else {
+            await viewContext.perform {
+                viewContext.delete(self)
             }
-        } ?? []
-        if count != Int32(models.count) {
-            count = Int32(models.count)
+            return []
         }
-        if viewContext.hasChanges {
-            Task { @MainActor in
-                try? viewContext.save()
+        return await viewContext.perform {
+            var dic = array.toDictionary {
+                $0.url
             }
+            let models = result.map { name, url, extinf -> PlayModel in
+                if let model = dic[url] {
+                    dic.removeValue(forKey: url)
+                    if name != model.name {
+                        model.name = name
+                    }
+                    model.setExt(info: extinf)
+                    return model
+                } else {
+                    let model = PlayModel(context: viewContext, url: url, name: name, extinf: extinf)
+                    model.m3uURL = self.m3uURL
+                    return model
+                }
+            }
+            if self.count != Int32(models.count) {
+                self.count = Int32(models.count)
+            }
+            viewContext.perform {
+                if viewContext.hasChanges {
+                    try? viewContext.save()
+                    for model in dic.values {
+                        viewContext.delete(model)
+                    }
+                }
+            }
+            return models
         }
-        return models
     }
 }
 
@@ -146,7 +192,7 @@ extension KSVideoPlayerView {
     init(url: URL) {
         let request = NSFetchRequest<PlayModel>(entityName: "PlayModel")
         request.predicate = NSPredicate(format: "url == %@", url.description)
-        let model = (try? PersistenceController.shared.container.viewContext.fetch(request).first) ?? PlayModel(url: url)
+        let model = PlayModel(url: url)
         self.init(model: model)
     }
 
@@ -189,13 +235,15 @@ extension KSVideoPlayerView {
         } else {
             options.formatContextOptions["listen_timeout"] = 3
         }
-        self.init(url: url, options: options) { layer in
+        self.init(url: url, options: options, title: model.name) { layer in
             if let layer {
                 model.duration = Int16(layer.player.duration)
                 if model.duration > 0 {
                     model.current = Int16(layer.player.currentPlaybackTime)
                 }
-                try? model.managedObjectContext?.save()
+                model.managedObjectContext?.perform {
+                    try? model.managedObjectContext?.save()
+                }
             }
         }
     }

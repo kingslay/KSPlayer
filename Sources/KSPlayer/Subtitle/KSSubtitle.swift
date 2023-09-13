@@ -11,12 +11,13 @@ import CoreGraphics
 import Foundation
 import SwiftUI
 
-public class SubtitlePart: CustomStringConvertible, NSMutableCopying {
-    public let start: TimeInterval
+public class SubtitlePart: CustomStringConvertible, Identifiable {
+    public var start: TimeInterval
     public var end: TimeInterval
     public var origin: CGPoint = .zero
-    public let text: NSMutableAttributedString?
+    public let text: NSAttributedString?
     public var image: UIImage?
+    public var textPosition: TextPosition?
     public var description: String {
         "Subtile Group ==========\nstart: \(start)\nend:\(end)\ntext:\(String(describing: text))"
     }
@@ -25,17 +26,36 @@ public class SubtitlePart: CustomStringConvertible, NSMutableCopying {
         var text = string
         text = text.trimmingCharacters(in: .whitespaces)
         text = text.replacingOccurrences(of: "\r", with: "")
-        self.init(start, end, attributedString: NSMutableAttributedString(string: text))
+        self.init(start, end, attributedString: NSAttributedString(string: text))
     }
 
-    public init(_ start: TimeInterval, _ end: TimeInterval, attributedString: NSMutableAttributedString?) {
+    public init(_ start: TimeInterval, _ end: TimeInterval, attributedString: NSAttributedString?) {
         self.start = start
         self.end = end
         text = attributedString
     }
+}
 
-    public func mutableCopy(with _: NSZone? = nil) -> Any {
-        SubtitlePart(start, end, attributedString: text?.mutableCopy() as? NSMutableAttributedString)
+public struct TextPosition {
+    public var verticalAlign: VerticalAlignment = .bottom
+    public var horizontalAlign: HorizontalAlignment = .center
+    public var leftMargin: CGFloat = 0
+    public var rightMargin: CGFloat = 0
+    public var verticalMargin: CGFloat = 10
+    public var edgeInsets: EdgeInsets {
+        var edgeInsets = EdgeInsets()
+        if verticalAlign == .bottom {
+            edgeInsets.bottom = verticalMargin
+        } else if verticalAlign == .top {
+            edgeInsets.top = verticalMargin
+        }
+        if horizontalAlign == .leading {
+            edgeInsets.leading = leftMargin
+        }
+        if horizontalAlign == .trailing {
+            edgeInsets.trailing = rightMargin
+        }
+        return edgeInsets
     }
 }
 
@@ -69,7 +89,7 @@ extension SubtitlePart: NumericComparable {
 }
 
 public protocol KSSubtitleProtocol {
-    func search(for time: TimeInterval) -> SubtitlePart?
+    func search(for time: TimeInterval) -> [SubtitlePart]
 }
 
 public protocol SubtitleInfo: KSSubtitleProtocol, AnyObject, Hashable, Identifiable {
@@ -95,103 +115,21 @@ public extension SubtitleInfo {
 
 public class KSSubtitle {
     public var parts: [SubtitlePart] = []
-    public private(set) var currentIndex = 0 {
-        didSet {
-            if oldValue != currentIndex {
-                isChangeIndex = true
-            }
-        }
-    }
-
-    private var isFirstSearch = true
-    public var isChangeIndex = true
-    public var currentPart: SubtitlePart {
-        parts[currentIndex]
-    }
-
-    public var partsCount: Int {
-        parts.count
-    }
-
     public init() {}
 }
 
 extension KSSubtitle: KSSubtitleProtocol {
     /// Search for target group for time
-    public func search(for time: TimeInterval) -> SubtitlePart? {
-        var index = currentIndex
-        if searchIndex(for: time) != nil {
-            if currentIndex == index {
-                index = currentIndex + 1
-                if index < parts.count, parts[index] == time {
-                    // swiftlint:disable force_cast
-                    let copy = parts[currentIndex].mutableCopy() as! SubtitlePart
-                    // swiftlint:enable force_cast
-                    repeat {
-                        if let otherText = parts[index].text {
-                            copy.text?.append(NSAttributedString(string: "\n"))
-                            copy.text?.append(otherText)
-                        }
-                        copy.end = parts[index].end
-                        index += 1
-                    } while index < parts.count && parts[index] == time
-                    return copy
-                }
-            }
-            return parts[currentIndex]
-        } else {
-            return nil
-        }
-    }
-
-    public func searchIndex(for time: TimeInterval) -> Int? {
-        guard currentIndex < partsCount else {
-            return nil
-        }
-        let group = parts[currentIndex]
-        if group == time {
-            if isFirstSearch {
-                isChangeIndex = true
-                isFirstSearch = false
-            } else {
-                isChangeIndex = false
-            }
-            return currentIndex
-        } else if group < time, currentIndex + 1 < parts.count {
-            let group = parts[currentIndex + 1]
-            if group == time {
-                currentIndex += 1
-                return currentIndex
+    public func search(for time: TimeInterval) -> [SubtitlePart] {
+        var result = [SubtitlePart]()
+        for part in parts {
+            if part == time {
+                result.append(part)
+            } else if part.start > time {
+                break
             }
         }
-        if let firstIndex = parts.binarySearch(key: time) {
-            currentIndex = firstIndex
-            return currentIndex
-        }
-        return nil
-    }
-
-    public func searchIndex(filter: (SubtitlePart, Int) -> Bool) -> NSRange? {
-        var length = 0
-        for (index, group) in parts.enumerated() {
-            let count = group.text?.length ?? 0
-            if filter(group, length + count) {
-                if currentIndex != index {
-                    currentIndex = index
-                } else {
-                    if isFirstSearch {
-                        isChangeIndex = true
-                        isFirstSearch = false
-                    } else {
-                        isChangeIndex = false
-                    }
-                }
-                return NSRange(location: length, length: count)
-            } else {
-                length += count
-            }
-        }
-        return nil
+        return result
     }
 }
 
@@ -216,10 +154,12 @@ public extension KSSubtitle {
         guard let subtitle = string else {
             throw NSError(errorCode: .subtitleUnEncoding)
         }
-        let parse = KSOptions.subtitleParses.first { $0.canParse(subtitle: subtitle) }
+        let scanner = Scanner(string: String(subtitle.replacingOccurrences(of: "\r\n\r\n", with: "\n\n")))
+        _ = scanner.scanCharacters(from: .controlCharacters)
+        let parse = KSOptions.subtitleParses.first { $0.canParse(scanner: scanner) }
         if let parse {
-            parts = parse.parse(subtitle: subtitle)
-            if partsCount == 0 {
+            parts = parse.parse(scanner: scanner)
+            if parts.count == 0 {
                 throw NSError(errorCode: .subtitleUnParse)
             }
         } else {
@@ -300,29 +240,11 @@ open class SubtitleModel: ObservableObject {
     public static var textFontSize = SubtitleModel.Size.standard.rawValue
     public static var textBold = false
     public static var textItalic = false
-    public static var textXAlign: TextAlignment = .center
-    public static var textYAlign: VerticalAlignment = .bottom
-    public static var textXMargin: Int = 0
-    public static var textYMargin: Int = 10
-    public static var edgeInsets: EdgeInsets {
-        var edgeInsets = EdgeInsets()
-        if SubtitleModel.textYAlign == .bottom {
-            edgeInsets.bottom = CGFloat(SubtitleModel.textYMargin)
-        } else if SubtitleModel.textYAlign == .top {
-            edgeInsets.top = CGFloat(SubtitleModel.textYMargin)
-        }
-        if SubtitleModel.textXAlign == .leading {
-            edgeInsets.leading = CGFloat(SubtitleModel.textXMargin)
-        } else if SubtitleModel.textXAlign == .trailing {
-            edgeInsets.trailing = CGFloat(SubtitleModel.textXMargin)
-        }
-        return edgeInsets
-    }
-
+    public static var textPosition = TextPosition()
     private var subtitleDataSouces: [SubtitleDataSouce] = KSOptions.subtitleDataSouces
     public private(set) var subtitleInfos = [any SubtitleInfo]()
     @Published
-    public private(set) var part: SubtitlePart?
+    public private(set) var parts = [SubtitlePart]()
     public var subtitleDelay = 0.0 // s
     public var url: URL? {
         didSet {
@@ -331,7 +253,7 @@ open class SubtitleModel: ObservableObject {
                 addSubtitle(dataSouce: datasouce)
             }
             DispatchQueue.main.async { [weak self] in
-                self?.part = nil
+                self?.parts = []
                 self?.selectedSubtitleInfo = nil
             }
         }
@@ -354,24 +276,19 @@ open class SubtitleModel: ObservableObject {
     }
 
     public func subtitle(currentTime: TimeInterval) -> Bool {
-        let newPart: SubtitlePart?
+        var newParts = [SubtitlePart]()
         if let subtile = selectedSubtitleInfo {
             let currentTime = currentTime - subtile.delay - subtitleDelay
-            if let part = subtile.search(for: currentTime) {
-                newPart = part
-            } else {
-                if let part, part.end > part.start, !(part == currentTime) {
-                    newPart = nil
-                } else {
-                    newPart = part
+            newParts = subtile.search(for: currentTime)
+            if newParts.isEmpty {
+                newParts = parts.filter { part in
+                    part.end <= part.start || part == currentTime
                 }
             }
-        } else {
-            newPart = nil
         }
         // swiftUI不会判断是否相等。所以需要这边判断下。
-        if newPart != part {
-            part = newPart
+        if newParts != parts {
+            parts = newParts
             return true
         } else {
             return false

@@ -69,7 +69,9 @@ struct ContentView: View {
                 guard let url = try? result.get() else {
                     return
                 }
-                appModel.open(url: url)
+                if url.startAccessingSecurityScopedResource() {
+                    appModel.open(url: url)
+                }
             }
         #endif
             .onOpenURL { url in
@@ -153,11 +155,8 @@ public extension View {
 private extension PlayModel {
     var view: some View {
         KSVideoPlayerView(model: self)
-        #if !os(tvOS)
-            .navigationTitle(name!)
-        #endif
         #if !os(macOS)
-        .toolbar(.hidden, for: .tabBar)
+            .toolbar(.hidden, for: .tabBar)
         #endif
     }
 }
