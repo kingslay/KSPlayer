@@ -98,7 +98,7 @@ public class FFmpegAssetTrack: MediaPlayerTrack {
         } else {
             name = language ?? mediaType.rawValue
         }
-        let info = name
+        var info = name
         if mediaType == .subtitle {
             info += " (Embed)"
         }
