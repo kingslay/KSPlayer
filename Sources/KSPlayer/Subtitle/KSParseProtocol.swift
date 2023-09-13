@@ -63,12 +63,20 @@ public class AssParse: KSParseProtocol {
     private let reg = try? NSRegularExpression(pattern: "\\{[^}]+\\}", options: .caseInsensitive)
     private var styleMap = [String: ASSStyle]()
     private var eventKeys = ["Layer", "Start", "End", "Style", "Name", "MarginL", "MarginR", "MarginV", "Effect", "Text"]
+    private var playResX = Float(0.0)
+    private var playResY = Float(0.0)
     public func canParse(scanner: Scanner) -> Bool {
         guard scanner.scanString("[Script Info]") != nil else {
             return false
         }
         while scanner.scanString("Format:") == nil {
-            _ = scanner.scanUpToCharacters(from: .newlines)
+            if scanner.scanString("PlayResX:") != nil {
+                playResX = scanner.scanFloat() ?? 0
+            } else if scanner.scanString("PlayResY:") != nil {
+                playResY = scanner.scanFloat() ?? 0
+            } else {
+                _ = scanner.scanUpToCharacters(from: .newlines)
+            }
         }
         guard var keys = scanner.scanUpToCharacters(from: .newlines)?.components(separatedBy: ",") else {
             return false
@@ -152,6 +160,8 @@ public class AssParse: KSParseProtocol {
         return part
     }
 }
+
+extension String {}
 
 public struct ASSStyle {
     let attrs: [NSAttributedString.Key: Any]
