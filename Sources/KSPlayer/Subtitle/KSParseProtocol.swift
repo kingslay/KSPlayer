@@ -158,6 +158,51 @@ public struct ASSStyle {
     let textPosition: TextPosition
 }
 
+public extension [NSAttributedString.Key: Any] {
+    mutating func parseStyle(style: String) {
+        var fontName: String?
+        var fontSize: Int?
+        let styleArr = style.components(separatedBy: CharacterSet(charactersIn: "{}"))
+        for subStr in styleArr {
+            let subStyleArr = subStr.components(separatedBy: "\\")
+            for item in subStyleArr {
+                var itemStr = item.replacingOccurrences(of: " ", with: "")
+                if itemStr.hasPrefix("fn") {
+                    fontName = String(itemStr.dropFirst(2))
+                } else if itemStr.hasPrefix("fs") {
+                    fontSize = Int(itemStr.dropFirst(2))
+                } else if let match = itemStr.range(of: "^b[0-9]+$", options: .regularExpression) {
+                    itemStr = String(itemStr[match])
+                    itemStr = itemStr.replacingOccurrences(of: "b", with: "")
+                    self[.expansion] = Int(itemStr)
+                } else if let match = itemStr.range(of: "^i[0-9]+$", options: .regularExpression) {
+                    itemStr = String(itemStr[match])
+                    itemStr = itemStr.replacingOccurrences(of: "i", with: "")
+                    self[.obliqueness] = Float(itemStr)
+                } else if let match = itemStr.range(of: "^u[0-9]+$", options: .regularExpression) {
+                    itemStr = String(itemStr[match])
+                    itemStr = itemStr.replacingOccurrences(of: "u", with: "")
+                    self[.underlineStyle] = Int(itemStr)
+                } else if let match = itemStr.range(of: "^s[0-9]+$", options: .regularExpression) {
+                    itemStr = String(itemStr[match])
+                    itemStr = itemStr.replacingOccurrences(of: "s", with: "")
+                    self[.strikethroughStyle] = Int(itemStr)
+                } else if itemStr.hasPrefix("c&H") || itemStr.hasPrefix("1c&H") {
+                    if let range = itemStr.range(of: "c") {
+                        itemStr = String(itemStr[range.upperBound...])
+                        self[.foregroundColor] = UIColor(assColor: itemStr)
+                    }
+                }
+            }
+        }
+        // Apply font attributes if available
+        if let fontName, let fontSize {
+            let font = UIFont(name: fontName, size: CGFloat(fontSize))
+            self[.font] = font
+        }
+    }
+}
+
 public extension [String: String] {
     func parseASSStyle() -> ASSStyle {
         var attributes: [NSAttributedString.Key: Any] = [:]

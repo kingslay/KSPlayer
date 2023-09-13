@@ -19,10 +19,10 @@ open class AudioPlayerView: PlayerView {
         toolBar.addArrangedSubview(toolBar.currentTimeLabel)
         toolBar.addArrangedSubview(toolBar.timeSlider)
         toolBar.addArrangedSubview(toolBar.totalTimeLabel)
-        toolBar.playButton.tintColor = UIColor(hex: 0x2166FF)
-        toolBar.timeSlider.setThumbImage(UIColor(hex: 0x2980FF).createImage(size: CGSize(width: 2, height: 15)), for: .normal)
-        toolBar.timeSlider.minimumTrackTintColor = UIColor(hex: 0xC8C7CC)
-        toolBar.timeSlider.maximumTrackTintColor = UIColor(hex: 0xEDEDED)
+        toolBar.playButton.tintColor = UIColor(rgb: 0x2166FF)
+        toolBar.timeSlider.setThumbImage(UIColor(rgb: 0x2980FF).createImage(size: CGSize(width: 2, height: 15)), for: .normal)
+        toolBar.timeSlider.minimumTrackTintColor = UIColor(rgb: 0xC8C7CC)
+        toolBar.timeSlider.maximumTrackTintColor = UIColor(rgb: 0xEDEDED)
         toolBar.timeSlider.trackHeigt = 7
         addSubview(toolBar)
         toolBar.translatesAutoresizingMaskIntoConstraints = false

@@ -86,17 +86,21 @@ public extension UIColor {
             colorString = String(colorString.dropLast())
         }
         if let hex = Scanner(string: colorString).scanInt(representation: .hexadecimal) {
-            let red = CGFloat((hex >> 24) & 0xFF)
-            let green = CGFloat((hex >> 16) & 0xFF)
-            let blue = CGFloat((hex >> 8) & 0xFF)
-            let alpha = 1 - (CGFloat(hex & 0xFF) / 255)
-            self.init(red: red / 255.0, green: green / 255.0, blue: blue / 255.0, alpha: alpha)
+            self.init(abgr: hex)
         } else {
             return nil
         }
     }
 
-    convenience init(hex: Int, alpha: CGFloat = 1) {
+    convenience init(abgr hex: Int) {
+        let alpha = 1 - (CGFloat(hex >> 24 & 0xFF) / 255)
+        let blue = CGFloat((hex >> 16) & 0xFF)
+        let green = CGFloat((hex >> 8) & 0xFF)
+        let red = CGFloat(hex & 0xFF)
+        self.init(red: red / 255.0, green: green / 255.0, blue: blue / 255.0, alpha: alpha)
+    }
+
+    convenience init(rgb hex: Int, alpha: CGFloat = 1) {
         let red = CGFloat((hex >> 16) & 0xFF)
         let green = CGFloat((hex >> 8) & 0xFF)
         let blue = CGFloat(hex & 0xFF)
