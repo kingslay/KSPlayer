@@ -252,7 +252,7 @@ public struct KSVideoPlayerView: View {
     }
 }
 
-@available(iOS 15, tvOS 15, macOS 12, *)
+@available(iOS 15, tvOS 16, macOS 12, *)
 struct VideoControllerView: View {
     @ObservedObject
     fileprivate var config: KSVideoPlayer.Coordinator
@@ -436,7 +436,7 @@ fileprivate extension SubtitlePart {
     }
 }
 
-@available(iOS 15, tvOS 15, macOS 12, *)
+@available(iOS 15, tvOS 16, macOS 12, *)
 struct VideoSettingView: View {
     @ObservedObject
     fileprivate var config: KSVideoPlayer.Coordinator
@@ -445,7 +445,7 @@ struct VideoSettingView: View {
     @Environment(\.dismiss)
     private var dismiss
     var body: some View {
-        Form {
+        PlatformView {
             Picker(selection: $config.playbackRate) {
                 ForEach([0.5, 1.0, 1.25, 1.5, 2.0] as [Float]) { value in
                     // 需要有一个变量text。不然会自动帮忙加很多0
@@ -509,6 +509,27 @@ struct VideoSettingView: View {
                 .keyboardShortcut(.defaultAction)
             }
         #endif
+    }
+}
+
+@available(iOS 15, tvOS 16, macOS 12, *)
+public struct PlatformView<Content: View>: View {
+    private let content: () -> Content
+    public var body: some View {
+        #if os(tvOS)
+        ScrollView {
+            content()
+        }
+        .pickerStyle(.navigationLink)
+        #else
+        Form {
+            content()
+        }
+        #endif
+    }
+
+    public init(@ViewBuilder content: @escaping () -> Content) {
+        self.content = content
     }
 }
 
