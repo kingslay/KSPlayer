@@ -98,9 +98,6 @@ public class FFmpegAssetTrack: MediaPlayerTrack {
         } else {
             name = language ?? mediaType.rawValue
         }
-        if mediaType == .subtitle {
-            name += "(Embed)"
-        }
         description = name + ", " + description
         //        var buf = [Int8](repeating: 0, count: 256)
         //        avcodec_string(&buf, buf.count, codecpar, 0)
