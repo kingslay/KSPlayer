@@ -502,28 +502,31 @@ public extension LogLevel {
 }
 
 public protocol LogHandler {
+    @inlinable 
     func log(level: LogLevel, message: CustomStringConvertible, file: String, function: String, line: UInt)
 }
 
 public class OSLog: LogHandler {
-    private let label: String
+    public let label: String
     public init(lable: String) {
         label = lable
     }
 
+    @inlinable
     public func log(level: LogLevel, message: CustomStringConvertible, file: String, function: String, line: UInt) {
         os_log(level.logType, "%@ %@: %@:%d %@ | %@", level.description, label, file, line, function, message.description)
     }
 }
 
 public class FileLog: LogHandler {
-    private let fileHandle: FileHandle
-    private let formatter = DateFormatter()
+    public let fileHandle: FileHandle
+    public let formatter = DateFormatter()
     public init(fileHandle: FileHandle) {
         self.fileHandle = fileHandle
         formatter.dateFormat = "MM-dd HH:mm:ss.SSSSSS"
     }
 
+    @inlinable
     public func log(level: LogLevel, message: CustomStringConvertible, file: String, function: String, line: UInt) {
         let string = String(format: "%@ %@ %@:%d %@ | %@\n", formatter.string(from: Date()), level.description, file, line, function, message.description)
         if let data = string.data(using: .utf8) {

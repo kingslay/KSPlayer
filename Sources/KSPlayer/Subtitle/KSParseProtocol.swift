@@ -152,65 +152,91 @@ public class AssParse: KSParseProtocol {
             return nil
         }
         text = text.replacingOccurrences(of: "\\N", with: "\n")
-        if let reg {
-            text = reg.stringByReplacingMatches(in: text, range: NSRange(location: 0, length: text.count), withTemplate: "")
-        }
-        let part = SubtitlePart(start, end, attributedString: NSAttributedString(string: text, attributes: attributes))
+        let part = SubtitlePart(start, end, attributedString: text.build(attributed: attributes))
         part.textPosition = textPosition
         return part
     }
 }
 
-extension String {}
+extension String {
+    func build(attributed: [NSAttributedString.Key: Any]?) -> NSAttributedString {
+        let lineCodes = splitStyle()
+        let attributedStr = NSMutableAttributedString()
+        var attributed = attributed ?? [:]
+        for lineCode in lineCodes {
+            attributedStr.append(lineCode.0.parseStyle(attributes: &attributed, style: lineCode.1))
+        }
+        return attributedStr
+    }
 
-public struct ASSStyle {
-    let attrs: [NSAttributedString.Key: Any]
-    let textPosition: TextPosition
-}
+    func splitStyle() -> [(String, String?)] {
+        let scanner = Scanner(string: self)
+        var result = [(String, String?)]()
+        var sytle: String?
+        while !scanner.isAtEnd {
+            if scanner.scanString("{") != nil {
+                sytle = scanner.scanUpToString("}")
+                _ = scanner.scanString("}")
+            } else if let text = scanner.scanUpToString("{") {
+                result.append((text, sytle))
+                _ = scanner.scanString("{")
+                sytle = scanner.scanUpToString("}")
+                _ = scanner.scanString("}")
+            } else if let text = scanner.scanUpToCharacters(from: .newlines) {
+                result.append((text, sytle))
+            }
+        }
+        return result
+    }
 
-public extension [NSAttributedString.Key: Any] {
-    mutating func parseStyle(style: String) {
+    func parseStyle(attributes: inout [NSAttributedString.Key: Any], style: String?) -> NSAttributedString {
+        guard let style else {
+            return NSAttributedString(string: self, attributes: attributes)
+        }
         var fontName: String?
         var fontSize: Int?
-        let styleArr = style.components(separatedBy: CharacterSet(charactersIn: "{}"))
-        for subStr in styleArr {
-            let subStyleArr = subStr.components(separatedBy: "\\")
-            for item in subStyleArr {
-                var itemStr = item.replacingOccurrences(of: " ", with: "")
-                if itemStr.hasPrefix("fn") {
-                    fontName = String(itemStr.dropFirst(2))
-                } else if itemStr.hasPrefix("fs") {
-                    fontSize = Int(itemStr.dropFirst(2))
-                } else if let match = itemStr.range(of: "^b[0-9]+$", options: .regularExpression) {
-                    itemStr = String(itemStr[match])
-                    itemStr = itemStr.replacingOccurrences(of: "b", with: "")
-                    self[.expansion] = Int(itemStr)
-                } else if let match = itemStr.range(of: "^i[0-9]+$", options: .regularExpression) {
-                    itemStr = String(itemStr[match])
-                    itemStr = itemStr.replacingOccurrences(of: "i", with: "")
-                    self[.obliqueness] = Float(itemStr)
-                } else if let match = itemStr.range(of: "^u[0-9]+$", options: .regularExpression) {
-                    itemStr = String(itemStr[match])
-                    itemStr = itemStr.replacingOccurrences(of: "u", with: "")
-                    self[.underlineStyle] = Int(itemStr)
-                } else if let match = itemStr.range(of: "^s[0-9]+$", options: .regularExpression) {
-                    itemStr = String(itemStr[match])
-                    itemStr = itemStr.replacingOccurrences(of: "s", with: "")
-                    self[.strikethroughStyle] = Int(itemStr)
-                } else if itemStr.hasPrefix("c&H") || itemStr.hasPrefix("1c&H") {
-                    if let range = itemStr.range(of: "c") {
-                        itemStr = String(itemStr[range.upperBound...])
-                        self[.foregroundColor] = UIColor(assColor: itemStr)
-                    }
+        let subStyleArr = style.components(separatedBy: "\\")
+        for item in subStyleArr {
+            var itemStr = item.replacingOccurrences(of: " ", with: "")
+            if itemStr.hasPrefix("fn") {
+                fontName = String(itemStr.dropFirst(2))
+            } else if itemStr.hasPrefix("fs") {
+                fontSize = Int(itemStr.dropFirst(2))
+            } else if let match = itemStr.range(of: "^b[0-9]+$", options: .regularExpression) {
+                itemStr = String(itemStr[match])
+                itemStr = itemStr.replacingOccurrences(of: "b", with: "")
+                attributes[.expansion] = Int(itemStr)
+            } else if let match = itemStr.range(of: "^i[0-9]+$", options: .regularExpression) {
+                itemStr = String(itemStr[match])
+                itemStr = itemStr.replacingOccurrences(of: "i", with: "")
+                attributes[.obliqueness] = Float(itemStr)
+            } else if let match = itemStr.range(of: "^u[0-9]+$", options: .regularExpression) {
+                itemStr = String(itemStr[match])
+                itemStr = itemStr.replacingOccurrences(of: "u", with: "")
+                attributes[.underlineStyle] = Int(itemStr)
+            } else if let match = itemStr.range(of: "^s[0-9]+$", options: .regularExpression) {
+                itemStr = String(itemStr[match])
+                itemStr = itemStr.replacingOccurrences(of: "s", with: "")
+                attributes[.strikethroughStyle] = Int(itemStr)
+            } else if itemStr.hasPrefix("c&H") || itemStr.hasPrefix("1c&H") {
+                if let range = itemStr.range(of: "c") {
+                    itemStr = String(itemStr[range.upperBound...])
+                    attributes[.foregroundColor] = UIColor(assColor: itemStr)
                 }
             }
         }
         // Apply font attributes if available
         if let fontName, let fontSize {
             let font = UIFont(name: fontName, size: CGFloat(fontSize))
-            self[.font] = font
+            attributes[.font] = font
         }
+        return NSAttributedString(string: self, attributes: attributes)
     }
+}
+
+public struct ASSStyle {
+    let attrs: [NSAttributedString.Key: Any]
+    let textPosition: TextPosition
 }
 
 public extension [String: String] {
@@ -262,7 +288,7 @@ public extension [String: String] {
 
         if self["BorderStyle"] == "1" {
             if let strokeWidth = self["Outline"].flatMap(Double.init), strokeWidth > 0 {
-                attributes[.strokeWidth] = strokeWidth
+                attributes[.strokeWidth] = -strokeWidth
                 if let assColor = self["OutlineColour"] {
                     attributes[.strokeColor] = UIColor(assColor: assColor)
                 }
