@@ -502,7 +502,7 @@ public extension LogLevel {
 }
 
 public protocol LogHandler {
-    @inlinable 
+    @inlinable
     func log(level: LogLevel, message: CustomStringConvertible, file: String, function: String, line: UInt)
 }
 

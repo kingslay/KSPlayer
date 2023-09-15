@@ -60,7 +60,6 @@ public extension KSParseProtocol {
 }
 
 public class AssParse: KSParseProtocol {
-    private let reg = try? NSRegularExpression(pattern: "\\{[^}]+\\}", options: .caseInsensitive)
     private var styleMap = [String: ASSStyle]()
     private var eventKeys = ["Layer", "Start", "End", "Style", "Name", "MarginL", "MarginR", "MarginV", "Effect", "Text"]
     private var playResX = Float(0.0)
@@ -159,7 +158,7 @@ public class AssParse: KSParseProtocol {
 }
 
 extension String {
-    func build(attributed: [NSAttributedString.Key: Any]?) -> NSAttributedString {
+    func build(attributed: [NSAttributedString.Key: Any]? = nil) -> NSAttributedString {
         let lineCodes = splitStyle()
         let attributedStr = NSMutableAttributedString()
         var attributed = attributed ?? [:]
@@ -344,7 +343,6 @@ public extension [String: String] {
 }
 
 public class VTTParse: KSParseProtocol {
-    private let reg = try? NSRegularExpression(pattern: "\\{[^}]+\\}", options: .caseInsensitive)
     public func canParse(scanner: Scanner) -> Bool {
         scanner.scanString("WEBVTT") != nil
     }
@@ -360,19 +358,15 @@ public class VTTParse: KSParseProtocol {
         _ = scanner.scanString("-->")
         if let startString,
            let endString = scanner.scanUpToCharacters(from: .newlines),
-           var text = scanner.scanUpToString("\n\n")
+           let text = scanner.scanUpToString("\n\n")
         {
-            if let reg {
-                text = reg.stringByReplacingMatches(in: text, range: NSRange(location: 0, length: text.count), withTemplate: "")
-            }
-            return SubtitlePart(startString.parseDuration(), endString.parseDuration(), text)
+            return SubtitlePart(startString.parseDuration(), endString.parseDuration(), attributedString: text.build())
         }
         return nil
     }
 }
 
 public class SrtParse: KSParseProtocol {
-    private let reg = try? NSRegularExpression(pattern: "\\{[^}]+\\}", options: .caseInsensitive)
     public func canParse(scanner: Scanner) -> Bool {
         scanner.string.contains(" --> ")
     }
@@ -389,12 +383,9 @@ public class SrtParse: KSParseProtocol {
         _ = scanner.scanString("-->")
         if let startString,
            let endString = scanner.scanUpToCharacters(from: .newlines),
-           var text = scanner.scanUpToString("\n\n")
+           let text = scanner.scanUpToString("\n\n")
         {
-            if let reg {
-                text = reg.stringByReplacingMatches(in: text, range: NSRange(location: 0, length: text.count), withTemplate: "")
-            }
-            return SubtitlePart(startString.parseDuration(), endString.parseDuration(), text)
+            return SubtitlePart(startString.parseDuration(), endString.parseDuration(), attributedString: text.build())
         }
         return nil
     }
