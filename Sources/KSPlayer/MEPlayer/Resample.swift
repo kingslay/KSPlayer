@@ -280,7 +280,12 @@ public class AudioDescriptor: Equatable {
             layoutTag = tag
         } else {
             av_channel_layout_default(&outChannel, Int32(channels))
-            layoutTag = outChannel.layoutTag!
+            if let tag = outChannel.layoutTag {
+                layoutTag = tag
+            } else {
+                av_channel_layout_default(&outChannel, 2)
+                layoutTag = outChannel.layoutTag!
+            }
         }
         KSLog("[audio] out channelLayout: \(outChannel)")
         var commonFormat: AVAudioCommonFormat
