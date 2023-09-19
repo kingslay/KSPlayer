@@ -67,19 +67,27 @@ struct TracyApp: App {
         .defaultSize(width: 1120, height: 630)
         .defaultPosition(.center)
         #endif
-        #if os(macOS)
+        #if !os(tvOS)
         WindowGroup("player", for: URL.self) { $url in
             if let url {
                 KSVideoPlayerView(url: url)
             }
         }
+        #if os(macOS)
         .defaultPosition(.center)
+        #endif
+        #endif
+        #if !os(tvOS)
         WindowGroup("player", for: PlayModel.self) { $model in
             if let model {
                 KSVideoPlayerView(model: model)
             }
         }
+        #if os(macOS)
         .defaultPosition(.center)
+        #endif
+        #endif
+        #if os(macOS)
         Settings {
             TabBarItem.Setting.destination
         }

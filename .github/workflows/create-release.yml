@@ -12,7 +12,7 @@ on:
 jobs:
   create_release:
     name: Create Release
-    runs-on: macos-12
+    runs-on: macos-13
     steps:
       - uses: actions/checkout@main
         with:

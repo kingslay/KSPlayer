@@ -346,11 +346,17 @@ extension KSMEPlayer: MediaPlayerProtocol {
     public func play() {
         KSLog("play \(self)")
         playbackState = .playing
+        if #available(iOS 15.0, tvOS 15.0, macOS 12.0, *) {
+            pipController?.invalidatePlaybackState()
+        }
     }
 
     public func pause() {
         KSLog("pause \(self)")
         playbackState = .paused
+        if #available(iOS 15.0, tvOS 15.0, macOS 12.0, *) {
+            pipController?.invalidatePlaybackState()
+        }
     }
 
     public func shutdown() {
