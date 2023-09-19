@@ -426,7 +426,9 @@ public extension KSOptions {
 
     static func outputNumberOfChannels(channels: AVAudioChannelCount, isUseAudioRenderer: Bool) -> AVAudioChannelCount {
         let maximumOutputNumberOfChannels = AVAudioChannelCount(AVAudioSession.sharedInstance().maximumOutputNumberOfChannels)
+        let preferredOutputNumberOfChannels = AVAudioChannelCount(AVAudioSession.sharedInstance().preferredOutputNumberOfChannels)
         KSLog("[audio] maximumOutputNumberOfChannels: \(maximumOutputNumberOfChannels)")
+        KSLog("[audio] preferredOutputNumberOfChannels: \(preferredOutputNumberOfChannels)")
         setAudioSession()
         let isSpatialAudioEnabled = isSpatialAudioEnabled()
         KSLog("[audio] isSpatialAudioEnabled: \(isSpatialAudioEnabled)")
@@ -434,7 +436,10 @@ public extension KSOptions {
         var channels = channels
         if channels > 2 {
             let minChannels = min(maximumOutputNumberOfChannels, channels)
-            try? AVAudioSession.sharedInstance().setPreferredOutputNumberOfChannels(Int(minChannels))
+            if minChannels > preferredOutputNumberOfChannels {
+                try? AVAudioSession.sharedInstance().setPreferredOutputNumberOfChannels(Int(minChannels))
+                KSLog("[audio] set preferredOutputNumberOfChannels: \(minChannels)")
+            }
             if !(isUseAudioRenderer && isSpatialAudioEnabled) {
                 let maxRouteChannelsCount = AVAudioSession.sharedInstance().currentRoute.outputs.compactMap {
                     $0.channels?.count
@@ -442,11 +447,8 @@ public extension KSOptions {
                 KSLog("[audio] currentRoute max channels: \(maxRouteChannelsCount)")
                 channels = AVAudioChannelCount(min(AVAudioSession.sharedInstance().outputNumberOfChannels, maxRouteChannelsCount))
             }
-        } else {
-            try? AVAudioSession.sharedInstance().setPreferredOutputNumberOfChannels(2)
         }
         KSLog("[audio] outputNumberOfChannels: \(AVAudioSession.sharedInstance().outputNumberOfChannels)")
-        KSLog("[audio] preferredOutputNumberOfChannels: \(AVAudioSession.sharedInstance().preferredOutputNumberOfChannels)")
         return channels
     }
     #endif
