@@ -239,12 +239,12 @@ public struct ASSStyle {
 }
 
 public extension [String: String] {
+    // swiftlint:disable cyclomatic_complexity
     func parseASSStyle() -> ASSStyle {
         var attributes: [NSAttributedString.Key: Any] = [:]
         var textPosition = TextPosition()
         if let fontName = self["Fontname"], let fontSize = self["Fontsize"].flatMap(Double.init) {
             var font = UIFont(name: fontName, size: fontSize) ?? UIFont.systemFont(ofSize: fontSize)
-            var fontDescriptor = font.fontDescriptor
             if let degrees = self["Angle"].flatMap(Double.init), degrees != 0 {
                 let radians = CGFloat(degrees * .pi / 180.0)
                 #if !canImport(UIKit)
@@ -252,9 +252,9 @@ public extension [String: String] {
                 #else
                 let matrix = CGAffineTransform(rotationAngle: radians)
                 #endif
-                fontDescriptor = fontDescriptor.withMatrix(matrix)
+                let fontDescriptor = UIFontDescriptor(name: fontName, matrix: matrix)
+                font = UIFont(descriptor: fontDescriptor, size: fontSize) ?? font
             }
-            font = UIFont(descriptor: fontDescriptor, size: fontSize) ?? font
             attributes[.font] = font
         }
         // 创建字体样式
@@ -274,16 +274,16 @@ public extension [String: String] {
             attributes[.strikethroughStyle] = NSUnderlineStyle.single.rawValue
         }
 
-        if let scaleX = self["ScaleX"].flatMap(Double.init), scaleX != 100 {
+//        if let scaleX = self["ScaleX"].flatMap(Double.init), scaleX != 100 {
 //            attributes[.expansion] = scaleX / 100.0
-        }
-        if let scaleY = self["ScaleY"].flatMap(Double.init), scaleY != 100 {
+//        }
+//        if let scaleY = self["ScaleY"].flatMap(Double.init), scaleY != 100 {
 //            attributes[.baselineOffset] = scaleY - 100.0
-        }
+//        }
 
-        if let spacing = self["Spacing"].flatMap(Double.init) {
+//        if let spacing = self["Spacing"].flatMap(Double.init) {
 //            attributes[.kern] = CGFloat(spacing)
-        }
+//        }
 
         if self["BorderStyle"] == "1" {
             if let strokeWidth = self["Outline"].flatMap(Double.init), strokeWidth > 0 {
@@ -340,6 +340,7 @@ public extension [String: String] {
         }
         return ASSStyle(attrs: attributes, textPosition: textPosition)
     }
+    // swiftlint:enable cyclomatic_complexity
 }
 
 public class VTTParse: KSParseProtocol {

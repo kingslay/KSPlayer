@@ -284,26 +284,17 @@ extension URL {
 
         let hash = offsets.map { offset -> String in
             file.seek(toFileOffset: offset)
-            return (file.readData(ofLength: 4096) as NSData).md5()
+            return file.readData(ofLength: 4096).md5()
         }.joined(separator: ";")
         return hash
     }
 }
 
-import CommonCrypto
-extension NSData {
+import CryptoKit
+
+public extension Data {
     func md5() -> String {
-        let digestLength = Int(CC_MD5_DIGEST_LENGTH)
-        let md5Buffer = UnsafeMutablePointer<CUnsignedChar>.allocate(capacity: digestLength)
-
-        CC_MD5(bytes, CC_LONG(length), md5Buffer)
-
-        let output = NSMutableString(capacity: Int(CC_MD5_DIGEST_LENGTH * 2))
-        for i in 0 ..< digestLength {
-            output.appendFormat("%02x", md5Buffer[i])
-        }
-
-        md5Buffer.deallocate()
-        return NSString(format: output) as String
+        let digestData = Insecure.MD5.hash(data: self)
+        return String(digestData.map { String(format: "%02hhx", $0) }.joined().prefix(32))
     }
 }

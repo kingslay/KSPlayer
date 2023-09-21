@@ -108,14 +108,18 @@ struct HomeView: View {
 
 struct MoiveView: View {
     static let width: CGFloat = {
-        #if os(iOS)
-        if UIDevice.current.userInterfaceIdiom == .pad {
-            return min(KSOptions.sceneSize.width, KSOptions.sceneSize.height) / 3 - 20
-        } else {
+        #if canImport(UIKit)
+        if UIDevice.current.userInterfaceIdiom == .phone {
             return min(KSOptions.sceneSize.width, KSOptions.sceneSize.height) / 2 - 20
+        } else if UIDevice.current.userInterfaceIdiom == .pad {
+            return min(KSOptions.sceneSize.width, KSOptions.sceneSize.height) / 3 - 20
+        } else if UIDevice.current.userInterfaceIdiom == .tv {
+            return KSOptions.sceneSize.width / 4 - 150
+        } else if UIDevice.current.userInterfaceIdiom == .mac {
+            return CGFloat(192)
+        } else {
+            return CGFloat(192)
         }
-        #elseif os(tvOS)
-        return KSOptions.sceneSize.width / 4 - 150
         #else
         return CGFloat(192)
         #endif

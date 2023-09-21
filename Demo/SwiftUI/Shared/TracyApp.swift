@@ -192,7 +192,11 @@ class APPModel: ObservableObject {
         NavigationLink(value: model) {
             MoiveView(model: model)
         }
+        #if targetEnvironment(macCatalyst)
+        .buttonStyle(.borderless)
+        #else
         .buttonStyle(.automatic)
+        #endif
         #endif
     }
 }

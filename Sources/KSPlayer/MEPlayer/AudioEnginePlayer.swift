@@ -151,7 +151,10 @@ public final class AudioEnginePlayer: AudioPlayer, FrameOutput {
         let isRunning = engine.isRunning
         engine.stop()
         engine.reset()
-        sourceNode = AVAudioSourceNode(format: audioFormat) { [weak self] _, _, frameCount, audioBufferList in
+        sourceNode = AVAudioSourceNode(format: audioFormat) { [weak self] _, timestamp, frameCount, audioBufferList in
+            if timestamp.pointee.mSampleTime == 0 {
+                return noErr
+            }
             self?.audioPlayerShouldInputData(ioData: UnsafeMutableAudioBufferListPointer(audioBufferList), numberOfFrames: frameCount)
             return noErr
         }
