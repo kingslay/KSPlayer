@@ -210,7 +210,6 @@ extension KSVideoPlayer.Coordinator: KSPlayerLayerDelegate {
             playbackRate = layer.player.playbackRate
             videoTracks = layer.player.tracks(mediaType: .video)
             audioTracks = layer.player.tracks(mediaType: .audio)
-            subtitleModel.selectedSubtitleInfo = subtitleModel.subtitleInfos.first
             selectedAudioTrack = audioTracks.first { $0.isEnabled }
             selectedVideoTrack = videoTracks.first { $0.isEnabled }
             if let subtitleDataSouce = layer.player.subtitleDataSouce {
