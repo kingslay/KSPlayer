@@ -129,7 +129,7 @@ struct M3UView: View {
 }
 
 struct AddM3UView: View {
-    #if DEBUG && targetEnvironment(simulator) && os(tvOS)
+    #if DEBUG && targetEnvironment(simulator)
     @State
     private var url = "https://raw.githubusercontent.com/kingslay/KSPlayer/develop/Tests/KSPlayerTests/test.m3u"
     #else
@@ -158,7 +158,7 @@ struct AddM3UView: View {
                 #if !os(tvOS)
                 .keyboardShortcut(.defaultAction)
                 #endif
-                #if os(macOS)
+                #if os(macOS) || targetEnvironment(macCatalyst)
                 Button("Cancel") {
                     dismiss()
                 }

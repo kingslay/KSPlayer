@@ -80,8 +80,8 @@ public struct KSVideoPlayerView: View {
             KSVideoPlayer(coordinator: playerCoordinator, url: url, options: options)
                 .onStateChanged { playerLayer, state in
                     if state == .readyToPlay {
-                        if let _title = playerLayer.player.metadata["title"] {
-                            title = _title
+                        if let movieTitle = playerLayer.player.metadata["title"] {
+                            title = movieTitle
                         }
                     } else if state == .bufferFinished {
                         isMaskShow = false
@@ -378,8 +378,8 @@ struct VideoSubtitleView: View {
     }
 
     fileprivate static func imageView(_ image: UIImage) -> some View {
-        #if canImport(VisionKit)
-        if #available(iOS 16.0, macOS 13.0, macCatalyst 17.0, *) {
+        #if canImport(VisionKit) && !targetEnvironment(simulator)
+        if #available(macCatalyst 17.0, *) {
             return LiveTextImage(uiImage: image)
         } else {
             return Image(uiImage: image)
@@ -501,7 +501,7 @@ struct VideoSettingView: View {
             }
         }
         .padding()
-        #if os(macOS)
+        #if os(macOS) || targetEnvironment(macCatalyst)
             .toolbar {
                 Button("Done") {
                     dismiss()
@@ -519,6 +519,7 @@ public struct PlatformView<Content: View>: View {
         #if os(tvOS)
         ScrollView {
             content()
+                .padding()
         }
         .pickerStyle(.navigationLink)
         #else

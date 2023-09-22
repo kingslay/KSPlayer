@@ -68,7 +68,7 @@ struct URLImportView: View {
                 #if !os(tvOS)
                 .keyboardShortcut(.defaultAction)
                 #endif
-                #if os(macOS)
+                #if os(macOS) || targetEnvironment(macCatalyst)
                 Button("Cancel") {
                     dismiss()
                 }

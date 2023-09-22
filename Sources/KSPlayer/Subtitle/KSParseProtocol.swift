@@ -60,7 +60,6 @@ public extension KSParseProtocol {
 }
 
 public class AssParse: KSParseProtocol {
-    private let reg = try? NSRegularExpression(pattern: "\\{[^}]+\\}", options: .caseInsensitive)
     private var styleMap = [String: ASSStyle]()
     private var eventKeys = ["Layer", "Start", "End", "Style", "Name", "MarginL", "MarginR", "MarginV", "Effect", "Text"]
     private var playResX = Float(0.0)
@@ -152,74 +151,100 @@ public class AssParse: KSParseProtocol {
             return nil
         }
         text = text.replacingOccurrences(of: "\\N", with: "\n")
-        if let reg {
-            text = reg.stringByReplacingMatches(in: text, range: NSRange(location: 0, length: text.count), withTemplate: "")
-        }
-        let part = SubtitlePart(start, end, attributedString: NSAttributedString(string: text, attributes: attributes))
+        let part = SubtitlePart(start, end, attributedString: text.build(attributed: attributes))
         part.textPosition = textPosition
         return part
     }
 }
 
-extension String {}
+extension String {
+    func build(attributed: [NSAttributedString.Key: Any]? = nil) -> NSAttributedString {
+        let lineCodes = splitStyle()
+        let attributedStr = NSMutableAttributedString()
+        var attributed = attributed ?? [:]
+        for lineCode in lineCodes {
+            attributedStr.append(lineCode.0.parseStyle(attributes: &attributed, style: lineCode.1))
+        }
+        return attributedStr
+    }
 
-public struct ASSStyle {
-    let attrs: [NSAttributedString.Key: Any]
-    let textPosition: TextPosition
-}
+    func splitStyle() -> [(String, String?)] {
+        let scanner = Scanner(string: self)
+        var result = [(String, String?)]()
+        var sytle: String?
+        while !scanner.isAtEnd {
+            if scanner.scanString("{") != nil {
+                sytle = scanner.scanUpToString("}")
+                _ = scanner.scanString("}")
+            } else if let text = scanner.scanUpToString("{") {
+                result.append((text, sytle))
+                _ = scanner.scanString("{")
+                sytle = scanner.scanUpToString("}")
+                _ = scanner.scanString("}")
+            } else if let text = scanner.scanUpToCharacters(from: .newlines) {
+                result.append((text, sytle))
+            }
+        }
+        return result
+    }
 
-public extension [NSAttributedString.Key: Any] {
-    mutating func parseStyle(style: String) {
+    func parseStyle(attributes: inout [NSAttributedString.Key: Any], style: String?) -> NSAttributedString {
+        guard let style else {
+            return NSAttributedString(string: self, attributes: attributes)
+        }
         var fontName: String?
         var fontSize: Int?
-        let styleArr = style.components(separatedBy: CharacterSet(charactersIn: "{}"))
-        for subStr in styleArr {
-            let subStyleArr = subStr.components(separatedBy: "\\")
-            for item in subStyleArr {
-                var itemStr = item.replacingOccurrences(of: " ", with: "")
-                if itemStr.hasPrefix("fn") {
-                    fontName = String(itemStr.dropFirst(2))
-                } else if itemStr.hasPrefix("fs") {
-                    fontSize = Int(itemStr.dropFirst(2))
-                } else if let match = itemStr.range(of: "^b[0-9]+$", options: .regularExpression) {
-                    itemStr = String(itemStr[match])
-                    itemStr = itemStr.replacingOccurrences(of: "b", with: "")
-                    self[.expansion] = Int(itemStr)
-                } else if let match = itemStr.range(of: "^i[0-9]+$", options: .regularExpression) {
-                    itemStr = String(itemStr[match])
-                    itemStr = itemStr.replacingOccurrences(of: "i", with: "")
-                    self[.obliqueness] = Float(itemStr)
-                } else if let match = itemStr.range(of: "^u[0-9]+$", options: .regularExpression) {
-                    itemStr = String(itemStr[match])
-                    itemStr = itemStr.replacingOccurrences(of: "u", with: "")
-                    self[.underlineStyle] = Int(itemStr)
-                } else if let match = itemStr.range(of: "^s[0-9]+$", options: .regularExpression) {
-                    itemStr = String(itemStr[match])
-                    itemStr = itemStr.replacingOccurrences(of: "s", with: "")
-                    self[.strikethroughStyle] = Int(itemStr)
-                } else if itemStr.hasPrefix("c&H") || itemStr.hasPrefix("1c&H") {
-                    if let range = itemStr.range(of: "c") {
-                        itemStr = String(itemStr[range.upperBound...])
-                        self[.foregroundColor] = UIColor(assColor: itemStr)
-                    }
+        let subStyleArr = style.components(separatedBy: "\\")
+        for item in subStyleArr {
+            var itemStr = item.replacingOccurrences(of: " ", with: "")
+            if itemStr.hasPrefix("fn") {
+                fontName = String(itemStr.dropFirst(2))
+            } else if itemStr.hasPrefix("fs") {
+                fontSize = Int(itemStr.dropFirst(2))
+            } else if let match = itemStr.range(of: "^b[0-9]+$", options: .regularExpression) {
+                itemStr = String(itemStr[match])
+                itemStr = itemStr.replacingOccurrences(of: "b", with: "")
+                attributes[.expansion] = Int(itemStr)
+            } else if let match = itemStr.range(of: "^i[0-9]+$", options: .regularExpression) {
+                itemStr = String(itemStr[match])
+                itemStr = itemStr.replacingOccurrences(of: "i", with: "")
+                attributes[.obliqueness] = Float(itemStr)
+            } else if let match = itemStr.range(of: "^u[0-9]+$", options: .regularExpression) {
+                itemStr = String(itemStr[match])
+                itemStr = itemStr.replacingOccurrences(of: "u", with: "")
+                attributes[.underlineStyle] = Int(itemStr)
+            } else if let match = itemStr.range(of: "^s[0-9]+$", options: .regularExpression) {
+                itemStr = String(itemStr[match])
+                itemStr = itemStr.replacingOccurrences(of: "s", with: "")
+                attributes[.strikethroughStyle] = Int(itemStr)
+            } else if itemStr.hasPrefix("c&H") || itemStr.hasPrefix("1c&H") {
+                if let range = itemStr.range(of: "c") {
+                    itemStr = String(itemStr[range.upperBound...])
+                    attributes[.foregroundColor] = UIColor(assColor: itemStr)
                 }
             }
         }
         // Apply font attributes if available
         if let fontName, let fontSize {
             let font = UIFont(name: fontName, size: CGFloat(fontSize))
-            self[.font] = font
+            attributes[.font] = font
         }
+        return NSAttributedString(string: self, attributes: attributes)
     }
 }
 
+public struct ASSStyle {
+    let attrs: [NSAttributedString.Key: Any]
+    let textPosition: TextPosition
+}
+
 public extension [String: String] {
+    // swiftlint:disable cyclomatic_complexity
     func parseASSStyle() -> ASSStyle {
         var attributes: [NSAttributedString.Key: Any] = [:]
         var textPosition = TextPosition()
         if let fontName = self["Fontname"], let fontSize = self["Fontsize"].flatMap(Double.init) {
             var font = UIFont(name: fontName, size: fontSize) ?? UIFont.systemFont(ofSize: fontSize)
-            var fontDescriptor = font.fontDescriptor
             if let degrees = self["Angle"].flatMap(Double.init), degrees != 0 {
                 let radians = CGFloat(degrees * .pi / 180.0)
                 #if !canImport(UIKit)
@@ -227,9 +252,9 @@ public extension [String: String] {
                 #else
                 let matrix = CGAffineTransform(rotationAngle: radians)
                 #endif
-                fontDescriptor = fontDescriptor.withMatrix(matrix)
+                let fontDescriptor = UIFontDescriptor(name: fontName, matrix: matrix)
+                font = UIFont(descriptor: fontDescriptor, size: fontSize) ?? font
             }
-            font = UIFont(descriptor: fontDescriptor, size: fontSize) ?? font
             attributes[.font] = font
         }
         // 创建字体样式
@@ -249,20 +274,20 @@ public extension [String: String] {
             attributes[.strikethroughStyle] = NSUnderlineStyle.single.rawValue
         }
 
-        if let scaleX = self["ScaleX"].flatMap(Double.init), scaleX != 100 {
+//        if let scaleX = self["ScaleX"].flatMap(Double.init), scaleX != 100 {
 //            attributes[.expansion] = scaleX / 100.0
-        }
-        if let scaleY = self["ScaleY"].flatMap(Double.init), scaleY != 100 {
+//        }
+//        if let scaleY = self["ScaleY"].flatMap(Double.init), scaleY != 100 {
 //            attributes[.baselineOffset] = scaleY - 100.0
-        }
+//        }
 
-        if let spacing = self["Spacing"].flatMap(Double.init) {
+//        if let spacing = self["Spacing"].flatMap(Double.init) {
 //            attributes[.kern] = CGFloat(spacing)
-        }
+//        }
 
         if self["BorderStyle"] == "1" {
             if let strokeWidth = self["Outline"].flatMap(Double.init), strokeWidth > 0 {
-                attributes[.strokeWidth] = strokeWidth
+                attributes[.strokeWidth] = -strokeWidth
                 if let assColor = self["OutlineColour"] {
                     attributes[.strokeColor] = UIColor(assColor: assColor)
                 }
@@ -315,10 +340,10 @@ public extension [String: String] {
         }
         return ASSStyle(attrs: attributes, textPosition: textPosition)
     }
+    // swiftlint:enable cyclomatic_complexity
 }
 
 public class VTTParse: KSParseProtocol {
-    private let reg = try? NSRegularExpression(pattern: "\\{[^}]+\\}", options: .caseInsensitive)
     public func canParse(scanner: Scanner) -> Bool {
         scanner.scanString("WEBVTT") != nil
     }
@@ -334,19 +359,15 @@ public class VTTParse: KSParseProtocol {
         _ = scanner.scanString("-->")
         if let startString,
            let endString = scanner.scanUpToCharacters(from: .newlines),
-           var text = scanner.scanUpToString("\n\n")
+           let text = scanner.scanUpToString("\n\n")
         {
-            if let reg {
-                text = reg.stringByReplacingMatches(in: text, range: NSRange(location: 0, length: text.count), withTemplate: "")
-            }
-            return SubtitlePart(startString.parseDuration(), endString.parseDuration(), text)
+            return SubtitlePart(startString.parseDuration(), endString.parseDuration(), attributedString: text.build())
         }
         return nil
     }
 }
 
 public class SrtParse: KSParseProtocol {
-    private let reg = try? NSRegularExpression(pattern: "\\{[^}]+\\}", options: .caseInsensitive)
     public func canParse(scanner: Scanner) -> Bool {
         scanner.string.contains(" --> ")
     }
@@ -363,12 +384,9 @@ public class SrtParse: KSParseProtocol {
         _ = scanner.scanString("-->")
         if let startString,
            let endString = scanner.scanUpToCharacters(from: .newlines),
-           var text = scanner.scanUpToString("\n\n")
+           let text = scanner.scanUpToString("\n\n")
         {
-            if let reg {
-                text = reg.stringByReplacingMatches(in: text, range: NSRange(location: 0, length: text.count), withTemplate: "")
-            }
-            return SubtitlePart(startString.parseDuration(), endString.parseDuration(), text)
+            return SubtitlePart(startString.parseDuration(), endString.parseDuration(), attributedString: text.build())
         }
         return nil
     }
