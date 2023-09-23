@@ -13,6 +13,7 @@ class MEOptions: KSOptions {
     override init() {
         super.init()
         formatContextOptions["reconnect_on_network_error"] = 1
+        audioLocale = Locale(identifier: "en-US")
     }
 
     override func process(assetTrack: some MediaPlayerTrack) {
