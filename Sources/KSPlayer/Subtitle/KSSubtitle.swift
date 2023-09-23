@@ -331,12 +331,10 @@ open class SubtitleModel: ObservableObject {
 
     public func addSubtitle(dataSouce: SubtitleDataSouce) {
         if let dataSouce = dataSouce as? SearchSubtitleDataSouce {
-            if let url {
-                Task {
-                    try? await dataSouce.searchSubtitle(url: url)
-                    dataSouce.infos.forEach { info in
-                        addSubtitle(info: info)
-                    }
+            Task { @MainActor in
+                try? await dataSouce.searchSubtitle(url: url)
+                dataSouce.infos.forEach { info in
+                    addSubtitle(info: info)
                 }
             }
         } else {
