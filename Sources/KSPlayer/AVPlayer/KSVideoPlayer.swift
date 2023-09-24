@@ -16,7 +16,8 @@ public typealias UIViewRepresentable = NSViewRepresentable
 #endif
 
 public struct KSVideoPlayer {
-    public let coordinator: Coordinator
+    @ObservedObject
+    public private(set) var coordinator: Coordinator
     public let url: URL
     public let options: KSOptions
     public init(coordinator: Coordinator, url: URL, options: KSOptions) {
@@ -174,9 +175,9 @@ extension KSVideoPlayer: UIViewRepresentable {
                 return playerLayer
             } else {
                 let playerLayer = KSPlayerLayer(url: url, options: options)
-                subtitleModel.url = url
                 playerLayer.delegate = self
                 self.playerLayer = playerLayer
+                subtitleModel.url = url
                 return playerLayer
             }
         }
@@ -284,6 +285,14 @@ public extension KSVideoPlayer {
         return self
     }
     #endif
+}
+
+extension View {
+    func then(_ body: (inout Self) -> Void) -> Self {
+        var result = self
+        body(&result)
+        return result
+    }
 }
 
 /// 这是一个频繁变化的model。View要少用这个

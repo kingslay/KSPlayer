@@ -69,6 +69,8 @@ open class KSOptions {
     public var syncDecodeAudio = false
     /// true: AVSampleBufferAudioRenderer false: AVAudioEngine
     public var isUseAudioRenderer = KSOptions.isUseAudioRenderer
+    // Locale(identifier: "en-US") Locale(identifier: "zh-CN")
+    public var audioLocale: Locale?
     // sutile
     public var autoSelectEmbedSubtitle = true
     public var subtitleDisable = false

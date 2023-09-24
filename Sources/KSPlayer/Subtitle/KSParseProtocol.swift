@@ -133,37 +133,44 @@ public class AssParse: KSParseProtocol {
             }
         }
         var attributes: [NSAttributedString.Key: Any]?
-        var textPosition: TextPosition?
+        var textPosition: TextPosition
         if let style = dic["Style"], let assStyle = styleMap[style] {
             attributes = assStyle.attrs
             textPosition = assStyle.textPosition
             if let marginL = dic["MarginL"].flatMap(Double.init), marginL != 0 {
-                textPosition?.leftMargin = CGFloat(marginL)
+                textPosition.leftMargin = CGFloat(marginL)
             }
             if let marginR = dic["MarginR"].flatMap(Double.init), marginR != 0 {
-                textPosition?.rightMargin = CGFloat(marginR)
+                textPosition.rightMargin = CGFloat(marginR)
             }
             if let marginV = dic["MarginV"].flatMap(Double.init), marginV != 0 {
-                textPosition?.verticalMargin = CGFloat(marginV)
+                textPosition.verticalMargin = CGFloat(marginV)
             }
+        } else {
+            textPosition = TextPosition()
         }
         guard var text = dic["Text"] else {
             return nil
         }
         text = text.replacingOccurrences(of: "\\N", with: "\n")
-        let part = SubtitlePart(start, end, attributedString: text.build(attributed: attributes))
+        let part = SubtitlePart(start, end, attributedString: text.build(textPosition: &textPosition, attributed: attributes))
         part.textPosition = textPosition
         return part
     }
 }
 
+public struct ASSStyle {
+    let attrs: [NSAttributedString.Key: Any]
+    let textPosition: TextPosition
+}
+
 extension String {
-    func build(attributed: [NSAttributedString.Key: Any]? = nil) -> NSAttributedString {
+    func build(textPosition: inout TextPosition, attributed: [NSAttributedString.Key: Any]? = nil) -> NSAttributedString {
         let lineCodes = splitStyle()
         let attributedStr = NSMutableAttributedString()
         var attributed = attributed ?? [:]
         for lineCode in lineCodes {
-            attributedStr.append(lineCode.0.parseStyle(attributes: &attributed, style: lineCode.1))
+            attributedStr.append(lineCode.0.parseStyle(attributes: &attributed, style: lineCode.1, textPosition: &textPosition))
         }
         return attributedStr
     }
@@ -188,61 +195,81 @@ extension String {
         return result
     }
 
-    func parseStyle(attributes: inout [NSAttributedString.Key: Any], style: String?) -> NSAttributedString {
+    func parseStyle(attributes: inout [NSAttributedString.Key: Any], style: String?, textPosition: inout TextPosition) -> NSAttributedString {
         guard let style else {
             return NSAttributedString(string: self, attributes: attributes)
         }
         var fontName: String?
-        var fontSize: Int?
+        var fontSize: Float?
         let subStyleArr = style.components(separatedBy: "\\")
+        var shadow = attributes[.shadow] as? NSShadow
         for item in subStyleArr {
-            var itemStr = item.replacingOccurrences(of: " ", with: "")
-            if itemStr.hasPrefix("fn") {
-                fontName = String(itemStr.dropFirst(2))
-            } else if itemStr.hasPrefix("fs") {
-                fontSize = Int(itemStr.dropFirst(2))
-            } else if let match = itemStr.range(of: "^b[0-9]+$", options: .regularExpression) {
-                itemStr = String(itemStr[match])
-                itemStr = itemStr.replacingOccurrences(of: "b", with: "")
-                attributes[.expansion] = Int(itemStr)
-            } else if let match = itemStr.range(of: "^i[0-9]+$", options: .regularExpression) {
-                itemStr = String(itemStr[match])
-                itemStr = itemStr.replacingOccurrences(of: "i", with: "")
-                attributes[.obliqueness] = Float(itemStr)
-            } else if let match = itemStr.range(of: "^u[0-9]+$", options: .regularExpression) {
-                itemStr = String(itemStr[match])
-                itemStr = itemStr.replacingOccurrences(of: "u", with: "")
-                attributes[.underlineStyle] = Int(itemStr)
-            } else if let match = itemStr.range(of: "^s[0-9]+$", options: .regularExpression) {
-                itemStr = String(itemStr[match])
-                itemStr = itemStr.replacingOccurrences(of: "s", with: "")
-                attributes[.strikethroughStyle] = Int(itemStr)
-            } else if itemStr.hasPrefix("c&H") || itemStr.hasPrefix("1c&H") {
-                if let range = itemStr.range(of: "c") {
-                    itemStr = String(itemStr[range.upperBound...])
-                    attributes[.foregroundColor] = UIColor(assColor: itemStr)
+            let itemStr = item.replacingOccurrences(of: " ", with: "")
+            let scanner = Scanner(string: itemStr)
+            let char = scanner.scanCharacter()
+            switch char {
+            case "a":
+                let char = scanner.scanCharacter()
+                if char == "n" {
+                    textPosition.ass(alignment: scanner.scanUpToCharacters(from: .newlines))
                 }
+            case "b":
+                attributes[.expansion] = scanner.scanFloat()
+            case "c":
+                attributes[.foregroundColor] = scanner.scanUpToCharacters(from: .newlines).flatMap(UIColor.init(assColor:))
+            case "f":
+                let char = scanner.scanCharacter()
+                if char == "n" {
+                    fontName = scanner.scanUpToCharacters(from: .newlines)
+                } else if char == "s" {
+                    fontSize = scanner.scanFloat()
+                }
+            case "i":
+                attributes[.obliqueness] = scanner.scanFloat()
+            case "u":
+                attributes[.underlineStyle] = scanner.scanInt()
+            case "s":
+                if scanner.scanString("had") != nil {
+                    if let size = scanner.scanFloat() {
+                        shadow = shadow ?? NSShadow()
+                        shadow?.shadowOffset = CGSize(width: CGFloat(size), height: CGFloat(size))
+                        shadow?.shadowBlurRadius = CGFloat(size)
+                    }
+                    attributes[.shadow] = shadow
+                } else {
+                    attributes[.strikethroughStyle] = scanner.scanInt()
+                }
+            case "1", "2", "3", "4":
+                let twoChar = scanner.scanCharacter()
+                if twoChar == "c" {
+                    let color = scanner.scanUpToCharacters(from: .newlines).flatMap(UIColor.init(assColor:))
+                    if char == "1" || char == "2" {
+                        attributes[.foregroundColor] = color
+                    } else if char == "3" {
+                        attributes[.strokeColor] = color
+                    } else if char == "4" {
+                        shadow = shadow ?? NSShadow()
+                        shadow?.shadowColor = color
+                        attributes[.shadow] = shadow
+                    }
+                }
+            default:
+                break
             }
         }
         // Apply font attributes if available
         if let fontName, let fontSize {
-            let font = UIFont(name: fontName, size: CGFloat(fontSize))
+            let font = UIFont(name: fontName, size: CGFloat(fontSize)) ?? UIFont.systemFont(ofSize: CGFloat(fontSize))
             attributes[.font] = font
         }
         return NSAttributedString(string: self, attributes: attributes)
     }
 }
 
-public struct ASSStyle {
-    let attrs: [NSAttributedString.Key: Any]
-    let textPosition: TextPosition
-}
-
 public extension [String: String] {
     // swiftlint:disable cyclomatic_complexity
     func parseASSStyle() -> ASSStyle {
         var attributes: [NSAttributedString.Key: Any] = [:]
-        var textPosition = TextPosition()
         if let fontName = self["Fontname"], let fontSize = self["Fontsize"].flatMap(Double.init) {
             var font = UIFont(name: fontName, size: fontSize) ?? UIFont.systemFont(ofSize: fontSize)
             if let degrees = self["Angle"].flatMap(Double.init), degrees != 0 {
@@ -303,32 +330,8 @@ public extension [String: String] {
                 attributes[.shadow] = shadow
             }
         }
-        switch self["Alignment"] {
-        case "1":
-            textPosition.horizontalAlign = .leading
-        case "2":
-            textPosition.horizontalAlign = .center
-        case "3":
-            textPosition.horizontalAlign = .trailing
-        case "4":
-            textPosition.verticalAlign = .center
-            textPosition.horizontalAlign = .leading
-        case "5":
-            textPosition.verticalAlign = .center
-        case "6":
-            textPosition.verticalAlign = .center
-            textPosition.horizontalAlign = .trailing
-        case "7":
-            textPosition.verticalAlign = .top
-            textPosition.horizontalAlign = .leading
-        case "8":
-            textPosition.verticalAlign = .top
-        case "9":
-            textPosition.verticalAlign = .top
-            textPosition.horizontalAlign = .trailing
-        default:
-            break
-        }
+        var textPosition = TextPosition()
+        textPosition.ass(alignment: self["Alignment"])
         if let marginL = self["MarginL"].flatMap(Double.init) {
             textPosition.leftMargin = CGFloat(marginL)
         }
@@ -361,7 +364,8 @@ public class VTTParse: KSParseProtocol {
            let endString = scanner.scanUpToCharacters(from: .newlines),
            let text = scanner.scanUpToString("\n\n")
         {
-            return SubtitlePart(startString.parseDuration(), endString.parseDuration(), attributedString: text.build())
+            var textPosition = TextPosition()
+            return SubtitlePart(startString.parseDuration(), endString.parseDuration(), attributedString: text.build(textPosition: &textPosition))
         }
         return nil
     }
@@ -386,7 +390,8 @@ public class SrtParse: KSParseProtocol {
            let endString = scanner.scanUpToCharacters(from: .newlines),
            let text = scanner.scanUpToString("\n\n")
         {
-            return SubtitlePart(startString.parseDuration(), endString.parseDuration(), attributedString: text.build())
+            var textPosition = TextPosition()
+            return SubtitlePart(startString.parseDuration(), endString.parseDuration(), attributedString: text.build(textPosition: &textPosition))
         }
         return nil
     }

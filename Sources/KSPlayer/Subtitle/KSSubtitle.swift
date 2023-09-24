@@ -57,6 +57,40 @@ public struct TextPosition {
         }
         return edgeInsets
     }
+
+    public mutating func ass(alignment: String?) {
+        switch alignment {
+        case "1":
+            verticalAlign = .bottom
+            horizontalAlign = .leading
+        case "2":
+            verticalAlign = .bottom
+            horizontalAlign = .center
+        case "3":
+            verticalAlign = .bottom
+            horizontalAlign = .trailing
+        case "4":
+            verticalAlign = .center
+            horizontalAlign = .leading
+        case "5":
+            verticalAlign = .center
+            horizontalAlign = .center
+        case "6":
+            verticalAlign = .center
+            horizontalAlign = .trailing
+        case "7":
+            verticalAlign = .top
+            horizontalAlign = .leading
+        case "8":
+            verticalAlign = .top
+            horizontalAlign = .center
+        case "9":
+            verticalAlign = .top
+            horizontalAlign = .trailing
+        default:
+            break
+        }
+    }
 }
 
 extension SubtitlePart: Comparable {
@@ -297,12 +331,10 @@ open class SubtitleModel: ObservableObject {
 
     public func addSubtitle(dataSouce: SubtitleDataSouce) {
         if let dataSouce = dataSouce as? SearchSubtitleDataSouce {
-            if let url {
-                Task {
-                    try? await dataSouce.searchSubtitle(url: url)
-                    dataSouce.infos.forEach { info in
-                        addSubtitle(info: info)
-                    }
+            Task { @MainActor in
+                try? await dataSouce.searchSubtitle(url: url)
+                dataSouce.infos.forEach { info in
+                    addSubtitle(info: info)
                 }
             }
         } else {

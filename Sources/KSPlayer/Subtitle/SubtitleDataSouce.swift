@@ -63,7 +63,7 @@ public protocol SubtitleDataSouce: AnyObject {
 }
 
 public protocol SearchSubtitleDataSouce: SubtitleDataSouce {
-    func searchSubtitle(url: URL) async throws
+    func searchSubtitle(url: URL?) async throws
 }
 
 public extension KSOptions {
@@ -90,8 +90,11 @@ public class CacheDataSouce: SearchSubtitleDataSouce {
         srtCacheInfoPath = (cacheFolder as NSString).appendingPathComponent("KSSrtInfo.plist")
     }
 
-    public func searchSubtitle(url: URL) async throws {
+    public func searchSubtitle(url: URL?) async throws {
         infos.removeAll()
+        guard let url else {
+            return
+        }
         srtCacheInfoPath = (cacheFolder as NSString).appendingPathComponent("KSSrtInfo_\(url.lastPathComponent).plist")
         if FileManager.default.fileExists(atPath: srtCacheInfoPath), let files = NSMutableDictionary(contentsOfFile: srtCacheInfoPath) as? [String: String] {
             srtInfoCaches = files.filter { FileManager.default.fileExists(atPath: $1) }
@@ -131,8 +134,11 @@ public class DirectorySubtitleDataSouce: SearchSubtitleDataSouce {
     public var infos = [any SubtitleInfo]()
     public init() {}
 
-    public func searchSubtitle(url: URL) async throws {
+    public func searchSubtitle(url: URL?) async throws {
         infos.removeAll()
+        guard let url else {
+            return
+        }
         if url.isFileURL {
             let subtitleURLs: [URL] = (try? FileManager.default.contentsOfDirectory(at: url.deletingLastPathComponent(), includingPropertiesForKeys: nil).filter(\.isSubtitle)) ?? []
             let contents = subtitleURLs.map { URLSubtitleInfo(url: $0) }.sorted { left, right in
@@ -146,8 +152,11 @@ public class DirectorySubtitleDataSouce: SearchSubtitleDataSouce {
 public class ShooterSubtitleDataSouce: SearchSubtitleDataSouce {
     public var infos = [any SubtitleInfo]()
     public init() {}
-    public func searchSubtitle(url: URL) async throws {
+    public func searchSubtitle(url: URL?) async throws {
         infos.removeAll()
+        guard let url else {
+            return
+        }
         guard url.isFileURL, let url = URL(string: "https://www.shooter.cn/api/subapi.php")?
             .add(queryItems: ["format": "json", "pathinfo": url.path, "filehash": url.shooterFilehash])
         else {
@@ -183,8 +192,11 @@ public class AssrtSubtitleDataSouce: SearchSubtitleDataSouce {
         self.token = token
     }
 
-    public func searchSubtitle(url: URL) async throws {
+    public func searchSubtitle(url: URL?) async throws {
         infos.removeAll()
+        guard let url else {
+            return
+        }
         let query = url.deletingPathExtension().lastPathComponent
         guard let searchApi = URL(string: "https://api.assrt.net/v1/sub/search")?.add(queryItems: ["q": query]) else {
             return

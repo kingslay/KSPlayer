@@ -43,6 +43,7 @@ final class MEPlayerItem {
         return tracks
     }
 
+    private var audioRecognizer: AudioRecognizer?
     private var videoTrack: SyncPlayerItemTrack<VideoVTBFrame>?
     private var audioTrack: SyncPlayerItemTrack<AudioFrame>?
     private(set) var assetTracks = [FFmpegAssetTrack]()
@@ -134,6 +135,11 @@ final class MEPlayerItem {
         operationQueue.maxConcurrentOperationCount = 1
         operationQueue.qualityOfService = .userInteractive
         _ = MEPlayerItem.onceInitial
+        if let locale = options.audioLocale {
+            audioRecognizer = AudioRecognizer(locale: locale) { text in
+                print(text)
+            }
+        }
     }
 
     func select(track: some MediaPlayerTrack) {
@@ -765,6 +771,11 @@ extension MEPlayerItem: OutputRenderSourceDelegate {
     }
 
     func getAudioOutputRender() -> AudioFrame? {
-        audioTrack?.getOutputRender(where: nil)
+        if let frame = audioTrack?.getOutputRender(where: nil) {
+            audioRecognizer?.append(frame: frame)
+            return frame
+        } else {
+            return nil
+        }
     }
 }
