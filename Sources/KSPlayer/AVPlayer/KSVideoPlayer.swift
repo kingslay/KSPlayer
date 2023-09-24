@@ -175,9 +175,9 @@ extension KSVideoPlayer: UIViewRepresentable {
                 return playerLayer
             } else {
                 let playerLayer = KSPlayerLayer(url: url, options: options)
-                subtitleModel.url = url
                 playerLayer.delegate = self
                 self.playerLayer = playerLayer
+                subtitleModel.url = url
                 return playerLayer
             }
         }
