@@ -164,6 +164,7 @@ public struct ASSStyle {
     let textPosition: TextPosition
 }
 
+// swiftlint:disable cyclomatic_complexity
 extension String {
     func build(textPosition: inout TextPosition, attributed: [NSAttributedString.Key: Any]? = nil) -> NSAttributedString {
         let lineCodes = splitStyle()
@@ -267,7 +268,6 @@ extension String {
 }
 
 public extension [String: String] {
-    // swiftlint:disable cyclomatic_complexity
     func parseASSStyle() -> ASSStyle {
         var attributes: [NSAttributedString.Key: Any] = [:]
         if let fontName = self["Fontname"], let fontSize = self["Fontsize"].flatMap(Double.init) {
