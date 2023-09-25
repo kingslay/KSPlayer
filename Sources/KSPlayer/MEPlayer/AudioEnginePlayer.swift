@@ -81,6 +81,7 @@ public final class AudioEnginePlayer: AudioPlayer, FrameOutput {
 
     private let engine = AVAudioEngine()
     private var sourceNode: AVAudioSourceNode?
+    private var sourceNodeAudioFormat: AVAudioFormat?
 
 //    private let reverb = AVAudioUnitReverb()
 //    private let nbandEQ = AVAudioUnitEQ()
@@ -141,9 +142,10 @@ public final class AudioEnginePlayer: AudioPlayer, FrameOutput {
     }
 
     func ceateSourceNode(audioFormat: AVAudioFormat) {
-        if sourceNode?.inputFormat(forBus: 0).isChannelEqual(audioFormat) ?? false {
+        if sourceNodeAudioFormat === audioFormat {
             return
         }
+        sourceNodeAudioFormat = audioFormat
         KSLog("[audio] outputFormat AudioFormat: \(audioFormat)")
         if let channelLayout = audioFormat.channelLayout {
             KSLog("[audio] outputFormat tag: \(channelLayout.layoutTag)")
@@ -248,7 +250,7 @@ public final class AudioEnginePlayer: AudioPlayer, FrameOutput {
                 self.currentRender = nil
                 continue
             }
-            if !(sourceNode?.inputFormat(forBus: 0).isChannelEqual(currentRender.audioFormat) ?? false) {
+            if !(sourceNodeAudioFormat === currentRender.audioFormat) {
                 runInMainqueue { [weak self] in
                     guard let self else {
                         return
