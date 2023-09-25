@@ -142,7 +142,7 @@ public final class AudioEnginePlayer: AudioPlayer, FrameOutput {
     }
 
     func ceateSourceNode(audioFormat: AVAudioFormat) {
-        if sourceNodeAudioFormat === audioFormat {
+        if sourceNodeAudioFormat == audioFormat {
             return
         }
         sourceNodeAudioFormat = audioFormat
@@ -250,7 +250,7 @@ public final class AudioEnginePlayer: AudioPlayer, FrameOutput {
                 self.currentRender = nil
                 continue
             }
-            if !(sourceNodeAudioFormat === currentRender.audioFormat) {
+            if sourceNodeAudioFormat != currentRender.audioFormat {
                 runInMainqueue { [weak self] in
                     guard let self else {
                         return
