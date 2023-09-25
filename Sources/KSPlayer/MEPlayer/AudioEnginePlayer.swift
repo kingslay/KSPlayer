@@ -17,6 +17,7 @@ protocol AudioPlayer: AnyObject {
     var threshold: Float { get set }
     var expansionRatio: Float { get set }
     var overallGain: Float { get set }
+    func prepare(audioFormat: AVAudioFormat)
     func play(time: TimeInterval)
     func pause()
     func flush()
@@ -130,14 +131,13 @@ public final class AudioEnginePlayer: AudioPlayer, FrameOutput {
         }
     }
 
-    init() {
+    func prepare(audioFormat: AVAudioFormat) {
         engine.attach(dynamicsProcessor)
         engine.attach(timePitch)
         if let audioUnit = engine.outputNode.audioUnit {
             addRenderNotify(audioUnit: audioUnit)
         }
-        ceateSourceNode(audioFormat: AVAudioFormat(standardFormatWithSampleRate: 44100, channelLayout: AVAudioChannelLayout(layoutTag: kAudioChannelLayoutTag_Stereo)!))
-        engine.prepare()
+        ceateSourceNode(audioFormat: audioFormat)
     }
 
     func ceateSourceNode(audioFormat: AVAudioFormat) {
@@ -149,6 +149,9 @@ public final class AudioEnginePlayer: AudioPlayer, FrameOutput {
             KSLog("[audio] outputFormat tag: \(channelLayout.layoutTag)")
             KSLog("[audio] outputFormat channelDescriptions: \(channelLayout.layout.channelDescriptions)")
         }
+        let isRunning = engine.isRunning
+        engine.stop()
+        engine.reset()
         sourceNode = AVAudioSourceNode(format: audioFormat) { [weak self] _, timestamp, frameCount, audioBufferList in
             if timestamp.pointee.mSampleTime == 0 {
                 return noErr
@@ -168,6 +171,14 @@ public final class AudioEnginePlayer: AudioPlayer, FrameOutput {
         }
         // 一定要传入format，这样多音轨音响才不会有问题。
         engine.connect(nodes: nodes, format: audioFormat)
+        engine.prepare()
+        if isRunning {
+            do {
+                try engine.start()
+            } catch {
+                KSLog(error)
+            }
+        }
     }
 
     func play(time _: TimeInterval) {

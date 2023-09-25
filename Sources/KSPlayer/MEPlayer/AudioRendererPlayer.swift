@@ -54,7 +54,7 @@ public class AudioRendererPlayer: AudioPlayer, FrameOutput {
         synchronizer.rate == 0
     }
 
-    init() {
+    func prepare(audioFormat _: AVAudioFormat) {
         synchronizer.addRenderer(renderer)
         if #available(macOS 11.3, iOS 14.5, tvOS 14.5, *) {
             synchronizer.delaysRateChangeUntilHasSufficientMediaData = false

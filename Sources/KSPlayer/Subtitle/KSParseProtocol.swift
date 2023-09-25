@@ -227,8 +227,6 @@ extension String {
                 }
             case "i":
                 attributes[.obliqueness] = scanner.scanFloat()
-            case "u":
-                attributes[.underlineStyle] = scanner.scanInt()
             case "s":
                 if scanner.scanString("had") != nil {
                     if let size = scanner.scanFloat() {
@@ -240,6 +238,8 @@ extension String {
                 } else {
                     attributes[.strikethroughStyle] = scanner.scanInt()
                 }
+            case "u":
+                attributes[.underlineStyle] = scanner.scanInt()
             case "1", "2", "3", "4":
                 let twoChar = scanner.scanCharacter()
                 if twoChar == "c" {

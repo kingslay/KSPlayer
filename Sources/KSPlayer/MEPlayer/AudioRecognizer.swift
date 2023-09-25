@@ -7,17 +7,17 @@
 
 import Foundation
 
-#if enableAudioRecognizer && canImport(Speech)
+#if enableFeatureAudioRecognizer && canImport(Speech)
 import Speech
 #endif
 
 public class AudioRecognizer {
-    #if enableAudioRecognizer && canImport(Speech)
+    #if enableFeatureAudioRecognizer && canImport(Speech)
     private let recognitionRequest: SFSpeechAudioBufferRecognitionRequest
     private let speechRecognizer: SFSpeechRecognizer
     #endif
     public init(locale: Locale, handler: @escaping (String) -> Void) {
-        #if enableAudioRecognizer && canImport(Speech)
+        #if enableFeatureAudioRecognizer && canImport(Speech)
         recognitionRequest = SFSpeechAudioBufferRecognitionRequest()
         recognitionRequest.shouldReportPartialResults = true
         recognitionRequest.requiresOnDeviceRecognition = true
@@ -32,7 +32,7 @@ public class AudioRecognizer {
     }
 
     func append(frame: AudioFrame) {
-        #if enableAudioRecognizer && canImport(Speech)
+        #if enableFeatureAudioRecognizer && canImport(Speech)
         if let sampleBuffer = frame.toCMSampleBuffer() {
             recognitionRequest.appendAudioSampleBuffer(sampleBuffer)
         }
