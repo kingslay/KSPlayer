@@ -17,6 +17,7 @@ protocol AudioPlayer: AnyObject {
     var threshold: Float { get set }
     var expansionRatio: Float { get set }
     var overallGain: Float { get set }
+    func prepare(audioFormat: AVAudioFormat)
     func play(time: TimeInterval)
     func pause()
     func flush()
@@ -80,6 +81,7 @@ public final class AudioEnginePlayer: AudioPlayer, FrameOutput {
 
     private let engine = AVAudioEngine()
     private var sourceNode: AVAudioSourceNode?
+    private var sourceNodeAudioFormat: AVAudioFormat?
 
 //    private let reverb = AVAudioUnitReverb()
 //    private let nbandEQ = AVAudioUnitEQ()
@@ -130,19 +132,20 @@ public final class AudioEnginePlayer: AudioPlayer, FrameOutput {
         }
     }
 
-    init() {
+    func prepare(audioFormat: AVAudioFormat) {
         engine.attach(dynamicsProcessor)
         engine.attach(timePitch)
         if let audioUnit = engine.outputNode.audioUnit {
             addRenderNotify(audioUnit: audioUnit)
         }
-        ceateSourceNode(audioFormat: AVAudioFormat(standardFormatWithSampleRate: 44100, channelLayout: AVAudioChannelLayout(layoutTag: kAudioChannelLayoutTag_Stereo)!))
+        ceateSourceNode(audioFormat: audioFormat)
     }
 
     func ceateSourceNode(audioFormat: AVAudioFormat) {
-        if sourceNode?.inputFormat(forBus: 0).isChannelEqual(audioFormat) ?? false {
+        if sourceNodeAudioFormat == audioFormat {
             return
         }
+        sourceNodeAudioFormat = audioFormat
         KSLog("[audio] outputFormat AudioFormat: \(audioFormat)")
         if let channelLayout = audioFormat.channelLayout {
             KSLog("[audio] outputFormat tag: \(channelLayout.layoutTag)")
@@ -247,7 +250,7 @@ public final class AudioEnginePlayer: AudioPlayer, FrameOutput {
                 self.currentRender = nil
                 continue
             }
-            if !(sourceNode?.inputFormat(forBus: 0).isChannelEqual(currentRender.audioFormat) ?? false) {
+            if sourceNodeAudioFormat != currentRender.audioFormat {
                 runInMainqueue { [weak self] in
                     guard let self else {
                         return

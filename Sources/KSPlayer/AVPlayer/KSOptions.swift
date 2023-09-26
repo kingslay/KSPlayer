@@ -449,6 +449,8 @@ public extension KSOptions {
                 KSLog("[audio] currentRoute max channels: \(maxRouteChannelsCount)")
                 channels = AVAudioChannelCount(min(AVAudioSession.sharedInstance().outputNumberOfChannels, maxRouteChannelsCount))
             }
+        } else {
+            channels = 2
         }
         KSLog("[audio] outputNumberOfChannels: \(AVAudioSession.sharedInstance().outputNumberOfChannels)")
         return channels

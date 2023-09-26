@@ -64,6 +64,8 @@ public class AudioRendererPlayer: AudioPlayer, FrameOutput {
 //        }
     }
 
+    func prepare(audioFormat _: AVAudioFormat) {}
+
     func play(time: TimeInterval) {
         synchronizer.setRate(playbackRate, time: CMTime(seconds: time))
         renderer.requestMediaDataWhenReady(on: serializationQueue) { [weak self] in

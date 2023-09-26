@@ -164,6 +164,7 @@ public struct ASSStyle {
     let textPosition: TextPosition
 }
 
+// swiftlint:disable cyclomatic_complexity
 extension String {
     func build(textPosition: inout TextPosition, attributed: [NSAttributedString.Key: Any]? = nil) -> NSAttributedString {
         let lineCodes = splitStyle()
@@ -226,8 +227,6 @@ extension String {
                 }
             case "i":
                 attributes[.obliqueness] = scanner.scanFloat()
-            case "u":
-                attributes[.underlineStyle] = scanner.scanInt()
             case "s":
                 if scanner.scanString("had") != nil {
                     if let size = scanner.scanFloat() {
@@ -239,6 +238,8 @@ extension String {
                 } else {
                     attributes[.strikethroughStyle] = scanner.scanInt()
                 }
+            case "u":
+                attributes[.underlineStyle] = scanner.scanInt()
             case "1", "2", "3", "4":
                 let twoChar = scanner.scanCharacter()
                 if twoChar == "c" {
@@ -267,7 +268,6 @@ extension String {
 }
 
 public extension [String: String] {
-    // swiftlint:disable cyclomatic_complexity
     func parseASSStyle() -> ASSStyle {
         var attributes: [NSAttributedString.Key: Any] = [:]
         if let fontName = self["Fontname"], let fontSize = self["Fontsize"].flatMap(Double.init) {

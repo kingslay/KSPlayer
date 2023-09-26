@@ -378,7 +378,7 @@ struct VideoSubtitleView: View {
     }
 
     fileprivate static func imageView(_ image: UIImage) -> some View {
-        #if canImport(VisionKit) && !targetEnvironment(simulator)
+        #if enableFeatureLiveText && canImport(VisionKit) && !targetEnvironment(simulator)
         if #available(macCatalyst 17.0, *) {
             return LiveTextImage(uiImage: image)
         } else {
