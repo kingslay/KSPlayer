@@ -55,7 +55,7 @@ class SyncPlayerItemTrack<Frame: MEFrame>: PlayerItemTrackProtocol, CustomString
             let capacity = options.audioFrameMaxCount(fps: fps, channels: Int(assetTrack.audioDescriptor?.channels ?? 2))
             outputRenderQueue = CircularBuffer(initialCapacity: capacity, expanding: false)
         } else if mediaType == .video {
-            outputRenderQueue = CircularBuffer(initialCapacity: options.videoFrameMaxCount(fps: fps), sorted: true, expanding: false)
+            outputRenderQueue = CircularBuffer(initialCapacity: options.videoFrameMaxCount(fps: fps, naturalSize: assetTrack.naturalSize), sorted: true, expanding: false)
         } else {
             outputRenderQueue = CircularBuffer()
         }

@@ -222,8 +222,8 @@ open class KSOptions {
         nil
     }
 
-    open func videoFrameMaxCount(fps: Float) -> Int {
-        Int(ceil(fps)) >> 2
+    open func videoFrameMaxCount(fps _: Float, naturalSize _: CGSize) -> Int {
+        16
     }
 
     open func audioFrameMaxCount(fps: Float, channels _: Int) -> Int {
