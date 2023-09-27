@@ -183,7 +183,7 @@ extension MovieModel {
                 ascending: false
             ),
         ]
-        request.predicate = NSPredicate(format: "playmodel != nil && playmodel.playTime != nil")
+        request.predicate = NSPredicate(format: "playmodel.playTime != nil")
         request.fetchLimit = 20
         return request
     }
@@ -214,7 +214,7 @@ extension KSVideoPlayerView {
     init(url: URL) {
         let request = NSFetchRequest<MovieModel>(entityName: "MovieModel")
         request.predicate = NSPredicate(format: "url == %@", url.description)
-        let model = MovieModel(url: url)
+        let model = (try? PersistenceController.shared.viewContext.fetch(request).first) ?? MovieModel(url: url)
         self.init(model: model)
     }
 

@@ -69,6 +69,7 @@ class VideoToolboxDecode: DecodeProtocol {
                     throw NSError(errorCode: .codecVideoReceiveFrame, avErrorCode: status)
                 } else {
                     // 解决从后台切换到前台，解码失败的问题
+                    self.session = DecompressionSession(codecpar: session.codecpar, options: options)
                     doFlushCodec()
                 }
             }
@@ -78,9 +79,6 @@ class VideoToolboxDecode: DecodeProtocol {
     }
 
     func doFlushCodec() {
-        if let session {
-            self.session = DecompressionSession(codecpar: session.codecpar, options: options)
-        }
         lastPosition = 0
         startTime = 0
     }
