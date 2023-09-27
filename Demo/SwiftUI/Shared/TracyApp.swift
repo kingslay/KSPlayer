@@ -78,7 +78,7 @@ struct TracyApp: App {
         #endif
         #endif
         #if !os(tvOS)
-        WindowGroup("player", for: PlayModel.self) { $model in
+        WindowGroup("player", for: MovieModel.self) { $model in
             if let model {
                 KSVideoPlayerView(model: model)
             }
@@ -104,8 +104,8 @@ struct TracyApp: App {
 class APPModel: ObservableObject {
     private(set) var groups = [String]()
     @Published var openURL: URL?
-    @Published var openPlayModel: PlayModel?
-    @Published private(set) var playlist = [PlayModel]() {
+    @Published var openPlayModel: MovieModel?
+    @Published private(set) var playlist = [MovieModel]() {
         didSet {
             var groupSet = Set<String>()
             playlist.forEach { model in
@@ -180,7 +180,7 @@ class APPModel: ObservableObject {
         }
     }
 
-    func content(model: PlayModel) -> some View {
+    func content(model: MovieModel) -> some View {
         #if os(macOS)
         Button {
             self.openPlayModel = model

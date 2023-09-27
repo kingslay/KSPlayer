@@ -146,13 +146,13 @@ public extension View {
                 .toolbar(.hidden, for: .tabBar)
             #endif
         }
-        .navigationDestination(for: PlayModel.self) { model in
+        .navigationDestination(for: MovieModel.self) { model in
             model.view
         }
     }
 }
 
-private extension PlayModel {
+private extension MovieModel {
     var view: some View {
         KSVideoPlayerView(model: self)
         #if !os(macOS)

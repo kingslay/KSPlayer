@@ -40,8 +40,8 @@ extension CodingUserInfoKey {
     static let managedObjectContext = CodingUserInfoKey(rawValue: "managedObjectContext")!
 }
 
-@objc(PlayModel)
-public class PlayModel: MovieModel, Codable {
+@objc(MovieModel)
+public class MovieModel: NSManagedObject, Codable {
     enum CodingKeys: String, CodingKey {
         case name, url, httpReferer, httpUserAgent
     }
@@ -64,7 +64,7 @@ public class PlayModel: MovieModel, Codable {
     }
 }
 
-extension PlayModel {
+extension MovieModel {
     convenience init(context: NSManagedObjectContext = PersistenceController.shared.viewContext, url: URL) {
         self.init(context: context, url: url, name: url.lastPathComponent)
     }
@@ -115,7 +115,7 @@ extension M3UModel {
         m3uURL = url
     }
 
-    func parsePlaylist(refresh: Bool = false) async throws -> [PlayModel] {
+    func parsePlaylist(refresh: Bool = false) async throws -> [MovieModel] {
         let viewContext = managedObjectContext ?? PersistenceController.shared.viewContext
         let m3uURL = await viewContext.perform {
             self.m3uURL
@@ -123,8 +123,8 @@ extension M3UModel {
         guard let m3uURL else {
             return []
         }
-        let array: [PlayModel] = await viewContext.perform {
-            let request = NSFetchRequest<PlayModel>(entityName: "PlayModel")
+        let array: [MovieModel] = await viewContext.perform {
+            let request = NSFetchRequest<MovieModel>(entityName: "MovieModel")
             request.predicate = NSPredicate(format: "m3uURL == %@", m3uURL.description)
             request.sortDescriptors = [NSSortDescriptor(key: "name", ascending: true)]
             return (try? viewContext.fetch(request)) ?? []
@@ -144,7 +144,7 @@ extension M3UModel {
             var dic = array.toDictionary {
                 $0.url
             }
-            let models = result.map { name, url, extinf -> PlayModel in
+            let models = result.map { name, url, extinf -> MovieModel in
                 if let model = dic[url] {
                     dic.removeValue(forKey: url)
                     if name != model.name {
@@ -153,7 +153,7 @@ extension M3UModel {
                     model.setExt(info: extinf)
                     return model
                 } else {
-                    let model = PlayModel(context: viewContext, url: url, name: name, extinf: extinf)
+                    let model = MovieModel(context: viewContext, url: url, name: name, extinf: extinf)
                     model.m3uURL = self.m3uURL
                     return model
                 }
@@ -174,30 +174,51 @@ extension M3UModel {
     }
 }
 
-extension PlayModel {
-    static var playTimeRequest: NSFetchRequest<PlayModel> {
-        let request = NSFetchRequest<PlayModel>(entityName: "PlayModel")
+extension MovieModel {
+    static var playTimeRequest: NSFetchRequest<MovieModel> {
+        let request = NSFetchRequest<MovieModel>(entityName: "MovieModel")
         request.sortDescriptors = [
             NSSortDescriptor(
-                keyPath: \PlayModel.playTime,
+                keyPath: \MovieModel.playmodel?.playTime,
                 ascending: false
             ),
         ]
-        request.predicate = NSPredicate(format: "playTime != nil")
+        request.predicate = NSPredicate(format: "playmodel != nil && playmodel.playTime != nil")
         request.fetchLimit = 20
         return request
+    }
+
+    public var isFavorite: Bool {
+        get {
+            playmodel?.isFavorite ?? false
+        }
+        set {
+            if let playmodel {
+                playmodel.isFavorite = newValue
+            } else {
+                let model = PlayModel()
+                model.isFavorite = newValue
+                playmodel = model
+            }
+        }
+    }
+}
+
+extension PlayModel {
+    convenience init() {
+        self.init(context: PersistenceController.shared.viewContext)
     }
 }
 
 extension KSVideoPlayerView {
     init(url: URL) {
-        let request = NSFetchRequest<PlayModel>(entityName: "PlayModel")
+        let request = NSFetchRequest<MovieModel>(entityName: "MovieModel")
         request.predicate = NSPredicate(format: "url == %@", url.description)
-        let model = PlayModel(url: url)
+        let model = MovieModel(url: url)
         self.init(model: model)
     }
 
-    init(model: PlayModel) {
+    init(model: MovieModel) {
         let url = model.url!
         let options = MEOptions()
         #if DEBUG
@@ -224,9 +245,16 @@ extension KSVideoPlayerView {
         #endif
         options.referer = model.httpReferer
         options.userAgent = model.httpUserAgent
-        model.playTime = Date()
-        if model.duration > 0, model.current > 0, model.duration > model.current + 120 {
-            options.startPlayTime = TimeInterval(model.current)
+        let playmodel: PlayModel
+        if let play = model.playmodel {
+            playmodel = play
+        } else {
+            playmodel = PlayModel()
+            model.playmodel = playmodel
+        }
+        playmodel.playTime = Date()
+        if playmodel.duration > 0, playmodel.current > 0, playmodel.duration > playmodel.current + 120 {
+            options.startPlayTime = TimeInterval(playmodel.current)
         }
         // There is total different meaning for 'listen_timeout' option in rtmp
         // set 'listen_timeout' = -1 for rtmp、rtsp
@@ -238,9 +266,9 @@ extension KSVideoPlayerView {
         }
         self.init(url: url, options: options, title: model.name) { layer in
             if let layer {
-                model.duration = Int16(layer.player.duration)
-                if model.duration > 0 {
-                    model.current = Int16(layer.player.currentPlaybackTime)
+                playmodel.duration = Int16(layer.player.duration)
+                if playmodel.duration > 0 {
+                    playmodel.current = Int16(layer.player.currentPlaybackTime)
                 }
                 model.managedObjectContext?.perform {
                     try? model.managedObjectContext?.save()

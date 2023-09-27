@@ -54,27 +54,33 @@ struct PersistenceController {
 //        viewContext = container.newBackgroundContext()
         let publicURL: URL
         let privateURL: URL
+        let localURL: URL
         if inMemory {
             publicURL = URL(fileURLWithPath: "/dev/null")
             privateURL = URL(fileURLWithPath: "/dev/null")
+            localURL = URL(fileURLWithPath: "/dev/null")
+
         } else {
             let directory = container.persistentStoreDescriptions.first!.url!.deletingLastPathComponent()
             KSLog("coreData directory \(directory)")
             publicURL = directory.appendingPathComponent("public.sqlite")
             privateURL = directory.appendingPathComponent("private.sqlite")
+            localURL = directory.appendingPathComponent("local.sqlite")
         }
         let publicDesc = NSPersistentStoreDescription(url: publicURL)
         publicDesc.configuration = "public"
-        publicDesc.cloudKitContainerOptions = NSPersistentCloudKitContainerOptions(containerIdentifier: "iCloud.com.kintan.tracy")
+        publicDesc.cloudKitContainerOptions = NSPersistentCloudKitContainerOptions(containerIdentifier: "iCloud.com.kintan.tracy.v1")
         publicDesc.cloudKitContainerOptions?.databaseScope = .public
         publicDesc.setOption(true as NSObject, forKey: NSPersistentHistoryTrackingKey)
         publicDesc.setOption(true as NSObject, forKey: NSPersistentStoreRemoteChangeNotificationPostOptionKey)
         let privateDesc = NSPersistentStoreDescription(url: privateURL)
         privateDesc.configuration = "private"
-        privateDesc.cloudKitContainerOptions = NSPersistentCloudKitContainerOptions(containerIdentifier: "iCloud.com.kintan.tracy")
+        privateDesc.cloudKitContainerOptions = NSPersistentCloudKitContainerOptions(containerIdentifier: "iCloud.com.kintan.tracy.v1")
         privateDesc.setOption(true as NSObject, forKey: NSPersistentHistoryTrackingKey)
         privateDesc.setOption(true as NSObject, forKey: NSPersistentStoreRemoteChangeNotificationPostOptionKey)
-        container.persistentStoreDescriptions = [publicDesc, privateDesc]
+        let localDesc = NSPersistentStoreDescription(url: localURL)
+        localDesc.configuration = "local"
+        container.persistentStoreDescriptions = [localDesc, privateDesc, publicDesc]
 //        let persistentStoreCoordinator = container.persistentStoreCoordinator
         container.loadPersistentStores { storeDescription, error in
             if let error = error as NSError? {
@@ -99,9 +105,9 @@ struct PersistenceController {
         let viewContext = container.newBackgroundContext()
         viewContext.automaticallyMergesChangesFromParent = true
         viewContext.mergePolicy = NSMergeByPropertyObjectTrumpMergePolicy
-//        #if DEBUG
-//        container.viewContext.mergePolicy = NSRollbackMergePolicy
-//        #endif
+        #if DEBUG
+        viewContext.mergePolicy = NSOverwriteMergePolicy
+        #endif
         viewContext.perform {
             do {
                 try viewContext.setQueryGenerationFrom(.current)

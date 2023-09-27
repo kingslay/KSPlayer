@@ -10,8 +10,8 @@ struct HomeView: View {
     @Default(\.showRecentPlayList)
     private var showRecentPlayList
 //    @Environment(\.horizontalSizeClass) var horizontalSizeClass
-    @FetchRequest(fetchRequest: PlayModel.playTimeRequest)
-    private var historyModels: FetchedResults<PlayModel>
+    @FetchRequest(fetchRequest: MovieModel.playTimeRequest)
+    private var historyModels: FetchedResults<MovieModel>
 
     var body: some View {
         ScrollView {
@@ -125,7 +125,7 @@ struct MoiveView: View {
         #endif
     }()
 
-    @ObservedObject var model: PlayModel
+    @ObservedObject var model: MovieModel
     var body: some View {
         VStack {
             image
@@ -137,7 +137,8 @@ struct MoiveView: View {
                 model.isFavorite.toggle()
                 try? model.managedObjectContext?.save()
             } label: {
-                Label(model.isFavorite ? "Cancel favorite" : "Favorite", systemImage: model.isFavorite ? "star" : "star.fill")
+                let isFavorite = model.isFavorite
+                Label(isFavorite ? "Cancel favorite" : "Favorite", systemImage: isFavorite ? "star" : "star.fill")
             }
             #if !os(tvOS)
             Button {
