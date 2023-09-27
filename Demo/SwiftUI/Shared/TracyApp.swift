@@ -128,7 +128,8 @@ class APPModel: ObservableObject {
             if let activeM3UModel, activeM3UModel != oldValue {
                 activeM3UURL = activeM3UModel.m3uURL
                 Task { @MainActor in
-                    if let list = try? await activeM3UModel.parsePlaylist() {
+                    playlist = await activeM3UModel.getMovieModels()
+                    if let list = try? await activeM3UModel.parsePlaylist(refresh: true) {
                         playlist = list
                     }
                 }

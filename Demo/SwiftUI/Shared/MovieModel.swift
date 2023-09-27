@@ -115,7 +115,7 @@ extension M3UModel {
         m3uURL = url
     }
 
-    func parsePlaylist(refresh: Bool = false) async throws -> [MovieModel] {
+    func getMovieModels() async -> [MovieModel] {
         let viewContext = managedObjectContext ?? PersistenceController.shared.viewContext
         let m3uURL = await viewContext.perform {
             self.m3uURL
@@ -123,15 +123,25 @@ extension M3UModel {
         guard let m3uURL else {
             return []
         }
-        let array: [MovieModel] = await viewContext.perform {
+        return await viewContext.perform {
             let request = NSFetchRequest<MovieModel>(entityName: "MovieModel")
             request.predicate = NSPredicate(format: "m3uURL == %@", m3uURL.description)
             request.sortDescriptors = [NSSortDescriptor(key: "name", ascending: true)]
             return (try? viewContext.fetch(request)) ?? []
         }
+    }
 
+    func parsePlaylist(refresh: Bool = false) async throws -> [MovieModel] {
+        let array = await getMovieModels()
         guard refresh || array.isEmpty else {
             return array
+        }
+        let viewContext = managedObjectContext ?? PersistenceController.shared.viewContext
+        let m3uURL = await viewContext.perform {
+            self.m3uURL
+        }
+        guard let m3uURL else {
+            return []
         }
         let result = try await m3uURL.parsePlaylist()
         guard result.count > 0 else {
