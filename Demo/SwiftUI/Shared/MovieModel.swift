@@ -240,7 +240,7 @@ extension MovieModel {
             return model
         }
         let newMovieModel = MovieModel(context: context)
-        newMovieModel.setValuesForKeys(dictionaryWithValues(forKeys: entity.attributeKeys))
+        newMovieModel.setValuesForKeys(dictionaryWithValues(forKeys: entity.attributesByName.keys.map { $0 }))
         newMovieModel.playmodel = model
         context.assign(newMovieModel, to: privateStore)
         context.delete(self)
