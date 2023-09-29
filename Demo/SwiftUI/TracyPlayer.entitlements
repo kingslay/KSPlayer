@@ -8,7 +8,7 @@
 	<string>development</string>
 	<key>com.apple.developer.icloud-container-identifiers</key>
 	<array>
-		<string>iCloud.com.kintan.tracy.v1</string>
+		<string>iCloud.TracyPlayer</string>
 	</array>
 	<key>com.apple.developer.icloud-services</key>
 	<array>
