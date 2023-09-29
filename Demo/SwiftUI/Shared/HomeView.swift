@@ -12,6 +12,17 @@ struct HomeView: View {
 //    @Environment(\.horizontalSizeClass) var horizontalSizeClass
     @FetchRequest(fetchRequest: MovieModel.playTimeRequest)
     private var historyModels: FetchedResults<MovieModel>
+    @FetchRequest
+    private var movieModels: FetchedResults<MovieModel>
+//    init() {
+//        self.init(m3uURL: self.appModel.activeM3UModel?.m3uURL)
+//    }
+    init(m3uURL: URL?) {
+        let request = MovieModel.fetchRequest()
+        request.sortDescriptors = [NSSortDescriptor(keyPath: \MovieModel.name, ascending: true)]
+        request.predicate = NSPredicate(format: "m3uURL == %@  && name != nil ", m3uURL?.description ?? "nil")
+        _movieModels = FetchRequest<MovieModel>(fetchRequest: request)
+    }
 
     var body: some View {
         ScrollView {
@@ -40,7 +51,7 @@ struct HomeView: View {
             }
             Section {
                 LazyVGrid(columns: [GridItem(.adaptive(minimum: MoiveView.width))]) {
-                    let playlist = appModel.playlist.filter { model in
+                    let playlist = movieModels.filter { model in
                         var isIncluded = true
                         if !nameFilter.isEmpty {
                             isIncluded = model.name!.contains(nameFilter)
@@ -129,7 +140,7 @@ struct MoiveView: View {
     var body: some View {
         VStack {
             image
-            Text(model.name!).lineLimit(1)
+            Text(model.name ?? "").lineLimit(1)
         }
         .frame(width: MoiveView.width)
         .contextMenu {

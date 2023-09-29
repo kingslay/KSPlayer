@@ -115,6 +115,21 @@ extension M3UModel {
         m3uURL = url
     }
 
+    func delete() {
+        guard let context = managedObjectContext, let m3uURL else {
+            return
+        }
+        context.delete(self)
+        let request = M3UModel.fetchRequest()
+        request.predicate = NSPredicate(format: "m3uURL == %@", m3uURL.description)
+        if let array = try? context.fetch(request), array.isEmpty {
+            let movieRequest = NSFetchRequest<NSFetchRequestResult>(entityName: "MovieModel")
+            movieRequest.predicate = NSPredicate(format: "m3uURL == %@", m3uURL.description)
+            let deleteRequest = NSBatchDeleteRequest(fetchRequest: movieRequest)
+            _ = try? context.execute(deleteRequest)
+        }
+    }
+
     func getMovieModels() async -> [MovieModel] {
         let viewContext = managedObjectContext ?? PersistenceController.shared.viewContext
         let m3uURL = await viewContext.perform {
@@ -131,11 +146,8 @@ extension M3UModel {
         }
     }
 
-    func parsePlaylist(refresh: Bool = false) async throws -> [MovieModel] {
+    func parsePlaylist() async throws -> [MovieModel] {
         let array = await getMovieModels()
-        guard refresh || array.isEmpty else {
-            return array
-        }
         let viewContext = managedObjectContext ?? PersistenceController.shared.viewContext
         let m3uURL = await viewContext.perform {
             self.m3uURL
@@ -186,7 +198,7 @@ extension M3UModel {
 
 extension MovieModel {
     static var playTimeRequest: NSFetchRequest<MovieModel> {
-        let request = NSFetchRequest<MovieModel>(entityName: "MovieModel")
+        let request = MovieModel.fetchRequest()
         request.sortDescriptors = [
             NSSortDescriptor(
                 keyPath: \MovieModel.playmodel?.playTime,
@@ -203,20 +215,56 @@ extension MovieModel {
             playmodel?.isFavorite ?? false
         }
         set {
-            if let playmodel {
-                playmodel.isFavorite = newValue
-            } else {
-                let model = PlayModel()
-                model.isFavorite = newValue
-                playmodel = model
-            }
+            let playmodel = getPlaymodel()
+            playmodel.isFavorite = newValue
         }
     }
+
+    func save() {
+        guard let context = managedObjectContext else {
+            return
+        }
+        context.perform {
+            do {
+                try context.save()
+            } catch {}
+        }
+    }
+
+    func getPlaymodel() -> PlayModel {
+        if let playmodel {
+            return playmodel
+        }
+        let model = PlayModel()
+        guard let context = managedObjectContext, let privateStore = PersistenceController.shared.privateStore else {
+            return model
+        }
+        let newMovieModel = MovieModel(context: context)
+        newMovieModel.setValuesForKeys(dictionaryWithValues(forKeys: entity.attributeKeys))
+        newMovieModel.playmodel = model
+        context.assign(newMovieModel, to: privateStore)
+        context.delete(self)
+//        try? context.save()
+        return model
+    }
 }
+
+extension NSManagedObject {}
 
 extension PlayModel {
     convenience init() {
         self.init(context: PersistenceController.shared.viewContext)
+    }
+
+    func save() {
+        guard let context = managedObjectContext else {
+            return
+        }
+        context.perform {
+            do {
+                try context.save()
+            } catch {}
+        }
     }
 }
 
@@ -255,13 +303,7 @@ extension KSVideoPlayerView {
         #endif
         options.referer = model.httpReferer
         options.userAgent = model.httpUserAgent
-        let playmodel: PlayModel
-        if let play = model.playmodel {
-            playmodel = play
-        } else {
-            playmodel = PlayModel()
-            model.playmodel = playmodel
-        }
+        let playmodel = model.getPlaymodel()
         playmodel.playTime = Date()
         if playmodel.duration > 0, playmodel.current > 0, playmodel.duration > playmodel.current + 120 {
             options.startPlayTime = TimeInterval(playmodel.current)
@@ -279,9 +321,6 @@ extension KSVideoPlayerView {
                 playmodel.duration = Int16(layer.player.duration)
                 if playmodel.duration > 0 {
                     playmodel.current = Int16(layer.player.currentPlaybackTime)
-                }
-                model.managedObjectContext?.perform {
-                    try? model.managedObjectContext?.save()
                 }
             }
         }

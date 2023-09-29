@@ -311,7 +311,7 @@ open class KSOptions {
     #endif
 
 //    private var lastMediaTime = CACurrentMediaTime()
-    open func videoClockSync(main: KSClock, nextVideoTime: TimeInterval) -> ClockProcessType {
+    open func videoClockSync(main: KSClock, nextVideoTime: TimeInterval, fps: Float) -> ClockProcessType {
         var desire = main.getTime() - videoDelay
         #if !os(macOS)
         desire -= AVAudioSession.sharedInstance().outputLatency
@@ -320,14 +320,12 @@ open class KSOptions {
 //        print("[video] video diff \(diff) audio \(main.positionTime) interval \(CACurrentMediaTime() - main.lastMediaTime) render interval \(CACurrentMediaTime() - lastMediaTime)")
         if diff > 10 || diff < -10 {
             return .next
-        } else if diff > 1 / 120 {
+        } else if diff > 1 / Double(fps * 2) {
             videoClockDelayCount = 0
             return .remain
         } else {
-            if diff < -0.04 {
+            if diff < -4 / Double(fps) {
                 KSLog("[video] video delay=\(diff), clock=\(desire), delay count=\(videoClockDelayCount)")
-            }
-            if diff < -0.1 {
                 videoClockDelayCount += 1
                 if diff < -8, videoClockDelayCount % 100 == 0 {
                     KSLog("[video] video delay seek video track")

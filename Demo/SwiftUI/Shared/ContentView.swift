@@ -15,7 +15,7 @@ struct ContentView: View {
                 link(to: .Files)
             }
         } detail: {
-            appModel.tabSelected.destination
+            appModel.tabSelected.destination(appModel: appModel)
         }
         #else
         TabView(selection: $appModel.tabSelected) {
@@ -88,11 +88,11 @@ struct ContentView: View {
         Group {
             if item == .Home {
                 NavigationStack(path: $appModel.path) {
-                    item.destination
+                    item.destination(appModel: appModel)
                 }
             } else {
                 NavigationStack {
-                    item.destination
+                    item.destination(appModel: appModel)
                 }
             }
         }
@@ -121,10 +121,10 @@ enum TabBarItem: Int {
     }
 
     @ViewBuilder
-    var destination: some View {
+    func destination(appModel: APPModel) -> some View {
         switch self {
         case .Home:
-            HomeView()
+            HomeView(m3uURL: appModel.activeM3UModel?.m3uURL)
                 .navigationPlay()
         case .Favorite:
             FavoriteView()

@@ -16,24 +16,20 @@
         <attribute name="name" attributeType="String" defaultValueString=""/>
         <attribute name="tvgID" optional="YES" attributeType="String"/>
         <attribute name="url" optional="YES" attributeType="URI"/>
-        <relationship name="playmodel" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="PlayModel"/>
-        <uniquenessConstraints>
-            <uniquenessConstraint>
-                <constraint value="url"/>
-            </uniquenessConstraint>
-        </uniquenessConstraints>
+        <relationship name="playmodel" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="PlayModel" inverseName="url" inverseEntity="PlayModel"/>
     </entity>
     <entity name="PlayModel" representedClassName="PlayModel" syncable="YES" codeGenerationType="class">
         <attribute name="current" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
         <attribute name="duration" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
         <attribute name="isFavorite" attributeType="Boolean" defaultValueString="NO" usesScalarValueType="YES"/>
         <attribute name="playTime" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <relationship name="url" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="MovieModel" inverseName="playmodel" inverseEntity="MovieModel"/>
     </entity>
     <configuration name="local">
         <memberEntity name="MovieModel"/>
-        <memberEntity name="PlayModel"/>
     </configuration>
     <configuration name="private" usedWithCloudKit="YES">
+        <memberEntity name="MovieModel"/>
         <memberEntity name="PlayModel"/>
     </configuration>
     <configuration name="public" usedWithCloudKit="YES">

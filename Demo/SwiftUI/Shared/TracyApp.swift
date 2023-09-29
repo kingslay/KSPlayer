@@ -89,7 +89,7 @@ struct TracyApp: App {
         #endif
         #if os(macOS)
         Settings {
-            TabBarItem.Setting.destination
+            TabBarItem.Setting.destination(appModel: appModel)
         }
 //        MenuBarExtra {
 //            MenuBar()
@@ -103,35 +103,29 @@ struct TracyApp: App {
 
 class APPModel: ObservableObject {
     private(set) var groups = [String]()
-    @Published var openURL: URL?
-    @Published var openPlayModel: MovieModel?
-    @Published private(set) var playlist = [MovieModel]() {
-        didSet {
-            var groupSet = Set<String>()
-            playlist.forEach { model in
-                if let group = model.group {
-                    groupSet.insert(group)
-                }
-            }
-            groups = Array(groupSet).sorted()
-        }
-    }
-
-    @Published var tabSelected: TabBarItem = .Home
-    @Published var path = NavigationPath()
-    @Published var openFileImport = false
-    @Published var openURLImport = false
-    @Published var hiddenTitleBar = false
-    @AppStorage("activeM3UURL") private var activeM3UURL: URL?
-    @Published var activeM3UModel: M3UModel? = nil {
+    @Published
+    var openURL: URL?
+    @Published
+    var openPlayModel: MovieModel?
+    @Published
+    var tabSelected: TabBarItem = .Home
+    @Published
+    var path = NavigationPath()
+    @Published
+    var openFileImport = false
+    @Published
+    var openURLImport = false
+    @Published
+    var hiddenTitleBar = false
+    @AppStorage("activeM3UURL")
+    private var activeM3UURL: URL?
+    @Published
+    var activeM3UModel: M3UModel? = nil {
         didSet {
             if let activeM3UModel, activeM3UModel != oldValue {
                 activeM3UURL = activeM3UModel.m3uURL
-                Task { @MainActor in
-                    playlist = await activeM3UModel.getMovieModels()
-                    if let list = try? await activeM3UModel.parsePlaylist(refresh: true) {
-                        playlist = list
-                    }
+                Task {
+                    try? await activeM3UModel.parsePlaylist()
                 }
             }
         }
