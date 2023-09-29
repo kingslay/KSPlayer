@@ -77,13 +77,13 @@ struct PersistenceController {
         }
         let publicDesc = NSPersistentStoreDescription(url: publicURL)
         publicDesc.configuration = "public"
-        publicDesc.cloudKitContainerOptions = NSPersistentCloudKitContainerOptions(containerIdentifier: "iCloud.com.kintan.tracy.v1")
+        publicDesc.cloudKitContainerOptions = NSPersistentCloudKitContainerOptions(containerIdentifier: "iCloud.TracyPlayer")
         publicDesc.cloudKitContainerOptions?.databaseScope = .public
         publicDesc.setOption(true as NSObject, forKey: NSPersistentHistoryTrackingKey)
         publicDesc.setOption(true as NSObject, forKey: NSPersistentStoreRemoteChangeNotificationPostOptionKey)
         let privateDesc = NSPersistentStoreDescription(url: privateURL)
         privateDesc.configuration = "private"
-        privateDesc.cloudKitContainerOptions = NSPersistentCloudKitContainerOptions(containerIdentifier: "iCloud.com.kintan.tracy.v1")
+        privateDesc.cloudKitContainerOptions = NSPersistentCloudKitContainerOptions(containerIdentifier: "iCloud.TracyPlayer")
         privateDesc.setOption(true as NSObject, forKey: NSPersistentHistoryTrackingKey)
         privateDesc.setOption(true as NSObject, forKey: NSPersistentStoreRemoteChangeNotificationPostOptionKey)
         let localDesc = NSPersistentStoreDescription(url: localURL)
