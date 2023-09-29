@@ -100,14 +100,16 @@ struct M3UView: View {
                 .foregroundColor(.secondary)
         }
         .contextMenu {
-            Button {
-                model.managedObjectContext?.delete(model)
-            } label: {
-                Label("Delete", systemImage: "trash.fill")
+            if PersistenceController.shared.container.canUpdateRecord(forManagedObjectWith: model.objectID) {
+                Button {
+                    model.delete()
+                } label: {
+                    Label("Delete", systemImage: "trash.fill")
+                }
             }
             Button {
                 Task {
-                    try? await _ = model.parsePlaylist(refresh: true)
+                    try? await _ = model.parsePlaylist()
                 }
             } label: {
                 Label("Refresh", systemImage: "arrow.clockwise.circle")

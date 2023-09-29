@@ -13,10 +13,10 @@ struct FavoriteView: View {
     @State
     private var nameFilter: String = ""
     @FetchRequest(
-        sortDescriptors: [NSSortDescriptor(keyPath: \PlayModel.name, ascending: true)],
-        predicate: NSPredicate(format: "isFavorite == YES")
+        sortDescriptors: [NSSortDescriptor(keyPath: \MovieModel.name, ascending: true)],
+        predicate: NSPredicate(format: "playmodel.isFavorite == YES")
     )
-    private var favoritelist: FetchedResults<PlayModel>
+    private var favoritelist: FetchedResults<MovieModel>
     var body: some View {
         ScrollView {
             LazyVGrid(columns: [GridItem(.adaptive(minimum: MoiveView.width))]) {

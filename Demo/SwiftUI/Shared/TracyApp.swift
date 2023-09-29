@@ -78,7 +78,7 @@ struct TracyApp: App {
         #endif
         #endif
         #if !os(tvOS)
-        WindowGroup("player", for: PlayModel.self) { $model in
+        WindowGroup("player", for: MovieModel.self) { $model in
             if let model {
                 KSVideoPlayerView(model: model)
             }
@@ -89,7 +89,7 @@ struct TracyApp: App {
         #endif
         #if os(macOS)
         Settings {
-            TabBarItem.Setting.destination
+            TabBarItem.Setting.destination(appModel: appModel)
         }
 //        MenuBarExtra {
 //            MenuBar()
@@ -103,34 +103,29 @@ struct TracyApp: App {
 
 class APPModel: ObservableObject {
     private(set) var groups = [String]()
-    @Published var openURL: URL?
-    @Published var openPlayModel: PlayModel?
-    @Published private(set) var playlist = [PlayModel]() {
-        didSet {
-            var groupSet = Set<String>()
-            playlist.forEach { model in
-                if let group = model.group {
-                    groupSet.insert(group)
-                }
-            }
-            groups = Array(groupSet).sorted()
-        }
-    }
-
-    @Published var tabSelected: TabBarItem = .Home
-    @Published var path = NavigationPath()
-    @Published var openFileImport = false
-    @Published var openURLImport = false
-    @Published var hiddenTitleBar = false
-    @AppStorage("activeM3UURL") private var activeM3UURL: URL?
-    @Published var activeM3UModel: M3UModel? = nil {
+    @Published
+    var openURL: URL?
+    @Published
+    var openPlayModel: MovieModel?
+    @Published
+    var tabSelected: TabBarItem = .Home
+    @Published
+    var path = NavigationPath()
+    @Published
+    var openFileImport = false
+    @Published
+    var openURLImport = false
+    @Published
+    var hiddenTitleBar = false
+    @AppStorage("activeM3UURL")
+    private var activeM3UURL: URL?
+    @Published
+    var activeM3UModel: M3UModel? = nil {
         didSet {
             if let activeM3UModel, activeM3UModel != oldValue {
                 activeM3UURL = activeM3UModel.m3uURL
-                Task { @MainActor in
-                    if let list = try? await activeM3UModel.parsePlaylist() {
-                        playlist = list
-                    }
+                Task {
+                    try? await activeM3UModel.parsePlaylist()
                 }
             }
         }
@@ -180,7 +175,7 @@ class APPModel: ObservableObject {
         }
     }
 
-    func content(model: PlayModel) -> some View {
+    func content(model: MovieModel) -> some View {
         #if os(macOS)
         Button {
             self.openPlayModel = model

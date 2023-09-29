@@ -10,8 +10,19 @@ struct HomeView: View {
     @Default(\.showRecentPlayList)
     private var showRecentPlayList
 //    @Environment(\.horizontalSizeClass) var horizontalSizeClass
-    @FetchRequest(fetchRequest: PlayModel.playTimeRequest)
-    private var historyModels: FetchedResults<PlayModel>
+    @FetchRequest(fetchRequest: MovieModel.playTimeRequest)
+    private var historyModels: FetchedResults<MovieModel>
+    @FetchRequest
+    private var movieModels: FetchedResults<MovieModel>
+//    init() {
+//        self.init(m3uURL: self.appModel.activeM3UModel?.m3uURL)
+//    }
+    init(m3uURL: URL?) {
+        let request = MovieModel.fetchRequest()
+        request.sortDescriptors = [NSSortDescriptor(keyPath: \MovieModel.name, ascending: true)]
+        request.predicate = NSPredicate(format: "m3uURL == %@  && name != nil ", m3uURL?.description ?? "nil")
+        _movieModels = FetchRequest<MovieModel>(fetchRequest: request)
+    }
 
     var body: some View {
         ScrollView {
@@ -40,7 +51,7 @@ struct HomeView: View {
             }
             Section {
                 LazyVGrid(columns: [GridItem(.adaptive(minimum: MoiveView.width))]) {
-                    let playlist = appModel.playlist.filter { model in
+                    let playlist = movieModels.filter { model in
                         var isIncluded = true
                         if !nameFilter.isEmpty {
                             isIncluded = model.name!.contains(nameFilter)
@@ -125,11 +136,11 @@ struct MoiveView: View {
         #endif
     }()
 
-    @ObservedObject var model: PlayModel
+    @ObservedObject var model: MovieModel
     var body: some View {
         VStack {
             image
-            Text(model.name!).lineLimit(1)
+            Text(model.name ?? "").lineLimit(1)
         }
         .frame(width: MoiveView.width)
         .contextMenu {
@@ -137,7 +148,8 @@ struct MoiveView: View {
                 model.isFavorite.toggle()
                 try? model.managedObjectContext?.save()
             } label: {
-                Label(model.isFavorite ? "Cancel favorite" : "Favorite", systemImage: model.isFavorite ? "star" : "star.fill")
+                let isFavorite = model.isFavorite
+                Label(isFavorite ? "Cancel favorite" : "Favorite", systemImage: isFavorite ? "star" : "star.fill")
             }
             #if !os(tvOS)
             Button {
