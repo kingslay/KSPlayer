@@ -123,10 +123,13 @@ extension M3UModel {
         let request = M3UModel.fetchRequest()
         request.predicate = NSPredicate(format: "m3uURL == %@", m3uURL.description)
         if let array = try? context.fetch(request), array.isEmpty {
-            let movieRequest = NSFetchRequest<NSFetchRequestResult>(entityName: "MovieModel")
+            let movieRequest = NSFetchRequest<MovieModel>(entityName: "MovieModel")
             movieRequest.predicate = NSPredicate(format: "m3uURL == %@", m3uURL.description)
-            let deleteRequest = NSBatchDeleteRequest(fetchRequest: movieRequest)
-            _ = try? context.execute(deleteRequest)
+            try? context.fetch(movieRequest).forEach { model in
+                context.delete(model)
+            }
+//            let deleteRequest = NSBatchDeleteRequest(fetchRequest: movieRequest)
+//            _ = try? context.execute(deleteRequest)
         }
     }
 
@@ -163,8 +166,18 @@ extension M3UModel {
             return []
         }
         return await viewContext.perform {
-            var dic = array.toDictionary {
-                $0.url
+            var dic = [URL?: MovieModel]()
+            array.forEach { model in
+                if let oldModel = dic[model.url] {
+                    if oldModel.playmodel == nil {
+                        viewContext.delete(oldModel)
+                        dic[model.url] = model
+                    } else {
+                        viewContext.delete(model)
+                    }
+                } else {
+                    dic[model.url] = model
+                }
             }
             let models = result.map { name, url, extinf -> MovieModel in
                 if let model = dic[url] {
@@ -243,6 +256,7 @@ extension MovieModel {
         newMovieModel.setValuesForKeys(dictionaryWithValues(forKeys: entity.attributesByName.keys.map { $0 }))
         newMovieModel.playmodel = model
         context.assign(newMovieModel, to: privateStore)
+        try? context.save()
         context.delete(self)
         return model
     }

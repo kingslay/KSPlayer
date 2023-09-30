@@ -124,8 +124,9 @@ class APPModel: ObservableObject {
         didSet {
             if let activeM3UModel, activeM3UModel != oldValue {
                 activeM3UURL = activeM3UModel.m3uURL
-                Task {
-                    try? await activeM3UModel.parsePlaylist()
+                Task { @MainActor in
+                    _ = try? await activeM3UModel.parsePlaylist()
+                    self.activeM3UModel = activeM3UModel
                 }
             }
         }
