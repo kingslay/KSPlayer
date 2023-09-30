@@ -32,6 +32,9 @@ jobs:
   buidTVOS:
     name: buidTVOS
     runs-on: macos-13
+     strategy:
+      matrix:
+        xcode: ["15.0"]
     steps:
       - uses: actions/checkout@main
         with:
