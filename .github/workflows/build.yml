@@ -37,7 +37,7 @@ jobs:
         with:
           submodules: 'true'
       - name: Set up Xcode
-        run:
+        run: |
           sudo xcode-select -s /Applications/Xcode_15.0.app/Contents/Developer
           xcode-select -p
           xcodebuild -version
