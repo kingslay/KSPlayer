@@ -17,7 +17,17 @@ public protocol DisplayLayerDelegate: NSObjectProtocol {
 }
 
 public final class MetalPlayView: UIView {
-    private var videoInfo: CMVideoFormatDescription?
+    private var formatDescription: CMFormatDescription? {
+        didSet {
+            #if os(tvOS) || os(xrOS)
+            if let formatDescription {
+                setDisplayCriteria(formatDescription: formatDescription)
+            }
+            #endif
+        }
+    }
+
+    private var fps = Float(60)
     public private(set) var pixelBuffer: CVPixelBuffer?
     /// 用displayLink会导致锁屏无法draw，
     /// 用DispatchSourceTimer的话，在播放4k视频的时候repeat的时间会变长,
@@ -49,6 +59,7 @@ public final class MetalPlayView: UIView {
     }
 
     func prepare(fps: Float, startPlayTime: TimeInterval = 0) {
+        self.fps = fps
         let preferredFramesPerSecond = Int(ceil(fps))
         displayLink.preferredFramesPerSecond = preferredFramesPerSecond << 1
         #if os(iOS)
@@ -157,6 +168,17 @@ extension MetalPlayView {
             let cmtime = frame.cmtime
             let par = pixelBuffer.size
             let sar = pixelBuffer.aspectRatio
+            if formatDescription == nil || !CMVideoFormatDescriptionMatchesImageBuffer(formatDescription!, imageBuffer: pixelBuffer) {
+                if formatDescription != nil {
+                    displayView.removeFromSuperview()
+                    displayView = AVSampleBufferDisplayView()
+                    addSubview(displayView)
+                }
+                let err = CMVideoFormatDescriptionCreateForImageBuffer(allocator: nil, imageBuffer: pixelBuffer, formatDescriptionOut: &formatDescription)
+                if err != noErr {
+                    KSLog("Error at CMVideoFormatDescriptionCreateForImageBuffer \(err)")
+                }
+            }
             if options.isUseDisplayLayer() {
                 if displayView.isHidden {
                     displayView.isHidden = false
@@ -190,20 +212,24 @@ extension MetalPlayView {
     }
 
     private func set(pixelBuffer: CVPixelBuffer, time: CMTime) {
-        if videoInfo == nil || !CMVideoFormatDescriptionMatchesImageBuffer(videoInfo!, imageBuffer: pixelBuffer) {
-            if videoInfo != nil {
-                displayView.removeFromSuperview()
-                displayView = AVSampleBufferDisplayView()
-                addSubview(displayView)
-            }
-            let err = CMVideoFormatDescriptionCreateForImageBuffer(allocator: nil, imageBuffer: pixelBuffer, formatDescriptionOut: &videoInfo)
-            if err != noErr {
-                KSLog("Error at CMVideoFormatDescriptionCreateForImageBuffer \(err)")
-            }
-        }
-        guard let videoInfo else { return }
-        displayView.enqueue(imageBuffer: pixelBuffer, formatDescription: videoInfo, time: time)
+        guard let formatDescription else { return }
+        displayView.enqueue(imageBuffer: pixelBuffer, formatDescription: formatDescription, time: time)
     }
+
+    #if os(tvOS) || os(xrOS)
+    private func setDisplayCriteria(formatDescription: CMFormatDescription) {
+        guard let displayManager = UIApplication.shared.windows.first?.avDisplayManager,
+              displayManager.isDisplayCriteriaMatchingEnabled,
+              !displayManager.isDisplayModeSwitchInProgress
+        else {
+            return
+        }
+        if #available(tvOS 17.0, *) {
+            let criteria = AVDisplayCriteria(refreshRate: fps, formatDescription: formatDescription)
+            displayManager.preferredDisplayCriteria = criteria
+        }
+    }
+    #endif
 }
 
 class MetalView: UIView {

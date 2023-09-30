@@ -232,7 +232,7 @@ public class AudioDescriptor: Equatable {
     fileprivate var channel: AVChannelLayout
     fileprivate var outChannel: AVChannelLayout
     var audioFormat: AVAudioFormat
-    public var channels: AVAudioChannelCount {
+    public var channelCount: AVAudioChannelCount {
         AVAudioChannelCount(channel.nb_channels)
     }
 
@@ -274,15 +274,15 @@ public class AudioDescriptor: Equatable {
         lhs.sampleFormat == rhs.sampleFormat && lhs.sampleRate == rhs.sampleRate && lhs.channel == rhs.channel
     }
 
-    private func audioFormat(channels: AVAudioChannelCount, isUseAudioRenderer: Bool) {
-        if channels != self.channels {
-            av_channel_layout_default(&outChannel, Int32(channels))
+    private func audioFormat(channelCount: AVAudioChannelCount, isUseAudioRenderer: Bool) {
+        if channelCount != self.channelCount {
+            av_channel_layout_default(&outChannel, Int32(channelCount))
         }
         let layoutTag: AudioChannelLayoutTag
         if let tag = outChannel.layoutTag {
             layoutTag = tag
         } else {
-            av_channel_layout_default(&outChannel, Int32(channels))
+            av_channel_layout_default(&outChannel, Int32(channelCount))
             if let tag = outChannel.layoutTag {
                 layoutTag = tag
             } else {
@@ -332,10 +332,10 @@ public class AudioDescriptor: Equatable {
 
     public func setAudioSession(isUseAudioRenderer: Bool) {
         #if os(macOS)
-        let channels = AVAudioChannelCount(2)
+        let channelCount = AVAudioChannelCount(2)
         #else
-        let channels = KSOptions.outputNumberOfChannels(channels: channels, isUseAudioRenderer: isUseAudioRenderer)
+        let channelCount = KSOptions.outputNumberOfChannels(channelCount: channelCount, isUseAudioRenderer: isUseAudioRenderer)
         #endif
-        audioFormat(channels: channels, isUseAudioRenderer: isUseAudioRenderer)
+        audioFormat(channelCount: channelCount, isUseAudioRenderer: isUseAudioRenderer)
     }
 }

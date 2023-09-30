@@ -509,6 +509,7 @@ extension AVAssetTrack {
 }
 
 class AVMediaPlayerTrack: MediaPlayerTrack {
+    let formatDescription: CMFormatDescription? = nil
     let description: String
     private let track: AVPlayerItemTrack
     let nominalFrameRate: Float

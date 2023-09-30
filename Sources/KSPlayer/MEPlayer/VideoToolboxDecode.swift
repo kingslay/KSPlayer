@@ -16,7 +16,7 @@ class VideoToolboxDecode: DecodeProtocol {
     private var startTime = Int64(0)
     private var lastPosition = Int64(0)
     required convenience init(assetTrack: FFmpegAssetTrack, options: KSOptions) {
-        self.init(assetTrack: assetTrack, options: options, session: DecompressionSession(codecpar: assetTrack.codecpar, options: options))
+        self.init(assetTrack: assetTrack, options: options, session: DecompressionSession(assetTrack: assetTrack, options: options))
     }
 
     init(assetTrack: FFmpegAssetTrack, options: KSOptions, session: DecompressionSession?) {
@@ -30,7 +30,7 @@ class VideoToolboxDecode: DecodeProtocol {
             return
         }
         do {
-            let sampleBuffer = try session.formatDescription.getSampleBuffer(isConvertNALSize: session.isConvertNALSize, data: data, size: Int(corePacket.size))
+            let sampleBuffer = try session.formatDescription.getSampleBuffer(isConvertNALSize: session.assetTrack.isConvertNALSize, data: data, size: Int(corePacket.size))
             let flags: VTDecodeFrameFlags = [
                 ._EnableAsynchronousDecompression,
             ]
@@ -69,7 +69,7 @@ class VideoToolboxDecode: DecodeProtocol {
                     throw NSError(errorCode: .codecVideoReceiveFrame, avErrorCode: status)
                 } else {
                     // 解决从后台切换到前台，解码失败的问题
-                    self.session = DecompressionSession(codecpar: session.codecpar, options: options)
+                    self.session = DecompressionSession(assetTrack: session.assetTrack, options: options)
                     doFlushCodec()
                 }
             }
@@ -94,90 +94,33 @@ class VideoToolboxDecode: DecodeProtocol {
 }
 
 class DecompressionSession {
-    fileprivate let isConvertNALSize: Bool
     fileprivate let formatDescription: CMFormatDescription
     fileprivate let decompressionSession: VTDecompressionSession
-    fileprivate var codecpar: AVCodecParameters
-    init?(codecpar: AVCodecParameters, options: KSOptions) {
-        self.codecpar = codecpar
-        let isFullRangeVideo = codecpar.color_range == AVCOL_RANGE_JPEG
-        let format = AVPixelFormat(codecpar.format)
-        guard let pixelFormatType = format.osType(fullRange: isFullRangeVideo) else {
-            return nil
-        }
-        let videoCodecType = codecpar.codec_id.mediaSubType.rawValue
-        #if os(macOS)
-        VTRegisterProfessionalVideoWorkflowVideoDecoders()
-        if #available(macOS 11.0, *) {
-            VTRegisterSupplementalVideoDecoderIfAvailable(videoCodecType)
-        }
-        #endif
-        var extradataSize = Int32(0)
-        var extradata = codecpar.extradata
-        let atomsData: Data?
-        if let extradata {
-            extradataSize = codecpar.extradata_size
-            if extradataSize >= 5, extradata[4] == 0xFE {
-                extradata[4] = 0xFF
-                isConvertNALSize = true
-            } else {
-                isConvertNALSize = false
-            }
-            atomsData = Data(bytes: extradata, count: Int(extradataSize))
-        } else {
-            if videoCodecType == kCMVideoCodecType_VP9 {
-                // ff_videotoolbox_vpcc_extradata_create
-                var ioContext: UnsafeMutablePointer<AVIOContext>?
-                guard avio_open_dyn_buf(&ioContext) == 0 else {
-                    return nil
-                }
-                ff_isom_write_vpcc(nil, ioContext, nil, 0, &self.codecpar)
-                extradataSize = avio_close_dyn_buf(ioContext, &extradata)
-                guard let extradata else {
-                    return nil
-                }
-                var data = Data()
-                var array: [UInt8] = [1, 0, 0, 0]
-                data.append(&array, count: 4)
-                data.append(extradata, count: Int(extradataSize))
-                atomsData = data
-            } else {
-                atomsData = nil
-            }
-            isConvertNALSize = false
-        }
-        let dic: NSMutableDictionary = [
-            kCVImageBufferChromaLocationBottomFieldKey: kCVImageBufferChromaLocation_Left,
-            kCVImageBufferChromaLocationTopFieldKey: kCVImageBufferChromaLocation_Left,
-            kCMFormatDescriptionExtension_FullRangeVideo: isFullRangeVideo,
-            videoCodecType == kCMVideoCodecType_HEVC ? "EnableHardwareAcceleratedVideoDecoder" : "RequireHardwareAcceleratedVideoDecoder": true,
-        ]
-        if let atomsData {
-            dic[kCMFormatDescriptionExtension_SampleDescriptionExtensionAtoms] = [videoCodecType.avc: atomsData]
-        }
-        dic[kCVImageBufferPixelAspectRatioKey] = codecpar.sample_aspect_ratio.size.aspectRatio
-        dic[kCVImageBufferColorPrimariesKey] = codecpar.color_primaries.colorPrimaries
-        dic[kCVImageBufferTransferFunctionKey] = codecpar.color_trc.transferFunction
-        dic[kCVImageBufferYCbCrMatrixKey] = codecpar.color_space.ycbcrMatrix
-        // swiftlint:disable line_length
-        var description: CMFormatDescription?
-        var status = CMVideoFormatDescriptionCreate(allocator: kCFAllocatorDefault, codecType: videoCodecType, width: codecpar.width, height: codecpar.height, extensions: dic, formatDescriptionOut: &description)
-        // swiftlint:enable line_length
-        guard status == noErr, let formatDescription = description else {
+    fileprivate var assetTrack: FFmpegAssetTrack
+    init?(assetTrack: FFmpegAssetTrack, options: KSOptions) {
+        self.assetTrack = assetTrack
+        let format = AVPixelFormat(assetTrack.codecpar.format)
+        guard let pixelFormatType = format.osType(fullRange: assetTrack.fullRangeVideo), let formatDescription = assetTrack.formatDescription else {
             return nil
         }
         self.formatDescription = formatDescription
+        #if os(macOS)
+        VTRegisterProfessionalVideoWorkflowVideoDecoders()
+        if #available(macOS 11.0, *) {
+            VTRegisterSupplementalVideoDecoderIfAvailable(formatDescription.mediaSubType.rawValue)
+        }
+        #endif
 //        VTDecompressionSessionCanAcceptFormatDescription(<#T##session: VTDecompressionSession##VTDecompressionSession#>, formatDescription: <#T##CMFormatDescription#>)
         let attributes: NSMutableDictionary = [
             kCVPixelBufferPixelFormatTypeKey: pixelFormatType,
             kCVPixelBufferMetalCompatibilityKey: true,
-            kCVPixelBufferWidthKey: codecpar.width,
-            kCVPixelBufferHeightKey: codecpar.height,
+            kCVPixelBufferWidthKey: assetTrack.codecpar.width,
+            kCVPixelBufferHeightKey: assetTrack.codecpar.height,
             kCVPixelBufferIOSurfacePropertiesKey: NSDictionary(),
         ]
         var session: VTDecompressionSession?
         // swiftlint:disable line_length
-        status = VTDecompressionSessionCreate(allocator: kCFAllocatorDefault, formatDescription: formatDescription, decoderSpecification: dic, imageBufferAttributes: attributes, outputCallback: nil, decompressionSessionOut: &session)
+        let status = VTDecompressionSessionCreate(allocator: kCFAllocatorDefault, formatDescription: formatDescription, decoderSpecification: nil, imageBufferAttributes: attributes, outputCallback: nil, decompressionSessionOut: &session)
         // swiftlint:enable line_length
         guard status == noErr, let decompressionSession = session else {
             return nil

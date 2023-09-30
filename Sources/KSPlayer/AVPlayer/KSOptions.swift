@@ -226,7 +226,7 @@ open class KSOptions {
         16
     }
 
-    open func audioFrameMaxCount(fps: Float, channels _: Int) -> Int {
+    open func audioFrameMaxCount(fps: Float, channelCount _: Int) -> Int {
         Int(fps) >> 2
     }
 
@@ -303,10 +303,20 @@ open class KSOptions {
      */
     open func process(assetTrack _: some MediaPlayerTrack) {}
 
-    #if os(tvOS)
-    open func preferredDisplayCriteria(refreshRate _: Float, videoDynamicRange _: Int32) -> AVDisplayCriteria? {
-//        AVDisplayCriteria(refreshRate: refreshRate, videoDynamicRange: videoDynamicRange)
-        nil
+    #if os(tvOS) || os(xrOS)
+    open func preferredDisplayCriteria(track: some MediaPlayerTrack) -> AVDisplayCriteria? {
+        let refreshRate = track.nominalFrameRate
+        if #available(tvOS 17.0, *) {
+            if let formatDescription = track.formatDescription {
+                return AVDisplayCriteria(refreshRate: refreshRate, formatDescription: formatDescription)
+            } else {
+                return nil
+            }
+        } else {
+//            let videoDynamicRange = track.dynamicRange(self).rawValue
+//            return AVDisplayCriteria(refreshRate: refreshRate, videoDynamicRange: videoDynamicRange)
+            return nil
+        }
     }
     #endif
 
@@ -424,7 +434,7 @@ public extension KSOptions {
         }
     }
 
-    static func outputNumberOfChannels(channels: AVAudioChannelCount, isUseAudioRenderer: Bool) -> AVAudioChannelCount {
+    static func outputNumberOfChannels(channelCount: AVAudioChannelCount, isUseAudioRenderer: Bool) -> AVAudioChannelCount {
         let maximumOutputNumberOfChannels = AVAudioChannelCount(AVAudioSession.sharedInstance().maximumOutputNumberOfChannels)
         let preferredOutputNumberOfChannels = AVAudioChannelCount(AVAudioSession.sharedInstance().preferredOutputNumberOfChannels)
         KSLog("[audio] maximumOutputNumberOfChannels: \(maximumOutputNumberOfChannels)")
@@ -433,9 +443,9 @@ public extension KSOptions {
         let isSpatialAudioEnabled = isSpatialAudioEnabled()
         KSLog("[audio] isSpatialAudioEnabled: \(isSpatialAudioEnabled)")
         KSLog("[audio] isUseAudioRenderer: \(isUseAudioRenderer)")
-        var channels = channels
-        if channels > 2 {
-            let minChannels = min(maximumOutputNumberOfChannels, channels)
+        var channelCount = channelCount
+        if channelCount > 2 {
+            let minChannels = min(maximumOutputNumberOfChannels, channelCount)
             if minChannels > preferredOutputNumberOfChannels {
                 try? AVAudioSession.sharedInstance().setPreferredOutputNumberOfChannels(Int(minChannels))
                 KSLog("[audio] set preferredOutputNumberOfChannels: \(minChannels)")
@@ -445,13 +455,13 @@ public extension KSOptions {
                     $0.channels?.count
                 }.max() ?? 2
                 KSLog("[audio] currentRoute max channels: \(maxRouteChannelsCount)")
-                channels = AVAudioChannelCount(min(AVAudioSession.sharedInstance().outputNumberOfChannels, maxRouteChannelsCount))
+                channelCount = AVAudioChannelCount(min(AVAudioSession.sharedInstance().outputNumberOfChannels, maxRouteChannelsCount))
             }
         } else {
-            channels = 2
+            channelCount = 2
         }
         KSLog("[audio] outputNumberOfChannels: \(AVAudioSession.sharedInstance().outputNumberOfChannels)")
-        return channels
+        return channelCount
     }
     #endif
 }

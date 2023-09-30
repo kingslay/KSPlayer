@@ -92,6 +92,7 @@ public protocol MediaPlayerTrack: AnyObject, CustomStringConvertible {
     var yCbCrMatrix: String? { get }
     var dovi: DOVIDecoderConfigurationRecord? { get }
     var fieldOrder: FFmpegFieldOrder { get }
+    var formatDescription: CMFormatDescription? { get }
 }
 
 // public extension MediaPlayerTrack: Identifiable {

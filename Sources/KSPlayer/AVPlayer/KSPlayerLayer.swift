@@ -341,7 +341,7 @@ extension KSPlayerLayer: MediaPlayerDelegate {
         }
         #endif
         for track in player.tracks(mediaType: .video) where track.isEnabled {
-            #if os(tvOS)
+            #if os(tvOS) || os(xrOS)
             setDisplayCriteria(track: track)
             #endif
         }
@@ -442,7 +442,7 @@ extension KSPlayerLayer: AVPictureInPictureControllerDelegate {
 // MARK: - private functions
 
 extension KSPlayerLayer {
-    #if os(tvOS)
+    #if os(tvOS) || os(xrOS)
     private func setDisplayCriteria(track: some MediaPlayerTrack) {
         guard let displayManager = UIApplication.shared.windows.first?.avDisplayManager,
               displayManager.isDisplayCriteriaMatchingEnabled,
@@ -450,9 +450,7 @@ extension KSPlayerLayer {
         else {
             return
         }
-        if let criteria = options.preferredDisplayCriteria(refreshRate: track.nominalFrameRate,
-                                                           videoDynamicRange: track.dynamicRange(options).rawValue)
-        {
+        if let criteria = options.preferredDisplayCriteria(track: track) {
             displayManager.preferredDisplayCriteria = criteria
         }
     }
