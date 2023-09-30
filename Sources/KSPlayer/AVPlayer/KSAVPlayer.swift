@@ -509,26 +509,19 @@ extension AVAssetTrack {
 }
 
 class AVMediaPlayerTrack: MediaPlayerTrack {
-    let formatDescription: CMFormatDescription? = nil
+    let formatDescription: CMFormatDescription?
     let description: String
     private let track: AVPlayerItemTrack
     let nominalFrameRate: Float
     let trackID: Int32
-    let mediaSubType: CMFormatDescription.MediaSubType
     let rotation: Int16 = 0
     let bitRate: Int64
     let naturalSize: CGSize
     let name: String
     let language: String?
     let mediaType: AVFoundation.AVMediaType
-    let depth: Int32
-    let fullRangeVideo: Bool
-    let colorPrimaries: String?
-    let transferFunction: String?
-    let yCbCrMatrix: String?
     let isImageSubtitle = false
     var dovi: DOVIDecoderConfigurationRecord?
-    var audioStreamBasicDescription: AudioStreamBasicDescription?
     let fieldOrder: FFmpegFieldOrder = .unknown
     var isPlayable: Bool
     var isEnabled: Bool {
@@ -544,7 +537,6 @@ class AVMediaPlayerTrack: MediaPlayerTrack {
         self.track = track
         trackID = track.assetTrack?.trackID ?? 0
         mediaType = track.assetTrack?.mediaType ?? .video
-        let formatDescription: Any?
         #if os(xrOS)
         name = track.assetTrack?.languageCode ?? ""
         language = track.assetTrack?.extendedLanguageTag
@@ -552,7 +544,7 @@ class AVMediaPlayerTrack: MediaPlayerTrack {
         naturalSize = track.assetTrack?.naturalSize ?? .zero
         bitRate = Int64(track.assetTrack?.estimatedDataRate ?? 0)
         isPlayable = false
-        formatDescription = track.assetTrack?.formatDescriptions.first
+        formatDescription = track.assetTrack?.formatDescriptions.first as? CMFormatDescription
         #else
         name = track.assetTrack?.languageCode ?? ""
         language = track.assetTrack?.extendedLanguageTag
@@ -560,30 +552,11 @@ class AVMediaPlayerTrack: MediaPlayerTrack {
         naturalSize = track.assetTrack?.naturalSize ?? .zero
         bitRate = Int64(track.assetTrack?.estimatedDataRate ?? 0)
         isPlayable = track.assetTrack?.isPlayable ?? false
-        formatDescription = track.assetTrack?.formatDescriptions.first
+        // swiftlint:disable force_cast
+        formatDescription = (track.assetTrack?.formatDescriptions.first as! CMFormatDescription)
+        // swiftlint:enable force_cast
         #endif
-        if let formatDescription {
-            // swiftlint:disable force_cast
-            let desc = formatDescription as! CMFormatDescription
-            // swiftlint:enable force_cast
-            mediaSubType = desc.mediaSubType
-            audioStreamBasicDescription = desc.audioStreamBasicDescription
-            let dictionary = CMFormatDescriptionGetExtensions(desc) as NSDictionary?
-            colorPrimaries = dictionary?[kCVImageBufferColorPrimariesKey] as? String
-            transferFunction = dictionary?[kCVImageBufferTransferFunctionKey] as? String
-            yCbCrMatrix = dictionary?[kCVImageBufferYCbCrMatrixKey] as? String
-            fullRangeVideo = (dictionary?[kCMFormatDescriptionExtension_FullRangeVideo] as? Int32 ?? 0) == 1
-            depth = dictionary?[kCMFormatDescriptionExtension_Depth] as? Int32 ?? 24
-            description = mediaSubType.rawValue.string
-        } else {
-            depth = 24
-            colorPrimaries = nil
-            transferFunction = nil
-            yCbCrMatrix = nil
-            mediaSubType = .boxed
-            fullRangeVideo = false
-            description = ""
-        }
+        description = (formatDescription?.mediaSubType ?? .boxed).rawValue.string
         #if os(xrOS)
         Task {
             isPlayable = await (try? track.assetTrack?.load(.isPlayable)) ?? false

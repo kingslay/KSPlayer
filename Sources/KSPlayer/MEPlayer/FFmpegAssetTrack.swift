@@ -11,7 +11,6 @@ import Libavformat
 public class FFmpegAssetTrack: MediaPlayerTrack {
     public private(set) var trackID: Int32 = 0
     public var name: String = ""
-    public let mediaSubType: CMFormatDescription.MediaSubType
     public private(set) var language: String?
     public private(set) var nominalFrameRate: Float = 0
     public private(set) var bitRate: Int64 = 0
@@ -23,7 +22,6 @@ public class FFmpegAssetTrack: MediaPlayerTrack {
     var codecpar: AVCodecParameters
     var timebase: Timebase = .defaultValue
     // audio
-    public let audioStreamBasicDescription: AudioStreamBasicDescription?
     public let audioDescriptor: AudioDescriptor?
     // subtitle
     public let isImageSubtitle: Bool
@@ -32,11 +30,6 @@ public class FFmpegAssetTrack: MediaPlayerTrack {
     // video
     public private(set) var rotation: Int16 = 0
     public let naturalSize: CGSize
-    public let depth: Int32
-    public let fullRangeVideo: Bool
-    public let colorPrimaries: String?
-    public let transferFunction: String?
-    public let yCbCrMatrix: String?
     public var dovi: DOVIDecoderConfigurationRecord?
     public let fieldOrder: FFmpegFieldOrder
     public let formatDescription: CMFormatDescription?
@@ -108,14 +101,8 @@ public class FFmpegAssetTrack: MediaPlayerTrack {
         self.codecpar = codecpar
         let format = AVPixelFormat(rawValue: codecpar.format)
         bitRate = codecpar.bit_rate
-        depth = format.bitDepth() * Int32(format.planeCount())
-        fullRangeVideo = codecpar.color_range == AVCOL_RANGE_JPEG
-        colorPrimaries = codecpar.color_primaries.colorPrimaries as String?
-        transferFunction = codecpar.color_trc.transferFunction as String?
-        yCbCrMatrix = codecpar.color_space.ycbcrMatrix as String?
+        // codec_tag byte order is LSB first CMFormatDescription.MediaSubType(rawValue: codecpar.codec_tag.bigEndian)
         let codecType = codecpar.codec_id.mediaSubType
-        // codec_tag byte order is LSB first
-        mediaSubType = codecpar.codec_tag == 0 ? codecType : CMFormatDescription.MediaSubType(rawValue: codecpar.codec_tag.bigEndian)
         var description = ""
         if let descriptor = avcodec_descriptor_get(codecpar.codec_id) {
             description += String(cString: descriptor.pointee.name)
@@ -124,18 +111,19 @@ public class FFmpegAssetTrack: MediaPlayerTrack {
             }
         }
         fieldOrder = FFmpegFieldOrder(rawValue: UInt8(codecpar.field_order.rawValue)) ?? .unknown
+        var formatDescriptionOut: CMFormatDescription?
         if codecpar.codec_type == AVMEDIA_TYPE_AUDIO {
             mediaType = .audio
             naturalSize = .zero
             audioDescriptor = AudioDescriptor(codecpar: codecpar)
-            formatDescription = nil
             isConvertNALSize = false
             let layout = codecpar.ch_layout
             let channelsPerFrame = UInt32(layout.nb_channels)
             let sampleFormat = AVSampleFormat(codecpar.format)
             let bytesPerSample = UInt32(av_get_bytes_per_sample(sampleFormat))
             let formatFlags = ((sampleFormat == AV_SAMPLE_FMT_FLT || sampleFormat == AV_SAMPLE_FMT_DBL) ? kAudioFormatFlagIsFloat : sampleFormat == AV_SAMPLE_FMT_U8 ? 0 : kAudioFormatFlagIsSignedInteger) | kAudioFormatFlagIsPacked
-            audioStreamBasicDescription = AudioStreamBasicDescription(mSampleRate: Float64(codecpar.sample_rate), mFormatID: codecType.rawValue, mFormatFlags: formatFlags, mBytesPerPacket: bytesPerSample * channelsPerFrame, mFramesPerPacket: 1, mBytesPerFrame: bytesPerSample * channelsPerFrame, mChannelsPerFrame: channelsPerFrame, mBitsPerChannel: bytesPerSample * 8, mReserved: 0)
+            var audioStreamBasicDescription = AudioStreamBasicDescription(mSampleRate: Float64(codecpar.sample_rate), mFormatID: codecType.rawValue, mFormatFlags: formatFlags, mBytesPerPacket: bytesPerSample * channelsPerFrame, mFramesPerPacket: 1, mBytesPerFrame: bytesPerSample * channelsPerFrame, mChannelsPerFrame: channelsPerFrame, mBitsPerChannel: bytesPerSample * 8, mReserved: 0)
+            _ = CMAudioFormatDescriptionCreate(allocator: kCFAllocatorDefault, asbd: &audioStreamBasicDescription, layoutSize: 0, layout: nil, magicCookieSize: 0, magicCookie: nil, extensions: nil, formatDescriptionOut: &formatDescriptionOut)
             description += ", \(codecpar.sample_rate)Hz"
             description += ", \(codecpar.ch_layout.description)"
             if let name = av_get_sample_fmt_name(sampleFormat) {
@@ -146,7 +134,6 @@ public class FFmpegAssetTrack: MediaPlayerTrack {
         } else if codecpar.codec_type == AVMEDIA_TYPE_VIDEO {
             audioDescriptor = nil
             mediaType = .video
-            audioStreamBasicDescription = nil
             let sar = codecpar.sample_aspect_ratio.size
             naturalSize = CGSize(width: Int(codecpar.width), height: Int(CGFloat(codecpar.height) * sar.height / sar.width))
             var extradataSize = Int32(0)
@@ -186,25 +173,19 @@ public class FFmpegAssetTrack: MediaPlayerTrack {
             let dic: NSMutableDictionary = [
                 kCVImageBufferChromaLocationBottomFieldKey: kCVImageBufferChromaLocation_Left,
                 kCVImageBufferChromaLocationTopFieldKey: kCVImageBufferChromaLocation_Left,
-                kCMFormatDescriptionExtension_FullRangeVideo: fullRangeVideo,
+                kCMFormatDescriptionExtension_FullRangeVideo: codecpar.color_range == AVCOL_RANGE_JPEG,
                 codecType.rawValue == kCMVideoCodecType_HEVC ? "EnableHardwareAcceleratedVideoDecoder" : "RequireHardwareAcceleratedVideoDecoder": true,
             ]
             if let atomsData {
                 dic[kCMFormatDescriptionExtension_SampleDescriptionExtensionAtoms] = [codecType.rawValue.avc: atomsData]
             }
             dic[kCVImageBufferPixelAspectRatioKey] = sar.aspectRatio
-            dic[kCVImageBufferColorPrimariesKey] = colorPrimaries
-            dic[kCVImageBufferTransferFunctionKey] = transferFunction
-            dic[kCVImageBufferYCbCrMatrixKey] = yCbCrMatrix
+            dic[kCVImageBufferColorPrimariesKey] = codecpar.color_primaries.colorPrimaries as String?
+            dic[kCVImageBufferTransferFunctionKey] = codecpar.color_trc.transferFunction as String?
+            dic[kCVImageBufferYCbCrMatrixKey] = codecpar.color_space.ycbcrMatrix as String?
             // swiftlint:disable line_length
-            var formatDescriptionOut: CMFormatDescription?
-            let status = CMVideoFormatDescriptionCreate(allocator: kCFAllocatorDefault, codecType: codecType.rawValue, width: codecpar.width, height: codecpar.height, extensions: dic, formatDescriptionOut: &formatDescriptionOut)
+            _ = CMVideoFormatDescriptionCreate(allocator: kCFAllocatorDefault, codecType: codecType.rawValue, width: codecpar.width, height: codecpar.height, extensions: dic, formatDescriptionOut: &formatDescriptionOut)
             // swiftlint:enable line_length
-            if status == noErr {
-                formatDescription = formatDescriptionOut
-            } else {
-                formatDescription = nil
-            }
             if let name = av_get_pix_fmt_name(format) {
                 formatName = String(cString: name)
             } else {
@@ -213,15 +194,15 @@ public class FFmpegAssetTrack: MediaPlayerTrack {
             description += ", \(Int(naturalSize.width))x\(Int(naturalSize.height))"
         } else if codecpar.codec_type == AVMEDIA_TYPE_SUBTITLE {
             mediaType = .subtitle
-            audioStreamBasicDescription = nil
             audioDescriptor = nil
             formatName = nil
-            formatDescription = nil
             isConvertNALSize = false
             naturalSize = .zero
+            _ = CMFormatDescriptionCreate(allocator: kCFAllocatorDefault, mediaType: kCMMediaType_Subtitle, mediaSubType: codecType.rawValue, extensions: nil, formatDescriptionOut: &formatDescriptionOut)
         } else {
             return nil
         }
+        formatDescription = formatDescriptionOut
         if let formatName {
             description += ", \(formatName)"
         }

@@ -40,31 +40,6 @@ public extension KSOptions {
 //    }
 // }
 
-public extension MediaPlayerTrack {
-    var codecType: FourCharCode {
-        mediaSubType.rawValue
-    }
-
-    func dynamicRange(_ options: KSOptions) -> DynamicRange {
-        let cotentRange: DynamicRange
-        if dovi != nil || codecType.string == "dvhe" || codecType == kCMVideoCodecType_DolbyVisionHEVC {
-            cotentRange = .dolbyVision
-        } else if transferFunction == kCVImageBufferTransferFunction_SMPTE_ST_2084_PQ as String { /// HDR
-            cotentRange = .hdr10
-        } else if transferFunction == kCVImageBufferTransferFunction_ITU_R_2100_HLG as String { /// HDR
-            cotentRange = .hlg
-        } else {
-            cotentRange = .sdr
-        }
-
-        return options.availableDynamicRange(cotentRange) ?? cotentRange
-    }
-
-    var colorSpace: CGColorSpace? {
-        KSOptions.colorSpace(ycbcrMatrix: yCbCrMatrix as CFString?, transferFunction: transferFunction as CFString?)
-    }
-}
-
 public enum DynamicRange: Int32 {
     case sdr = 0
     case hdr10 = 2

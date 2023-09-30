@@ -77,19 +77,12 @@ public protocol MediaPlayerTrack: AnyObject, CustomStringConvertible {
     var name: String { get }
     var language: String? { get }
     var mediaType: AVFoundation.AVMediaType { get }
-    var mediaSubType: CMFormatDescription.MediaSubType { get }
     var nominalFrameRate: Float { get }
     var bitRate: Int64 { get }
     var isEnabled: Bool { get set }
-    var audioStreamBasicDescription: AudioStreamBasicDescription? { get }
     var isImageSubtitle: Bool { get }
     var rotation: Int16 { get }
     var naturalSize: CGSize { get }
-    var depth: Int32 { get }
-    var fullRangeVideo: Bool { get }
-    var colorPrimaries: String? { get }
-    var transferFunction: String? { get }
-    var yCbCrMatrix: String? { get }
     var dovi: DOVIDecoderConfigurationRecord? { get }
     var fieldOrder: FFmpegFieldOrder { get }
     var formatDescription: CMFormatDescription? { get }
@@ -136,3 +129,75 @@ public enum FFmpegFieldOrder: UInt8 {
 }
 
 // swiftlint:enable identifier_name
+public extension MediaPlayerTrack {
+    var codecType: FourCharCode {
+        mediaSubType.rawValue
+    }
+
+    func dynamicRange(_ options: KSOptions) -> DynamicRange {
+        let cotentRange: DynamicRange
+        if dovi != nil || codecType.string == "dvhe" || codecType == kCMVideoCodecType_DolbyVisionHEVC {
+            cotentRange = .dolbyVision
+        } else if transferFunction == kCVImageBufferTransferFunction_SMPTE_ST_2084_PQ as String { /// HDR
+            cotentRange = .hdr10
+        } else if transferFunction == kCVImageBufferTransferFunction_ITU_R_2100_HLG as String { /// HDR
+            cotentRange = .hlg
+        } else {
+            cotentRange = .sdr
+        }
+
+        return options.availableDynamicRange(cotentRange) ?? cotentRange
+    }
+
+    var colorSpace: CGColorSpace? {
+        KSOptions.colorSpace(ycbcrMatrix: yCbCrMatrix as CFString?, transferFunction: transferFunction as CFString?)
+    }
+
+    var mediaSubType: CMFormatDescription.MediaSubType {
+        formatDescription?.mediaSubType ?? .boxed
+    }
+
+    var audioStreamBasicDescription: AudioStreamBasicDescription? {
+        formatDescription?.audioStreamBasicDescription
+    }
+
+    var depth: Int32 {
+        if let formatDescription, let dictionary = CMFormatDescriptionGetExtensions(formatDescription) as NSDictionary? {
+            return dictionary[kCMFormatDescriptionExtension_Depth] as? Int32 ?? 24
+        } else {
+            return 24
+        }
+    }
+
+    var fullRangeVideo: Bool {
+        if let formatDescription, let dictionary = CMFormatDescriptionGetExtensions(formatDescription) as NSDictionary? {
+            return dictionary[kCMFormatDescriptionExtension_FullRangeVideo] as? Bool ?? false
+        } else {
+            return false
+        }
+    }
+
+    var colorPrimaries: String? {
+        if let formatDescription, let dictionary = CMFormatDescriptionGetExtensions(formatDescription) as NSDictionary? {
+            return dictionary[kCVImageBufferColorPrimariesKey] as? String
+        } else {
+            return nil
+        }
+    }
+
+    var transferFunction: String? {
+        if let formatDescription, let dictionary = CMFormatDescriptionGetExtensions(formatDescription) as NSDictionary? {
+            return dictionary[kCVImageBufferTransferFunctionKey] as? String
+        } else {
+            return nil
+        }
+    }
+
+    var yCbCrMatrix: String? {
+        if let formatDescription, let dictionary = CMFormatDescriptionGetExtensions(formatDescription) as NSDictionary? {
+            return dictionary[kCVImageBufferYCbCrMatrixKey] as? String
+        } else {
+            return nil
+        }
+    }
+}
