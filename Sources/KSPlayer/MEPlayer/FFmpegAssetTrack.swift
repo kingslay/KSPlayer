@@ -29,7 +29,6 @@ public class FFmpegAssetTrack: MediaPlayerTrack {
     weak var subtitle: SyncPlayerItemTrack<SubtitleFrame>?
     // video
     public private(set) var rotation: Int16 = 0
-    public let naturalSize: CGSize
     public var dovi: DOVIDecoderConfigurationRecord?
     public let fieldOrder: FFmpegFieldOrder
     public let formatDescription: CMFormatDescription?
@@ -114,7 +113,6 @@ public class FFmpegAssetTrack: MediaPlayerTrack {
         var formatDescriptionOut: CMFormatDescription?
         if codecpar.codec_type == AVMEDIA_TYPE_AUDIO {
             mediaType = .audio
-            naturalSize = .zero
             audioDescriptor = AudioDescriptor(codecpar: codecpar)
             isConvertNALSize = false
             let layout = codecpar.ch_layout
@@ -135,7 +133,6 @@ public class FFmpegAssetTrack: MediaPlayerTrack {
             audioDescriptor = nil
             mediaType = .video
             let sar = codecpar.sample_aspect_ratio.size
-            naturalSize = CGSize(width: Int(codecpar.width), height: Int(CGFloat(codecpar.height) * sar.height / sar.width))
             var extradataSize = Int32(0)
             var extradata = codecpar.extradata
             let atomsData: Data?
@@ -173,6 +170,7 @@ public class FFmpegAssetTrack: MediaPlayerTrack {
             let dic: NSMutableDictionary = [
                 kCVImageBufferChromaLocationBottomFieldKey: kCVImageBufferChromaLocation_Left,
                 kCVImageBufferChromaLocationTopFieldKey: kCVImageBufferChromaLocation_Left,
+                kCMFormatDescriptionExtension_Depth: format.bitDepth() * Int32(format.planeCount()),
                 kCMFormatDescriptionExtension_FullRangeVideo: codecpar.color_range == AVCOL_RANGE_JPEG,
                 codecType.rawValue == kCMVideoCodecType_HEVC ? "EnableHardwareAcceleratedVideoDecoder" : "RequireHardwareAcceleratedVideoDecoder": true,
             ]
@@ -191,13 +189,13 @@ public class FFmpegAssetTrack: MediaPlayerTrack {
             } else {
                 formatName = nil
             }
+            let naturalSize = CGSize(width: Int(codecpar.width), height: Int(CGFloat(codecpar.height) * sar.height / sar.width))
             description += ", \(Int(naturalSize.width))x\(Int(naturalSize.height))"
         } else if codecpar.codec_type == AVMEDIA_TYPE_SUBTITLE {
             mediaType = .subtitle
             audioDescriptor = nil
             formatName = nil
             isConvertNALSize = false
-            naturalSize = .zero
             _ = CMFormatDescriptionCreate(allocator: kCFAllocatorDefault, mediaType: kCMMediaType_Subtitle, mediaSubType: codecType.rawValue, extensions: nil, formatDescriptionOut: &formatDescriptionOut)
         } else {
             return nil

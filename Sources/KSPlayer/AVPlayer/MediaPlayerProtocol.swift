@@ -82,7 +82,6 @@ public protocol MediaPlayerTrack: AnyObject, CustomStringConvertible {
     var isEnabled: Bool { get set }
     var isImageSubtitle: Bool { get }
     var rotation: Int16 { get }
-    var naturalSize: CGSize { get }
     var dovi: DOVIDecoderConfigurationRecord? { get }
     var fieldOrder: FFmpegFieldOrder { get }
     var formatDescription: CMFormatDescription? { get }
@@ -159,6 +158,27 @@ public extension MediaPlayerTrack {
 
     var audioStreamBasicDescription: AudioStreamBasicDescription? {
         formatDescription?.audioStreamBasicDescription
+    }
+
+    var naturalSize: CGSize {
+        formatDescription.map { description in
+            let dimensions = description.dimensions
+            let aspectRatio = aspectRatio
+            return CGSize(width: Int(dimensions.width), height: Int(CGFloat(dimensions.height) * aspectRatio.height / aspectRatio.width))
+        } ?? .zero
+    }
+
+    var aspectRatio: CGSize {
+        if let formatDescription, let dictionary = CMFormatDescriptionGetExtensions(formatDescription) as NSDictionary? {
+            if let ratio = dictionary[kCVImageBufferPixelAspectRatioKey] as? NSDictionary,
+               let horizontal = (ratio[kCVImageBufferPixelAspectRatioHorizontalSpacingKey] as? NSNumber)?.intValue,
+               let vertical = (ratio[kCVImageBufferPixelAspectRatioVerticalSpacingKey] as? NSNumber)?.intValue,
+               horizontal > 0, vertical > 0
+            {
+                return CGSize(width: horizontal, height: vertical)
+            }
+        }
+        return CGSize(width: 1, height: 1)
     }
 
     var depth: Int32 {

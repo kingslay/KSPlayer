@@ -516,7 +516,6 @@ class AVMediaPlayerTrack: MediaPlayerTrack {
     let trackID: Int32
     let rotation: Int16 = 0
     let bitRate: Int64
-    let naturalSize: CGSize
     let name: String
     let language: String?
     let mediaType: AVFoundation.AVMediaType
@@ -541,7 +540,6 @@ class AVMediaPlayerTrack: MediaPlayerTrack {
         name = track.assetTrack?.languageCode ?? ""
         language = track.assetTrack?.extendedLanguageTag
         nominalFrameRate = track.assetTrack?.nominalFrameRate ?? 24.0
-        naturalSize = track.assetTrack?.naturalSize ?? .zero
         bitRate = Int64(track.assetTrack?.estimatedDataRate ?? 0)
         isPlayable = false
         formatDescription = track.assetTrack?.formatDescriptions.first as? CMFormatDescription
@@ -549,7 +547,6 @@ class AVMediaPlayerTrack: MediaPlayerTrack {
         name = track.assetTrack?.languageCode ?? ""
         language = track.assetTrack?.extendedLanguageTag
         nominalFrameRate = track.assetTrack?.nominalFrameRate ?? 24.0
-        naturalSize = track.assetTrack?.naturalSize ?? .zero
         bitRate = Int64(track.assetTrack?.estimatedDataRate ?? 0)
         isPlayable = track.assetTrack?.isPlayable ?? false
         // swiftlint:disable force_cast
