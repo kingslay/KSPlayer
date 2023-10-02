@@ -102,7 +102,6 @@ struct TracyApp: App {
 }
 
 class APPModel: ObservableObject {
-    private(set) var groups = [String]()
     @Published
     var openURL: URL?
     @Published
