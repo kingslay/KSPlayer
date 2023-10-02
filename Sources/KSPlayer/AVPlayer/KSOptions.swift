@@ -400,6 +400,7 @@ public extension KSOptions {
     static var hardwareDecode = true
     static var asynchronousDecompression = true
     static var isPipPopViewController = false
+    static var displayCriteriaMatchingEnabled = true
     /// 日志级别
     static var logLevel = LogLevel.warning
     static var logger: LogHandler = OSLog(lable: "KSPlayer")
