@@ -91,7 +91,7 @@ public class CacheDataSouce: SearchSubtitleDataSouce {
     }
 
     public func searchSubtitle(url: URL?) async throws {
-        infos.removeAll()
+        infos = [any SubtitleInfo]()
         guard let url else {
             return
         }
@@ -135,7 +135,7 @@ public class DirectorySubtitleDataSouce: SearchSubtitleDataSouce {
     public init() {}
 
     public func searchSubtitle(url: URL?) async throws {
-        infos.removeAll()
+        infos = [any SubtitleInfo]()
         guard let url else {
             return
         }
@@ -153,7 +153,7 @@ public class ShooterSubtitleDataSouce: SearchSubtitleDataSouce {
     public var infos = [any SubtitleInfo]()
     public init() {}
     public func searchSubtitle(url: URL?) async throws {
-        infos.removeAll()
+        infos = [any SubtitleInfo]()
         guard let url else {
             return
         }
@@ -193,7 +193,7 @@ public class AssrtSubtitleDataSouce: SearchSubtitleDataSouce {
     }
 
     public func searchSubtitle(url: URL?) async throws {
-        infos.removeAll()
+        infos = [any SubtitleInfo]()
         guard let url else {
             return
         }
