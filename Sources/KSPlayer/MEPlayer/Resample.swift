@@ -231,7 +231,7 @@ public class AudioDescriptor: Equatable {
     fileprivate let sampleFormat: AVSampleFormat
     fileprivate var channel: AVChannelLayout
     fileprivate var outChannel: AVChannelLayout
-    var audioFormat: AVAudioFormat
+    private(set) var audioFormat: AVAudioFormat
     public var channelCount: AVAudioChannelCount {
         AVAudioChannelCount(channel.nb_channels)
     }
@@ -254,7 +254,7 @@ public class AudioDescriptor: Equatable {
             self.sampleRate = sampleRate
         }
         sampleFormat = AVSampleFormat(rawValue: codecpar.format)
-        audioFormat = AVAudioFormat(standardFormatWithSampleRate: Double(sampleRate), channelLayout: AVAudioChannelLayout(layoutTag: kAudioChannelLayoutTag_Stereo)!)
+        audioFormat = AVAudioFormat(standardFormatWithSampleRate: Double(self.sampleRate), channelLayout: AVAudioChannelLayout(layoutTag: kAudioChannelLayoutTag_Stereo)!)
     }
 
     init(frame: AVFrame) {
@@ -267,7 +267,7 @@ public class AudioDescriptor: Equatable {
             self.sampleRate = sampleRate
         }
         sampleFormat = AVSampleFormat(rawValue: frame.format)
-        audioFormat = AVAudioFormat(standardFormatWithSampleRate: Double(sampleRate), channelLayout: AVAudioChannelLayout(layoutTag: kAudioChannelLayoutTag_Stereo)!)
+        audioFormat = AVAudioFormat(standardFormatWithSampleRate: Double(self.sampleRate), channelLayout: AVAudioChannelLayout(layoutTag: kAudioChannelLayoutTag_Stereo)!)
     }
 
     public static func == (lhs: AudioDescriptor, rhs: AudioDescriptor) -> Bool {
