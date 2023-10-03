@@ -206,7 +206,7 @@ open class KSPlayerLayer: UIView {
         }
         NotificationCenter.default.removeObserver(self)
         MPNowPlayingInfoCenter.default().nowPlayingInfo = nil
-        #if os(tvOS)
+        #if os(tvOS) || os(xrOS)
         UIApplication.shared.windows.first?.avDisplayManager.preferredDisplayCriteria = nil
         #endif
     }
@@ -277,9 +277,6 @@ open class KSPlayerLayer: UIView {
         player.playbackVolume = 1
         UIApplication.shared.isIdleTimerDisabled = false
         MPNowPlayingInfoCenter.default().nowPlayingInfo = nil
-        #if os(tvOS)
-        UIApplication.shared.windows.first?.avDisplayManager.preferredDisplayCriteria = nil
-        #endif
     }
 
     open func seek(time: TimeInterval, autoPlay: Bool, completion: @escaping ((Bool) -> Void)) {
