@@ -168,17 +168,6 @@ extension MetalPlayView {
             let cmtime = frame.cmtime
             let par = pixelBuffer.size
             let sar = pixelBuffer.aspectRatio
-            if formatDescription == nil || !CMVideoFormatDescriptionMatchesImageBuffer(formatDescription!, imageBuffer: pixelBuffer) {
-                if formatDescription != nil {
-                    displayView.removeFromSuperview()
-                    displayView = AVSampleBufferDisplayView()
-                    addSubview(displayView)
-                }
-                let err = CMVideoFormatDescriptionCreateForImageBuffer(allocator: nil, imageBuffer: pixelBuffer, formatDescriptionOut: &formatDescription)
-                if err != noErr {
-                    KSLog("Error at CMVideoFormatDescriptionCreateForImageBuffer \(err)")
-                }
-            }
             if options.isUseDisplayLayer() {
                 if displayView.isHidden {
                     displayView.isHidden = false
@@ -188,6 +177,7 @@ extension MetalPlayView {
                 if let dar = options.customizeDar(sar: sar, par: par) {
                     pixelBuffer.aspectRatio = CGSize(width: dar.width, height: dar.height * par.width / par.height)
                 }
+                checkFormatDescription(pixelBuffer: pixelBuffer)
                 set(pixelBuffer: pixelBuffer, time: cmtime)
             } else {
                 if !displayView.isHidden {
@@ -205,9 +195,24 @@ extension MetalPlayView {
                 } else {
                     size = KSOptions.sceneSize
                 }
+                checkFormatDescription(pixelBuffer: pixelBuffer)
                 metalView.draw(pixelBuffer: pixelBuffer, display: options.display, size: size)
             }
             renderSource?.setVideo(time: cmtime)
+        }
+    }
+
+    private func checkFormatDescription(pixelBuffer: CVPixelBuffer) {
+        if formatDescription == nil || !CMVideoFormatDescriptionMatchesImageBuffer(formatDescription!, imageBuffer: pixelBuffer) {
+            if formatDescription != nil {
+                displayView.removeFromSuperview()
+                displayView = AVSampleBufferDisplayView()
+                addSubview(displayView)
+            }
+            let err = CMVideoFormatDescriptionCreateForImageBuffer(allocator: nil, imageBuffer: pixelBuffer, formatDescriptionOut: &formatDescription)
+            if err != noErr {
+                KSLog("Error at CMVideoFormatDescriptionCreateForImageBuffer \(err)")
+            }
         }
     }
 
