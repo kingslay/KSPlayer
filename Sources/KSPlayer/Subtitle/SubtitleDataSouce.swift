@@ -168,11 +168,11 @@ public class ShooterSubtitleDataSouce: SearchSubtitleDataSouce {
         guard let json = try JSONSerialization.jsonObject(with: data) as? [[String: Any]] else {
             return
         }
-        json.forEach { sub in
+        infos = json.flatMap { sub in
             let filesDic = sub["Files"] as? [[String: String]]
 //                let desc = sub["Desc"] as? String ?? ""
             let delay = TimeInterval(sub["Delay"] as? Int ?? 0) / 1000.0
-            let result = filesDic?.compactMap { dic in
+            return filesDic?.compactMap { dic in
                 if let string = dic["Link"], let url = URL(string: string) {
                     let info = URLSubtitleInfo(subtitleID: string, name: "", url: url)
                     info.delay = delay
@@ -180,7 +180,6 @@ public class ShooterSubtitleDataSouce: SearchSubtitleDataSouce {
                 }
                 return nil
             } ?? [URLSubtitleInfo]()
-            self.infos.append(contentsOf: result)
         }
     }
 }
@@ -214,11 +213,13 @@ public class AssrtSubtitleDataSouce: SearchSubtitleDataSouce {
         guard let subDict = json["sub"] as? [String: Any], let subArray = subDict["subs"] as? [[String: Any]] else {
             return
         }
+        var result = [URLSubtitleInfo]()
         for sub in subArray {
             if let assrtSubID = sub["id"] as? Int {
-                try await infos.append(contentsOf: loadDetails(assrtSubID: String(assrtSubID)))
+                try await result.append(contentsOf: loadDetails(assrtSubID: String(assrtSubID)))
             }
         }
+        infos = result
     }
 
     func loadDetails(assrtSubID: String) async throws -> [URLSubtitleInfo] {

@@ -239,7 +239,7 @@ open class SubtitleModel: ObservableObject {
             switch self {
             case .smaller:
                 #if os(tvOS)
-                return 30
+                return 48
                 #elseif os(macOS)
                 return 20
                 #else
@@ -247,7 +247,7 @@ open class SubtitleModel: ObservableObject {
                 #endif
             case .standard:
                 #if os(tvOS)
-                return 36
+                return 58
                 #elseif os(macOS)
                 return 26
                 #else
@@ -255,7 +255,7 @@ open class SubtitleModel: ObservableObject {
                 #endif
             case .large:
                 #if os(tvOS)
-                return 42
+                return 68
                 #elseif os(macOS)
                 return 32
                 #else

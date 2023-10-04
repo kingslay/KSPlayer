@@ -191,19 +191,19 @@ public struct KSVideoPlayerView: View {
         //            return .handled
         //        }
         #if os(macOS)
-        .onTapGesture(count: 2) {
-            guard let view = playerCoordinator.playerLayer else {
-                return
+            .onTapGesture(count: 2) {
+                guard let view = playerCoordinator.playerLayer else {
+                    return
+                }
+                view.window?.toggleFullScreen(nil)
+                view.needsLayout = true
+                view.layoutSubtreeIfNeeded()
             }
-            view.window?.toggleFullScreen(nil)
-            view.needsLayout = true
-            view.layoutSubtreeIfNeeded()
-        }
-        .onExitCommand {
-            playerCoordinator.playerLayer?.exitFullScreenMode()
-        }
+            .onExitCommand {
+                playerCoordinator.playerLayer?.exitFullScreenMode()
+            }
         #else
-        .onTapGesture {
+            .onTapGesture {
                 isMaskShow.toggle()
             }
         #endif
