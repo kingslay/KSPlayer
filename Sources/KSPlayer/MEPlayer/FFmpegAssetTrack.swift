@@ -62,22 +62,23 @@ public class FFmpegAssetTrack: MediaPlayerTrack {
         } else {
             rotation = 0
         }
-        let frameRate = stream.pointee.avg_frame_rate
-        if stream.pointee.duration > 0, stream.pointee.nb_frames > 0, stream.pointee.nb_frames != stream.pointee.duration {
-            nominalFrameRate = Float(stream.pointee.nb_frames) * Float(timebase.den) / Float(stream.pointee.duration) * Float(timebase.num)
-        } else if frameRate.den > 0, frameRate.num > 0 {
-            nominalFrameRate = Float(frameRate.num) / Float(frameRate.den)
-        } else {
-            if mediaType == .audio {
-                var frameSize = codecpar.frame_size
-                if frameSize < 1 {
-                    frameSize = timebase.den / timebase.num
-                }
-                nominalFrameRate = max(Float(codecpar.sample_rate / frameSize), 44)
-            } else {
-                nominalFrameRate = 24
+
+        if mediaType == .audio {
+            var frameSize = codecpar.frame_size
+            if frameSize < 1 {
+                frameSize = timebase.den / timebase.num
             }
+            nominalFrameRate = max(Float(codecpar.sample_rate / frameSize), 44)
+        } else {
+            let frameRate = stream.pointee.avg_frame_rate
+            if stream.pointee.duration > 0, stream.pointee.nb_frames > 0, stream.pointee.nb_frames != stream.pointee.duration {
+                nominalFrameRate = Float(stream.pointee.nb_frames) * Float(timebase.den) / Float(stream.pointee.duration) * Float(timebase.num)
+            } else if frameRate.den > 0, frameRate.num > 0 {
+                nominalFrameRate = Float(frameRate.num) / Float(frameRate.den)
+            }
+            nominalFrameRate = 24
         }
+
         if codecpar.codec_type == AVMEDIA_TYPE_VIDEO {
             description += ", \(nominalFrameRate) fps"
         }
