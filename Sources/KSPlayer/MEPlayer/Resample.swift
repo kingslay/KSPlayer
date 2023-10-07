@@ -66,7 +66,7 @@ class VideoSwresample: Swresample {
         self.height = height
         self.width = width
         let pixelFormatType: OSType
-        if let osType = format.osType(), osType.planeCount() == format.planeCount() {
+        if let osType = format.osType(), osType.planeCount() == format.planeCount(), format.bitDepth() <= 8 {
             pixelFormatType = osType
             sws_freeContext(imgConvertCtx)
             imgConvertCtx = nil
