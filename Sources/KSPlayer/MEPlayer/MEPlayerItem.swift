@@ -122,7 +122,7 @@ final class MEPlayerItem {
             if log.hasPrefix("parser not found for codec") {
                 KSLog(log)
             }
-            KSLog(level: LogLevel(rawValue: level) ?? KSOptions.logLevel, log)
+            KSLog(level: LogLevel(rawValue: level) ?? .warning, log)
         }
     }()
 

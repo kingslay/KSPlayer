@@ -554,7 +554,7 @@ public class FileLog: LogHandler {
     KSLog(level: .error, error().localizedDescription, file: file, function: function, line: line)
 }
 
-@inlinable public func KSLog(level: LogLevel = KSOptions.logLevel, _ message: @autoclosure () -> CustomStringConvertible, file: String = #file, function: String = #function, line: UInt = #line) {
+@inlinable public func KSLog(level: LogLevel = .warning, _ message: @autoclosure () -> CustomStringConvertible, file: String = #file, function: String = #function, line: UInt = #line) {
     if level.rawValue <= KSOptions.logLevel.rawValue {
         let fileName = (file as NSString).lastPathComponent
         KSOptions.logger.log(level: level, message: message(), file: fileName, function: function, line: line)
