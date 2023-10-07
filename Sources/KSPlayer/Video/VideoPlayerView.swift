@@ -240,7 +240,12 @@ open class VideoPlayerView: PlayerView {
         if srtControl.subtitle(currentTime: currentTime) {
             if let part = srtControl.parts.first {
                 subtitleBackView.image = part.image
-                subtitleLabel.attributedText = part.text
+                if let text = part.text {
+                    let attributedText = NSMutableAttributedString(attributedString: text)
+                    attributedText.addAttributes([.font: SubtitleModel.textFont],
+                                                 range: NSRange(location: 0, length: text.length))
+                    subtitleLabel.attributedText = attributedText
+                }
                 subtitleBackView.isHidden = false
             } else {
                 subtitleBackView.image = nil

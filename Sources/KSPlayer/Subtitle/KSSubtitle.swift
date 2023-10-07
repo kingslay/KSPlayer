@@ -239,7 +239,7 @@ open class SubtitleModel: ObservableObject {
             switch self {
             case .smaller:
                 #if os(tvOS)
-                return 30
+                return 48
                 #elseif os(macOS)
                 return 20
                 #else
@@ -247,7 +247,7 @@ open class SubtitleModel: ObservableObject {
                 #endif
             case .standard:
                 #if os(tvOS)
-                return 36
+                return 58
                 #elseif os(macOS)
                 return 26
                 #else
@@ -255,7 +255,7 @@ open class SubtitleModel: ObservableObject {
                 #endif
             case .large:
                 #if os(tvOS)
-                return 42
+                return 68
                 #elseif os(macOS)
                 return 32
                 #else
@@ -286,6 +286,7 @@ open class SubtitleModel: ObservableObject {
             subtitleDataSouces.forEach { datasouce in
                 addSubtitle(dataSouce: datasouce)
             }
+            // 要用async，不能在更新UI的时候，修改Publishe变量
             DispatchQueue.main.async { [weak self] in
                 self?.parts = []
                 self?.selectedSubtitleInfo = nil
@@ -333,14 +334,10 @@ open class SubtitleModel: ObservableObject {
         if let dataSouce = dataSouce as? SearchSubtitleDataSouce {
             Task {
                 try? await dataSouce.searchSubtitle(url: url)
-                dataSouce.infos.forEach { info in
-                    addSubtitle(info: info)
-                }
+                subtitleInfos.append(contentsOf: dataSouce.infos)
             }
         } else {
-            dataSouce.infos.forEach { info in
-                addSubtitle(info: info)
-            }
+            subtitleInfos.append(contentsOf: dataSouce.infos)
         }
     }
 }

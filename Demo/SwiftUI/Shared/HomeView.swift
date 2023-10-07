@@ -14,9 +14,6 @@ struct HomeView: View {
     private var historyModels: FetchedResults<MovieModel>
     @FetchRequest
     private var movieModels: FetchedResults<MovieModel>
-//    init() {
-//        self.init(m3uURL: self.appModel.activeM3UModel?.m3uURL)
-//    }
     init(m3uURL: URL?) {
         let request = MovieModel.fetchRequest()
         request.sortDescriptors = [NSSortDescriptor(keyPath: \MovieModel.name, ascending: true)]
@@ -102,10 +99,18 @@ struct HomeView: View {
             #if !os(tvOS)
             .keyboardShortcut("o", modifiers: [.command, .shift])
             #endif
-
+            let groups = movieModels.reduce(Set<String>()) { partialResult, model in
+                if let group = model.group {
+                    var set = partialResult
+                    set.insert(group)
+                    return set
+                } else {
+                    return partialResult
+                }
+            }.sorted()
             Picker("group filter", selection: $groupFilter) {
                 Text("All").tag(nil as String?)
-                ForEach(appModel.groups) { group in
+                ForEach(groups) { group in
                     Text(group).tag(group as String?)
                 }
             }

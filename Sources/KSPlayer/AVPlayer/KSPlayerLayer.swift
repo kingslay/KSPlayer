@@ -206,7 +206,7 @@ open class KSPlayerLayer: UIView {
         }
         NotificationCenter.default.removeObserver(self)
         MPNowPlayingInfoCenter.default().nowPlayingInfo = nil
-        #if os(tvOS)
+        #if os(tvOS) || os(xrOS)
         UIApplication.shared.windows.first?.avDisplayManager.preferredDisplayCriteria = nil
         #endif
     }
@@ -277,9 +277,6 @@ open class KSPlayerLayer: UIView {
         player.playbackVolume = 1
         UIApplication.shared.isIdleTimerDisabled = false
         MPNowPlayingInfoCenter.default().nowPlayingInfo = nil
-        #if os(tvOS)
-        UIApplication.shared.windows.first?.avDisplayManager.preferredDisplayCriteria = nil
-        #endif
     }
 
     open func seek(time: TimeInterval, autoPlay: Bool, completion: @escaping ((Bool) -> Void)) {
@@ -341,7 +338,7 @@ extension KSPlayerLayer: MediaPlayerDelegate {
         }
         #endif
         for track in player.tracks(mediaType: .video) where track.isEnabled {
-            #if os(tvOS)
+            #if os(tvOS) || os(xrOS)
             setDisplayCriteria(track: track)
             #endif
         }
@@ -442,7 +439,7 @@ extension KSPlayerLayer: AVPictureInPictureControllerDelegate {
 // MARK: - private functions
 
 extension KSPlayerLayer {
-    #if os(tvOS)
+    #if os(tvOS) || os(xrOS)
     private func setDisplayCriteria(track: some MediaPlayerTrack) {
         guard let displayManager = UIApplication.shared.windows.first?.avDisplayManager,
               displayManager.isDisplayCriteriaMatchingEnabled,
@@ -450,9 +447,7 @@ extension KSPlayerLayer {
         else {
             return
         }
-        if let criteria = options.preferredDisplayCriteria(refreshRate: track.nominalFrameRate,
-                                                           videoDynamicRange: track.dynamicRange(options).rawValue)
-        {
+        if let criteria = options.preferredDisplayCriteria(track: track) {
             displayManager.preferredDisplayCriteria = criteria
         }
     }

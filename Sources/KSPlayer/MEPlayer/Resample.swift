@@ -66,7 +66,7 @@ class VideoSwresample: Swresample {
         self.height = height
         self.width = width
         let pixelFormatType: OSType
-        if let osType = format.osType(), osType.planeCount() == format.planeCount() {
+        if let osType = format.osType(), osType.planeCount() == format.planeCount(), format.bitDepth() <= 8 {
             pixelFormatType = osType
             sws_freeContext(imgConvertCtx)
             imgConvertCtx = nil
@@ -231,8 +231,8 @@ public class AudioDescriptor: Equatable {
     fileprivate let sampleFormat: AVSampleFormat
     fileprivate var channel: AVChannelLayout
     fileprivate var outChannel: AVChannelLayout
-    var audioFormat: AVAudioFormat
-    public var channels: AVAudioChannelCount {
+    private(set) var audioFormat: AVAudioFormat
+    public var channelCount: AVAudioChannelCount {
         AVAudioChannelCount(channel.nb_channels)
     }
 
@@ -254,7 +254,7 @@ public class AudioDescriptor: Equatable {
             self.sampleRate = sampleRate
         }
         sampleFormat = AVSampleFormat(rawValue: codecpar.format)
-        audioFormat = AVAudioFormat(standardFormatWithSampleRate: Double(sampleRate), channelLayout: AVAudioChannelLayout(layoutTag: kAudioChannelLayoutTag_Stereo)!)
+        audioFormat = AVAudioFormat(standardFormatWithSampleRate: Double(self.sampleRate), channelLayout: AVAudioChannelLayout(layoutTag: kAudioChannelLayoutTag_Stereo)!)
     }
 
     init(frame: AVFrame) {
@@ -267,22 +267,22 @@ public class AudioDescriptor: Equatable {
             self.sampleRate = sampleRate
         }
         sampleFormat = AVSampleFormat(rawValue: frame.format)
-        audioFormat = AVAudioFormat(standardFormatWithSampleRate: Double(sampleRate), channelLayout: AVAudioChannelLayout(layoutTag: kAudioChannelLayoutTag_Stereo)!)
+        audioFormat = AVAudioFormat(standardFormatWithSampleRate: Double(self.sampleRate), channelLayout: AVAudioChannelLayout(layoutTag: kAudioChannelLayoutTag_Stereo)!)
     }
 
     public static func == (lhs: AudioDescriptor, rhs: AudioDescriptor) -> Bool {
         lhs.sampleFormat == rhs.sampleFormat && lhs.sampleRate == rhs.sampleRate && lhs.channel == rhs.channel
     }
 
-    private func audioFormat(channels: AVAudioChannelCount, isUseAudioRenderer: Bool) {
-        if channels != self.channels {
-            av_channel_layout_default(&outChannel, Int32(channels))
+    private func audioFormat(channelCount: AVAudioChannelCount, isUseAudioRenderer: Bool) {
+        if channelCount != self.channelCount {
+            av_channel_layout_default(&outChannel, Int32(channelCount))
         }
         let layoutTag: AudioChannelLayoutTag
         if let tag = outChannel.layoutTag {
             layoutTag = tag
         } else {
-            av_channel_layout_default(&outChannel, Int32(channels))
+            av_channel_layout_default(&outChannel, Int32(channelCount))
             if let tag = outChannel.layoutTag {
                 layoutTag = tag
             } else {
@@ -332,10 +332,10 @@ public class AudioDescriptor: Equatable {
 
     public func setAudioSession(isUseAudioRenderer: Bool) {
         #if os(macOS)
-        let channels = AVAudioChannelCount(2)
+        let channelCount = AVAudioChannelCount(2)
         #else
-        let channels = KSOptions.outputNumberOfChannels(channels: channels, isUseAudioRenderer: isUseAudioRenderer)
+        let channelCount = KSOptions.outputNumberOfChannels(channelCount: channelCount, isUseAudioRenderer: isUseAudioRenderer)
         #endif
-        audioFormat(channels: channels, isUseAudioRenderer: isUseAudioRenderer)
+        audioFormat(channelCount: channelCount, isUseAudioRenderer: isUseAudioRenderer)
     }
 }

@@ -102,7 +102,6 @@ struct TracyApp: App {
 }
 
 class APPModel: ObservableObject {
-    private(set) var groups = [String]()
     @Published
     var openURL: URL?
     @Published
@@ -124,15 +123,18 @@ class APPModel: ObservableObject {
         didSet {
             if let activeM3UModel, activeM3UModel != oldValue {
                 activeM3UURL = activeM3UModel.m3uURL
-                Task {
-                    try? await activeM3UModel.parsePlaylist()
+                Task { @MainActor in
+                    _ = try? await activeM3UModel.parsePlaylist()
+                    self.activeM3UModel = activeM3UModel
                 }
             }
         }
     }
 
     init() {
-        #if !DEBUG
+        #if DEBUG
+        KSOptions.logLevel = .debug
+        #else
         var fileHandle = FileHandle.standardOutput
         if let logURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent("log.txt") {
             if !FileManager.default.fileExists(atPath: logURL.path) {
