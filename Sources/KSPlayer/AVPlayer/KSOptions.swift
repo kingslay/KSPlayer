@@ -306,12 +306,8 @@ open class KSOptions {
     #if os(tvOS) || os(xrOS)
     open func preferredDisplayCriteria(track: some MediaPlayerTrack) -> AVDisplayCriteria? {
         let refreshRate = track.nominalFrameRate
-        if #available(tvOS 17.0, *) {
-            if let formatDescription = track.formatDescription {
-                return AVDisplayCriteria(refreshRate: refreshRate, formatDescription: formatDescription)
-            } else {
-                return nil
-            }
+        if KSOptions.displayCriteriaFormatDescriptionEnabled, let formatDescription = track.formatDescription, #available(tvOS 17.0, *) {
+            return AVDisplayCriteria(refreshRate: refreshRate, formatDescription: formatDescription)
         } else {
 //            let videoDynamicRange = track.dynamicRange(self).rawValue
 //            return AVDisplayCriteria(refreshRate: refreshRate, videoDynamicRange: videoDynamicRange)
@@ -400,7 +396,7 @@ public extension KSOptions {
     static var hardwareDecode = true
     static var asynchronousDecompression = true
     static var isPipPopViewController = false
-    static var displayCriteriaMatchingEnabled = true
+    static var displayCriteriaFormatDescriptionEnabled = false
     /// 日志级别
     static var logLevel = LogLevel.warning
     static var logger: LogHandler = OSLog(lable: "KSPlayer")

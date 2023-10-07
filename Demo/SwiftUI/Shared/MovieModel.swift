@@ -32,12 +32,8 @@ class MEOptions: KSOptions {
     #if os(tvOS) || os(xrOS)
     override open func preferredDisplayCriteria(track: some MediaPlayerTrack) -> AVDisplayCriteria? {
         let refreshRate = track.nominalFrameRate
-        if #available(tvOS 17.0, *) {
-            if let formatDescription = track.formatDescription {
-                return AVDisplayCriteria(refreshRate: refreshRate, formatDescription: formatDescription)
-            } else {
-                return nil
-            }
+        if KSOptions.displayCriteriaFormatDescriptionEnabled, let formatDescription = track.formatDescription, #available(tvOS 17.0, *) {
+            return AVDisplayCriteria(refreshRate: refreshRate, formatDescription: formatDescription)
         } else {
             let videoDynamicRange = track.dynamicRange(self).rawValue
             return AVDisplayCriteria(refreshRate: refreshRate, videoDynamicRange: videoDynamicRange)

@@ -19,11 +19,11 @@ public protocol DisplayLayerDelegate: NSObjectProtocol {
 public final class MetalPlayView: UIView {
     private var formatDescription: CMFormatDescription? {
         didSet {
-            if KSOptions.displayCriteriaMatchingEnabled, let formatDescription {
-                #if os(tvOS) || os(xrOS)
+            #if os(tvOS) || os(xrOS)
+            if KSOptions.displayCriteriaFormatDescriptionEnabled, let formatDescription {
                 setDisplayCriteria(formatDescription: formatDescription)
-                #endif
             }
+            #endif
         }
     }
 
