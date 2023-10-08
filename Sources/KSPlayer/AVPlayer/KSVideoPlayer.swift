@@ -108,48 +108,15 @@ extension KSVideoPlayer: UIViewRepresentable {
 
         public var subtitleModel = SubtitleModel()
         public var timemodel = ControllerTimeModel()
-        public var selectedAudioTrack: MediaPlayerTrack? {
-            didSet {
-                if oldValue?.trackID != selectedAudioTrack?.trackID {
-                    if let track = selectedAudioTrack {
-                        playerLayer?.player.select(track: track)
-                        playerLayer?.player.isMuted = false
-                    } else {
-                        playerLayer?.player.isMuted = true
-                    }
-                }
-            }
-        }
-
-        public var selectedVideoTrack: MediaPlayerTrack? {
-            didSet {
-                if oldValue?.trackID != selectedVideoTrack?.trackID {
-                    if let track = selectedVideoTrack {
-                        playerLayer?.player.select(track: track)
-                        playerLayer?.options.videoDisable = false
-                    } else {
-                        oldValue?.isEnabled = false
-                        playerLayer?.options.videoDisable = true
-                    }
-                }
-            }
-        }
-
         // 在SplitView模式下，第二次进入会先调用makeUIView。然后在调用之前的dismantleUIView.所以如果进入的是同一个View的话，就会导致playerLayer被清空了。最准确的方式是在onDisappear清空playerLayer
         public var playerLayer: KSPlayerLayer? {
             didSet {
                 oldValue?.delegate = nil
                 oldValue?.pause()
                 subtitleModel.url = nil
-                selectedAudioTrack = nil
-                selectedVideoTrack = nil
-                audioTracks.removeAll()
-                videoTracks.removeAll()
             }
         }
 
-        public var audioTracks = [MediaPlayerTrack]()
-        public var videoTracks = [MediaPlayerTrack]()
         fileprivate var onPlay: ((TimeInterval, TimeInterval) -> Void)?
         fileprivate var onFinish: ((KSPlayerLayer, Error?) -> Void)?
         fileprivate var onStateChanged: ((KSPlayerLayer, KSPlayerState) -> Void)?
@@ -209,10 +176,6 @@ extension KSVideoPlayer.Coordinator: KSPlayerLayerDelegate {
     public func player(layer: KSPlayerLayer, state: KSPlayerState) {
         if state == .readyToPlay {
             playbackRate = layer.player.playbackRate
-            videoTracks = layer.player.tracks(mediaType: .video)
-            audioTracks = layer.player.tracks(mediaType: .audio)
-            selectedAudioTrack = audioTracks.first { $0.isEnabled }
-            selectedVideoTrack = videoTracks.first { $0.isEnabled }
             if let subtitleDataSouce = layer.player.subtitleDataSouce {
                 // 要延后增加内嵌字幕。因为有些内嵌字幕是放在视频流的。所以会比readyToPlay回调晚。
                 DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 1) { [weak self] in

@@ -453,26 +453,38 @@ struct VideoSettingView: View {
             } label: {
                 Label("Playback Speed", systemImage: "speedometer")
             }
-            if !config.audioTracks.isEmpty {
+
+            if let audioTracks = config.playerLayer?.player.tracks(mediaType: .audio), !audioTracks.isEmpty {
                 Picker(selection: Binding {
-                    config.selectedAudioTrack?.trackID
+                    audioTracks.first { $0.isEnabled }?.trackID
                 } set: { value in
-                    config.selectedAudioTrack = config.audioTracks.first { $0.trackID == value }
+                    if let track = audioTracks.first(where: { $0.trackID == value }) {
+                        config.playerLayer?.player.select(track: track)
+                        config.playerLayer?.player.isMuted = false
+                    } else {
+                        config.playerLayer?.player.isMuted = true
+                    }
                 }) {
-                    ForEach(config.audioTracks, id: \.trackID) { track in
+                    ForEach(audioTracks, id: \.trackID) { track in
                         Text(track.description).tag(track.trackID as Int32?)
                     }
                 } label: {
                     Label("Audio track", systemImage: "waveform")
                 }
             }
-            if !config.videoTracks.isEmpty {
+
+            if let videoTracks = config.playerLayer?.player.tracks(mediaType: .video), !videoTracks.isEmpty {
                 Picker(selection: Binding {
-                    config.selectedVideoTrack?.trackID
+                    videoTracks.first { $0.isEnabled }?.trackID
                 } set: { value in
-                    config.selectedVideoTrack = config.videoTracks.first { $0.trackID == value }
+                    if let track = videoTracks.first(where: { $0.trackID == value }) {
+                        config.playerLayer?.player.select(track: track)
+                        config.playerLayer?.options.videoDisable = false
+                    } else {
+                        config.playerLayer?.options.videoDisable = true
+                    }
                 }) {
-                    ForEach(config.videoTracks, id: \.trackID) { track in
+                    ForEach(videoTracks, id: \.trackID) { track in
                         Text(track.description).tag(track.trackID as Int32?)
                     }
                 } label: {
