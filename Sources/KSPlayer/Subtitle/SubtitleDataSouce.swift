@@ -255,6 +255,77 @@ public class AssrtSubtitleDataSouce: SearchSubtitleDataSouce {
     }
 }
 
+public class OpenSubtitleDataSouce: SearchSubtitleDataSouce {
+    private var token: String? = nil
+    private let username: String?
+    private let password: String?
+    private let apiKey: String
+    private let languages: [String]
+    public var infos = [any SubtitleInfo]()
+    public init(apiKey: String, languages: [String] = ["zh-cn"], username: String? = nil, password: String? = nil) {
+        self.apiKey = apiKey
+        self.languages = languages
+        self.username = username
+        self.password = password
+    }
+
+    public func searchSubtitle(url: URL?) async throws {
+        infos = [any SubtitleInfo]()
+        guard let url else {
+            return
+        }
+        let query = url.deletingPathExtension().lastPathComponent
+        guard let searchApi = URL(string: "https://api.opensubtitles.com/api/v1/subtitles")?.add(queryItems: ["query": query, "languages": languages.joined(separator: ",")]) else {
+            return
+        }
+        var request = URLRequest(url: searchApi)
+        request.addValue(apiKey, forHTTPHeaderField: "Api-Key")
+        if let token {
+            request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        }
+        let (data, _) = try await URLSession.shared.data(for: request)
+        guard let json = try JSONSerialization.jsonObject(with: data) as? [String: Any] else {
+            return
+        }
+        guard let dataArray = json["data"] as? [[String: Any]] else {
+            return
+        }
+        var result = [URLSubtitleInfo]()
+        for sub in dataArray {
+            if let attributes = sub["attributes"] as? [String: Any], let files = attributes["files"] as? [[String: Any]] {
+                for file in files {
+                    if let fileID = file["file_id"] as? Int, let info = try await loadDetails(fileID: fileID) {
+                        result.append(info)
+                    }
+                }
+            }
+        }
+        infos = result
+    }
+
+    func loadDetails(fileID: Int) async throws -> URLSubtitleInfo? {
+        guard let detailApi = URL(string: "https://api.opensubtitles.com/api/v1/download")?.add(queryItems: ["file_id": String(fileID)]) else {
+            return nil
+        }
+        var request = URLRequest(url: detailApi)
+        request.httpMethod = "POST"
+        request.addValue(apiKey, forHTTPHeaderField: "Api-Key")
+        if let token {
+            request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        }
+        let (data, _) = try await URLSession.shared.data(for: request)
+        guard let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else {
+            return nil
+        }
+        guard let link = json["link"] as? String, let fileName = json["file_name"] as?
+            String, let url = URL(string: link)
+        else {
+            return nil
+        }
+        return URLSubtitleInfo(subtitleID: String(fileID), name: fileName, url: url)
+    }
+}
+
 extension URL {
     public var components: URLComponents? {
         URLComponents(url: self, resolvingAgainstBaseURL: true)
