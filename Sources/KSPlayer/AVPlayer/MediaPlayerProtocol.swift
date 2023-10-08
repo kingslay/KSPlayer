@@ -139,7 +139,7 @@ public extension MediaPlayerTrack {
             cotentRange = .dolbyVision
         } else if transferFunction == kCVImageBufferTransferFunction_SMPTE_ST_2084_PQ as String { /// HDR
             cotentRange = .hdr10
-        } else if transferFunction == kCVImageBufferTransferFunction_ITU_R_2100_HLG as String { /// HDR
+        } else if transferFunction == kCVImageBufferTransferFunction_ITU_R_2100_HLG as String { /// HLG
             cotentRange = .hlg
         } else {
             cotentRange = .sdr
@@ -220,4 +220,17 @@ public extension MediaPlayerTrack {
             return nil
         }
     }
+}
+
+func setHttpProxy() {
+    guard let proxySettings = CFNetworkCopySystemProxySettings()?.takeUnretainedValue() as? NSDictionary else {
+        unsetenv("http_proxy")
+        return
+    }
+    guard let proxyHost = proxySettings[kCFNetworkProxiesHTTPProxy] as? String, let proxyPort = proxySettings[kCFNetworkProxiesHTTPPort] as? Int else {
+        unsetenv("http_proxy")
+        return
+    }
+    let httpProxy = "http://\(proxyHost):\(proxyPort)"
+    setenv("http_proxy", httpProxy, 0)
 }

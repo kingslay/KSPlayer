@@ -106,6 +106,9 @@ open class KSOptions {
         // 参数的配置可以参考protocols.texi 和 http.c
         formatContextOptions["auto_convert"] = 0
         formatContextOptions["fps_probe_size"] = 3
+//        formatContextOptions["probesize"] = 40 * 1024
+//        formatContextOptions["max_analyze_duration"] = 300 * 1000
+
         formatContextOptions["reconnect"] = 1
         // 开启这个，纯ipv6地址会无法播放。
 //        formatContextOptions["reconnect_at_eof"] = 1

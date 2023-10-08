@@ -188,7 +188,7 @@ public extension KSSubtitle {
         guard let subtitle = string else {
             throw NSError(errorCode: .subtitleUnEncoding)
         }
-        let scanner = Scanner(string: String(subtitle.replacingOccurrences(of: "\r\n\r\n", with: "\n\n")))
+        let scanner = Scanner(string: subtitle)
         _ = scanner.scanCharacters(from: .controlCharacters)
         let parse = KSOptions.subtitleParses.first { $0.canParse(scanner: scanner) }
         if let parse {

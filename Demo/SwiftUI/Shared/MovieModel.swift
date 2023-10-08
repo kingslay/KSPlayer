@@ -330,6 +330,8 @@ extension KSVideoPlayerView {
                 if playmodel.duration > 0 {
                     playmodel.current = Int16(layer.player.currentPlaybackTime)
                 }
+                playmodel.save()
+                model.save()
             }
         }
     }

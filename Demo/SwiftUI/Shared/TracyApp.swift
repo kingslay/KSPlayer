@@ -133,7 +133,7 @@ class APPModel: ObservableObject {
 
     init() {
         #if DEBUG
-        KSOptions.logLevel = .debug
+//        KSOptions.logLevel = .debug
         #else
         var fileHandle = FileHandle.standardOutput
         if let logURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent("log.txt") {
