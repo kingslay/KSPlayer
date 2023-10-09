@@ -125,7 +125,10 @@ class APPModel: ObservableObject {
                 activeM3UURL = activeM3UModel.m3uURL
                 Task { @MainActor in
                     _ = try? await activeM3UModel.parsePlaylist()
-                    self.activeM3UModel = activeM3UModel
+                    // 为了解决第一次添加m3u。没有数据的问题，所以需要在查询结果出来之后，在设置下。
+                    if activeM3UModel == self.activeM3UModel {
+                        self.activeM3UModel = activeM3UModel
+                    }
                 }
             }
         }
