@@ -88,6 +88,7 @@ open class KSOptions {
     public var asynchronousDecompression = KSOptions.asynchronousDecompression
     public var videoDisable = false
     public var canStartPictureInPictureAutomaticallyFromInline = true
+    public var automaticWindowResize = true
     private var videoClockDelayCount = 0
 
     public internal(set) var formatName = ""

@@ -319,12 +319,14 @@ extension KSPlayerLayer: MediaPlayerDelegate {
         #if os(macOS)
         if let window {
             window.isMovableByWindowBackground = true
-            let naturalSize = player.naturalSize
-            if naturalSize.width > 0, naturalSize.height > 0 {
-                window.aspectRatio = naturalSize
-                var frame = window.frame
-                frame.size.height = frame.width * naturalSize.height / naturalSize.width
-                window.setFrame(frame, display: true)
+            if options.automaticWindowResize {
+                let naturalSize = player.naturalSize
+                if naturalSize.width > 0, naturalSize.height > 0 {
+                    window.aspectRatio = naturalSize
+                    var frame = window.frame
+                    frame.size.height = frame.width * naturalSize.height / naturalSize.width
+                    window.setFrame(frame, display: true)
+                }
             }
         }
         #endif
