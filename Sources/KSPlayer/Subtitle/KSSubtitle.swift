@@ -276,6 +276,7 @@ open class SubtitleModel: ObservableObject {
     public static var textItalic = false
     public static var textPosition = TextPosition()
     private var subtitleDataSouces: [SubtitleDataSouce] = KSOptions.subtitleDataSouces
+    @Published
     public private(set) var subtitleInfos = [any SubtitleInfo]()
     @Published
     public private(set) var parts = [SubtitlePart]()
@@ -339,7 +340,7 @@ open class SubtitleModel: ObservableObject {
                         $0 === info
                     }
                 }
-                Task {
+                Task { @MainActor in
                     try? await dataSouce.searchSubtitle(query: query, languages: languages)
                     subtitleInfos.append(contentsOf: dataSouce.infos)
                 }
@@ -349,7 +350,7 @@ open class SubtitleModel: ObservableObject {
 
     public func addSubtitle(dataSouce: SubtitleDataSouce) {
         if let dataSouce = dataSouce as? FileURLSubtitleDataSouce {
-            Task {
+            Task { @MainActor in
                 try? await dataSouce.searchSubtitle(fileURL: url)
                 subtitleInfos.append(contentsOf: dataSouce.infos)
             }

@@ -440,8 +440,16 @@ struct VideoSettingView: View {
     fileprivate var config: KSVideoPlayer.Coordinator
     @ObservedObject
     fileprivate var subtitleModel: SubtitleModel
+    @State
+    fileprivate var subtitleTitle: String
     @Environment(\.dismiss)
     private var dismiss
+    init(config: KSVideoPlayer.Coordinator, subtitleModel: SubtitleModel) {
+        self.config = config
+        self.subtitleModel = subtitleModel
+        _subtitleTitle = .init(initialValue: subtitleModel.url?.deletingPathExtension().lastPathComponent ?? "")
+    }
+
     var body: some View {
         PlatformView {
             Picker(selection: $config.playbackRate) {
@@ -491,24 +499,26 @@ struct VideoSettingView: View {
                     Label("Video track", systemImage: "video.fill")
                 }
             }
-            if !config.subtitleModel.subtitleInfos.isEmpty {
-                Picker(selection: Binding {
-                    subtitleModel.selectedSubtitleInfo?.subtitleID
-                } set: { value in
-                    subtitleModel.selectedSubtitleInfo = subtitleModel.subtitleInfos.first { $0.subtitleID == value }
-                }) {
-                    Text("Off").tag(nil as String?)
-                    ForEach(subtitleModel.subtitleInfos, id: \.subtitleID) { track in
-                        Text(track.name).tag(track.subtitleID as String?)
-                    }
-                } label: {
-                    Label("Sutitle", systemImage: "captions.bubble")
+            Picker(selection: Binding {
+                subtitleModel.selectedSubtitleInfo?.subtitleID
+            } set: { value in
+                subtitleModel.selectedSubtitleInfo = subtitleModel.subtitleInfos.first { $0.subtitleID == value }
+            }) {
+                Text("Off").tag(nil as String?)
+                ForEach(subtitleModel.subtitleInfos, id: \.subtitleID) { track in
+                    Text(track.name).tag(track.subtitleID as String?)
                 }
-                TextField("Sutitle delay", value: $subtitleModel.subtitleDelay, format: .number)
+            } label: {
+                Label("Sutitle", systemImage: "captions.bubble")
+            }
+            TextField("Get more Sutitle", text: $subtitleTitle)
+            Button("Search") {
+                subtitleModel.searchSubtitle(query: subtitleTitle, languages: ["zh-cn"])
             }
             if let fileSize = config.playerLayer?.player.fileSize, fileSize > 0 {
                 Text("File Size \(String(format: "%.1f", fileSize / 1_000_000))MB")
             }
+            TextField("Sutitle delay", value: $subtitleModel.subtitleDelay, format: .number)
         }
         .padding()
         #if os(macOS) || targetEnvironment(macCatalyst)

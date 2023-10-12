@@ -261,15 +261,15 @@ public class OpenSubtitleDataSouce: SearchSubtitleDataSouce {
         try await searchSubtitle(query: query, imdbID: 0, tmdbID: 0, languages: languages)
     }
 
-    public func searchSubtitle(query: String?, imdbID: Int?, tmdbID: Int?, languages: [String] = ["zh-cn"]) async throws {
+    public func searchSubtitle(query: String?, imdbID: Int, tmdbID: Int, languages: [String] = ["zh-cn"]) async throws {
         var queryItems = [String: String]()
         if let query {
             queryItems["query"] = query
         }
-        if let imdbID {
+        if imdbID != 0 {
             queryItems["imbd_id"] = String(imdbID)
         }
-        if let tmdbID {
+        if tmdbID != 0 {
             queryItems["tmdb_id"] = String(tmdbID)
         }
         if queryItems.isEmpty {
@@ -278,6 +278,7 @@ public class OpenSubtitleDataSouce: SearchSubtitleDataSouce {
         queryItems["languages"] = languages.joined(separator: ",")
     }
 
+    // https://opensubtitles.stoplight.io/docs/opensubtitles-api/a172317bd5ccc-search-for-subtitles
     public func searchSubtitle(queryItems: [String: String]) async throws {
         infos = [any SubtitleInfo]()
         if queryItems.isEmpty {

@@ -113,7 +113,6 @@ extension KSVideoPlayer: UIViewRepresentable {
             didSet {
                 oldValue?.delegate = nil
                 oldValue?.pause()
-                subtitleModel.url = nil
             }
         }
 
@@ -131,20 +130,23 @@ extension KSVideoPlayer: UIViewRepresentable {
         public init() {}
 
         public func makeView(url: URL, options: KSOptions) -> KSPlayerLayer {
+            defer {
+                DispatchQueue.main.async { [weak self] in
+                    self?.subtitleModel.url = url
+                }
+            }
             if let playerLayer {
                 if playerLayer.url == url {
                     return playerLayer
                 }
                 playerLayer.delegate = nil
                 playerLayer.set(url: url, options: options)
-                subtitleModel.url = url
                 playerLayer.delegate = self
                 return playerLayer
             } else {
                 let playerLayer = KSPlayerLayer(url: url, options: options)
                 playerLayer.delegate = self
                 self.playerLayer = playerLayer
-                subtitleModel.url = url
                 return playerLayer
             }
         }
@@ -158,6 +160,9 @@ extension KSVideoPlayer: UIViewRepresentable {
             onSwipe = nil
             #endif
             playerLayer = nil
+            DispatchQueue.main.async { [weak self] in
+                self?.subtitleModel.url = nil
+            }
         }
 
         public func skip(interval: Int) {

@@ -50,7 +50,7 @@ public enum KSPlayerState: CustomStringConvertible {
         }
     }
 
-    public var isPlaying: Bool { self == .readyToPlay || self == .buffering || self == .bufferFinished }
+    public var isPlaying: Bool { self == .buffering || self == .bufferFinished }
 }
 
 public protocol KSPlayerLayerDelegate: AnyObject {
@@ -459,13 +459,6 @@ extension KSPlayerLayer {
         startTime = CACurrentMediaTime()
         bufferedCount = 0
         player.prepareToPlay()
-        if isAutoPlay {
-            DispatchQueue.main.async {
-                self.state = .buffering
-            }
-        } else {
-            state = .prepareToPlay
-        }
         if let view = player.view {
             addSubview(view)
         }
@@ -521,7 +514,7 @@ extension KSPlayerLayer {
         }
     }
 
-    private func registerRemoteControllEvent() {
+    public func registerRemoteControllEvent() {
         let remoteCommand = MPRemoteCommandCenter.shared()
         remoteCommand.playCommand.addTarget { [weak self] _ in
             guard let self else {
