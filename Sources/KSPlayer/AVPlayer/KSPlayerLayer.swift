@@ -339,11 +339,6 @@ extension KSPlayerLayer: MediaPlayerDelegate {
             }
         }
         #endif
-        for track in player.tracks(mediaType: .video) where track.isEnabled {
-            #if os(tvOS) || os(xrOS)
-            setDisplayCriteria(track: track)
-            #endif
-        }
         if isAutoPlay {
             if shouldSeekTo > 0 {
                 seek(time: shouldSeekTo, autoPlay: true) { [weak self] _ in
@@ -441,20 +436,6 @@ extension KSPlayerLayer: AVPictureInPictureControllerDelegate {
 // MARK: - private functions
 
 extension KSPlayerLayer {
-    #if os(tvOS) || os(xrOS)
-    private func setDisplayCriteria(track: some MediaPlayerTrack) {
-        guard let displayManager = UIApplication.shared.windows.first?.avDisplayManager,
-              displayManager.isDisplayCriteriaMatchingEnabled,
-              !displayManager.isDisplayModeSwitchInProgress
-        else {
-            return
-        }
-        if let criteria = options.preferredDisplayCriteria(track: track) {
-            displayManager.preferredDisplayCriteria = criteria
-        }
-    }
-    #endif
-
     private func prepareToPlay() {
         startTime = CACurrentMediaTime()
         bufferedCount = 0

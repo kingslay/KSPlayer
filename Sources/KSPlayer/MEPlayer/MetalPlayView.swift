@@ -19,11 +19,7 @@ public protocol DisplayLayerDelegate: NSObjectProtocol {
 public final class MetalPlayView: UIView {
     private var formatDescription: CMFormatDescription? {
         didSet {
-            #if os(tvOS) || os(xrOS)
-            if KSOptions.displayCriteriaFormatDescriptionEnabled, let formatDescription {
-                setDisplayCriteria(formatDescription: formatDescription)
-            }
-            #endif
+            options.updateVideo(refreshRate: fps, formatDescription: formatDescription)
         }
     }
 
@@ -220,21 +216,6 @@ extension MetalPlayView {
         guard let formatDescription else { return }
         displayView.enqueue(imageBuffer: pixelBuffer, formatDescription: formatDescription, time: time)
     }
-
-    #if os(tvOS) || os(xrOS)
-    private func setDisplayCriteria(formatDescription: CMFormatDescription) {
-        guard let displayManager = UIApplication.shared.windows.first?.avDisplayManager,
-              displayManager.isDisplayCriteriaMatchingEnabled,
-              !displayManager.isDisplayModeSwitchInProgress
-        else {
-            return
-        }
-        if #available(tvOS 17.0, *) {
-            let criteria = AVDisplayCriteria(refreshRate: fps, formatDescription: formatDescription)
-            displayManager.preferredDisplayCriteria = criteria
-        }
-    }
-    #endif
 }
 
 class MetalView: UIView {

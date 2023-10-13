@@ -98,27 +98,32 @@ class MEOptions: KSOptions {
     override func process(assetTrack: some MediaPlayerTrack) {
         if assetTrack.mediaType == .video {
             if [FFmpegFieldOrder.bb, .bt, .tt, .tb].contains(assetTrack.fieldOrder) {
-                videoFilters.append("yadif=mode=1:parity=-1:deint=1")
+                videoFilters.append("yadif=mode=0:parity=-1:deint=1")
                 hardwareDecode = false
             }
-        }
-    }
-
-    #if os(tvOS) || os(xrOS)
-    override open func preferredDisplayCriteria(track: some MediaPlayerTrack) -> AVDisplayCriteria? {
-        let refreshRate = track.nominalFrameRate
-        if #available(tvOS 17.0, *) {
-            if let formatDescription = track.formatDescription {
-                return AVDisplayCriteria(refreshRate: refreshRate, formatDescription: formatDescription)
-            } else {
-                return nil
+            #if os(tvOS) || os(xrOS)
+            runInMainqueue { [weak self] in
+                guard let self else {
+                    return
+                }
+                if let displayManager = UIApplication.shared.windows.first?.avDisplayManager,
+                   displayManager.isDisplayCriteriaMatchingEnabled,
+                   !displayManager.isDisplayModeSwitchInProgress
+                {
+                    let refreshRate = assetTrack.nominalFrameRate
+                    if KSOptions.displayCriteriaFormatDescriptionEnabled, let formatDescription = assetTrack.formatDescription, #available(tvOS 17.0, *) {
+                        displayManager.preferredDisplayCriteria = AVDisplayCriteria(refreshRate: refreshRate, formatDescription: formatDescription)
+                    } else {
+                        if let dynamicRange = assetTrack.dynamicRange {
+                            let videoDynamicRange = self.availableDynamicRange(dynamicRange) ?? dynamicRange
+                            displayManager.preferredDisplayCriteria = AVDisplayCriteria(refreshRate: refreshRate, videoDynamicRange: videoDynamicRange.rawValue)
+                        }
+                    }
+                }
             }
-        } else {
-            let videoDynamicRange = track.dynamicRange(self).rawValue
-            return AVDisplayCriteria(refreshRate: refreshRate, videoDynamicRange: videoDynamicRange)
+            #endif
         }
     }
-    #endif
 }
 
 var testObjects: [KSPlayerResource] = {

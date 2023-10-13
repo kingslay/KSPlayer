@@ -133,19 +133,12 @@ public extension MediaPlayerTrack {
         mediaSubType.rawValue
     }
 
-    func dynamicRange(_ options: KSOptions) -> DynamicRange {
-        let cotentRange: DynamicRange
-        if dovi != nil || codecType.string == "dvhe" || codecType == kCMVideoCodecType_DolbyVisionHEVC {
-            cotentRange = .dolbyVision
-        } else if transferFunction == kCVImageBufferTransferFunction_SMPTE_ST_2084_PQ as String { /// HDR
-            cotentRange = .hdr10
-        } else if transferFunction == kCVImageBufferTransferFunction_ITU_R_2100_HLG as String { /// HLG
-            cotentRange = .hlg
+    var dynamicRange: DynamicRange? {
+        if dovi != nil {
+            return .dolbyVision
         } else {
-            cotentRange = .sdr
+            return formatDescription?.dynamicRange
         }
-
-        return options.availableDynamicRange(cotentRange) ?? cotentRange
     }
 
     var colorSpace: CGColorSpace? {
@@ -198,7 +191,39 @@ public extension MediaPlayerTrack {
     }
 
     var colorPrimaries: String? {
-        if let formatDescription, let dictionary = CMFormatDescriptionGetExtensions(formatDescription) as NSDictionary? {
+        formatDescription?.colorPrimaries
+    }
+
+    var transferFunction: String? {
+        formatDescription?.transferFunction
+    }
+
+    var yCbCrMatrix: String? {
+        formatDescription?.yCbCrMatrix
+    }
+}
+
+extension CMFormatDescription {
+    var dynamicRange: DynamicRange {
+        let cotentRange: DynamicRange
+        if codecType.string == "dvhe" || codecType == kCMVideoCodecType_DolbyVisionHEVC {
+            cotentRange = .dolbyVision
+        } else if transferFunction == kCVImageBufferTransferFunction_SMPTE_ST_2084_PQ as String { /// HDR
+            cotentRange = .hdr10
+        } else if transferFunction == kCVImageBufferTransferFunction_ITU_R_2100_HLG as String { /// HLG
+            cotentRange = .hlg
+        } else {
+            cotentRange = .sdr
+        }
+        return cotentRange
+    }
+
+    var codecType: FourCharCode {
+        mediaSubType.rawValue
+    }
+
+    var colorPrimaries: String? {
+        if let dictionary = CMFormatDescriptionGetExtensions(self) as NSDictionary? {
             return dictionary[kCVImageBufferColorPrimariesKey] as? String
         } else {
             return nil
@@ -206,7 +231,7 @@ public extension MediaPlayerTrack {
     }
 
     var transferFunction: String? {
-        if let formatDescription, let dictionary = CMFormatDescriptionGetExtensions(formatDescription) as NSDictionary? {
+        if let dictionary = CMFormatDescriptionGetExtensions(self) as NSDictionary? {
             return dictionary[kCVImageBufferTransferFunctionKey] as? String
         } else {
             return nil
@@ -214,7 +239,7 @@ public extension MediaPlayerTrack {
     }
 
     var yCbCrMatrix: String? {
-        if let formatDescription, let dictionary = CMFormatDescriptionGetExtensions(formatDescription) as NSDictionary? {
+        if let dictionary = CMFormatDescriptionGetExtensions(self) as NSDictionary? {
             return dictionary[kCVImageBufferYCbCrMatrixKey] as? String
         } else {
             return nil

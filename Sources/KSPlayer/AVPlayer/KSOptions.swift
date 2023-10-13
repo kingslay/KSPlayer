@@ -7,7 +7,9 @@
 
 import AVFoundation
 import OSLog
-
+#if canImport(UIKit)
+import UIKit
+#endif
 open class KSOptions {
     /// 最低缓存视频时间
     @Published
@@ -303,22 +305,45 @@ open class KSOptions {
     }
 
     /**
-            在创建解码器之前可以对KSOptions做一些处理。例如判断fieldOrder为tt或bb的话，那就自动加videofilters
+            在创建解码器之前可以对KSOptions和assetTrack做一些处理。例如判断fieldOrder为tt或bb的话，那就自动加videofilters
      */
-    open func process(assetTrack _: some MediaPlayerTrack) {}
+    open func process(assetTrack: some MediaPlayerTrack) {
+        if assetTrack.mediaType == .video {
+            #if os(tvOS) || os(xrOS)
+            runInMainqueue {
+                if let displayManager = UIApplication.shared.windows.first?.avDisplayManager,
+                   displayManager.isDisplayCriteriaMatchingEnabled,
+                   !displayManager.isDisplayModeSwitchInProgress
+                {
+                    let refreshRate = assetTrack.nominalFrameRate
+                    if KSOptions.displayCriteriaFormatDescriptionEnabled, let formatDescription = assetTrack.formatDescription, #available(tvOS 17.0, *) {
+                        displayManager.preferredDisplayCriteria = AVDisplayCriteria(refreshRate: refreshRate, formatDescription: formatDescription)
+                    } else {
+                        //                    if let dynamicRange = assetTrack.dynamicRange {
+                        //                        let videoDynamicRange = availableDynamicRange(dynamicRange) ?? dynamicRange
+                        //                        displayManager.preferredDisplayCriteria = AVDisplayCriteria(refreshRate: refreshRate, videoDynamicRange: videoDynamicRange.rawValue)
+                        //                    }
+                    }
+                }
+            }
 
-    #if os(tvOS) || os(xrOS)
-    open func preferredDisplayCriteria(track: some MediaPlayerTrack) -> AVDisplayCriteria? {
-        let refreshRate = track.nominalFrameRate
-        if KSOptions.displayCriteriaFormatDescriptionEnabled, let formatDescription = track.formatDescription, #available(tvOS 17.0, *) {
-            return AVDisplayCriteria(refreshRate: refreshRate, formatDescription: formatDescription)
-        } else {
-//            let videoDynamicRange = track.dynamicRange(self).rawValue
-//            return AVDisplayCriteria(refreshRate: refreshRate, videoDynamicRange: videoDynamicRange)
-            return nil
+            #endif
         }
     }
-    #endif
+
+    open func updateVideo(refreshRate: Float, formatDescription: CMFormatDescription?) {
+        #if os(tvOS) || os(xrOS)
+        guard let displayManager = UIApplication.shared.windows.first?.avDisplayManager,
+              displayManager.isDisplayCriteriaMatchingEnabled,
+              !displayManager.isDisplayModeSwitchInProgress
+        else {
+            return
+        }
+        if KSOptions.displayCriteriaFormatDescriptionEnabled, let formatDescription, #available(tvOS 17.0, *) {
+            displayManager.preferredDisplayCriteria = AVDisplayCriteria(refreshRate: refreshRate, formatDescription: formatDescription)
+        }
+        #endif
+    }
 
 //    private var lastMediaTime = CACurrentMediaTime()
     open func videoClockSync(main: KSClock, nextVideoTime: TimeInterval, fps: Float) -> ClockProcessType {
@@ -358,7 +383,7 @@ open class KSOptions {
         }
     }
 
-    func availableDynamicRange(_ cotentRange: DynamicRange?) -> DynamicRange? {
+    open func availableDynamicRange(_ cotentRange: DynamicRange?) -> DynamicRange? {
         #if canImport(UIKit)
         let availableHDRModes = AVPlayer.availableHDRModes
         if let preferedDynamicRange = destinationDynamicRange {

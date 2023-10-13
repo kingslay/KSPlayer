@@ -8,6 +8,9 @@
 import CoreData
 import Foundation
 import KSPlayer
+#if canImport(UIKit)
+import UIKit
+#endif
 class MEOptions: KSOptions {
     static var isUseDisplayLayer = true
     override init() {
@@ -22,28 +25,33 @@ class MEOptions: KSOptions {
                 videoFilters.append("yadif=mode=0:parity=-1:deint=1")
                 hardwareDecode = false
             }
+            #if os(tvOS) || os(xrOS)
+            runInMainqueue { [weak self] in
+                guard let self else {
+                    return
+                }
+                if let displayManager = UIApplication.shared.windows.first?.avDisplayManager,
+                   displayManager.isDisplayCriteriaMatchingEnabled,
+                   !displayManager.isDisplayModeSwitchInProgress
+                {
+                    let refreshRate = assetTrack.nominalFrameRate
+                    if KSOptions.displayCriteriaFormatDescriptionEnabled, let formatDescription = assetTrack.formatDescription, #available(tvOS 17.0, *) {
+                        displayManager.preferredDisplayCriteria = AVDisplayCriteria(refreshRate: refreshRate, formatDescription: formatDescription)
+                    } else {
+                        if let dynamicRange = assetTrack.dynamicRange {
+                            let videoDynamicRange = self.availableDynamicRange(dynamicRange) ?? dynamicRange
+                            displayManager.preferredDisplayCriteria = AVDisplayCriteria(refreshRate: refreshRate, videoDynamicRange: videoDynamicRange.rawValue)
+                        }
+                    }
+                }
+            }
+            #endif
         }
     }
 
     override func isUseDisplayLayer() -> Bool {
         MEOptions.isUseDisplayLayer && display == .plane
     }
-
-    #if os(tvOS) || os(xrOS)
-    override open func preferredDisplayCriteria(track: some MediaPlayerTrack) -> AVDisplayCriteria? {
-        let refreshRate = track.nominalFrameRate
-        if KSOptions.displayCriteriaFormatDescriptionEnabled, let formatDescription = track.formatDescription, #available(tvOS 17.0, *) {
-            return AVDisplayCriteria(refreshRate: refreshRate, formatDescription: formatDescription)
-        } else {
-            let videoDynamicRange = track.dynamicRange(self).rawValue
-            return AVDisplayCriteria(refreshRate: refreshRate, videoDynamicRange: videoDynamicRange)
-        }
-    }
-    #endif
-}
-
-extension CodingUserInfoKey {
-    static let managedObjectContext = CodingUserInfoKey(rawValue: "managedObjectContext")!
 }
 
 @objc(MovieModel)
