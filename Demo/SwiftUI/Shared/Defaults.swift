@@ -150,6 +150,13 @@ public class Defaults: ObservableObject {
         }
     }
 
+    @AppStorage("displayCriteriaFormatDescriptionEnabled")
+    public var displayCriteriaFormatDescriptionEnabled = KSOptions.displayCriteriaFormatDescriptionEnabled {
+        didSet {
+            KSOptions.displayCriteriaFormatDescriptionEnabled = displayCriteriaFormatDescriptionEnabled
+        }
+    }
+
     public static let shared = Defaults()
     private init() {
         KSOptions.isUseAudioRenderer = isUseAudioRenderer

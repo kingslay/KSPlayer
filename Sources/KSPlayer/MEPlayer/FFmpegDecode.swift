@@ -28,7 +28,7 @@ class FFmpegDecode: DecodeProtocol {
         codecContext?.pointee.time_base = assetTrack.timebase.rational
         filter = MEFilter(timebase: assetTrack.timebase, isAudio: assetTrack.mediaType == .audio, nominalFrameRate: assetTrack.nominalFrameRate, options: options)
         if assetTrack.mediaType == .video {
-            swresample = VideoSwresample()
+            swresample = VideoSwresample(fps: assetTrack.nominalFrameRate)
         } else {
             assetTrack.audioDescriptor?.setAudioSession(isUseAudioRenderer: options.isUseAudioRenderer)
             swresample = AudioSwresample(audioDescriptor: assetTrack.audioDescriptor!)

@@ -62,12 +62,14 @@ struct SettingVideoView: View {
     private var asynchronousDecompression
     @Default(\.isUseDisplayLayer)
     private var isUseDisplayLayer
-
+    @Default(\.displayCriteriaFormatDescriptionEnabled)
+    private var displayCriteriaFormatDescriptionEnabled
     var body: some View {
         Form {
             Toggle("Hardware decoder", isOn: $hardwareDecode)
             Toggle("Asynchronous Decompression", isOn: $asynchronousDecompression)
             Toggle("Use DisplayLayer", isOn: $isUseDisplayLayer)
+            Toggle("Enable FormatDescription DisplayCriteria ", isOn: $displayCriteriaFormatDescriptionEnabled)
         }
     }
 }
