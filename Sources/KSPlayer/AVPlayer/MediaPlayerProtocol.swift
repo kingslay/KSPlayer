@@ -203,7 +203,7 @@ public extension MediaPlayerTrack {
     }
 }
 
-extension CMFormatDescription {
+public extension CMFormatDescription {
     var dynamicRange: DynamicRange {
         let cotentRange: DynamicRange
         if codecType.string == "dvhe" || codecType == kCMVideoCodecType_DolbyVisionHEVC {
