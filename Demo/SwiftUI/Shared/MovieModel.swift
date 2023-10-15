@@ -61,9 +61,7 @@ class MEOptions: KSOptions {
             if KSOptions.displayCriteriaFormatDescriptionEnabled, #available(tvOS 17.0, *) {
                 displayManager.preferredDisplayCriteria = AVDisplayCriteria(refreshRate: refreshRate, formatDescription: formatDescription)
             } else {
-                let videoDynamicRange = formatDescription.dynamicRange {
-                    displayManager.preferredDisplayCriteria = AVDisplayCriteria(refreshRate: refreshRate, videoDynamicRange: videoDynamicRange.rawValue)
-                }
+                displayManager.preferredDisplayCriteria = AVDisplayCriteria(refreshRate: refreshRate, videoDynamicRange: formatDescription.dynamicRange.rawValue)
             }
         }
         #endif
