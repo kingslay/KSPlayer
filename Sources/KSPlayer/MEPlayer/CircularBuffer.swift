@@ -167,7 +167,8 @@ public class CircularBuffer<Item: ObjectQueueItem> {
 
 extension FixedWidthInteger {
     /// Returns the next power of two.
-    @inline(__always) func nextPowerOf2() -> Self {
+    @inline(__always)
+    func nextPowerOf2() -> Self {
         guard self != 0 else {
             return 1
         }

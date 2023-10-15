@@ -62,9 +62,12 @@ public protocol KSPlayerLayerDelegate: AnyObject {
 
 open class KSPlayerLayer: UIView {
     public weak var delegate: KSPlayerLayerDelegate?
-    @Published public var bufferingProgress: Int = 0
-    @Published public var loopCount: Int = 0
-    @Published public var isPipActive = false {
+    @Published
+    public var bufferingProgress: Int = 0
+    @Published
+    public var loopCount: Int = 0
+    @Published
+    public var isPipActive = false {
         didSet {
             if #available(tvOS 14.0, *) {
                 guard let pipController = player.pipController else {
@@ -206,9 +209,7 @@ open class KSPlayerLayer: UIView {
         }
         NotificationCenter.default.removeObserver(self)
         MPNowPlayingInfoCenter.default().nowPlayingInfo = nil
-        #if os(tvOS) || os(xrOS)
-        UIApplication.shared.windows.first?.avDisplayManager.preferredDisplayCriteria = nil
-        #endif
+        options.playerLayerDeinit()
     }
 
     public func set(url: URL, options: KSOptions) {

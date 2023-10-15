@@ -91,6 +91,8 @@ open class KSOptions {
     public var videoDisable = false
     public var canStartPictureInPictureAutomaticallyFromInline = true
     public var automaticWindowResize = true
+    @Published
+    public var videoInterlacingType: VideoInterlacingType?
     private var videoClockDelayCount = 0
 
     public internal(set) var formatName = ""
@@ -249,15 +251,6 @@ open class KSOptions {
         display == .plane
     }
 
-    private var idetTypeMap = [VideoInterlacingType: Int]()
-    @Published public var videoInterlacingType: VideoInterlacingType?
-    public enum VideoInterlacingType: String {
-        case tff
-        case bff
-        case progressive
-        case undetermined
-    }
-
     open func io(log: String) {
         if log.starts(with: "Original list of addresses"), dnsStartTime == 0 {
             dnsStartTime = CACurrentMediaTime()
@@ -268,6 +261,7 @@ open class KSOptions {
         }
     }
 
+    private var idetTypeMap = [VideoInterlacingType: Int]()
     open func filter(log: String) {
         if log.starts(with: "Repeated Field:") {
             log.split(separator: ",").forEach { str in
@@ -403,6 +397,19 @@ open class KSOptions {
         #endif
         return cotentRange
     }
+
+    open func playerLayerDeinit() {
+        #if os(tvOS) || os(xrOS)
+        UIApplication.shared.windows.first?.avDisplayManager.preferredDisplayCriteria = nil
+        #endif
+    }
+}
+
+public enum VideoInterlacingType: String {
+    case tff
+    case bff
+    case progressive
+    case undetermined
 }
 
 public extension KSOptions {
@@ -575,18 +582,21 @@ public class FileLog: LogHandler {
     }
 }
 
-@inlinable public func KSLog(_ error: @autoclosure () -> Error, file: String = #file, function: String = #function, line: UInt = #line) {
+@inlinable
+public func KSLog(_ error: @autoclosure () -> Error, file: String = #file, function: String = #function, line: UInt = #line) {
     KSLog(level: .error, error().localizedDescription, file: file, function: function, line: line)
 }
 
-@inlinable public func KSLog(level: LogLevel = .warning, _ message: @autoclosure () -> CustomStringConvertible, file: String = #file, function: String = #function, line: UInt = #line) {
+@inlinable
+public func KSLog(level: LogLevel = .warning, _ message: @autoclosure () -> CustomStringConvertible, file: String = #file, function: String = #function, line: UInt = #line) {
     if level.rawValue <= KSOptions.logLevel.rawValue {
         let fileName = (file as NSString).lastPathComponent
         KSOptions.logger.log(level: level, message: message(), file: fileName, function: function, line: line)
     }
 }
 
-@inlinable public func KSLog(level: LogLevel = .warning, dso: UnsafeRawPointer = #dsohandle, _ message: StaticString, _ args: CVarArg...) {
+@inlinable
+public func KSLog(level: LogLevel = .warning, dso: UnsafeRawPointer = #dsohandle, _ message: StaticString, _ args: CVarArg...) {
     if level.rawValue <= KSOptions.logLevel.rawValue {
         os_log(level.logType, dso: dso, message, args)
     }

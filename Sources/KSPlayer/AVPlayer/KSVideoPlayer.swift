@@ -266,6 +266,8 @@ extension View {
 /// 这是一个频繁变化的model。View要少用这个
 public class ControllerTimeModel: ObservableObject {
     // 改成int才不会频繁更新
-    @Published public var currentTime = 0
-    @Published public var totalTime = 1
+    @Published
+    public var currentTime = 0
+    @Published
+    public var totalTime = 1
 }
