@@ -6,6 +6,7 @@
 //
 
 import CoreData
+import CoreMedia
 import Foundation
 import KSPlayer
 #if canImport(UIKit)
