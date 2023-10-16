@@ -23,8 +23,8 @@ class MEOptions: KSOptions {
     override func process(assetTrack: some MediaPlayerTrack) {
         if assetTrack.mediaType == .video {
             if [FFmpegFieldOrder.bb, .bt, .tt, .tb].contains(assetTrack.fieldOrder) {
-                videoFilters.append("yadif=mode=0:parity=-1:deint=1")
-                hardwareDecode = false
+                videoFilters.append("yadif_videotoolbox=mode=0:parity=-1:deint=1")
+                asynchronousDecompression = false
             }
             #if os(tvOS) || os(xrOS)
             runInMainqueue { [weak self] in
@@ -345,9 +345,11 @@ extension KSVideoPlayerView {
         }
         // There is total different meaning for 'listen_timeout' option in rtmp
         // set 'listen_timeout' = -1 for rtmp、rtsp
-        if url.absoluteString.starts(with: "rtmp") || url.absoluteString.starts(with: "rtsp") {
+        if url.scheme == "rtmp" || url.scheme == "rtsp" {
             options.formatContextOptions["listen_timeout"] = -1
-            options.formatContextOptions["fflags"] = ["nobuffer", "autobsf"]
+            options.formatContextOptions["fflags"] = ["nobuffer"]
+            options.preferredForwardBufferDuration = 2
+            options.hardwareDecode = false
         } else {
             options.formatContextOptions["listen_timeout"] = 3
         }

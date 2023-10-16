@@ -167,7 +167,7 @@ open class KSOptions {
                 return true
             }
             // 处理视频轨道一致没有值的问题(纯音频)
-            if capacity.mediaType == .video && capacity.frameCount == 0 && capacity.packetCount == 0 {
+            if capacitys.count > 1, capacity.mediaType == .video && capacity.frameCount == 0 && capacity.packetCount == 0 {
                 return true
             }
             guard capacity.frameCount >= capacity.frameMaxCount >> 2 else {

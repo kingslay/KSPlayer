@@ -98,8 +98,8 @@ class MEOptions: KSOptions {
     override func process(assetTrack: some MediaPlayerTrack) {
         if assetTrack.mediaType == .video {
             if [FFmpegFieldOrder.bb, .bt, .tt, .tb].contains(assetTrack.fieldOrder) {
-                videoFilters.append("yadif=mode=0:parity=-1:deint=1")
-                hardwareDecode = false
+                videoFilters.append("yadif_videotoolbox=mode=0:parity=-1:deint=1")
+                asynchronousDecompression = false
             }
             #if os(tvOS) || os(xrOS)
             runInMainqueue { [weak self] in
