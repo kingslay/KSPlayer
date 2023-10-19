@@ -17,6 +17,11 @@ jobs:
       - uses: actions/checkout@main
         with:
           submodules: 'true'
+      - name: Set up Xcode
+        run: |
+          sudo xcode-select -s /Applications/Xcode_15.0.app/Contents/Developer
+          xcode-select -p
+          xcodebuild -version
       - name: Build
         run: swift build -v -c release
       - name: Test
