@@ -182,28 +182,26 @@ public struct KSVideoPlayerView: View {
         .tint(.white)
         .persistentSystemOverlays(.hidden)
         .toolbar(isMaskShow ? .visible : .hidden, for: .automatic)
-        //        .onKeyPress(.leftArrow) {
-        //            playerCoordinator.skip(interval: -15)
-        //            return .handled
-        //        }
-        //        .onKeyPress(.rightArrow) {
-        //            playerCoordinator.skip(interval: 15)
-        //            return .handled
-        //        }
+        .onKeyPressLeftArrow {
+            playerCoordinator.skip(interval: -15)
+        }
+        .onKeyPressRightArrow {
+            playerCoordinator.skip(interval: 15)
+        }
         #if os(macOS)
-            .onTapGesture(count: 2) {
-                guard let view = playerCoordinator.playerLayer else {
-                    return
-                }
-                view.window?.toggleFullScreen(nil)
-                view.needsLayout = true
-                view.layoutSubtreeIfNeeded()
+        .onTapGesture(count: 2) {
+            guard let view = playerCoordinator.playerLayer else {
+                return
             }
-            .onExitCommand {
-                playerCoordinator.playerLayer?.exitFullScreenMode()
-            }
+            view.window?.toggleFullScreen(nil)
+            view.needsLayout = true
+            view.layoutSubtreeIfNeeded()
+        }
+        .onExitCommand {
+            playerCoordinator.playerLayer?.exitFullScreenMode()
+        }
         #else
-            .onTapGesture {
+        .onTapGesture {
                 isMaskShow.toggle()
             }
         #endif
@@ -248,6 +246,30 @@ public struct KSVideoPlayerView: View {
                 let info = URLSubtitleInfo(url: url)
                 playerCoordinator.subtitleModel.selectedSubtitleInfo = info
             }
+        }
+    }
+}
+
+extension View {
+    func onKeyPressLeftArrow(action: @escaping () -> Void) -> some View {
+        if #available(iOS 17.0, macOS 14.0, tvOS 17.0, *) {
+            return onKeyPress(.leftArrow) {
+                action()
+                return .handled
+            }
+        } else {
+            return self
+        }
+    }
+
+    func onKeyPressRightArrow(action: @escaping () -> Void) -> some View {
+        if #available(iOS 17.0, macOS 14.0, tvOS 17.0, *) {
+            return onKeyPress(.rightArrow) {
+                action()
+                return .handled
+            }
+        } else {
+            return self
         }
     }
 }
