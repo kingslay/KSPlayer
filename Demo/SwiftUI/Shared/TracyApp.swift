@@ -125,7 +125,10 @@ class APPModel: ObservableObject {
                 activeM3UURL = activeM3UModel.m3uURL
                 Task { @MainActor in
                     _ = try? await activeM3UModel.parsePlaylist()
-                    self.activeM3UModel = activeM3UModel
+                    // 为了解决第一次添加m3u。没有数据的问题，所以需要在查询结果出来之后，在设置下。
+                    if activeM3UModel == self.activeM3UModel {
+                        self.activeM3UModel = activeM3UModel
+                    }
                 }
             }
         }
@@ -133,7 +136,7 @@ class APPModel: ObservableObject {
 
     init() {
         #if DEBUG
-        KSOptions.logLevel = .debug
+//        KSOptions.logLevel = .debug
         #else
         var fileHandle = FileHandle.standardOutput
         if let logURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent("log.txt") {
@@ -150,7 +153,7 @@ class APPModel: ObservableObject {
         KSOptions.firstPlayerType = KSMEPlayer.self
         KSOptions.secondPlayerType = KSMEPlayer.self
         _ = Defaults.shared
-        KSOptions.subtitleDataSouces = [DirectorySubtitleDataSouce(), ShooterSubtitleDataSouce(), AssrtSubtitleDataSouce(token: "5IzWrb2J099vmA96ECQXwdRSe9xdoBUv")]
+        KSOptions.subtitleDataSouces = [DirectorySubtitleDataSouce(), ShooterSubtitleDataSouce(), AssrtSubtitleDataSouce(token: "5IzWrb2J099vmA96ECQXwdRSe9xdoBUv"), OpenSubtitleDataSouce(apiKey: "0D0gt8nV6SFHVVejdxAMpvOT0wByfKE5")]
         if let activeM3UURL {
             addM3U(url: activeM3UURL)
         }

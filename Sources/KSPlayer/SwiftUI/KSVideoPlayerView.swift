@@ -182,28 +182,26 @@ public struct KSVideoPlayerView: View {
         .tint(.white)
         .persistentSystemOverlays(.hidden)
         .toolbar(isMaskShow ? .visible : .hidden, for: .automatic)
-        //        .onKeyPress(.leftArrow) {
-        //            playerCoordinator.skip(interval: -15)
-        //            return .handled
-        //        }
-        //        .onKeyPress(.rightArrow) {
-        //            playerCoordinator.skip(interval: 15)
-        //            return .handled
-        //        }
+        .onKeyPressLeftArrow {
+            playerCoordinator.skip(interval: -15)
+        }
+        .onKeyPressRightArrow {
+            playerCoordinator.skip(interval: 15)
+        }
         #if os(macOS)
-            .onTapGesture(count: 2) {
-                guard let view = playerCoordinator.playerLayer else {
-                    return
-                }
-                view.window?.toggleFullScreen(nil)
-                view.needsLayout = true
-                view.layoutSubtreeIfNeeded()
+        .onTapGesture(count: 2) {
+            guard let view = playerCoordinator.playerLayer else {
+                return
             }
-            .onExitCommand {
-                playerCoordinator.playerLayer?.exitFullScreenMode()
-            }
+            view.window?.toggleFullScreen(nil)
+            view.needsLayout = true
+            view.layoutSubtreeIfNeeded()
+        }
+        .onExitCommand {
+            playerCoordinator.playerLayer?.exitFullScreenMode()
+        }
         #else
-            .onTapGesture {
+        .onTapGesture {
                 isMaskShow.toggle()
             }
         #endif
@@ -248,6 +246,30 @@ public struct KSVideoPlayerView: View {
                 let info = URLSubtitleInfo(url: url)
                 playerCoordinator.subtitleModel.selectedSubtitleInfo = info
             }
+        }
+    }
+}
+
+extension View {
+    func onKeyPressLeftArrow(action: @escaping () -> Void) -> some View {
+        if #available(iOS 17.0, macOS 14.0, tvOS 17.0, *) {
+            return onKeyPress(.leftArrow) {
+                action()
+                return .handled
+            }
+        } else {
+            return self
+        }
+    }
+
+    func onKeyPressRightArrow(action: @escaping () -> Void) -> some View {
+        if #available(iOS 17.0, macOS 14.0, tvOS 17.0, *) {
+            return onKeyPress(.rightArrow) {
+                action()
+                return .handled
+            }
+        } else {
+            return self
         }
     }
 }
@@ -440,8 +462,16 @@ struct VideoSettingView: View {
     fileprivate var config: KSVideoPlayer.Coordinator
     @ObservedObject
     fileprivate var subtitleModel: SubtitleModel
+    @State
+    fileprivate var subtitleTitle: String
     @Environment(\.dismiss)
     private var dismiss
+    init(config: KSVideoPlayer.Coordinator, subtitleModel: SubtitleModel) {
+        self.config = config
+        self.subtitleModel = subtitleModel
+        _subtitleTitle = .init(initialValue: subtitleModel.url?.deletingPathExtension().lastPathComponent ?? "")
+    }
+
     var body: some View {
         PlatformView {
             Picker(selection: $config.playbackRate) {
@@ -453,50 +483,64 @@ struct VideoSettingView: View {
             } label: {
                 Label("Playback Speed", systemImage: "speedometer")
             }
-            if !config.audioTracks.isEmpty {
+
+            if let audioTracks = config.playerLayer?.player.tracks(mediaType: .audio), !audioTracks.isEmpty {
                 Picker(selection: Binding {
-                    config.selectedAudioTrack?.trackID
+                    audioTracks.first { $0.isEnabled }?.trackID
                 } set: { value in
-                    config.selectedAudioTrack = config.audioTracks.first { $0.trackID == value }
+                    if let track = audioTracks.first(where: { $0.trackID == value }) {
+                        config.playerLayer?.player.select(track: track)
+                        config.playerLayer?.player.isMuted = false
+                    } else {
+                        config.playerLayer?.player.isMuted = true
+                    }
                 }) {
-                    ForEach(config.audioTracks, id: \.trackID) { track in
+                    ForEach(audioTracks, id: \.trackID) { track in
                         Text(track.description).tag(track.trackID as Int32?)
                     }
                 } label: {
                     Label("Audio track", systemImage: "waveform")
                 }
             }
-            if !config.videoTracks.isEmpty {
+
+            if let videoTracks = config.playerLayer?.player.tracks(mediaType: .video), !videoTracks.isEmpty {
                 Picker(selection: Binding {
-                    config.selectedVideoTrack?.trackID
+                    videoTracks.first { $0.isEnabled }?.trackID
                 } set: { value in
-                    config.selectedVideoTrack = config.videoTracks.first { $0.trackID == value }
+                    if let track = videoTracks.first(where: { $0.trackID == value }) {
+                        config.playerLayer?.player.select(track: track)
+                        config.playerLayer?.options.videoDisable = false
+                    } else {
+                        config.playerLayer?.options.videoDisable = true
+                    }
                 }) {
-                    ForEach(config.videoTracks, id: \.trackID) { track in
+                    ForEach(videoTracks, id: \.trackID) { track in
                         Text(track.description).tag(track.trackID as Int32?)
                     }
                 } label: {
                     Label("Video track", systemImage: "video.fill")
                 }
             }
-            if !config.subtitleModel.subtitleInfos.isEmpty {
-                Picker(selection: Binding {
-                    subtitleModel.selectedSubtitleInfo?.subtitleID
-                } set: { value in
-                    subtitleModel.selectedSubtitleInfo = subtitleModel.subtitleInfos.first { $0.subtitleID == value }
-                }) {
-                    Text("Off").tag(nil as String?)
-                    ForEach(subtitleModel.subtitleInfos, id: \.subtitleID) { track in
-                        Text(track.name).tag(track.subtitleID as String?)
-                    }
-                } label: {
-                    Label("Sutitle", systemImage: "captions.bubble")
+            Picker(selection: Binding {
+                subtitleModel.selectedSubtitleInfo?.subtitleID
+            } set: { value in
+                subtitleModel.selectedSubtitleInfo = subtitleModel.subtitleInfos.first { $0.subtitleID == value }
+            }) {
+                Text("Off").tag(nil as String?)
+                ForEach(subtitleModel.subtitleInfos, id: \.subtitleID) { track in
+                    Text(track.name).tag(track.subtitleID as String?)
                 }
-                TextField("Sutitle delay", value: $subtitleModel.subtitleDelay, format: .number)
+            } label: {
+                Label("Sutitle", systemImage: "captions.bubble")
+            }
+            TextField("Get more Sutitle", text: $subtitleTitle)
+            Button("Search") {
+                subtitleModel.searchSubtitle(query: subtitleTitle, languages: ["zh-cn"])
             }
             if let fileSize = config.playerLayer?.player.fileSize, fileSize > 0 {
                 Text("File Size \(String(format: "%.1f", fileSize / 1_000_000))MB")
             }
+            TextField("Sutitle delay", value: $subtitleModel.subtitleDelay, format: .number)
         }
         .padding()
         #if os(macOS) || targetEnvironment(macCatalyst)

@@ -6,8 +6,12 @@
 //
 
 import CoreData
+import CoreMedia
 import Foundation
 import KSPlayer
+#if canImport(UIKit)
+import UIKit
+#endif
 class MEOptions: KSOptions {
     static var isUseDisplayLayer = true
     override init() {
@@ -19,31 +23,54 @@ class MEOptions: KSOptions {
     override func process(assetTrack: some MediaPlayerTrack) {
         if assetTrack.mediaType == .video {
             if [FFmpegFieldOrder.bb, .bt, .tt, .tb].contains(assetTrack.fieldOrder) {
-                videoFilters.append("yadif=mode=0:parity=-1:deint=1")
-                hardwareDecode = false
+                videoFilters.append("yadif_videotoolbox=mode=0:parity=-1:deint=1")
+                asynchronousDecompression = false
+            }
+            #if os(tvOS) || os(xrOS)
+            runInMainqueue { [weak self] in
+                guard let self else {
+                    return
+                }
+                if let displayManager = UIApplication.shared.windows.first?.avDisplayManager,
+                   displayManager.isDisplayCriteriaMatchingEnabled,
+                   !displayManager.isDisplayModeSwitchInProgress
+                {
+                    let refreshRate = assetTrack.nominalFrameRate
+                    if KSOptions.displayCriteriaFormatDescriptionEnabled, let formatDescription = assetTrack.formatDescription, #available(tvOS 17.0, *) {
+                        displayManager.preferredDisplayCriteria = AVDisplayCriteria(refreshRate: refreshRate, formatDescription: formatDescription)
+                    } else {
+                        if let dynamicRange = assetTrack.dynamicRange {
+                            let videoDynamicRange = self.availableDynamicRange(dynamicRange) ?? dynamicRange
+                            displayManager.preferredDisplayCriteria = AVDisplayCriteria(refreshRate: refreshRate, videoDynamicRange: videoDynamicRange.rawValue)
+                        }
+                    }
+                }
+            }
+            #endif
+        }
+    }
+
+    override func updateVideo(refreshRate: Float, formatDescription: CMFormatDescription?) {
+        #if os(tvOS) || os(xrOS)
+        guard let displayManager = UIApplication.shared.windows.first?.avDisplayManager,
+              displayManager.isDisplayCriteriaMatchingEnabled,
+              !displayManager.isDisplayModeSwitchInProgress
+        else {
+            return
+        }
+        if let formatDescription {
+            if KSOptions.displayCriteriaFormatDescriptionEnabled, #available(tvOS 17.0, *) {
+                displayManager.preferredDisplayCriteria = AVDisplayCriteria(refreshRate: refreshRate, formatDescription: formatDescription)
+            } else {
+                displayManager.preferredDisplayCriteria = AVDisplayCriteria(refreshRate: refreshRate, videoDynamicRange: formatDescription.dynamicRange.rawValue)
             }
         }
+        #endif
     }
 
     override func isUseDisplayLayer() -> Bool {
         MEOptions.isUseDisplayLayer && display == .plane
     }
-
-    #if os(tvOS) || os(xrOS)
-    override open func preferredDisplayCriteria(track: some MediaPlayerTrack) -> AVDisplayCriteria? {
-        let refreshRate = track.nominalFrameRate
-        if KSOptions.displayCriteriaFormatDescriptionEnabled, let formatDescription = track.formatDescription, #available(tvOS 17.0, *) {
-            return AVDisplayCriteria(refreshRate: refreshRate, formatDescription: formatDescription)
-        } else {
-            let videoDynamicRange = track.dynamicRange(self).rawValue
-            return AVDisplayCriteria(refreshRate: refreshRate, videoDynamicRange: videoDynamicRange)
-        }
-    }
-    #endif
-}
-
-extension CodingUserInfoKey {
-    static let managedObjectContext = CodingUserInfoKey(rawValue: "managedObjectContext")!
 }
 
 @objc(MovieModel)
@@ -318,9 +345,11 @@ extension KSVideoPlayerView {
         }
         // There is total different meaning for 'listen_timeout' option in rtmp
         // set 'listen_timeout' = -1 for rtmp、rtsp
-        if url.absoluteString.starts(with: "rtmp") || url.absoluteString.starts(with: "rtsp") {
+        if url.scheme == "rtmp" || url.scheme == "rtsp" {
             options.formatContextOptions["listen_timeout"] = -1
-            options.formatContextOptions["fflags"] = ["nobuffer", "autobsf"]
+            options.formatContextOptions["fflags"] = ["nobuffer"]
+            options.preferredForwardBufferDuration = 2
+            options.hardwareDecode = false
         } else {
             options.formatContextOptions["listen_timeout"] = 3
         }
@@ -330,6 +359,8 @@ extension KSVideoPlayerView {
                 if playmodel.duration > 0 {
                     playmodel.current = Int16(layer.player.currentPlaybackTime)
                 }
+                playmodel.save()
+                model.save()
             }
         }
     }

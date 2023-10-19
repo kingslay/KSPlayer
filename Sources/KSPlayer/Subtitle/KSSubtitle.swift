@@ -188,7 +188,7 @@ public extension KSSubtitle {
         guard let subtitle = string else {
             throw NSError(errorCode: .subtitleUnEncoding)
         }
-        let scanner = Scanner(string: String(subtitle.replacingOccurrences(of: "\r\n\r\n", with: "\n\n")))
+        let scanner = Scanner(string: subtitle)
         _ = scanner.scanCharacters(from: .controlCharacters)
         let parse = KSOptions.subtitleParses.first { $0.canParse(scanner: scanner) }
         if let parse {
@@ -276,6 +276,7 @@ open class SubtitleModel: ObservableObject {
     public static var textItalic = false
     public static var textPosition = TextPosition()
     private var subtitleDataSouces: [SubtitleDataSouce] = KSOptions.subtitleDataSouces
+    @Published
     public private(set) var subtitleInfos = [any SubtitleInfo]()
     @Published
     public private(set) var parts = [SubtitlePart]()
@@ -283,6 +284,7 @@ open class SubtitleModel: ObservableObject {
     public var url: URL? {
         didSet {
             subtitleInfos.removeAll()
+            searchSubtitle(query: nil, languages: [])
             subtitleDataSouces.forEach { datasouce in
                 addSubtitle(dataSouce: datasouce)
             }
@@ -330,10 +332,26 @@ open class SubtitleModel: ObservableObject {
         }
     }
 
+    public func searchSubtitle(query: String?, languages: [String]) {
+        subtitleDataSouces.forEach { dataSouce in
+            if let dataSouce = dataSouce as? SearchSubtitleDataSouce {
+                subtitleInfos.removeAll { info in
+                    dataSouce.infos.contains {
+                        $0 === info
+                    }
+                }
+                Task { @MainActor in
+                    try? await dataSouce.searchSubtitle(query: query, languages: languages)
+                    subtitleInfos.append(contentsOf: dataSouce.infos)
+                }
+            }
+        }
+    }
+
     public func addSubtitle(dataSouce: SubtitleDataSouce) {
-        if let dataSouce = dataSouce as? SearchSubtitleDataSouce {
-            Task {
-                try? await dataSouce.searchSubtitle(url: url)
+        if let dataSouce = dataSouce as? FileURLSubtitleDataSouce {
+            Task { @MainActor in
+                try? await dataSouce.searchSubtitle(fileURL: url)
                 subtitleInfos.append(contentsOf: dataSouce.infos)
             }
         } else {

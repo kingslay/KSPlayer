@@ -19,15 +19,25 @@ public protocol DisplayLayerDelegate: NSObjectProtocol {
 public final class MetalPlayView: UIView {
     private var formatDescription: CMFormatDescription? {
         didSet {
-            #if os(tvOS) || os(xrOS)
-            if KSOptions.displayCriteriaFormatDescriptionEnabled, let formatDescription {
-                setDisplayCriteria(formatDescription: formatDescription)
-            }
-            #endif
+            options.updateVideo(refreshRate: fps, formatDescription: formatDescription)
         }
     }
 
-    private var fps = Float(60)
+    private var fps = Float(60) {
+        didSet {
+            if fps != oldValue {
+                let preferredFramesPerSecond = Int(ceil(fps))
+                displayLink.preferredFramesPerSecond = preferredFramesPerSecond << 1
+                #if os(iOS)
+                if #available(iOS 15.0, tvOS 15.0, *) {
+                    displayLink.preferredFrameRateRange = CAFrameRateRange(minimum: Float(preferredFramesPerSecond), maximum: Float(preferredFramesPerSecond << 1))
+                }
+                #endif
+                options.updateVideo(refreshRate: fps, formatDescription: formatDescription)
+            }
+        }
+    }
+
     public private(set) var pixelBuffer: CVPixelBuffer?
     /// 用displayLink会导致锁屏无法draw，
     /// 用DispatchSourceTimer的话，在播放4k视频的时候repeat的时间会变长,
@@ -56,20 +66,6 @@ public final class MetalPlayView: UIView {
         // 一定要用common。不然在视频上面操作view的话，那就会卡顿了。
         displayLink.add(to: .main, forMode: .common)
         pause()
-    }
-
-    func prepare(fps: Float, startPlayTime: TimeInterval = 0) {
-        self.fps = fps
-        let preferredFramesPerSecond = Int(ceil(fps))
-        displayLink.preferredFramesPerSecond = preferredFramesPerSecond << 1
-        #if os(iOS)
-        if #available(iOS 15.0, tvOS 15.0, *) {
-            displayLink.preferredFrameRateRange = CAFrameRateRange(minimum: Float(preferredFramesPerSecond), maximum: Float(preferredFramesPerSecond << 1))
-        }
-        #endif
-        if let controlTimebase = displayView.displayLayer.controlTimebase, startPlayTime > 1 {
-            CMTimebaseSetTime(controlTimebase, time: CMTimeMake(value: Int64(startPlayTime), timescale: 1))
-        }
     }
 
     func play() {
@@ -165,6 +161,7 @@ extension MetalPlayView {
             guard let pixelBuffer else {
                 return
             }
+            fps = frame.fps
             let cmtime = frame.cmtime
             let par = pixelBuffer.size
             let sar = pixelBuffer.aspectRatio
@@ -220,21 +217,6 @@ extension MetalPlayView {
         guard let formatDescription else { return }
         displayView.enqueue(imageBuffer: pixelBuffer, formatDescription: formatDescription, time: time)
     }
-
-    #if os(tvOS) || os(xrOS)
-    private func setDisplayCriteria(formatDescription: CMFormatDescription) {
-        guard let displayManager = UIApplication.shared.windows.first?.avDisplayManager,
-              displayManager.isDisplayCriteriaMatchingEnabled,
-              !displayManager.isDisplayModeSwitchInProgress
-        else {
-            return
-        }
-        if #available(tvOS 17.0, *) {
-            let criteria = AVDisplayCriteria(refreshRate: fps, formatDescription: formatDescription)
-            displayManager.preferredDisplayCriteria = criteria
-        }
-    }
-    #endif
 }
 
 class MetalView: UIView {

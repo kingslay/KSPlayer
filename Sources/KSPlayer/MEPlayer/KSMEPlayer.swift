@@ -177,15 +177,15 @@ extension KSMEPlayer: MEPlayerDelegate {
         if vidoeTracks.isEmpty {
             videoOutput = nil
         }
-        let fps = vidoeTracks.first { $0.isEnabled }.map(\.nominalFrameRate) ?? 24
         let audioDescriptor = tracks(mediaType: .audio).first { $0.isEnabled }.flatMap {
             $0 as? FFmpegAssetTrack
         }?.audioDescriptor ?? .defaultValue
         runInMainqueue { [weak self] in
             guard let self else { return }
             self.audioOutput.prepare(audioFormat: audioDescriptor.audioFormat)
-            self.videoOutput?.prepare(fps: fps, startPlayTime: self.options.startPlayTime)
-            self.videoOutput?.play()
+            if let controlTimebase = videoOutput?.displayView.displayLayer.controlTimebase, self.options.startPlayTime > 1 {
+                CMTimebaseSetTime(controlTimebase, time: CMTimeMake(value: Int64(self.options.startPlayTime), timescale: 1))
+            }
             self.delegate?.readyToPlay(player: self)
         }
     }
@@ -421,12 +421,6 @@ extension KSMEPlayer: MediaPlayerProtocol {
     }
 
     public func select(track: some MediaPlayerTrack) {
-        if track.mediaType == .video {
-            let fps = tracks(mediaType: .video).first { $0.isEnabled }.map(\.nominalFrameRate) ?? 24
-            if fps != track.nominalFrameRate {
-                videoOutput?.prepare(fps: fps)
-            }
-        }
         playerItem.select(track: track)
     }
 }

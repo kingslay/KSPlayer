@@ -7,7 +7,9 @@
 
 import AVFoundation
 import OSLog
-
+#if canImport(UIKit)
+import UIKit
+#endif
 open class KSOptions {
     /// 最低缓存视频时间
     @Published
@@ -88,6 +90,9 @@ open class KSOptions {
     public var asynchronousDecompression = KSOptions.asynchronousDecompression
     public var videoDisable = false
     public var canStartPictureInPictureAutomaticallyFromInline = true
+    public var automaticWindowResize = true
+    @Published
+    public var videoInterlacingType: VideoInterlacingType?
     private var videoClockDelayCount = 0
 
     public internal(set) var formatName = ""
@@ -106,6 +111,9 @@ open class KSOptions {
         // 参数的配置可以参考protocols.texi 和 http.c
         formatContextOptions["auto_convert"] = 0
         formatContextOptions["fps_probe_size"] = 3
+//        formatContextOptions["probesize"] = 40 * 1024
+//        formatContextOptions["max_analyze_duration"] = 300 * 1000
+
         formatContextOptions["reconnect"] = 1
         // 开启这个，纯ipv6地址会无法播放。
 //        formatContextOptions["reconnect_at_eof"] = 1
@@ -159,7 +167,7 @@ open class KSOptions {
                 return true
             }
             // 处理视频轨道一致没有值的问题(纯音频)
-            if capacity.mediaType == .video && capacity.frameCount == 0 && capacity.packetCount == 0 {
+            if capacitys.count > 1, capacity.mediaType == .video && capacity.frameCount == 0 && capacity.packetCount == 0 {
                 return true
             }
             guard capacity.frameCount >= capacity.frameMaxCount >> 2 else {
@@ -243,15 +251,6 @@ open class KSOptions {
         display == .plane
     }
 
-    private var idetTypeMap = [VideoInterlacingType: Int]()
-    @Published public var videoInterlacingType: VideoInterlacingType?
-    public enum VideoInterlacingType: String {
-        case tff
-        case bff
-        case progressive
-        case undetermined
-    }
-
     open func io(log: String) {
         if log.starts(with: "Original list of addresses"), dnsStartTime == 0 {
             dnsStartTime = CACurrentMediaTime()
@@ -262,6 +261,7 @@ open class KSOptions {
         }
     }
 
+    private var idetTypeMap = [VideoInterlacingType: Int]()
     open func filter(log: String) {
         if log.starts(with: "Repeated Field:") {
             log.split(separator: ",").forEach { str in
@@ -299,22 +299,49 @@ open class KSOptions {
     }
 
     /**
-            在创建解码器之前可以对KSOptions做一些处理。例如判断fieldOrder为tt或bb的话，那就自动加videofilters
+            在创建解码器之前可以对KSOptions和assetTrack做一些处理。例如判断fieldOrder为tt或bb的话，那就自动加videofilters
      */
-    open func process(assetTrack _: some MediaPlayerTrack) {}
+    open func process(assetTrack: some MediaPlayerTrack) {
+        if assetTrack.mediaType == .video {
+            #if os(tvOS) || os(xrOS)
+            runInMainqueue {
+                if let displayManager = UIApplication.shared.windows.first?.avDisplayManager,
+                   displayManager.isDisplayCriteriaMatchingEnabled,
+                   !displayManager.isDisplayModeSwitchInProgress
+                {
+                    let refreshRate = assetTrack.nominalFrameRate
+                    if KSOptions.displayCriteriaFormatDescriptionEnabled, let formatDescription = assetTrack.formatDescription, #available(tvOS 17.0, *) {
+                        displayManager.preferredDisplayCriteria = AVDisplayCriteria(refreshRate: refreshRate, formatDescription: formatDescription)
+                    } else {
+                        //                    if let dynamicRange = assetTrack.dynamicRange {
+                        //                        let videoDynamicRange = availableDynamicRange(dynamicRange) ?? dynamicRange
+                        //                        displayManager.preferredDisplayCriteria = AVDisplayCriteria(refreshRate: refreshRate, videoDynamicRange: videoDynamicRange.rawValue)
+                        //                    }
+                    }
+                }
+            }
 
-    #if os(tvOS) || os(xrOS)
-    open func preferredDisplayCriteria(track: some MediaPlayerTrack) -> AVDisplayCriteria? {
-        let refreshRate = track.nominalFrameRate
-        if KSOptions.displayCriteriaFormatDescriptionEnabled, let formatDescription = track.formatDescription, #available(tvOS 17.0, *) {
-            return AVDisplayCriteria(refreshRate: refreshRate, formatDescription: formatDescription)
-        } else {
-//            let videoDynamicRange = track.dynamicRange(self).rawValue
-//            return AVDisplayCriteria(refreshRate: refreshRate, videoDynamicRange: videoDynamicRange)
-            return nil
+            #endif
         }
     }
-    #endif
+
+    open func updateVideo(refreshRate: Float, formatDescription: CMFormatDescription?) {
+        #if os(tvOS) || os(xrOS)
+        guard let displayManager = UIApplication.shared.windows.first?.avDisplayManager,
+              displayManager.isDisplayCriteriaMatchingEnabled,
+              !displayManager.isDisplayModeSwitchInProgress
+        else {
+            return
+        }
+        if let formatDescription {
+            if KSOptions.displayCriteriaFormatDescriptionEnabled, #available(tvOS 17.0, *) {
+                displayManager.preferredDisplayCriteria = AVDisplayCriteria(refreshRate: refreshRate, formatDescription: formatDescription)
+            } else {
+//                displayManager.preferredDisplayCriteria = AVDisplayCriteria(refreshRate: refreshRate, videoDynamicRange: formatDescription.dynamicRange.rawValue)
+            }
+        }
+        #endif
+    }
 
 //    private var lastMediaTime = CACurrentMediaTime()
     open func videoClockSync(main: KSClock, nextVideoTime: TimeInterval, fps: Float) -> ClockProcessType {
@@ -354,7 +381,7 @@ open class KSOptions {
         }
     }
 
-    func availableDynamicRange(_ cotentRange: DynamicRange?) -> DynamicRange? {
+    open func availableDynamicRange(_ cotentRange: DynamicRange?) -> DynamicRange? {
         #if canImport(UIKit)
         let availableHDRModes = AVPlayer.availableHDRModes
         if let preferedDynamicRange = destinationDynamicRange {
@@ -374,6 +401,19 @@ open class KSOptions {
         #endif
         return cotentRange
     }
+
+    open func playerLayerDeinit() {
+        #if os(tvOS) || os(xrOS)
+        UIApplication.shared.windows.first?.avDisplayManager.preferredDisplayCriteria = nil
+        #endif
+    }
+}
+
+public enum VideoInterlacingType: String {
+    case tff
+    case bff
+    case progressive
+    case undetermined
 }
 
 public extension KSOptions {
@@ -407,15 +447,16 @@ public extension KSOptions {
         return Int(ncpu)
     }
 
-    internal static func setAudioSession() {
+    static func setAudioSession() {
         #if os(macOS)
 //        try? AVAudioSession.sharedInstance().setRouteSharingPolicy(.longFormAudio)
         #else
         let category = AVAudioSession.sharedInstance().category
-        if category != .playback, category != .playAndRecord {
-            try? AVAudioSession.sharedInstance().setCategory(.playback, mode: .default, policy: .longFormAudio)
+        if category == .playback || category == .playAndRecord {
+            try? AVAudioSession.sharedInstance().setCategory(category, mode: .moviePlayback, policy: .longFormAudio)
+        } else {
+            try? AVAudioSession.sharedInstance().setCategory(.playback, mode: .moviePlayback, policy: .longFormAudio)
         }
-        try? AVAudioSession.sharedInstance().setMode(.moviePlayback)
         try? AVAudioSession.sharedInstance().setActive(true)
         #endif
     }
@@ -546,18 +587,21 @@ public class FileLog: LogHandler {
     }
 }
 
-@inlinable public func KSLog(_ error: @autoclosure () -> Error, file: String = #file, function: String = #function, line: UInt = #line) {
+@inlinable
+public func KSLog(_ error: @autoclosure () -> Error, file: String = #file, function: String = #function, line: UInt = #line) {
     KSLog(level: .error, error().localizedDescription, file: file, function: function, line: line)
 }
 
-@inlinable public func KSLog(level: LogLevel = .warning, _ message: @autoclosure () -> CustomStringConvertible, file: String = #file, function: String = #function, line: UInt = #line) {
+@inlinable
+public func KSLog(level: LogLevel = .warning, _ message: @autoclosure () -> CustomStringConvertible, file: String = #file, function: String = #function, line: UInt = #line) {
     if level.rawValue <= KSOptions.logLevel.rawValue {
         let fileName = (file as NSString).lastPathComponent
         KSOptions.logger.log(level: level, message: message(), file: fileName, function: function, line: line)
     }
 }
 
-@inlinable public func KSLog(level: LogLevel = .warning, dso: UnsafeRawPointer = #dsohandle, _ message: StaticString, _ args: CVarArg...) {
+@inlinable
+public func KSLog(level: LogLevel = .warning, dso: UnsafeRawPointer = #dsohandle, _ message: StaticString, _ args: CVarArg...) {
     if level.rawValue <= KSOptions.logLevel.rawValue {
         os_log(level.logType, dso: dso, message, args)
     }

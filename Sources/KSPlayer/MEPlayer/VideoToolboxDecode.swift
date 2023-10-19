@@ -11,16 +11,14 @@ import Libavformat
 import VideoToolbox
 class VideoToolboxDecode: DecodeProtocol {
     private var session: DecompressionSession?
-    private let timebase: Timebase
     private let options: KSOptions
     private var startTime = Int64(0)
     private var lastPosition = Int64(0)
     required convenience init(assetTrack: FFmpegAssetTrack, options: KSOptions) {
-        self.init(assetTrack: assetTrack, options: options, session: DecompressionSession(assetTrack: assetTrack, options: options))
+        self.init(options: options, session: DecompressionSession(assetTrack: assetTrack, options: options))
     }
 
-    init(assetTrack: FFmpegAssetTrack, options: KSOptions, session: DecompressionSession?) {
-        timebase = assetTrack.timebase
+    init(options: KSOptions, session: DecompressionSession?) {
         self.options = options
         self.session = session
     }
@@ -51,9 +49,9 @@ class VideoToolboxDecode: DecodeProtocol {
                     }
                     return
                 }
-                let frame = VideoVTBFrame()
+                let frame = VideoVTBFrame(fps: session.assetTrack.nominalFrameRate)
                 frame.corePixelBuffer = imageBuffer
-                frame.timebase = self.timebase
+                frame.timebase = session.assetTrack.timebase
                 if packetFlags & AV_PKT_FLAG_KEY == 1, packetFlags & AV_PKT_FLAG_DISCARD != 0, self.lastPosition > 0 {
                     self.startTime = self.lastPosition - pts
                 }

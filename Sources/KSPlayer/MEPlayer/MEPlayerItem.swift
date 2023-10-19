@@ -83,7 +83,7 @@ final class MEPlayerItem {
         }
     }
 
-    private lazy var timer: Timer = .scheduledTimer(withTimeInterval: 0.02, repeats: true) { [weak self] _ in
+    private lazy var timer: Timer = .scheduledTimer(withTimeInterval: 0.05, repeats: true) { [weak self] _ in
         self?.codecDidChangeCapacity()
     }
 
@@ -204,6 +204,7 @@ extension MEPlayerItem {
 //        formatCtx.pointee.io_open = { formatCtx, context, url, flags, options -> Int32 in
 //            return 0
 //        }
+        setHttpProxy()
         var avOptions = options.formatContextOptions.avOptions
         let urlString: String
         if url.isFileURL {

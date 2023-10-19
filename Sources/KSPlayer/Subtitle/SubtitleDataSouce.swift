@@ -62,8 +62,12 @@ public protocol SubtitleDataSouce: AnyObject {
     var infos: [any SubtitleInfo] { get }
 }
 
+public protocol FileURLSubtitleDataSouce: SubtitleDataSouce {
+    func searchSubtitle(fileURL: URL?) async throws
+}
+
 public protocol SearchSubtitleDataSouce: SubtitleDataSouce {
-    func searchSubtitle(url: URL?) async throws
+    func searchSubtitle(query: String?, languages: [String]) async throws
 }
 
 public extension KSOptions {
@@ -71,98 +75,85 @@ public extension KSOptions {
 }
 
 public extension SubtitleDataSouce {
-    func addCache(subtitleID: String, downloadURL: URL) {
-        CacheDataSouce.singleton.addCache(subtitleID: subtitleID, downloadURL: downloadURL)
+    func addCache(query: String, downloadURL: URL) {
+        CacheDataSouce.singleton.addCache(query: query, downloadURL: downloadURL)
     }
 }
 
 public class CacheDataSouce: SearchSubtitleDataSouce {
     public static let singleton = CacheDataSouce()
     public var infos = [any SubtitleInfo]()
-    private let cacheFolder = (NSTemporaryDirectory() as NSString).appendingPathComponent("KSSubtitleCache")
-    private var srtCacheInfoPath: String
+    private let srtCacheInfoPath: String
     // 因为plist不能保存URL
-    private var srtInfoCaches = [String: String]()
+    private var srtInfoCaches: [String: [String]]
     private init() {
+        let cacheFolder = (NSTemporaryDirectory() as NSString).appendingPathComponent("KSSubtitleCache")
         if !FileManager.default.fileExists(atPath: cacheFolder) {
             try? FileManager.default.createDirectory(atPath: cacheFolder, withIntermediateDirectories: true, attributes: nil)
         }
         srtCacheInfoPath = (cacheFolder as NSString).appendingPathComponent("KSSrtInfo.plist")
+        srtInfoCaches = (NSMutableDictionary(contentsOfFile: srtCacheInfoPath) as? [String: [String]]) ?? [String: [String]]()
     }
 
-    public func searchSubtitle(url: URL?) async throws {
+    public func searchSubtitle(query: String?, languages _: [String] = ["zh-cn"]) async throws {
         infos = [any SubtitleInfo]()
-        guard let url else {
+        guard let query else {
             return
         }
-        srtCacheInfoPath = (cacheFolder as NSString).appendingPathComponent("KSSrtInfo_\(url.lastPathComponent).plist")
-        if FileManager.default.fileExists(atPath: srtCacheInfoPath), let files = NSMutableDictionary(contentsOfFile: srtCacheInfoPath) as? [String: String] {
-            srtInfoCaches = files.filter { FileManager.default.fileExists(atPath: $1) }
-            if srtInfoCaches.isEmpty {
-                infos = []
-            } else {
-                let array = srtInfoCaches.map { subtitleID, downloadURL -> (any SubtitleInfo) in
-                    let info = URLSubtitleInfo(subtitleID: subtitleID, name: (downloadURL as NSString).lastPathComponent, url: URL(fileURLWithPath: downloadURL))
-                    info.comment = "本地"
-                    return info
-                }
-                infos = array
-            }
-            if srtInfoCaches.count != files.count {
-                (srtInfoCaches as NSDictionary).write(toFile: srtCacheInfoPath, atomically: false)
-            }
-        } else {
-            srtInfoCaches = [String: String]()
-            infos = []
-        }
+        infos = srtInfoCaches[query]?.map { downloadURL -> (any SubtitleInfo) in
+            let info = URLSubtitleInfo(url: URL(fileURLWithPath: downloadURL))
+            info.comment = "local"
+            return info
+        } ?? [any SubtitleInfo]()
     }
 
-    public func addCache(subtitleID: String, downloadURL: URL) {
-        srtInfoCaches[subtitleID] = downloadURL.path
+    public func addCache(query: String, downloadURL: URL) {
+        var array = srtInfoCaches[query] ?? [String]()
+        array.append(downloadURL.path)
+        srtInfoCaches[query] = array
         (srtInfoCaches as NSDictionary).write(toFile: srtCacheInfoPath, atomically: false)
     }
 }
 
 public class URLSubtitleDataSouce: SubtitleDataSouce {
-    public let infos: [any SubtitleInfo]
+    public var infos: [any SubtitleInfo]
     public init(urls: [URL]) {
         infos = urls.map { URLSubtitleInfo(url: $0) }
     }
 }
 
-public class DirectorySubtitleDataSouce: SearchSubtitleDataSouce {
+public class DirectorySubtitleDataSouce: FileURLSubtitleDataSouce {
     public var infos = [any SubtitleInfo]()
     public init() {}
 
-    public func searchSubtitle(url: URL?) async throws {
+    public func searchSubtitle(fileURL: URL?) async throws {
         infos = [any SubtitleInfo]()
-        guard let url else {
+        guard let fileURL else {
             return
         }
-        if url.isFileURL {
-            let subtitleURLs: [URL] = (try? FileManager.default.contentsOfDirectory(at: url.deletingLastPathComponent(), includingPropertiesForKeys: nil).filter(\.isSubtitle)) ?? []
-            let contents = subtitleURLs.map { URLSubtitleInfo(url: $0) }.sorted { left, right in
+        if fileURL.isFileURL {
+            let subtitleURLs: [URL] = (try? FileManager.default.contentsOfDirectory(at: fileURL.deletingLastPathComponent(), includingPropertiesForKeys: nil).filter(\.isSubtitle)) ?? []
+            infos = subtitleURLs.map { URLSubtitleInfo(url: $0) }.sorted { left, right in
                 left.name < right.name
             }
-            infos.append(contentsOf: contents)
         }
     }
 }
 
-public class ShooterSubtitleDataSouce: SearchSubtitleDataSouce {
+public class ShooterSubtitleDataSouce: FileURLSubtitleDataSouce {
     public var infos = [any SubtitleInfo]()
     public init() {}
-    public func searchSubtitle(url: URL?) async throws {
+    public func searchSubtitle(fileURL: URL?) async throws {
         infos = [any SubtitleInfo]()
-        guard let url else {
+        guard let fileURL else {
             return
         }
-        guard url.isFileURL, let url = URL(string: "https://www.shooter.cn/api/subapi.php")?
-            .add(queryItems: ["format": "json", "pathinfo": url.path, "filehash": url.shooterFilehash])
+        guard fileURL.isFileURL, let searchApi = URL(string: "https://www.shooter.cn/api/subapi.php")?
+            .add(queryItems: ["format": "json", "pathinfo": fileURL.path, "filehash": fileURL.shooterFilehash])
         else {
             return
         }
-        var request = URLRequest(url: url)
+        var request = URLRequest(url: searchApi)
         request.httpMethod = "POST"
         let (data, _) = try await URLSession.shared.data(for: request)
         guard let json = try JSONSerialization.jsonObject(with: data) as? [[String: Any]] else {
@@ -191,12 +182,11 @@ public class AssrtSubtitleDataSouce: SearchSubtitleDataSouce {
         self.token = token
     }
 
-    public func searchSubtitle(url: URL?) async throws {
+    public func searchSubtitle(query: String?, languages _: [String] = ["zh-cn"]) async throws {
         infos = [any SubtitleInfo]()
-        guard let url else {
+        guard let query else {
             return
         }
-        let query = url.deletingPathExtension().lastPathComponent
         guard let searchApi = URL(string: "https://api.assrt.net/v1/sub/search")?.add(queryItems: ["q": query]) else {
             return
         }
@@ -252,6 +242,96 @@ public class AssrtSubtitleDataSouce: SearchSubtitleDataSouce {
             infos.append(info)
         }
         return infos
+    }
+}
+
+public class OpenSubtitleDataSouce: SearchSubtitleDataSouce {
+    private var token: String? = nil
+    private let username: String?
+    private let password: String?
+    private let apiKey: String
+    public var infos = [any SubtitleInfo]()
+    public init(apiKey: String, username: String? = nil, password: String? = nil) {
+        self.apiKey = apiKey
+        self.username = username
+        self.password = password
+    }
+
+    public func searchSubtitle(query: String?, languages: [String] = ["zh-cn"]) async throws {
+        try await searchSubtitle(query: query, imdbID: 0, tmdbID: 0, languages: languages)
+    }
+
+    public func searchSubtitle(query: String?, imdbID: Int, tmdbID: Int, languages: [String] = ["zh-cn"]) async throws {
+        var queryItems = [String: String]()
+        if let query {
+            queryItems["query"] = query
+        }
+        if imdbID != 0 {
+            queryItems["imbd_id"] = String(imdbID)
+        }
+        if tmdbID != 0 {
+            queryItems["tmdb_id"] = String(tmdbID)
+        }
+        if queryItems.isEmpty {
+            return
+        }
+        queryItems["languages"] = languages.joined(separator: ",")
+    }
+
+    // https://opensubtitles.stoplight.io/docs/opensubtitles-api/a172317bd5ccc-search-for-subtitles
+    public func searchSubtitle(queryItems: [String: String]) async throws {
+        infos = [any SubtitleInfo]()
+        if queryItems.isEmpty {
+            return
+        }
+        guard let searchApi = URL(string: "https://api.opensubtitles.com/api/v1/subtitles")?.add(queryItems: queryItems) else {
+            return
+        }
+        var request = URLRequest(url: searchApi)
+        request.addValue(apiKey, forHTTPHeaderField: "Api-Key")
+        if let token {
+            request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        }
+        let (data, _) = try await URLSession.shared.data(for: request)
+        guard let json = try JSONSerialization.jsonObject(with: data) as? [String: Any] else {
+            return
+        }
+        guard let dataArray = json["data"] as? [[String: Any]] else {
+            return
+        }
+        var result = [URLSubtitleInfo]()
+        for sub in dataArray {
+            if let attributes = sub["attributes"] as? [String: Any], let files = attributes["files"] as? [[String: Any]] {
+                for file in files {
+                    if let fileID = file["file_id"] as? Int, let info = try await loadDetails(fileID: fileID) {
+                        result.append(info)
+                    }
+                }
+            }
+        }
+        infos = result
+    }
+
+    func loadDetails(fileID: Int) async throws -> URLSubtitleInfo? {
+        guard let detailApi = URL(string: "https://api.opensubtitles.com/api/v1/download")?.add(queryItems: ["file_id": String(fileID)]) else {
+            return nil
+        }
+        var request = URLRequest(url: detailApi)
+        request.httpMethod = "POST"
+        request.addValue(apiKey, forHTTPHeaderField: "Api-Key")
+        if let token {
+            request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        }
+        let (data, _) = try await URLSession.shared.data(for: request)
+        guard let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else {
+            return nil
+        }
+        guard let link = json["link"] as? String, let fileName = json["file_name"] as?
+            String, let url = URL(string: link)
+        else {
+            return nil
+        }
+        return URLSubtitleInfo(subtitleID: String(fileID), name: fileName, url: url)
     }
 }
 

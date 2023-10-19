@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 53;
+	objectVersion = 54;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -20,6 +20,7 @@
 		AC3E54AB24B9E810002B6B1B /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = AC3E498E24B9CB5E002B6B1B /* LaunchScreen.storyboard */; };
 		AC3E54AC24B9E815002B6B1B /* Localized.strings in Resources */ = {isa = PBXBuildFile; fileRef = AC3E491D24B98CEB002B6B1B /* Localized.strings */; };
 		AC458DE621DF830F00BD4CF9 /* AudioViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC458DE521DF830F00BD4CF9 /* AudioViewController.swift */; };
+		AC68AA322AD3FA320061A4CA /* MEPlayerViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC68AA312AD3FA310061A4CA /* MEPlayerViewController.swift */; };
 		AC80332224BA1A2F002B3D40 /* hevc.mkv in Resources */ = {isa = PBXBuildFile; fileRef = AC80331E24BA1A2F002B3D40 /* hevc.mkv */; };
 		ACA2123E2756169900F58F75 /* raw.h264 in Resources */ = {isa = PBXBuildFile; fileRef = ACA2123D2756169900F58F75 /* raw.h264 */; };
 		ACE8052D2A83B92800690A9B /* RootViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACE8052C2A83B92800690A9B /* RootViewController.swift */; };
@@ -46,6 +47,7 @@
 		AC3E498C24B9CA67002B6B1B /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "zh-Hans.lproj/Localized.strings"; sourceTree = "<group>"; };
 		AC3E498E24B9CB5E002B6B1B /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = LaunchScreen.storyboard; sourceTree = "<group>"; };
 		AC458DE521DF830F00BD4CF9 /* AudioViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioViewController.swift; sourceTree = "<group>"; };
+		AC68AA312AD3FA310061A4CA /* MEPlayerViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MEPlayerViewController.swift; sourceTree = "<group>"; };
 		AC7E04DB2414DA5E00B0F540 /* libxml2.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libxml2.tbd; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk/usr/lib/libxml2.tbd; sourceTree = DEVELOPER_DIR; };
 		AC80331E24BA1A2F002B3D40 /* hevc.mkv */ = {isa = PBXFileReference; lastKnownFileType = file; path = hevc.mkv; sourceTree = "<group>"; };
 		ACA2123D2756169900F58F75 /* raw.h264 */ = {isa = PBXFileReference; lastKnownFileType = file; path = raw.h264; sourceTree = "<group>"; };
@@ -106,6 +108,7 @@
 				AC08615A20B69A4500D801FC /* Info.plist */,
 				AC3E491D24B98CEB002B6B1B /* Localized.strings */,
 				AC80331A24BA1A2F002B3D40 /* Resources */,
+				AC68AA312AD3FA310061A4CA /* MEPlayerViewController.swift */,
 			);
 			path = "demo-iOS";
 			sourceTree = "<group>";
@@ -275,6 +278,7 @@
 				AC458DE621DF830F00BD4CF9 /* AudioViewController.swift in Sources */,
 				AC08619620B69AB400D801FC /* DetailViewController.swift in Sources */,
 				AC08614F20B69A4500D801FC /* AppDelegate.swift in Sources */,
+				AC68AA322AD3FA320061A4CA /* MEPlayerViewController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -333,10 +333,9 @@ public extension URL {
 
     func parsePlaylist() async throws -> [(String, URL, [String: String])] {
         let data = try await data()
-        guard var string = String(data: data, encoding: .utf8) else {
+        guard let string = String(data: data, encoding: .utf8) else {
             return []
         }
-        string = string.replacingOccurrences(of: "\r\n", with: "\n")
         let scanner = Scanner(string: string)
         var entrys = [(String, URL, [String: String])]()
         guard scanner.scanString("#EXTM3U") != nil else {
@@ -357,7 +356,10 @@ public extension URL {
      http://example.com/stream.m3u8
      */
     private func parseM3U(scanner: Scanner) -> (String, URL, [String: String])? {
-        _ = scanner.scanString("#EXTINF:")
+        if scanner.scanString("#EXTINF:") == nil {
+            _ = scanner.scanUpToCharacters(from: .newlines)
+            return nil
+        }
         var extinf = [String: String]()
         if let duration = scanner.scanDouble() {
             extinf["duration"] = String(duration)
@@ -371,16 +373,16 @@ public extension URL {
                 extinf[key] = value
             }
         }
-        let title = scanner.scanUpToString("\n")
+        let title = scanner.scanUpToCharacters(from: .newlines)
         if scanner.scanString("#EXTVLCOPT:") != nil {
             let key = scanner.scanUpToString("=")
             _ = scanner.scanString("=")
-            let value = scanner.scanUpToString("\n")
+            let value = scanner.scanUpToCharacters(from: .newlines)
             if let key, let value {
                 extinf[key] = value
             }
         }
-        let urlString = scanner.scanUpToString("\n")
+        let urlString = scanner.scanUpToCharacters(from: .newlines)
         if let urlString, var url = URL(string: urlString) {
             if url.path.hasPrefix("./") {
                 url = deletingLastPathComponent().appendingPathComponent(url.path).standardized

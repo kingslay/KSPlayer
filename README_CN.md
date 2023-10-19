@@ -144,7 +144,8 @@ public protocol PlayerControllerDelegate: class {
   open class KSOptions {
     //    public static let shared = KSOptions()
     /// 最低缓存视频时间
-    @Published public var preferredForwardBufferDuration = KSOptions.preferredForwardBufferDuration
+    @Published 
+    public var preferredForwardBufferDuration = KSOptions.preferredForwardBufferDuration
     /// 最大缓存视频时间
     public var maxBufferDuration = KSOptions.maxBufferDuration
     /// 是否开启秒开

@@ -340,7 +340,11 @@ final class VideoVTBFrame: MEFrame {
     var duration: Int64 = 0
     var position: Int64 = 0
     var size: Int32 = 0
+    let fps: Float
     var corePixelBuffer: CVPixelBuffer?
+    init(fps: Float) {
+        self.fps = fps
+    }
 }
 
 extension Array {

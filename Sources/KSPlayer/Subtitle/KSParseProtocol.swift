@@ -356,13 +356,13 @@ public class VTTParse: KSParseProtocol {
      简中封装 by Q66
      */
     public func parsePart(scanner: Scanner) -> SubtitlePart? {
-        _ = scanner.scanUpToString("\n\n")
-        let startString = scanner.scanUpToString(" --> ")
+        _ = scanner.scanUpToCharacters(from: .newlines)
+        let startString = scanner.scanUpToString("-->")
         // skip spaces and newlines by default.
         _ = scanner.scanString("-->")
         if let startString,
            let endString = scanner.scanUpToCharacters(from: .newlines),
-           let text = scanner.scanUpToString("\n\n")
+           let text = scanner.scanUpToCharacters(from: .newlines)
         {
             var textPosition = TextPosition()
             return SubtitlePart(startString.parseDuration(), endString.parseDuration(), attributedString: text.build(textPosition: &textPosition))
@@ -383,12 +383,12 @@ public class SrtParse: KSParseProtocol {
      */
     public func parsePart(scanner: Scanner) -> SubtitlePart? {
         _ = scanner.scanUpToCharacters(from: .newlines)
-        let startString = scanner.scanUpToString(" --> ")
+        let startString = scanner.scanUpToString("-->")
         // skip spaces and newlines by default.
         _ = scanner.scanString("-->")
         if let startString,
            let endString = scanner.scanUpToCharacters(from: .newlines),
-           let text = scanner.scanUpToString("\n\n")
+           let text = scanner.scanUpToCharacters(from: .newlines)
         {
             var textPosition = TextPosition()
             return SubtitlePart(startString.parseDuration(), endString.parseDuration(), attributedString: text.build(textPosition: &textPosition))
