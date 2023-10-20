@@ -10,7 +10,13 @@ import Libavformat
 #if canImport(VideoToolbox)
 import VideoToolbox
 class VideoToolboxDecode: DecodeProtocol {
-    private var session: DecompressionSession?
+    private var session: DecompressionSession? {
+        didSet {
+            if let oldValue {
+                VTDecompressionSessionInvalidate(oldValue.decompressionSession)
+            }
+        }
+    }
     private let options: KSOptions
     private var startTime = Int64(0)
     private var lastPosition = Int64(0)
@@ -138,10 +144,6 @@ class DecompressionSession {
                                  value: pixelTransferProperties as CFDictionary)
         }
         self.decompressionSession = decompressionSession
-    }
-
-    deinit {
-        VTDecompressionSessionInvalidate(decompressionSession)
     }
 }
 #endif
