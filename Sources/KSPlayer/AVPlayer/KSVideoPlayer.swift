@@ -106,6 +106,36 @@ extension KSVideoPlayer: UIViewRepresentable {
             }
         }
 
+        @Published
+        public var isMaskShow = true {
+            didSet {
+                if isMaskShow != oldValue {
+                    if isMaskShow {
+                        delayItem?.cancel()
+                        // 播放的时候才自动隐藏
+                        guard state == .bufferFinished else { return }
+                        delayItem = DispatchWorkItem { [weak self] in
+                            self?.isMaskShow = false
+                        }
+                        DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + KSOptions.animateDelayTimeInterval,
+                                                      execute: delayItem!)
+                    }
+                    #if os(macOS)
+                    isMaskShow ? NSCursor.unhide() : NSCursor.setHiddenUntilMouseMoves(true)
+                    if let window = playerLayer?.window {
+                        if !window.styleMask.contains(.fullScreen) {
+                            window.standardWindowButton(.closeButton)?.superview?.superview?.isHidden = !isMaskShow
+                            //                    window.standardWindowButton(.zoomButton)?.isHidden = !isMaskShow
+                            //                    window.standardWindowButton(.closeButton)?.isHidden = !isMaskShow
+                            //                    window.standardWindowButton(.miniaturizeButton)?.isHidden = !isMaskShow
+                            //                    window.titleVisibility = isMaskShow ? .visible : .hidden
+                        }
+                    }
+                    #endif
+                }
+            }
+        }
+
         public var subtitleModel = SubtitleModel()
         public var timemodel = ControllerTimeModel()
         // 在SplitView模式下，第二次进入会先调用makeUIView。然后在调用之前的dismantleUIView.所以如果进入的是同一个View的话，就会导致playerLayer被清空了。最准确的方式是在onDisappear清空playerLayer
@@ -116,6 +146,7 @@ extension KSVideoPlayer: UIViewRepresentable {
             }
         }
 
+        private var delayItem: DispatchWorkItem?
         fileprivate var onPlay: ((TimeInterval, TimeInterval) -> Void)?
         fileprivate var onFinish: ((KSPlayerLayer, Error?) -> Void)?
         fileprivate var onStateChanged: ((KSPlayerLayer, KSPlayerState) -> Void)?
@@ -160,6 +191,8 @@ extension KSVideoPlayer: UIViewRepresentable {
             onSwipe = nil
             #endif
             playerLayer = nil
+            delayItem?.cancel()
+            delayItem = nil
             DispatchQueue.main.async { [weak self] in
                 self?.subtitleModel.url = nil
             }
@@ -191,6 +224,10 @@ extension KSVideoPlayer.Coordinator: KSPlayerLayerDelegate {
                     }
                 }
             }
+        } else if state == .bufferFinished {
+            isMaskShow = false
+        } else {
+            isMaskShow = true
         }
         self.state = state
         onStateChanged?(layer, state)

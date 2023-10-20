@@ -62,7 +62,9 @@ class VideoToolboxDecode: DecodeProtocol {
                 self.lastPosition += frame.duration
                 completionHandler(.success(frame))
             }
-            if status == kVTInvalidSessionErr || status == kVTVideoDecoderMalfunctionErr || status == kVTVideoDecoderBadDataErr {
+            if status == noErr {
+                VTDecompressionSessionWaitForAsynchronousFrames(session.decompressionSession)
+            } else if status == kVTInvalidSessionErr || status == kVTVideoDecoderMalfunctionErr || status == kVTVideoDecoderBadDataErr {
                 if corePacket.flags & AV_PKT_FLAG_KEY == 1 {
                     throw NSError(errorCode: .codecVideoReceiveFrame, avErrorCode: status)
                 } else {
@@ -139,7 +141,6 @@ class DecompressionSession {
     }
 
     deinit {
-        VTDecompressionSessionWaitForAsynchronousFrames(decompressionSession)
         VTDecompressionSessionInvalidate(decompressionSession)
     }
 }
