@@ -164,6 +164,11 @@ extension M3UModel {
 //            let deleteRequest = NSBatchDeleteRequest(fetchRequest: movieRequest)
 //            _ = try? context.execute(deleteRequest)
         }
+        do {
+            try context.save()
+        } catch {
+            KSLog(level: .error, error.localizedDescription)
+        }
     }
 
     func getMovieModels() async -> [MovieModel] {
@@ -193,9 +198,7 @@ extension M3UModel {
         }
         let result = try await m3uURL.parsePlaylist()
         guard result.count > 0 else {
-            await viewContext.perform {
-                viewContext.delete(self)
-            }
+            delete()
             return []
         }
         return await viewContext.perform {
@@ -231,10 +234,10 @@ extension M3UModel {
             }
             viewContext.perform {
                 if viewContext.hasChanges {
-                    try? viewContext.save()
                     for model in dic.values {
                         viewContext.delete(model)
                     }
+                    try? viewContext.save()
                 }
             }
             return models
@@ -278,6 +281,7 @@ extension MovieModel {
         newMovieModel.setValuesForKeys(dictionaryWithValues(forKeys: entity.attributesByName.keys.map { $0 }))
         newMovieModel.playmodel = model
         context.assign(newMovieModel, to: privateStore)
+//        try? context.save()
         newMovieModel.save()
         context.delete(self)
         return model
@@ -353,6 +357,8 @@ extension KSVideoPlayerView {
         } else {
             options.formatContextOptions["listen_timeout"] = 3
         }
+        playmodel.save()
+        model.save()
         self.init(url: url, options: options, title: model.name) { layer in
             if let layer {
                 playmodel.duration = Int16(layer.player.duration)
