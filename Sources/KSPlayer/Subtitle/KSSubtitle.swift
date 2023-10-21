@@ -325,6 +325,12 @@ open class SubtitleModel: ObservableObject {
         }
         // swiftUI不会判断是否相等。所以需要这边判断下。
         if newParts != parts {
+            newParts.forEach { part in
+                if let text = part.text as? NSMutableAttributedString {
+                    text.addAttributes([.font: SubtitleModel.textFont],
+                                       range: NSRange(location: 0, length: text.length))
+                }
+            }
             parts = newParts
             return true
         } else {

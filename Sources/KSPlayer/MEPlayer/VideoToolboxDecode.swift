@@ -17,6 +17,7 @@ class VideoToolboxDecode: DecodeProtocol {
             }
         }
     }
+
     private let options: KSOptions
     private var startTime = Int64(0)
     private var lastPosition = Int64(0)
