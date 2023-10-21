@@ -157,9 +157,7 @@ public struct KSVideoPlayerView: View {
                 playerCoordinator.playerLayer?.play()
             }
         }
-        .onTapGesture {
-            playerCoordinator.isMaskShow.toggle()
-        }
+
         #if os(macOS)
         .onTapGesture(count: 2) {
             guard let view = playerCoordinator.playerLayer else {
@@ -173,6 +171,9 @@ public struct KSVideoPlayerView: View {
             playerCoordinator.playerLayer?.exitFullScreenMode()
         }
         #endif
+        .onTapGesture {
+            playerCoordinator.isMaskShow.toggle()
+        }
         #if os(tvOS)
         .onPlayPauseCommand {
             if playerCoordinator.state.isPlaying {
@@ -514,8 +515,8 @@ struct VideoSettingView: View {
                 Label("Sutitle", systemImage: "captions.bubble")
             }
             TextField("Sutitle delay", value: $subtitleModel.subtitleDelay, format: .number)
-            TextField("Get more Sutitle", text: $subtitleTitle)
-            Button("Search") {
+            TextField("Title", text: $subtitleTitle)
+            Button("Search Sutitle") {
                 subtitleModel.searchSubtitle(query: subtitleTitle, languages: ["zh-cn"])
             }
             if let fileSize = config.playerLayer?.player.fileSize, fileSize > 0 {
