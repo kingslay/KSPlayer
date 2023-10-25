@@ -14,6 +14,7 @@ import UIKit
 #endif
 class MEOptions: KSOptions {
     static var isUseDisplayLayer = true
+    static var yadifMode = 0
     override init() {
         super.init()
         formatContextOptions["reconnect_on_network_error"] = 1
@@ -23,7 +24,7 @@ class MEOptions: KSOptions {
     override func process(assetTrack: some MediaPlayerTrack) {
         if assetTrack.mediaType == .video {
             if [FFmpegFieldOrder.bb, .bt, .tt, .tb].contains(assetTrack.fieldOrder) {
-                videoFilters.append("yadif_videotoolbox=mode=0:parity=-1:deint=1")
+                videoFilters.append("yadif_videotoolbox=mode=\(MEOptions.yadifMode):parity=-1:deint=1")
                 asynchronousDecompression = false
             }
             #if os(tvOS) || os(xrOS)
@@ -330,7 +331,7 @@ extension KSVideoPlayerView {
             options.syncDecodeAudio = true
         } else if url.lastPathComponent == "subrip.mkv" {
             options.asynchronousDecompression = false
-            options.videoFilters.append("yadif_videotoolbox=mode=0:parity=-1:deint=1")
+            options.videoFilters.append("yadif_videotoolbox=mode=\(MEOptions.yadifMode):parity=-1:deint=1")
         } else if url.lastPathComponent == "big_buck_bunny.mp4" {
             options.startPlayTime = 25
         } else if url.lastPathComponent == "bipbopall.m3u8" {

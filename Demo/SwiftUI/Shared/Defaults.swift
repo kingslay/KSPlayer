@@ -157,6 +157,13 @@ public class Defaults: ObservableObject {
         }
     }
 
+    @AppStorage("yadifMode")
+    public var yadifMode = MEOptions.yadifMode {
+        didSet {
+            MEOptions.yadifMode = yadifMode
+        }
+    }
+
     public static let shared = Defaults()
     private init() {
         KSOptions.isUseAudioRenderer = isUseAudioRenderer
@@ -180,6 +187,7 @@ public class Defaults: ObservableObject {
         KSOptions.isSecondOpen = isSecondOpen
         KSOptions.isAccurateSeek = isAccurateSeek
         KSOptions.isPipPopViewController = isPipPopViewController
+        MEOptions.yadifMode = yadifMode
     }
 }
 

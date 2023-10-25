@@ -120,7 +120,7 @@ final class MEPlayerItem {
             }
             // 找不到解码器
             if log.hasPrefix("parser not found for codec") {
-                KSLog(log)
+                KSLog(level: .error, log)
             }
             KSLog(level: LogLevel(rawValue: level) ?? .warning, log)
         }
