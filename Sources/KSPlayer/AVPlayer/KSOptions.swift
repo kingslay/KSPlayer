@@ -43,6 +43,7 @@ open class KSOptions {
     public var probesize: Int64?
     public var maxAnalyzeDuration: Int64?
     public var lowres = UInt8(0)
+    public var codecLowDelay = false
     public var startPlayTime: TimeInterval = 0
     public var startPlayRate: Float = 1.0
     public var registerRemoteControll: Bool = true // 默认支持来自系统控制中心的控制
@@ -111,7 +112,6 @@ open class KSOptions {
         // 参数的配置可以参考protocols.texi 和 http.c
         formatContextOptions["auto_convert"] = 0
         formatContextOptions["fps_probe_size"] = 3
-//        formatContextOptions["probesize"] = 40 * 1024
 //        formatContextOptions["max_analyze_duration"] = 300 * 1000
 
         formatContextOptions["reconnect"] = 1

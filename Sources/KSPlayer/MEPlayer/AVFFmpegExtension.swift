@@ -93,6 +93,9 @@ extension AVCodecParameters {
         }
         codecContext.pointee.codec_id = codec.pointee.id
         codecContext.pointee.flags2 |= AV_CODEC_FLAG2_FAST
+        if options.codecLowDelay {
+            codecContext.pointee.flags |= AV_CODEC_FLAG_LOW_DELAY
+        }
         var lowres = options.lowres
         if lowres > codec.pointee.max_lowres {
             lowres = codec.pointee.max_lowres

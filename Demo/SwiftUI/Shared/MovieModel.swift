@@ -355,7 +355,13 @@ extension KSVideoPlayerView {
         if url.scheme == "rtmp" || url.scheme == "rtsp" {
             options.formatContextOptions["listen_timeout"] = -1
             options.formatContextOptions["fflags"] = ["nobuffer"]
-            options.preferredForwardBufferDuration = 2
+            // tcp or udp
+            options.formatContextOptions["rtsp_transport"] = "tcp"
+            options.probesize = 4096
+            options.maxAnalyzeDuration = 2_000_000
+            options.codecLowDelay = true
+            options.preferredForwardBufferDuration = 1
+            options.maxBufferDuration = 3600
             options.hardwareDecode = false
         } else {
             options.formatContextOptions["listen_timeout"] = 3
