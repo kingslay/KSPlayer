@@ -24,7 +24,9 @@ class MEOptions: KSOptions {
     override func process(assetTrack: some MediaPlayerTrack) {
         if assetTrack.mediaType == .video {
             if [FFmpegFieldOrder.bb, .bt, .tt, .tb].contains(assetTrack.fieldOrder) {
-                videoFilters.append("yadif_videotoolbox=mode=\(MEOptions.yadifMode):parity=-1:deint=1")
+                // todo 先不要用yadif_videotoolbox，不然会crash。这个后续在看下要怎么解决
+                videoFilters.append("yadif=mode=\(MEOptions.yadifMode):parity=-1:deint=1")
+                hardwareDecode = false
                 asynchronousDecompression = false
             }
             #if os(tvOS) || os(xrOS)
