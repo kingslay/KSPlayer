@@ -74,7 +74,9 @@ public class KSMEPlayer: NSObject {
 
     public var playbackRate: Float = 1 {
         didSet {
-            audioOutput.playbackRate = playbackRate
+            if playbackRate != audioOutput.playbackRate {
+                audioOutput.playbackRate = playbackRate
+            }
         }
     }
 
@@ -250,6 +252,11 @@ extension KSMEPlayer: MEPlayerDelegate {
                     // 在主线程更新进度
                     self?.bufferingProgress = progress
                 }
+            }
+        }
+        if duration == 0 {
+            if let rate = options.liveAdaptivePlaybackRate(loadingState: loadingState) {
+                playbackRate = rate
             }
         }
     }

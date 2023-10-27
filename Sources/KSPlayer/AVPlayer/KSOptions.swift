@@ -160,7 +160,7 @@ open class KSOptions {
         let packetCount = capacitys.map(\.packetCount).max() ?? 0
         let frameCount = capacitys.map(\.frameCount).max() ?? 0
         let isEndOfFile = capacitys.allSatisfy(\.isEndOfFile)
-        let loadedTime = capacitys.map { TimeInterval($0.packetCount + $0.frameCount) / TimeInterval($0.fps) }.max() ?? 0
+        let loadedTime = capacitys.map(\.loadedTime).min() ?? 0
         let progress = loadedTime * 100.0 / preferredForwardBufferDuration
         let isPlayable = capacitys.allSatisfy { capacity in
             if capacity.isEndOfFile && capacity.packetCount == 0 {
@@ -189,7 +189,7 @@ open class KSOptions {
                     }
                 }
             }
-            return capacity.packetCount + capacity.frameCount >= Int(capacity.fps * Float(preferredForwardBufferDuration))
+            return capacity.loadedTime >= preferredForwardBufferDuration
         }
         return LoadingState(loadedTime: loadedTime, progress: progress, packetCount: packetCount,
                             frameCount: frameCount, isEndOfFile: isEndOfFile, isPlayable: isPlayable,
@@ -406,6 +406,16 @@ open class KSOptions {
         #if os(tvOS) || os(xrOS)
         UIApplication.shared.windows.first?.avDisplayManager.preferredDisplayCriteria = nil
         #endif
+    }
+
+    open func liveAdaptivePlaybackRate(loadingState: LoadingState) -> Float? {
+        if loadingState.loadedTime > preferredForwardBufferDuration + 4 {
+            return 1.2
+        } else if loadingState.loadedTime < preferredForwardBufferDuration {
+            return 0.8
+        } else {
+            return 1
+        }
     }
 }
 

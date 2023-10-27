@@ -163,6 +163,12 @@ public protocol CapacityProtocol {
     var mediaType: AVFoundation.AVMediaType { get }
 }
 
+extension CapacityProtocol {
+    var loadedTime: TimeInterval {
+        TimeInterval(packetCount + frameCount) / TimeInterval(fps)
+    }
+}
+
 public struct LoadingState {
     public let loadedTime: TimeInterval
     public let progress: TimeInterval

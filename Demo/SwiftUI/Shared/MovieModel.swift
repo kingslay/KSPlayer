@@ -25,6 +25,7 @@ class MEOptions: KSOptions {
         if assetTrack.mediaType == .video {
             if [FFmpegFieldOrder.bb, .bt, .tt, .tb].contains(assetTrack.fieldOrder) {
                 // todo 先不要用yadif_videotoolbox，不然会crash。这个后续在看下要怎么解决
+//                videoFilters.append("yadif_videotoolbox=mode=\(MEOptions.yadifMode):parity=-1:deint=1")
                 videoFilters.append("yadif=mode=\(MEOptions.yadifMode):parity=-1:deint=1")
                 hardwareDecode = false
                 asynchronousDecompression = false
