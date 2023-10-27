@@ -56,19 +56,12 @@ class MEFilter {
         guard ret >= 0 else { return false }
         ret = avfilter_link(bufferContext, 0, inputs.pointee.filter_ctx, UInt32(inputs.pointee.pad_idx))
         guard ret >= 0 else { return false }
-        var hwDeviceCtx: UnsafeMutablePointer<AVBufferRef>?
-        av_hwdevice_ctx_create(&hwDeviceCtx, AV_HWDEVICE_TYPE_VIDEOTOOLBOX, nil, nil, 0)
-        if let hwDeviceCtx {
-            (0 ..< graph.pointee.nb_filters).forEach { i in
-                graph.pointee.filters[Int(i)]?.pointee.hw_device_ctx = av_buffer_ref(hwDeviceCtx)
-            }
-        }
         ret = avfilter_graph_config(graph, nil)
         guard ret >= 0 else { return false }
         return true
     }
 
-    public func filter(options: KSOptions, inputFrame: UnsafeMutablePointer<AVFrame>, hwFramesCtx: UnsafeMutablePointer<AVBufferRef>?) -> UnsafeMutablePointer<AVFrame> {
+    public func filter(options: KSOptions, inputFrame: UnsafeMutablePointer<AVFrame>) -> UnsafeMutablePointer<AVFrame> {
         let filters: String
         if isAudio {
             filters = options.audioFilters.joined(separator: ",")
@@ -88,7 +81,9 @@ class MEFilter {
         params.height = inputFrame.pointee.height
         params.sample_aspect_ratio = inputFrame.pointee.sample_aspect_ratio
         params.frame_rate = AVRational(num: 1, den: Int32(nominalFrameRate))
-        params.hw_frames_ctx = hwFramesCtx
+        if let ctx = inputFrame.pointee.hw_frames_ctx {
+            params.hw_frames_ctx = av_buffer_ref(ctx)
+        }
         params.sample_rate = inputFrame.pointee.sample_rate
         params.ch_layout = inputFrame.pointee.ch_layout
         if self.params != params || self.filters != filters {
