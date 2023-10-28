@@ -17,6 +17,7 @@ class MEFilter {
     private let timebase: Timebase
     private let isAudio: Bool
     private var params = AVBufferSrcParameters()
+    private var bestEffortTimestamp = Int64(0)
     private let nominalFrameRate: Float
     deinit {
         graph?.pointee.opaque = nil
@@ -61,7 +62,7 @@ class MEFilter {
         return true
     }
 
-    public func filter(options: KSOptions, inputFrame: UnsafeMutablePointer<AVFrame>) -> UnsafeMutablePointer<AVFrame> {
+    public func filter(options: KSOptions, inputFrame: UnsafeMutablePointer<AVFrame>) -> UnsafeMutablePointer<AVFrame>? {
         let filters: String
         if isAudio {
             filters = options.audioFilters.joined(separator: ",")
@@ -97,10 +98,15 @@ class MEFilter {
             return inputFrame
         }
         var ret = av_buffersrc_add_frame_flags(bufferContext, inputFrame, Int32(AV_BUFFERSRC_FLAG_KEEP_REF))
-        guard ret == 0 else { return inputFrame }
-        av_frame_unref(outputFrame)
-        ret = av_buffersink_get_frame_flags(bufferSinkContext, outputFrame, 0)
-        guard ret == 0 else { return inputFrame }
+        guard ret == 0 else { return nil }
+        autoreleasepool {
+            ret = av_buffersink_get_frame_flags(bufferSinkContext, outputFrame, 0)
+        }
+        guard ret == 0 else { return nil }
+        if outputFrame?.pointee.best_effort_timestamp == bestEffortTimestamp {
+            return nil
+        }
+        bestEffortTimestamp = outputFrame?.pointee.best_effort_timestamp ?? 0
         return outputFrame ?? inputFrame
     }
 }

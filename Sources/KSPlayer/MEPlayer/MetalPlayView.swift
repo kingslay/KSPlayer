@@ -323,9 +323,7 @@ class AVSampleBufferDisplayView: UIView {
                 displayLayer.enqueue(sampleBuffer)
             } else {
                 KSLog("[video] AVSampleBufferDisplayLayer not readyForMoreMediaData. video time \(time), controlTime \(displayLayer.timebase.time) ")
-                if let controlTimebase = displayLayer.controlTimebase {
-                    CMTimebaseSetTime(controlTimebase, time: time)
-                }
+                displayLayer.enqueue(sampleBuffer)
             }
             if #available(macOS 11.0, iOS 14, tvOS 14, *) {
                 if displayLayer.requiresFlushToResumeDecoding {

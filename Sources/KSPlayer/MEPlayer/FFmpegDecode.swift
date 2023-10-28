@@ -41,10 +41,13 @@ class FFmpegDecode: DecodeProtocol {
         }
         while true {
             let result = avcodec_receive_frame(codecContext, coreFrame)
-            if result == 0, var avframe = coreFrame {
+            if result == 0, let avframe = coreFrame {
                 do {
-                    avframe = filter.filter(options: options, inputFrame: avframe)
-                    var frame = try swresample.transfer(avframe: avframe)
+                    guard let filterFrame = filter.filter(options: options, inputFrame: avframe) else {
+                        av_frame_unref(avframe)
+                        continue
+                    }
+                    var frame = try swresample.transfer(avframe: filterFrame)
                     frame.timebase = packet.assetTrack.timebase
 //                frame.timebase = Timebase(avframe.pointee.time_base)
                     frame.size = avframe.pointee.pkt_size
@@ -111,9 +114,11 @@ class FFmpegDecode: DecodeProtocol {
                     bestEffortTimestamp = position
                     bestEffortTimestamp += frame.duration
                     completionHandler(.success(frame))
+                    av_frame_unref(filterFrame)
                 } catch {
                     completionHandler(.failure(error))
                 }
+                av_frame_unref(avframe)
             } else {
                 if result == AVError.eof.code {
                     avcodec_flush_buffers(codecContext)
