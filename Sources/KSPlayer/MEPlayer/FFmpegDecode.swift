@@ -42,81 +42,79 @@ class FFmpegDecode: DecodeProtocol {
         while true {
             let result = avcodec_receive_frame(codecContext, coreFrame)
             if result == 0, let avframe = coreFrame {
-                do {
-                    guard let filterFrame = filter.filter(options: options, inputFrame: avframe) else {
+                filter.filter(options: options, inputFrame: avframe) { avframe in
+                    do {
+                        var frame = try swresample.transfer(avframe: avframe)
+                        frame.timebase = packet.assetTrack.timebase
+                        //                frame.timebase = Timebase(avframe.pointee.time_base)
+                        frame.size = avframe.pointee.pkt_size
+                        frame.duration = avframe.pointee.duration
+                        if frame.duration == 0, avframe.pointee.sample_rate != 0, frame.timebase.num != 0 {
+                            frame.duration = Int64(avframe.pointee.nb_samples) * Int64(frame.timebase.den) / (Int64(avframe.pointee.sample_rate) * Int64(frame.timebase.num))
+                        }
+                        if packet.assetTrack.mediaType == .video {
+                            if Int32(codecContext.pointee.properties) & FF_CODEC_PROPERTY_CLOSED_CAPTIONS > 0, packet.assetTrack.closedCaptionsTrack == nil {
+                                var codecpar = AVCodecParameters()
+                                codecpar.codec_type = AVMEDIA_TYPE_SUBTITLE
+                                codecpar.codec_id = AV_CODEC_ID_EIA_608
+                                if let assetTrack = FFmpegAssetTrack(codecpar: codecpar) {
+                                    assetTrack.name = "Closed Captions"
+                                    assetTrack.startTime = packet.assetTrack.startTime
+                                    assetTrack.timebase = packet.assetTrack.timebase
+                                    let subtitle = SyncPlayerItemTrack<SubtitleFrame>(assetTrack: assetTrack, options: self.options)
+                                    assetTrack.isEnabled = !assetTrack.isImageSubtitle
+                                    assetTrack.subtitle = subtitle
+                                    packet.assetTrack.closedCaptionsTrack = assetTrack
+                                    subtitle.decode()
+                                }
+                            }
+                            if let sideData = av_frame_get_side_data(avframe, AV_FRAME_DATA_A53_CC),
+                               let closedCaptionsTrack = packet.assetTrack.closedCaptionsTrack,
+                               let subtitle = closedCaptionsTrack.subtitle
+                            {
+                                let closedCaptionsPacket = Packet()
+                                closedCaptionsPacket.assetTrack = closedCaptionsTrack
+                                if let corePacket = packet.corePacket {
+                                    closedCaptionsPacket.corePacket?.pointee.pts = corePacket.pointee.pts
+                                    closedCaptionsPacket.corePacket?.pointee.dts = corePacket.pointee.dts
+                                    closedCaptionsPacket.corePacket?.pointee.pos = corePacket.pointee.pos
+                                    closedCaptionsPacket.corePacket?.pointee.time_base = corePacket.pointee.time_base
+                                    closedCaptionsPacket.corePacket?.pointee.stream_index = corePacket.pointee.stream_index
+                                }
+                                closedCaptionsPacket.corePacket?.pointee.flags |= AV_PKT_FLAG_KEY
+                                closedCaptionsPacket.corePacket?.pointee.size = Int32(sideData.pointee.size)
+                                let buffer = av_buffer_ref(sideData.pointee.buf)
+                                closedCaptionsPacket.corePacket?.pointee.data = buffer?.pointee.data
+                                closedCaptionsPacket.corePacket?.pointee.buf = buffer
+                                closedCaptionsPacket.fill()
+                                subtitle.putPacket(packet: closedCaptionsPacket)
+                            }
+                            if let sideData = av_frame_get_side_data(avframe, AV_FRAME_DATA_SEI_UNREGISTERED) {
+                                let size = sideData.pointee.size
+                                if size > AV_UUID_LEN {
+                                    let str = String(cString: sideData.pointee.data.advanced(by: Int(AV_UUID_LEN)))
+                                    options.sei(string: str)
+                                }
+                            }
+                        }
+                        var position = avframe.pointee.best_effort_timestamp
+                        if position < 0 {
+                            position = avframe.pointee.pts
+                        }
+                        if position < 0 {
+                            position = avframe.pointee.pkt_dts
+                        }
+                        if position < 0 {
+                            position = bestEffortTimestamp
+                        }
+                        frame.position = position
+                        bestEffortTimestamp = position
+                        bestEffortTimestamp += frame.duration
+                        completionHandler(.success(frame))
                         av_frame_unref(avframe)
-                        continue
+                    } catch {
+                        completionHandler(.failure(error))
                     }
-                    var frame = try swresample.transfer(avframe: filterFrame)
-                    frame.timebase = packet.assetTrack.timebase
-//                frame.timebase = Timebase(avframe.pointee.time_base)
-                    frame.size = avframe.pointee.pkt_size
-                    frame.duration = avframe.pointee.duration
-                    if frame.duration == 0, avframe.pointee.sample_rate != 0, frame.timebase.num != 0 {
-                        frame.duration = Int64(avframe.pointee.nb_samples) * Int64(frame.timebase.den) / (Int64(avframe.pointee.sample_rate) * Int64(frame.timebase.num))
-                    }
-                    if packet.assetTrack.mediaType == .video {
-                        if Int32(codecContext.pointee.properties) & FF_CODEC_PROPERTY_CLOSED_CAPTIONS > 0, packet.assetTrack.closedCaptionsTrack == nil {
-                            var codecpar = AVCodecParameters()
-                            codecpar.codec_type = AVMEDIA_TYPE_SUBTITLE
-                            codecpar.codec_id = AV_CODEC_ID_EIA_608
-                            if let assetTrack = FFmpegAssetTrack(codecpar: codecpar) {
-                                assetTrack.name = "Closed Captions"
-                                assetTrack.startTime = packet.assetTrack.startTime
-                                assetTrack.timebase = packet.assetTrack.timebase
-                                let subtitle = SyncPlayerItemTrack<SubtitleFrame>(assetTrack: assetTrack, options: options)
-                                assetTrack.isEnabled = !assetTrack.isImageSubtitle
-                                assetTrack.subtitle = subtitle
-                                packet.assetTrack.closedCaptionsTrack = assetTrack
-                                subtitle.decode()
-                            }
-                        }
-                        if let sideData = av_frame_get_side_data(avframe, AV_FRAME_DATA_A53_CC),
-                           let closedCaptionsTrack = packet.assetTrack.closedCaptionsTrack,
-                           let subtitle = closedCaptionsTrack.subtitle
-                        {
-                            let closedCaptionsPacket = Packet()
-                            closedCaptionsPacket.assetTrack = closedCaptionsTrack
-                            if let corePacket = packet.corePacket {
-                                closedCaptionsPacket.corePacket?.pointee.pts = corePacket.pointee.pts
-                                closedCaptionsPacket.corePacket?.pointee.dts = corePacket.pointee.dts
-                                closedCaptionsPacket.corePacket?.pointee.pos = corePacket.pointee.pos
-                                closedCaptionsPacket.corePacket?.pointee.time_base = corePacket.pointee.time_base
-                                closedCaptionsPacket.corePacket?.pointee.stream_index = corePacket.pointee.stream_index
-                            }
-                            closedCaptionsPacket.corePacket?.pointee.flags |= AV_PKT_FLAG_KEY
-                            closedCaptionsPacket.corePacket?.pointee.size = Int32(sideData.pointee.size)
-                            let buffer = av_buffer_ref(sideData.pointee.buf)
-                            closedCaptionsPacket.corePacket?.pointee.data = buffer?.pointee.data
-                            closedCaptionsPacket.corePacket?.pointee.buf = buffer
-                            closedCaptionsPacket.fill()
-                            subtitle.putPacket(packet: closedCaptionsPacket)
-                        }
-                        if let sideData = av_frame_get_side_data(avframe, AV_FRAME_DATA_SEI_UNREGISTERED) {
-                            let size = sideData.pointee.size
-                            if size > AV_UUID_LEN {
-                                let str = String(cString: sideData.pointee.data.advanced(by: Int(AV_UUID_LEN)))
-                                options.sei(string: str)
-                            }
-                        }
-                    }
-                    var position = avframe.pointee.best_effort_timestamp
-                    if position < 0 {
-                        position = avframe.pointee.pts
-                    }
-                    if position < 0 {
-                        position = avframe.pointee.pkt_dts
-                    }
-                    if position < 0 {
-                        position = bestEffortTimestamp
-                    }
-                    frame.position = position
-                    bestEffortTimestamp = position
-                    bestEffortTimestamp += frame.duration
-                    completionHandler(.success(frame))
-                    av_frame_unref(filterFrame)
-                } catch {
-                    completionHandler(.failure(error))
                 }
                 av_frame_unref(avframe)
             } else {

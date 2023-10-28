@@ -17,7 +17,6 @@ class MEFilter {
     private let timebase: Timebase
     private let isAudio: Bool
     private var params = AVBufferSrcParameters()
-    private var bestEffortTimestamp = Int64(0)
     private let nominalFrameRate: Float
     deinit {
         graph?.pointee.opaque = nil
@@ -62,7 +61,7 @@ class MEFilter {
         return true
     }
 
-    public func filter(options: KSOptions, inputFrame: UnsafeMutablePointer<AVFrame>) -> UnsafeMutablePointer<AVFrame>? {
+    public func filter(options: KSOptions, inputFrame: UnsafeMutablePointer<AVFrame>, completionHandler: (UnsafeMutablePointer<AVFrame>) -> Void) {
         let filters: String
         if isAudio {
             filters = options.audioFilters.joined(separator: ",")
@@ -73,7 +72,8 @@ class MEFilter {
             filters = options.videoFilters.joined(separator: ",")
         }
         guard !filters.isEmpty else {
-            return inputFrame
+            completionHandler(inputFrame)
+            return
         }
         var params = AVBufferSrcParameters()
         params.format = inputFrame.pointee.format
@@ -91,22 +91,18 @@ class MEFilter {
             self.params = params
             self.filters = filters
             if !setup(filters: filters) {
-                return inputFrame
+                completionHandler(inputFrame)
             }
         }
         if graph?.pointee.sink_links_count == 0 {
-            return inputFrame
+            completionHandler(inputFrame)
         }
         var ret = av_buffersrc_add_frame_flags(bufferContext, inputFrame, Int32(AV_BUFFERSRC_FLAG_KEEP_REF))
-        guard ret == 0 else { return nil }
-        autoreleasepool {
+        while ret == 0 {
             ret = av_buffersink_get_frame_flags(bufferSinkContext, outputFrame, 0)
+            if ret == 0, let outputFrame {
+                completionHandler(outputFrame)
+            }
         }
-        guard ret == 0 else { return nil }
-        if outputFrame?.pointee.best_effort_timestamp == bestEffortTimestamp {
-            return nil
-        }
-        bestEffortTimestamp = outputFrame?.pointee.best_effort_timestamp ?? 0
-        return outputFrame ?? inputFrame
     }
 }
