@@ -9,9 +9,15 @@ import AVFoundation
 import AVKit
 import KSPlayer
 import SwiftUI
+import UserNotifications
 
 @main
 struct TracyApp: App {
+    #if os(macOS)
+    @NSApplicationDelegateAdaptor private var appDelegate: AppDelegate
+    #else
+    @UIApplicationDelegateAdaptor private var appDelegate: AppDelegate
+    #endif
     private let appModel = APPModel()
     init() {
         let arguments = ProcessInfo.processInfo.arguments.dropFirst()
@@ -98,6 +104,42 @@ struct TracyApp: App {
 //        }
 //        .menuBarExtraStyle(.menu)
         #endif
+    }
+}
+
+class AppDelegate: NSObject, UIApplicationDelegate {
+    #if os(macOS)
+    func applicationDidFinishLaunching(_: Notification) {
+//        requestNotification()
+    }
+    #else
+    func application(_: UIApplication, didFinishLaunchingWithOptions _: [UIApplication.LaunchOptionsKey: Any]? = nil) -> Bool {
+//        requestNotification()
+        true
+    }
+    #endif
+
+    func application(_: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
+        let tokenString = deviceToken.reduce("") { $0 + String(format: "%02x", $1) }
+        print("Device push notification token - \(tokenString)")
+    }
+
+    func application(_: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: Error) {
+        print("Failed to register for remote notification. Error \(error)")
+    }
+
+    private func requestNotification() {
+        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound]) { allowed, error in
+            if allowed {
+                // register for remote push notification
+                DispatchQueue.main.async {
+                    UIApplication.shared.registerForRemoteNotifications()
+                }
+                print("Push notification allowed by user")
+            } else {
+                print("Error while requesting push notification permission. Error \(error)")
+            }
+        }
     }
 }
 

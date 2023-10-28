@@ -254,7 +254,7 @@ extension KSMEPlayer: MEPlayerDelegate {
                 }
             }
         }
-        if duration == 0 {
+        if duration == 0, playbackState == .playing, loadState == .playable {
             if let rate = options.liveAdaptivePlaybackRate(loadingState: loadingState) {
                 playbackRate = rate
             }

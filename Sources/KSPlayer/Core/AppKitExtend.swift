@@ -11,6 +11,8 @@ import AppKit
 import CoreMedia
 import IOKit.pwr_mgt
 
+public typealias UIApplicationDelegate = NSApplicationDelegate
+public typealias UIApplication = NSApplication
 public typealias UIWindow = NSWindow
 public typealias UIViewController = NSViewController
 public typealias UIColor = NSColor
@@ -26,7 +28,6 @@ public typealias UITextField = NSTextField
 public typealias UIImageView = NSImageView
 public typealias UITapGestureRecognizer = NSClickGestureRecognizer
 public typealias UXSlider = NSSlider
-public typealias UIApplication = NSApplication
 public typealias UITableView = NSTableView
 public typealias UITableViewDelegate = NSTableViewDelegate
 public typealias UITableViewDataSource = NSTableViewDataSource
