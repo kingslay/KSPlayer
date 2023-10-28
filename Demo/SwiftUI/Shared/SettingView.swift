@@ -73,10 +73,10 @@ struct SettingVideoView: View {
             Toggle("Use DisplayLayer", isOn: $isUseDisplayLayer)
             Toggle("Enable FormatDescription DisplayCriteria ", isOn: $displayCriteriaFormatDescriptionEnabled)
             Picker("yadif Mode", selection: $yadifMode) {
-                Text("send_frame").tag(0)
-                Text("send_field").tag(1)
-                Text("send_frame_nospatial").tag(2)
-                Text("send_field_nospatial").tag(3)
+                Text("yadif").tag(0)
+                Text("yadif_2x").tag(1)
+                Text("yadif_spatial_skip").tag(2)
+                Text("yadif_2x_spatial_skip").tag(3)
             }
         }
     }

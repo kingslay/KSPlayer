@@ -14,7 +14,7 @@ import UIKit
 #endif
 class MEOptions: KSOptions {
     static var isUseDisplayLayer = true
-    static var yadifMode = 0
+    static var yadifMode = 1
     override init() {
         super.init()
         formatContextOptions["reconnect_on_network_error"] = 1
