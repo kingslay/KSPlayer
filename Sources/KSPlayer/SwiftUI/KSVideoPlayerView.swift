@@ -53,6 +53,9 @@ public struct KSVideoPlayerView: View {
                         }
                     }
                 }
+                .onBufferChanged { bufferedCount, consumeTime in
+                    print("bufferedCount \(bufferedCount), consumeTime \(consumeTime)")
+                }
             #if canImport(UIKit)
                 .onSwipe { direction in
                     playerCoordinator.isMaskShow = true
