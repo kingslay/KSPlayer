@@ -59,6 +59,43 @@ class MEFilter {
         return true
     }
 
+    private func setup2(filters: String) -> Bool {
+        guard let graph else {
+            return false
+        }
+        let bufferName = isAudio ? "abuffer" : "buffer"
+        let bufferSrc = avfilter_get_by_name(bufferName)
+        var ret = avfilter_graph_create_filter(&bufferSrcContext, bufferSrc, "ksplayer_\(bufferName)", params.arg, nil, graph)
+        av_buffersrc_parameters_set(bufferSrcContext, &params)
+        let bufferSink = avfilter_get_by_name(bufferName + "sink")
+        ret = avfilter_graph_create_filter(&bufferSinkContext, bufferSink, "ksplayer_\(bufferName)sink", nil, nil, graph)
+        guard ret >= 0 else { return false }
+        //        av_opt_set_int_list(bufferSinkContext, "pix_fmts", [AV_PIX_FMT_GRAY8, AV_PIX_FMT_NONE] AV_PIX_FMT_NONE,AV_OPT_SEARCH_CHILDREN)
+        var inputs = avfilter_inout_alloc()
+        var outputs = avfilter_inout_alloc()
+        outputs?.pointee.name = strdup("in")
+        outputs?.pointee.filter_ctx = bufferSrcContext
+        outputs?.pointee.pad_idx = 0
+        outputs?.pointee.next = nil
+        inputs?.pointee.name = strdup("out")
+        inputs?.pointee.filter_ctx = bufferSinkContext
+        inputs?.pointee.pad_idx = 0
+        inputs?.pointee.next = nil
+        let filterNb = Int(graph.pointee.nb_filters)
+        ret = avfilter_graph_parse_ptr(graph, filters, &inputs, &outputs, nil)
+        guard ret >= 0 else {
+            avfilter_inout_free(&inputs)
+            avfilter_inout_free(&outputs)
+            return false
+        }
+        for i in 0 ..< Int(graph.pointee.nb_filters) - filterNb {
+            swap(&graph.pointee.filters[i], &graph.pointee.filters[i + filterNb])
+        }
+        ret = avfilter_graph_config(graph, nil)
+        guard ret >= 0 else { return false }
+        return true
+    }
+
     public func filter(options: KSOptions, inputFrame: UnsafeMutablePointer<AVFrame>, completionHandler: (UnsafeMutablePointer<AVFrame>) -> Void) {
         let filters: String
         if isAudio {
