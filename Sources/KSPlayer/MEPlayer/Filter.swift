@@ -10,18 +10,16 @@ import Libavfilter
 import Libavutil
 class MEFilter {
     private var graph: UnsafeMutablePointer<AVFilterGraph>?
-    private var bufferContext: UnsafeMutablePointer<AVFilterContext>?
+    private var bufferSrcContext: UnsafeMutablePointer<AVFilterContext>?
     private var bufferSinkContext: UnsafeMutablePointer<AVFilterContext>?
-    private var outputFrame = av_frame_alloc()
     private var filters: String?
-    private let timebase: Timebase
+    let timebase: Timebase
     private let isAudio: Bool
     private var params = AVBufferSrcParameters()
     private let nominalFrameRate: Float
     deinit {
         graph?.pointee.opaque = nil
         avfilter_graph_free(&graph)
-        av_frame_free(&outputFrame)
     }
 
     public init(timebase: Timebase, isAudio: Bool, nominalFrameRate: Float, options: KSOptions) {
@@ -49,12 +47,12 @@ class MEFilter {
         ret = avfilter_link(outputs.pointee.filter_ctx, UInt32(outputs.pointee.pad_idx), bufferSinkContext, 0)
         guard ret >= 0 else { return false }
         let buffer = avfilter_get_by_name(isAudio ? "abuffer" : "buffer")
-        bufferContext = avfilter_graph_alloc_filter(graph, buffer, "in")
-        guard bufferContext != nil else { return false }
-        av_buffersrc_parameters_set(bufferContext, &params)
-        ret = avfilter_init_str(bufferContext, nil)
+        bufferSrcContext = avfilter_graph_alloc_filter(graph, buffer, "in")
+        guard bufferSrcContext != nil else { return false }
+        av_buffersrc_parameters_set(bufferSrcContext, &params)
+        ret = avfilter_init_str(bufferSrcContext, nil)
         guard ret >= 0 else { return false }
-        ret = avfilter_link(bufferContext, 0, inputs.pointee.filter_ctx, UInt32(inputs.pointee.pad_idx))
+        ret = avfilter_link(bufferSrcContext, 0, inputs.pointee.filter_ctx, UInt32(inputs.pointee.pad_idx))
         guard ret >= 0 else { return false }
         ret = avfilter_graph_config(graph, nil)
         guard ret >= 0 else { return false }
@@ -92,16 +90,20 @@ class MEFilter {
             self.filters = filters
             if !setup(filters: filters) {
                 completionHandler(inputFrame)
+                return
             }
         }
         if graph?.pointee.sink_links_count == 0 {
             completionHandler(inputFrame)
+            return
         }
-        var ret = av_buffersrc_add_frame_flags(bufferContext, inputFrame, Int32(AV_BUFFERSRC_FLAG_KEEP_REF))
+        var ret = av_buffersrc_add_frame_flags(bufferSrcContext, inputFrame, 0)
         while ret == 0 {
-            ret = av_buffersink_get_frame_flags(bufferSinkContext, outputFrame, 0)
-            if ret == 0, let outputFrame {
-                completionHandler(outputFrame)
+            ret = av_buffersink_get_frame_flags(bufferSinkContext, inputFrame, 0)
+            if ret == 0 {
+//                timebase = Timebase(av_buffersink_get_time_base(bufferSinkContext))
+                completionHandler(inputFrame)
+                av_frame_unref(inputFrame)
             }
         }
     }
