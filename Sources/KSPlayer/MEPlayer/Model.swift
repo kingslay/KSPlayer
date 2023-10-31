@@ -8,6 +8,9 @@
 import AVFoundation
 import CoreMedia
 import Libavcodec
+#if canImport(UIKit)
+import UIKit
+#endif
 
 // MARK: enum
 
