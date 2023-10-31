@@ -9,7 +9,7 @@ import AudioToolbox
 import AVFAudio
 import CoreAudio
 
-public final class AudioGraphPlayer: AudioPlayer, FrameOutput {
+public final class AudioGraphPlayer: AudioOutput {
     private let graph: AUGraph
     private var audioUnitForMixer: AudioUnit!
     private var audioUnitForTimePitch: AudioUnit!
@@ -21,7 +21,7 @@ public final class AudioGraphPlayer: AudioPlayer, FrameOutput {
     #if os(macOS)
     private var volumeBeforeMute: Float = 0.0
     #endif
-    weak var renderSource: OutputRenderSourceDelegate?
+    public weak var renderSource: OutputRenderSourceDelegate?
     private var currentRender: AudioFrame? {
         didSet {
             if currentRender == nil {
@@ -30,15 +30,15 @@ public final class AudioGraphPlayer: AudioPlayer, FrameOutput {
         }
     }
 
-    func play(time _: TimeInterval) {
+    public func play(time _: TimeInterval) {
         AUGraphStart(graph)
     }
 
-    func pause() {
+    public func pause() {
         AUGraphStop(graph)
     }
 
-    var playbackRate: Float {
+    public var playbackRate: Float {
         get {
             var playbackRate = AudioUnitParameterValue(0.0)
             AudioUnitGetParameter(audioUnitForTimePitch, kNewTimePitchParam_Rate, kAudioUnitScope_Global, 0, &playbackRate)
@@ -49,7 +49,7 @@ public final class AudioGraphPlayer: AudioPlayer, FrameOutput {
         }
     }
 
-    var volume: Float {
+    public var volume: Float {
         get {
             var volume = AudioUnitParameterValue(0.0)
             #if os(macOS)
@@ -148,7 +148,7 @@ public final class AudioGraphPlayer: AudioPlayer, FrameOutput {
         }
     }
 
-    init() {
+    public init() {
         var newGraph: AUGraph!
         NewAUGraph(&newGraph)
         graph = newGraph
@@ -197,7 +197,7 @@ public final class AudioGraphPlayer: AudioPlayer, FrameOutput {
         addRenderNotify(audioUnit: audioUnitForOutput)
     }
 
-    func prepare(audioFormat: AVAudioFormat) {
+    public func prepare(audioFormat: AVAudioFormat) {
         if sourceNodeAudioFormat == audioFormat {
             return
         }
@@ -230,7 +230,7 @@ public final class AudioGraphPlayer: AudioPlayer, FrameOutput {
         AUGraphInitialize(graph)
     }
 
-    func flush() {
+    public func flush() {
         currentRender = nil
     }
 

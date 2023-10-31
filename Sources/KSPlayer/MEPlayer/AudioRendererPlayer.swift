@@ -8,8 +8,8 @@
 import AVFoundation
 import Foundation
 
-public class AudioRendererPlayer: AudioPlayer, FrameOutput {
-    var playbackRate: Float = 1 {
+public class AudioRendererPlayer: AudioOutput {
+    public var playbackRate: Float = 1 {
         didSet {
             if !isPaused {
                 synchronizer.rate = playbackRate
@@ -17,7 +17,7 @@ public class AudioRendererPlayer: AudioPlayer, FrameOutput {
         }
     }
 
-    var volume: Float {
+    public var volume: Float {
         get {
             renderer.volume
         }
@@ -26,7 +26,7 @@ public class AudioRendererPlayer: AudioPlayer, FrameOutput {
         }
     }
 
-    var isMuted: Bool {
+    public var isMuted: Bool {
         get {
             renderer.isMuted
         }
@@ -35,17 +35,17 @@ public class AudioRendererPlayer: AudioPlayer, FrameOutput {
         }
     }
 
-    var attackTime: Float = 0
+    public var attackTime: Float = 0
 
-    var releaseTime: Float = 0
+    public var releaseTime: Float = 0
 
-    var threshold: Float = 0
+    public var threshold: Float = 0
 
-    var expansionRatio: Float = 0
+    public var expansionRatio: Float = 0
 
-    var overallGain: Float = 0
+    public var overallGain: Float = 0
 
-    weak var renderSource: OutputRenderSourceDelegate?
+    public weak var renderSource: OutputRenderSourceDelegate?
     private var periodicTimeObserver: Any?
     private let renderer = AVSampleBufferAudioRenderer()
     private let synchronizer = AVSampleBufferRenderSynchronizer()
@@ -54,7 +54,7 @@ public class AudioRendererPlayer: AudioPlayer, FrameOutput {
         synchronizer.rate == 0
     }
 
-    init() {
+    public required init() {
         synchronizer.addRenderer(renderer)
         if #available(macOS 11.3, iOS 14.5, tvOS 14.5, *) {
             synchronizer.delaysRateChangeUntilHasSufficientMediaData = false
@@ -64,9 +64,9 @@ public class AudioRendererPlayer: AudioPlayer, FrameOutput {
 //        }
     }
 
-    func prepare(audioFormat _: AVAudioFormat) {}
+    public func prepare(audioFormat _: AVAudioFormat) {}
 
-    func play(time: TimeInterval) {
+    public func play(time: TimeInterval) {
         synchronizer.setRate(playbackRate, time: CMTime(seconds: time))
         renderer.requestMediaDataWhenReady(on: serializationQueue) { [weak self] in
             guard let self else {
@@ -82,7 +82,7 @@ public class AudioRendererPlayer: AudioPlayer, FrameOutput {
         }
     }
 
-    func pause() {
+    public func pause() {
         synchronizer.rate = 0
         renderer.stopRequestingMediaData()
         if let periodicTimeObserver {
@@ -91,7 +91,7 @@ public class AudioRendererPlayer: AudioPlayer, FrameOutput {
         }
     }
 
-    func flush() {
+    public func flush() {
         renderer.flush()
     }
 

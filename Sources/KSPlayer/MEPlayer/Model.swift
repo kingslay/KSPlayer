@@ -25,7 +25,7 @@ enum MESourceState {
 
 // MARK: delegate
 
-protocol OutputRenderSourceDelegate: AnyObject {
+public protocol OutputRenderSourceDelegate: AnyObject {
     func getVideoOutputRender(force: Bool) -> VideoVTBFrame?
     func getAudioOutputRender() -> AudioFrame?
     func setAudio(time: CMTime)
@@ -52,8 +52,10 @@ public protocol ObjectQueueItem {
     var size: Int32 { get set }
 }
 
-protocol FrameOutput: AnyObject {
+public protocol FrameOutput: AnyObject {
     var renderSource: OutputRenderSourceDelegate? { get set }
+    func pause()
+    func flush()
 }
 
 protocol MEFrame: ObjectQueueItem {
@@ -61,8 +63,8 @@ protocol MEFrame: ObjectQueueItem {
 }
 
 extension MEFrame {
-    public var seconds: TimeInterval { cmtime.seconds }
-    public var cmtime: CMTime { timebase.cmtime(for: position) }
+    var seconds: TimeInterval { cmtime.seconds }
+    var cmtime: CMTime { timebase.cmtime(for: position) }
 }
 
 // MARK: model
@@ -76,6 +78,8 @@ public extension KSOptions {
     /// true: AVSampleBufferAudioRenderer false: AVAudioEngine
 //    static var isUseAudioRenderer = KSOptions.isSpatialAudioEnabled
     static var isUseAudioRenderer = false
+    static var audioPlayerType: AudioOutput.Type = AudioEnginePlayer.self
+    static var videoPlayerType: (VideoOutput & UIView).Type = MetalPlayView.self
     static func colorSpace(ycbcrMatrix: CFString?, transferFunction: CFString?) -> CGColorSpace? {
         switch ycbcrMatrix {
         case kCVImageBufferYCbCrMatrix_ITU_R_709_2:
@@ -147,7 +151,7 @@ enum MECodecState {
     case finished
 }
 
-struct Timebase {
+public struct Timebase {
     static let defaultValue = Timebase(num: 1, den: 1)
     public let num: Int32
     public let den: Int32
@@ -198,13 +202,13 @@ final class SubtitleFrame: MEFrame {
     }
 }
 
-final class AudioFrame: MEFrame {
+public final class AudioFrame: MEFrame {
     let dataSize: Int
     let audioFormat: AVAudioFormat
-    var timebase = Timebase.defaultValue
-    var duration: Int64 = 0
-    var position: Int64 = 0
-    var size: Int32 = 0
+    public var timebase = Timebase.defaultValue
+    public var duration: Int64 = 0
+    public var position: Int64 = 0
+    public var size: Int32 = 0
     var numberOfSamples: UInt32 = 0
     var data: [UnsafeMutablePointer<UInt8>?]
     public init(dataSize: Int, audioFormat: AVAudioFormat) {
@@ -334,12 +338,12 @@ final class AudioFrame: MEFrame {
     }
 }
 
-final class VideoVTBFrame: MEFrame {
-    var timebase = Timebase.defaultValue
+public final class VideoVTBFrame: MEFrame {
+    public var timebase = Timebase.defaultValue
     // 交叉视频的duration会不准，直接减半了
-    var duration: Int64 = 0
-    var position: Int64 = 0
-    var size: Int32 = 0
+    public var duration: Int64 = 0
+    public var position: Int64 = 0
+    public var size: Int32 = 0
     let fps: Float
     var corePixelBuffer: CVPixelBuffer?
     init(fps: Float) {

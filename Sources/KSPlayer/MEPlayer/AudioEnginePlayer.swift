@@ -8,7 +8,7 @@
 import AVFoundation
 import CoreAudio
 
-protocol AudioPlayer: AnyObject {
+public protocol AudioOutput: FrameOutput {
     var playbackRate: Float { get set }
     var volume: Float { get set }
     var isMuted: Bool { get set }
@@ -17,13 +17,12 @@ protocol AudioPlayer: AnyObject {
     var threshold: Float { get set }
     var expansionRatio: Float { get set }
     var overallGain: Float { get set }
+    init()
     func prepare(audioFormat: AVAudioFormat)
     func play(time: TimeInterval)
-    func pause()
-    func flush()
 }
 
-public final class AudioEnginePlayer: AudioPlayer, FrameOutput {
+public final class AudioEnginePlayer: AudioOutput {
     public var attackTime: Float {
         get {
             var value = AudioUnitParameterValue(1.0)
@@ -96,7 +95,7 @@ public final class AudioEnginePlayer: AudioPlayer, FrameOutput {
                                   componentFlags: 0,
                                   componentFlagsMask: 0))
     private var currentRenderReadOffset = UInt32(0)
-    weak var renderSource: OutputRenderSourceDelegate?
+    public weak var renderSource: OutputRenderSourceDelegate?
     private var currentRender: AudioFrame? {
         didSet {
             if currentRender == nil {
@@ -105,7 +104,7 @@ public final class AudioEnginePlayer: AudioPlayer, FrameOutput {
         }
     }
 
-    var playbackRate: Float {
+    public var playbackRate: Float {
         get {
             timePitch.rate
         }
@@ -114,7 +113,7 @@ public final class AudioEnginePlayer: AudioPlayer, FrameOutput {
         }
     }
 
-    var volume: Float {
+    public var volume: Float {
         get {
             engine.mainMixerNode.volume
         }
@@ -132,16 +131,15 @@ public final class AudioEnginePlayer: AudioPlayer, FrameOutput {
         }
     }
 
-    func prepare(audioFormat: AVAudioFormat) {
+    public init() {
         engine.attach(dynamicsProcessor)
         engine.attach(timePitch)
         if let audioUnit = engine.outputNode.audioUnit {
             addRenderNotify(audioUnit: audioUnit)
         }
-        ceateSourceNode(audioFormat: audioFormat)
     }
 
-    func ceateSourceNode(audioFormat: AVAudioFormat) {
+    public func prepare(audioFormat: AVAudioFormat) {
         if sourceNodeAudioFormat == audioFormat {
             return
         }
@@ -183,7 +181,7 @@ public final class AudioEnginePlayer: AudioPlayer, FrameOutput {
         }
     }
 
-    func play(time _: TimeInterval) {
+    public func play(time _: TimeInterval) {
         if !engine.isRunning {
             do {
                 try engine.start()
@@ -193,13 +191,13 @@ public final class AudioEnginePlayer: AudioPlayer, FrameOutput {
         }
     }
 
-    func pause() {
+    public func pause() {
         if engine.isRunning {
             engine.pause()
         }
     }
 
-    func flush() {
+    public func flush() {
         currentRender = nil
     }
 
@@ -255,7 +253,7 @@ public final class AudioEnginePlayer: AudioPlayer, FrameOutput {
                     guard let self else {
                         return
                     }
-                    self.ceateSourceNode(audioFormat: currentRender.audioFormat)
+                    self.prepare(audioFormat: currentRender.audioFormat)
                 }
                 return
             }

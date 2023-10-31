@@ -16,7 +16,22 @@ public protocol DisplayLayerDelegate: NSObjectProtocol {
     func change(displayLayer: AVSampleBufferDisplayLayer)
 }
 
-public final class MetalPlayView: UIView {
+public protocol VideoOutput: FrameOutput {
+    var displayLayerDelegate: DisplayLayerDelegate? { get set }
+    var options: KSOptions { get set }
+    var displayLayer: AVSampleBufferDisplayLayer { get }
+    var pixelBuffer: CVPixelBuffer? { get }
+    init(options: KSOptions)
+    func invalidate()
+    func play()
+    func readNextFrame()
+}
+
+public final class MetalPlayView: UIView, VideoOutput {
+    public var displayLayer: AVSampleBufferDisplayLayer {
+        displayView.displayLayer
+    }
+
     private var formatDescription: CMFormatDescription? {
         didSet {
             options.updateVideo(refreshRate: fps, formatDescription: formatDescription)
@@ -44,8 +59,8 @@ public final class MetalPlayView: UIView {
     /// 用MTKView的draw(in:)也是不行，会卡顿
     private var displayLink: CADisplayLink!
 //    private let timer = DispatchSource.makeTimerSource(queue: DispatchQueue.main)
-    var options: KSOptions
-    weak var renderSource: OutputRenderSourceDelegate?
+    public var options: KSOptions
+    public weak var renderSource: OutputRenderSourceDelegate?
     // AVSampleBufferAudioRenderer AVSampleBufferRenderSynchronizer AVSampleBufferDisplayLayer
     var displayView = AVSampleBufferDisplayView() {
         didSet {
@@ -55,7 +70,7 @@ public final class MetalPlayView: UIView {
 
     private let metalView = MetalView()
     public weak var displayLayerDelegate: DisplayLayerDelegate?
-    init(options: KSOptions) {
+    public init(options: KSOptions) {
         self.options = options
         super.init(frame: .zero)
         addSubview(displayView)
@@ -68,11 +83,11 @@ public final class MetalPlayView: UIView {
         pause()
     }
 
-    func play() {
+    public func play() {
         displayLink.isPaused = false
     }
 
-    func pause() {
+    public func pause() {
         displayLink.isPaused = true
     }
 
@@ -126,7 +141,8 @@ public final class MetalPlayView: UIView {
     }
     #endif
 
-    func clear() {
+    public func flush() {
+        pixelBuffer = nil
         if displayView.isHidden {
             metalView.clear()
         } else {
@@ -134,7 +150,7 @@ public final class MetalPlayView: UIView {
         }
     }
 
-    func invalidate() {
+    public func invalidate() {
         displayLink.invalidate()
     }
 
