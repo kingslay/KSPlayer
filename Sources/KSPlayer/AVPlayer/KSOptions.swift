@@ -418,17 +418,18 @@ open class KSOptions {
         #endif
     }
 
-    open func liveAdaptivePlaybackRate(loadingState: LoadingState) -> Float? {
-        if loadingState.isFirst {
-            return nil
-        }
-        if loadingState.loadedTime > preferredForwardBufferDuration + 5 {
-            return 1.2
-        } else if loadingState.loadedTime < preferredForwardBufferDuration / 2 {
-            return 0.8
-        } else {
-            return 1
-        }
+    open func liveAdaptivePlaybackRate(loadingState _: LoadingState) -> Float? {
+        nil
+//        if loadingState.isFirst {
+//            return nil
+//        }
+//        if loadingState.loadedTime > preferredForwardBufferDuration + 5 {
+//            return 1.2
+//        } else if loadingState.loadedTime < preferredForwardBufferDuration / 2 {
+//            return 0.8
+//        } else {
+//            return 1
+//        }
     }
 }
 
