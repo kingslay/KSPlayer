@@ -42,6 +42,9 @@ public class CircularBuffer<Item: ObjectQueueItem> {
         if destroyed {
             return
         }
+        if _buffer[Int(tailIndex & mask)] != nil {
+            assertionFailure("value is not nil of headIndex: \(headIndex),tailIndex: \(tailIndex), bufferCount: \(_buffer.count), mask: \(mask)")
+        }
         _buffer[Int(tailIndex & mask)] = value
         if sorted {
             // 不用sort进行排序，这个比较高效
@@ -74,7 +77,7 @@ public class CircularBuffer<Item: ObjectQueueItem> {
         }
     }
 
-    public func pop(wait: Bool = false, where predicate: ((Item) -> Bool)? = nil) -> Item? {
+    public func pop(wait: Bool = false, where predicate: ((Item, Int) -> Bool)? = nil) -> Item? {
         condition.lock()
         defer { condition.unlock() }
         if destroyed {
@@ -95,7 +98,7 @@ public class CircularBuffer<Item: ObjectQueueItem> {
             assertionFailure("value is nil of index: \(index) headIndex: \(headIndex),tailIndex: \(tailIndex), bufferCount: \(_buffer.count), mask: \(mask)")
             return nil
         }
-        if let predicate, !predicate(item) {
+        if let predicate, !predicate(item, _count) {
             return nil
         } else {
             headIndex &+= 1
@@ -132,10 +135,8 @@ public class CircularBuffer<Item: ObjectQueueItem> {
         defer { condition.unlock() }
         headIndex = 0
         tailIndex = 0
-        if destroyed {
-            _buffer.removeAll(keepingCapacity: true)
-            _buffer.append(contentsOf: ContiguousArray<Item?>(repeating: nil, count: maxCount))
-        }
+        _buffer.removeAll(keepingCapacity: !destroyed)
+        _buffer.append(contentsOf: ContiguousArray<Item?>(repeating: nil, count: destroyed ? 1 : maxCount))
         condition.broadcast()
     }
 

@@ -148,7 +148,9 @@ public struct VideoAdaptationState {
 public enum ClockProcessType {
     case remain
     case next
-    case dropNext
+    case dropNextFrame
+    case dropNextPacket
+    case dropGOPPacket
     case flush
     case seek
 }

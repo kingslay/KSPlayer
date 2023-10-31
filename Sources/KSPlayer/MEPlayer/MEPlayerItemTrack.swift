@@ -89,7 +89,7 @@ class SyncPlayerItemTrack<Frame: MEFrame>: PlayerItemTrackProtocol, CustomString
         }
     }
 
-    func getOutputRender(where predicate: ((Frame) -> Bool)?) -> Frame? {
+    func getOutputRender(where predicate: ((Frame, Int) -> Bool)?) -> Frame? {
         let outputFecthRender = outputRenderQueue.pop(where: predicate)
         if outputFecthRender == nil {
             if state == .finished, frameCount == 0 {
@@ -155,7 +155,7 @@ final class AsyncPlayerItemTrack<Frame: MEFrame>: SyncPlayerItemTrack<Frame> {
     private var decodeOperation: BlockOperation!
     // 无缝播放使用的PacketQueue
     private var loopPacketQueue: CircularBuffer<Packet>?
-    private var packetQueue = CircularBuffer<Packet>()
+    var packetQueue = CircularBuffer<Packet>()
     override var packetCount: Int { packetQueue.count }
     override var isLoopModel: Bool {
         didSet {

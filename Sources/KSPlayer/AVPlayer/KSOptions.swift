@@ -157,17 +157,13 @@ open class KSOptions {
 
     // 缓冲算法函数
     open func playable(capacitys: [CapacityProtocol], isFirst: Bool, isSeek: Bool) -> LoadingState {
-        let packetCount = capacitys.map(\.packetCount).max() ?? 0
-        let frameCount = capacitys.map(\.frameCount).max() ?? 0
+        let packetCount = capacitys.map(\.packetCount).min() ?? 0
+        let frameCount = capacitys.map(\.frameCount).min() ?? 0
         let isEndOfFile = capacitys.allSatisfy(\.isEndOfFile)
         let loadedTime = capacitys.map(\.loadedTime).min() ?? 0
         let progress = loadedTime * 100.0 / preferredForwardBufferDuration
         let isPlayable = capacitys.allSatisfy { capacity in
             if capacity.isEndOfFile && capacity.packetCount == 0 {
-                return true
-            }
-            // 处理视频轨道一致没有值的问题(纯音频)
-            if capacitys.count > 1, capacity.mediaType == .video && capacity.frameCount == 0 && capacity.packetCount == 0 {
                 return true
             }
             guard capacity.frameCount >= capacity.frameMaxCount >> 2 else {
@@ -184,8 +180,8 @@ open class KSOptions {
                 if capacity.mediaType == .audio || isSecondOpen {
                     if isFirst {
                         return true
-                    } else if isSeek, capacity.packetCount >= Int(capacity.fps) {
-                        return true
+                    } else {
+                        return capacity.loadedTime >= preferredForwardBufferDuration / 2
                     }
                 }
             }
@@ -344,7 +340,7 @@ open class KSOptions {
     }
 
 //    private var lastMediaTime = CACurrentMediaTime()
-    open func videoClockSync(main: KSClock, nextVideoTime: TimeInterval, fps: Float) -> ClockProcessType {
+    open func videoClockSync(main: KSClock, nextVideoTime: TimeInterval, fps: Float, frameCount: Int) -> ClockProcessType {
         var desire = main.getTime() - videoDelay
         #if !os(macOS)
         desire -= AVAudioSession.sharedInstance().outputLatency
@@ -358,19 +354,33 @@ open class KSOptions {
             return .remain
         } else {
             if diff < -4 / Double(fps) {
-                KSLog("[video] video delay=\(diff), clock=\(desire), delay count=\(videoClockDelayCount)")
                 videoClockDelayCount += 1
-                if diff < -8, videoClockDelayCount % 100 == 0 {
-                    KSLog("[video] video delay seek video track")
-                    return .seek
-                }
-                if diff < -1, videoClockDelayCount % 10 == 0 {
-                    return .flush
-                }
-                if videoClockDelayCount % 2 == 0 {
-                    return .dropNext
+                let log = "[video] video delay=\(diff), clock=\(desire), delay count=\(videoClockDelayCount), frameCount=\(frameCount)"
+                if frameCount == 1 {
+                    if diff < -1, videoClockDelayCount % 10 == 0 {
+                        KSLog("\(log) drop gop Packet")
+                        return .dropGOPPacket
+                    } else if videoClockDelayCount % 5 == 0 {
+                        KSLog("\(log) drop next frame")
+                        return .dropNextFrame
+                    } else {
+                        return .next
+                    }
                 } else {
-                    return .next
+                    if diff < -8, videoClockDelayCount % 100 == 0 {
+                        KSLog("\(log) seek video track")
+                        return .seek
+                    }
+                    if diff < -1, videoClockDelayCount % 10 == 0 {
+                        KSLog("\(log) flush video track")
+                        return .flush
+                    }
+                    if videoClockDelayCount % 2 == 0 {
+                        KSLog("\(log) drop next frame")
+                        return .dropNextFrame
+                    } else {
+                        return .next
+                    }
                 }
             } else {
                 videoClockDelayCount = 0
@@ -409,9 +419,12 @@ open class KSOptions {
     }
 
     open func liveAdaptivePlaybackRate(loadingState: LoadingState) -> Float? {
-        if loadingState.loadedTime > preferredForwardBufferDuration + 4 {
+        if loadingState.isFirst {
+            return nil
+        }
+        if loadingState.loadedTime > preferredForwardBufferDuration + 5 {
             return 1.2
-        } else if loadingState.loadedTime < preferredForwardBufferDuration {
+        } else if loadingState.loadedTime < preferredForwardBufferDuration / 2 {
             return 0.8
         } else {
             return 1

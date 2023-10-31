@@ -32,16 +32,7 @@ final class MEPlayerItem {
     private var isSeek = false
     private var allPlayerItemTracks = [PlayerItemTrackProtocol]()
     private var maxFrameDuration = 10.0
-    private var videoAudioTracks: [CapacityProtocol] {
-        var tracks = [CapacityProtocol]()
-        if let audioTrack {
-            tracks.append(audioTrack)
-        }
-        if !options.videoDisable, let videoTrack {
-            tracks.append(videoTrack)
-        }
-        return tracks
-    }
+    private var videoAudioTracks = [CapacityProtocol]()
 
     private var audioRecognizer: AudioRecognizer?
     private var videoTrack: SyncPlayerItemTrack<VideoVTBFrame>?
@@ -331,6 +322,7 @@ extension MEPlayerItem {
         videoAdaptation = nil
         videoTrack = nil
         audioTrack = nil
+        videoAudioTracks.removeAll()
         assetTracks = (0 ..< Int(formatCtx.pointee.nb_streams)).compactMap { i in
             if let coreStream = formatCtx.pointee.streams[i] {
                 coreStream.pointee.discard = AVDISCARD_ALL
@@ -384,6 +376,9 @@ extension MEPlayerItem {
                 track.delegate = self
                 allPlayerItemTracks.append(track)
                 videoTrack = track
+                if first.codecpar.codec_id != AV_CODEC_ID_MJPEG {
+                    videoAudioTracks.append(track)
+                }
                 if bitRates.count > 1, options.videoAdaptable {
                     let bitRateState = VideoAdaptationState.BitRateState(bitRate: first.bitRate, time: CACurrentMediaTime())
                     videoAdaptation = VideoAdaptationState(bitRates: bitRates.sorted(by: <), duration: duration, fps: first.nominalFrameRate, bitRateStates: [bitRateState])
@@ -407,6 +402,7 @@ extension MEPlayerItem {
             track.delegate = self
             allPlayerItemTracks.append(track)
             audioTrack = track
+            videoAudioTracks.append(track)
             isAudioStalled = false
         }
     }
@@ -750,9 +746,9 @@ extension MEPlayerItem: OutputRenderSourceDelegate {
         }
         let fps = videoTrack.fps
         var type: ClockProcessType = force ? .next : .remain
-        let predicate: ((VideoVTBFrame) -> Bool)? = force ? nil : { [weak self] frame -> Bool in
+        let predicate: ((VideoVTBFrame, Int) -> Bool)? = force ? nil : { [weak self] frame, count -> Bool in
             guard let self else { return true }
-            type = self.options.videoClockSync(main: self.mainClock(), nextVideoTime: frame.seconds, fps: fps)
+            type = self.options.videoClockSync(main: self.mainClock(), nextVideoTime: frame.seconds, fps: fps, frameCount: count)
             return type != .remain
         }
         let frame = videoTrack.getOutputRender(where: predicate)
@@ -761,13 +757,36 @@ extension MEPlayerItem: OutputRenderSourceDelegate {
             break
         case .next:
             break
-        case .dropNext:
+        case .dropNextFrame:
             _ = videoTrack.getOutputRender(where: nil)
         case .flush:
             videoTrack.outputRenderQueue.flush()
         case .seek:
             videoTrack.outputRenderQueue.flush()
             videoTrack.seekTime = currentPlaybackTime
+        case .dropNextPacket:
+            if let videoTrack = videoTrack as? AsyncPlayerItemTrack {
+                _ = videoTrack.packetQueue.pop { item, _ -> Bool in
+                    if let corePacket = item.corePacket {
+                        return corePacket.pointee.flags & AV_PKT_FLAG_KEY != AV_PKT_FLAG_KEY
+                    } else {
+                        return false
+                    }
+                }
+            }
+        case .dropGOPPacket:
+            if let videoTrack = videoTrack as? AsyncPlayerItemTrack {
+                var packet: Packet? = nil
+                repeat {
+                    packet = videoTrack.packetQueue.pop { item, _ -> Bool in
+                        if let corePacket = item.corePacket {
+                            return corePacket.pointee.flags & AV_PKT_FLAG_KEY != AV_PKT_FLAG_KEY
+                        } else {
+                            return false
+                        }
+                    }
+                } while packet != nil
+            }
         }
         return frame
     }

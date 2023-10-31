@@ -33,12 +33,10 @@ class MEFilter {
     private func setup(filters: String) -> Bool {
         var inputs = avfilter_inout_alloc()
         var outputs = avfilter_inout_alloc()
-        defer {
-            avfilter_inout_free(&inputs)
-            avfilter_inout_free(&outputs)
-        }
         var ret = avfilter_graph_parse2(graph, filters, &inputs, &outputs)
         guard ret >= 0, let graph, let inputs, let outputs else {
+            avfilter_inout_free(&inputs)
+            avfilter_inout_free(&outputs)
             return false
         }
         let bufferSink = avfilter_get_by_name(isAudio ? "abuffersink" : "buffersink")
