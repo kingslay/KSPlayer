@@ -744,11 +744,10 @@ extension MEPlayerItem: OutputRenderSourceDelegate {
         guard let videoTrack else {
             return nil
         }
-        let fps = videoTrack.fps
         var type: ClockProcessType = force ? .next : .remain
         let predicate: ((VideoVTBFrame, Int) -> Bool)? = force ? nil : { [weak self] frame, count -> Bool in
             guard let self else { return true }
-            type = self.options.videoClockSync(main: self.mainClock(), nextVideoTime: frame.seconds, fps: fps, frameCount: count)
+            type = self.options.videoClockSync(main: self.mainClock(), nextVideoTime: frame.seconds, fps: frame.fps, frameCount: count)
             return type != .remain
         }
         let frame = videoTrack.getOutputRender(where: predicate)

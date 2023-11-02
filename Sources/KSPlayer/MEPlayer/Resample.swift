@@ -53,10 +53,6 @@ class VideoSwresample: Swresample {
 //                let hdrVivid = sideData.data.withMemoryRebound(to: AVDynamicHDRVivid.self, capacity: 1) { $0 }.pointee
 //            }
 //        }
-        if let pixelBuffer = frame.corePixelBuffer {
-            pixelBuffer.colorspace = KSOptions.colorSpace(ycbcrMatrix: pixelBuffer.yCbCrMatrix, transferFunction: pixelBuffer.transferFunction)
-        }
-
         return frame
     }
 
@@ -100,6 +96,7 @@ class VideoSwresample: Swresample {
             if let chroma = frame.chroma_location.chroma {
                 CVBufferSetAttachment(pbuf, kCVImageBufferChromaLocationTopFieldKey, chroma, .shouldPropagate)
             }
+            pbuf.colorspace = KSOptions.colorSpace(ycbcrMatrix: pbuf.yCbCrMatrix, transferFunction: pbuf.transferFunction)
         }
         return pbuf
     }

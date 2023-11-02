@@ -137,7 +137,7 @@ class AppDelegate: NSObject, UIApplicationDelegate {
                 }
                 print("Push notification allowed by user")
             } else {
-                print("Error while requesting push notification permission. Error \(error)")
+                print("Error while requesting push notification permission. Error \(String(describing: error))")
             }
         }
     }

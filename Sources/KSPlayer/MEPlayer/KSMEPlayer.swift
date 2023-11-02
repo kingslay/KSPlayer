@@ -400,7 +400,7 @@ extension KSMEPlayer: MediaPlayerProtocol {
     }
 
     public func thumbnailImageAtCurrentTime() async -> CGImage? {
-        await videoOutput?.pixelBuffer?.cgImage()
+        videoOutput?.pixelBuffer?.cgImage()
     }
 
     public func enterBackground() {}
