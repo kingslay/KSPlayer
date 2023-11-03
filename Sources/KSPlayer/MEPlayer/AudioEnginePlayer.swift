@@ -115,10 +115,10 @@ public final class AudioEnginePlayer: AudioOutput {
 
     public var volume: Float {
         get {
-            engine.mainMixerNode.volume
+            sourceNode?.volume ?? 1
         }
         set {
-            engine.mainMixerNode.volume = newValue
+            sourceNode?.volume = newValue
         }
     }
 

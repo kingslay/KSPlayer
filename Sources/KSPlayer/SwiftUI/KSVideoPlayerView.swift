@@ -94,9 +94,9 @@ public struct KSVideoPlayerView: View {
                         playerCoordinator.skip(interval: 15)
                     #if os(macOS)
                     case .up:
-                        playerCoordinator.playerLayer?.player.playbackVolume += 1
+                        playerCoordinator.playerLayer?.player.playbackVolume += 0.2
                     case .down:
-                        playerCoordinator.playerLayer?.player.playbackVolume -= 1
+                        playerCoordinator.playerLayer?.player.playbackVolume -= 0.2
                     #else
                     case .up:
                         showDropDownMenu = false
