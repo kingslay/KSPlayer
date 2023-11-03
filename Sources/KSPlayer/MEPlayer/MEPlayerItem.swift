@@ -328,6 +328,9 @@ extension MEPlayerItem {
                 coreStream.pointee.discard = AVDISCARD_ALL
                 if let assetTrack = FFmpegAssetTrack(stream: coreStream) {
                     assetTrack.startTime = startTime
+                    if let audioDescriptor = assetTrack.audioDescriptor {
+                        audioDescriptor.setAudioSession(isUseAudioRenderer: options.isUseAudioRenderer)
+                    }
                     if !options.subtitleDisable, assetTrack.mediaType == .subtitle {
                         let subtitle = SyncPlayerItemTrack<SubtitleFrame>(assetTrack: assetTrack, options: options)
                         assetTrack.isEnabled = !assetTrack.isImageSubtitle
