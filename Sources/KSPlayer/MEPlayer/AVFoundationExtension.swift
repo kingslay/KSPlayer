@@ -166,6 +166,10 @@ extension AVAudioChannelLayout {
         KSLog("[audio] out mask: \(outChannel.u.mask) nb_channels: \(outChannel.nb_channels)")
         return outChannel
     }
+
+    public var channelDescriptions: String {
+        "tag: \(layoutTag), channelDescriptions: \(layout.channelDescriptions)"
+    }
 }
 
 extension AVAudioFormat {

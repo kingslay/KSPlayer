@@ -146,8 +146,7 @@ public final class AudioEnginePlayer: AudioOutput {
         sourceNodeAudioFormat = audioFormat
         KSLog("[audio] outputFormat AudioFormat: \(audioFormat)")
         if let channelLayout = audioFormat.channelLayout {
-            KSLog("[audio] outputFormat tag: \(channelLayout.layoutTag)")
-            KSLog("[audio] outputFormat channelDescriptions: \(channelLayout.layout.channelDescriptions)")
+            KSLog("[audio] outputFormat channelLayout \(channelLayout.channelDescriptions)")
         }
         let isRunning = engine.isRunning
         engine.stop()

@@ -79,8 +79,6 @@ public extension KSOptions {
     static var stackSize = 65536
     static var isClearVideoWhereReplace = true
     /// true: AVSampleBufferAudioRenderer false: AVAudioEngine
-//    static var isUseAudioRenderer = KSOptions.isSpatialAudioEnabled
-    static var isUseAudioRenderer = false
     static var audioPlayerType: AudioOutput.Type = AudioEnginePlayer.self
     static var videoPlayerType: (VideoOutput & UIView).Type = MetalPlayView.self
     static func colorSpace(ycbcrMatrix: CFString?, transferFunction: CFString?) -> CGColorSpace? {

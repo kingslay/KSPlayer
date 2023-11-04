@@ -45,12 +45,17 @@ struct SettingGeneralView: View {
 }
 
 struct SettingAudioView: View {
-    @Default(\.isUseAudioRenderer)
-    private var isUseAudioRenderer
+    @Default(\.audioPlayerType)
+    private var audioPlayerType
     init() {}
     var body: some View {
         Form {
-            Toggle("Use Audio Renderer", isOn: $isUseAudioRenderer)
+            Picker("audio Player Type", selection: $audioPlayerType) {
+                Text("AUGraph").tag(NSStringFromClass(AudioGraphPlayer.self))
+                Text("AudioUnit").tag(NSStringFromClass(AudioUnitPlayer.self))
+                Text("AVAudioEngine").tag(NSStringFromClass(AudioEnginePlayer.self))
+                Text("AVSampleBufferAudioRenderer").tag(NSStringFromClass(AudioRendererPlayer.self))
+            }
         }
     }
 }

@@ -70,8 +70,6 @@ open class KSOptions {
     // audio
     public var audioFilters = [String]()
     public var syncDecodeAudio = false
-    /// true: AVSampleBufferAudioRenderer false: AVAudioEngine
-    public var isUseAudioRenderer = KSOptions.isUseAudioRenderer
     // Locale(identifier: "en-US") Locale(identifier: "zh-CN")
     public var audioLocale: Locale?
     // sutile
@@ -496,7 +494,7 @@ public extension KSOptions {
         }
     }
 
-    static func outputNumberOfChannels(channelCount: AVAudioChannelCount, isUseAudioRenderer: Bool) -> AVAudioChannelCount {
+    static func outputNumberOfChannels(channelCount: AVAudioChannelCount) -> AVAudioChannelCount {
         let maximumOutputNumberOfChannels = AVAudioChannelCount(AVAudioSession.sharedInstance().maximumOutputNumberOfChannels)
         let preferredOutputNumberOfChannels = AVAudioChannelCount(AVAudioSession.sharedInstance().preferredOutputNumberOfChannels)
         KSLog("[audio] maximumOutputNumberOfChannels: \(maximumOutputNumberOfChannels)")
@@ -504,6 +502,7 @@ public extension KSOptions {
         setAudioSession()
         let isSpatialAudioEnabled = isSpatialAudioEnabled()
         KSLog("[audio] isSpatialAudioEnabled: \(isSpatialAudioEnabled)")
+        let isUseAudioRenderer = KSOptions.audioPlayerType == AudioRendererPlayer.self
         KSLog("[audio] isUseAudioRenderer: \(isUseAudioRenderer)")
         var channelCount = channelCount
         if channelCount > 2 {
