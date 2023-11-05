@@ -514,14 +514,15 @@ public extension KSOptions {
                 try? AVAudioSession.sharedInstance().setPreferredOutputNumberOfChannels(Int(minChannels))
                 KSLog("[audio] set preferredOutputNumberOfChannels: \(minChannels)")
             }
-            // 不要从currentRoute获取maxRouteChannelsCount，有可能会不准。导致多音道设备也返回2（一开始播放一个2声道，就容易出现）
-//            if !(isUseAudioRenderer && isSpatialAudioEnabled) {
-//                let maxRouteChannelsCount = AVAudioSession.sharedInstance().currentRoute.outputs.compactMap {
-//                    $0.channels?.count
-//                }.max() ?? 2
-//                KSLog("[audio] currentRoute max channels: \(maxRouteChannelsCount)")
+            if !(isUseAudioRenderer && isSpatialAudioEnabled) {
+                let maxRouteChannelsCount = AVAudioSession.sharedInstance().currentRoute.outputs.compactMap {
+                    $0.channels?.count
+                }.max() ?? 2
+                KSLog("[audio] currentRoute max channels: \(maxRouteChannelsCount)")
+                // 不要用maxRouteChannelsCount来panduan，有可能会不准。导致多音道设备也返回2（一开始播放一个2声道，就容易出现）
 //                channelCount = AVAudioChannelCount(min(AVAudioSession.sharedInstance().outputNumberOfChannels, maxRouteChannelsCount))
-//            }
+                channelCount = AVAudioChannelCount(AVAudioSession.sharedInstance().outputNumberOfChannels)
+            }
         } else {
             channelCount = 2
         }
