@@ -13,7 +13,11 @@ import KSPlayer
 import UIKit
 #endif
 class MEOptions: KSOptions {
+    #if os(iOS)
     static var isUseDisplayLayer = true
+    #else
+    static var isUseDisplayLayer = false
+    #endif
     static var yadifMode = 1
     override init() {
         super.init()

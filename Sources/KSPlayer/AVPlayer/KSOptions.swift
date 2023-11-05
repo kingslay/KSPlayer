@@ -242,7 +242,11 @@ open class KSOptions {
     }
 
     open func isUseDisplayLayer() -> Bool {
+        #if os(iOS)
         display == .plane
+        #else
+        false
+        #endif
     }
 
     open func io(log: String) {
