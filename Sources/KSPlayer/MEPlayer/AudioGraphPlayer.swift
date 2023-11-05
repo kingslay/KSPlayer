@@ -9,11 +9,11 @@ import AudioToolbox
 import AVFAudio
 import CoreAudio
 
-public final class AudioGraphPlayer: AudioOutput {
+public final class AudioGraphPlayer: AudioOutput, AudioDynamicsProcessor {
+    public private(set) var audioUnitForDynamicsProcessor: AudioUnit
     private let graph: AUGraph
     private var audioUnitForMixer: AudioUnit!
     private var audioUnitForTimePitch: AudioUnit!
-    private var audioUnitForDynamicsProcessor: AudioUnit!
     private var audioUnitForOutput: AudioUnit!
     private var currentRenderReadOffset = UInt32(0)
     private var sourceNodeAudioFormat: AVAudioFormat?
@@ -93,61 +93,6 @@ public final class AudioGraphPlayer: AudioOutput {
         }
     }
 
-    public var attackTime: Float {
-        get {
-            var value = AudioUnitParameterValue(1.0)
-            AudioUnitGetParameter(audioUnitForDynamicsProcessor, kDynamicsProcessorParam_AttackTime, kAudioUnitScope_Global, 0, &value)
-            return value
-        }
-        set {
-            AudioUnitSetParameter(audioUnitForDynamicsProcessor, kDynamicsProcessorParam_AttackTime, kAudioUnitScope_Global, 0, AudioUnitParameterValue(newValue), 0)
-        }
-    }
-
-    public var releaseTime: Float {
-        get {
-            var value = AudioUnitParameterValue(1.0)
-            AudioUnitGetParameter(audioUnitForDynamicsProcessor, kDynamicsProcessorParam_ReleaseTime, kAudioUnitScope_Global, 0, &value)
-            return value
-        }
-        set {
-            AudioUnitSetParameter(audioUnitForDynamicsProcessor, kDynamicsProcessorParam_ReleaseTime, kAudioUnitScope_Global, 0, AudioUnitParameterValue(newValue), 0)
-        }
-    }
-
-    public var threshold: Float {
-        get {
-            var value = AudioUnitParameterValue(1.0)
-            AudioUnitGetParameter(audioUnitForDynamicsProcessor, kDynamicsProcessorParam_Threshold, kAudioUnitScope_Global, 0, &value)
-            return value
-        }
-        set {
-            AudioUnitSetParameter(audioUnitForDynamicsProcessor, kDynamicsProcessorParam_Threshold, kAudioUnitScope_Global, 0, AudioUnitParameterValue(newValue), 0)
-        }
-    }
-
-    public var expansionRatio: Float {
-        get {
-            var value = AudioUnitParameterValue(1.0)
-            AudioUnitGetParameter(audioUnitForDynamicsProcessor, kDynamicsProcessorParam_ExpansionRatio, kAudioUnitScope_Global, 0, &value)
-            return value
-        }
-        set {
-            AudioUnitSetParameter(audioUnitForDynamicsProcessor, kDynamicsProcessorParam_ExpansionRatio, kAudioUnitScope_Global, 0, AudioUnitParameterValue(newValue), 0)
-        }
-    }
-
-    public var overallGain: Float {
-        get {
-            var value = AudioUnitParameterValue(1.0)
-            AudioUnitGetParameter(audioUnitForDynamicsProcessor, kDynamicsProcessorParam_OverallGain, kAudioUnitScope_Global, 0, &value)
-            return value
-        }
-        set {
-            AudioUnitSetParameter(audioUnitForDynamicsProcessor, kDynamicsProcessorParam_OverallGain, kAudioUnitScope_Global, 0, AudioUnitParameterValue(newValue), 0)
-        }
-    }
-
     public init() {
         var newGraph: AUGraph!
         NewAUGraph(&newGraph)
@@ -189,7 +134,9 @@ public final class AudioGraphPlayer: AudioOutput {
         AUGraphConnectNodeInput(graph, nodeForDynamicsProcessor, 0, nodeForMixer, 0)
         AUGraphConnectNodeInput(graph, nodeForMixer, 0, nodeForOutput, 0)
         AUGraphNodeInfo(graph, nodeForTimePitch, &descriptionForTimePitch, &audioUnitForTimePitch)
+        var audioUnitForDynamicsProcessor: AudioUnit?
         AUGraphNodeInfo(graph, nodeForDynamicsProcessor, &descriptionForDynamicsProcessor, &audioUnitForDynamicsProcessor)
+        self.audioUnitForDynamicsProcessor = audioUnitForDynamicsProcessor!
         AUGraphNodeInfo(graph, nodeForMixer, &descriptionForMixer, &audioUnitForMixer)
         AUGraphNodeInfo(graph, nodeForOutput, &descriptionForOutput, &audioUnitForOutput)
         addRenderNotify(audioUnit: audioUnitForOutput)

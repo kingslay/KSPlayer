@@ -35,16 +35,6 @@ public class AudioRendererPlayer: AudioOutput {
         }
     }
 
-    public var attackTime: Float = 0
-
-    public var releaseTime: Float = 0
-
-    public var threshold: Float = 0
-
-    public var expansionRatio: Float = 0
-
-    public var overallGain: Float = 0
-
     public weak var renderSource: OutputRenderSourceDelegate?
     private var periodicTimeObserver: Any?
     private let renderer = AVSampleBufferAudioRenderer()

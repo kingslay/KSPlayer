@@ -16,7 +16,7 @@ import AppKit
 public class KSMEPlayer: NSObject {
     private var loopCount = 1
     private var playerItem: MEPlayerItem
-    private let audioOutput: AudioOutput = KSOptions.audioPlayerType.init()
+    public let audioOutput: AudioOutput = KSOptions.audioPlayerType.init()
     private var options: KSOptions
     private var bufferingCountDownTimer: Timer?
     public private(set) var videoOutput: (VideoOutput & UIView)? {
@@ -548,50 +548,5 @@ public extension KSMEPlayer {
 
     var bytesRead: Int64 {
         playerItem.bytesRead
-    }
-
-    var attackTime: Float {
-        get {
-            audioOutput.attackTime
-        }
-        set {
-            audioOutput.attackTime = newValue
-        }
-    }
-
-    var releaseTime: Float {
-        get {
-            audioOutput.releaseTime
-        }
-        set {
-            audioOutput.releaseTime = newValue
-        }
-    }
-
-    var threshold: Float {
-        get {
-            audioOutput.threshold
-        }
-        set {
-            audioOutput.threshold = newValue
-        }
-    }
-
-    var expansionRatio: Float {
-        get {
-            audioOutput.expansionRatio
-        }
-        set {
-            audioOutput.expansionRatio = newValue
-        }
-    }
-
-    var overallGain: Float {
-        get {
-            audioOutput.overallGain
-        }
-        set {
-            audioOutput.overallGain = newValue
-        }
     }
 }

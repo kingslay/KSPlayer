@@ -10,7 +10,6 @@ import AVFAudio
 import CoreAudio
 
 public final class AudioUnitPlayer: AudioOutput {
-    private var audioUnitForDynamicsProcessor: AudioUnit!
     private var audioUnitForOutput: AudioUnit!
     private var currentRenderReadOffset = UInt32(0)
     private var sourceNodeAudioFormat: AVAudioFormat?
@@ -67,84 +66,8 @@ public final class AudioUnitPlayer: AudioOutput {
         }
     }
 
-    public var isMuted: Bool {
-        get {
-            var value = AudioUnitParameterValue(1.0)
-            #if os(macOS)
-            AudioUnitGetParameter(audioUnitForOutput, kStereoMixerParam_Volume, kAudioUnitScope_Input, 0, &value)
-            #else
-            AudioUnitGetParameter(audioUnitForOutput, kMultiChannelMixerParam_Enable, kAudioUnitScope_Input, 0, &value)
-            #endif
-            return value == 0
-        }
-        set {
-            let value = newValue ? 0 : 1
-            #if os(macOS)
-            if value == 0 {
-                volumeBeforeMute = volume
-            }
-            AudioUnitSetParameter(audioUnitForOutput, kStereoMixerParam_Volume, kAudioUnitScope_Input, 0, min(Float(value), volumeBeforeMute), 0)
-            #else
-            AudioUnitSetParameter(audioUnitForOutput, kMultiChannelMixerParam_Enable, kAudioUnitScope_Input, 0, AudioUnitParameterValue(value), 0)
-            #endif
-        }
-    }
-
-    public var attackTime: Float {
-        get {
-            var value = AudioUnitParameterValue(1.0)
-            AudioUnitGetParameter(audioUnitForDynamicsProcessor, kDynamicsProcessorParam_AttackTime, kAudioUnitScope_Global, 0, &value)
-            return value
-        }
-        set {
-            AudioUnitSetParameter(audioUnitForDynamicsProcessor, kDynamicsProcessorParam_AttackTime, kAudioUnitScope_Global, 0, AudioUnitParameterValue(newValue), 0)
-        }
-    }
-
-    public var releaseTime: Float {
-        get {
-            var value = AudioUnitParameterValue(1.0)
-            AudioUnitGetParameter(audioUnitForDynamicsProcessor, kDynamicsProcessorParam_ReleaseTime, kAudioUnitScope_Global, 0, &value)
-            return value
-        }
-        set {
-            AudioUnitSetParameter(audioUnitForDynamicsProcessor, kDynamicsProcessorParam_ReleaseTime, kAudioUnitScope_Global, 0, AudioUnitParameterValue(newValue), 0)
-        }
-    }
-
-    public var threshold: Float {
-        get {
-            var value = AudioUnitParameterValue(1.0)
-            AudioUnitGetParameter(audioUnitForDynamicsProcessor, kDynamicsProcessorParam_Threshold, kAudioUnitScope_Global, 0, &value)
-            return value
-        }
-        set {
-            AudioUnitSetParameter(audioUnitForDynamicsProcessor, kDynamicsProcessorParam_Threshold, kAudioUnitScope_Global, 0, AudioUnitParameterValue(newValue), 0)
-        }
-    }
-
-    public var expansionRatio: Float {
-        get {
-            var value = AudioUnitParameterValue(1.0)
-            AudioUnitGetParameter(audioUnitForDynamicsProcessor, kDynamicsProcessorParam_ExpansionRatio, kAudioUnitScope_Global, 0, &value)
-            return value
-        }
-        set {
-            AudioUnitSetParameter(audioUnitForDynamicsProcessor, kDynamicsProcessorParam_ExpansionRatio, kAudioUnitScope_Global, 0, AudioUnitParameterValue(newValue), 0)
-        }
-    }
-
-    public var overallGain: Float {
-        get {
-            var value = AudioUnitParameterValue(1.0)
-            AudioUnitGetParameter(audioUnitForDynamicsProcessor, kDynamicsProcessorParam_OverallGain, kAudioUnitScope_Global, 0, &value)
-            return value
-        }
-        set {
-            AudioUnitSetParameter(audioUnitForDynamicsProcessor, kDynamicsProcessorParam_OverallGain, kAudioUnitScope_Global, 0, AudioUnitParameterValue(newValue), 0)
-        }
-    }
-
+    public var isMuted: Bool = false
+    public var latency = Float(0)
     public init() {
         var descriptionForOutput = AudioComponentDescription()
         descriptionForOutput.componentType = kAudioUnitType_Output
@@ -192,6 +115,12 @@ public final class AudioUnitPlayer: AudioOutput {
                              UInt32(MemoryLayout<AudioChannelLayout>.size))
         AudioUnitInitialize(audioUnitForOutput)
         AudioOutputUnitStart(audioUnitForOutput)
+        var size = UInt32(MemoryLayout<Float64>.size)
+        AudioUnitGetProperty(audioUnitForOutput,
+                             kAudioUnitProperty_Latency,
+                             kAudioUnitScope_Global, 0,
+                             &latency,
+                             &size)
     }
 
     public func flush() {
@@ -200,6 +129,7 @@ public final class AudioUnitPlayer: AudioOutput {
 
     deinit {
         AudioOutputUnitStop(audioUnitForOutput)
+        AudioUnitUninitialize(audioUnitForOutput)
     }
 }
 
@@ -258,7 +188,11 @@ extension AudioUnitPlayer {
             let bytesToCopy = Int(framesToCopy * sampleSize)
             let offset = Int(currentRenderReadOffset * sampleSize)
             for i in 0 ..< min(ioData.count, currentRender.data.count) {
-                (ioData[i].mData! + ioDataWriteOffset).copyMemory(from: currentRender.data[i]! + offset, byteCount: bytesToCopy)
+                if isMuted {
+                    memset(ioData[i].mData! + ioDataWriteOffset, 0, bytesToCopy)
+                } else {
+                    (ioData[i].mData! + ioDataWriteOffset).copyMemory(from: currentRender.data[i]! + offset, byteCount: bytesToCopy)
+                }
             }
             numberOfSamples -= framesToCopy
             ioDataWriteOffset += bytesToCopy
