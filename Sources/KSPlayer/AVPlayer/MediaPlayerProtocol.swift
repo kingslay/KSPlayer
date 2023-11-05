@@ -18,6 +18,8 @@ public protocol MediaPlayback: AnyObject {
     var fileSize: Double { get }
     var metadata: [String: String] { get }
     var naturalSize: CGSize { get }
+    var audioBitrate: Int { get }
+    var videoBitrate: Int { get }
     var currentPlaybackTime: TimeInterval { get }
     func prepareToPlay()
     func shutdown()

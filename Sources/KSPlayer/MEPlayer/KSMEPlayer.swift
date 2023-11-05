@@ -327,6 +327,10 @@ extension KSMEPlayer: MediaPlayerProtocol {
 
     public var seekable: Bool { playerItem.seekable }
 
+    public var videoBitrate: Int { playerItem.videoBitrate }
+
+    public var audioBitrate: Int { playerItem.audioBitrate }
+
     public func seek(time: TimeInterval, completion: @escaping ((Bool) -> Void)) {
         let time = max(time, 0)
         playbackState = .seeking

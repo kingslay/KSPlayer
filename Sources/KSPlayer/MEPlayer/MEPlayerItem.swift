@@ -569,6 +569,14 @@ extension MEPlayerItem {
 // MARK: MediaPlayback
 
 extension MEPlayerItem: MediaPlayback {
+    var videoBitrate: Int {
+        Int(8 * (videoTrack?.bitrate ?? 0))
+    }
+
+    var audioBitrate: Int {
+        Int(8 * (audioTrack?.bitrate ?? 0))
+    }
+
     var seekable: Bool {
         guard let formatCtx else {
             return false
@@ -766,11 +774,7 @@ extension MEPlayerItem: OutputRenderSourceDelegate {
         case .dropNextPacket:
             if let videoTrack = videoTrack as? AsyncPlayerItemTrack {
                 _ = videoTrack.packetQueue.pop { item, _ -> Bool in
-                    if let corePacket = item.corePacket {
-                        return corePacket.pointee.flags & AV_PKT_FLAG_KEY != AV_PKT_FLAG_KEY
-                    } else {
-                        return false
-                    }
+                    !item.isKeyFrame
                 }
             }
         case .dropGOPPacket:
@@ -778,11 +782,7 @@ extension MEPlayerItem: OutputRenderSourceDelegate {
                 var packet: Packet? = nil
                 repeat {
                     packet = videoTrack.packetQueue.pop { item, _ -> Bool in
-                        if let corePacket = item.corePacket {
-                            return corePacket.pointee.flags & AV_PKT_FLAG_KEY != AV_PKT_FLAG_KEY
-                        } else {
-                            return false
-                        }
+                        !item.isKeyFrame
                     }
                 } while packet != nil
             }

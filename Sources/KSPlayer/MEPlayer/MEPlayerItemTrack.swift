@@ -107,7 +107,24 @@ class SyncPlayerItemTrack<Frame: MEFrame>: PlayerItemTrackProtocol, CustomString
         outputRenderQueue.shutdown()
     }
 
+    private var lastPacketBytes = Int32(0)
+    private var lastPacketSeconds = Double(-1)
+    var bitrate = Double(0)
     fileprivate func doDecode(packet: Packet) {
+        if packet.isKeyFrame, packet.assetTrack.mediaType != .subtitle {
+            let seconds = packet.seconds
+            let diff = seconds - lastPacketSeconds
+            if lastPacketSeconds < 0 || diff < 0 {
+                bitrate = 0
+                lastPacketBytes = 0
+                lastPacketSeconds = seconds
+            } else if diff > 0.5 {
+                bitrate = Double(lastPacketBytes) / diff
+                lastPacketBytes = 0
+                lastPacketSeconds = seconds
+            }
+        }
+        lastPacketBytes += packet.size
         let decoder = decoderMap.value(for: packet.assetTrack.trackID, default: makeDecode(assetTrack: packet.assetTrack))
         decoder.decodeFrame(from: packet) { [weak self] result in
             guard let self else {

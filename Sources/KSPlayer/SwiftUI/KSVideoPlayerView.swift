@@ -523,6 +523,8 @@ struct VideoSettingView: View {
                 subtitleModel.searchSubtitle(query: subtitleTitle, languages: ["zh-cn"])
             }
             Text("Stream Type: \((videoTracks?.first { $0.isEnabled }?.fieldOrder ?? .progressive).description)")
+            Text("Audio bitrate: \(config.playerLayer?.player.audioBitrate ?? 0) b/s")
+            Text("Video bitrate: \(config.playerLayer?.player.videoBitrate ?? 0) b/s")
             if let fileSize = config.playerLayer?.player.fileSize, fileSize > 0 {
                 Text("File Size: \(String(format: "%.1f", fileSize / 1_000_000))MB")
             }

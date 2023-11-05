@@ -176,6 +176,18 @@ final class Packet: ObjectQueueItem {
     var size: Int32 = 0
     var assetTrack: FFmpegAssetTrack!
     private(set) var corePacket = av_packet_alloc()
+    var isKeyFrame: Bool {
+        if let corePacket {
+            return corePacket.pointee.flags & AV_PKT_FLAG_KEY == AV_PKT_FLAG_KEY
+        } else {
+            return false
+        }
+    }
+
+    var seconds: Double {
+        assetTrack.timebase.cmtime(for: position).seconds
+    }
+
     func fill() {
         guard let corePacket else {
             return

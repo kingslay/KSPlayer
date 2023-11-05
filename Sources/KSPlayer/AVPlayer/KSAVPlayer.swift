@@ -126,7 +126,8 @@ public class KSAVPlayer {
     public private(set) var duration: TimeInterval = 0
     public private(set) var fileSize: Double = 0
     public private(set) var playableTime: TimeInterval = 0
-
+    public var audioBitrate: Int = 0
+    public var videoBitrate: Int = 0
     public var playbackRate: Float = 1 {
         didSet {
             if playbackState == .playing {
