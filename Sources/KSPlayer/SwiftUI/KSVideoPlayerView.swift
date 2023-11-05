@@ -486,8 +486,8 @@ struct VideoSettingView: View {
                     Label("Audio track", systemImage: "waveform")
                 }
             }
-
-            if let videoTracks = config.playerLayer?.player.tracks(mediaType: .video), !videoTracks.isEmpty {
+            let videoTracks = config.playerLayer?.player.tracks(mediaType: .video)
+            if let videoTracks, !videoTracks.isEmpty {
                 Picker(selection: Binding {
                     videoTracks.first { $0.isEnabled }?.trackID
                 } set: { value in
@@ -522,8 +522,9 @@ struct VideoSettingView: View {
             Button("Search Sutitle") {
                 subtitleModel.searchSubtitle(query: subtitleTitle, languages: ["zh-cn"])
             }
+            Text("Stream Type: \((videoTracks?.first { $0.isEnabled }?.fieldOrder ?? .progressive).description)")
             if let fileSize = config.playerLayer?.player.fileSize, fileSize > 0 {
-                Text("File Size \(String(format: "%.1f", fileSize / 1_000_000))MB")
+                Text("File Size: \(String(format: "%.1f", fileSize / 1_000_000))MB")
             }
         }
         .padding()

@@ -127,6 +127,23 @@ public enum FFmpegFieldOrder: UInt8 {
     case bt // < Bottom coded first, top displayed first
 }
 
+extension FFmpegFieldOrder: CustomStringConvertible {
+    public var description: String {
+        switch self {
+        case .unknown, .progressive:
+            return "progressive"
+        case .tt:
+            return "top first"
+        case .bb:
+            return "bottom first"
+        case .tb:
+            return "top coded first (swapped)"
+        case .bt:
+            return "bottom coded first (swapped)"
+        }
+    }
+}
+
 // swiftlint:enable identifier_name
 public extension MediaPlayerTrack {
     var codecType: FourCharCode {
