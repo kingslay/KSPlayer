@@ -26,12 +26,19 @@ public final class AudioUnitPlayer: AudioOutput {
         }
     }
 
+    private var isPlaying = false
     public func play(time _: TimeInterval) {
-        AudioOutputUnitStart(audioUnitForOutput)
+        if !isPlaying {
+            isPlaying = true
+            AudioOutputUnitStart(audioUnitForOutput)
+        }
     }
 
     public func pause() {
-        AudioOutputUnitStop(audioUnitForOutput)
+        if isPlaying {
+            isPlaying = false
+            AudioOutputUnitStop(audioUnitForOutput)
+        }
     }
 
     public var playbackRate: Float {
@@ -67,7 +74,7 @@ public final class AudioUnitPlayer: AudioOutput {
     }
 
     public var isMuted: Bool = false
-    public var latency = Float(0)
+    public var latency = Float64(0)
     public init() {
         var descriptionForOutput = AudioComponentDescription()
         descriptionForOutput.componentType = kAudioUnitType_Output
@@ -114,7 +121,6 @@ public final class AudioUnitPlayer: AudioOutput {
                              channelLayout,
                              UInt32(MemoryLayout<AudioChannelLayout>.size))
         AudioUnitInitialize(audioUnitForOutput)
-        AudioOutputUnitStart(audioUnitForOutput)
         var size = UInt32(MemoryLayout<Float64>.size)
         AudioUnitGetProperty(audioUnitForOutput,
                              kAudioUnitProperty_Latency,
@@ -127,10 +133,7 @@ public final class AudioUnitPlayer: AudioOutput {
         currentRender = nil
     }
 
-    deinit {
-        AudioOutputUnitStop(audioUnitForOutput)
-        AudioUnitUninitialize(audioUnitForOutput)
-    }
+    deinit {}
 }
 
 extension AudioUnitPlayer {

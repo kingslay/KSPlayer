@@ -488,10 +488,10 @@ public extension KSOptions {
     }
 
     #if !os(macOS)
-    static func isSpatialAudioEnabled() -> Bool {
+    static func isSpatialAudioEnabled(channelCount: AVAudioChannelCount) -> Bool {
         if #available(tvOS 15.0, iOS 15.0, *) {
             let isSpatialAudioEnabled = AVAudioSession.sharedInstance().currentRoute.outputs.contains { $0.isSpatialAudioEnabled }
-            try? AVAudioSession.sharedInstance().setSupportsMultichannelContent(isSpatialAudioEnabled)
+            try? AVAudioSession.sharedInstance().setSupportsMultichannelContent(channelCount > 2)
             return isSpatialAudioEnabled
         } else {
             return false
@@ -503,8 +503,7 @@ public extension KSOptions {
         let preferredOutputNumberOfChannels = AVAudioChannelCount(AVAudioSession.sharedInstance().preferredOutputNumberOfChannels)
         KSLog("[audio] maximumOutputNumberOfChannels: \(maximumOutputNumberOfChannels)")
         KSLog("[audio] preferredOutputNumberOfChannels: \(preferredOutputNumberOfChannels)")
-        setAudioSession()
-        let isSpatialAudioEnabled = isSpatialAudioEnabled()
+        let isSpatialAudioEnabled = isSpatialAudioEnabled(channelCount: channelCount)
         KSLog("[audio] isSpatialAudioEnabled: \(isSpatialAudioEnabled)")
         let isUseAudioRenderer = KSOptions.audioPlayerType == AudioRendererPlayer.self
         KSLog("[audio] isUseAudioRenderer: \(isUseAudioRenderer)")

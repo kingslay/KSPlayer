@@ -16,7 +16,7 @@ import AppKit
 public class KSMEPlayer: NSObject {
     private var loopCount = 1
     private var playerItem: MEPlayerItem
-    public let audioOutput: AudioOutput = KSOptions.audioPlayerType.init()
+    public let audioOutput: AudioOutput
     private var options: KSOptions
     private var bufferingCountDownTimer: Timer?
     public private(set) var videoOutput: (VideoOutput & UIView)? {
@@ -100,6 +100,8 @@ public class KSMEPlayer: NSObject {
     }
 
     public required init(url: URL, options: KSOptions) {
+        KSOptions.setAudioSession()
+        audioOutput = KSOptions.audioPlayerType.init()
         playerItem = MEPlayerItem(url: url, options: options)
         if options.videoDisable {
             videoOutput = nil
@@ -184,6 +186,7 @@ extension KSMEPlayer: MEPlayerDelegate {
         runInMainqueue { [weak self] in
             guard let self else { return }
             if let audioDescriptor {
+                KSLog("[audio] audio type: \(self.audioOutput) prepare audioFormat )")
                 self.audioOutput.prepare(audioFormat: audioDescriptor.audioFormat)
             }
             if let controlTimebase = videoOutput?.displayLayer.controlTimebase, self.options.startPlayTime > 1 {
