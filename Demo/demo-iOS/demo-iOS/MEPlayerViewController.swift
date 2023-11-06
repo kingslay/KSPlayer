@@ -8,6 +8,8 @@
 
 import Foundation
 import KSPlayer
+import UIKit
+
 class MEPlayerViewController: UIViewController {
     private var player: MediaPlayerProtocol!
     override func viewDidLoad() {
