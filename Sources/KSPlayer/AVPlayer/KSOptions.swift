@@ -299,29 +299,7 @@ open class KSOptions {
     /**
             在创建解码器之前可以对KSOptions和assetTrack做一些处理。例如判断fieldOrder为tt或bb的话，那就自动加videofilters
      */
-    open func process(assetTrack: some MediaPlayerTrack) {
-        if assetTrack.mediaType == .video {
-            #if os(tvOS) || os(xrOS)
-            runInMainqueue {
-                if let displayManager = UIApplication.shared.windows.first?.avDisplayManager,
-                   displayManager.isDisplayCriteriaMatchingEnabled,
-                   !displayManager.isDisplayModeSwitchInProgress
-                {
-                    let refreshRate = assetTrack.nominalFrameRate
-                    if KSOptions.displayCriteriaFormatDescriptionEnabled, let formatDescription = assetTrack.formatDescription, #available(tvOS 17.0, *) {
-                        displayManager.preferredDisplayCriteria = AVDisplayCriteria(refreshRate: refreshRate, formatDescription: formatDescription)
-                    } else {
-                        //                    if let dynamicRange = assetTrack.dynamicRange {
-                        //                        let videoDynamicRange = availableDynamicRange(dynamicRange) ?? dynamicRange
-                        //                        displayManager.preferredDisplayCriteria = AVDisplayCriteria(refreshRate: refreshRate, videoDynamicRange: videoDynamicRange.rawValue)
-                        //                    }
-                    }
-                }
-            }
-
-            #endif
-        }
-    }
+    open func process(assetTrack _: some MediaPlayerTrack) {}
 
     open func updateVideo(refreshRate: Float, formatDescription: CMFormatDescription?) {
         #if os(tvOS) || os(xrOS)

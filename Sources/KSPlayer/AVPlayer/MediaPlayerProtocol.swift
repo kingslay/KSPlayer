@@ -227,7 +227,7 @@ public extension CMFormatDescription {
         let cotentRange: DynamicRange
         if codecType.string == "dvhe" || codecType == kCMVideoCodecType_DolbyVisionHEVC {
             cotentRange = .dolbyVision
-        } else if transferFunction == kCVImageBufferTransferFunction_SMPTE_ST_2084_PQ as String { /// HDR
+        } else if codecType.bitDepth == 10 || transferFunction == kCVImageBufferTransferFunction_SMPTE_ST_2084_PQ as String { /// HDR
             cotentRange = .hdr10
         } else if transferFunction == kCVImageBufferTransferFunction_ITU_R_2100_HLG as String { /// HLG
             cotentRange = .hlg

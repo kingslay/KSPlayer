@@ -100,7 +100,6 @@ public class FFmpegAssetTrack: MediaPlayerTrack {
 
     init?(codecpar: AVCodecParameters) {
         self.codecpar = codecpar
-        let format = AVPixelFormat(rawValue: codecpar.format)
         bitRate = codecpar.bit_rate
         // codec_tag byte order is LSB first CMFormatDescription.MediaSubType(rawValue: codecpar.codec_tag.bigEndian)
         let codecType = codecpar.codec_id.mediaSubType
@@ -169,16 +168,20 @@ public class FFmpegAssetTrack: MediaPlayerTrack {
                 }
                 isConvertNALSize = false
             }
+            let format = AVPixelFormat(rawValue: codecpar.format)
+            let fullRange = codecpar.color_range == AVCOL_RANGE_JPEG
             let dic: NSMutableDictionary = [
                 kCVImageBufferChromaLocationBottomFieldKey: kCVImageBufferChromaLocation_Left,
                 kCVImageBufferChromaLocationTopFieldKey: kCVImageBufferChromaLocation_Left,
-                kCMFormatDescriptionExtension_Depth: format.bitDepth() * Int32(format.planeCount()),
-                kCMFormatDescriptionExtension_FullRangeVideo: codecpar.color_range == AVCOL_RANGE_JPEG,
+                kCMFormatDescriptionExtension_Depth: format.bitDepth * Int32(format.planeCount),
+                kCMFormatDescriptionExtension_FullRangeVideo: fullRange,
                 codecType.rawValue == kCMVideoCodecType_HEVC ? "EnableHardwareAcceleratedVideoDecoder" : "RequireHardwareAcceleratedVideoDecoder": true,
             ]
+            // kCMFormatDescriptionExtension_BitsPerComponent
             if let atomsData {
                 dic[kCMFormatDescriptionExtension_SampleDescriptionExtensionAtoms] = [codecType.rawValue.avc: atomsData]
             }
+            dic[kCVPixelBufferPixelFormatTypeKey] = format.osType(fullRange: fullRange)
             dic[kCVImageBufferPixelAspectRatioKey] = sar.aspectRatio
             dic[kCVImageBufferColorPrimariesKey] = codecpar.color_primaries.colorPrimaries as String?
             dic[kCVImageBufferTransferFunctionKey] = codecpar.color_trc.transferFunction as String?
@@ -225,5 +228,12 @@ public class FFmpegAssetTrack: MediaPlayerTrack {
         set {
             stream?.pointee.discard = newValue ? AVDISCARD_DEFAULT : AVDISCARD_ALL
         }
+    }
+}
+
+extension FFmpegAssetTrack {
+    var pixelFormatType: OSType? {
+        let format = AVPixelFormat(codecpar.format)
+        return format.osType(fullRange: fullRangeVideo)
     }
 }

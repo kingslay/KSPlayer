@@ -64,7 +64,7 @@ class VideoSwresample: Swresample {
         self.height = height
         self.width = width
         let pixelFormatType: OSType
-        if let osType = format.osType(), osType.planeCount() == format.planeCount(), format.bitDepth() <= 8 {
+        if let osType = format.osType(), osType.planeCount == format.planeCount, format.bitDepth <= 8 {
             pixelFormatType = osType
             sws_freeContext(imgConvertCtx)
             imgConvertCtx = nil
@@ -123,7 +123,7 @@ class VideoSwresample: Swresample {
                 }
                 _ = sws_scale(imgConvertCtx, data.map { UnsafePointer($0) }, linesize, 0, height, contents, bytesPerRow)
             } else {
-                let planeCount = format.planeCount()
+                let planeCount = format.planeCount
                 for i in 0 ..< bufferPlaneCount {
                     let height = pbuf.heightOfPlane(at: i)
                     let size = Int(linesize[i])

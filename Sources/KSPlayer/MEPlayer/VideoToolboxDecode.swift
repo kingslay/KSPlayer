@@ -106,8 +106,7 @@ class DecompressionSession {
     fileprivate var assetTrack: FFmpegAssetTrack
     init?(assetTrack: FFmpegAssetTrack, options: KSOptions) {
         self.assetTrack = assetTrack
-        let format = AVPixelFormat(assetTrack.codecpar.format)
-        guard let pixelFormatType = format.osType(fullRange: assetTrack.fullRangeVideo), let formatDescription = assetTrack.formatDescription else {
+        guard let pixelFormatType = assetTrack.pixelFormatType, let formatDescription = assetTrack.formatDescription else {
             return nil
         }
         self.formatDescription = formatDescription

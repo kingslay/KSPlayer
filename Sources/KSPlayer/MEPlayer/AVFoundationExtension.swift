@@ -11,7 +11,7 @@ import FFmpegKit
 import Libavutil
 
 extension OSType {
-    func planeCount() -> UInt8 {
+    var planeCount: UInt8 {
         switch self {
         case
             kCVPixelFormatType_48RGB,
@@ -41,6 +41,15 @@ extension OSType {
             kCVPixelFormatType_420YpCbCr8PlanarFullRange:
             return 3
         default: return 2
+        }
+    }
+
+    var bitDepth: Int32 {
+        switch self {
+        case kCVPixelFormatType_420YpCbCr10BiPlanarVideoRange, kCVPixelFormatType_422YpCbCr10BiPlanarVideoRange, kCVPixelFormatType_444YpCbCr10BiPlanarVideoRange, kCVPixelFormatType_420YpCbCr10BiPlanarFullRange, kCVPixelFormatType_422YpCbCr10BiPlanarFullRange, kCVPixelFormatType_444YpCbCr10BiPlanarFullRange:
+            return 10
+        default:
+            return 8
         }
     }
 }

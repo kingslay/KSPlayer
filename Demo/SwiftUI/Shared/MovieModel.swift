@@ -34,27 +34,6 @@ class MEOptions: KSOptions {
                 hardwareDecode = false
                 asynchronousDecompression = false
             }
-            #if os(tvOS) || os(xrOS)
-            runInMainqueue { [weak self] in
-                guard let self else {
-                    return
-                }
-                if let displayManager = UIApplication.shared.windows.first?.avDisplayManager,
-                   displayManager.isDisplayCriteriaMatchingEnabled,
-                   !displayManager.isDisplayModeSwitchInProgress
-                {
-                    let refreshRate = assetTrack.nominalFrameRate
-                    if KSOptions.displayCriteriaFormatDescriptionEnabled, let formatDescription = assetTrack.formatDescription, #available(tvOS 17.0, *) {
-                        displayManager.preferredDisplayCriteria = AVDisplayCriteria(refreshRate: refreshRate, formatDescription: formatDescription)
-                    } else {
-                        if let dynamicRange = assetTrack.dynamicRange {
-                            let videoDynamicRange = self.availableDynamicRange(dynamicRange) ?? dynamicRange
-                            displayManager.preferredDisplayCriteria = AVDisplayCriteria(refreshRate: refreshRate, videoDynamicRange: videoDynamicRange.rawValue)
-                        }
-                    }
-                }
-            }
-            #endif
         }
     }
 

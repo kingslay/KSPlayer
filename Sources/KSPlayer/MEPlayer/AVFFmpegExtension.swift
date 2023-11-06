@@ -221,12 +221,12 @@ extension AVChromaLocation {
 }
 
 extension AVPixelFormat {
-    func bitDepth() -> Int32 {
+    var bitDepth: Int32 {
         let descriptor = av_pix_fmt_desc_get(self)
         return descriptor?.pointee.comp.0.depth ?? 8
     }
 
-    func planeCount() -> UInt8 {
+    var planeCount: UInt8 {
         if let desc = av_pix_fmt_desc_get(self) {
             switch desc.pointee.nb_components {
             case 3:
