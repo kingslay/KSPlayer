@@ -15,7 +15,7 @@ import AppKit
 #endif
 class SubtitleDecode: DecodeProtocol {
     private var codecContext: UnsafeMutablePointer<AVCodecContext>?
-    private let scale = VideoSwresample(dstFormat: AV_PIX_FMT_ARGB)
+    private let scale = VideoSwresample(dstFormat: AV_PIX_FMT_ARGB, isDovi: false)
     private var subtitle = AVSubtitle()
     private var startTime = TimeInterval(0)
     private var preSubtitleFrame: SubtitleFrame?

@@ -32,9 +32,10 @@ public final class MetalPlayView: UIView, VideoOutput {
         displayView.displayLayer
     }
 
+    private var isDovi: Bool = false
     private var formatDescription: CMFormatDescription? {
         didSet {
-            options.updateVideo(refreshRate: fps, formatDescription: formatDescription)
+            options.updateVideo(refreshRate: fps, isDovi: isDovi, formatDescription: formatDescription)
         }
     }
 
@@ -48,7 +49,7 @@ public final class MetalPlayView: UIView, VideoOutput {
                     displayLink.preferredFrameRateRange = CAFrameRateRange(minimum: Float(preferredFramesPerSecond), maximum: Float(preferredFramesPerSecond << 1))
                 }
                 #endif
-                options.updateVideo(refreshRate: fps, formatDescription: formatDescription)
+                options.updateVideo(refreshRate: fps, isDovi: isDovi, formatDescription: formatDescription)
             }
         }
     }
@@ -177,6 +178,7 @@ extension MetalPlayView {
             guard let pixelBuffer else {
                 return
             }
+            isDovi = frame.isDovi
             fps = frame.fps
             let cmtime = frame.cmtime
             let par = pixelBuffer.size

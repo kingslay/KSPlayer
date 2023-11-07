@@ -81,6 +81,7 @@ public extension KSOptions {
     /// true: AVSampleBufferAudioRenderer false: AVAudioEngine
     static var audioPlayerType: AudioOutput.Type = AudioEnginePlayer.self
     static var videoPlayerType: (VideoOutput & UIView).Type = MetalPlayView.self
+    static var yadifMode = 1
     static func colorSpace(ycbcrMatrix: CFString?, transferFunction: CFString?) -> CGColorSpace? {
         switch ycbcrMatrix {
         case kCVImageBufferYCbCrMatrix_ITU_R_709_2:
@@ -357,10 +358,12 @@ public final class VideoVTBFrame: MEFrame {
     public var duration: Int64 = 0
     public var position: Int64 = 0
     public var size: Int32 = 0
-    let fps: Float
+    public let fps: Float
+    public let isDovi: Bool
     var corePixelBuffer: CVPixelBuffer?
-    init(fps: Float) {
+    init(fps: Float, isDovi: Bool) {
         self.fps = fps
+        self.isDovi = isDovi
     }
 }
 

@@ -25,13 +25,15 @@ class VideoSwresample: Swresample {
     private var pool: CVPixelBufferPool?
     private let dstFormat: AVPixelFormat?
     private let fps: Float
-    init(dstFormat: AVPixelFormat? = nil, fps: Float = 60) {
+    private let isDovi: Bool
+    init(dstFormat: AVPixelFormat? = nil, fps: Float = 60, isDovi: Bool) {
         self.dstFormat = dstFormat
         self.fps = fps
+        self.isDovi = isDovi
     }
 
     func transfer(avframe: UnsafeMutablePointer<AVFrame>) throws -> MEFrame {
-        let frame = VideoVTBFrame(fps: fps)
+        let frame = VideoVTBFrame(fps: fps, isDovi: isDovi)
         if avframe.pointee.format == AV_PIX_FMT_VIDEOTOOLBOX.rawValue {
             frame.corePixelBuffer = unsafeBitCast(avframe.pointee.data.3, to: CVPixelBuffer.self)
         } else {
