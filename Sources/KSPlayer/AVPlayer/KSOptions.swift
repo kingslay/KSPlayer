@@ -490,12 +490,9 @@ public extension KSOptions {
     static func outputNumberOfChannels(channelCount: AVAudioChannelCount) -> AVAudioChannelCount {
         let maximumOutputNumberOfChannels = AVAudioChannelCount(AVAudioSession.sharedInstance().maximumOutputNumberOfChannels)
         let preferredOutputNumberOfChannels = AVAudioChannelCount(AVAudioSession.sharedInstance().preferredOutputNumberOfChannels)
-        KSLog("[audio] maximumOutputNumberOfChannels: \(maximumOutputNumberOfChannels)")
-        KSLog("[audio] preferredOutputNumberOfChannels: \(preferredOutputNumberOfChannels)")
         let isSpatialAudioEnabled = isSpatialAudioEnabled(channelCount: channelCount)
-        KSLog("[audio] isSpatialAudioEnabled: \(isSpatialAudioEnabled)")
         let isUseAudioRenderer = KSOptions.audioPlayerType == AudioRendererPlayer.self
-        KSLog("[audio] isUseAudioRenderer: \(isUseAudioRenderer)")
+        KSLog("[audio] maximumOutputNumberOfChannels: \(maximumOutputNumberOfChannels), preferredOutputNumberOfChannels: \(preferredOutputNumberOfChannels), isSpatialAudioEnabled: \(isSpatialAudioEnabled), isUseAudioRenderer: \(isUseAudioRenderer) ")
         let maxRouteChannelsCount = AVAudioSession.sharedInstance().currentRoute.outputs.compactMap {
             $0.channels?.count
         }.max() ?? 2
@@ -503,10 +500,8 @@ public extension KSOptions {
         var channelCount = channelCount
         if channelCount > 2 {
             let minChannels = min(maximumOutputNumberOfChannels, channelCount)
-            if minChannels > preferredOutputNumberOfChannels {
-                try? AVAudioSession.sharedInstance().setPreferredOutputNumberOfChannels(Int(minChannels))
-                KSLog("[audio] set preferredOutputNumberOfChannels: \(minChannels)")
-            }
+            try? AVAudioSession.sharedInstance().setPreferredOutputNumberOfChannels(Int(minChannels))
+            KSLog("[audio] set preferredOutputNumberOfChannels: \(minChannels)")
             // iOS 有空间音频功能，所以不用处理
             #if os(tvOS) || targetEnvironment(simulator)
             if !(isUseAudioRenderer && isSpatialAudioEnabled) {
@@ -516,6 +511,7 @@ public extension KSOptions {
             }
             #endif
         } else {
+            try? AVAudioSession.sharedInstance().setPreferredOutputNumberOfChannels(2)
             channelCount = 2
         }
         KSLog("[audio] outputNumberOfChannels: \(AVAudioSession.sharedInstance().outputNumberOfChannels)")

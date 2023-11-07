@@ -132,6 +132,9 @@ public class KSMEPlayer: NSObject {
     }
 
     deinit {
+        #if !os(macOS)
+        try? AVAudioSession.sharedInstance().setPreferredOutputNumberOfChannels(2)
+        #endif
         NotificationCenter.default.removeObserver(self)
         videoOutput?.invalidate()
         playerItem.shutdown()
