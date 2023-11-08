@@ -240,12 +240,9 @@ open class KSOptions {
         nil
     }
 
+    // 虽然只有iOS才支持PIP。但是因为AVSampleBufferDisplayLayer能够支持HDR10+。所以默认还是推荐用AVSampleBufferDisplayLayer
     open func isUseDisplayLayer() -> Bool {
-        #if os(iOS)
         display == .plane
-        #else
-        false
-        #endif
     }
 
     open func io(log: String) {
