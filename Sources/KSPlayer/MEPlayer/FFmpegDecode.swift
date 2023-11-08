@@ -51,7 +51,6 @@ class FFmpegDecode: DecodeProtocol {
                             assetTrack.startTime = packet.assetTrack.startTime
                             assetTrack.timebase = packet.assetTrack.timebase
                             let subtitle = SyncPlayerItemTrack<SubtitleFrame>(assetTrack: assetTrack, options: options)
-                            assetTrack.isEnabled = !assetTrack.isImageSubtitle
                             assetTrack.subtitle = subtitle
                             packet.assetTrack.closedCaptionsTrack = assetTrack
                             subtitle.decode()

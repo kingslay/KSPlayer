@@ -83,17 +83,17 @@ public class FFmpegAssetTrack: MediaPlayerTrack {
         if codecpar.codec_type == AVMEDIA_TYPE_VIDEO {
             description += ", \(nominalFrameRate) fps"
         }
-        if let value = metadata["language"] {
-            language = Locale.current.localizedString(forLanguageCode: value)
-        } else {
-            language = nil
-        }
+        language = metadata["language"]
         if let value = metadata["title"] {
             name = value
         } else {
             name = language ?? mediaType.rawValue
         }
         description = name + ", " + description
+        // AV_DISPOSITION_DEFAULT
+        if mediaType == .subtitle {
+            isEnabled = !isImageSubtitle || stream.pointee.disposition & AV_DISPOSITION_FORCED == AV_DISPOSITION_FORCED
+        }
         //        var buf = [Int8](repeating: 0, count: 256)
         //        avcodec_string(&buf, buf.count, codecpar, 0)
     }
@@ -226,7 +226,11 @@ public class FFmpegAssetTrack: MediaPlayerTrack {
             stream?.pointee.discard == AVDISCARD_DEFAULT
         }
         set {
-            stream?.pointee.discard = newValue ? AVDISCARD_DEFAULT : AVDISCARD_ALL
+            var discard = newValue ? AVDISCARD_DEFAULT : AVDISCARD_ALL
+            if mediaType == .subtitle, !isImageSubtitle {
+                discard = AVDISCARD_ALL
+            }
+            stream?.pointee.discard = discard
         }
     }
 }

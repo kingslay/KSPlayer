@@ -9,12 +9,6 @@ import Libavcodec
 import Libavutil
 
 extension FFmpegAssetTrack: SubtitleInfo {
-    public func subtitle(isEnabled: Bool) {
-        if isImageSubtitle {
-            self.isEnabled = isEnabled
-        }
-    }
-
     public var subtitleID: String {
         String(trackID)
     }

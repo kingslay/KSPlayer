@@ -268,7 +268,7 @@ open class VideoPlayerView: PlayerView {
                     guard let self else { return }
                     self.srtControl.addSubtitle(dataSouce: subtitleDataSouce)
                     if self.srtControl.selectedSubtitleInfo == nil, layer.options.autoSelectEmbedSubtitle {
-                        self.srtControl.selectedSubtitleInfo = self.srtControl.subtitleInfos.first
+                        self.srtControl.selectedSubtitleInfo = self.srtControl.subtitleInfos.first { $0.isEnabled }
                     }
                     self.toolBar.srtButton.isHidden = self.srtControl.subtitleInfos.isEmpty
                     if #available(iOS 14.0, tvOS 15.0, *) {

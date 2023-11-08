@@ -74,7 +74,6 @@ open class KSOptions {
     public var audioLocale: Locale?
     // sutile
     public var autoSelectEmbedSubtitle = true
-    public var subtitleDisable = false
     public var isSeekImageSubtitle = false
     // video
     public var display = DisplayEnum.plane

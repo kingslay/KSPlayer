@@ -133,7 +133,7 @@ public protocol SubtitleInfo: KSSubtitleProtocol, AnyObject, Hashable, Identifia
     //    var userInfo: NSMutableDictionary? { get set }
     //    var subtitleDataSouce: SubtitleDataSouce? { get set }
 //    var comment: String? { get }
-    func subtitle(isEnabled: Bool)
+    var isEnabled: Bool { get set }
 }
 
 public extension SubtitleInfo {
@@ -299,8 +299,8 @@ open class SubtitleModel: ObservableObject {
     @Published
     public var selectedSubtitleInfo: (any SubtitleInfo)? {
         didSet {
-            oldValue?.subtitle(isEnabled: false)
-            selectedSubtitleInfo?.subtitle(isEnabled: true)
+            oldValue?.isEnabled = false
+            selectedSubtitleInfo?.isEnabled = true
         }
     }
 

@@ -328,9 +328,8 @@ extension MEPlayerItem {
                 coreStream.pointee.discard = AVDISCARD_ALL
                 if let assetTrack = FFmpegAssetTrack(stream: coreStream) {
                     assetTrack.startTime = startTime
-                    if !options.subtitleDisable, assetTrack.mediaType == .subtitle {
+                    if assetTrack.mediaType == .subtitle {
                         let subtitle = SyncPlayerItemTrack<SubtitleFrame>(assetTrack: assetTrack, options: options)
-                        assetTrack.isEnabled = !assetTrack.isImageSubtitle
                         assetTrack.subtitle = subtitle
                         allPlayerItemTracks.append(subtitle)
                     }
@@ -338,9 +337,6 @@ extension MEPlayerItem {
                 }
             }
             return nil
-        }
-        if options.autoSelectEmbedSubtitle {
-            assetTracks.first { $0.mediaType == .subtitle }?.isEnabled = true
         }
         var videoIndex: Int32 = -1
         if !options.videoDisable {

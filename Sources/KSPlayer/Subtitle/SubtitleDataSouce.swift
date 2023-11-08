@@ -6,17 +6,26 @@
 //
 import Foundation
 public class EmptySubtitleInfo: SubtitleInfo {
+    public var isEnabled: Bool = true
     public let subtitleID: String = ""
     public var delay: TimeInterval = 0
     public let name = NSLocalizedString("no show subtitle", comment: "")
     public func search(for _: TimeInterval) -> [SubtitlePart] {
         []
     }
-
-    public func subtitle(isEnabled _: Bool) {}
 }
 
 public class URLSubtitleInfo: KSSubtitle, SubtitleInfo {
+    public var isEnabled: Bool = false {
+        didSet {
+            if isEnabled, parts.isEmpty {
+                Task {
+                    try? await parse(url: downloadURL, userAgent: userAgent)
+                }
+            }
+        }
+    }
+
     private var downloadURL: URL
     public var delay: TimeInterval = 0
     public private(set) var name: String
@@ -45,14 +54,6 @@ public class URLSubtitleInfo: KSSubtitle, SubtitleInfo {
                 fileURL.appendPathComponent(filename)
                 try? FileManager.default.moveItem(at: tmpUrl, to: fileURL)
                 self.downloadURL = fileURL
-            }
-        }
-    }
-
-    public func subtitle(isEnabled: Bool) {
-        if isEnabled, parts.isEmpty {
-            Task {
-                try? await parse(url: downloadURL, userAgent: userAgent)
             }
         }
     }
