@@ -330,16 +330,12 @@ public class AudioDescriptor: Equatable {
         //        AVAudioChannelLayout(layout: outChannel.layoutTag.channelLayout)
     }
 
-    public func setAudioFormat() -> AVAudioFormat {
+    public func updateAudioFormat() {
         #if os(macOS)
         let channelCount = AVAudioChannelCount(2)
         #else
-        let channelCount = KSOptions.outputNumberOfChannels(channelCount: channelCount)
+        let channelCount = KSOptions.outputNumberOfChannels(channelCount: AVAudioChannelCount(channel.nb_channels))
         #endif
-        return AudioDescriptor.audioFormat(sampleFormat: sampleFormat, sampleRate: sampleRate, outChannel: &outChannel, channelCount: channelCount)
-    }
-
-    public func updateAudioFormat() {
-        audioFormat = setAudioFormat()
+        audioFormat = AudioDescriptor.audioFormat(sampleFormat: sampleFormat, sampleRate: sampleRate, outChannel: &outChannel, channelCount: channelCount)
     }
 }
