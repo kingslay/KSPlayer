@@ -266,15 +266,16 @@ Any contributing and pull requests are warmly welcome. However, before you plan 
 Open-source projects cannot live long without your help. If you find KSPlayer to be useful, please consider supporting this 
 project by becoming a sponsor. 
 
-Thanks to [cdguy](https://github.com/cdguy) [UnknownCoder807](https://github.com/UnknownCoder807) [skrew](https://github.com/skrew) and LillyPlayer community for sponsoring a LG S95QR Sound Bar 
-
-Thanks to [skrew](https://github.com/skrew) and LillyPlayer community for sponsoring a 2022 Apple TV 4K
-
 Become a sponsor through [GitHub Sponsors](https://github.com/sponsors/kingslay/). :heart:
 
 Your user icon or company logo shows up this with a link to your home page. 
 
-[UnknownCoder807](https://github.com/UnknownCoder807)   [skrew](https://github.com/skrew)   [Kimentanm](https://github.com/Kimentanm)   [nakiostudio](https://github.com/nakiostudio)   
+[UnknownCoder807](https://github.com/UnknownCoder807)   [skrew](https://github.com/skrew)   [Kimentanm](https://github.com/Kimentanm)   [nakiostudio](https://github.com/nakiostudio)    [byMohamedali](https://github.com/byMohamedali)
+
+
+Thanks to [cdguy](https://github.com/cdguy) [UnknownCoder807](https://github.com/UnknownCoder807) [skrew](https://github.com/skrew) and LillyPlayer community for sponsoring a LG S95QR Sound Bar 
+
+Thanks to [skrew](https://github.com/skrew) and LillyPlayer community for sponsoring a 2022 Apple TV 4K
 
 ## Communication
 
