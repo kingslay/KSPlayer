@@ -110,7 +110,7 @@ public class KSAVPlayer {
     }
 
     public var naturalSize: CGSize = .zero
-    public var metadata = [String: String]()
+    public let dynamicInfo: DynamicInfo? = nil
     @available(macOS 12.0, iOS 15.0, tvOS 15.0, *)
     public var playbackCoordinator: AVPlaybackCoordinator {
         playerView.player.playbackCoordinator
@@ -126,8 +126,6 @@ public class KSAVPlayer {
     public private(set) var duration: TimeInterval = 0
     public private(set) var fileSize: Double = 0
     public private(set) var playableTime: TimeInterval = 0
-    public var audioBitrate: Int = 0
-    public var videoBitrate: Int = 0
     public var playbackRate: Float = 1 {
         didSet {
             if playbackState == .playing {

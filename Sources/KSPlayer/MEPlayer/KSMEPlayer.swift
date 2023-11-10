@@ -339,9 +339,9 @@ extension KSMEPlayer: MediaPlayerProtocol {
 
     public var seekable: Bool { playerItem.seekable }
 
-    public var videoBitrate: Int { playerItem.videoBitrate }
-
-    public var audioBitrate: Int { playerItem.audioBitrate }
+    public var dynamicInfo: DynamicInfo? {
+        playerItem.dynamicInfo
+    }
 
     public func seek(time: TimeInterval, completion: @escaping ((Bool) -> Void)) {
         let time = max(time, 0)
@@ -555,17 +555,5 @@ extension KSMEPlayer: DisplayLayerDelegate {
             // 更改contentSource会直接crash
 //            pipController?.contentSource = contentSource
         }
-    }
-}
-
-// MARK: - public functions
-
-public extension KSMEPlayer {
-    var metadata: [String: String] {
-        playerItem.metadata
-    }
-
-    var bytesRead: Int64 {
-        playerItem.bytesRead
     }
 }

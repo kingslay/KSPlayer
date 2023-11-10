@@ -228,13 +228,10 @@ class AudioSwresample: Swresample {
 public class AudioDescriptor: Equatable {
 //    static let defaultValue = AudioDescriptor()
     public let sampleRate: Int32
+    public private(set) var audioFormat: AVAudioFormat
+    fileprivate(set) var channel: AVChannelLayout
     fileprivate let sampleFormat: AVSampleFormat
-    fileprivate var channel: AVChannelLayout
     fileprivate var outChannel: AVChannelLayout
-    private(set) var audioFormat: AVAudioFormat
-    public var channelCount: AVAudioChannelCount {
-        AVAudioChannelCount(channel.nb_channels)
-    }
 
     private convenience init() {
         self.init(sampleFormat: AV_SAMPLE_FMT_FLT, sampleRate: 44100, channel: AVChannelLayout.defaultValue)

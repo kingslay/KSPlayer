@@ -48,7 +48,7 @@ public struct KSVideoPlayerView: View {
             KSVideoPlayer(coordinator: playerCoordinator, url: url, options: options)
                 .onStateChanged { playerLayer, state in
                     if state == .readyToPlay {
-                        if let movieTitle = playerLayer.player.metadata["title"] {
+                        if let movieTitle = playerLayer.player.dynamicInfo?.metadata["title"] {
                             title = movieTitle
                         }
                     }
@@ -523,8 +523,14 @@ struct VideoSettingView: View {
                 subtitleModel.searchSubtitle(query: subtitleTitle, languages: ["zh-cn"])
             }
             Text("Stream Type: \((videoTracks?.first { $0.isEnabled }?.fieldOrder ?? .progressive).description)")
-            Text("Audio bitrate: \(config.playerLayer?.player.audioBitrate ?? 0) b/s")
-            Text("Video bitrate: \(config.playerLayer?.player.videoBitrate ?? 0) b/s")
+            if let dynamicInfo = config.playerLayer?.player.dynamicInfo {
+                Text("Display FPS: \(dynamicInfo.displayFPS) ")
+                Text("Audio Video sync: \(dynamicInfo.audioVideoSyncDiff)")
+                Text("Dropped Frames: \(dynamicInfo.droppedVideoFrameCount + dynamicInfo.droppedVideoPacketCount)")
+                Text("Bytes Read: \(dynamicInfo.bytesRead)")
+                Text("Audio bitrate: \(dynamicInfo.audioBitrate) b/s")
+                Text("Video bitrate: \(dynamicInfo.videoBitrate) b/s")
+            }
             if let fileSize = config.playerLayer?.player.fileSize, fileSize > 0 {
                 Text("File Size: \(String(format: "%.1f", fileSize / 1_000_000))MB")
             }

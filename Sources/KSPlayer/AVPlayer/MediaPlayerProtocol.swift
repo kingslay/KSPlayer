@@ -16,14 +16,45 @@ import AppKit
 public protocol MediaPlayback: AnyObject {
     var duration: TimeInterval { get }
     var fileSize: Double { get }
-    var metadata: [String: String] { get }
     var naturalSize: CGSize { get }
-    var audioBitrate: Int { get }
-    var videoBitrate: Int { get }
     var currentPlaybackTime: TimeInterval { get }
     func prepareToPlay()
     func shutdown()
     func seek(time: TimeInterval, completion: @escaping ((Bool) -> Void))
+}
+
+public class DynamicInfo {
+    private let metadataBlock: () -> [String: String]
+    private let bytesReadBlock: () -> Int64
+    private let audioBitrateBlock: () -> Int
+    private let videoBitrateBlock: () -> Int
+    public var metadata: [String: String] {
+        metadataBlock()
+    }
+
+    public var bytesRead: Int64 {
+        bytesReadBlock()
+    }
+
+    public var audioBitrate: Int {
+        audioBitrateBlock()
+    }
+
+    public var videoBitrate: Int {
+        videoBitrateBlock()
+    }
+
+    @Published
+    public var displayFPS = 0.0
+    public var audioVideoSyncDiff = 0.0
+    public var droppedVideoFrameCount = UInt32(0)
+    public var droppedVideoPacketCount = UInt32(0)
+    init(metadata: @escaping () -> [String: String], bytesRead: @escaping () -> Int64, audioBitrate: @escaping () -> Int, videoBitrate: @escaping () -> Int) {
+        metadataBlock = metadata
+        bytesReadBlock = bytesRead
+        audioBitrateBlock = audioBitrate
+        videoBitrateBlock = videoBitrate
+    }
 }
 
 public protocol MediaPlayerProtocol: MediaPlayback {
@@ -48,6 +79,7 @@ public protocol MediaPlayerProtocol: MediaPlayback {
     var playbackCoordinator: AVPlaybackCoordinator { get }
     @available(tvOS 14.0, *)
     var pipController: KSPictureInPictureController? { get }
+    var dynamicInfo: DynamicInfo? { get }
     init(url: URL, options: KSOptions)
     func replace(url: URL, options: KSOptions)
     func play()
@@ -173,40 +205,7 @@ public extension MediaPlayerTrack {
     }
 
     var naturalSize: CGSize {
-        formatDescription.map { description in
-            let dimensions = description.dimensions
-            let aspectRatio = aspectRatio
-            return CGSize(width: Int(dimensions.width), height: Int(CGFloat(dimensions.height) * aspectRatio.height / aspectRatio.width))
-        } ?? .zero
-    }
-
-    var aspectRatio: CGSize {
-        if let formatDescription, let dictionary = CMFormatDescriptionGetExtensions(formatDescription) as NSDictionary? {
-            if let ratio = dictionary[kCVImageBufferPixelAspectRatioKey] as? NSDictionary,
-               let horizontal = (ratio[kCVImageBufferPixelAspectRatioHorizontalSpacingKey] as? NSNumber)?.intValue,
-               let vertical = (ratio[kCVImageBufferPixelAspectRatioVerticalSpacingKey] as? NSNumber)?.intValue,
-               horizontal > 0, vertical > 0
-            {
-                return CGSize(width: horizontal, height: vertical)
-            }
-        }
-        return CGSize(width: 1, height: 1)
-    }
-
-    var depth: Int32 {
-        if let formatDescription, let dictionary = CMFormatDescriptionGetExtensions(formatDescription) as NSDictionary? {
-            return dictionary[kCMFormatDescriptionExtension_Depth] as? Int32 ?? 24
-        } else {
-            return 24
-        }
-    }
-
-    var fullRangeVideo: Bool {
-        if let formatDescription, let dictionary = CMFormatDescriptionGetExtensions(formatDescription) as NSDictionary? {
-            return dictionary[kCMFormatDescriptionExtension_FullRangeVideo] as? Bool ?? false
-        } else {
-            return false
-        }
+        formatDescription?.naturalSize ?? .zero
     }
 
     var colorPrimaries: String? {
@@ -262,6 +261,40 @@ public extension CMFormatDescription {
             return dictionary[kCVImageBufferYCbCrMatrixKey] as? String
         } else {
             return nil
+        }
+    }
+
+    var naturalSize: CGSize {
+        let aspectRatio = aspectRatio
+        return CGSize(width: Int(dimensions.width), height: Int(CGFloat(dimensions.height) * aspectRatio.height / aspectRatio.width))
+    }
+
+    var aspectRatio: CGSize {
+        if let dictionary = CMFormatDescriptionGetExtensions(self) as NSDictionary? {
+            if let ratio = dictionary[kCVImageBufferPixelAspectRatioKey] as? NSDictionary,
+               let horizontal = (ratio[kCVImageBufferPixelAspectRatioHorizontalSpacingKey] as? NSNumber)?.intValue,
+               let vertical = (ratio[kCVImageBufferPixelAspectRatioVerticalSpacingKey] as? NSNumber)?.intValue,
+               horizontal > 0, vertical > 0
+            {
+                return CGSize(width: horizontal, height: vertical)
+            }
+        }
+        return CGSize(width: 1, height: 1)
+    }
+
+    var depth: Int32 {
+        if let dictionary = CMFormatDescriptionGetExtensions(self) as NSDictionary? {
+            return dictionary[kCMFormatDescriptionExtension_Depth] as? Int32 ?? 24
+        } else {
+            return 24
+        }
+    }
+
+    var fullRangeVideo: Bool {
+        if let dictionary = CMFormatDescriptionGetExtensions(self) as NSDictionary? {
+            return dictionary[kCMFormatDescriptionExtension_FullRangeVideo] as? Bool ?? false
+        } else {
+            return false
         }
     }
 }

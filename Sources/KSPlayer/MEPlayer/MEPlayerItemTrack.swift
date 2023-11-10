@@ -52,7 +52,7 @@ class SyncPlayerItemTrack<Frame: MEFrame>: PlayerItemTrackProtocol, CustomString
         fps = assetTrack.nominalFrameRate
         // 默认缓存队列大小跟帧率挂钩,经测试除以4，最优
         if mediaType == .audio {
-            let capacity = options.audioFrameMaxCount(fps: fps, channelCount: Int(assetTrack.audioDescriptor?.channelCount ?? 2))
+            let capacity = options.audioFrameMaxCount(fps: fps, channelCount: Int(assetTrack.audioDescriptor?.audioFormat.channelCount ?? 2))
             outputRenderQueue = CircularBuffer(initialCapacity: capacity, expanding: false)
         } else if mediaType == .video {
             outputRenderQueue = CircularBuffer(initialCapacity: options.videoFrameMaxCount(fps: fps, naturalSize: assetTrack.naturalSize), sorted: true, expanding: false)
@@ -118,7 +118,7 @@ class SyncPlayerItemTrack<Frame: MEFrame>: PlayerItemTrackProtocol, CustomString
                 bitrate = 0
                 lastPacketBytes = 0
                 lastPacketSeconds = seconds
-            } else if diff > 0.5 {
+            } else if diff > 1 {
                 bitrate = Double(lastPacketBytes) / diff
                 lastPacketBytes = 0
                 lastPacketSeconds = seconds

@@ -327,7 +327,7 @@ open class KSOptions {
     }
 
 //    private var lastMediaTime = CACurrentMediaTime()
-    open func videoClockSync(main: KSClock, nextVideoTime: TimeInterval, fps: Float, frameCount: Int) -> ClockProcessType {
+    open func videoClockSync(main: KSClock, nextVideoTime: TimeInterval, fps: Float, frameCount: Int) -> (Double, ClockProcessType) {
         var desire = main.getTime() - videoDelay
         #if !os(macOS)
         desire -= AVAudioSession.sharedInstance().outputLatency
@@ -335,10 +335,10 @@ open class KSOptions {
         let diff = nextVideoTime - desire
 //        print("[video] video diff \(diff) audio \(main.positionTime) interval \(CACurrentMediaTime() - main.lastMediaTime) render interval \(CACurrentMediaTime() - lastMediaTime)")
         if diff > 10 || diff < -10 {
-            return .next
+            return (diff, .next)
         } else if diff > 1 / Double(fps * 2) {
             videoClockDelayCount = 0
-            return .remain
+            return (diff, .remain)
         } else {
             if diff < -4 / Double(fps) {
                 videoClockDelayCount += 1
@@ -346,34 +346,34 @@ open class KSOptions {
                 if frameCount == 1 {
                     if diff < -1, videoClockDelayCount % 10 == 0 {
                         KSLog("\(log) drop gop Packet")
-                        return .dropGOPPacket
+                        return (diff, .dropGOPPacket)
                     } else if videoClockDelayCount % 5 == 0 {
                         KSLog("\(log) drop next frame")
-                        return .dropNextFrame
+                        return (diff, .dropNextFrame)
                     } else {
-                        return .next
+                        return (diff, .next)
                     }
                 } else {
                     if diff < -8, videoClockDelayCount % 100 == 0 {
                         KSLog("\(log) seek video track")
-                        return .seek
+                        return (diff, .seek)
                     }
                     if diff < -1, videoClockDelayCount % 10 == 0 {
                         KSLog("\(log) flush video track")
-                        return .flush
+                        return (diff, .flush)
                     }
                     if videoClockDelayCount % 2 == 0 {
                         KSLog("\(log) drop next frame")
-                        return .dropNextFrame
+                        return (diff, .dropNextFrame)
                     } else {
-                        return .next
+                        return (diff, .next)
                     }
                 }
             } else {
                 videoClockDelayCount = 0
 //                print("[video] video interval \(CACurrentMediaTime() - lastMediaTime)")
 //                lastMediaTime = CACurrentMediaTime()
-                return .next
+                return (diff, .next)
             }
         }
     }

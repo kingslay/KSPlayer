@@ -33,12 +33,13 @@ final class MEPlayerItem {
     private var allPlayerItemTracks = [PlayerItemTrackProtocol]()
     private var maxFrameDuration = 10.0
     private var videoAudioTracks = [CapacityProtocol]()
-
     private var audioRecognizer: AudioRecognizer?
     private var videoTrack: SyncPlayerItemTrack<VideoVTBFrame>?
     private var audioTrack: SyncPlayerItemTrack<AudioFrame>?
     private(set) var assetTracks = [FFmpegAssetTrack]()
     private var videoAdaptation: VideoAdaptationState?
+    private var videoDisplayCount = UInt8(0)
+    private var lastVideoDisplayTime = CACurrentMediaTime()
     var currentPlaybackTime: TimeInterval {
         state == .seeking ? seekTime : mainClock().positionTime
     }
@@ -76,6 +77,16 @@ final class MEPlayerItem {
 
     private lazy var timer: Timer = .scheduledTimer(withTimeInterval: 0.05, repeats: true) { [weak self] _ in
         self?.codecDidChangeCapacity()
+    }
+
+    lazy var dynamicInfo = DynamicInfo { [weak self] in
+        toDictionary(self?.formatCtx?.pointee.metadata)
+    } bytesRead: { [weak self] in
+        self?.formatCtx?.pointee.pb.pointee.bytes_read ?? 0
+    } audioBitrate: { [weak self] in
+        Int(8 * (self?.audioTrack?.bitrate ?? 0))
+    } videoBitrate: { [weak self] in
+        Int(8 * (self?.videoTrack?.bitrate ?? 0))
     }
 
     private static var onceInitial: Void = {
@@ -552,27 +563,9 @@ extension MEPlayerItem {
     }
 }
 
-extension MEPlayerItem {
-    var metadata: [String: String] {
-        toDictionary(formatCtx?.pointee.metadata)
-    }
-
-    var bytesRead: Int64 {
-        formatCtx?.pointee.pb.pointee.bytes_read ?? 0
-    }
-}
-
 // MARK: MediaPlayback
 
 extension MEPlayerItem: MediaPlayback {
-    var videoBitrate: Int {
-        Int(8 * (videoTrack?.bitrate ?? 0))
-    }
-
-    var audioBitrate: Int {
-        Int(8 * (audioTrack?.bitrate ?? 0))
-    }
-
     var seekable: Bool {
         guard let formatCtx else {
             return false
@@ -738,6 +731,14 @@ extension MEPlayerItem: OutputRenderSourceDelegate {
 
     func setVideo(time: CMTime) {
         videoClock.positionTime = time.seconds
+        let time = CACurrentMediaTime()
+        videoDisplayCount += 1
+        let diff = time - lastVideoDisplayTime
+        if diff > 1 {
+            dynamicInfo.displayFPS = Double(videoDisplayCount) / diff
+            videoDisplayCount = 0
+            lastVideoDisplayTime = time
+        }
     }
 
     func setAudio(time: CMTime) {
@@ -751,7 +752,7 @@ extension MEPlayerItem: OutputRenderSourceDelegate {
         var type: ClockProcessType = force ? .next : .remain
         let predicate: ((VideoVTBFrame, Int) -> Bool)? = force ? nil : { [weak self] frame, count -> Bool in
             guard let self else { return true }
-            type = self.options.videoClockSync(main: self.mainClock(), nextVideoTime: frame.seconds, fps: frame.fps, frameCount: count)
+            (self.dynamicInfo.audioVideoSyncDiff, type) = self.options.videoClockSync(main: self.mainClock(), nextVideoTime: frame.seconds, fps: frame.fps, frameCount: count)
             return type != .remain
         }
         let frame = videoTrack.getOutputRender(where: predicate)
@@ -761,16 +762,23 @@ extension MEPlayerItem: OutputRenderSourceDelegate {
         case .next:
             break
         case .dropNextFrame:
-            _ = videoTrack.getOutputRender(where: nil)
+            if videoTrack.getOutputRender(where: nil) != nil {
+                dynamicInfo.droppedVideoFrameCount += 1
+            }
         case .flush:
+            let count = videoTrack.outputRenderQueue.count
             videoTrack.outputRenderQueue.flush()
+            dynamicInfo.droppedVideoFrameCount += UInt32(count)
         case .seek:
             videoTrack.outputRenderQueue.flush()
             videoTrack.seekTime = currentPlaybackTime
         case .dropNextPacket:
             if let videoTrack = videoTrack as? AsyncPlayerItemTrack {
-                _ = videoTrack.packetQueue.pop { item, _ -> Bool in
+                let packet = videoTrack.packetQueue.pop { item, _ -> Bool in
                     !item.isKeyFrame
+                }
+                if packet != nil {
+                    dynamicInfo.droppedVideoPacketCount += 1
                 }
             }
         case .dropGOPPacket:
@@ -779,6 +787,9 @@ extension MEPlayerItem: OutputRenderSourceDelegate {
                 repeat {
                     packet = videoTrack.packetQueue.pop { item, _ -> Bool in
                         !item.isKeyFrame
+                    }
+                    if packet != nil {
+                        dynamicInfo.droppedVideoPacketCount += 1
                     }
                 } while packet != nil
             }
