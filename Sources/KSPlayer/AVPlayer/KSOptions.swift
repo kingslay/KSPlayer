@@ -501,16 +501,16 @@ public extension KSOptions {
             // iOS 有空间音频功能，所以不用处理
             #if os(tvOS) || targetEnvironment(simulator)
             if !(isUseAudioRenderer && isSpatialAudioEnabled) {
-                // 不要用maxRouteChannelsCount来panduan，有可能会不准。导致多音道设备也返回2（一开始播放一个2声道，就容易出现）
+                // 不要用maxRouteChannelsCount来判断，有可能会不准。导致多音道设备也返回2（一开始播放一个2声道，就容易出现），也不能用outputNumberOfChannels来判断，有可能会返回2
 //                channelCount = AVAudioChannelCount(min(AVAudioSession.sharedInstance().outputNumberOfChannels, maxRouteChannelsCount))
-                channelCount = AVAudioChannelCount(AVAudioSession.sharedInstance().outputNumberOfChannels)
+                channelCount = minChannels
             }
             #endif
         } else {
             try? AVAudioSession.sharedInstance().setPreferredOutputNumberOfChannels(2)
             channelCount = 2
         }
-        KSLog("[audio] outputNumberOfChannels: \(AVAudioSession.sharedInstance().outputNumberOfChannels)")
+        KSLog("[audio] outputNumberOfChannels: \(AVAudioSession.sharedInstance().outputNumberOfChannels) output channelCount: \(channelCount)")
         return channelCount
     }
     #endif

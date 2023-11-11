@@ -101,12 +101,17 @@ public final class AudioUnitPlayer: AudioOutput {
         sourceNodeAudioFormat = audioFormat
         sampleSize = audioFormat.sampleSize
         var audioStreamBasicDescription = audioFormat.formatDescription.audioStreamBasicDescription
-        let audioStreamBasicDescriptionSize = UInt32(MemoryLayout<AudioStreamBasicDescription>.size)
         AudioUnitSetProperty(audioUnitForOutput,
                              kAudioUnitProperty_StreamFormat,
                              kAudioUnitScope_Input, 0,
                              &audioStreamBasicDescription,
-                             audioStreamBasicDescriptionSize)
+                             UInt32(MemoryLayout<AudioStreamBasicDescription>.size))
+        let channelLayout = audioFormat.channelLayout?.layout
+        AudioUnitSetProperty(audioUnitForOutput,
+                             kAudioUnitProperty_AudioChannelLayout,
+                             kAudioUnitScope_Input, 0,
+                             channelLayout,
+                             UInt32(MemoryLayout<AudioChannelLayout>.size))
         var inputCallbackStruct = renderCallbackStruct()
         AudioUnitSetProperty(audioUnitForOutput,
                              kAudioUnitProperty_SetRenderCallback,
@@ -114,12 +119,6 @@ public final class AudioUnitPlayer: AudioOutput {
                              &inputCallbackStruct,
                              UInt32(MemoryLayout<AURenderCallbackStruct>.size))
         addRenderNotify(audioUnit: audioUnitForOutput)
-        let channelLayout = audioFormat.channelLayout?.layout
-        AudioUnitSetProperty(audioUnitForOutput,
-                             kAudioUnitProperty_AudioChannelLayout,
-                             kAudioUnitScope_Input, 0,
-                             channelLayout,
-                             UInt32(MemoryLayout<AudioChannelLayout>.size))
         AudioUnitInitialize(audioUnitForOutput)
         var size = UInt32(MemoryLayout<Float64>.size)
         AudioUnitGetProperty(audioUnitForOutput,

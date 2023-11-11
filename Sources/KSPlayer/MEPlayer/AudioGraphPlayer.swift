@@ -175,6 +175,11 @@ public final class AudioGraphPlayer: AudioOutput, AudioDynamicsProcessor {
                                      kAudioUnitScope_Output, 0,
                                      &audioStreamBasicDescription,
                                      audioStreamBasicDescriptionSize)
+                AudioUnitSetProperty(unit,
+                                     kAudioUnitProperty_AudioChannelLayout,
+                                     kAudioUnitScope_Output, 0,
+                                     channelLayout,
+                                     UInt32(MemoryLayout<AudioChannelLayout>.size))
             }
             if unit == audioUnitForTimePitch {
                 var inputCallbackStruct = renderCallbackStruct()
