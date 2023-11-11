@@ -10,28 +10,30 @@ import Libavformat
 #if canImport(VideoToolbox)
 import VideoToolbox
 class VideoToolboxDecode: DecodeProtocol {
-    private var session: DecompressionSession? {
+    private var session: DecompressionSession {
         didSet {
-            if let oldValue {
-                VTDecompressionSessionInvalidate(oldValue.decompressionSession)
-            }
+            VTDecompressionSessionInvalidate(oldValue.decompressionSession)
         }
     }
 
     private let options: KSOptions
     private var startTime = Int64(0)
     private var lastPosition = Int64(0)
-    required convenience init(assetTrack: FFmpegAssetTrack, options: KSOptions) {
-        self.init(options: options, session: DecompressionSession(assetTrack: assetTrack, options: options))
-    }
+    private var needReconfig = false
 
-    init(options: KSOptions, session: DecompressionSession?) {
+    init(options: KSOptions, session: DecompressionSession) {
         self.options = options
         self.session = session
     }
 
     func decodeFrame(from packet: Packet, completionHandler: @escaping (Result<MEFrame, Error>) -> Void) {
-        guard let corePacket = packet.corePacket?.pointee, let data = corePacket.data, let session else {
+        if needReconfig {
+            // 解决从后台切换到前台，解码失败的问题
+            session = DecompressionSession(assetTrack: session.assetTrack, options: options)!
+            doFlushCodec()
+            needReconfig = false
+        }
+        guard let corePacket = packet.corePacket?.pointee, let data = corePacket.data else {
             return
         }
         do {
@@ -52,6 +54,9 @@ class VideoToolboxDecode: DecodeProtocol {
                     if status == kVTInvalidSessionErr || status == kVTVideoDecoderMalfunctionErr || status == kVTVideoDecoderBadDataErr {
                         if packet.isKeyFrame {
                             completionHandler(.failure(NSError(errorCode: .codecVideoReceiveFrame, avErrorCode: status)))
+                        } else {
+                            // 解决从后台切换到前台，解码失败的问题
+                            self.needReconfig = true
                         }
                     }
                     return
@@ -70,14 +75,15 @@ class VideoToolboxDecode: DecodeProtocol {
                 completionHandler(.success(frame))
             }
             if status == noErr {
-                VTDecompressionSessionWaitForAsynchronousFrames(session.decompressionSession)
+                if !flags.contains(._EnableAsynchronousDecompression) {
+                    VTDecompressionSessionWaitForAsynchronousFrames(session.decompressionSession)
+                }
             } else if status == kVTInvalidSessionErr || status == kVTVideoDecoderMalfunctionErr || status == kVTVideoDecoderBadDataErr {
                 if packet.isKeyFrame {
                     throw NSError(errorCode: .codecVideoReceiveFrame, avErrorCode: status)
                 } else {
                     // 解决从后台切换到前台，解码失败的问题
-                    self.session = DecompressionSession(assetTrack: session.assetTrack, options: options)
-                    doFlushCodec()
+                    needReconfig = true
                 }
             }
         } catch {
@@ -91,7 +97,7 @@ class VideoToolboxDecode: DecodeProtocol {
     }
 
     func shutdown() {
-        session = nil
+        VTDecompressionSessionInvalidate(session.decompressionSession)
     }
 
     func decode() {

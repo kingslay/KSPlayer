@@ -282,7 +282,6 @@ public extension Dictionary {
 }
 
 protocol DecodeProtocol {
-    init(assetTrack: FFmpegAssetTrack, options: KSOptions)
     func decode()
     func decodeFrame(from packet: Packet, completionHandler: @escaping (Result<MEFrame, Error>) -> Void)
     func doFlushCodec()

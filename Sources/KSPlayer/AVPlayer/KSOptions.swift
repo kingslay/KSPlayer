@@ -32,7 +32,7 @@ open class KSOptions {
      AVSEEK_FLAG_ANY: 4
      AVSEEK_FLAG_FRAME: 8
      */
-    public var seekFlags = Int32(0)
+    public var seekFlags = Int32(1)
     // ffmpeg only cache http
     public var cache = false
     //  record stream
