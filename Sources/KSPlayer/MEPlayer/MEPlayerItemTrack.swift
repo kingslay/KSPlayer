@@ -137,6 +137,7 @@ class SyncPlayerItemTrack<Frame: MEFrame>: PlayerItemTrackProtocol, CustomString
                 }
                 if self.seekTime > 0 {
                     let timestamp = frame.position + frame.duration
+//                    KSLog("seektime \(self.seekTime), frame \(frame.seconds), mediaType \(packet.assetTrack.mediaType)")
                     if timestamp <= 0 || frame.timebase.cmtime(for: timestamp).seconds < self.seekTime {
                         return
                     } else {
