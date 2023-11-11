@@ -257,7 +257,7 @@ extension View {
     }
 }
 
-@available(iOS 15, tvOS 16, macOS 12, *)
+@available(iOS 16, tvOS 16, macOS 13, *)
 struct VideoControllerView: View {
     @ObservedObject
     fileprivate var config: KSVideoPlayer.Coordinator
@@ -374,7 +374,8 @@ extension EventModifiers {
 
 @available(iOS 16, tvOS 16, macOS 13, *)
 struct VideoSubtitleView: View {
-    @ObservedObject fileprivate var model: SubtitleModel
+    @ObservedObject
+    fileprivate var model: SubtitleModel
     var body: some View {
         ZStack {
             ForEach(model.parts) { part in
@@ -440,7 +441,7 @@ fileprivate extension SubtitlePart {
     }
 }
 
-@available(iOS 15, tvOS 16, macOS 12, *)
+@available(iOS 16, tvOS 16, macOS 13, *)
 struct VideoSettingView: View {
     @ObservedObject
     fileprivate var config: KSVideoPlayer.Coordinator
@@ -522,28 +523,36 @@ struct VideoSettingView: View {
             Button("Search Sutitle") {
                 subtitleModel.searchSubtitle(query: subtitleTitle, languages: ["zh-cn"])
             }
-            Text("Stream Type: \((videoTracks?.first { $0.isEnabled }?.fieldOrder ?? .progressive).description)")
+            LabeledContent("Stream Type", value: (videoTracks?.first { $0.isEnabled }?.fieldOrder ?? .progressive).description)
             if let dynamicInfo = config.playerLayer?.player.dynamicInfo {
-                Text("Display FPS: \(dynamicInfo.displayFPS) ")
-                Text("Audio Video sync: \(dynamicInfo.audioVideoSyncDiff)")
-                Text("Dropped Frames: \(dynamicInfo.droppedVideoFrameCount + dynamicInfo.droppedVideoPacketCount)")
-                Text("Bytes Read: \(dynamicInfo.bytesRead)")
-                Text("Audio bitrate: \(dynamicInfo.audioBitrate) b/s")
-                Text("Video bitrate: \(dynamicInfo.videoBitrate) b/s")
+                DynamicInfoView(dynamicInfo: dynamicInfo)
             }
             if let fileSize = config.playerLayer?.player.fileSize, fileSize > 0 {
-                Text("File Size: \(String(format: "%.1f", fileSize / 1_000_000))MB")
+                LabeledContent("File Size", value: fileSize.kmFormatted + "B")
             }
         }
-        .padding()
         #if os(macOS) || targetEnvironment(macCatalyst)
-            .toolbar {
-                Button("Done") {
-                    dismiss()
-                }
-                .keyboardShortcut(.defaultAction)
+        .toolbar {
+            Button("Done") {
+                dismiss()
             }
+            .keyboardShortcut(.defaultAction)
+        }
         #endif
+    }
+}
+
+@available(iOS 16, tvOS 16, macOS 13, *)
+public struct DynamicInfoView: View {
+    @ObservedObject
+    fileprivate var dynamicInfo: DynamicInfo
+    public var body: some View {
+        LabeledContent("Display FPS", value: dynamicInfo.displayFPS, format: .number)
+        LabeledContent("Audio Video sync", value: dynamicInfo.audioVideoSyncDiff, format: .number)
+        LabeledContent("Dropped Frames", value: dynamicInfo.droppedVideoFrameCount + dynamicInfo.droppedVideoPacketCount, format: .number)
+        LabeledContent("Bytes Read", value: dynamicInfo.bytesRead.kmFormatted + "B")
+        LabeledContent("Audio bitrate", value: dynamicInfo.audioBitrate.kmFormatted + "bps")
+        LabeledContent("Video bitrate", value: dynamicInfo.videoBitrate.kmFormatted + "bps")
     }
 }
 
@@ -561,6 +570,9 @@ public struct PlatformView<Content: View>: View {
         Form {
             content()
         }
+        #if os(macOS)
+        .padding()
+        #endif
         #endif
     }
 

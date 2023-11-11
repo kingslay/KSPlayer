@@ -23,7 +23,7 @@ public protocol MediaPlayback: AnyObject {
     func seek(time: TimeInterval, completion: @escaping ((Bool) -> Void))
 }
 
-public class DynamicInfo {
+public class DynamicInfo: ObservableObject {
     private let metadataBlock: () -> [String: String]
     private let bytesReadBlock: () -> Int64
     private let audioBitrateBlock: () -> Int

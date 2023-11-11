@@ -497,6 +497,27 @@ public extension Int {
     }
 }
 
+public extension FixedWidthInteger {
+    var kmFormatted: String {
+        Double(self).kmFormatted
+    }
+}
+
+public extension Double {
+    var kmFormatted: String {
+//        return .formatted(.number.notation(.compactName))
+        if self >= 1_000_000 {
+            return String(format: "%.1fM", locale: Locale.current, self / 1_000_000)
+//                .replacingOccurrences(of: ".0", with: "")
+        } else if self >= 10000, self <= 999_999 {
+            return String(format: "%.1fK", locale: Locale.current, self / 1000)
+//                .replacingOccurrences(of: ".0", with: "")
+        } else {
+            return String(format: "%.0f", locale: Locale.current, self)
+        }
+    }
+}
+
 extension TextAlignment: RawRepresentable {
     public typealias RawValue = String
     public init?(rawValue: RawValue) {
