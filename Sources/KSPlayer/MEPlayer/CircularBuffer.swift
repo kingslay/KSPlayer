@@ -16,22 +16,24 @@ public class CircularBuffer<Item: ObjectQueueItem> {
     private let expanding: Bool
     private let sorted: Bool
     private var destroyed = false
-    @inline(__always) private var _count: Int { Int(tailIndex &- headIndex) }
-    @inline(__always) public var count: Int {
+    @inline(__always)
+    private var _count: Int { Int(tailIndex &- headIndex) }
+    @inline(__always)
+    public var count: Int {
 //        condition.lock()
 //        defer { condition.unlock() }
         Int(tailIndex &- headIndex)
     }
 
-    public var maxCount: Int
+    public internal(set) var fps: Float = 24
+    public private(set) var maxCount: Int
     private var mask: UInt
-
     public init(initialCapacity: Int = 256, sorted: Bool = false, expanding: Bool = true) {
         self.expanding = expanding
         self.sorted = sorted
         let capacity = initialCapacity.nextPowerOf2()
-        _buffer = ContiguousArray<Item?>(repeating: nil, count: capacity)
-        maxCount = capacity
+        _buffer = ContiguousArray<Item?>(repeating: nil, count: Int(capacity))
+        maxCount = Int(capacity)
         mask = UInt(maxCount - 1)
         assert(_buffer.count == capacity)
     }

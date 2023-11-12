@@ -223,12 +223,17 @@ open class KSOptions {
         nil
     }
 
-    open func videoFrameMaxCount(fps _: Float, naturalSize _: CGSize) -> Int {
-        16
+    open func videoFrameMaxCount(fps _: Float, naturalSize _: CGSize, isLive: Bool) -> UInt8 {
+        isLive ? 4 : 16
     }
 
-    open func audioFrameMaxCount(fps: Float, channelCount _: Int) -> Int {
-        Int(fps) >> 2
+    open func audioFrameMaxCount(fps: Float, channelCount _: Int) -> UInt8 {
+        let count = Int(fps) >> 2
+        if count >= UInt8.max {
+            return UInt8.max
+        } else {
+            return UInt8(count)
+        }
     }
 
     /// customize dar

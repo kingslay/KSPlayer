@@ -37,6 +37,12 @@ public class FFmpegAssetTrack: MediaPlayerTrack {
     let isConvertNALSize: Bool
     public var description: String {
         var description = codecName
+        if let formatName {
+            description += ", \(formatName)"
+        }
+        if bitsPerRawSample > 0 {
+            description += "(\(bitsPerRawSample.kmFormatted) bit)"
+        }
         if let audioDescriptor {
             description += ", \(audioDescriptor.sampleRate)Hz"
             description += ", \(audioDescriptor.channel.description)"
@@ -45,19 +51,13 @@ public class FFmpegAssetTrack: MediaPlayerTrack {
             if mediaType == .video {
                 let naturalSize = formatDescription.naturalSize
                 description += ", \(Int(naturalSize.width))x\(Int(naturalSize.height))"
-                description += ", \(nominalFrameRate) fps"
+                description += String(format: ", %.2f fps", nominalFrameRate)
             }
         }
-        if let formatName {
-            description += ", \(formatName)"
+        if bitRate > 0 {
+            description += ", \(bitRate.kmFormatted)bps"
         }
 
-        if bitRate > 0 {
-            description += ", \(bitRate)BPS"
-        }
-        if bitsPerRawSample > 0 {
-            description += ", (\(bitsPerRawSample) bit)"
-        }
         return description
     }
 
@@ -226,7 +226,6 @@ public class FFmpegAssetTrack: MediaPlayerTrack {
             } else {
                 formatName = nil
             }
-            let naturalSize = CGSize(width: Int(codecpar.width), height: Int(CGFloat(codecpar.height) * sar.height / sar.width))
         } else if codecpar.codec_type == AVMEDIA_TYPE_SUBTITLE {
             mediaType = .subtitle
             audioDescriptor = nil
@@ -253,7 +252,7 @@ public class FFmpegAssetTrack: MediaPlayerTrack {
         set {
             var discard = newValue ? AVDISCARD_DEFAULT : AVDISCARD_ALL
             if mediaType == .subtitle, !isImageSubtitle {
-                discard = AVDISCARD_ALL
+                discard = AVDISCARD_DEFAULT
             }
             stream?.pointee.discard = discard
         }

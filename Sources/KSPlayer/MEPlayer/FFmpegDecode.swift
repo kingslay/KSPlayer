@@ -50,7 +50,7 @@ class FFmpegDecode: DecodeProtocol {
                             assetTrack.name = "Closed Captions"
                             assetTrack.startTime = packet.assetTrack.startTime
                             assetTrack.timebase = packet.assetTrack.timebase
-                            let subtitle = SyncPlayerItemTrack<SubtitleFrame>(assetTrack: assetTrack, options: options)
+                            let subtitle = SyncPlayerItemTrack<SubtitleFrame>(mediaType: .subtitle, frameCapacity: 255, options: options)
                             assetTrack.subtitle = subtitle
                             packet.assetTrack.closedCaptionsTrack = assetTrack
                             subtitle.decode()

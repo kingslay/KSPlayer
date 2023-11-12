@@ -9,7 +9,7 @@ import CoreMedia
 import Libavformat
 
 protocol PlayerItemTrackProtocol: CapacityProtocol, AnyObject {
-    init(assetTrack: FFmpegAssetTrack, options: KSOptions)
+    init(mediaType: AVFoundation.AVMediaType, frameCapacity: UInt8, options: KSOptions)
     // 是否无缝循环
     var isLoopModel: Bool { get set }
     var isEndOfFile: Bool { get set }
@@ -35,31 +35,32 @@ class SyncPlayerItemTrack<Frame: MEFrame>: PlayerItemTrackProtocol, CustomString
 
     var isEndOfFile: Bool = false
     var packetCount: Int { 0 }
-    var frameCount: Int { outputRenderQueue.count }
-    let frameMaxCount: Int
     let description: String
     weak var delegate: CodecCapacityDelegate?
-    let fps: Float
     let mediaType: AVFoundation.AVMediaType
     let outputRenderQueue: CircularBuffer<Frame>
     var isLoopModel = false
+    var frameCount: Int { outputRenderQueue.count }
+    var frameMaxCount: Int {
+        outputRenderQueue.maxCount
+    }
 
-    required init(assetTrack: FFmpegAssetTrack, options: KSOptions) {
+    var fps: Float {
+        outputRenderQueue.fps
+    }
+
+    required init(mediaType: AVFoundation.AVMediaType, frameCapacity: UInt8, options: KSOptions) {
         self.options = options
-        options.process(assetTrack: assetTrack)
-        mediaType = assetTrack.mediaType
+        self.mediaType = mediaType
         description = mediaType.rawValue
-        fps = assetTrack.nominalFrameRate
         // 默认缓存队列大小跟帧率挂钩,经测试除以4，最优
         if mediaType == .audio {
-            let capacity = options.audioFrameMaxCount(fps: fps, channelCount: Int(assetTrack.audioDescriptor?.audioFormat.channelCount ?? 2))
-            outputRenderQueue = CircularBuffer(initialCapacity: capacity, expanding: false)
+            outputRenderQueue = CircularBuffer(initialCapacity: Int(frameCapacity), expanding: false)
         } else if mediaType == .video {
-            outputRenderQueue = CircularBuffer(initialCapacity: options.videoFrameMaxCount(fps: fps, naturalSize: assetTrack.naturalSize), sorted: true, expanding: false)
+            outputRenderQueue = CircularBuffer(initialCapacity: Int(frameCapacity), sorted: true, expanding: false)
         } else {
-            outputRenderQueue = CircularBuffer()
+            outputRenderQueue = CircularBuffer(initialCapacity: Int(frameCapacity))
         }
-        frameMaxCount = outputRenderQueue.maxCount
     }
 
     func decode() {
@@ -146,6 +147,7 @@ class SyncPlayerItemTrack<Frame: MEFrame>: PlayerItemTrackProtocol, CustomString
                 }
                 if let frame = frame as? Frame {
                     self.outputRenderQueue.push(frame)
+                    self.outputRenderQueue.fps = packet.assetTrack.nominalFrameRate
                 }
             } catch {
                 KSLog("Decoder did Failed : \(error)")
@@ -193,9 +195,9 @@ final class AsyncPlayerItemTrack<Frame: MEFrame>: SyncPlayerItemTrack<Frame> {
         }
     }
 
-    required init(assetTrack: FFmpegAssetTrack, options: KSOptions) {
-        super.init(assetTrack: assetTrack, options: options)
-        operationQueue.name = "KSPlayer_" + description
+    required init(mediaType: AVFoundation.AVMediaType, frameCapacity: UInt8, options: KSOptions) {
+        super.init(mediaType: mediaType, frameCapacity: frameCapacity, options: options)
+        operationQueue.name = "KSPlayer_" + mediaType.rawValue
         operationQueue.maxConcurrentOperationCount = 1
         operationQueue.qualityOfService = .userInteractive
     }

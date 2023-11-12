@@ -340,7 +340,7 @@ extension MEPlayerItem {
                 if let assetTrack = FFmpegAssetTrack(stream: coreStream) {
                     assetTrack.startTime = startTime
                     if assetTrack.mediaType == .subtitle {
-                        let subtitle = SyncPlayerItemTrack<SubtitleFrame>(assetTrack: assetTrack, options: options)
+                        let subtitle = SyncPlayerItemTrack<SubtitleFrame>(mediaType: .subtitle, frameCapacity: 255, options: options)
                         assetTrack.subtitle = subtitle
                         allPlayerItemTracks.append(subtitle)
                     }
@@ -379,7 +379,9 @@ extension MEPlayerItem {
                     }
                 }
                 naturalSize = abs(rotation - 90) <= 1 || abs(rotation - 270) <= 1 ? first.naturalSize.reverse : first.naturalSize
-                let track = options.syncDecodeVideo ? SyncPlayerItemTrack<VideoVTBFrame>(assetTrack: first, options: options) : AsyncPlayerItemTrack<VideoVTBFrame>(assetTrack: first, options: options)
+                options.process(assetTrack: first)
+                let frameCapacity = options.videoFrameMaxCount(fps: first.nominalFrameRate, naturalSize: naturalSize, isLive: duration == 0)
+                let track = options.syncDecodeVideo ? SyncPlayerItemTrack<VideoVTBFrame>(mediaType: .video, frameCapacity: frameCapacity, options: options) : AsyncPlayerItemTrack<VideoVTBFrame>(mediaType: .video, frameCapacity: frameCapacity, options: options)
                 track.delegate = self
                 allPlayerItemTracks.append(track)
                 videoTrack = track
@@ -405,7 +407,9 @@ extension MEPlayerItem {
             index > 0 ? $0.trackID == index : true
         }) {
             first.isEnabled = true
-            let track = options.syncDecodeAudio ? SyncPlayerItemTrack<AudioFrame>(assetTrack: first, options: options) : AsyncPlayerItemTrack<AudioFrame>(assetTrack: first, options: options)
+            options.process(assetTrack: first)
+            let frameCapacity = options.audioFrameMaxCount(fps: first.nominalFrameRate, channelCount: Int(first.audioDescriptor?.audioFormat.channelCount ?? 2))
+            let track = options.syncDecodeAudio ? SyncPlayerItemTrack<AudioFrame>(mediaType: .audio, frameCapacity: frameCapacity, options: options) : AsyncPlayerItemTrack<AudioFrame>(mediaType: .audio, frameCapacity: frameCapacity, options: options)
             track.delegate = self
             allPlayerItemTracks.append(track)
             audioTrack = track
