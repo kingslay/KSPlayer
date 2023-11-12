@@ -107,6 +107,7 @@ open class KSOptions {
     public internal(set) var decodeVideoTime = 0.0
     public init() {
         // 参数的配置可以参考protocols.texi 和 http.c
+        formatContextOptions["scan_all_pmts"] = 1
         formatContextOptions["auto_convert"] = 0
         formatContextOptions["fps_probe_size"] = 3
 //        formatContextOptions["max_analyze_duration"] = 300 * 1000
