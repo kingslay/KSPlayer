@@ -259,7 +259,7 @@ public class AudioDescriptor: Equatable {
         #else
         let channelCount = KSOptions.outputNumberOfChannels(channelCount: AVAudioChannelCount(outChannel.nb_channels))
         #endif
-        audioFormat = AudioDescriptor.audioFormat(sampleFormat: sampleFormat, sampleRate: sampleRate, outChannel: &outChannel, channelCount: channelCount)
+        audioFormat = AudioDescriptor.audioFormat(sampleFormat: sampleFormat, sampleRate: self.sampleRate, outChannel: &outChannel, channelCount: channelCount)
     }
 
     public static func == (lhs: AudioDescriptor, rhs: AudioDescriptor) -> Bool {
