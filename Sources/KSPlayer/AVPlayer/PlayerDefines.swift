@@ -62,6 +62,21 @@ public enum DynamicRange: Int32 {
     #endif
 }
 
+extension DynamicRange: CustomStringConvertible {
+    public var description: String {
+        switch self {
+        case .sdr:
+            return "SDR"
+        case .hdr10:
+            return "HDR10"
+        case .hlg:
+            return "HDR"
+        case .dolbyVision:
+            return "Dolby Vision"
+        }
+    }
+}
+
 extension DynamicRange {
     var colorPrimaries: CFString {
         switch self {

@@ -82,7 +82,7 @@ final class MEPlayerItem {
     lazy var dynamicInfo = DynamicInfo { [weak self] in
         toDictionary(self?.formatCtx?.pointee.metadata)
     } bytesRead: { [weak self] in
-        self?.formatCtx?.pointee.pb.pointee.bytes_read ?? 0
+        self?.formatCtx?.pointee.pb?.pointee.bytes_read ?? 0
     } audioBitrate: { [weak self] in
         Int(8 * (self?.audioTrack?.bitrate ?? 0))
     } videoBitrate: { [weak self] in

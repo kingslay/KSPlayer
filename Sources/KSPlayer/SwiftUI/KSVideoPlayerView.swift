@@ -503,8 +503,9 @@ struct VideoSettingView: View {
                         Text(track.description).tag(track.trackID as Int32?)
                     }
                 } label: {
-                    Label("Video track", systemImage: "video.fill")
+                    Label("Video Track", systemImage: "video.fill")
                 }
+                LabeledContent("Video Type", value: (videoTracks.first { $0.isEnabled }?.dynamicRange ?? .sdr).description)
             }
             Picker(selection: Binding {
                 subtitleModel.selectedSubtitleInfo?.subtitleID
