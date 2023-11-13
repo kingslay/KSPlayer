@@ -34,12 +34,12 @@
 		AC77DFB026402327001351AE /* TracyApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TracyApp.swift; sourceTree = "<group>"; };
 		AC77DFB126402327001351AE /* URLImportView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = URLImportView.swift; sourceTree = "<group>"; };
 		AC77DFB226402329001351AE /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		AC77DFB726402329001351AE /* TracyPlayer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TracyPlayer.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		AC77DFB726402329001351AE /* Player.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Player.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		ACADA07528EDC067001B76D1 /* TracyPlayer.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = TracyPlayer.entitlements; sourceTree = "<group>"; };
 		ACB965462A42EDCD00378A4C /* SettingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingView.swift; sourceTree = "<group>"; };
 		ACD2F747275F6E860006D16F /* KSPlayer */ = {isa = PBXFileReference; lastKnownFileType = folder; name = KSPlayer; path = ../..; sourceTree = "<group>"; };
 		ACD786482A6A8648004A0220 /* Defaults.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Defaults.swift; sourceTree = "<group>"; };
-		ACE3619328EB689F00F234EB /* TracyPlayer-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = "TracyPlayer-Info.plist"; sourceTree = "<group>"; };
+		ACE3619328EB689F00F234EB /* Player-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "Player-Info.plist"; sourceTree = "<group>"; };
 		ACEA9FEA298BFC8800FBA74B /* MovieModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MovieModel.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -59,7 +59,7 @@
 			isa = PBXGroup;
 			children = (
 				ACADA07528EDC067001B76D1 /* TracyPlayer.entitlements */,
-				ACE3619328EB689F00F234EB /* TracyPlayer-Info.plist */,
+				ACE3619328EB689F00F234EB /* Player-Info.plist */,
 				ACD2F743275F6D7A0006D16F /* Packages */,
 				AC77DFAF26402327001351AE /* Shared */,
 				AC77DFB826402329001351AE /* Products */,
@@ -92,7 +92,7 @@
 		AC77DFB826402329001351AE /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				AC77DFB726402329001351AE /* TracyPlayer.app */,
+				AC77DFB726402329001351AE /* Player.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -123,9 +123,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		AC77DFB626402329001351AE /* TracyPlayer */ = {
+		AC77DFB626402329001351AE /* Player */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = AC77DFCB26402329001351AE /* Build configuration list for PBXNativeTarget "TracyPlayer" */;
+			buildConfigurationList = AC77DFCB26402329001351AE /* Build configuration list for PBXNativeTarget "Player" */;
 			buildPhases = (
 				AC77DFB326402329001351AE /* Sources */,
 				AC77DFB426402329001351AE /* Frameworks */,
@@ -135,12 +135,12 @@
 			);
 			dependencies = (
 			);
-			name = TracyPlayer;
+			name = Player;
 			packageProductDependencies = (
 				ACD2F771275F735C0006D16F /* KSPlayer */,
 			);
 			productName = "demo-SPM (iOS)";
-			productReference = AC77DFB726402329001351AE /* TracyPlayer.app */;
+			productReference = AC77DFB726402329001351AE /* Player.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -158,7 +158,7 @@
 					};
 				};
 			};
-			buildConfigurationList = AC77DFAE26402327001351AE /* Build configuration list for PBXProject "TracyPlayer" */;
+			buildConfigurationList = AC77DFAE26402327001351AE /* Build configuration list for PBXProject "Player" */;
 			compatibilityVersion = "Xcode 9.3";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -171,7 +171,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				AC77DFB626402329001351AE /* TracyPlayer */,
+				AC77DFB626402329001351AE /* Player */,
 			);
 		};
 /* End PBXProject section */
@@ -356,7 +356,7 @@
 				ENABLE_HARDENED_RUNTIME = YES;
 				"ENABLE_HARDENED_RUNTIME[sdk=macosx*]" = YES;
 				ENABLE_PREVIEWS = YES;
-				INFOPLIST_FILE = "TracyPlayer-Info.plist";
+				INFOPLIST_FILE = "Player-Info.plist";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.video";
 				INFOPLIST_KEY_LSSupportsOpeningDocumentsInPlace = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = " ";
@@ -369,7 +369,8 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 2.1.2;
-				PRODUCT_BUNDLE_IDENTIFIER = com.kintan.tracy;
+				PRODUCT_BUNDLE_IDENTIFIER = com.kintan.player;
+				PRODUCT_NAME = Player;
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				"PROVISIONING_PROFILE_SPECIFIER[sdk=macosx*]" = "";
 				SUPPORTED_PLATFORMS = "appletvos appletvsimulator iphoneos iphonesimulator macosx xros xrsimulator";
@@ -398,7 +399,7 @@
 				ENABLE_HARDENED_RUNTIME = YES;
 				"ENABLE_HARDENED_RUNTIME[sdk=macosx*]" = YES;
 				ENABLE_PREVIEWS = YES;
-				INFOPLIST_FILE = "TracyPlayer-Info.plist";
+				INFOPLIST_FILE = "Player-Info.plist";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.video";
 				INFOPLIST_KEY_LSSupportsOpeningDocumentsInPlace = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = " ";
@@ -411,7 +412,8 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 2.1.2;
-				PRODUCT_BUNDLE_IDENTIFIER = com.kintan.tracy;
+				PRODUCT_BUNDLE_IDENTIFIER = com.kintan.player;
+				PRODUCT_NAME = Player;
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				"PROVISIONING_PROFILE_SPECIFIER[sdk=macosx*]" = "";
 				SUPPORTED_PLATFORMS = "appletvos appletvsimulator iphoneos iphonesimulator macosx xros xrsimulator";
@@ -428,7 +430,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		AC77DFAE26402327001351AE /* Build configuration list for PBXProject "TracyPlayer" */ = {
+		AC77DFAE26402327001351AE /* Build configuration list for PBXProject "Player" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				AC77DFC926402329001351AE /* Debug */,
@@ -437,7 +439,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		AC77DFCB26402329001351AE /* Build configuration list for PBXNativeTarget "TracyPlayer" */ = {
+		AC77DFCB26402329001351AE /* Build configuration list for PBXNativeTarget "Player" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				AC77DFCC26402329001351AE /* Debug */,

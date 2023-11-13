@@ -253,16 +253,8 @@ extension MovieModel {
             return playmodel
         }
         let model = PlayModel()
-        guard let context = managedObjectContext, let privateStore = PersistenceController.shared.privateStore else {
-            return model
-        }
-        let newMovieModel = MovieModel(context: context)
-        newMovieModel.setValuesForKeys(dictionaryWithValues(forKeys: entity.attributesByName.keys.map { $0 }))
-        newMovieModel.playmodel = model
-        context.assign(newMovieModel, to: privateStore)
-//        try? context.save()
-        newMovieModel.save()
-        context.delete(self)
+        playmodel = model
+        model.save()
         return model
     }
 }

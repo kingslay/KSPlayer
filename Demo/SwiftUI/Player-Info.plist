@@ -572,7 +572,6 @@
 	<array>
 		<string>audio</string>
 		<string>fetch</string>
-		<string>remote-notification</string>
 	</array>
 </dict>
 </plist>
