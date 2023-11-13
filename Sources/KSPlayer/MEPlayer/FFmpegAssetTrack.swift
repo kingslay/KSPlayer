@@ -69,25 +69,12 @@ public class FFmpegAssetTrack: MediaPlayerTrack {
         if let value = metadata["variant_bitrate"] ?? metadata["BPS"], let bitRate = Int64(value) {
             self.bitRate = bitRate
         }
-
-        if stream.pointee.side_data?.pointee.type == AV_PKT_DATA_DOVI_CONF {
-            dovi = stream.pointee.side_data?.pointee.data.withMemoryRebound(to: DOVIDecoderConfigurationRecord.self, capacity: 1) { $0 }.pointee
-        }
         trackID = stream.pointee.index
         var timebase = Timebase(stream.pointee.time_base)
         if timebase.num <= 0 || timebase.den <= 0 {
             timebase = Timebase(num: 1, den: 1000)
         }
         self.timebase = timebase
-        if let rotateTag = metadata["rotate"], rotateTag == "0" {
-            rotation = 0
-        } else if let displaymatrix = av_stream_get_side_data(stream, AV_PKT_DATA_DISPLAYMATRIX, nil) {
-            let matrix = displaymatrix.withMemoryRebound(to: Int32.self, capacity: 1) { $0 }
-            rotation = Int16(Int(-av_display_rotation_get(matrix)) % 360)
-        } else {
-            rotation = 0
-        }
-
         if mediaType == .audio {
             var frameSize = codecpar.frame_size
             if frameSize < 1 {
@@ -165,6 +152,15 @@ public class FFmpegAssetTrack: MediaPlayerTrack {
         } else if codecpar.codec_type == AVMEDIA_TYPE_VIDEO {
             audioDescriptor = nil
             mediaType = .video
+            for i in 0 ..< codecpar.nb_coded_side_data {
+                let sideData = codecpar.coded_side_data[Int(i)]
+                if sideData.type == AV_PKT_DATA_DOVI_CONF {
+                    dovi = sideData.data.withMemoryRebound(to: DOVIDecoderConfigurationRecord.self, capacity: 1) { $0 }.pointee
+                } else if sideData.type == AV_PKT_DATA_DISPLAYMATRIX {
+                    let matrix = sideData.data.withMemoryRebound(to: Int32.self, capacity: 1) { $0 }
+                    rotation = Int16(Int(-av_display_rotation_get(matrix)) % 360)
+                }
+            }
             let sar = codecpar.sample_aspect_ratio.size
             var extradataSize = Int32(0)
             var extradata = codecpar.extradata
