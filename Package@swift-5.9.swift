@@ -36,6 +36,9 @@ let package = Package(
 )
 
 var ffmpegKitPath = FileManager.default.currentDirectoryPath + "/FFmpegKit"
+if !FileManager.default.fileExists(atPath: ffmpegKitPath) {
+    ffmpegKitPath = FileManager.default.currentDirectoryPath + "/KSPlayer/FFmpegKit"
+}
 if !FileManager.default.fileExists(atPath: ffmpegKitPath), let url = URL(string: #file) {
     let path = url.deletingLastPathComponent().path
     // 解决用xcode引入spm的时候，依赖关系出错的问题
