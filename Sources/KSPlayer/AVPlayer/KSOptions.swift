@@ -340,7 +340,8 @@ open class KSOptions {
         #endif
         let diff = nextVideoTime - desire
 //        print("[video] video diff \(diff) audio \(main.positionTime) interval \(CACurrentMediaTime() - main.lastMediaTime) render interval \(CACurrentMediaTime() - lastMediaTime)")
-        if diff > 1 / Double(fps * 2) {
+        // 最大刷新率上限
+        if diff >= 1 / 120 {
             videoClockDelayCount = 0
             return (diff, .remain)
         } else {
