@@ -121,6 +121,7 @@ public class CircularBuffer<Item: ObjectQueueItem> {
             if let item = _buffer[Int(i & mask)] {
                 if predicate(item) {
                     result.append(item)
+                    _buffer[Int(i & mask)] = nil
                     headIndex = i + 1
                 }
             } else {

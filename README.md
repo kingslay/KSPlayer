@@ -18,7 +18,7 @@ English | [简体中文](./README_CN.md)
 - [x] iOS, tvOS, macOS, visionOS, Mac Catalyst, Apple Silicon M1, SwiftUI.
 - [x] Multiple audio/video tracks.
 - [x] hardware accelerator.
-- [x] 4k/HDR
+- [x] 4k/HDR/HDR10/HDR10+/Dolby Vision
 - [x] text subtitle/Closed Captions/image subtitle(dvbsub/dvdsub/pgssub)
 - [x] Picture in Picture
 - [x] Record video

@@ -149,12 +149,8 @@ final class MEPlayerItem {
             return
         }
         assetTracks.filter { $0.mediaType == track.mediaType }.forEach {
-            if $0.mediaType == .subtitle, !$0.isImageSubtitle {
-                return
-            }
-            $0.isEnabled = false
+            $0.isEnabled = track === $0
         }
-        track.isEnabled = true
         guard let assetTrack = track as? FFmpegAssetTrack else {
             return
         }
