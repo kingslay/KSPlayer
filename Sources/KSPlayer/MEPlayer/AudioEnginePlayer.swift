@@ -78,12 +78,31 @@ public extension AudioDynamicsProcessor {
     }
 }
 
-public final class AudioEnginePlayer: AudioOutput, AudioDynamicsProcessor {
+public final class AudioEngineDynamicsPlayer: AudioEnginePlayer, AudioDynamicsProcessor {
+    private let dynamicsProcessor = AVAudioUnitEffect(audioComponentDescription:
+        AudioComponentDescription(componentType: kAudioUnitType_Effect,
+                                  componentSubType: kAudioUnitSubType_DynamicsProcessor,
+                                  componentManufacturer: kAudioUnitManufacturer_Apple,
+                                  componentFlags: 0,
+                                  componentFlagsMask: 0))
     public var audioUnitForDynamicsProcessor: AudioUnit {
         dynamicsProcessor.audioUnit
     }
 
-    private let engine = AVAudioEngine()
+    override func audioNodes() -> [AVAudioNode] {
+        var nodes: [AVAudioNode] = [dynamicsProcessor]
+        nodes.append(contentsOf: super.audioNodes())
+        return nodes
+    }
+
+    public required init() {
+        super.init()
+        engine.attach(dynamicsProcessor)
+    }
+}
+
+public class AudioEnginePlayer: AudioOutput {
+    public let engine = AVAudioEngine()
     private var sourceNode: AVAudioSourceNode?
     private var sourceNodeAudioFormat: AVAudioFormat?
 
@@ -93,12 +112,6 @@ public final class AudioEnginePlayer: AudioOutput, AudioDynamicsProcessor {
 //    private let delay = AVAudioUnitDelay()
     private let timePitch = AVAudioUnitTimePitch()
     private var sampleSize = UInt32(MemoryLayout<Float>.size)
-    private let dynamicsProcessor = AVAudioUnitEffect(audioComponentDescription:
-        AudioComponentDescription(componentType: kAudioUnitType_Effect,
-                                  componentSubType: kAudioUnitSubType_DynamicsProcessor,
-                                  componentManufacturer: kAudioUnitManufacturer_Apple,
-                                  componentFlags: 0,
-                                  componentFlagsMask: 0))
     private var currentRenderReadOffset = UInt32(0)
     public weak var renderSource: OutputRenderSourceDelegate?
     private var currentRender: AudioFrame? {
@@ -136,8 +149,7 @@ public final class AudioEnginePlayer: AudioOutput, AudioDynamicsProcessor {
         }
     }
 
-    public init() {
-        engine.attach(dynamicsProcessor)
+    public required init() {
         engine.attach(timePitch)
         if let audioUnit = engine.outputNode.audioUnit {
             addRenderNotify(audioUnit: audioUnit)
@@ -169,7 +181,9 @@ public final class AudioEnginePlayer: AudioOutput, AudioDynamicsProcessor {
         KSLog("[audio] new sourceNode inputFormat: \(sourceNode.inputFormat(forBus: 0))")
         sampleSize = audioFormat.sampleSize
         engine.attach(sourceNode)
-        var nodes = [sourceNode, dynamicsProcessor, timePitch, engine.mainMixerNode]
+        var nodes: [AVAudioNode] = [sourceNode]
+        nodes.append(contentsOf: audioNodes())
+        nodes.append(engine.mainMixerNode)
         if audioFormat.channelCount > 2 {
             nodes.append(engine.outputNode)
         }
@@ -183,6 +197,10 @@ public final class AudioEnginePlayer: AudioOutput, AudioDynamicsProcessor {
                 KSLog(error)
             }
         }
+    }
+
+    func audioNodes() -> [AVAudioNode] {
+        [timePitch, engine.mainMixerNode]
     }
 
     public func play(time _: TimeInterval) {
