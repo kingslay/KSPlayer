@@ -178,6 +178,7 @@ extension String {
 
     func splitStyle() -> [(String, String?)] {
         let scanner = Scanner(string: self)
+        scanner.charactersToBeSkipped = nil
         var result = [(String, String?)]()
         var sytle: String?
         while !scanner.isAtEnd {
@@ -186,9 +187,6 @@ extension String {
                 _ = scanner.scanString("}")
             } else if let text = scanner.scanUpToString("{") {
                 result.append((text, sytle))
-                _ = scanner.scanString("{")
-                sytle = scanner.scanUpToString("}")
-                _ = scanner.scanString("}")
             } else if let text = scanner.scanUpToCharacters(from: .newlines) {
                 result.append((text, sytle))
             }
