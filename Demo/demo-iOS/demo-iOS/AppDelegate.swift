@@ -80,7 +80,7 @@ class CustomVideoPlayerView: VideoPlayerView {
                 print("audio name: \(track.name) language: \(track.language ?? "")")
             }
             for track in layer.player.tracks(mediaType: .video) {
-                print("video name: \(track.name) bitRate: \(track.bitRate) fps: \(track.nominalFrameRate) depth: \(track.depth) colorPrimaries: \(track.colorPrimaries ?? "") colorPrimaries: \(track.transferFunction ?? "") yCbCrMatrix: \(track.yCbCrMatrix ?? "") codecType:  \(track.mediaSubType.rawValue.string)")
+                print("video name: \(track.name) bitRate: \(track.bitRate) fps: \(track.nominalFrameRate) colorPrimaries: \(track.colorPrimaries ?? "") colorPrimaries: \(track.transferFunction ?? "") yCbCrMatrix: \(track.yCbCrMatrix ?? "") codecType:  \(track.mediaSubType.rawValue.string)")
             }
         }
     }

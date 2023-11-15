@@ -183,7 +183,6 @@ public class AudioEnginePlayer: AudioOutput {
         engine.attach(sourceNode)
         var nodes: [AVAudioNode] = [sourceNode]
         nodes.append(contentsOf: audioNodes())
-        nodes.append(engine.mainMixerNode)
         if audioFormat.channelCount > 2 {
             nodes.append(engine.outputNode)
         }
