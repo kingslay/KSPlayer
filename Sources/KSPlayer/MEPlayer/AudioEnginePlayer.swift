@@ -161,6 +161,10 @@ public class AudioEnginePlayer: AudioOutput {
             return
         }
         sourceNodeAudioFormat = audioFormat
+        #if !os(macOS)
+        try? AVAudioSession.sharedInstance().setPreferredOutputNumberOfChannels(Int(audioFormat.channelCount))
+        KSLog("[audio] set preferredOutputNumberOfChannels: \(audioFormat.channelCount)")
+        #endif
         KSLog("[audio] outputFormat AudioFormat: \(audioFormat)")
         if let channelLayout = audioFormat.channelLayout {
             KSLog("[audio] outputFormat channelLayout \(channelLayout.channelDescriptions)")

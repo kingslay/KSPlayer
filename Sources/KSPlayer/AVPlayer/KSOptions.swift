@@ -163,7 +163,7 @@ open class KSOptions {
             if capacity.isEndOfFile && capacity.packetCount == 0 {
                 return true
             }
-            guard capacity.frameCount >= capacity.frameMaxCount >> 2 else {
+            guard capacity.frameCount >= 2 else {
                 return false
             }
             if capacity.isEndOfFile {
@@ -227,8 +227,8 @@ open class KSOptions {
         isLive ? 4 : 16
     }
 
-    open func audioFrameMaxCount(fps: Float, channelCount _: Int) -> UInt8 {
-        let count = Int(fps) >> 2
+    open func audioFrameMaxCount(fps: Float, channelCount: Int) -> UInt8 {
+        let count = (Int(fps) * channelCount) >> 2
         if count >= UInt8.max {
             return UInt8.max
         } else {
@@ -500,8 +500,6 @@ public extension KSOptions {
         var channelCount = channelCount
         if channelCount > 2 {
             let minChannels = min(maximumOutputNumberOfChannels, channelCount)
-            try? AVAudioSession.sharedInstance().setPreferredOutputNumberOfChannels(Int(minChannels))
-            KSLog("[audio] set preferredOutputNumberOfChannels: \(minChannels)")
             // iOS 有空间音频功能，所以不用处理
             #if os(tvOS) || targetEnvironment(simulator)
             if !(isUseAudioRenderer && isSpatialAudioEnabled) {
@@ -511,7 +509,6 @@ public extension KSOptions {
             }
             #endif
         } else {
-            try? AVAudioSession.sharedInstance().setPreferredOutputNumberOfChannels(2)
             channelCount = 2
         }
         KSLog("[audio] outputNumberOfChannels: \(AVAudioSession.sharedInstance().outputNumberOfChannels) output channelCount: \(channelCount)")

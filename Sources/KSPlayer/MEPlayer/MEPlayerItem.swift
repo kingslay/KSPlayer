@@ -404,7 +404,9 @@ extension MEPlayerItem {
         }) {
             first.isEnabled = true
             options.process(assetTrack: first)
-            let frameCapacity = options.audioFrameMaxCount(fps: first.nominalFrameRate, channelCount: Int(first.audioDescriptor?.audioFormat.channelCount ?? 2))
+            // 音频要比较所有的音轨，因为truehd的fps是1200，跟其他的音轨差距太大了
+            let fps = audios.map(\.nominalFrameRate).max() ?? 44
+            let frameCapacity = options.audioFrameMaxCount(fps: fps, channelCount: Int(first.audioDescriptor?.audioFormat.channelCount ?? 2))
             let track = options.syncDecodeAudio ? SyncPlayerItemTrack<AudioFrame>(mediaType: .audio, frameCapacity: frameCapacity, options: options) : AsyncPlayerItemTrack<AudioFrame>(mediaType: .audio, frameCapacity: frameCapacity, options: options)
             track.delegate = self
             allPlayerItemTracks.append(track)
