@@ -83,7 +83,6 @@
 				ACD786482A6A8648004A0220 /* Defaults.swift */,
 				AC43F6652A519D400026ECF2 /* Persistence.swift */,
 				AC77DFB226402329001351AE /* Assets.xcassets */,
-				ACD2F77F275F9BEE0006D16F /* Resources */,
 				AC43F6422A51916F0026ECF2 /* Model.xcdatamodeld */,
 			);
 			path = Shared;
@@ -110,14 +109,6 @@
 			children = (
 			);
 			name = Frameworks;
-			sourceTree = "<group>";
-		};
-		ACD2F77F275F9BEE0006D16F /* Resources */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			name = Resources;
-			path = ../../../Tests/KSPlayerTests/Resources;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */

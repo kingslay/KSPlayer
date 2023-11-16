@@ -475,9 +475,6 @@ struct VideoSettingView: View {
                 } set: { value in
                     if let track = audioTracks.first(where: { $0.trackID == value }) {
                         config.playerLayer?.player.select(track: track)
-                        config.playerLayer?.player.isMuted = false
-                    } else {
-                        config.playerLayer?.player.isMuted = true
                     }
                 }) {
                     ForEach(audioTracks, id: \.trackID) { track in
@@ -494,9 +491,6 @@ struct VideoSettingView: View {
                 } set: { value in
                     if let track = videoTracks.first(where: { $0.trackID == value }) {
                         config.playerLayer?.player.select(track: track)
-                        config.playerLayer?.options.videoDisable = false
-                    } else {
-                        config.playerLayer?.options.videoDisable = true
                     }
                 }) {
                     ForEach(videoTracks, id: \.trackID) { track in

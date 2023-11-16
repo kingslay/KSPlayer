@@ -9,19 +9,13 @@
 /* Begin PBXBuildFile section */
 		4F8BF0EAD4FD485055852FBD /* Pods_demo_tvOS.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F227C20AECAAE8524D2F0F1D /* Pods_demo_tvOS.framework */; };
 		AC08611F20B69A1C00D801FC /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AC08611E20B69A1C00D801FC /* Assets.xcassets */; };
-		AC368CA128A9E92F003BD454 /* h264.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = AC368C9A28A9E92E003BD454 /* h264.mp4 */; };
-		AC368CA228A9E92F003BD454 /* vr.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = AC368C9B28A9E92E003BD454 /* vr.mp4 */; };
-		AC368CA328A9E92F003BD454 /* hevc.mkv in Resources */ = {isa = PBXBuildFile; fileRef = AC368C9C28A9E92E003BD454 /* hevc.mkv */; };
-		AC368CA428A9E92F003BD454 /* mjpeg.flac in Resources */ = {isa = PBXBuildFile; fileRef = AC368C9D28A9E92E003BD454 /* mjpeg.flac */; };
-		AC368CA528A9E92F003BD454 /* dvd_subtitle.mkv in Resources */ = {isa = PBXBuildFile; fileRef = AC368C9E28A9E92E003BD454 /* dvd_subtitle.mkv */; };
-		AC368CA628A9E92F003BD454 /* raw.h264 in Resources */ = {isa = PBXBuildFile; fileRef = AC368C9F28A9E92F003BD454 /* raw.h264 */; };
-		AC368CA728A9E92F003BD454 /* subrip.mkv in Resources */ = {isa = PBXBuildFile; fileRef = AC368CA028A9E92F003BD454 /* subrip.mkv */; };
 		AC3A420223D32DFE00B666A4 /* MasterViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC3A41FE23D32DFD00B666A4 /* MasterViewController.swift */; };
 		AC3A420323D32DFE00B666A4 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC3A41FF23D32DFE00B666A4 /* AppDelegate.swift */; };
 		AC3A420423D32DFE00B666A4 /* DetailViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC3A420023D32DFE00B666A4 /* DetailViewController.swift */; };
 		AC3A420523D32DFE00B666A4 /* AudioViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC3A420123D32DFE00B666A4 /* AudioViewController.swift */; };
 		AC80333224BA1B54002B3D40 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = AC80333124BA1B54002B3D40 /* Main.storyboard */; };
 		ACBBA9802A8503F400D262FC /* RootViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACBBA97F2A8503F400D262FC /* RootViewController.swift */; };
+		ACCB7FF52B05F7E300273BAA /* test.m3u in Resources */ = {isa = PBXBuildFile; fileRef = ACCB7FF42B05F7E300273BAA /* test.m3u */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -31,19 +25,13 @@
 		AC08611420B69A1C00D801FC /* demo-tvOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "demo-tvOS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		AC08611E20B69A1C00D801FC /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		AC08612020B69A1C00D801FC /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		AC368C9A28A9E92E003BD454 /* h264.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = h264.mp4; sourceTree = "<group>"; };
-		AC368C9B28A9E92E003BD454 /* vr.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = vr.mp4; sourceTree = "<group>"; };
-		AC368C9C28A9E92E003BD454 /* hevc.mkv */ = {isa = PBXFileReference; lastKnownFileType = file; path = hevc.mkv; sourceTree = "<group>"; };
-		AC368C9D28A9E92E003BD454 /* mjpeg.flac */ = {isa = PBXFileReference; lastKnownFileType = file; path = mjpeg.flac; sourceTree = "<group>"; };
-		AC368C9E28A9E92E003BD454 /* dvd_subtitle.mkv */ = {isa = PBXFileReference; lastKnownFileType = file; path = dvd_subtitle.mkv; sourceTree = "<group>"; };
-		AC368C9F28A9E92F003BD454 /* raw.h264 */ = {isa = PBXFileReference; lastKnownFileType = file; path = raw.h264; sourceTree = "<group>"; };
-		AC368CA028A9E92F003BD454 /* subrip.mkv */ = {isa = PBXFileReference; lastKnownFileType = file; path = subrip.mkv; sourceTree = "<group>"; };
 		AC3A41FE23D32DFD00B666A4 /* MasterViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = MasterViewController.swift; path = "../../demo-iOS/demo-iOS/MasterViewController.swift"; sourceTree = "<group>"; };
 		AC3A41FF23D32DFE00B666A4 /* AppDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = AppDelegate.swift; path = "../../demo-iOS/demo-iOS/AppDelegate.swift"; sourceTree = "<group>"; };
 		AC3A420023D32DFE00B666A4 /* DetailViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = DetailViewController.swift; path = "../../demo-iOS/demo-iOS/DetailViewController.swift"; sourceTree = "<group>"; };
 		AC3A420123D32DFE00B666A4 /* AudioViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = AudioViewController.swift; path = "../../demo-iOS/demo-iOS/AudioViewController.swift"; sourceTree = "<group>"; };
 		AC80333124BA1B54002B3D40 /* Main.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = Main.storyboard; sourceTree = "<group>"; };
 		ACBBA97F2A8503F400D262FC /* RootViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = RootViewController.swift; path = "../../demo-iOS/demo-iOS/RootViewController.swift"; sourceTree = "<group>"; };
+		ACCB7FF42B05F7E300273BAA /* test.m3u */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = test.m3u; path = ../../../Tests/KSPlayerTests/test.m3u; sourceTree = "<group>"; };
 		D4B47B55C1204959E7C6D995 /* Pods-demo-tvOS.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-demo-tvOS.release.xcconfig"; path = "../Pods/Target Support Files/Pods-demo-tvOS/Pods-demo-tvOS.release.xcconfig"; sourceTree = "<group>"; };
 		F227C20AECAAE8524D2F0F1D /* Pods_demo_tvOS.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_demo_tvOS.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -86,29 +74,14 @@
 				AC3A420123D32DFE00B666A4 /* AudioViewController.swift */,
 				AC3A420023D32DFE00B666A4 /* DetailViewController.swift */,
 				AC3A41FE23D32DFD00B666A4 /* MasterViewController.swift */,
+				ACCB7FF42B05F7E300273BAA /* test.m3u */,
 				AC08611E20B69A1C00D801FC /* Assets.xcassets */,
 				AC80333124BA1B54002B3D40 /* Main.storyboard */,
 				AC08612020B69A1C00D801FC /* Info.plist */,
-				AC80332324BA1AE3002B3D40 /* Resources */,
 				06D08BDA294DDA7400D919DB /* AVDisplayCriteriaKS.h */,
 				06D08BDB294DDA9900D919DB /* Bridging-Header.h */,
 			);
 			path = "demo-tvOS";
-			sourceTree = "<group>";
-		};
-		AC80332324BA1AE3002B3D40 /* Resources */ = {
-			isa = PBXGroup;
-			children = (
-				AC368C9E28A9E92E003BD454 /* dvd_subtitle.mkv */,
-				AC368C9A28A9E92E003BD454 /* h264.mp4 */,
-				AC368C9C28A9E92E003BD454 /* hevc.mkv */,
-				AC368C9D28A9E92E003BD454 /* mjpeg.flac */,
-				AC368C9F28A9E92F003BD454 /* raw.h264 */,
-				AC368CA028A9E92F003BD454 /* subrip.mkv */,
-				AC368C9B28A9E92E003BD454 /* vr.mp4 */,
-			);
-			name = Resources;
-			path = ../../../Tests/KSPlayerTests/Resources;
 			sourceTree = "<group>";
 		};
 		CF87FE6837F03B47FBE2E033 /* Pods */ = {
@@ -190,15 +163,9 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				AC368CA328A9E92F003BD454 /* hevc.mkv in Resources */,
-				AC368CA428A9E92F003BD454 /* mjpeg.flac in Resources */,
-				AC368CA728A9E92F003BD454 /* subrip.mkv in Resources */,
-				AC368CA228A9E92F003BD454 /* vr.mp4 in Resources */,
-				AC368CA128A9E92F003BD454 /* h264.mp4 in Resources */,
 				AC80333224BA1B54002B3D40 /* Main.storyboard in Resources */,
-				AC368CA528A9E92F003BD454 /* dvd_subtitle.mkv in Resources */,
+				ACCB7FF52B05F7E300273BAA /* test.m3u in Resources */,
 				AC08611F20B69A1C00D801FC /* Assets.xcassets in Resources */,
-				AC368CA628A9E92F003BD454 /* raw.h264 in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -128,6 +128,13 @@ class MEOptions: KSOptions {
 
 var testObjects: [KSPlayerResource] = {
     var objects = [KSPlayerResource]()
+    if let url = Bundle.main.url(forResource: "test", withExtension: "m3u"), let data = try? Data(contentsOf: url) {
+        let result = data.parsePlaylist()
+        for (name, url, _) in result {
+            objects.append(KSPlayerResource(url: url, options: MEOptions(), name: name))
+        }
+    }
+
     for ext in ["mp4", "mkv", "mov", "h264", "flac", "webm"] {
         guard let urls = Bundle.main.urls(forResourcesWithExtension: ext, subdirectory: nil) else {
             continue
