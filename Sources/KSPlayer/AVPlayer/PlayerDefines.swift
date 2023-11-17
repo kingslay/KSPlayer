@@ -450,7 +450,7 @@ extension Scanner {
             }
         }
         let urlString = scanUpToCharacters(from: .newlines)
-        if let urlString, var url = URL(string: urlString) {
+        if let urlString, let url = URL(string: urlString) {
             return (title ?? url.lastPathComponent, url, extinf)
         }
         return nil
