@@ -107,8 +107,7 @@ class MEOptions: KSOptions {
                     return
                 }
                 if let displayManager = UIApplication.shared.windows.first?.avDisplayManager,
-                   displayManager.isDisplayCriteriaMatchingEnabled,
-                   !displayManager.isDisplayModeSwitchInProgress
+                   displayManager.isDisplayCriteriaMatchingEnabled
                 {
                     let refreshRate = assetTrack.nominalFrameRate
                     if KSOptions.displayCriteriaFormatDescriptionEnabled, let formatDescription = assetTrack.formatDescription, #available(tvOS 17.0, *) {

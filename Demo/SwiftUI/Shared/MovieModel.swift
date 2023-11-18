@@ -31,8 +31,7 @@ class MEOptions: KSOptions {
     override func updateVideo(refreshRate: Float, isDovi: Bool, formatDescription: CMFormatDescription?) {
         #if os(tvOS) || os(xrOS)
         guard let displayManager = UIApplication.shared.windows.first?.avDisplayManager,
-              displayManager.isDisplayCriteriaMatchingEnabled,
-              !displayManager.isDisplayModeSwitchInProgress
+              displayManager.isDisplayCriteriaMatchingEnabled
         else {
             return
         }
