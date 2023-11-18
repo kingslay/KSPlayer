@@ -28,6 +28,7 @@ struct PersistenceController {
             "https://iptv-org.github.io/iptv/languages/zho.m3u",
             "https://iptv-org.github.io/iptv/languages/eng.m3u",
             "https://raw.githubusercontent.com/kingslay/TestVideo/main/test.m3u",
+            "https://raw.githubusercontent.com/kingslay/TestVideo/main/TestVideo.m3u",
             "https://raw.githubusercontent.com/kingslay/bulaoge/main/bulaoge.m3u",
         ]
         urls.forEach { str in
