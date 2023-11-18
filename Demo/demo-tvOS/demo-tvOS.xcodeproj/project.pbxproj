@@ -13,9 +13,9 @@
 		AC3A420323D32DFE00B666A4 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC3A41FF23D32DFE00B666A4 /* AppDelegate.swift */; };
 		AC3A420423D32DFE00B666A4 /* DetailViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC3A420023D32DFE00B666A4 /* DetailViewController.swift */; };
 		AC3A420523D32DFE00B666A4 /* AudioViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC3A420123D32DFE00B666A4 /* AudioViewController.swift */; };
+		AC78D5DC2B09057900A28998 /* test.m3u in Resources */ = {isa = PBXBuildFile; fileRef = AC78D5DB2B09057900A28998 /* test.m3u */; };
 		AC80333224BA1B54002B3D40 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = AC80333124BA1B54002B3D40 /* Main.storyboard */; };
 		ACBBA9802A8503F400D262FC /* RootViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACBBA97F2A8503F400D262FC /* RootViewController.swift */; };
-		ACCB7FF52B05F7E300273BAA /* test.m3u in Resources */ = {isa = PBXBuildFile; fileRef = ACCB7FF42B05F7E300273BAA /* test.m3u */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -29,9 +29,9 @@
 		AC3A41FF23D32DFE00B666A4 /* AppDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = AppDelegate.swift; path = "../../demo-iOS/demo-iOS/AppDelegate.swift"; sourceTree = "<group>"; };
 		AC3A420023D32DFE00B666A4 /* DetailViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = DetailViewController.swift; path = "../../demo-iOS/demo-iOS/DetailViewController.swift"; sourceTree = "<group>"; };
 		AC3A420123D32DFE00B666A4 /* AudioViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = AudioViewController.swift; path = "../../demo-iOS/demo-iOS/AudioViewController.swift"; sourceTree = "<group>"; };
+		AC78D5DB2B09057900A28998 /* test.m3u */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = test.m3u; path = ../../../Tests/KSPlayerTests/Resources/test.m3u; sourceTree = "<group>"; };
 		AC80333124BA1B54002B3D40 /* Main.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = Main.storyboard; sourceTree = "<group>"; };
 		ACBBA97F2A8503F400D262FC /* RootViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = RootViewController.swift; path = "../../demo-iOS/demo-iOS/RootViewController.swift"; sourceTree = "<group>"; };
-		ACCB7FF42B05F7E300273BAA /* test.m3u */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = test.m3u; path = ../../../Tests/KSPlayerTests/test.m3u; sourceTree = "<group>"; };
 		D4B47B55C1204959E7C6D995 /* Pods-demo-tvOS.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-demo-tvOS.release.xcconfig"; path = "../Pods/Target Support Files/Pods-demo-tvOS/Pods-demo-tvOS.release.xcconfig"; sourceTree = "<group>"; };
 		F227C20AECAAE8524D2F0F1D /* Pods_demo_tvOS.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_demo_tvOS.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -74,7 +74,7 @@
 				AC3A420123D32DFE00B666A4 /* AudioViewController.swift */,
 				AC3A420023D32DFE00B666A4 /* DetailViewController.swift */,
 				AC3A41FE23D32DFD00B666A4 /* MasterViewController.swift */,
-				ACCB7FF42B05F7E300273BAA /* test.m3u */,
+				AC78D5DB2B09057900A28998 /* test.m3u */,
 				AC08611E20B69A1C00D801FC /* Assets.xcassets */,
 				AC80333124BA1B54002B3D40 /* Main.storyboard */,
 				AC08612020B69A1C00D801FC /* Info.plist */,
@@ -164,7 +164,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				AC80333224BA1B54002B3D40 /* Main.storyboard in Resources */,
-				ACCB7FF52B05F7E300273BAA /* test.m3u in Resources */,
+				AC78D5DC2B09057900A28998 /* test.m3u in Resources */,
 				AC08611F20B69A1C00D801FC /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

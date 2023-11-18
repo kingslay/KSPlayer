@@ -194,10 +194,10 @@ public class AudioEnginePlayer: AudioOutput {
         engine.connect(nodes: nodes, format: audioFormat)
         engine.prepare()
         if isRunning {
-            do {
-                try engine.start()
-            } catch {
-                KSLog(error)
+            try? engine.start()
+            // 从多声道切换到2声道马上调用start会不生效。需要异步主线程才可以
+            DispatchQueue.main.async { [weak self] in
+                self?.play(time: 0)
             }
         }
     }

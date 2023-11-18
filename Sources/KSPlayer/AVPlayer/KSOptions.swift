@@ -324,7 +324,7 @@ open class KSOptions {
             if KSOptions.displayCriteriaFormatDescriptionEnabled, #available(tvOS 17.0, *) {
                 displayManager.preferredDisplayCriteria = AVDisplayCriteria(refreshRate: refreshRate, formatDescription: formatDescription)
             } else {
-                let dynamicRange = isDovi ? .dolbyVision : formatDescription.dynamicRange
+//                let dynamicRange = isDovi ? .dolbyVision : formatDescription.dynamicRange
 //                displayManager.preferredDisplayCriteria = AVDisplayCriteria(refreshRate: refreshRate, videoDynamicRange: dynamicRange.rawValue)
             }
         }
