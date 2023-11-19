@@ -504,7 +504,12 @@ struct VideoSettingView: View {
             Picker(selection: Binding {
                 subtitleModel.selectedSubtitleInfo?.subtitleID
             } set: { value in
-                subtitleModel.selectedSubtitleInfo = subtitleModel.subtitleInfos.first { $0.subtitleID == value }
+                let info = subtitleModel.subtitleInfos.first { $0.subtitleID == value }
+                subtitleModel.selectedSubtitleInfo = info
+                if let info = info as? MediaPlayerTrack {
+                    // 因为图片字幕想要实时的显示，那就需要seek。所以需要走select track
+                    config.playerLayer?.player.select(track: info)
+                }
             }) {
                 Text("Off").tag(nil as String?)
                 ForEach(subtitleModel.subtitleInfos, id: \.subtitleID) { track in
