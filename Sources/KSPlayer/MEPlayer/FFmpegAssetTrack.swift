@@ -80,7 +80,7 @@ public class FFmpegAssetTrack: MediaPlayerTrack {
             if frameSize < 1 {
                 frameSize = timebase.den / timebase.num
             }
-            nominalFrameRate = max(Float(codecpar.sample_rate / frameSize), 44)
+            nominalFrameRate = max(Float(codecpar.sample_rate / frameSize), 48)
         } else {
             let frameRate = stream.pointee.avg_frame_rate
             if stream.pointee.duration > 0, stream.pointee.nb_frames > 0, stream.pointee.nb_frames != stream.pointee.duration {

@@ -234,7 +234,7 @@ public class AudioDescriptor: Equatable {
     fileprivate var outChannel: AVChannelLayout
 
     private convenience init() {
-        self.init(sampleFormat: AV_SAMPLE_FMT_FLT, sampleRate: 44100, channel: AVChannelLayout.defaultValue)
+        self.init(sampleFormat: AV_SAMPLE_FMT_FLT, sampleRate: 48000, channel: AVChannelLayout.defaultValue)
     }
 
     convenience init(codecpar: AVCodecParameters) {
@@ -249,7 +249,7 @@ public class AudioDescriptor: Equatable {
         self.channel = channel
         outChannel = channel
         if sampleRate <= 0 {
-            self.sampleRate = 44100
+            self.sampleRate = 48000
         } else {
             self.sampleRate = sampleRate
         }
@@ -269,7 +269,7 @@ public class AudioDescriptor: Equatable {
     public static func == (lhs: AudioDescriptor, rhs: AVFrame) -> Bool {
         var sampleRate = rhs.sample_rate
         if sampleRate <= 0 {
-            sampleRate = 44100
+            sampleRate = 48000
         }
         return lhs.sampleFormat == AVSampleFormat(rawValue: rhs.format) && lhs.sampleRate == sampleRate && lhs.channel == rhs.ch_layout
     }
