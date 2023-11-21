@@ -541,17 +541,16 @@ class AVMediaPlayerTrack: MediaPlayerTrack {
         nominalFrameRate = track.assetTrack?.nominalFrameRate ?? 24.0
         bitRate = Int64(track.assetTrack?.estimatedDataRate ?? 0)
         isPlayable = false
-        formatDescription = track.assetTrack?.formatDescriptions.first as? CMFormatDescription
         #else
         name = track.assetTrack?.languageCode ?? ""
         language = track.assetTrack?.extendedLanguageTag
         nominalFrameRate = track.assetTrack?.nominalFrameRate ?? 24.0
         bitRate = Int64(track.assetTrack?.estimatedDataRate ?? 0)
         isPlayable = track.assetTrack?.isPlayable ?? false
+        #endif
         // swiftlint:disable force_cast
         formatDescription = (track.assetTrack?.formatDescriptions.first as! CMFormatDescription)
         // swiftlint:enable force_cast
-        #endif
         description = (formatDescription?.mediaSubType ?? .boxed).rawValue.string
         #if os(xrOS)
         Task {

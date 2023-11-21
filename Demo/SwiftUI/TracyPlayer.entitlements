@@ -28,8 +28,6 @@
 	<true/>
 	<key>com.apple.security.network.client</key>
 	<true/>
-	<key>com.apple.security.network.server</key>
-	<true/>
 	<key>inter-app-audio</key>
 	<true/>
 </dict>
