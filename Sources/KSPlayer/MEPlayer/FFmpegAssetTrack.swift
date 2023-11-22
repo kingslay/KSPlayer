@@ -18,7 +18,7 @@ public class FFmpegAssetTrack: MediaPlayerTrack {
     public let mediaType: AVFoundation.AVMediaType
     public let formatName: String?
     private var stream: UnsafeMutablePointer<AVStream>?
-    var startTime = TimeInterval(0)
+    var startTime = CMTime.zero
     var codecpar: AVCodecParameters
     var timebase: Timebase = .defaultValue
     let bitsPerRawSample: Int32
@@ -74,6 +74,7 @@ public class FFmpegAssetTrack: MediaPlayerTrack {
         if timebase.num <= 0 || timebase.den <= 0 {
             timebase = Timebase(num: 1, den: 1000)
         }
+        startTime = timebase.cmtime(for: stream.pointee.start_time)
         self.timebase = timebase
         if mediaType == .audio {
             var frameSize = codecpar.frame_size

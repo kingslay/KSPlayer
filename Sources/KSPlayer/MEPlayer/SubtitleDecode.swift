@@ -21,7 +21,7 @@ class SubtitleDecode: DecodeProtocol {
     private var preSubtitleFrame: SubtitleFrame?
     private let assParse = AssParse()
     required init(assetTrack: FFmpegAssetTrack, options: KSOptions) {
-        startTime = assetTrack.startTime
+        startTime = assetTrack.startTime.seconds
         do {
             codecContext = try assetTrack.ceateContext(options: options)
             if let pointer = codecContext?.pointee.subtitle_header {
