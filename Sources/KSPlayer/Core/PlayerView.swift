@@ -35,6 +35,7 @@ public protocol PlayerControllerDelegate: AnyObject {
     func playerController(action: PlayerButtonType)
     // `bufferedCount: 0` indicates first time loading
     func playerController(bufferedCount: Int, consumeTime: TimeInterval)
+    func playerController(seek: TimeInterval)
 }
 
 open class PlayerView: UIView, KSPlayerLayerDelegate, KSSliderDelegate {
@@ -159,7 +160,8 @@ open class PlayerView: UIView, KSPlayerLayerDelegate, KSSliderDelegate {
         if event == .valueChanged {
             toolBar.currentTime = value
         } else if event == .touchUpInside {
-            seek(time: value) { _ in
+            seek(time: value) { [weak self] _ in
+                self?.delegate?.playerController(seek: value)
             }
         }
     }
