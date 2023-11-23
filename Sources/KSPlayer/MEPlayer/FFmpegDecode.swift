@@ -11,8 +11,6 @@ import Libavcodec
 
 class FFmpegDecode: DecodeProtocol {
     private let options: KSOptions
-    // 第一次seek不要调用avcodec_flush_buffers。否则seek完之后可能会因为不是关键帧而导致蓝屏
-    private var firstSeek = true
     private var coreFrame: UnsafeMutablePointer<AVFrame>? = av_frame_alloc()
     private var codecContext: UnsafeMutablePointer<AVCodecContext>?
     private var bestEffortTimestamp = Int64(0)
@@ -131,9 +129,6 @@ class FFmpegDecode: DecodeProtocol {
 
     func doFlushCodec() {
         bestEffortTimestamp = Int64(0)
-        if firstSeek {
-            firstSeek = false
-        }
     }
 
     func shutdown() {
