@@ -133,10 +133,6 @@ class FFmpegDecode: DecodeProtocol {
         bestEffortTimestamp = Int64(0)
         if firstSeek {
             firstSeek = false
-        } else {
-            if codecContext != nil {
-                avcodec_flush_buffers(codecContext)
-            }
         }
     }
 
