@@ -254,7 +254,7 @@ extension MEPlayerItem {
             videoClock.positionTime = startTime
             audioClock.positionTime = startTime
         }
-        duration = TimeInterval(max(formatCtx.pointee.duration, 0) * 100 / Int64(AV_TIME_BASE)) / 100.0
+        duration = TimeInterval(max(formatCtx.pointee.duration, 0) / Int64(AV_TIME_BASE))
         fileSize = Double(formatCtx.pointee.bit_rate) * duration / 8
         createCodec(formatCtx: formatCtx)
         if let outputURL = options.outputURL {
