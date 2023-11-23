@@ -107,7 +107,7 @@ final class MEPlayerItem {
                     let context = ptr.assumingMemoryBound(to: URLContext.self).pointee
                     if let opaque = context.interrupt_callback.opaque {
                         let playerItem = Unmanaged<MEPlayerItem>.fromOpaque(opaque).takeUnretainedValue()
-                        playerItem.options.io(log: log)
+                        playerItem.options.urlIO(log: String(log))
                         if log.starts(with: "Will reconnect at") {
                             let seconds = playerItem.mainClock().positionTime.seconds
                             playerItem.videoTrack?.seekTime = seconds

@@ -110,6 +110,7 @@ open class KSOptions {
         formatContextOptions["scan_all_pmts"] = 1
         formatContextOptions["auto_convert"] = 0
         formatContextOptions["fps_probe_size"] = 3
+        formatContextOptions["protocol_whitelist"] = "file,http,https,tcp,tls,crypto,async,cache"
 //        formatContextOptions["max_analyze_duration"] = 300 * 1000
         formatContextOptions["reconnect"] = 1
         // 开启这个，纯ipv6地址会无法播放。
@@ -250,7 +251,7 @@ open class KSOptions {
         display == .plane
     }
 
-    open func io(log: String) {
+    open func urlIO(log: String) {
         if log.starts(with: "Original list of addresses"), dnsStartTime == 0 {
             dnsStartTime = CACurrentMediaTime()
         } else if log.starts(with: "Starting connection attempt to"), tcpStartTime == 0 {
