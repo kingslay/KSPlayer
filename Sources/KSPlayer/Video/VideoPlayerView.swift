@@ -163,7 +163,6 @@ open class VideoPlayerView: PlayerView {
     // MARK: - setup UI
 
     open func setupUIComponents() {
-        backgroundColor = .black
         addSubview(contentOverlayView)
         addSubview(controllerView)
         #if os(macOS)

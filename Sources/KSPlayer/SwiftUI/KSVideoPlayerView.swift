@@ -143,7 +143,6 @@ public struct KSVideoPlayerView: View {
             }
         }
         .preferredColorScheme(.dark)
-        .background(Color.black)
         .tint(.white)
         .persistentSystemOverlays(.hidden)
         .toolbar(playerCoordinator.isMaskShow ? .visible : .hidden, for: .automatic)
