@@ -11,7 +11,6 @@ import CoreMedia
 #if canImport(MetalKit)
 import MetalKit
 #endif
-
 public protocol DisplayLayerDelegate: NSObjectProtocol {
     func change(displayLayer: AVSampleBufferDisplayLayer)
 }

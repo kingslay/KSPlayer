@@ -6,7 +6,8 @@
 //
 
 import Foundation
-
+/// 这个是单生产者，多消费者的阻塞队列和单生产者，多消费者的阻塞环形队列。并且环形队列还要有排序的能力。
+/// 因为seek需要清空队列，所以导致他是多消费者。后续可以看下能不能改成单消费者的。
 public class CircularBuffer<Item: ObjectQueueItem> {
     private var _buffer = ContiguousArray<Item?>()
 //    private let semaphore = DispatchSemaphore(value: 0)
