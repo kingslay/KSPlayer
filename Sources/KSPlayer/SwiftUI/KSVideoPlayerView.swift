@@ -147,19 +147,19 @@ public struct KSVideoPlayerView: View {
         .persistentSystemOverlays(.hidden)
         .toolbar(playerCoordinator.isMaskShow ? .visible : .hidden, for: .automatic)
         #if !os(xrOS)
-        .onKeyPressLeftArrow {
-            playerCoordinator.skip(interval: -15)
-        }
-        .onKeyPressRightArrow {
-            playerCoordinator.skip(interval: 15)
-        }
-        .onKeyPressSapce {
-            if playerCoordinator.state.isPlaying {
-                playerCoordinator.playerLayer?.pause()
-            } else {
-                playerCoordinator.playerLayer?.play()
+            .onKeyPressLeftArrow {
+                playerCoordinator.skip(interval: -15)
             }
-        }
+            .onKeyPressRightArrow {
+                playerCoordinator.skip(interval: 15)
+            }
+            .onKeyPressSapce {
+                if playerCoordinator.state.isPlaying {
+                    playerCoordinator.playerLayer?.pause()
+                } else {
+                    playerCoordinator.playerLayer?.play()
+                }
+            }
         #endif
         #if os(macOS)
         .onTapGesture(count: 2) {
