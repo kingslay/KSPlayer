@@ -116,6 +116,7 @@ open class KSOptions {
         // 开启这个，纯ipv6地址会无法播放。并且有些视频结束了，但还会一直尝试重连。所以这个值默认不设置
 //        formatContextOptions["reconnect_at_eof"] = 1
         formatContextOptions["reconnect_streamed"] = 1
+        formatContextOptions["multiple_requests"] = 1
         // 开启这个，会导致tcp Failed to resolve hostname 还会一直重试
 //        formatContextOptions["reconnect_on_network_error"] = 1
         // There is total different meaning for 'listen_timeout' option in rtmp
