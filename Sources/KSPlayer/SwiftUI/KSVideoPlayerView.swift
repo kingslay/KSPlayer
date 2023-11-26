@@ -146,6 +146,7 @@ public struct KSVideoPlayerView: View {
         .tint(.white)
         .persistentSystemOverlays(.hidden)
         .toolbar(playerCoordinator.isMaskShow ? .visible : .hidden, for: .automatic)
+        #if !os(xrOS)
         .onKeyPressLeftArrow {
             playerCoordinator.skip(interval: -15)
         }
@@ -159,7 +160,7 @@ public struct KSVideoPlayerView: View {
                 playerCoordinator.playerLayer?.play()
             }
         }
-
+        #endif
         #if os(macOS)
         .onTapGesture(count: 2) {
             guard let view = playerCoordinator.playerLayer else {
