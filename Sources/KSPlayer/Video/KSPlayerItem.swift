@@ -123,8 +123,8 @@ public struct KSNowPlayableMetadata {
         return nowPlayingInfo
     }
 
-    init(mediaType: MPNowPlayingInfoMediaType? = nil, isLiveStream: Bool? = nil, title: String, artist: String? = nil,
-         artwork: MPMediaItemArtwork? = nil, albumArtist: String? = nil, albumTitle: String? = nil)
+    public init(mediaType: MPNowPlayingInfoMediaType? = nil, isLiveStream: Bool? = nil, title: String, artist: String? = nil,
+                artwork: MPMediaItemArtwork? = nil, albumArtist: String? = nil, albumTitle: String? = nil)
     {
         self.mediaType = mediaType
         self.isLiveStream = isLiveStream
@@ -135,7 +135,7 @@ public struct KSNowPlayableMetadata {
         self.albumTitle = albumTitle
     }
 
-    init(mediaType: MPNowPlayingInfoMediaType? = nil, isLiveStream: Bool? = nil, title: String, artist: String? = nil, image: UIImage, albumArtist: String? = nil, albumTitle: String? = nil) {
+    public init(mediaType: MPNowPlayingInfoMediaType? = nil, isLiveStream: Bool? = nil, title: String, artist: String? = nil, image: UIImage, albumArtist: String? = nil, albumTitle: String? = nil) {
         self.mediaType = mediaType
         self.isLiveStream = isLiveStream
         self.title = title

@@ -231,7 +231,6 @@ extension MEPlayerItem {
         }
         options.openTime = CACurrentMediaTime()
         formatCtx.pointee.flags |= AVFMT_FLAG_GENPTS
-        av_format_inject_global_side_data(formatCtx)
         if let probesize = options.probesize {
             formatCtx.pointee.probesize = probesize
         }
@@ -244,6 +243,8 @@ extension MEPlayerItem {
             avformat_close_input(&self.formatCtx)
             return
         }
+        // FIXME: hack, ffplay maybe should not use avio_feof() to test for the end
+        formatCtx.pointee.pb?.pointee.eof_reached = 0
         let flags = formatCtx.pointee.iformat.pointee.flags
         maxFrameDuration = flags & AVFMT_TS_DISCONT == AVFMT_TS_DISCONT ? 10.0 : 3600.0
         options.findTime = CACurrentMediaTime()
@@ -529,9 +530,6 @@ extension MEPlayerItem {
                     }
                 }
             }
-            if formatCtx?.pointee.pb?.pointee.eof_reached == 1 {
-                // todo need reconnect
-            }
             if corePacket.pointee.size <= 0 {
                 return 0
             }
@@ -554,7 +552,7 @@ extension MEPlayerItem {
                 }
             }
         } else {
-            if readResult == AVError.eof.code || formatCtx?.pointee.pb?.pointee.eof_reached == 1 {
+            if readResult == AVError.eof.code || avio_feof(formatCtx?.pointee.pb) > 0 {
                 if options.isLoopPlay, allPlayerItemTracks.allSatisfy({ !$0.isLoopModel }) {
                     allPlayerItemTracks.forEach { $0.isLoopModel = true }
                     _ = av_seek_frame(formatCtx, -1, startTime.value, AVSEEK_FLAG_BACKWARD)

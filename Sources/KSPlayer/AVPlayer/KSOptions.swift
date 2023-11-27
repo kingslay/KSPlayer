@@ -110,7 +110,8 @@ open class KSOptions {
         formatContextOptions["scan_all_pmts"] = 1
         formatContextOptions["auto_convert"] = 0
         formatContextOptions["fps_probe_size"] = 3
-        formatContextOptions["protocol_whitelist"] = "file,http,https,tcp,tls,crypto,async,cache,data,httpproxy"
+        // 默认情况下允许所有协议，只有嵌套协议才需要指定这个协议子集，例如m3u8里面有http。
+//        formatContextOptions["protocol_whitelist"] = "file,http,https,tcp,tls,crypto,async,cache,data,httpproxy"
 //        formatContextOptions["max_analyze_duration"] = 300 * 1000
         formatContextOptions["reconnect"] = 1
         // 开启这个，纯ipv6地址会无法播放。并且有些视频结束了，但还会一直尝试重连。所以这个值默认不设置
