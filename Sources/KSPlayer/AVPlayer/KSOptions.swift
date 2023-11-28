@@ -215,10 +215,6 @@ open class KSOptions {
     ///  wanted video stream index, or nil for automatic selection
     /// - Parameter : video bitRate
     /// - Returns: The index of the bitRates
-    open func wantedVideo(bitRates _: [Int64]) -> Int? {
-        nil
-    }
-
     open func wantedVideo(tracks _: [MediaPlayerTrack]) -> Int?{
         nil
     }
