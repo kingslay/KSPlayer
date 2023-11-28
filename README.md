@@ -55,6 +55,7 @@ target 'ProjectName' do
     pod 'KSPlayer',:git => 'https://github.com/kingslay/KSPlayer.git', :branch => 'develop'
     pod 'FFmpegKit',:git => 'https://github.com/kingslay/FFmpegKit.git', :branch => 'main'
     pod 'OpenSSL',:git => 'https://github.com/kingslay/FFmpegKit.git', :branch => 'main'
+    pod 'Libass',:git => 'https://github.com/kingslay/FFmpegKit.git', :branch => 'main'
 end
 ```
 

@@ -66,7 +66,7 @@ class VideoSwresample: Swresample {
         self.height = height
         self.width = width
         let pixelFormatType: OSType
-        if let osType = format.osType(), osType.planeCount == format.planeCount, format.bitDepth <= 8 {
+        if let osType = format.osType(), format.bitDepth <= 8 {
             pixelFormatType = osType
             sws_freeContext(imgConvertCtx)
             imgConvertCtx = nil
@@ -126,6 +126,7 @@ class VideoSwresample: Swresample {
                 _ = sws_scale(imgConvertCtx, data.map { UnsafePointer($0) }, linesize, 0, height, contents, bytesPerRow)
             } else {
                 let planeCount = format.planeCount
+                let byteCount = format.bitDepth > 8 ? 2 : 1
                 for i in 0 ..< bufferPlaneCount {
                     let height = pbuf.heightOfPlane(at: i)
                     let size = Int(linesize[i])
@@ -138,9 +139,10 @@ class VideoSwresample: Swresample {
                         for _ in 0 ..< height {
                             var j = 0
                             while j < size {
-                                contents?.advanced(by: 2 * j).copyMemory(from: sourceU.advanced(by: j), byteCount: 1)
-                                contents?.advanced(by: 2 * j + 1).copyMemory(from: sourceV.advanced(by: j), byteCount: 1)
-                                j += 1
+                                contents?.advanced(by: 2 * j).copyMemory(from: sourceU.advanced(by: j), byteCount: byteCount)
+                                contents?.advanced(by: 2 * j + byteCount).copyMemory(from: sourceU.advanced(by: j), byteCount: byteCount)
+
+                                j += byteCount
                             }
                             contents = contents?.advanced(by: bytesPerRow)
                             sourceU = sourceU.advanced(by: size)

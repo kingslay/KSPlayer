@@ -11,39 +11,6 @@ import FFmpegKit
 import Libavutil
 
 extension OSType {
-    var planeCount: UInt8 {
-        switch self {
-        case
-            kCVPixelFormatType_48RGB,
-            kCVPixelFormatType_32ABGR,
-            kCVPixelFormatType_32ARGB,
-            kCVPixelFormatType_32BGRA,
-            kCVPixelFormatType_32RGBA,
-            kCVPixelFormatType_24BGR,
-            kCVPixelFormatType_24RGB,
-            kCVPixelFormatType_16LE555,
-            kCVPixelFormatType_16BE565,
-            kCVPixelFormatType_16LE565,
-            kCVPixelFormatType_16BE555,
-            kCVPixelFormatType_OneComponent8,
-            kCVPixelFormatType_1Monochrome:
-            return 1
-        case
-            kCVPixelFormatType_444YpCbCr8,
-            kCVPixelFormatType_4444YpCbCrA8R,
-            kCVPixelFormatType_444YpCbCr10,
-            kCVPixelFormatType_4444AYpCbCr16,
-            kCVPixelFormatType_422YpCbCr8,
-            kCVPixelFormatType_422YpCbCr8_yuvs,
-            kCVPixelFormatType_422YpCbCr10,
-            kCVPixelFormatType_422YpCbCr16,
-            kCVPixelFormatType_420YpCbCr8Planar,
-            kCVPixelFormatType_420YpCbCr8PlanarFullRange:
-            return 3
-        default: return 2
-        }
-    }
-
     var bitDepth: Int32 {
         switch self {
         case kCVPixelFormatType_420YpCbCr10BiPlanarVideoRange, kCVPixelFormatType_422YpCbCr10BiPlanarVideoRange, kCVPixelFormatType_444YpCbCr10BiPlanarVideoRange, kCVPixelFormatType_420YpCbCr10BiPlanarFullRange, kCVPixelFormatType_422YpCbCr10BiPlanarFullRange, kCVPixelFormatType_444YpCbCr10BiPlanarFullRange:

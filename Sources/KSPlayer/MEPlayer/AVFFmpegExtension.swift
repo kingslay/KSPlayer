@@ -292,8 +292,8 @@ extension AVPixelFormat {
         case AV_PIX_FMT_NV16: return fullRange ? kCVPixelFormatType_422YpCbCr8BiPlanarFullRange : kCVPixelFormatType_422YpCbCr8BiPlanarVideoRange
         case AV_PIX_FMT_UYVY422: return kCVPixelFormatType_422YpCbCr8
         case AV_PIX_FMT_YUYV422: return kCVPixelFormatType_422YpCbCr8_yuvs
-        case AV_PIX_FMT_P210BE, AV_PIX_FMT_P210LE: return fullRange ? kCVPixelFormatType_422YpCbCr10BiPlanarFullRange : kCVPixelFormatType_422YpCbCr10BiPlanarVideoRange
-        case AV_PIX_FMT_YUV422P10BE, AV_PIX_FMT_YUV422P10LE: return kCVPixelFormatType_422YpCbCr10
+        case AV_PIX_FMT_P210BE, AV_PIX_FMT_P210LE: return kCVPixelFormatType_422YpCbCr10
+        case AV_PIX_FMT_YUV422P10BE, AV_PIX_FMT_YUV422P10LE: return fullRange ? kCVPixelFormatType_422YpCbCr10BiPlanarFullRange : kCVPixelFormatType_422YpCbCr10BiPlanarVideoRange
         case AV_PIX_FMT_P216BE, AV_PIX_FMT_P216LE: return kCVPixelFormatType_422YpCbCr16BiPlanarVideoRange
         case AV_PIX_FMT_YUV422P16BE, AV_PIX_FMT_YUV422P16LE: return kCVPixelFormatType_422YpCbCr16
         case AV_PIX_FMT_NV24: return fullRange ? kCVPixelFormatType_444YpCbCr8BiPlanarFullRange : kCVPixelFormatType_444YpCbCr8BiPlanarVideoRange
