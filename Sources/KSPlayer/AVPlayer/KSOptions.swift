@@ -219,6 +219,9 @@ open class KSOptions {
         nil
     }
 
+    open func wantedVideo(tracks _: [MediaPlayerTrack]) -> Int?{
+        nil
+    }
     /// wanted audio stream index, or nil for automatic selection
     /// - Parameter :  audio bitRate and language
     /// - Returns: The index of the infos
