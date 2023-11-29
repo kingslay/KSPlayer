@@ -353,7 +353,7 @@ extension MEPlayerItem {
                 $0 > 0
             }
             let wantedStreamNb: Int32
-            if !videos.isEmpty, let index = options.wantedVideo(bitRates: bitRates) {
+            if !videos.isEmpty, let index = options.wantedVideo(tracks: videos) {
                 wantedStreamNb = videos[index].trackID
             } else {
                 wantedStreamNb = -1
