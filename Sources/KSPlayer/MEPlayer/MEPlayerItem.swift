@@ -349,9 +349,6 @@ extension MEPlayerItem {
         var videoIndex: Int32 = -1
         if !options.videoDisable {
             let videos = assetTracks.filter { $0.mediaType == .video }
-            let bitRates = videos.map(\.bitRate).filter {
-                $0 > 0
-            }
             let wantedStreamNb: Int32
             if !videos.isEmpty, let index = options.wantedVideo(tracks: videos) {
                 wantedStreamNb = videos[index].trackID
@@ -385,6 +382,9 @@ extension MEPlayerItem {
                 if first.codecpar.codec_id != AV_CODEC_ID_MJPEG {
                     videoAudioTracks.append(track)
                 }
+                let bitRates = videos.map(\.bitRate).filter {
+                    $0 > 0
+                }
                 if bitRates.count > 1, options.videoAdaptable {
                     let bitRateState = VideoAdaptationState.BitRateState(bitRate: first.bitRate, time: CACurrentMediaTime())
                     videoAdaptation = VideoAdaptationState(bitRates: bitRates.sorted(by: <), duration: duration, fps: first.nominalFrameRate, bitRateStates: [bitRateState])
@@ -394,7 +394,7 @@ extension MEPlayerItem {
 
         let audios = assetTracks.filter { $0.mediaType == .audio }
         let wantedStreamNb: Int32
-        if !audios.isEmpty, let index = options.wantedAudio(infos: audios.map { ($0.bitRate, $0.language) }) {
+        if !audios.isEmpty, let index = options.wantedAudio(tracks: audios) {
             wantedStreamNb = audios[index].trackID
         } else {
             wantedStreamNb = -1
