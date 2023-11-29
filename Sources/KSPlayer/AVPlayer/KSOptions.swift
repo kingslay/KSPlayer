@@ -307,10 +307,10 @@ open class KSOptions {
         if assetTrack.mediaType == .video {
             if [FFmpegFieldOrder.bb, .bt, .tt, .tb].contains(assetTrack.fieldOrder) {
                 // todo 先不要用yadif_videotoolbox，不然会crash。这个后续在看下要怎么解决
-//                videoFilters.append("yadif_videotoolbox=mode=\(KSOptions.yadifMode):parity=-1:deint=1")
-                videoFilters.append("yadif=mode=\(KSOptions.yadifMode):parity=-1:deint=1")
                 hardwareDecode = false
                 asynchronousDecompression = false
+                let yadif = hardwareDecode ? "yadif_videotoolbox" : "yadif"
+                videoFilters.append("\(yadif)=mode=\(KSOptions.yadifMode):parity=-1:deint=1")
             }
         }
     }
@@ -480,10 +480,10 @@ public extension KSOptions {
     }
 
     #if !os(macOS)
-    static func isSpatialAudioEnabled(channelCount: AVAudioChannelCount) -> Bool {
+    static func isSpatialAudioEnabled(channelCount _: AVAudioChannelCount) -> Bool {
         if #available(tvOS 15.0, iOS 15.0, *) {
             let isSpatialAudioEnabled = AVAudioSession.sharedInstance().currentRoute.outputs.contains { $0.isSpatialAudioEnabled }
-            try? AVAudioSession.sharedInstance().setSupportsMultichannelContent(channelCount > 2)
+            try? AVAudioSession.sharedInstance().setSupportsMultichannelContent(isSpatialAudioEnabled)
             return isSpatialAudioEnabled
         } else {
             return false
