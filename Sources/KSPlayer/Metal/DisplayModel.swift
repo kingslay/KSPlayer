@@ -2,7 +2,7 @@
 //  DisplayModel.swift
 //  KSPlayer-iOS
 //
-//  Created by wangjinbian on 2020/1/11.
+//  Created by kintan on 2020/1/11.
 //
 
 import Foundation

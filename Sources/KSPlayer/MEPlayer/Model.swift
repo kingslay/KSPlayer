@@ -135,6 +135,24 @@ public extension KSOptions {
         }
     }
 
+    static func pixelFormat(planeCount: Int, bitDepth: Int32) -> [MTLPixelFormat] {
+        if planeCount == 3 {
+            if bitDepth > 8 {
+                return [.r16Unorm, .r16Unorm, .r16Unorm]
+            } else {
+                return [.r8Unorm, .r8Unorm, .r8Unorm]
+            }
+        } else if planeCount == 2 {
+            if bitDepth > 8 {
+                return [.r16Unorm, .rg16Unorm]
+            } else {
+                return [.r8Unorm, .rg8Unorm]
+            }
+        } else {
+            return [colorPixelFormat(bitDepth: bitDepth)]
+        }
+    }
+
     static func colorPixelFormat(bitDepth: Int32) -> MTLPixelFormat {
         if bitDepth == 10 {
             return .bgr10a2Unorm
@@ -360,7 +378,7 @@ public final class VideoVTBFrame: MEFrame {
     public var size: Int32 = 0
     public let fps: Float
     public let isDovi: Bool
-    var corePixelBuffer: CVPixelBuffer?
+    var corePixelBuffer: PixelBufferProtocol?
     init(fps: Float, isDovi: Bool) {
         self.fps = fps
         self.isDovi = isDovi

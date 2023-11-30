@@ -33,7 +33,7 @@ extension UnsafeMutablePointer where Pointee == AVCodecContext {
                         let framesCtxData = UnsafeMutableRawPointer(framesCtx.pointee.data)
                             .bindMemory(to: AVHWFramesContext.self, capacity: 1)
                         framesCtxData.pointee.format = AV_PIX_FMT_VIDEOTOOLBOX
-                        framesCtxData.pointee.sw_format = ctx.pointee.pix_fmt.bestPixelFormat()
+                        framesCtxData.pointee.sw_format = ctx.pointee.pix_fmt.bestPixelFormat
                         framesCtxData.pointee.width = ctx.pointee.width
                         framesCtxData.pointee.height = ctx.pointee.height
                     }
@@ -241,8 +241,16 @@ extension AVPixelFormat {
         }
     }
 
+    var leftShift: UInt8 {
+        if [AV_PIX_FMT_YUV420P10LE, AV_PIX_FMT_YUV422P10LE, AV_PIX_FMT_YUV444P10LE].contains(self) {
+            return 6
+        } else {
+            return 0
+        }
+    }
+
     // videotoolbox_best_pixel_format
-    func bestPixelFormat() -> AVPixelFormat {
+    var bestPixelFormat: AVPixelFormat {
         if let desc = av_pix_fmt_desc_get(self) {
             if desc.pointee.flags & UInt64(AV_PIX_FMT_FLAG_ALPHA) != 0 {
                 return AV_PIX_FMT_AYUV64LE
@@ -257,7 +265,7 @@ extension AVPixelFormat {
             if desc.pointee.log2_chroma_h == 0 {
                 return depth <= 8 ? AV_PIX_FMT_NV16 : AV_PIX_FMT_P210LE
             }
-            return depth > 8 ? AV_PIX_FMT_P010LE : AV_PIX_FMT_NV12
+            return depth <= 8 ? AV_PIX_FMT_NV12 : AV_PIX_FMT_P010LE
         } else {
             return AV_PIX_FMT_NV12
         }
@@ -285,16 +293,16 @@ extension AVPixelFormat {
         case AV_PIX_FMT_RGBA: return kCVPixelFormatType_32RGBA
         case AV_PIX_FMT_BGR48BE, AV_PIX_FMT_BGR48LE: return kCVPixelFormatType_48RGB
         case AV_PIX_FMT_NV12: return fullRange ? kCVPixelFormatType_420YpCbCr8BiPlanarFullRange : kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange
+        //  AVSampleBufferDisplayLayer不能显示 kCVPixelFormatType_420YpCbCr8PlanarFullRange,所以换成是kCVPixelFormatType_420YpCbCr8BiPlanarFullRange
+        case AV_PIX_FMT_YUV420P, AV_PIX_FMT_YUVJ420P: return fullRange ? kCVPixelFormatType_420YpCbCr8BiPlanarFullRange : kCVPixelFormatType_420YpCbCr8Planar
         case AV_PIX_FMT_P010BE, AV_PIX_FMT_P010LE, AV_PIX_FMT_YUV420P10BE, AV_PIX_FMT_YUV420P10LE: return fullRange ? kCVPixelFormatType_420YpCbCr10BiPlanarFullRange : kCVPixelFormatType_420YpCbCr10BiPlanarVideoRange
-        case AV_PIX_FMT_YUV420P, AV_PIX_FMT_YUVJ420P: return kCVPixelFormatType_420YpCbCr8BiPlanarFullRange
-        //  AVSampleBufferDisplayLayer不能显示 kCVPixelFormatType_420YpCbCr8PlanarFullRange
-        case AV_PIX_FMT_NV16: return fullRange ? kCVPixelFormatType_422YpCbCr8BiPlanarFullRange : kCVPixelFormatType_422YpCbCr8BiPlanarVideoRange
         case AV_PIX_FMT_UYVY422: return kCVPixelFormatType_422YpCbCr8
         case AV_PIX_FMT_YUYV422: return kCVPixelFormatType_422YpCbCr8_yuvs
+        case AV_PIX_FMT_NV16: return fullRange ? kCVPixelFormatType_422YpCbCr8BiPlanarFullRange : kCVPixelFormatType_422YpCbCr8BiPlanarVideoRange
+        case AV_PIX_FMT_YUV422P, AV_PIX_FMT_YUVJ422P: return fullRange ? kCVPixelFormatType_422YpCbCr8BiPlanarFullRange : kCVPixelFormatType_422YpCbCr8BiPlanarVideoRange
         case AV_PIX_FMT_Y210BE, AV_PIX_FMT_Y210LE: return kCVPixelFormatType_422YpCbCr10
         case AV_PIX_FMT_P210BE, AV_PIX_FMT_P210LE, AV_PIX_FMT_YUV422P10BE, AV_PIX_FMT_YUV422P10LE: return fullRange ? kCVPixelFormatType_422YpCbCr10BiPlanarFullRange : kCVPixelFormatType_422YpCbCr10BiPlanarVideoRange
-        case AV_PIX_FMT_P216BE, AV_PIX_FMT_P216LE: return kCVPixelFormatType_422YpCbCr16BiPlanarVideoRange
-        case AV_PIX_FMT_YUV422P16BE, AV_PIX_FMT_YUV422P16LE: return kCVPixelFormatType_422YpCbCr16
+        case AV_PIX_FMT_P216BE, AV_PIX_FMT_P216LE, AV_PIX_FMT_YUV422P16BE, AV_PIX_FMT_YUV422P16LE: return kCVPixelFormatType_422YpCbCr16BiPlanarVideoRange
         case AV_PIX_FMT_NV24, AV_PIX_FMT_YUV444P: return fullRange ? kCVPixelFormatType_444YpCbCr8BiPlanarFullRange : kCVPixelFormatType_444YpCbCr8BiPlanarVideoRange
         case AV_PIX_FMT_YUVA444P: return kCVPixelFormatType_4444YpCbCrA8R
         case AV_PIX_FMT_P410BE, AV_PIX_FMT_P410LE, AV_PIX_FMT_YUV444P10BE, AV_PIX_FMT_YUV444P10LE: return fullRange ? kCVPixelFormatType_444YpCbCr10BiPlanarFullRange : kCVPixelFormatType_444YpCbCr10BiPlanarVideoRange

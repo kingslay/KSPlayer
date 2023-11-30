@@ -1,8 +1,8 @@
 //
-//  MetalRenderer.swift
+//  MetalRender.swift
 //  KSPlayer-iOS
 //
-//  Created by wangjinbian on 2020/1/11.
+//  Created by kintan on 2020/1/11.
 //
 import Accelerate
 import CoreVideo
@@ -60,6 +60,20 @@ class MetalRender {
         return buffer
     }()
 
+    private lazy var leftShiftMatrixBuffer: MTLBuffer? = {
+        var firstColumn = SIMD3<UInt8>(1, 1, 1)
+        let buffer = MetalRender.device.makeBuffer(bytes: &firstColumn, length: MemoryLayout<SIMD3<UInt8>>.size)
+        buffer?.label = "leftShit"
+        return buffer
+    }()
+
+    private lazy var leftShiftSixMatrixBuffer: MTLBuffer? = {
+        var firstColumn = SIMD3<UInt8>(64, 64, 64)
+        let buffer = MetalRender.device.makeBuffer(bytes: &firstColumn, length: MemoryLayout<SIMD3<UInt8>>.size)
+        buffer?.label = "leftShit"
+        return buffer
+    }()
+
     func clear(drawable: MTLDrawable) {
         renderPassDescriptor.colorAttachments[0].clearColor = MTLClearColor(red: 0, green: 0, blue: 0, alpha: 0)
         renderPassDescriptor.colorAttachments[0].loadAction = .clear
@@ -74,7 +88,7 @@ class MetalRender {
         commandBuffer.waitUntilCompleted()
     }
 
-    func draw(pixelBuffer: CVPixelBuffer, display: DisplayEnum = .plane, drawable: CAMetalDrawable) {
+    func draw(pixelBuffer: PixelBufferProtocol, display: DisplayEnum = .plane, drawable: CAMetalDrawable) {
         let inputTextures = pixelBuffer.textures()
         renderPassDescriptor.colorAttachments[0].texture = drawable.texture
         guard !inputTextures.isEmpty, let commandBuffer = commandQueue?.makeCommandBuffer(), let encoder = commandBuffer.makeRenderCommandEncoder(descriptor: renderPassDescriptor) else {
@@ -97,7 +111,7 @@ class MetalRender {
         commandBuffer.waitUntilCompleted()
     }
 
-    private func setFragmentBuffer(pixelBuffer: CVPixelBuffer, encoder: MTLRenderCommandEncoder) {
+    private func setFragmentBuffer(pixelBuffer: PixelBufferProtocol, encoder: MTLRenderCommandEncoder) {
         if pixelBuffer.planeCount > 1 {
             let buffer: MTLBuffer?
             let yCbCrMatrix = pixelBuffer.yCbCrMatrix
@@ -114,6 +128,8 @@ class MetalRender {
             encoder.setFragmentBuffer(buffer, offset: 0, index: 0)
             let colorOffset = isFullRangeVideo ? colorOffsetFullRangeMatrixBuffer : colorOffsetVideoRangeMatrixBuffer
             encoder.setFragmentBuffer(colorOffset, offset: 0, index: 1)
+            let leftShift = pixelBuffer.leftShift == 0 ? leftShiftMatrixBuffer : leftShiftSixMatrixBuffer
+            encoder.setFragmentBuffer(leftShift, offset: 0, index: 2)
         }
     }
 
@@ -141,18 +157,7 @@ class MetalRender {
         guard let iosurface = CVPixelBufferGetIOSurface(pixelBuffer)?.takeUnretainedValue() else {
             return []
         }
-        let formats: [MTLPixelFormat]
-        if pixelBuffer.planeCount == 3 {
-            formats = [.r8Unorm, .r8Unorm, .r8Unorm]
-        } else if pixelBuffer.planeCount == 2 {
-            if pixelBuffer.bitDepth > 8 {
-                formats = [.r16Unorm, .rg16Unorm]
-            } else {
-                formats = [.r8Unorm, .rg8Unorm]
-            }
-        } else {
-            formats = [.bgra8Unorm]
-        }
+        let formats = KSOptions.pixelFormat(planeCount: pixelBuffer.planeCount, bitDepth: pixelBuffer.bitDepth)
         return (0 ..< pixelBuffer.planeCount).compactMap { index in
             let width = pixelBuffer.widthOfPlane(at: index)
             let height = pixelBuffer.heightOfPlane(at: index)

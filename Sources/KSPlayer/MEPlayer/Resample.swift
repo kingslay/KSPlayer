@@ -2,7 +2,7 @@
 //  Resample.swift
 //  KSPlayer-iOS
 //
-//  Created by wangjinbian on 2020/1/27.
+//  Created by kintan on 2020/1/27.
 //
 
 import AVFoundation
@@ -40,7 +40,7 @@ class VideoSwscale: FrameTransfer {
             imgConvertCtx = nil
             outFrame = nil
         } else {
-            let dstFormat = format.bestPixelFormat()
+            let dstFormat = format.bestPixelFormat
             imgConvertCtx = sws_getCachedContext(imgConvertCtx, width, height, self.format, width, height, dstFormat, SWS_BICUBIC, nil, nil, nil)
             outFrame = av_frame_alloc()
             outFrame?.pointee.format = dstFormat.rawValue
@@ -113,12 +113,12 @@ class VideoSwresample: FrameChange {
         self.height = height
         self.width = width
         let pixelFormatType: OSType
-        if let osType = format.osType(), format.bitDepth == 8 || format.bitDepth == 16 || [AV_PIX_FMT_Y210LE, AV_PIX_FMT_P410LE, AV_PIX_FMT_P210LE, AV_PIX_FMT_P010LE].contains(format) {
+        if let osType = format.osType() {
             pixelFormatType = osType
             sws_freeContext(imgConvertCtx)
             imgConvertCtx = nil
         } else {
-            let dstFormat = dstFormat ?? format.bestPixelFormat()
+            let dstFormat = dstFormat ?? format.bestPixelFormat
             pixelFormatType = dstFormat.osType()!
 //            imgConvertCtx = sws_getContext(width, height, self.format, width, height, dstFormat, SWS_FAST_BILINEAR, nil, nil, nil)
             imgConvertCtx = sws_getCachedContext(imgConvertCtx, width, height, self.format, width, height, dstFormat, SWS_FAST_BILINEAR, nil, nil, nil)
@@ -126,10 +126,13 @@ class VideoSwresample: FrameChange {
         pool = CVPixelBufferPool.ceate(width: width, height: height, bytesPerRowAlignment: linesize, pixelFormatType: pixelFormatType)
     }
 
-    private func transfer(frame: AVFrame) -> CVPixelBuffer? {
+    private func transfer(frame: AVFrame) -> PixelBufferProtocol? {
         let format = AVPixelFormat(rawValue: frame.format)
         let width = frame.width
         let height = frame.height
+        if format.leftShift > 0 {
+            return PixelBuffer(frame: frame)
+        }
         let pbuf = transfer(format: format, width: width, height: height, data: Array(tuple: frame.data), linesize: Array(tuple: frame.linesize))
         if let pbuf {
             pbuf.aspectRatio = frame.sample_aspect_ratio.size
