@@ -62,6 +62,21 @@ public enum DynamicRange: Int32 {
     #endif
 }
 
+extension DynamicRange: CustomStringConvertible {
+    public var description: String {
+        switch self {
+        case .sdr:
+            return "SDR"
+        case .hdr10:
+            return "HDR10"
+        case .hlg:
+            return "HDR"
+        case .dolbyVision:
+            return "Dolby Vision"
+        }
+    }
+}
+
 extension DynamicRange {
     var colorPrimaries: CFString {
         switch self {
@@ -341,63 +356,15 @@ public extension URL {
 
     func parsePlaylist() async throws -> [(String, URL, [String: String])] {
         let data = try await data()
-        guard let string = String(data: data, encoding: .utf8) else {
-            return []
-        }
-        let scanner = Scanner(string: string)
-        var entrys = [(String, URL, [String: String])]()
-        guard scanner.scanString("#EXTM3U") != nil else {
-            return []
-        }
-        while !scanner.isAtEnd {
-            if let entry = parseM3U(scanner: scanner) {
-                entrys.append(entry)
+        var entrys = data.parsePlaylist()
+        for i in 0 ..< entrys.count {
+            var entry = entrys[i]
+            if entry.1.path.hasPrefix("./") {
+                entry.1 = deletingLastPathComponent().appendingPathComponent(entry.1.path).standardized
+                entrys[i] = entry
             }
         }
         return entrys
-    }
-
-    /*
-     #EXTINF:-1 tvg-id="ExampleTV.ua" tvg-logo="https://image.com" group-title="test test", Example TV (720p) [Not 24/7]
-     #EXTVLCOPT:http-referrer=http://example.com/
-     #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64)
-     http://example.com/stream.m3u8
-     */
-    private func parseM3U(scanner: Scanner) -> (String, URL, [String: String])? {
-        if scanner.scanString("#EXTINF:") == nil {
-            _ = scanner.scanUpToCharacters(from: .newlines)
-            return nil
-        }
-        var extinf = [String: String]()
-        if let duration = scanner.scanDouble() {
-            extinf["duration"] = String(duration)
-        }
-        while scanner.scanString(",") == nil {
-            let key = scanner.scanUpToString("=")
-            _ = scanner.scanString("=\"")
-            let value = scanner.scanUpToString("\"")
-            _ = scanner.scanString("\"")
-            if let key, let value {
-                extinf[key] = value
-            }
-        }
-        let title = scanner.scanUpToCharacters(from: .newlines)
-        if scanner.scanString("#EXTVLCOPT:") != nil {
-            let key = scanner.scanUpToString("=")
-            _ = scanner.scanString("=")
-            let value = scanner.scanUpToCharacters(from: .newlines)
-            if let key, let value {
-                extinf[key] = value
-            }
-        }
-        let urlString = scanner.scanUpToCharacters(from: .newlines)
-        if let urlString, var url = URL(string: urlString) {
-            if url.path.hasPrefix("./") {
-                url = deletingLastPathComponent().appendingPathComponent(url.path).standardized
-            }
-            return (title ?? url.lastPathComponent, url, extinf)
-        }
-        return nil
     }
 
     func data(userAgent: String? = nil) async throws -> Data {
@@ -426,6 +393,67 @@ public extension URL {
             completion(response.suggestedFilename ?? url.lastPathComponent, url)
         }
         task.resume()
+    }
+}
+
+public extension Data {
+    func parsePlaylist() -> [(String, URL, [String: String])] {
+        guard let string = String(data: self, encoding: .utf8) else {
+            return []
+        }
+        let scanner = Scanner(string: string)
+        var entrys = [(String, URL, [String: String])]()
+        guard scanner.scanString("#EXTM3U") != nil else {
+            return []
+        }
+        while !scanner.isAtEnd {
+            if let entry = scanner.parseM3U() {
+                entrys.append(entry)
+            }
+        }
+        return entrys
+    }
+}
+
+extension Scanner {
+    /*
+     #EXTINF:-1 tvg-id="ExampleTV.ua" tvg-logo="https://image.com" group-title="test test", Example TV (720p) [Not 24/7]
+     #EXTVLCOPT:http-referrer=http://example.com/
+     #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64)
+     http://example.com/stream.m3u8
+     */
+    func parseM3U() -> (String, URL, [String: String])? {
+        if scanString("#EXTINF:") == nil {
+            _ = scanUpToCharacters(from: .newlines)
+            return nil
+        }
+        var extinf = [String: String]()
+        if let duration = scanDouble() {
+            extinf["duration"] = String(duration)
+        }
+        while scanString(",") == nil {
+            let key = scanUpToString("=")
+            _ = scanString("=\"")
+            let value = scanUpToString("\"")
+            _ = scanString("\"")
+            if let key, let value {
+                extinf[key] = value
+            }
+        }
+        let title = scanUpToCharacters(from: .newlines)
+        if scanString("#EXTVLCOPT:") != nil {
+            let key = scanUpToString("=")
+            _ = scanString("=")
+            let value = scanUpToCharacters(from: .newlines)
+            if let key, let value {
+                extinf[key] = value
+            }
+        }
+        let urlString = scanUpToCharacters(from: .newlines)
+        if let urlString, let url = URL(string: urlString) {
+            return (title ?? url.lastPathComponent, url, extinf)
+        }
+        return nil
     }
 }
 

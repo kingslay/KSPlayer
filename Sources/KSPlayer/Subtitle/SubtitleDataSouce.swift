@@ -277,6 +277,7 @@ public class OpenSubtitleDataSouce: SearchSubtitleDataSouce {
             return
         }
         queryItems["languages"] = languages.joined(separator: ",")
+        try await searchSubtitle(queryItems: queryItems)
     }
 
     // https://opensubtitles.stoplight.io/docs/opensubtitles-api/a172317bd5ccc-search-for-subtitles

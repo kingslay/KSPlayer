@@ -143,24 +143,24 @@ public struct KSVideoPlayerView: View {
             }
         }
         .preferredColorScheme(.dark)
-        .background(Color.black)
         .tint(.white)
         .persistentSystemOverlays(.hidden)
         .toolbar(playerCoordinator.isMaskShow ? .visible : .hidden, for: .automatic)
-        .onKeyPressLeftArrow {
-            playerCoordinator.skip(interval: -15)
-        }
-        .onKeyPressRightArrow {
-            playerCoordinator.skip(interval: 15)
-        }
-        .onKeyPressSapce {
-            if playerCoordinator.state.isPlaying {
-                playerCoordinator.playerLayer?.pause()
-            } else {
-                playerCoordinator.playerLayer?.play()
+        #if !os(xrOS)
+            .onKeyPressLeftArrow {
+                playerCoordinator.skip(interval: -15)
             }
-        }
-
+            .onKeyPressRightArrow {
+                playerCoordinator.skip(interval: 15)
+            }
+            .onKeyPressSapce {
+                if playerCoordinator.state.isPlaying {
+                    playerCoordinator.playerLayer?.pause()
+                } else {
+                    playerCoordinator.playerLayer?.play()
+                }
+            }
+        #endif
         #if os(macOS)
         .onTapGesture(count: 2) {
             guard let view = playerCoordinator.playerLayer else {
@@ -475,9 +475,6 @@ struct VideoSettingView: View {
                 } set: { value in
                     if let track = audioTracks.first(where: { $0.trackID == value }) {
                         config.playerLayer?.player.select(track: track)
-                        config.playerLayer?.player.isMuted = false
-                    } else {
-                        config.playerLayer?.player.isMuted = true
                     }
                 }) {
                     ForEach(audioTracks, id: \.trackID) { track in
@@ -494,22 +491,25 @@ struct VideoSettingView: View {
                 } set: { value in
                     if let track = videoTracks.first(where: { $0.trackID == value }) {
                         config.playerLayer?.player.select(track: track)
-                        config.playerLayer?.options.videoDisable = false
-                    } else {
-                        config.playerLayer?.options.videoDisable = true
                     }
                 }) {
                     ForEach(videoTracks, id: \.trackID) { track in
                         Text(track.description).tag(track.trackID as Int32?)
                     }
                 } label: {
-                    Label("Video track", systemImage: "video.fill")
+                    Label("Video Track", systemImage: "video.fill")
                 }
+                LabeledContent("Video Type", value: (videoTracks.first { $0.isEnabled }?.dynamicRange ?? .sdr).description)
             }
             Picker(selection: Binding {
                 subtitleModel.selectedSubtitleInfo?.subtitleID
             } set: { value in
-                subtitleModel.selectedSubtitleInfo = subtitleModel.subtitleInfos.first { $0.subtitleID == value }
+                let info = subtitleModel.subtitleInfos.first { $0.subtitleID == value }
+                subtitleModel.selectedSubtitleInfo = info
+                if let info = info as? MediaPlayerTrack {
+                    // 因为图片字幕想要实时的显示，那就需要seek。所以需要走select track
+                    config.playerLayer?.player.select(track: info)
+                }
             }) {
                 Text("Off").tag(nil as String?)
                 ForEach(subtitleModel.subtitleInfos, id: \.subtitleID) { track in

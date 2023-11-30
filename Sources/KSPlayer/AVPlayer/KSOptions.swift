@@ -110,12 +110,14 @@ open class KSOptions {
         formatContextOptions["scan_all_pmts"] = 1
         formatContextOptions["auto_convert"] = 0
         formatContextOptions["fps_probe_size"] = 3
+        // 默认情况下允许所有协议，只有嵌套协议才需要指定这个协议子集，例如m3u8里面有http。
+//        formatContextOptions["protocol_whitelist"] = "file,http,https,tcp,tls,crypto,async,cache,data,httpproxy"
 //        formatContextOptions["max_analyze_duration"] = 300 * 1000
-
         formatContextOptions["reconnect"] = 1
-        // 开启这个，纯ipv6地址会无法播放。
+        // 开启这个，纯ipv6地址会无法播放。并且有些视频结束了，但还会一直尝试重连。所以这个值默认不设置
 //        formatContextOptions["reconnect_at_eof"] = 1
         formatContextOptions["reconnect_streamed"] = 1
+        formatContextOptions["multiple_requests"] = 1
         // 开启这个，会导致tcp Failed to resolve hostname 还会一直重试
 //        formatContextOptions["reconnect_on_network_error"] = 1
         // There is total different meaning for 'listen_timeout' option in rtmp
@@ -164,7 +166,7 @@ open class KSOptions {
             if capacity.isEndOfFile && capacity.packetCount == 0 {
                 return true
             }
-            guard capacity.frameCount >= capacity.frameMaxCount >> 2 else {
+            guard capacity.frameCount >= 2 else {
                 return false
             }
             if capacity.isEndOfFile {
@@ -211,16 +213,16 @@ open class KSOptions {
     }
 
     ///  wanted video stream index, or nil for automatic selection
-    /// - Parameter : video bitRate
-    /// - Returns: The index of the bitRates
-    open func wantedVideo(bitRates _: [Int64]) -> Int? {
+    /// - Parameter : video track
+    /// - Returns: The index of the track
+    open func wantedVideo(tracks _: [MediaPlayerTrack]) -> Int? {
         nil
     }
 
     /// wanted audio stream index, or nil for automatic selection
-    /// - Parameter :  audio bitRate and language
-    /// - Returns: The index of the infos
-    open func wantedAudio(infos _: [(bitRate: Int64, language: String?)]) -> Int? {
+    /// - Parameter :  audio track
+    /// - Returns: The index of the track
+    open func wantedAudio(tracks _: [MediaPlayerTrack]) -> Int? {
         nil
     }
 
@@ -228,8 +230,8 @@ open class KSOptions {
         isLive ? 4 : 16
     }
 
-    open func audioFrameMaxCount(fps: Float, channelCount _: Int) -> UInt8 {
-        let count = Int(fps) >> 2
+    open func audioFrameMaxCount(fps: Float, channelCount: Int) -> UInt8 {
+        let count = (Int(fps) * channelCount) >> 2
         if count >= UInt8.max {
             return UInt8.max
         } else {
@@ -251,7 +253,7 @@ open class KSOptions {
         display == .plane
     }
 
-    open func io(log: String) {
+    open func urlIO(log: String) {
         if log.starts(with: "Original list of addresses"), dnsStartTime == 0 {
             dnsStartTime = CACurrentMediaTime()
         } else if log.starts(with: "Starting connection attempt to"), tcpStartTime == 0 {
@@ -305,27 +307,27 @@ open class KSOptions {
         if assetTrack.mediaType == .video {
             if [FFmpegFieldOrder.bb, .bt, .tt, .tb].contains(assetTrack.fieldOrder) {
                 // todo 先不要用yadif_videotoolbox，不然会crash。这个后续在看下要怎么解决
-//                videoFilters.append("yadif_videotoolbox=mode=\(KSOptions.yadifMode):parity=-1:deint=1")
-                videoFilters.append("yadif=mode=\(KSOptions.yadifMode):parity=-1:deint=1")
                 hardwareDecode = false
                 asynchronousDecompression = false
+                let yadif = hardwareDecode ? "yadif_videotoolbox" : "yadif"
+                videoFilters.append("\(yadif)=mode=\(KSOptions.yadifMode):parity=-1:deint=1")
             }
         }
     }
 
-    open func updateVideo(refreshRate: Float, isDovi: Bool, formatDescription: CMFormatDescription?) {
+    open func updateVideo(refreshRate: Float, isDovi _: Bool, formatDescription: CMFormatDescription?) {
         #if os(tvOS) || os(xrOS)
         guard let displayManager = UIApplication.shared.windows.first?.avDisplayManager,
-              displayManager.isDisplayCriteriaMatchingEnabled,
-              !displayManager.isDisplayModeSwitchInProgress
+              displayManager.isDisplayCriteriaMatchingEnabled
         else {
             return
         }
+//        快速更改preferredDisplayCriteria，会导致isDisplayModeSwitchInProgress变成true，例如退出一个视频，然后在3s内重新进入的话，
         if let formatDescription {
             if KSOptions.displayCriteriaFormatDescriptionEnabled, #available(tvOS 17.0, *) {
                 displayManager.preferredDisplayCriteria = AVDisplayCriteria(refreshRate: refreshRate, formatDescription: formatDescription)
             } else {
-                let dynamicRange = isDovi ? .dolbyVision : formatDescription.dynamicRange
+//                let dynamicRange = isDovi ? .dolbyVision : formatDescription.dynamicRange
 //                displayManager.preferredDisplayCriteria = AVDisplayCriteria(refreshRate: refreshRate, videoDynamicRange: dynamicRange.rawValue)
             }
         }
@@ -340,7 +342,8 @@ open class KSOptions {
         #endif
         let diff = nextVideoTime - desire
 //        print("[video] video diff \(diff) audio \(main.positionTime) interval \(CACurrentMediaTime() - main.lastMediaTime) render interval \(CACurrentMediaTime() - lastMediaTime)")
-        if diff > 1 / Double(fps * 2) {
+        // 最大刷新率上限
+        if diff >= 1 / 120 {
             videoClockDelayCount = 0
             return (diff, .remain)
         } else {
@@ -477,10 +480,10 @@ public extension KSOptions {
     }
 
     #if !os(macOS)
-    static func isSpatialAudioEnabled(channelCount: AVAudioChannelCount) -> Bool {
+    static func isSpatialAudioEnabled(channelCount _: AVAudioChannelCount) -> Bool {
         if #available(tvOS 15.0, iOS 15.0, *) {
             let isSpatialAudioEnabled = AVAudioSession.sharedInstance().currentRoute.outputs.contains { $0.isSpatialAudioEnabled }
-            try? AVAudioSession.sharedInstance().setSupportsMultichannelContent(channelCount > 2)
+            try? AVAudioSession.sharedInstance().setSupportsMultichannelContent(isSpatialAudioEnabled)
             return isSpatialAudioEnabled
         } else {
             return false
@@ -500,8 +503,6 @@ public extension KSOptions {
         var channelCount = channelCount
         if channelCount > 2 {
             let minChannels = min(maximumOutputNumberOfChannels, channelCount)
-            try? AVAudioSession.sharedInstance().setPreferredOutputNumberOfChannels(Int(minChannels))
-            KSLog("[audio] set preferredOutputNumberOfChannels: \(minChannels)")
             // iOS 有空间音频功能，所以不用处理
             #if os(tvOS) || targetEnvironment(simulator)
             if !(isUseAudioRenderer && isSpatialAudioEnabled) {
@@ -511,7 +512,6 @@ public extension KSOptions {
             }
             #endif
         } else {
-            try? AVAudioSession.sharedInstance().setPreferredOutputNumberOfChannels(2)
             channelCount = 2
         }
         KSLog("[audio] outputNumberOfChannels: \(AVAudioSession.sharedInstance().outputNumberOfChannels) output channelCount: \(channelCount)")
@@ -635,13 +635,13 @@ public extension Array {
 
 public struct KSClock {
     public private(set) var lastMediaTime = CACurrentMediaTime()
-    public internal(set) var positionTime = TimeInterval(0) {
+    public internal(set) var positionTime = CMTime.zero {
         didSet {
             lastMediaTime = CACurrentMediaTime()
         }
     }
 
     func getTime() -> TimeInterval {
-        positionTime + CACurrentMediaTime() - lastMediaTime
+        positionTime.seconds + CACurrentMediaTime() - lastMediaTime
     }
 }

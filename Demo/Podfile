@@ -3,8 +3,10 @@ workspace 'Demo.xcworkspace'
 install! 'cocoapods', :generate_multiple_pod_projects => true
 def common
   pod 'KSPlayer', :path => '../', :testspecs => ['Tests']
+  pod 'Libass', :path => '../FFmpegKit'
   pod 'OpenSSL', :path => '../FFmpegKit'
   pod 'FFmpegKit', :path => '../FFmpegKit'
+#  pod 'Libass',:git => 'https://github.com/kingslay/FFmpegKit.git', :branch => 'main'
 #  pod 'FFmpegKit',:git => 'https://github.com/kingslay/FFmpegKit.git', :branch => 'main'
 #  pod 'OpenSSL',:git => 'https://github.com/kingslay/FFmpegKit.git', :branch => 'main'
   pod 'SwiftLint'

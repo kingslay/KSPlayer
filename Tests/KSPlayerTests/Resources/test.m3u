@@ -1,0 +1,17 @@
+#EXTM3U
+#EXTINF:-1 group-title="test",mp4视频
+http://clips.vorwaerts-gmbh.de/big_buck_bunny.mp4
+#EXTINF:-1 group-title="test",m3u8视频
+http://devimages.apple.com/iphone/samples/bipbop/bipbopall.m3u8
+#EXTINF:-1 group-title="test",fmp4
+https://bitmovin-a.akamaihd.net/content/dataset/multi-codec/hevc/stream_fmp4.m3u8
+#EXTINF:-1 group-title="test",tvb视频
+http://116.199.5.51:8114/00000000/hls/index.m3u8?Fsv_chan_hls_se_idx=188&FvSeid=1&Fsv_ctype=LIVES&Fsv_otype=1&Provider_id=&Pcontent_id=.m3u8
+#EXTINF:-1 group-title="test",dash视频
+http://dash.edgesuite.net/akamai/bbb_30fps/bbb_30fps.mpd
+#EXTINF:-1 group-title="test",https视频
+https://devstreaming-cdn.apple.com/videos/wwdc/2019/244gmopitz5ezs2kkq/244/hls_vod_mvp.m3u8
+#EXTINF:-1 group-title="test",rtsp video
+rtsp://rtsp.stream/pattern
+#EXTINF:-1 group-title="test",HDR MKV
+https://github.com/qiudaomao/MPVColorIssue/raw/master/MPVColorIssue/resources/captain.marvel.2019.2160p.uhd.bluray.x265-terminal.sample.mkv

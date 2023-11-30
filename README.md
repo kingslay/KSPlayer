@@ -18,7 +18,7 @@ English | [简体中文](./README_CN.md)
 - [x] iOS, tvOS, macOS, visionOS, Mac Catalyst, Apple Silicon M1, SwiftUI.
 - [x] Multiple audio/video tracks.
 - [x] hardware accelerator.
-- [x] 4k/HDR
+- [x] 4k/HDR/HDR10/HDR10+/Dolby Vision
 - [x] text subtitle/Closed Captions/image subtitle(dvbsub/dvdsub/pgssub)
 - [x] Picture in Picture
 - [x] Record video
@@ -55,6 +55,7 @@ target 'ProjectName' do
     pod 'KSPlayer',:git => 'https://github.com/kingslay/KSPlayer.git', :branch => 'develop'
     pod 'FFmpegKit',:git => 'https://github.com/kingslay/FFmpegKit.git', :branch => 'main'
     pod 'OpenSSL',:git => 'https://github.com/kingslay/FFmpegKit.git', :branch => 'main'
+    pod 'Libass',:git => 'https://github.com/kingslay/FFmpegKit.git', :branch => 'main'
 end
 ```
 
@@ -272,6 +273,7 @@ Your user icon or company logo shows up this with a link to your home page.
 
 [UnknownCoder807](https://github.com/UnknownCoder807)   [skrew](https://github.com/skrew)   [Kimentanm](https://github.com/Kimentanm)   [nakiostudio](https://github.com/nakiostudio)    [byMohamedali](https://github.com/byMohamedali)
 
+Thanks to [nightfall708](https://github.com/nightfall708) for sponsoring a mac mini
 
 Thanks to [cdguy](https://github.com/cdguy) [UnknownCoder807](https://github.com/UnknownCoder807) [skrew](https://github.com/skrew) and LillyPlayer community for sponsoring a LG S95QR Sound Bar 
 

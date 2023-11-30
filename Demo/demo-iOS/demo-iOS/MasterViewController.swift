@@ -33,6 +33,7 @@ class MasterViewController: UIViewController {
     var tableView = UITableView()
     override func viewDidLoad() {
         super.viewDidLoad()
+        navigationItem.setRightBarButton(UIBarButtonItem(barButtonSystemItem: .add, target: self, action: #selector(addURL)), animated: false)
         view.addSubview(tableView)
         tableView.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
@@ -65,24 +66,17 @@ extension MasterViewController: UITableViewDataSource {
     // MARK: - Table View
 
     func numberOfSections(in _: UITableView) -> Int {
-        2
+        1
     }
 
-    func tableView(_: UITableView, numberOfRowsInSection section: Int) -> Int {
-        if section == 1 {
-            return testObjects.count
-        }
-        return 1
+    func tableView(_: UITableView, numberOfRowsInSection _: Int) -> Int {
+        testObjects.count
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath)
         if let cell = cell as? TableViewCell {
-            if indexPath.section == 1 {
-                cell.nameLabel.text = testObjects[indexPath.row].name
-            } else {
-                cell.nameLabel.text = "Enter self URL"
-            }
+            cell.nameLabel.text = testObjects[indexPath.row].name
         }
         return cell
     }
@@ -91,20 +85,15 @@ extension MasterViewController: UITableViewDataSource {
 extension MasterViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
-
-        if indexPath.section == 1 {
-            play(resource: testObjects[indexPath.row])
-        } else {
-            showAlertForEnterURL()
-        }
+        play(resource: testObjects[indexPath.row])
     }
 }
 
 // MARK: - Actions
 
 extension MasterViewController {
-    func showAlertForEnterURL(_ message: String? = nil) {
-        let alert = UIAlertController(title: "Enter movie URL", message: message, preferredStyle: .alert)
+    @objc func addURL() {
+        let alert = UIAlertController(title: "Enter movie URL", message: nil, preferredStyle: .alert)
 
         alert.addTextField(configurationHandler: { testField in
             testField.placeholder = "URL"
@@ -113,18 +102,14 @@ extension MasterViewController {
 
         alert.addAction(UIAlertAction(title: "Play", style: .default, handler: { [weak self] _ in
             guard let textFieldText = alert.textFields?.first?.text,
-                  let mURL = URL(string: textFieldText)
+                  let url = URL(string: textFieldText)
             else {
-                self?.showAlertForEnterURL("Please enter valid URL")
                 return
             }
-
-            let resource = KSPlayerResource(url: mURL)
+            let resource = KSPlayerResource(url: url)
             self?.play(resource: resource)
         }))
-
         alert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
-
         present(alert, animated: true)
     }
 

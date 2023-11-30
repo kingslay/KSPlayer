@@ -80,7 +80,7 @@ class CustomVideoPlayerView: VideoPlayerView {
                 print("audio name: \(track.name) language: \(track.language ?? "")")
             }
             for track in layer.player.tracks(mediaType: .video) {
-                print("video name: \(track.name) bitRate: \(track.bitRate) fps: \(track.nominalFrameRate) depth: \(track.depth) colorPrimaries: \(track.colorPrimaries ?? "") colorPrimaries: \(track.transferFunction ?? "") yCbCrMatrix: \(track.yCbCrMatrix ?? "") codecType:  \(track.mediaSubType.rawValue.string)")
+                print("video name: \(track.name) bitRate: \(track.bitRate) fps: \(track.nominalFrameRate) colorPrimaries: \(track.colorPrimaries ?? "") colorPrimaries: \(track.transferFunction ?? "") yCbCrMatrix: \(track.yCbCrMatrix ?? "") codecType:  \(track.mediaSubType.rawValue.string)")
             }
         }
     }
@@ -107,8 +107,7 @@ class MEOptions: KSOptions {
                     return
                 }
                 if let displayManager = UIApplication.shared.windows.first?.avDisplayManager,
-                   displayManager.isDisplayCriteriaMatchingEnabled,
-                   !displayManager.isDisplayModeSwitchInProgress
+                   displayManager.isDisplayCriteriaMatchingEnabled
                 {
                     let refreshRate = assetTrack.nominalFrameRate
                     if KSOptions.displayCriteriaFormatDescriptionEnabled, let formatDescription = assetTrack.formatDescription, #available(tvOS 17.0, *) {
@@ -128,6 +127,13 @@ class MEOptions: KSOptions {
 
 var testObjects: [KSPlayerResource] = {
     var objects = [KSPlayerResource]()
+    if let url = Bundle.main.url(forResource: "test", withExtension: "m3u"), let data = try? Data(contentsOf: url) {
+        let result = data.parsePlaylist()
+        for (name, url, _) in result {
+            objects.append(KSPlayerResource(url: url, options: MEOptions(), name: name))
+        }
+    }
+
     for ext in ["mp4", "mkv", "mov", "h264", "flac", "webm"] {
         guard let urls = Bundle.main.urls(forResourcesWithExtension: ext, subdirectory: nil) else {
             continue

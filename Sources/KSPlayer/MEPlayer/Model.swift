@@ -277,15 +277,15 @@ public final class AudioFrame: MEFrame {
             switch audioFormat.commonFormat {
             case .pcmFormatInt16:
                 data[i]?.withMemoryRebound(to: Int16.self, capacity: capacity) { src in
-                    pcmBuffer.int16ChannelData?[i].assign(from: src, count: capacity)
+                    pcmBuffer.int16ChannelData?[i].update(from: src, count: capacity)
                 }
             case .pcmFormatInt32:
                 data[i]?.withMemoryRebound(to: Int32.self, capacity: capacity) { src in
-                    pcmBuffer.int32ChannelData?[i].assign(from: src, count: capacity)
+                    pcmBuffer.int32ChannelData?[i].update(from: src, count: capacity)
                 }
             default:
                 data[i]?.withMemoryRebound(to: Float.self, capacity: capacity) { src in
-                    pcmBuffer.floatChannelData?[i].assign(from: src, count: capacity)
+                    pcmBuffer.floatChannelData?[i].update(from: src, count: capacity)
                 }
             }
         }

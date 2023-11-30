@@ -11,12 +11,10 @@ import Libavcodec
 
 class FFmpegDecode: DecodeProtocol {
     private let options: KSOptions
-    // 第一次seek不要调用avcodec_flush_buffers。否则seek完之后可能会因为不是关键帧而导致蓝屏
-    private var firstSeek = true
     private var coreFrame: UnsafeMutablePointer<AVFrame>? = av_frame_alloc()
     private var codecContext: UnsafeMutablePointer<AVCodecContext>?
     private var bestEffortTimestamp = Int64(0)
-    private let swresample: Swresample
+    private let frameChange: FrameChange
     private let filter: MEFilter
     required init(assetTrack: FFmpegAssetTrack, options: KSOptions) {
         self.options = options
@@ -28,9 +26,9 @@ class FFmpegDecode: DecodeProtocol {
         codecContext?.pointee.time_base = assetTrack.timebase.rational
         filter = MEFilter(timebase: assetTrack.timebase, isAudio: assetTrack.mediaType == .audio, nominalFrameRate: assetTrack.nominalFrameRate, options: options)
         if assetTrack.mediaType == .video {
-            swresample = VideoSwresample(fps: assetTrack.nominalFrameRate, isDovi: assetTrack.dovi != nil)
+            frameChange = VideoSwresample(fps: assetTrack.nominalFrameRate, isDovi: assetTrack.dovi != nil)
         } else {
-            swresample = AudioSwresample(audioDescriptor: assetTrack.audioDescriptor!)
+            frameChange = AudioSwresample(audioDescriptor: assetTrack.audioDescriptor!)
         }
     }
 
@@ -87,7 +85,7 @@ class FFmpegDecode: DecodeProtocol {
                 }
                 filter.filter(options: options, inputFrame: avframe) { avframe in
                     do {
-                        var frame = try swresample.transfer(avframe: avframe)
+                        var frame = try frameChange.change(avframe: avframe)
                         frame.timebase = filter.timebase
                         //                frame.timebase = Timebase(avframe.pointee.time_base)
                         frame.size = avframe.pointee.pkt_size
@@ -131,19 +129,12 @@ class FFmpegDecode: DecodeProtocol {
 
     func doFlushCodec() {
         bestEffortTimestamp = Int64(0)
-        if firstSeek {
-            firstSeek = false
-        } else {
-            if codecContext != nil {
-                avcodec_flush_buffers(codecContext)
-            }
-        }
     }
 
     func shutdown() {
         av_frame_free(&coreFrame)
         avcodec_free_context(&codecContext)
-        swresample.shutdown()
+        frameChange.shutdown()
     }
 
     func decode() {

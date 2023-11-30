@@ -7,15 +7,9 @@
 	<key>com.apple.developer.aps-environment</key>
 	<string>development</string>
 	<key>com.apple.developer.icloud-container-identifiers</key>
-	<array>
-		<string>iCloud.TracyPlayer</string>
-	</array>
+	<array/>
 	<key>com.apple.developer.icloud-services</key>
-	<array>
-		<string>CloudKit</string>
-	</array>
-	<key>com.apple.developer.ubiquity-kvstore-identifier</key>
-	<string>$(TeamIdentifierPrefix)$(CFBundleIdentifier)</string>
+	<array/>
 	<key>com.apple.security.app-sandbox</key>
 	<true/>
 	<key>com.apple.security.assets.movies.read-write</key>
@@ -33,8 +27,6 @@
 	<key>com.apple.security.files.user-selected.read-only</key>
 	<true/>
 	<key>com.apple.security.network.client</key>
-	<true/>
-	<key>com.apple.security.network.server</key>
 	<true/>
 	<key>inter-app-audio</key>
 	<true/>

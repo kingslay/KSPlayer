@@ -12,12 +12,59 @@ import Libavcodec
 import Libswresample
 import Libswscale
 
-protocol Swresample {
-    func transfer(avframe: UnsafeMutablePointer<AVFrame>) throws -> MEFrame
+protocol FrameTransfer {
+    func transfer(avframe: UnsafeMutablePointer<AVFrame>) -> UnsafeMutablePointer<AVFrame>
     func shutdown()
 }
 
-class VideoSwresample: Swresample {
+protocol FrameChange {
+    func change(avframe: UnsafeMutablePointer<AVFrame>) throws -> MEFrame
+    func shutdown()
+}
+
+class VideoSwscale: FrameTransfer {
+    private var imgConvertCtx: OpaquePointer?
+    private var format: AVPixelFormat = AV_PIX_FMT_NONE
+    private var height: Int32 = 0
+    private var width: Int32 = 0
+    private var outFrame: UnsafeMutablePointer<AVFrame>?
+    private func setup(format: AVPixelFormat, width: Int32, height: Int32, linesize _: Int32) {
+        if self.format == format, self.width == width, self.height == height {
+            return
+        }
+        self.format = format
+        self.height = height
+        self.width = width
+        if format.osType() != nil {
+            sws_freeContext(imgConvertCtx)
+            imgConvertCtx = nil
+            outFrame = nil
+        } else {
+            let dstFormat = format.bestPixelFormat()
+            imgConvertCtx = sws_getCachedContext(imgConvertCtx, width, height, self.format, width, height, dstFormat, SWS_BICUBIC, nil, nil, nil)
+            outFrame = av_frame_alloc()
+            outFrame?.pointee.format = dstFormat.rawValue
+            outFrame?.pointee.width = width
+            outFrame?.pointee.height = height
+        }
+    }
+
+    func transfer(avframe: UnsafeMutablePointer<AVFrame>) -> UnsafeMutablePointer<AVFrame> {
+        setup(format: AVPixelFormat(rawValue: avframe.pointee.format), width: avframe.pointee.width, height: avframe.pointee.height, linesize: avframe.pointee.linesize.0)
+        if let imgConvertCtx, let outFrame {
+            sws_scale_frame(imgConvertCtx, outFrame, avframe)
+            return outFrame
+        }
+        return avframe
+    }
+
+    func shutdown() {
+        sws_freeContext(imgConvertCtx)
+        imgConvertCtx = nil
+    }
+}
+
+class VideoSwresample: FrameChange {
     private var imgConvertCtx: OpaquePointer?
     private var format: AVPixelFormat = AV_PIX_FMT_NONE
     private var height: Int32 = 0
@@ -32,7 +79,7 @@ class VideoSwresample: Swresample {
         self.isDovi = isDovi
     }
 
-    func transfer(avframe: UnsafeMutablePointer<AVFrame>) throws -> MEFrame {
+    func change(avframe: UnsafeMutablePointer<AVFrame>) throws -> MEFrame {
         let frame = VideoVTBFrame(fps: fps, isDovi: isDovi)
         if avframe.pointee.format == AV_PIX_FMT_VIDEOTOOLBOX.rawValue {
             frame.corePixelBuffer = unsafeBitCast(avframe.pointee.data.3, to: CVPixelBuffer.self)
@@ -66,14 +113,15 @@ class VideoSwresample: Swresample {
         self.height = height
         self.width = width
         let pixelFormatType: OSType
-        if let osType = format.osType(), osType.planeCount == format.planeCount, format.bitDepth <= 8 {
+        if let osType = format.osType(), format.bitDepth == 8 || format.bitDepth == 16 || [AV_PIX_FMT_Y210LE, AV_PIX_FMT_P410LE, AV_PIX_FMT_P210LE, AV_PIX_FMT_P010LE].contains(format) {
             pixelFormatType = osType
             sws_freeContext(imgConvertCtx)
             imgConvertCtx = nil
         } else {
             let dstFormat = dstFormat ?? format.bestPixelFormat()
             pixelFormatType = dstFormat.osType()!
-            imgConvertCtx = sws_getCachedContext(imgConvertCtx, width, height, self.format, width, height, dstFormat, SWS_BICUBIC, nil, nil, nil)
+//            imgConvertCtx = sws_getContext(width, height, self.format, width, height, dstFormat, SWS_FAST_BILINEAR, nil, nil, nil)
+            imgConvertCtx = sws_getCachedContext(imgConvertCtx, width, height, self.format, width, height, dstFormat, SWS_FAST_BILINEAR, nil, nil, nil)
         }
         pool = CVPixelBufferPool.ceate(width: width, height: height, bytesPerRowAlignment: linesize, pixelFormatType: pixelFormatType)
     }
@@ -126,6 +174,7 @@ class VideoSwresample: Swresample {
                 _ = sws_scale(imgConvertCtx, data.map { UnsafePointer($0) }, linesize, 0, height, contents, bytesPerRow)
             } else {
                 let planeCount = format.planeCount
+                let byteCount = format.bitDepth > 8 ? 2 : 1
                 for i in 0 ..< bufferPlaneCount {
                     let height = pbuf.heightOfPlane(at: i)
                     let size = Int(linesize[i])
@@ -138,9 +187,9 @@ class VideoSwresample: Swresample {
                         for _ in 0 ..< height {
                             var j = 0
                             while j < size {
-                                contents?.advanced(by: 2 * j).copyMemory(from: sourceU.advanced(by: j), byteCount: 1)
-                                contents?.advanced(by: 2 * j + 1).copyMemory(from: sourceV.advanced(by: j), byteCount: 1)
-                                j += 1
+                                contents?.advanced(by: 2 * j).copyMemory(from: sourceU.advanced(by: j), byteCount: byteCount)
+                                contents?.advanced(by: 2 * j + byteCount).copyMemory(from: sourceV.advanced(by: j), byteCount: byteCount)
+                                j += byteCount
                             }
                             contents = contents?.advanced(by: bytesPerRow)
                             sourceU = sourceU.advanced(by: size)
@@ -177,7 +226,7 @@ extension BinaryInteger {
 
 typealias SwrContext = OpaquePointer
 
-class AudioSwresample: Swresample {
+class AudioSwresample: FrameChange {
     private var swrContext: SwrContext?
     private var descriptor: AudioDescriptor
     private var outChannel: AVChannelLayout
@@ -199,7 +248,7 @@ class AudioSwresample: Swresample {
         }
     }
 
-    func transfer(avframe: UnsafeMutablePointer<AVFrame>) throws -> MEFrame {
+    func change(avframe: UnsafeMutablePointer<AVFrame>) throws -> MEFrame {
         if !(descriptor == avframe.pointee) || outChannel != descriptor.outChannel {
             let newDescriptor = AudioDescriptor(frame: avframe.pointee)
             if setup(descriptor: newDescriptor) {
@@ -234,7 +283,7 @@ public class AudioDescriptor: Equatable {
     fileprivate var outChannel: AVChannelLayout
 
     private convenience init() {
-        self.init(sampleFormat: AV_SAMPLE_FMT_FLT, sampleRate: 44100, channel: AVChannelLayout.defaultValue)
+        self.init(sampleFormat: AV_SAMPLE_FMT_FLT, sampleRate: 48000, channel: AVChannelLayout.defaultValue)
     }
 
     convenience init(codecpar: AVCodecParameters) {
@@ -249,7 +298,7 @@ public class AudioDescriptor: Equatable {
         self.channel = channel
         outChannel = channel
         if sampleRate <= 0 {
-            self.sampleRate = 44100
+            self.sampleRate = 48000
         } else {
             self.sampleRate = sampleRate
         }
@@ -269,7 +318,7 @@ public class AudioDescriptor: Equatable {
     public static func == (lhs: AudioDescriptor, rhs: AVFrame) -> Bool {
         var sampleRate = rhs.sample_rate
         if sampleRate <= 0 {
-            sampleRate = 44100
+            sampleRate = 48000
         }
         return lhs.sampleFormat == AVSampleFormat(rawValue: rhs.format) && lhs.sampleRate == sampleRate && lhs.channel == rhs.ch_layout
     }
@@ -323,7 +372,7 @@ public class AudioDescriptor: Equatable {
             interleaved = false
         }
         interleaved = KSOptions.audioPlayerType == AudioRendererPlayer.self
-        if !interleaved {
+        if !(KSOptions.audioPlayerType == AudioRendererPlayer.self || KSOptions.audioPlayerType == AudioUnitPlayer.self) {
             commonFormat = .pcmFormatFloat32
         }
         return AVAudioFormat(commonFormat: commonFormat, sampleRate: Double(sampleRate), interleaved: interleaved, channelLayout: AVAudioChannelLayout(layoutTag: layoutTag)!)

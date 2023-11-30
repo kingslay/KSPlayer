@@ -153,6 +153,10 @@ public final class AudioGraphPlayer: AudioOutput, AudioDynamicsProcessor {
             return
         }
         sourceNodeAudioFormat = audioFormat
+        #if !os(macOS)
+        try? AVAudioSession.sharedInstance().setPreferredOutputNumberOfChannels(Int(audioFormat.channelCount))
+        KSLog("[audio] set preferredOutputNumberOfChannels: \(audioFormat.channelCount)")
+        #endif
         sampleSize = audioFormat.sampleSize
         var audioStreamBasicDescription = audioFormat.formatDescription.audioStreamBasicDescription
         let audioStreamBasicDescriptionSize = UInt32(MemoryLayout<AudioStreamBasicDescription>.size)

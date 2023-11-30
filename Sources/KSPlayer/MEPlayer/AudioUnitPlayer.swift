@@ -14,9 +14,6 @@ public final class AudioUnitPlayer: AudioOutput {
     private var currentRenderReadOffset = UInt32(0)
     private var sourceNodeAudioFormat: AVAudioFormat?
     private var sampleSize = UInt32(MemoryLayout<Float>.size)
-    #if os(macOS)
-    private var volumeBeforeMute: Float = 0.0
-    #endif
     public weak var renderSource: OutputRenderSourceDelegate?
     private var currentRender: AudioFrame? {
         didSet {
@@ -41,38 +38,8 @@ public final class AudioUnitPlayer: AudioOutput {
         }
     }
 
-    public var playbackRate: Float {
-        get {
-            var playbackRate = AudioUnitParameterValue(0.0)
-            AudioUnitGetParameter(audioUnitForOutput, kNewTimePitchParam_Rate, kAudioUnitScope_Global, 0, &playbackRate)
-            return playbackRate
-        }
-        set {
-            AudioUnitSetParameter(audioUnitForOutput, kNewTimePitchParam_Rate, kAudioUnitScope_Global, 0, newValue, 0)
-        }
-    }
-
-    public var volume: Float {
-        get {
-            var volume = AudioUnitParameterValue(0.0)
-            #if os(macOS)
-            let inID = kStereoMixerParam_Volume
-            #else
-            let inID = kMultiChannelMixerParam_Volume
-            #endif
-            AudioUnitGetParameter(audioUnitForOutput, inID, kAudioUnitScope_Input, 0, &volume)
-            return volume
-        }
-        set {
-            #if os(macOS)
-            let inID = kStereoMixerParam_Volume
-            #else
-            let inID = kMultiChannelMixerParam_Volume
-            #endif
-            AudioUnitSetParameter(audioUnitForOutput, inID, kAudioUnitScope_Input, 0, newValue, 0)
-        }
-    }
-
+    public var playbackRate: Float = 1
+    public var volume: Float = 1
     public var isMuted: Bool = false
     public var latency = Float64(0)
     public init() {
@@ -99,6 +66,10 @@ public final class AudioUnitPlayer: AudioOutput {
             return
         }
         sourceNodeAudioFormat = audioFormat
+        #if !os(macOS)
+        try? AVAudioSession.sharedInstance().setPreferredOutputNumberOfChannels(Int(audioFormat.channelCount))
+        KSLog("[audio] set preferredOutputNumberOfChannels: \(audioFormat.channelCount)")
+        #endif
         sampleSize = audioFormat.sampleSize
         var audioStreamBasicDescription = audioFormat.formatDescription.audioStreamBasicDescription
         AudioUnitSetProperty(audioUnitForOutput,

@@ -236,7 +236,7 @@ extension KSMEPlayer: MEPlayerDelegate {
             playableTime = currentPlaybackTime + loadingState.loadedTime
         }
         if loadState == .playable {
-            if !loadingState.isEndOfFile, loadingState.frameCount == 0, loadingState.packetCount == 0 || !(loadingState.isFirst || loadingState.isSeek) {
+            if !loadingState.isEndOfFile, loadingState.frameCount == 0, loadingState.packetCount == 0 {
                 loadState = .loading
                 if playbackState == .playing {
                     runInMainqueue { [weak self] in
@@ -326,7 +326,7 @@ extension KSMEPlayer: MediaPlayerProtocol {
 
     public var currentPlaybackTime: TimeInterval {
         get {
-            playerItem.currentPlaybackTime - playerItem.startTime
+            playerItem.currentPlaybackTime
         }
         set {
             seek(time: newValue) { _ in }
@@ -356,7 +356,7 @@ extension KSMEPlayer: MediaPlayerProtocol {
             seekTime = time
         }
         audioOutput.flush()
-        playerItem.seek(time: seekTime + playerItem.startTime) { [weak self] result in
+        playerItem.seek(time: seekTime) { [weak self] result in
             guard let self else { return }
             if result {
                 if let controlTimebase = self.videoOutput?.displayLayer.controlTimebase {

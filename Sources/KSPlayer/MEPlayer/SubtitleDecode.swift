@@ -21,7 +21,7 @@ class SubtitleDecode: DecodeProtocol {
     private var preSubtitleFrame: SubtitleFrame?
     private let assParse = AssParse()
     required init(assetTrack: FFmpegAssetTrack, options: KSOptions) {
-        startTime = assetTrack.startTime
+        startTime = assetTrack.startTime.seconds
         do {
             codecContext = try assetTrack.ceateContext(options: options)
             if let pointer = codecContext?.pointee.subtitle_header {
@@ -46,24 +46,28 @@ class SubtitleDecode: DecodeProtocol {
         if gotsubtitle == 0 {
             return
         }
-        let parts = text(subtitle: subtitle)
         let position = packet.position
         var start = packet.assetTrack.timebase.cmtime(for: position).seconds + TimeInterval(subtitle.start_display_time) / 1000.0
         if start >= startTime {
             start -= startTime
         }
-        var duration = TimeInterval(subtitle.end_display_time - subtitle.start_display_time) / 1000.0
-        if duration == 0 {
+        var duration = 0.0
+        if subtitle.end_display_time != UInt32.max {
+            duration = TimeInterval(subtitle.end_display_time - subtitle.start_display_time) / 1000.0
+        }
+        if duration == 0, packet.duration != 0 {
             duration = packet.assetTrack.timebase.cmtime(for: packet.duration).seconds
         }
+        if let preSubtitleFrame, preSubtitleFrame.part.end == preSubtitleFrame.part.start {
+            preSubtitleFrame.part.end = start
+        }
+        preSubtitleFrame = nil
+        let parts = text(subtitle: subtitle)
         for part in parts {
             part.start = start
             part.end = start + duration
             let frame = SubtitleFrame(part: part, timebase: packet.assetTrack.timebase)
             frame.position = position
-            if let preSubtitleFrame, preSubtitleFrame.part.end == preSubtitleFrame.part.start {
-                preSubtitleFrame.part.end = frame.part.start
-            }
             preSubtitleFrame = frame
             completionHandler(.success(frame))
         }
