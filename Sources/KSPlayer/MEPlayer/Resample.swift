@@ -138,13 +138,11 @@ class VideoSwresample: FrameChange {
             pbuf.aspectRatio = frame.sample_aspect_ratio.size
             pbuf.yCbCrMatrix = frame.colorspace.ycbcrMatrix
             pbuf.colorPrimaries = frame.color_primaries.colorPrimaries
+            pbuf.transferFunction = frame.color_trc.transferFunction
             // vt_pixbuf_set_colorspace
-            if let transferFunction = frame.color_trc.transferFunction {
-                pbuf.transferFunction = transferFunction
-                if transferFunction == kCVImageBufferTransferFunction_UseGamma {
-                    let gamma = NSNumber(value: frame.color_trc == AVCOL_TRC_GAMMA22 ? 2.2 : 2.8)
-                    CVBufferSetAttachment(pbuf, kCVImageBufferGammaLevelKey, gamma, .shouldPropagate)
-                }
+            if pbuf.transferFunction == kCVImageBufferTransferFunction_UseGamma {
+                let gamma = NSNumber(value: frame.color_trc == AVCOL_TRC_GAMMA22 ? 2.2 : 2.8)
+                CVBufferSetAttachment(pbuf, kCVImageBufferGammaLevelKey, gamma, .shouldPropagate)
             }
             if let chroma = frame.chroma_location.chroma {
                 CVBufferSetAttachment(pbuf, kCVImageBufferChromaLocationTopFieldKey, chroma, .shouldPropagate)

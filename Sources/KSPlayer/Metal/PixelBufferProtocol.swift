@@ -163,20 +163,19 @@ class PixelBuffer: PixelBufferProtocol {
     let colorPrimaries: CFString?
     let transferFunction: CFString?
     let yCbCrMatrix: CFString?
+    let colorspace: CGColorSpace?
     private let format: AVPixelFormat
     private let formats: [MTLPixelFormat]
     private let widths: [Int]
     private let heights: [Int]
     private let buffers: [MTLBuffer?]
     private let lineSize: [Int]
-    public var colorspace: CGColorSpace? {
-        attachmentsDic.flatMap { CVImageBufferCreateColorSpaceFromAttachments($0)?.takeUnretainedValue() }
-    }
 
     init(frame: AVFrame) {
         yCbCrMatrix = frame.colorspace.ycbcrMatrix
         colorPrimaries = frame.color_primaries.colorPrimaries
         transferFunction = frame.color_trc.transferFunction
+        colorspace = KSOptions.colorSpace(ycbcrMatrix: yCbCrMatrix, transferFunction: transferFunction)
         var attachments = [CFString: CFString]()
         attachments[kCVImageBufferColorPrimariesKey] = colorPrimaries
         attachments[kCVImageBufferTransferFunctionKey] = transferFunction

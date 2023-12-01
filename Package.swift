@@ -4,9 +4,7 @@ import PackageDescription
 let package = Package(
     name: "KSPlayer",
     defaultLocalization: "en",
-    platforms: [.macOS(.v10_15),
-//                .visionOS(.v1),
-                .iOS(.v13), .tvOS(.v13)],
+    platforms: [.macOS(.v10_15), .macCatalyst(.v13), .iOS(.v13), .tvOS(.v13)],
     products: [
         // Products define the executables and libraries produced by a package, and make them visible to other packages.
         .library(
@@ -35,6 +33,10 @@ let package = Package(
     ]
 )
 var ffmpegKitPath = FileManager.default.currentDirectoryPath + "/FFmpegKit"
+if !FileManager.default.fileExists(atPath: ffmpegKitPath) {
+    ffmpegKitPath = FileManager.default.currentDirectoryPath + "../FFmpegKit"
+}
+
 if !FileManager.default.fileExists(atPath: ffmpegKitPath) {
     ffmpegKitPath = FileManager.default.currentDirectoryPath + "/KSPlayer/FFmpegKit"
 }
