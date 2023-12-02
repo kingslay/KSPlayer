@@ -74,7 +74,7 @@ extension AVCodecContext {
 }
 
 extension AVCodecParameters {
-    mutating func ceateContext(options: KSOptions) throws -> UnsafeMutablePointer<AVCodecContext> {
+    mutating func createContext(options: KSOptions) throws -> UnsafeMutablePointer<AVCodecContext> {
         var codecContextOption = avcodec_alloc_context3(nil)
         guard let codecContext = codecContextOption else {
             throw NSError(errorCode: .codecContextCreate)
@@ -106,6 +106,7 @@ extension AVCodecParameters {
             av_dict_set_int(&avOptions, "lowres", Int64(lowres), 0)
         }
         result = avcodec_open2(codecContext, codec, &avOptions)
+        av_dict_free(&avOptions)
         guard result == 0 else {
             avcodec_free_context(&codecContextOption)
             throw NSError(errorCode: .codesContextOpen, avErrorCode: result)

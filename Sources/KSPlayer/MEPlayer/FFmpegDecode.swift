@@ -19,7 +19,7 @@ class FFmpegDecode: DecodeProtocol {
     required init(assetTrack: FFmpegAssetTrack, options: KSOptions) {
         self.options = options
         do {
-            codecContext = try assetTrack.ceateContext(options: options)
+            codecContext = try assetTrack.createContext(options: options)
         } catch {
             KSLog(error as CustomStringConvertible)
         }

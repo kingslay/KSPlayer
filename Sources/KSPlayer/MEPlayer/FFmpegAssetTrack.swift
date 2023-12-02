@@ -238,8 +238,8 @@ public class FFmpegAssetTrack: MediaPlayerTrack {
         trackID = 0
     }
 
-    func ceateContext(options: KSOptions) throws -> UnsafeMutablePointer<AVCodecContext> {
-        try codecpar.ceateContext(options: options)
+    func createContext(options: KSOptions) throws -> UnsafeMutablePointer<AVCodecContext> {
+        try codecpar.createContext(options: options)
     }
 
     public var isEnabled: Bool {

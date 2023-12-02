@@ -23,7 +23,7 @@ class SubtitleDecode: DecodeProtocol {
     required init(assetTrack: FFmpegAssetTrack, options: KSOptions) {
         startTime = assetTrack.startTime.seconds
         do {
-            codecContext = try assetTrack.ceateContext(options: options)
+            codecContext = try assetTrack.createContext(options: options)
             if let pointer = codecContext?.pointee.subtitle_header {
                 let subtitleHeader = String(cString: pointer)
                 _ = assParse.canParse(scanner: Scanner(string: subtitleHeader))
