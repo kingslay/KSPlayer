@@ -26,7 +26,7 @@ public class URLSubtitleInfo: KSSubtitle, SubtitleInfo {
         }
     }
 
-    private var downloadURL: URL
+    public private(set) var downloadURL: URL
     public var delay: TimeInterval = 0
     public private(set) var name: String
     public let subtitleID: String
@@ -75,13 +75,7 @@ public extension KSOptions {
     static var subtitleDataSouces: [SubtitleDataSouce] = [DirectorySubtitleDataSouce()]
 }
 
-public extension SubtitleDataSouce {
-    func addCache(query: String, downloadURL: URL) {
-        CacheDataSouce.singleton.addCache(query: query, downloadURL: downloadURL)
-    }
-}
-
-public class CacheDataSouce: SearchSubtitleDataSouce {
+public class CacheDataSouce: FileURLSubtitleDataSouce {
     public static let singleton = CacheDataSouce()
     public var infos = [any SubtitleInfo]()
     private let srtCacheInfoPath: String
@@ -93,26 +87,44 @@ public class CacheDataSouce: SearchSubtitleDataSouce {
             try? FileManager.default.createDirectory(atPath: cacheFolder, withIntermediateDirectories: true, attributes: nil)
         }
         srtCacheInfoPath = (cacheFolder as NSString).appendingPathComponent("KSSrtInfo.plist")
-        srtInfoCaches = (NSMutableDictionary(contentsOfFile: srtCacheInfoPath) as? [String: [String]]) ?? [String: [String]]()
+        srtInfoCaches = [String: [String]]()
+        DispatchQueue.global().async { [weak self] in
+            guard let self else {
+                return
+            }
+            self.srtInfoCaches = (NSMutableDictionary(contentsOfFile: self.srtCacheInfoPath) as? [String: [String]]) ?? [String: [String]]()
+        }
     }
 
-    public func searchSubtitle(query: String?, languages _: [String] = ["zh-cn"]) async throws {
+    public func searchSubtitle(fileURL: URL?) async throws {
         infos = [any SubtitleInfo]()
-        guard let query else {
+        guard let fileURL else {
             return
         }
-        infos = srtInfoCaches[query]?.map { downloadURL -> (any SubtitleInfo) in
-            let info = URLSubtitleInfo(url: URL(fileURLWithPath: downloadURL))
+        infos = srtInfoCaches[fileURL.absoluteString]?.compactMap { downloadURL -> (any SubtitleInfo)? in
+            guard let url = URL(string: downloadURL) else {
+                return nil
+            }
+            let info = URLSubtitleInfo(url: url)
             info.comment = "local"
             return info
         } ?? [any SubtitleInfo]()
     }
 
-    public func addCache(query: String, downloadURL: URL) {
-        var array = srtInfoCaches[query] ?? [String]()
-        array.append(downloadURL.path)
-        srtInfoCaches[query] = array
-        (srtInfoCaches as NSDictionary).write(toFile: srtCacheInfoPath, atomically: false)
+    public func addCache(fileURL: URL, downloadURL: URL) {
+        let file = fileURL.absoluteString
+        let path = downloadURL.absoluteString
+        var array = srtInfoCaches[file] ?? [String]()
+        if !array.contains(where: { $0 == path }) {
+            array.append(path)
+            srtInfoCaches[file] = array
+            DispatchQueue.global().async { [weak self] in
+                guard let self else {
+                    return
+                }
+                (self.srtInfoCaches as NSDictionary).write(toFile: self.srtCacheInfoPath, atomically: false)
+            }
+        }
     }
 }
 
@@ -263,6 +275,7 @@ public class OpenSubtitleDataSouce: SearchSubtitleDataSouce {
     }
 
     public func searchSubtitle(query: String?, imdbID: Int, tmdbID: Int, languages: [String] = ["zh-cn"]) async throws {
+        infos = [any SubtitleInfo]()
         var queryItems = [String: String]()
         if let query {
             queryItems["query"] = query
