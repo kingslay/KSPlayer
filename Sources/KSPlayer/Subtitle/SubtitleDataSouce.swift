@@ -67,6 +67,10 @@ public protocol FileURLSubtitleDataSouce: SubtitleDataSouce {
     func searchSubtitle(fileURL: URL?) async throws
 }
 
+public protocol CacheSubtitleDataSouce: FileURLSubtitleDataSouce {
+    func addCache(fileURL: URL, downloadURL: URL)
+}
+
 public protocol SearchSubtitleDataSouce: SubtitleDataSouce {
     func searchSubtitle(query: String?, languages: [String]) async throws
 }
@@ -75,8 +79,8 @@ public extension KSOptions {
     static var subtitleDataSouces: [SubtitleDataSouce] = [DirectorySubtitleDataSouce()]
 }
 
-public class CacheDataSouce: FileURLSubtitleDataSouce {
-    public static let singleton = CacheDataSouce()
+public class PlistCacheSubtitleDataSouce: CacheSubtitleDataSouce {
+    public static let singleton = PlistCacheSubtitleDataSouce()
     public var infos = [any SubtitleInfo]()
     private let srtCacheInfoPath: String
     // 因为plist不能保存URL
