@@ -11,7 +11,7 @@ import SwiftUI
 @available(iOS 16.0, macOS 13.0, tvOS 16.0, watchOS 9.0, *)
 public struct KSVideoPlayerView: View {
     private let subtitleDataSouce: SubtitleDataSouce?
-    private let onPlayerDisappear: ((KSPlayerLayer?) -> Void)?
+    private let onPlayerDisappear: ((ControllerTimeModel) -> Void)?
     @State
     private var title: String
     @State
@@ -32,7 +32,7 @@ public struct KSVideoPlayerView: View {
         }
     }
 
-    public init(url: URL, options: KSOptions, title: String? = nil, subtitleDataSouce: SubtitleDataSouce? = nil, onPlayerDisappear: ((KSPlayerLayer?) -> Void)? = nil) {
+    public init(url: URL, options: KSOptions, title: String? = nil, subtitleDataSouce: SubtitleDataSouce? = nil, onPlayerDisappear: ((ControllerTimeModel) -> Void)? = nil) {
         _url = .init(initialValue: url)
         _title = .init(initialValue: title ?? url.lastPathComponent)
         #if os(macOS)
@@ -140,7 +140,8 @@ public struct KSVideoPlayerView: View {
 //                    #endif
         }
         .onDisappear {
-            onPlayerDisappear?(playerCoordinator.playerLayer)
+            // 在tvos，playerLayer已经为空了。所以改成用timemodel
+            onPlayerDisappear?(playerCoordinator.timemodel)
         }
         .preferredColorScheme(.dark)
         .tint(.white)

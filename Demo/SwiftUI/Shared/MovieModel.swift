@@ -335,15 +335,6 @@ extension KSVideoPlayerView {
         }
         playmodel.save()
         model.save()
-        self.init(url: url, options: options, title: model.name) { layer in
-            if let layer {
-                playmodel.duration = Int16(layer.player.duration)
-                if playmodel.duration > 0 {
-                    playmodel.current = Int16(layer.player.currentPlaybackTime)
-                }
-                playmodel.save()
-                model.save()
-            }
-        }
+        self.init(url: url, options: options, title: model.name)
     }
 }
