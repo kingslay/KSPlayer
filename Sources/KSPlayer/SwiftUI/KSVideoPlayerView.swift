@@ -66,21 +66,6 @@ public struct KSVideoPlayerView: View {
                     }
                 }
             #endif
-                .onAppear {
-                    if let subtitleDataSouce {
-                        playerCoordinator.subtitleModel.addSubtitle(dataSouce: subtitleDataSouce)
-                    }
-                    // 不要加这个，不然playerCoordinator无法释放，也可以在onDisappear调用removeMonitor释放
-//                    #if os(macOS)
-//                    NSEvent.addLocalMonitorForEvents(matching: [.mouseMoved]) {
-//                        isMaskShow = overView
-//                        return $0
-//                    }
-//                    #endif
-                }
-                .onDisappear {
-                    onPlayerDisappear?(playerCoordinator.playerLayer)
-                }
                 .ignoresSafeArea()
             #if os(iOS) || os(xrOS)
                 .navigationBarTitleDisplayMode(.inline)
@@ -141,6 +126,21 @@ public struct KSVideoPlayerView: View {
                     }
                 #endif
             }
+        }
+        .onAppear {
+            if let subtitleDataSouce {
+                playerCoordinator.subtitleModel.addSubtitle(dataSouce: subtitleDataSouce)
+            }
+            // 不要加这个，不然playerCoordinator无法释放，也可以在onDisappear调用removeMonitor释放
+//                    #if os(macOS)
+//                    NSEvent.addLocalMonitorForEvents(matching: [.mouseMoved]) {
+//                        isMaskShow = overView
+//                        return $0
+//                    }
+//                    #endif
+        }
+        .onDisappear {
+            onPlayerDisappear?(playerCoordinator.playerLayer)
         }
         .preferredColorScheme(.dark)
         .tint(.white)
