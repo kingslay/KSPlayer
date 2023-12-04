@@ -153,13 +153,15 @@ public class FFmpegAssetTrack: MediaPlayerTrack {
         } else if codecpar.codec_type == AVMEDIA_TYPE_VIDEO {
             audioDescriptor = nil
             mediaType = .video
-            for i in 0 ..< codecpar.nb_coded_side_data {
-                let sideData = codecpar.coded_side_data[Int(i)]
-                if sideData.type == AV_PKT_DATA_DOVI_CONF {
-                    dovi = sideData.data.withMemoryRebound(to: DOVIDecoderConfigurationRecord.self, capacity: 1) { $0 }.pointee
-                } else if sideData.type == AV_PKT_DATA_DISPLAYMATRIX {
-                    let matrix = sideData.data.withMemoryRebound(to: Int32.self, capacity: 1) { $0 }
-                    rotation = Int16(Int(-av_display_rotation_get(matrix)) % 360)
+            if codecpar.nb_coded_side_data > 0 {
+                for i in 0 ..< codecpar.nb_coded_side_data {
+                    let sideData = codecpar.coded_side_data[Int(i)]
+                    if sideData.type == AV_PKT_DATA_DOVI_CONF {
+                        dovi = sideData.data.withMemoryRebound(to: DOVIDecoderConfigurationRecord.self, capacity: 1) { $0 }.pointee
+                    } else if sideData.type == AV_PKT_DATA_DISPLAYMATRIX {
+                        let matrix = sideData.data.withMemoryRebound(to: Int32.self, capacity: 1) { $0 }
+                        rotation = Int16(Int(-av_display_rotation_get(matrix)) % 360)
+                    }
                 }
             }
             let sar = codecpar.sample_aspect_ratio.size
