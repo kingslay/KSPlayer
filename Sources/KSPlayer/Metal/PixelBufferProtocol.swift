@@ -16,17 +16,16 @@ import UIKit
 #endif
 
 public protocol PixelBufferProtocol: AnyObject {
-    var aspectRatio: CGSize { get set }
-    var planeCount: Int { get }
     var width: Int { get }
     var height: Int { get }
     var bitDepth: Int32 { get }
     var leftShift: UInt8 { get }
-//    var colorPrimaries: CFString? { get }
-//    var transferFunction: CFString? { get }
-    var yCbCrMatrix: CFString? { get }
-    var colorspace: CGColorSpace? { get }
-    var attachmentsDic: CFDictionary? { get }
+    var planeCount: Int { get }
+    var aspectRatio: CGSize { get set }
+    var yCbCrMatrix: CFString? { get set }
+    var colorPrimaries: CFString? { get set }
+    var transferFunction: CFString? { get set }
+    var colorspace: CGColorSpace? { get set }
     var cvPixelBuffer: CVPixelBuffer? { get }
     var isFullRangeVideo: Bool { get }
     func cgImage() -> CGImage?
@@ -86,7 +85,7 @@ extension CVPixelBuffer: PixelBufferProtocol {
         }
     }
 
-    var colorPrimaries: CFString? {
+    public var colorPrimaries: CFString? {
         get {
             CVBufferGetAttachment(self, kCVImageBufferColorPrimariesKey, nil)?.takeUnretainedValue() as? NSString
         }
@@ -97,7 +96,7 @@ extension CVPixelBuffer: PixelBufferProtocol {
         }
     }
 
-    var transferFunction: CFString? {
+    public var transferFunction: CFString? {
         get {
             CVBufferGetAttachment(self, kCVImageBufferTransferFunctionKey, nil)?.takeUnretainedValue() as? NSString
         }
@@ -159,11 +158,10 @@ class PixelBuffer: PixelBufferProtocol {
     let leftShift: UInt8
     let isFullRangeVideo: Bool
     var cvPixelBuffer: CVPixelBuffer? { nil }
-    var attachmentsDic: CFDictionary?
-    let colorPrimaries: CFString?
-    let transferFunction: CFString?
-    let yCbCrMatrix: CFString?
-    let colorspace: CGColorSpace?
+    var colorPrimaries: CFString?
+    var transferFunction: CFString?
+    var yCbCrMatrix: CFString?
+    var colorspace: CGColorSpace?
     private let format: AVPixelFormat
     private let formats: [MTLPixelFormat]
     private let widths: [Int]
@@ -176,11 +174,6 @@ class PixelBuffer: PixelBufferProtocol {
         colorPrimaries = frame.color_primaries.colorPrimaries
         transferFunction = frame.color_trc.transferFunction
         colorspace = KSOptions.colorSpace(ycbcrMatrix: yCbCrMatrix, transferFunction: transferFunction)
-        var attachments = [CFString: CFString]()
-        attachments[kCVImageBufferColorPrimariesKey] = colorPrimaries
-        attachments[kCVImageBufferTransferFunctionKey] = transferFunction
-        attachments[kCVImageBufferYCbCrMatrixKey] = yCbCrMatrix
-        attachmentsDic = attachments as CFDictionary
         width = Int(frame.width)
         height = Int(frame.height)
         isFullRangeVideo = frame.color_range == AVCOL_RANGE_JPEG

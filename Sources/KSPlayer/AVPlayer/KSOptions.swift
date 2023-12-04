@@ -402,6 +402,8 @@ open class KSOptions {
                 return availableHDRModes.dynamicRange
             }
         }
+        #else
+        return destinationDynamicRange ?? cotentRange
         #endif
         return cotentRange
     }
