@@ -549,7 +549,11 @@ class AVMediaPlayerTrack: MediaPlayerTrack {
         isPlayable = track.assetTrack?.isPlayable ?? false
         #endif
         // swiftlint:disable force_cast
-        formatDescription = (track.assetTrack?.formatDescriptions.first as! CMFormatDescription)
+        if let first = track.assetTrack?.formatDescriptions.first {
+            formatDescription = first as! CMFormatDescription
+        } else {
+            formatDescription = nil
+        }
         // swiftlint:enable force_cast
         description = (formatDescription?.mediaSubType ?? .boxed).rawValue.string
         #if os(xrOS)
