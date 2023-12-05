@@ -153,9 +153,9 @@ public class FFmpegAssetTrack: MediaPlayerTrack {
         } else if codecpar.codec_type == AVMEDIA_TYPE_VIDEO {
             audioDescriptor = nil
             mediaType = .video
-            if codecpar.nb_coded_side_data > 0 {
+            if codecpar.nb_coded_side_data > 0, let sideDatas = codecpar.coded_side_data {
                 for i in 0 ..< codecpar.nb_coded_side_data {
-                    let sideData = codecpar.coded_side_data[Int(i)]
+                    let sideData = sideDatas[Int(i)]
                     if sideData.type == AV_PKT_DATA_DOVI_CONF {
                         dovi = sideData.data.withMemoryRebound(to: DOVIDecoderConfigurationRecord.self, capacity: 1) { $0 }.pointee
                     } else if sideData.type == AV_PKT_DATA_DISPLAYMATRIX {

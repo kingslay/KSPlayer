@@ -426,10 +426,10 @@ public class SrtParse: KSParseProtocol {
                     text += str
                 }
                 newLine = scanner.scanCharacters(from: .newlines)
-                if newLine == "\n" {
+                if newLine == "\n" || newLine == "\r\n" {
                     text += "\n"
                 }
-            } while newLine == "\n"
+            } while newLine == "\n" || newLine == "\r\n"
             var textPosition = TextPosition()
             return SubtitlePart(startString.parseDuration(), endString.parseDuration(), attributedString: text.build(textPosition: &textPosition))
         }
