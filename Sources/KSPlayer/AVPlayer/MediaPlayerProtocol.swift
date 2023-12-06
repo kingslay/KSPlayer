@@ -142,14 +142,14 @@ public enum MediaLoadState: Int {
 
 // swiftlint:disable identifier_name
 public struct DOVIDecoderConfigurationRecord {
-    let dv_version_major: UInt8
-    let dv_version_minor: UInt8
-    let dv_profile: UInt8
-    let dv_level: UInt8
-    let rpu_present_flag: UInt8
-    let el_present_flag: UInt8
-    let bl_present_flag: UInt8
-    let dv_bl_signal_compatibility_id: UInt8
+    public let dv_version_major: UInt8
+    public let dv_version_minor: UInt8
+    public let dv_profile: UInt8
+    public let dv_level: UInt8
+    public let rpu_present_flag: UInt8
+    public let el_present_flag: UInt8
+    public let bl_present_flag: UInt8
+    public let dv_bl_signal_compatibility_id: UInt8
 }
 
 public enum FFmpegFieldOrder: UInt8 {

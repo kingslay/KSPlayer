@@ -132,14 +132,14 @@ class MEFilter {
             completionHandler(inputFrame)
             return
         }
-        var ret = av_buffersrc_add_frame_flags(bufferSrcContext, inputFrame, 0)
-        while ret == 0 {
-            ret = av_buffersink_get_frame_flags(bufferSinkContext, inputFrame, 0)
-            if ret == 0 {
+        let ret = av_buffersrc_add_frame_flags(bufferSrcContext, inputFrame, 0)
+        if ret < 0 {
+            return
+        }
+        while av_buffersink_get_frame_flags(bufferSinkContext, inputFrame, 0) >= 0 {
 //                timebase = Timebase(av_buffersink_get_time_base(bufferSinkContext))
-                completionHandler(inputFrame)
-                av_frame_unref(inputFrame)
-            }
+            completionHandler(inputFrame)
+//            av_frame_unref(inputFrame)
         }
     }
 }
