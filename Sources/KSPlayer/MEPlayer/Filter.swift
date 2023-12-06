@@ -139,7 +139,8 @@ class MEFilter {
         while av_buffersink_get_frame_flags(bufferSinkContext, inputFrame, 0) >= 0 {
 //                timebase = Timebase(av_buffersink_get_time_base(bufferSinkContext))
             completionHandler(inputFrame)
-//            av_frame_unref(inputFrame)
+            // 一定要加av_frame_unref，不然会内存泄漏。
+            av_frame_unref(inputFrame)
         }
     }
 }
