@@ -161,10 +161,12 @@ extension AudioUnitPlayer {
             let bytesToCopy = Int(framesToCopy * sampleSize)
             let offset = Int(currentRenderReadOffset * sampleSize)
             for i in 0 ..< min(ioData.count, currentRender.data.count) {
-                if isMuted {
-                    memset(ioData[i].mData! + ioDataWriteOffset, 0, bytesToCopy)
-                } else {
-                    (ioData[i].mData! + ioDataWriteOffset).copyMemory(from: currentRender.data[i]! + offset, byteCount: bytesToCopy)
+                if let source = currentRender.data[i], let destination = ioData[i].mData {
+                    if isMuted {
+                        memset(destination + ioDataWriteOffset, 0, bytesToCopy)
+                    } else {
+                        (destination + ioDataWriteOffset).copyMemory(from: source + offset, byteCount: bytesToCopy)
+                    }
                 }
             }
             numberOfSamples -= framesToCopy

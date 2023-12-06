@@ -286,7 +286,9 @@ public class AudioEnginePlayer: AudioOutput {
             let bytesToCopy = Int(framesToCopy * sampleSize)
             let offset = Int(currentRenderReadOffset * sampleSize)
             for i in 0 ..< min(ioData.count, currentRender.data.count) {
-                (ioData[i].mData! + ioDataWriteOffset).copyMemory(from: currentRender.data[i]! + offset, byteCount: bytesToCopy)
+                if let source = currentRender.data[i], let destination = ioData[i].mData {
+                    (destination + ioDataWriteOffset).copyMemory(from: source + offset, byteCount: bytesToCopy)
+                }
             }
             numberOfSamples -= framesToCopy
             ioDataWriteOffset += bytesToCopy
