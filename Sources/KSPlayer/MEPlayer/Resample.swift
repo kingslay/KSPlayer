@@ -106,7 +106,6 @@ class VideoSwresample: FrameChange {
                 }
             }
         }
-        frame.corePixelBuffer?.colorspace = KSOptions.colorSpace(ycbcrMatrix: frame.corePixelBuffer?.yCbCrMatrix, transferFunction: frame.corePixelBuffer?.transferFunction)
         return frame
     }
 
@@ -152,6 +151,7 @@ class VideoSwresample: FrameChange {
             if let chroma = frame.chroma_location.chroma {
                 CVBufferSetAttachment(pbuf, kCVImageBufferChromaLocationTopFieldKey, chroma, .shouldPropagate)
             }
+            pbuf.colorspace = KSOptions.colorSpace(ycbcrMatrix: pbuf.yCbCrMatrix, transferFunction: pbuf.transferFunction)
         }
         return pbuf
     }

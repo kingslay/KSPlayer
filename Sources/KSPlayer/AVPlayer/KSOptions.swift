@@ -402,10 +402,10 @@ open class KSOptions {
                 return availableHDRModes.dynamicRange
             }
         }
+        return cotentRange
         #else
         return destinationDynamicRange ?? cotentRange
         #endif
-        return cotentRange
     }
 
     open func playerLayerDeinit() {
