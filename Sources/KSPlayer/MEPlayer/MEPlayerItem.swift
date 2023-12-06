@@ -402,7 +402,7 @@ extension MEPlayerItem {
         let index = av_find_best_stream(formatCtx, AVMEDIA_TYPE_AUDIO, wantedStreamNb, videoIndex, nil, 0)
         if let first = audios.first(where: {
             index > 0 ? $0.trackID == index : true
-        }) {
+        }), first.codecpar.codec_id != AV_CODEC_ID_NONE {
             first.isEnabled = true
             options.process(assetTrack: first)
             // 音频要比较所有的音轨，因为truehd的fps是1200，跟其他的音轨差距太大了
