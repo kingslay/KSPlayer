@@ -217,19 +217,13 @@ extension MetalPlayView {
     }
 
     private func checkFormatDescription(pixelBuffer: PixelBufferProtocol) {
-        guard let pixelBuffer = pixelBuffer.cvPixelBuffer else {
-            return
-        }
-        if formatDescription == nil || !CMVideoFormatDescriptionMatchesImageBuffer(formatDescription!, imageBuffer: pixelBuffer) {
+        if formatDescription == nil || !pixelBuffer.matche(formatDescription: formatDescription!) {
             if formatDescription != nil {
                 displayView.removeFromSuperview()
                 displayView = AVSampleBufferDisplayView()
                 addSubview(displayView)
             }
-            let err = CMVideoFormatDescriptionCreateForImageBuffer(allocator: nil, imageBuffer: pixelBuffer, formatDescriptionOut: &formatDescription)
-            if err != noErr {
-                KSLog("Error at CMVideoFormatDescriptionCreateForImageBuffer \(err)")
-            }
+            formatDescription = pixelBuffer.formatDescription
         }
     }
 

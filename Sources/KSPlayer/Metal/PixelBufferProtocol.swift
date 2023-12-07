@@ -21,6 +21,7 @@ public protocol PixelBufferProtocol: AnyObject {
     var bitDepth: Int32 { get }
     var leftShift: UInt8 { get }
     var planeCount: Int { get }
+    var formatDescription: CMVideoFormatDescription? { get }
     var aspectRatio: CGSize { get set }
     var yCbCrMatrix: CFString? { get set }
     var colorPrimaries: CFString? { get set }
@@ -32,6 +33,7 @@ public protocol PixelBufferProtocol: AnyObject {
     func textures() -> [MTLTexture]
     func widthOfPlane(at planeIndex: Int) -> Int
     func heightOfPlane(at planeIndex: Int) -> Int
+    func matche(formatDescription: CMVideoFormatDescription) -> Bool
 }
 
 extension PixelBufferProtocol {
@@ -65,6 +67,14 @@ extension CVPixelBuffer: PixelBufferProtocol {
     var isPlanar: Bool { CVPixelBufferIsPlanar(self) }
 
     public var planeCount: Int { isPlanar ? CVPixelBufferGetPlaneCount(self) : 1 }
+    public var formatDescription: CMVideoFormatDescription? {
+        var formatDescription: CMVideoFormatDescription?
+        let err = CMVideoFormatDescriptionCreateForImageBuffer(allocator: nil, imageBuffer: self, formatDescriptionOut: &formatDescription)
+        if err != noErr {
+            KSLog("Error at CMVideoFormatDescriptionCreateForImageBuffer \(err)")
+        }
+        return formatDescription
+    }
 
     public var isFullRangeVideo: Bool {
         CVBufferGetAttachment(self, kCMFormatDescriptionExtension_FullRangeVideo, nil)?.takeUnretainedValue() as? Bool ?? false
@@ -147,6 +157,10 @@ extension CVPixelBuffer: PixelBufferProtocol {
     public func textures() -> [MTLTexture] {
         MetalRender.texture(pixelBuffer: self)
     }
+
+    public func matche(formatDescription: CMVideoFormatDescription) -> Bool {
+        CMVideoFormatDescriptionMatchesImageBuffer(formatDescription, imageBuffer: self)
+    }
 }
 
 class PixelBuffer: PixelBufferProtocol {
@@ -162,6 +176,7 @@ class PixelBuffer: PixelBufferProtocol {
     var transferFunction: CFString?
     var yCbCrMatrix: CFString?
     var colorspace: CGColorSpace?
+    var formatDescription: CMVideoFormatDescription? = nil
     private let format: AVPixelFormat
     private let formats: [MTLPixelFormat]
     private let widths: [Int]
@@ -240,6 +255,10 @@ class PixelBuffer: PixelBufferProtocol {
             scale.shutdown()
         }
         return image
+    }
+
+    public func matche(formatDescription: CMVideoFormatDescription) -> Bool {
+        self.formatDescription == formatDescription
     }
 }
 

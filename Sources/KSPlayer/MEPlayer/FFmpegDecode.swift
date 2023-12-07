@@ -86,6 +86,9 @@ class FFmpegDecode: DecodeProtocol {
                 filter.filter(options: options, inputFrame: avframe) { avframe in
                     do {
                         var frame = try frameChange.change(avframe: avframe)
+                        if let videoFrame = frame as? VideoVTBFrame, let pixelBuffer = videoFrame.corePixelBuffer as? PixelBuffer {
+                            pixelBuffer.formatDescription = packet.assetTrack.formatDescription
+                        }
                         frame.timebase = filter.timebase
                         //                frame.timebase = Timebase(avframe.pointee.time_base)
                         frame.size = avframe.pointee.pkt_size
@@ -93,7 +96,6 @@ class FFmpegDecode: DecodeProtocol {
                         if frame.duration == 0, avframe.pointee.sample_rate != 0, frame.timebase.num != 0 {
                             frame.duration = Int64(avframe.pointee.nb_samples) * Int64(frame.timebase.den) / (Int64(avframe.pointee.sample_rate) * Int64(frame.timebase.num))
                         }
-
                         var position = avframe.pointee.best_effort_timestamp
                         if position < 0 {
                             position = avframe.pointee.pts
