@@ -68,7 +68,7 @@ public class AudioRendererPlayer: AudioOutput {
             guard let self else {
                 return
             }
-            self.renderSource?.setAudio(time: time)
+            self.renderSource?.setAudio(time: time, position: -1)
         }
     }
 

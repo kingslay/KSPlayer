@@ -42,7 +42,7 @@ class VideoToolboxDecode: DecodeProtocol {
                 ._EnableAsynchronousDecompression,
             ]
             var flagOut = VTDecodeInfoFlags.frameDropped
-            let pts = corePacket.pts
+            let timestamp = packet.timestamp
             let packetFlags = corePacket.flags
             let duration = corePacket.duration
             let size = corePacket.size
@@ -65,10 +65,11 @@ class VideoToolboxDecode: DecodeProtocol {
                 frame.corePixelBuffer = imageBuffer
                 frame.timebase = session.assetTrack.timebase
                 if packet.isKeyFrame, packetFlags & AV_PKT_FLAG_DISCARD != 0, self.lastPosition > 0 {
-                    self.startTime = self.lastPosition - pts
+                    self.startTime = self.lastPosition - timestamp
                 }
-                self.lastPosition = max(self.lastPosition, pts)
-                frame.position = self.startTime + pts
+                self.lastPosition = max(self.lastPosition, timestamp)
+                frame.position = packet.position
+                frame.timestamp = self.startTime + timestamp
                 frame.duration = duration
                 frame.size = size
                 self.lastPosition += frame.duration

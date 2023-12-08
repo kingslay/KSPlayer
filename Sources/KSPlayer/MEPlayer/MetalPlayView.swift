@@ -212,7 +212,7 @@ extension MetalPlayView {
                 checkFormatDescription(pixelBuffer: pixelBuffer)
                 metalView.draw(pixelBuffer: pixelBuffer, display: options.display, size: size)
             }
-            renderSource?.setVideo(time: cmtime)
+            renderSource?.setVideo(time: cmtime, position: frame.position)
         }
     }
 

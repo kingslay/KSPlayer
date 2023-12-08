@@ -31,8 +31,8 @@ enum MESourceState {
 public protocol OutputRenderSourceDelegate: AnyObject {
     func getVideoOutputRender(force: Bool) -> VideoVTBFrame?
     func getAudioOutputRender() -> AudioFrame?
-    func setAudio(time: CMTime)
-    func setVideo(time: CMTime)
+    func setAudio(time: CMTime, position: Int64)
+    func setVideo(time: CMTime, position: Int64)
 }
 
 protocol CodecCapacityDelegate: AnyObject {
@@ -50,7 +50,9 @@ protocol MEPlayerDelegate: AnyObject {
 // MARK: protocol
 
 public protocol ObjectQueueItem {
+    var timestamp: Int64 { get set }
     var duration: Int64 { get set }
+    // byte position
     var position: Int64 { get set }
     var size: Int32 { get set }
 }
@@ -67,7 +69,7 @@ protocol MEFrame: ObjectQueueItem {
 
 extension MEFrame {
     var seconds: TimeInterval { cmtime.seconds }
-    var cmtime: CMTime { timebase.cmtime(for: position) }
+    var cmtime: CMTime { timebase.cmtime(for: timestamp) }
 }
 
 // MARK: model
@@ -191,6 +193,7 @@ extension Timebase {
 
 final class Packet: ObjectQueueItem {
     var duration: Int64 = 0
+    var timestamp: Int64 = 0
     var position: Int64 = 0
     var size: Int32 = 0
     var assetTrack: FFmpegAssetTrack!
@@ -211,7 +214,8 @@ final class Packet: ObjectQueueItem {
         guard let corePacket else {
             return
         }
-        position = corePacket.pointee.pts == Int64.min ? corePacket.pointee.dts : corePacket.pointee.pts
+        timestamp = corePacket.pointee.pts == Int64.min ? corePacket.pointee.dts : corePacket.pointee.pts
+        position = corePacket.pointee.pos
         duration = corePacket.pointee.duration
         size = corePacket.pointee.size
     }
@@ -223,6 +227,7 @@ final class Packet: ObjectQueueItem {
 }
 
 final class SubtitleFrame: MEFrame {
+    var timestamp: Int64 = 0
     var timebase: Timebase
     var duration: Int64 = 0
     var position: Int64 = 0
@@ -238,6 +243,7 @@ public final class AudioFrame: MEFrame {
     let dataSize: Int
     let audioFormat: AVAudioFormat
     public var timebase = Timebase.defaultValue
+    public var timestamp: Int64 = 0
     public var duration: Int64 = 0
     public var position: Int64 = 0
     public var size: Int32 = 0
@@ -255,6 +261,7 @@ public final class AudioFrame: MEFrame {
     init(array: [AudioFrame]) {
         audioFormat = array[0].audioFormat
         timebase = array[0].timebase
+        timestamp = array[0].timestamp
         position = array[0].position
         var dataSize = 0
         for frame in array {
@@ -375,6 +382,7 @@ public final class VideoVTBFrame: MEFrame {
     // 交叉视频的duration会不准，直接减半了
     public var duration: Int64 = 0
     public var position: Int64 = 0
+    public var timestamp: Int64 = 0
     public var size: Int32 = 0
     public let fps: Float
     public let isDovi: Bool

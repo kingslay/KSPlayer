@@ -35,6 +35,7 @@ public class FFmpegAssetTrack: MediaPlayerTrack {
     public let formatDescription: CMFormatDescription?
     var closedCaptionsTrack: FFmpegAssetTrack?
     let isConvertNALSize: Bool
+    var seekByBytes = false
     public var description: String {
         var description = codecName
         if let formatName {

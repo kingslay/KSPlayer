@@ -283,9 +283,9 @@ extension AudioGraphPlayer {
 
     private func audioPlayerDidRenderSample(sampleTimestamp _: AudioTimeStamp) {
         if let currentRender {
-            let currentPreparePosition = currentRender.position + currentRender.duration * Int64(currentRenderReadOffset) / Int64(currentRender.numberOfSamples)
+            let currentPreparePosition = currentRender.timestamp + currentRender.duration * Int64(currentRenderReadOffset) / Int64(currentRender.numberOfSamples)
             if currentPreparePosition > 0 {
-                renderSource?.setAudio(time: currentRender.timebase.cmtime(for: currentPreparePosition))
+                renderSource?.setAudio(time: currentRender.timebase.cmtime(for: currentPreparePosition), position: currentRender.position)
             }
         }
     }

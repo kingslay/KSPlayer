@@ -16,8 +16,10 @@ class FFmpegDecode: DecodeProtocol {
     private var bestEffortTimestamp = Int64(0)
     private let frameChange: FrameChange
     private let filter: MEFilter
+    private let seekByBytes: Bool
     required init(assetTrack: FFmpegAssetTrack, options: KSOptions) {
         self.options = options
+        seekByBytes = assetTrack.seekByBytes
         do {
             codecContext = try assetTrack.createContext(options: options)
         } catch {
@@ -91,23 +93,24 @@ class FFmpegDecode: DecodeProtocol {
                         }
                         frame.timebase = filter.timebase
                         //                frame.timebase = Timebase(avframe.pointee.time_base)
-                        frame.size = avframe.pointee.pkt_size
+                        frame.size = packet.size
+                        frame.position = packet.position
                         frame.duration = avframe.pointee.duration
                         if frame.duration == 0, avframe.pointee.sample_rate != 0, frame.timebase.num != 0 {
                             frame.duration = Int64(avframe.pointee.nb_samples) * Int64(frame.timebase.den) / (Int64(avframe.pointee.sample_rate) * Int64(frame.timebase.num))
                         }
-                        var position = avframe.pointee.best_effort_timestamp
-                        if position < 0 {
-                            position = avframe.pointee.pts
+                        var timestamp = avframe.pointee.best_effort_timestamp
+                        if timestamp < 0 {
+                            timestamp = avframe.pointee.pts
                         }
-                        if position < 0 {
-                            position = avframe.pointee.pkt_dts
+                        if timestamp < 0 {
+                            timestamp = avframe.pointee.pkt_dts
                         }
-                        if position < 0 {
-                            position = bestEffortTimestamp
+                        if timestamp < 0 {
+                            timestamp = bestEffortTimestamp
                         }
-                        frame.position = position
-                        bestEffortTimestamp = position
+                        frame.timestamp = timestamp
+                        bestEffortTimestamp = timestamp
                         bestEffortTimestamp += frame.duration
                         completionHandler(.success(frame))
                     } catch {
@@ -131,6 +134,9 @@ class FFmpegDecode: DecodeProtocol {
 
     func doFlushCodec() {
         bestEffortTimestamp = Int64(0)
+        if seekByBytes {
+            avcodec_flush_buffers(codecContext)
+        }
     }
 
     func shutdown() {

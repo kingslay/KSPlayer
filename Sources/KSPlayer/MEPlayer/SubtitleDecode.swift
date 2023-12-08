@@ -46,8 +46,8 @@ class SubtitleDecode: DecodeProtocol {
         if gotsubtitle == 0 {
             return
         }
-        let position = packet.position
-        var start = packet.assetTrack.timebase.cmtime(for: position).seconds + TimeInterval(subtitle.start_display_time) / 1000.0
+        let timestamp = packet.timestamp
+        var start = packet.assetTrack.timebase.cmtime(for: timestamp).seconds + TimeInterval(subtitle.start_display_time) / 1000.0
         if start >= startTime {
             start -= startTime
         }
@@ -67,7 +67,7 @@ class SubtitleDecode: DecodeProtocol {
             part.start = start
             part.end = start + duration
             let frame = SubtitleFrame(part: part, timebase: packet.assetTrack.timebase)
-            frame.position = position
+            frame.timestamp = timestamp
             preSubtitleFrame = frame
             completionHandler(.success(frame))
         }
