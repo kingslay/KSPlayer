@@ -52,6 +52,13 @@ class MEFilter {
         guard ret >= 0 else { return false }
         ret = avfilter_link(bufferSrcContext, 0, inputs.pointee.filter_ctx, UInt32(inputs.pointee.pad_idx))
         guard ret >= 0 else { return false }
+        if let ctx = params.hw_frames_ctx {
+            let framesCtxData = UnsafeMutableRawPointer(ctx.pointee.data).bindMemory(to: AVHWFramesContext.self, capacity: 1)
+            inputs.pointee.filter_ctx.pointee.hw_device_ctx = framesCtxData.pointee.device_ref
+//                    outputs.pointee.filter_ctx.pointee.hw_device_ctx = framesCtxData.pointee.device_ref
+//                    bufferSrcContext?.pointee.hw_device_ctx = framesCtxData.pointee.device_ref
+//                    bufferSinkContext?.pointee.hw_device_ctx = framesCtxData.pointee.device_ref
+        }
         ret = avfilter_graph_config(graph, nil)
         guard ret >= 0 else { return false }
         return true

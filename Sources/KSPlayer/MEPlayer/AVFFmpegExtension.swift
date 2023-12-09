@@ -28,20 +28,22 @@ extension UnsafeMutablePointer where Pointee == AVCodecContext {
                     if deviceCtx == nil {
                         break
                     }
-                    var framesCtx = av_hwframe_ctx_alloc(deviceCtx)
-                    if let framesCtx {
-                        let framesCtxData = UnsafeMutableRawPointer(framesCtx.pointee.data)
-                            .bindMemory(to: AVHWFramesContext.self, capacity: 1)
-                        framesCtxData.pointee.format = AV_PIX_FMT_VIDEOTOOLBOX
-                        framesCtxData.pointee.sw_format = ctx.pointee.pix_fmt.bestPixelFormat
-                        framesCtxData.pointee.width = ctx.pointee.width
-                        framesCtxData.pointee.height = ctx.pointee.height
-                    }
-                    if av_hwframe_ctx_init(framesCtx) != 0 {
-                        av_buffer_unref(&framesCtx)
-                        break
-                    }
-                    ctx.pointee.hw_frames_ctx = framesCtx
+                    // 只要有hw_device_ctx就可以了。不需要hw_frames_ctx
+                    ctx.pointee.hw_device_ctx = deviceCtx
+//                    var framesCtx = av_hwframe_ctx_alloc(deviceCtx)
+//                    if let framesCtx {
+//                        let framesCtxData = UnsafeMutableRawPointer(framesCtx.pointee.data)
+//                            .bindMemory(to: AVHWFramesContext.self, capacity: 1)
+//                        framesCtxData.pointee.format = AV_PIX_FMT_VIDEOTOOLBOX
+//                        framesCtxData.pointee.sw_format = ctx.pointee.pix_fmt.bestPixelFormat
+//                        framesCtxData.pointee.width = ctx.pointee.width
+//                        framesCtxData.pointee.height = ctx.pointee.height
+//                    }
+//                    if av_hwframe_ctx_init(framesCtx) != 0 {
+//                        av_buffer_unref(&framesCtx)
+//                        break
+//                    }
+//                    ctx.pointee.hw_frames_ctx = framesCtx
                     return fmt[i]
                 }
                 i += 1
