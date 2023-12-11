@@ -189,7 +189,8 @@ class VideoSwresample: FrameChange {
                     if bufferPlaneCount < planeCount, i + 2 == planeCount {
                         var sourceU = data[i]!
                         var sourceV = data[i + 1]!
-                        for _ in 0 ..< height {
+                        var k = 0
+                        while k < height {
                             var j = 0
                             while j < size {
                                 contents?.advanced(by: 2 * j).copyMemory(from: sourceU.advanced(by: j), byteCount: byteCount)
@@ -199,14 +200,15 @@ class VideoSwresample: FrameChange {
                             contents = contents?.advanced(by: bytesPerRow)
                             sourceU = sourceU.advanced(by: size)
                             sourceV = sourceV.advanced(by: size)
+                            k += 1
                         }
                     } else if bytesPerRow == size {
                         contents?.copyMemory(from: source, byteCount: height * size)
                     } else {
-                        for _ in 0 ..< height {
-                            contents?.copyMemory(from: source, byteCount: size)
-                            contents = contents?.advanced(by: bytesPerRow)
-                            source = source.advanced(by: size)
+                        var j = 0
+                        while j < height {
+                            contents?.advanced(by: j * bytesPerRow).copyMemory(from: source.advanced(by: j * size), byteCount: size)
+                            j += 1
                         }
                     }
                 }

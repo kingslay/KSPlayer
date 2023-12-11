@@ -217,17 +217,26 @@ class PixelBuffer: PixelBufferProtocol {
         let bytes = Array(tuple: frame.data)
         let bytesPerRow = Array(tuple: frame.linesize).compactMap { Int($0) }
         for i in 0 ..< planeCount {
-            lineSize.append(bytesPerRow[i].alignment(value: MetalRender.device.minimumLinearTextureAlignment(for: formats[i])))
-            buffers.append(MetalRender.device.makeBuffer(length: lineSize[i] * heights[i]))
-            if bytesPerRow[i] == lineSize[i] {
-                buffers[i]?.contents().copyMemory(from: bytes[i]!, byteCount: heights[i] * lineSize[i])
+            let alignment = MetalRender.device.minimumLinearTextureAlignment(for: formats[i])
+            lineSize.append(bytesPerRow[i].alignment(value: alignment))
+            let buffer: MTLBuffer?
+            let size = lineSize[i]
+            let byteCount = bytesPerRow[i]
+            let height = heights[i]
+            if byteCount == size {
+                buffer = MetalRender.device.makeBuffer(bytes: bytes[i]!, length: height * size)
             } else {
-                let contents = buffers[i]?.contents()
+                buffer = MetalRender.device.makeBuffer(length: heights[i] * lineSize[i])
+                let contents = buffer?.contents()
                 let source = bytes[i]!
-                for j in 0 ..< heights[i] {
-                    contents?.advanced(by: j * lineSize[i]).copyMemory(from: source.advanced(by: j * bytesPerRow[i]), byteCount: bytesPerRow[i])
+                var j = 0
+                // while 的性能比for in快。
+                while j < height {
+                    contents?.advanced(by: j * size).copyMemory(from: source.advanced(by: j * byteCount), byteCount: byteCount)
+                    j += 1
                 }
             }
+            buffers.append(buffer)
         }
         self.lineSize = lineSize
         self.buffers = buffers
