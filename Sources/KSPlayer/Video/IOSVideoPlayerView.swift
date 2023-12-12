@@ -33,6 +33,14 @@ open class IOSVideoPlayerView: VideoPlayerView {
             fullScreenDelegate?.player(isMaskShow: isMaskShow, isFullScreen: landscapeButton.isSelected)
         }
     }
+    
+    #if !os(xrOS)
+    private var brightness: CGFloat = UIScreen.main.brightness {
+        didSet {
+            UIScreen.main.brightness = brightness
+        }
+    }
+    #endif
 
     override open func customizeUIComponents() {
         super.customizeUIComponents()
@@ -254,7 +262,7 @@ open class IOSVideoPlayerView: VideoPlayerView {
                 }
             } else if KSOptions.enableBrightnessGestures {
                 #if !os(xrOS)
-                UIScreen.main.brightness += CGFloat(panValue(velocity: point, direction: direction, currentTime: Float(toolBar.currentTime), totalTime: Float(totalTime)))
+                brightness += CGFloat(panValue(velocity: point, direction: direction, currentTime: Float(toolBar.currentTime), totalTime: Float(totalTime)))
                 #endif
             }
         } else {
