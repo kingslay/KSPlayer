@@ -50,11 +50,17 @@ protocol MEPlayerDelegate: AnyObject {
 // MARK: protocol
 
 public protocol ObjectQueueItem {
+    var timebase: Timebase { get }
     var timestamp: Int64 { get set }
     var duration: Int64 { get set }
     // byte position
     var position: Int64 { get set }
     var size: Int32 { get set }
+}
+
+extension ObjectQueueItem {
+    var seconds: TimeInterval { cmtime.seconds }
+    var cmtime: CMTime { timebase.cmtime(for: timestamp) }
 }
 
 public protocol FrameOutput: AnyObject {
@@ -65,11 +71,6 @@ public protocol FrameOutput: AnyObject {
 
 protocol MEFrame: ObjectQueueItem {
     var timebase: Timebase { get set }
-}
-
-extension MEFrame {
-    var seconds: TimeInterval { cmtime.seconds }
-    var cmtime: CMTime { timebase.cmtime(for: timestamp) }
 }
 
 // MARK: model
@@ -196,8 +197,11 @@ final class Packet: ObjectQueueItem {
     var timestamp: Int64 = 0
     var position: Int64 = 0
     var size: Int32 = 0
-    var assetTrack: FFmpegAssetTrack!
     private(set) var corePacket = av_packet_alloc()
+    var timebase: Timebase {
+        assetTrack.timebase
+    }
+
     var isKeyFrame: Bool {
         if let corePacket {
             return corePacket.pointee.flags & AV_PKT_FLAG_KEY == AV_PKT_FLAG_KEY
@@ -206,18 +210,16 @@ final class Packet: ObjectQueueItem {
         }
     }
 
-    var seconds: Double {
-        assetTrack.timebase.cmtime(for: position).seconds
-    }
-
-    func fill() {
-        guard let corePacket else {
-            return
+    var assetTrack: FFmpegAssetTrack! {
+        didSet {
+            guard let packet = corePacket?.pointee else {
+                return
+            }
+            timestamp = packet.pts == Int64.min ? packet.dts : packet.pts
+            position = packet.pos
+            duration = packet.duration
+            size = packet.size
         }
-        timestamp = corePacket.pointee.pts == Int64.min ? corePacket.pointee.dts : corePacket.pointee.pts
-        position = corePacket.pointee.pos
-        duration = corePacket.pointee.duration
-        size = corePacket.pointee.size
     }
 
     deinit {

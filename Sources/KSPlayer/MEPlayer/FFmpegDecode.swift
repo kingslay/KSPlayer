@@ -61,7 +61,6 @@ class FFmpegDecode: DecodeProtocol {
                        let subtitle = closedCaptionsTrack.subtitle
                     {
                         let closedCaptionsPacket = Packet()
-                        closedCaptionsPacket.assetTrack = closedCaptionsTrack
                         if let corePacket = packet.corePacket {
                             closedCaptionsPacket.corePacket?.pointee.pts = corePacket.pointee.pts
                             closedCaptionsPacket.corePacket?.pointee.dts = corePacket.pointee.dts
@@ -74,7 +73,7 @@ class FFmpegDecode: DecodeProtocol {
                         let buffer = av_buffer_ref(sideData.pointee.buf)
                         closedCaptionsPacket.corePacket?.pointee.data = buffer?.pointee.data
                         closedCaptionsPacket.corePacket?.pointee.buf = buffer
-                        closedCaptionsPacket.fill()
+                        closedCaptionsPacket.assetTrack = closedCaptionsTrack
                         subtitle.putPacket(packet: closedCaptionsPacket)
                     }
                     if let sideData = av_frame_get_side_data(avframe, AV_FRAME_DATA_SEI_UNREGISTERED) {

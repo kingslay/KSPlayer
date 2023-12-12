@@ -230,7 +230,7 @@ class PixelBuffer: PixelBufferProtocol {
                 let contents = buffer?.contents()
                 let source = bytes[i]!
                 var j = 0
-                // while 的性能比for in快。
+                // 性能 while > stride(from:to:by:) > for in
                 while j < height {
                     contents?.advanced(by: j * size).copyMemory(from: source.advanced(by: j * byteCount), byteCount: byteCount)
                     j += 1

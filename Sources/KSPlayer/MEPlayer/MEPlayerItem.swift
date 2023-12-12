@@ -544,7 +544,6 @@ extension MEPlayerItem {
             if corePacket.pointee.size <= 0 {
                 return 0
             }
-            packet.fill()
             let first = assetTracks.first { $0.trackID == corePacket.pointee.stream_index }
             if let first, first.isEnabled {
                 packet.assetTrack = first
