@@ -33,7 +33,7 @@ open class IOSVideoPlayerView: VideoPlayerView {
             fullScreenDelegate?.player(isMaskShow: isMaskShow, isFullScreen: landscapeButton.isSelected)
         }
     }
-    
+
     #if !os(xrOS)
     private var brightness: CGFloat = UIScreen.main.brightness {
         didSet {

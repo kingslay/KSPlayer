@@ -12,7 +12,7 @@ public class FFmpegAssetTrack: MediaPlayerTrack {
     public private(set) var trackID: Int32 = 0
     public let codecName: String
     public var name: String = ""
-    public private(set) var language: String?
+    public private(set) var languageCode: String?
     public private(set) var nominalFrameRate: Float = 0
     public private(set) var bitRate: Int64 = 0
     public let mediaType: AVFoundation.AVMediaType
@@ -97,9 +97,9 @@ public class FFmpegAssetTrack: MediaPlayerTrack {
         }
 
         if let value = metadata["language"], value != "und" {
-            language = Locale.current.localizedString(forLanguageCode: value)
+            languageCode = value
         } else {
-            language = nil
+            languageCode = nil
         }
         if let value = metadata["title"] {
             name = value
