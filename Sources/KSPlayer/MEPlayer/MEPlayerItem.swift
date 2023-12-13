@@ -138,7 +138,7 @@ final class MEPlayerItem {
         operationQueue.name = "KSPlayer_" + String(describing: self).components(separatedBy: ".").last!
         operationQueue.maxConcurrentOperationCount = 1
         operationQueue.qualityOfService = .userInteractive
-//        _ = MEPlayerItem.onceInitial
+        _ = MEPlayerItem.onceInitial
         if let locale = options.audioLocale {
             audioRecognizer = AudioRecognizer(locale: locale) { text in
                 print(text)
