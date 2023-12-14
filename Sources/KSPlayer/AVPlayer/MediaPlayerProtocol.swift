@@ -17,6 +17,7 @@ public protocol MediaPlayback: AnyObject {
     var duration: TimeInterval { get }
     var fileSize: Double { get }
     var naturalSize: CGSize { get }
+    var chapters: [Chapter] { get }
     var currentPlaybackTime: TimeInterval { get }
     func prepareToPlay()
     func shutdown()
@@ -55,6 +56,12 @@ public class DynamicInfo: ObservableObject {
         audioBitrateBlock = audioBitrate
         videoBitrateBlock = videoBitrate
     }
+}
+
+public struct Chapter {
+    public let start: TimeInterval
+    public let end: TimeInterval
+    public let title: String
 }
 
 public protocol MediaPlayerProtocol: MediaPlayback {

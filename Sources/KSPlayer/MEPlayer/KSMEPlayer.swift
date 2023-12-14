@@ -283,6 +283,10 @@ extension KSMEPlayer: MEPlayerDelegate {
 }
 
 extension KSMEPlayer: MediaPlayerProtocol {
+    public var chapters: [Chapter] {
+        playerItem.chapters
+    }
+
     public var subtitleDataSouce: SubtitleDataSouce? { self }
     public var playbackVolume: Float {
         get {

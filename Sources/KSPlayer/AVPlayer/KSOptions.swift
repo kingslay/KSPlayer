@@ -454,6 +454,7 @@ public extension KSOptions {
     /// seek完是否自动播放
     static var isSeekedAutoPlay = true
     static var hardwareDecode = true
+    // 默认不用自研的硬解，因为有些视频的AVPacket的pts顺序是不对的，只有解码后的AVFrame里面的pts是对的。
     static var asynchronousDecompression = false
     static var isPipPopViewController = false
     static var displayCriteriaFormatDescriptionEnabled = false

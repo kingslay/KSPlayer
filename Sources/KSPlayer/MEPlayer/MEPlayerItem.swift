@@ -41,6 +41,7 @@ final class MEPlayerItem {
     private var videoDisplayCount = UInt8(0)
     private var seekByBytes = false
     private var lastVideoDisplayTime = CACurrentMediaTime()
+    public private(set) var chapters: [Chapter] = []
     var currentPlaybackTime: TimeInterval {
         state == .seeking ? seekTime : (mainClock().time - startTime).seconds
     }
@@ -81,6 +82,7 @@ final class MEPlayerItem {
     }
 
     lazy var dynamicInfo = DynamicInfo { [weak self] in
+        // metadata可能会实时变化。所以把它放在DynamicInfo里面
         toDictionary(self?.formatCtx?.pointee.metadata)
     } bytesRead: { [weak self] in
         self?.formatCtx?.pointee.pb?.pointee.bytes_read ?? 0
@@ -258,6 +260,20 @@ extension MEPlayerItem {
         duration = TimeInterval(max(formatCtx.pointee.duration, 0) / Int64(AV_TIME_BASE))
         fileSize = Double(formatCtx.pointee.bit_rate) * duration / 8
         createCodec(formatCtx: formatCtx)
+        if formatCtx.pointee.nb_chapters > 0 {
+            chapters.removeAll()
+            for i in 0 ..< formatCtx.pointee.nb_chapters {
+                if let chapter = formatCtx.pointee.chapters[Int(i)]?.pointee {
+                    let timeBase = Timebase(chapter.time_base)
+                    let start = timeBase.cmtime(for: chapter.start).seconds
+                    let end = timeBase.cmtime(for: chapter.end).seconds
+                    let metadata = toDictionary(chapter.metadata)
+                    let title = metadata["title"] ?? ""
+                    chapters.append(Chapter(start: start, end: end, title: title))
+                }
+            }
+        }
+
         if let outputURL = options.outputURL {
             openOutput(url: outputURL)
         }
