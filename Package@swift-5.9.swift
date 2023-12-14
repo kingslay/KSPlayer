@@ -23,8 +23,12 @@ let package = Package(
                 .product(name: "FFmpegKit", package: "FFmpegKit"),
 //                .product(name: "Libass", package: "FFmpegKit"),
 //                .product(name: "Libmpv", package: "FFmpegKit"),
+                "DisplayCriteria",
             ],
             resources: [.process("Metal/Shaders.metal")]
+        ),
+        .target(
+            name: "DisplayCriteria"
         ),
         .testTarget(
             name: "KSPlayerTests",

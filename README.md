@@ -53,6 +53,7 @@ Make sure to use the latest version **cocoapods 1.10.1+**, which can be installe
 target 'ProjectName' do
     use_frameworks!
     pod 'KSPlayer',:git => 'https://github.com/kingslay/KSPlayer.git', :branch => 'develop'
+    pod 'DisplayCriteria',:git => 'https://github.com/kingslay/KSPlayer.git', :branch => 'develop'
     pod 'FFmpegKit',:git => 'https://github.com/kingslay/FFmpegKit.git', :branch => 'main'
     pod 'OpenSSL',:git => 'https://github.com/kingslay/FFmpegKit.git', :branch => 'main'
     pod 'Libass',:git => 'https://github.com/kingslay/FFmpegKit.git', :branch => 'main'

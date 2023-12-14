@@ -9,8 +9,6 @@
 #define AVDisplayCriteriaKS_h
 #if __has_include(<AVFoundation/AVDisplayCriteria.h>)
 #import <AVFoundation/AVDisplayCriteria.h>
-#import <AVFoundation/AVPlayer.h>
-
 @interface AVDisplayCriteria ()
 @property(readonly) int videoDynamicRange;
 @property(readonly, nonatomic) float refreshRate;
@@ -18,4 +16,3 @@
 @end
 #endif
 #endif /* AVDisplayCriteriaKS_h */
-

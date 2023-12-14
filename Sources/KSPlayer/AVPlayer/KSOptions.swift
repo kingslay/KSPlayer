@@ -6,7 +6,11 @@
 //
 
 import AVFoundation
+#if os(tvOS) || os(xrOS)
+import DisplayCriteria
+#endif
 import OSLog
+
 #if canImport(UIKit)
 import UIKit
 #endif
@@ -315,7 +319,7 @@ open class KSOptions {
         }
     }
 
-    open func updateVideo(refreshRate: Float, isDovi _: Bool, formatDescription: CMFormatDescription?) {
+    open func updateVideo(refreshRate: Float, isDovi: Bool, formatDescription: CMFormatDescription?) {
         #if os(tvOS) || os(xrOS)
         guard let displayManager = UIApplication.shared.windows.first?.avDisplayManager,
               displayManager.isDisplayCriteriaMatchingEnabled
@@ -327,8 +331,8 @@ open class KSOptions {
             if KSOptions.displayCriteriaFormatDescriptionEnabled, #available(tvOS 17.0, *) {
                 displayManager.preferredDisplayCriteria = AVDisplayCriteria(refreshRate: refreshRate, formatDescription: formatDescription)
             } else {
-//                let dynamicRange = isDovi ? .dolbyVision : formatDescription.dynamicRange
-//                displayManager.preferredDisplayCriteria = AVDisplayCriteria(refreshRate: refreshRate, videoDynamicRange: dynamicRange.rawValue)
+                let dynamicRange = isDovi ? .dolbyVision : formatDescription.dynamicRange
+                displayManager.preferredDisplayCriteria = AVDisplayCriteria(refreshRate: refreshRate, videoDynamicRange: dynamicRange.rawValue)
             }
         }
         #endif

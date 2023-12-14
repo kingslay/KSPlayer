@@ -35,6 +35,7 @@ Pod::Spec.new do |s|
         ss.ios.frameworks  = 'UIKit'
         ss.tvos.frameworks  = 'UIKit'
         ss.osx.frameworks  = 'AppKit'
+        ss.dependency 'DisplayCriteria'
     end
     #ffmpeg播放内核
     s.subspec 'MEPlayer' do |ss|

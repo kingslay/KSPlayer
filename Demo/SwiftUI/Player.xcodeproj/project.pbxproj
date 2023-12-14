@@ -23,8 +23,6 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		AC3CAD6228BB88A200AA1C2C /* AVDisplayCriteriaKS.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AVDisplayCriteriaKS.h; sourceTree = "<group>"; };
-		AC3CAD6328BB893500AA1C2C /* Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Bridging-Header.h"; sourceTree = "<group>"; };
 		AC43F6402A5172830026ECF2 /* FavoriteView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FavoriteView.swift; sourceTree = "<group>"; };
 		AC43F6432A51916F0026ECF2 /* Model.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = Model.xcdatamodel; sourceTree = "<group>"; };
 		AC43F6652A519D400026ECF2 /* Persistence.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Persistence.swift; sourceTree = "<group>"; };
@@ -70,8 +68,6 @@
 		AC77DFAF26402327001351AE /* Shared */ = {
 			isa = PBXGroup;
 			children = (
-				AC3CAD6228BB88A200AA1C2C /* AVDisplayCriteriaKS.h */,
-				AC3CAD6328BB893500AA1C2C /* Bridging-Header.h */,
 				ACEA9FEA298BFC8800FBA74B /* MovieModel.swift */,
 				AC44E0F929290CBB00617BD3 /* HomeView.swift */,
 				AC44E0FA29290CBC00617BD3 /* ContentView.swift */,
@@ -368,7 +364,6 @@
 				SUPPORTS_MACCATALYST = YES;
 				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
-				SWIFT_OBJC_BRIDGING_HEADER = "Shared/Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2,3,6,7";
 			};
@@ -411,7 +406,6 @@
 				SUPPORTS_MACCATALYST = YES;
 				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
-				SWIFT_OBJC_BRIDGING_HEADER = "Shared/Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2,3,6,7";
 				VALIDATE_PRODUCT = YES;
