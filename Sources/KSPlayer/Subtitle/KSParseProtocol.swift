@@ -20,9 +20,9 @@ public extension KSOptions {
     static var subtitleParses: [KSParseProtocol] = [AssParse(), VTTParse(), SrtParse()]
 }
 
-extension String {
+public extension String {
     /// 把字符串时间转为对应的秒
-    /// - Parameter fromStr: srt 00:02:52,184 ass0:30:11.56 vtt:00:00.430
+    /// - Parameter fromStr: srt 00:02:52,184 ass 0:30:11.56 vtt 00:00.430
     /// - Returns: 秒
     func parseDuration() -> TimeInterval {
         let scanner = Scanner(string: self)
