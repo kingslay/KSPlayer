@@ -13,7 +13,8 @@ import Combine
 public struct Slider: View {
     private let process: Binding<Float>
     private let onEditingChanged: (Bool) -> Void
-    @FocusState private var isFocused: Bool
+    @FocusState
+    private var isFocused: Bool
     public init(value: Binding<Double>, in bounds: ClosedRange<Double> = 0 ... 1, onEditingChanged: @escaping (Bool) -> Void = { _ in }) {
         process = Binding {
             Float((value.wrappedValue - bounds.lowerBound) / (bounds.upperBound - bounds.lowerBound))
@@ -132,7 +133,6 @@ public class TVSlide: UIControl {
             onEditingChanged(false)
         case .cancelled, .failed:
             process.wrappedValue = beganProgress
-            onEditingChanged(false)
         @unknown default:
             break
         }
@@ -167,13 +167,7 @@ public class TVSlide: UIControl {
             }
             preMoveDirection = .right
             preMoveTime = CACurrentMediaTime()
-        case .upArrow:
-            preMoveDirection = .up
-            preMoveTime = CACurrentMediaTime()
-            timer.fireDate = Date.distantFuture
-            onEditingChanged(false)
-        case .downArrow:
-            preMoveDirection = .down
+        case .select:
             preMoveTime = CACurrentMediaTime()
             timer.fireDate = Date.distantFuture
             onEditingChanged(false)

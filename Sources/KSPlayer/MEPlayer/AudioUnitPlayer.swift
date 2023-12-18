@@ -103,7 +103,9 @@ public final class AudioUnitPlayer: AudioOutput {
         currentRender = nil
     }
 
-    deinit {}
+    deinit {
+        pause()
+    }
 }
 
 extension AudioUnitPlayer {
