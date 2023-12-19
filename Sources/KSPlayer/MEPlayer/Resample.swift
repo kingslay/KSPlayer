@@ -157,7 +157,7 @@ class VideoSwresample: FrameChange {
     }
 
     func transfer(format: AVPixelFormat, width: Int32, height: Int32, data: [UnsafeMutablePointer<UInt8>?], linesize: [Int32]) -> CVPixelBuffer? {
-        setup(format: format, width: width, height: height, linesize: linesize[0])
+        setup(format: format, width: width, height: height, linesize: linesize[1] == 0 ? linesize[0] : linesize[1])
         guard let pool else {
             return nil
         }

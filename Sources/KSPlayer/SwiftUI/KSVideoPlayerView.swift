@@ -290,15 +290,17 @@ struct VideoControllerView: View {
             Spacer()
             HStack {
                 Spacer()
-                Button {
-                    config.skip(interval: -15)
-                } label: {
-                    Image(systemName: "gobackward.15")
-                        .font(.largeTitle)
+                if config.playerLayer?.player.seekable ?? false {
+                    Button {
+                        config.skip(interval: -15)
+                    } label: {
+                        Image(systemName: "gobackward.15")
+                            .font(.largeTitle)
+                    }
+                    #if !os(tvOS)
+                    .keyboardShortcut(.leftArrow, modifiers: .none)
+                    #endif
                 }
-                #if !os(tvOS)
-                .keyboardShortcut(.leftArrow, modifiers: .none)
-                #endif
                 Spacer()
                 Button {
                     if config.state.isPlaying {
@@ -314,15 +316,17 @@ struct VideoControllerView: View {
                 .keyboardShortcut(.space, modifiers: .none)
                 #endif
                 Spacer()
-                Button {
-                    config.skip(interval: 15)
-                } label: {
-                    Image(systemName: "goforward.15")
-                        .font(.largeTitle)
+                if config.playerLayer?.player.seekable ?? false {
+                    Button {
+                        config.skip(interval: 15)
+                    } label: {
+                        Image(systemName: "goforward.15")
+                            .font(.largeTitle)
+                    }
+                    #if !os(tvOS)
+                    .keyboardShortcut(.rightArrow, modifiers: .none)
+                    #endif
                 }
-                #if !os(tvOS)
-                .keyboardShortcut(.rightArrow, modifiers: .none)
-                #endif
                 Spacer()
             }
             Spacer()
@@ -468,6 +472,7 @@ public struct MenuView<Label, SelectionValue, Content>: View where Label: View, 
             }
             .pickerStyle(.inline)
         } label: {
+            // menu 里面的label无法调整大小
             label()
         }
         .menuIndicator(.hidden)
