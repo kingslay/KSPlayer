@@ -83,7 +83,6 @@ public struct KSVideoPlayerView: View {
                 }
             }
             .padding()
-            .background(.black.opacity(0.2))
             .opacity(playerCoordinator.isMaskShow ? 1 : 0)
         }
         .onAppear {
@@ -309,7 +308,7 @@ struct VideoControllerView: View {
                         config.playerLayer?.play()
                     }
                 } label: {
-                    Image(systemName: config.state == .error ? "play.slash.fill" : (config.state.isPlaying ? "pause.fill" : "play.fill"))
+                    Image(systemName: config.state == .error ? "play.slash.fill" : (config.state.isPlaying ? "pause.circle.fill" : "play.circle.fill"))
                         .font(.largeTitle)
                 }
                 #if !os(tvOS)
@@ -359,8 +358,9 @@ struct VideoControllerView: View {
         Button {
             config.isMuted.toggle()
         } label: {
-            Image(systemName: config.isMuted ? "speaker.slash.fill" : "speaker.wave.2.fill")
+            Image(systemName: config.isMuted ? "speaker.slash.circle.fill" : "speaker.wave.2.circle.fill")
         }
+        .shadow(color: .black, radius: 1)
     }
 
     private var contentModeButton: some View {
@@ -383,8 +383,7 @@ struct VideoControllerView: View {
                 Text(track.description).tag(track.trackID as Int32?)
             }
         } label: {
-            Image(systemName: "waveform")
-                .font(.largeTitle)
+            Image(systemName: "waveform.circle.fill")
         }
     }
 
@@ -404,8 +403,7 @@ struct VideoControllerView: View {
                 Text(track.name).tag(track.subtitleID as String?)
             }
         } label: {
-            Image(systemName: "text.bubble")
-                .font(.largeTitle)
+            Image(systemName: "text.bubble.fill")
         }
     }
 
@@ -418,7 +416,6 @@ struct VideoControllerView: View {
             }
         } label: {
             Image(systemName: "gauge.with.dots.needle.67percent")
-                .font(.largeTitle)
         }
     }
 
@@ -426,7 +423,7 @@ struct VideoControllerView: View {
         Button {
             config.playerLayer?.isPipActive.toggle()
         } label: {
-            Image(systemName: "rectangle.on.rectangle")
+            Image(systemName: "rectangle.on.rectangle.circle.fill")
         }
     }
 
@@ -434,8 +431,7 @@ struct VideoControllerView: View {
         Button {
             showVideoSetting.toggle()
         } label: {
-            Image(systemName: "info")
-                .font(.largeTitle)
+            Image(systemName: "info.circle.fill")
         }
     }
 }
