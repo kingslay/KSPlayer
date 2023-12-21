@@ -18,8 +18,6 @@ public struct KSVideoPlayerView: View {
     private var playerCoordinator = KSVideoPlayer.Coordinator()
     @Environment(\.dismiss)
     private var dismiss
-    @FocusState
-    private var controllerFocused: Bool
     public let options: KSOptions
     @State
     public var url: URL {
@@ -160,9 +158,7 @@ public struct KSVideoPlayerView: View {
             }
         }
         .onExitCommand {
-            if controllerFocused {
-                controllerFocused = false
-            } else if playerCoordinator.isMaskShow {
+            if playerCoordinator.isMaskShow {
                 playerCoordinator.isMaskShow = false
             } else {
                 dismiss()
