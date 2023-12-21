@@ -118,7 +118,7 @@ public protocol MediaPlayerTrack: AnyObject, CustomStringConvertible {
     var name: String { get }
     var languageCode: String? { get }
     var mediaType: AVFoundation.AVMediaType { get }
-    var nominalFrameRate: Float { get }
+    var nominalFrameRate: Float { get set }
     var bitRate: Int64 { get }
     var isEnabled: Bool { get set }
     var isImageSubtitle: Bool { get }

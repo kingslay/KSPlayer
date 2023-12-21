@@ -13,7 +13,7 @@ public class FFmpegAssetTrack: MediaPlayerTrack {
     public let codecName: String
     public var name: String = ""
     public private(set) var languageCode: String?
-    public private(set) var nominalFrameRate: Float = 0
+    public var nominalFrameRate: Float = 0
     public private(set) var bitRate: Int64 = 0
     public let mediaType: AVFoundation.AVMediaType
     public let formatName: String?

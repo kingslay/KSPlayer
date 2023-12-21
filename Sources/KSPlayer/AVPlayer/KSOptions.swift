@@ -315,6 +315,9 @@ open class KSOptions {
                 asynchronousDecompression = false
                 let yadif = hardwareDecode ? "yadif_videotoolbox" : "yadif"
                 videoFilters.append("\(yadif)=mode=\(KSOptions.yadifMode):parity=-1:deint=1")
+                if KSOptions.yadifMode == 1 || KSOptions.yadifMode == 3 {
+                    assetTrack.nominalFrameRate = assetTrack.nominalFrameRate * 2
+                }
             }
         }
     }
@@ -338,16 +341,14 @@ open class KSOptions {
         #endif
     }
 
-//    private var lastMediaTime = CACurrentMediaTime()
     open func videoClockSync(main: KSClock, nextVideoTime: TimeInterval, fps: Float, frameCount: Int) -> (Double, ClockProcessType) {
         var desire = main.getTime() - videoDelay
         #if !os(macOS)
         desire -= AVAudioSession.sharedInstance().outputLatency
         #endif
         let diff = nextVideoTime - desire
-//        print("[video] video diff \(diff) main \(main.time.seconds) interval \(CACurrentMediaTime() - main.lastMediaTime) render interval \(CACurrentMediaTime() - lastMediaTime)")
-        // 最大刷新率上限
-        if diff >= 1 / 120 {
+//        print("[video] video diff \(diff) nextVideoTime \(nextVideoTime) main \(main.time.seconds)")
+        if diff >= 1 / Double(fps * 4 / 3) {
             videoClockDelayCount = 0
             return (diff, .remain)
         } else {
@@ -382,8 +383,6 @@ open class KSOptions {
                 }
             } else {
                 videoClockDelayCount = 0
-//                print("[video] video interval \(CACurrentMediaTime() - lastMediaTime)")
-//                lastMediaTime = CACurrentMediaTime()
                 return (diff, .next)
             }
         }

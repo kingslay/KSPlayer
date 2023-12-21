@@ -775,15 +775,15 @@ extension MEPlayerItem: OutputRenderSourceDelegate {
     }
 
     func setVideo(time: CMTime, position: Int64) {
+//        print("[video] video interval \(CACurrentMediaTime() - videoClock.lastMediaTime) video diff \(time.seconds - videoClock.time.seconds)")
         videoClock.time = time
         videoClock.position = position
-        let time = CACurrentMediaTime()
         videoDisplayCount += 1
-        let diff = time - lastVideoDisplayTime
+        let diff = videoClock.lastMediaTime - lastVideoDisplayTime
         if diff > 1 {
             dynamicInfo.displayFPS = Double(videoDisplayCount) / diff
             videoDisplayCount = 0
-            lastVideoDisplayTime = time
+            lastVideoDisplayTime = videoClock.lastMediaTime
         }
     }
 

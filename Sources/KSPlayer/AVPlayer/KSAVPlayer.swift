@@ -512,7 +512,7 @@ class AVMediaPlayerTrack: MediaPlayerTrack {
     let formatDescription: CMFormatDescription?
     let description: String
     private let track: AVPlayerItemTrack
-    let nominalFrameRate: Float
+    var nominalFrameRate: Float
     let trackID: Int32
     let rotation: Int16 = 0
     let bitRate: Int64

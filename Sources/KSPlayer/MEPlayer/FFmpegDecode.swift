@@ -108,9 +108,12 @@ class FFmpegDecode: DecodeProtocol {
                         if timestamp < 0 {
                             timestamp = bestEffortTimestamp
                         }
+                        if timestamp == bestEffortTimestamp {
+                            bestEffortTimestamp += frame.duration
+                            timestamp = bestEffortTimestamp
+                        }
                         frame.timestamp = timestamp
                         bestEffortTimestamp = timestamp
-                        bestEffortTimestamp += frame.duration
                         completionHandler(.success(frame))
                     } catch {
                         completionHandler(.failure(error))
