@@ -348,7 +348,7 @@ open class KSOptions {
         #endif
         let diff = nextVideoTime - desire
 //        print("[video] video diff \(diff) nextVideoTime \(nextVideoTime) main \(main.time.seconds)")
-        if diff >= 1 / Double(fps * 4 / 3) {
+        if diff >= 1 / Double(fps * 2) {
             videoClockDelayCount = 0
             return (diff, .remain)
         } else {
