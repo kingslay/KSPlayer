@@ -104,7 +104,7 @@ public final class AudioUnitPlayer: AudioOutput {
     }
 
     deinit {
-        pause()
+        AudioUnitUninitialize(audioUnitForOutput)
     }
 }
 
