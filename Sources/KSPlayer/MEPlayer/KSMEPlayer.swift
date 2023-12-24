@@ -561,3 +561,13 @@ extension KSMEPlayer: DisplayLayerDelegate {
         }
     }
 }
+
+public extension KSMEPlayer {
+    func startRecord(url: URL) {
+        playerItem.startRecord(url: url)
+    }
+
+    func stoptRecord() {
+        playerItem.stopRecord()
+    }
+}

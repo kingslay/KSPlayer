@@ -275,7 +275,7 @@ extension MEPlayerItem {
         }
 
         if let outputURL = options.outputURL {
-            openOutput(url: outputURL)
+            startRecord(url: outputURL)
         }
         if videoTrack == nil, audioTrack == nil {
             state = .failed
@@ -285,7 +285,8 @@ extension MEPlayerItem {
         }
     }
 
-    private func openOutput(url: URL) {
+    func startRecord(url: URL) {
+        stopRecord()
         let filename = url.isFileURL ? url.path : url.absoluteString
         var ret = avformat_alloc_output_context2(&outputFormatCtx, nil, nil, filename)
         guard let outputFormatCtx, let formatCtx else {
@@ -641,9 +642,7 @@ extension MEPlayerItem: MediaPlayback {
         guard state != .closed else { return }
         state = .closed
         av_packet_free(&outputPacket)
-        if let outputFormatCtx {
-            av_write_trailer(outputFormatCtx)
-        }
+        stopRecord()
         // 故意循环引用。等结束了。才释放
         let closeOperation = BlockOperation {
             Thread.current.name = (self.operationQueue.name ?? "") + "_close"
@@ -674,6 +673,12 @@ extension MEPlayerItem: MediaPlayback {
             }
         }
         self.closeOperation = closeOperation
+    }
+
+    func stopRecord() {
+        if let outputFormatCtx {
+            av_write_trailer(outputFormatCtx)
+        }
     }
 
     func seek(time: TimeInterval, completion: @escaping ((Bool) -> Void)) {
