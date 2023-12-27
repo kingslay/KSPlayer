@@ -273,6 +273,12 @@ extension NSError {
         userInfo[NSLocalizedDescriptionKey] = errorCode.description
         self.init(domain: KSPlayerErrorDomain, code: errorCode.rawValue, userInfo: userInfo)
     }
+
+    convenience init(description: String) {
+        var userInfo = [String: Any]()
+        userInfo[NSLocalizedDescriptionKey] = description
+        self.init(domain: KSPlayerErrorDomain, code: 0, userInfo: userInfo)
+    }
 }
 
 extension CMTime {

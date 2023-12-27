@@ -28,14 +28,14 @@ public class ThumbnailController {
         self.thumbnailCount = thumbnailCount
     }
 
-    public func generateThumbnail(for url: URL, thumbWidth: Int32 = 240) async -> [FFThumbnail] {
+    public func generateThumbnail(for url: URL, thumbWidth: Int32 = 240) async throws -> [FFThumbnail] {
         let task = Task {
-            getPeeks(for: url, thumbWidth: thumbWidth)
+            try getPeeks(for: url, thumbWidth: thumbWidth)
         }
-        return await task.value
+        return try await task.value
     }
 
-    private func getPeeks(for url: URL, thumbWidth: Int32 = 240) -> [FFThumbnail] {
+    private func getPeeks(for url: URL, thumbWidth: Int32 = 240) throws -> [FFThumbnail] {
         let urlString: String
         if url.isFileURL {
             urlString = url.path
@@ -49,11 +49,11 @@ public class ThumbnailController {
         }
         var result = avformat_open_input(&formatCtx, urlString, nil, nil)
         guard result == 0, let formatCtx else {
-            return []
+            throw NSError(errorCode: .formatOpenInput, avErrorCode: result)
         }
         result = avformat_find_stream_info(formatCtx, nil)
         guard result == 0 else {
-            return []
+            throw NSError(errorCode: .formatFindStreamInfo, avErrorCode: result)
         }
         var videoStreamIndex = -1
         for i in 0 ..< Int32(formatCtx.pointee.nb_streams) {
@@ -63,21 +63,18 @@ public class ThumbnailController {
             }
         }
         guard videoStreamIndex >= 0, let videoStream = formatCtx.pointee.streams[videoStreamIndex] else {
-            return []
+            throw NSError(description: "No video stream")
         }
 
         let videoAvgFrameRate = videoStream.pointee.avg_frame_rate
         if videoAvgFrameRate.den == 0 || av_q2d(videoAvgFrameRate) == 0 {
-            print("Avg frame rate = 0, ignore")
-            return []
+            throw NSError(description: "Avg frame rate = 0, ignore")
         }
-        var codecContext = try? videoStream.pointee.codecpar.pointee.createContext(options: nil)
+        var codecContext = try videoStream.pointee.codecpar.pointee.createContext(options: nil)
         defer {
             avcodec_close(codecContext)
+            var codecContext: UnsafeMutablePointer<AVCodecContext>? = codecContext
             avcodec_free_context(&codecContext)
-        }
-        guard let codecContext else {
-            return []
         }
         let thumbHeight = thumbWidth * codecContext.pointee.height / codecContext.pointee.width
         let reScale = VideoSwresample(dstWidth: thumbWidth, dstHeight: thumbHeight, isDovi: false)
@@ -93,7 +90,7 @@ public class ThumbnailController {
             av_frame_free(&frame)
         }
         guard let frame else {
-            return []
+            throw NSError(description: "can not av_frame_alloc")
         }
         for i in 0 ... thumbnailCount {
             let seek_pos = interval * Int64(i) + videoStream.pointee.start_time
