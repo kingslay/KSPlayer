@@ -9,7 +9,9 @@ import AVFoundation
 import Foundation
 import Libavcodec
 import Libavformat
-
+#if canImport(UIKit)
+import UIKit
+#endif
 public struct FFThumbnail {
     public let image: UIImage
     public let time: TimeInterval
