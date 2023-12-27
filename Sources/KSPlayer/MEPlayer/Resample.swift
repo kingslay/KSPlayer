@@ -70,10 +70,14 @@ class VideoSwresample: FrameChange {
     private var height: Int32 = 0
     private var width: Int32 = 0
     private var pool: CVPixelBufferPool?
+    private var dstHeight: Int32?
+    private var dstWidth: Int32?
     private let dstFormat: AVPixelFormat?
     private let fps: Float
     private let isDovi: Bool
-    init(dstFormat: AVPixelFormat? = nil, fps: Float = 60, isDovi: Bool) {
+    init(dstWidth: Int32? = nil, dstHeight: Int32? = nil, dstFormat: AVPixelFormat? = nil, fps: Float = 60, isDovi: Bool) {
+        self.dstWidth = dstWidth
+        self.dstHeight = dstHeight
         self.dstFormat = dstFormat
         self.fps = fps
         self.isDovi = isDovi
@@ -116,8 +120,10 @@ class VideoSwresample: FrameChange {
         self.format = format
         self.height = height
         self.width = width
+        let dstWidth = dstWidth ?? width
+        let dstHeight = dstHeight ?? height
         let pixelFormatType: OSType
-        if let osType = format.osType() {
+        if self.dstWidth == nil, self.dstHeight == nil, dstFormat == nil, let osType = format.osType() {
             pixelFormatType = osType
             sws_freeContext(imgConvertCtx)
             imgConvertCtx = nil
@@ -125,12 +131,12 @@ class VideoSwresample: FrameChange {
             let dstFormat = dstFormat ?? format.bestPixelFormat
             pixelFormatType = dstFormat.osType()!
 //            imgConvertCtx = sws_getContext(width, height, self.format, width, height, dstFormat, SWS_FAST_BILINEAR, nil, nil, nil)
-            imgConvertCtx = sws_getCachedContext(imgConvertCtx, width, height, self.format, width, height, dstFormat, SWS_FAST_BILINEAR, nil, nil, nil)
+            imgConvertCtx = sws_getCachedContext(imgConvertCtx, width, height, self.format, dstWidth, dstHeight, dstFormat, SWS_FAST_BILINEAR, nil, nil, nil)
         }
-        pool = CVPixelBufferPool.ceate(width: width, height: height, bytesPerRowAlignment: linesize, pixelFormatType: pixelFormatType)
+        pool = CVPixelBufferPool.ceate(width: dstWidth, height: dstHeight, bytesPerRowAlignment: linesize, pixelFormatType: pixelFormatType)
     }
 
-    private func transfer(frame: AVFrame) -> PixelBufferProtocol? {
+    func transfer(frame: AVFrame) -> PixelBufferProtocol? {
         let format = AVPixelFormat(rawValue: frame.format)
         let width = frame.width
         let height = frame.height
