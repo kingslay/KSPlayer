@@ -131,6 +131,7 @@ class VideoSwresample: FrameChange {
             let dstFormat = dstFormat ?? format.bestPixelFormat
             pixelFormatType = dstFormat.osType()!
 //            imgConvertCtx = sws_getContext(width, height, self.format, width, height, dstFormat, SWS_FAST_BILINEAR, nil, nil, nil)
+            // AV_PIX_FMT_VIDEOTOOLBOX格式是无法进行swscale的
             imgConvertCtx = sws_getCachedContext(imgConvertCtx, width, height, self.format, dstWidth, dstHeight, dstFormat, SWS_FAST_BILINEAR, nil, nil, nil)
         }
         pool = CVPixelBufferPool.ceate(width: dstWidth, height: dstHeight, bytesPerRowAlignment: linesize, pixelFormatType: pixelFormatType)
