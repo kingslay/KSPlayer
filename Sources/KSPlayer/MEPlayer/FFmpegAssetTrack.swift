@@ -104,7 +104,7 @@ public class FFmpegAssetTrack: MediaPlayerTrack {
         if let value = metadata["title"] {
             name = value
         } else {
-            name = codecName
+            name = languageCode ?? codecName
         }
         // AV_DISPOSITION_DEFAULT
         if mediaType == .subtitle {
