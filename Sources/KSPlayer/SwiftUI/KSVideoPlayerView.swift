@@ -53,13 +53,8 @@ public struct KSVideoPlayerView: View {
                     print("bufferedCount \(bufferedCount), consumeTime \(consumeTime)")
                 }
             #if canImport(UIKit)
-                .onSwipe { direction in
+                .onSwipe { _ in
                     playerCoordinator.isMaskShow = true
-                    if direction == .left {
-                        playerCoordinator.skip(interval: -15)
-                    } else if direction == .right {
-                        playerCoordinator.skip(interval: 15)
-                    }
                 }
             #endif
                 .ignoresSafeArea()
@@ -243,15 +238,15 @@ struct VideoControllerView: View {
             #if os(tvOS)
             Spacer()
             HStack {
-                Button {
-                    dismiss()
-                } label: {
-                    Image(systemName: "x.circle.fill")
-                }
+//                Button {
+//                    dismiss()
+//                } label: {
+//                    Image(systemName: "x.circle.fill")
+//                }
                 Text(title)
                 ProgressView()
                     .opacity(config.state == .buffering ? 1 : 0)
-                Spacer()
+                Spacer(minLength: 400)
                 if let audioTracks = config.playerLayer?.player.tracks(mediaType: .audio), !audioTracks.isEmpty {
                     audioButton(audioTracks: audioTracks)
                 }
@@ -259,7 +254,7 @@ struct VideoControllerView: View {
                 contentModeButton
                 subtitleButton
                 playbackRateButton
-                pipButton
+//                pipButton
                 infoButton
             }
             #else
@@ -346,7 +341,7 @@ struct VideoControllerView: View {
         .buttonStyle(.borderless)
         #endif
         .sheet(isPresented: $showVideoSetting) {
-            VideoSettingView(config: config, subtitleModel: config.subtitleModel)
+            VideoSettingView(config: config, subtitleModel: config.subtitleModel, subtitleTitle: title)
         }
     }
 
@@ -443,18 +438,9 @@ public struct MenuView<Label, SelectionValue, Content>: View where Label: View, 
     private var showMenu = false
     public var body: some View {
         #if os(tvOS)
-        Button {
-            showMenu = true
-        } label: {
-            label()
-        }
-        .sheet(isPresented: $showMenu) {
-            Picker(selection: selection) {
-                content()
-            } label: {
-                EmptyView()
-            }
-        }
+        Picker(selection: selection, content: content, label: label)
+            .pickerStyle(.navigationLink)
+            .frame(height: 50)
         #else
         Menu {
             Picker(selection: selection) {
@@ -586,11 +572,6 @@ struct VideoSettingView: View {
     fileprivate var subtitleTitle: String
     @Environment(\.dismiss)
     private var dismiss
-    init(config: KSVideoPlayer.Coordinator, subtitleModel: SubtitleModel) {
-        self.config = config
-        self.subtitleModel = subtitleModel
-        _subtitleTitle = .init(initialValue: subtitleModel.url?.deletingPathExtension().lastPathComponent ?? "")
-    }
 
     var body: some View {
         PlatformView {
