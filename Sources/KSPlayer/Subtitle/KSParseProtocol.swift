@@ -368,8 +368,11 @@ public class VTTParse: KSParseProtocol {
      简中封装 by Q66
      */
     public func parsePart(scanner: Scanner) -> SubtitlePart? {
-        _ = scanner.scanDecimal()
-        _ = scanner.scanCharacters(from: .newlines)
+        var decimal: String?
+        repeat {
+            decimal = scanner.scanUpToCharacters(from: .newlines)
+            _ = scanner.scanCharacters(from: .newlines)
+        } while decimal.flatMap(Int.init) == nil
         let startString = scanner.scanUpToString("-->")
         // skip spaces and newlines by default.
         _ = scanner.scanString("-->")
@@ -384,10 +387,10 @@ public class VTTParse: KSParseProtocol {
                     text += str
                 }
                 newLine = scanner.scanCharacters(from: .newlines)
-                if newLine == "\n" {
+                if newLine == "\n" || newLine == "\r\n" {
                     text += "\n"
                 }
-            } while newLine == "\n"
+            } while newLine == "\n" || newLine == "\r\n"
             var textPosition = TextPosition()
             return SubtitlePart(startString.parseDuration(), endString.parseDuration(), attributedString: text.build(textPosition: &textPosition))
         }
@@ -410,8 +413,11 @@ public class SrtParse: KSParseProtocol {
      {\an4}慢慢来
      */
     public func parsePart(scanner: Scanner) -> SubtitlePart? {
-        _ = scanner.scanDecimal()
-        _ = scanner.scanCharacters(from: .newlines)
+        var decimal: String?
+        repeat {
+            decimal = scanner.scanUpToCharacters(from: .newlines)
+            _ = scanner.scanCharacters(from: .newlines)
+        } while decimal.flatMap(Int.init) == nil
         let startString = scanner.scanUpToString("-->")
         // skip spaces and newlines by default.
         _ = scanner.scanString("-->")
