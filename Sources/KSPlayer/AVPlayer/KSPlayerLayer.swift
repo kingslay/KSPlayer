@@ -298,7 +298,7 @@ open class KSPlayerLayer: UIView {
         if time.isInfinite || time.isNaN {
             completion(false)
         }
-        if player.isReadyToPlay {
+        if player.isReadyToPlay, player.seekable {
             player.seek(time: time) { [weak self] finished in
                 guard let self else { return }
                 if finished, autoPlay {

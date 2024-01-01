@@ -12,8 +12,8 @@ public class FFmpegAssetTrack: MediaPlayerTrack {
     public private(set) var trackID: Int32 = 0
     public let codecName: String
     public var name: String = ""
-    public private(set) var language: String?
-    public private(set) var nominalFrameRate: Float = 0
+    public private(set) var languageCode: String?
+    public var nominalFrameRate: Float = 0
     public private(set) var bitRate: Int64 = 0
     public let mediaType: AVFoundation.AVMediaType
     public let formatName: String?
@@ -35,6 +35,7 @@ public class FFmpegAssetTrack: MediaPlayerTrack {
     public let formatDescription: CMFormatDescription?
     var closedCaptionsTrack: FFmpegAssetTrack?
     let isConvertNALSize: Bool
+    var seekByBytes = false
     public var description: String {
         var description = codecName
         if let formatName {
@@ -57,7 +58,9 @@ public class FFmpegAssetTrack: MediaPlayerTrack {
         if bitRate > 0 {
             description += ", \(bitRate.kmFormatted)bps"
         }
-
+        if let language {
+            description += "(\(language))"
+        }
         return description
     }
 
@@ -93,18 +96,15 @@ public class FFmpegAssetTrack: MediaPlayerTrack {
             }
         }
 
-        if let value = metadata["language"] {
-            language = Locale.current.localizedString(forLanguageCode: value)
+        if let value = metadata["language"], value != "und" {
+            languageCode = value
         } else {
-            language = nil
+            languageCode = nil
         }
         if let value = metadata["title"] {
             name = value
         } else {
-            name = codecName
-            if let language {
-                name += "(\(language))"
-            }
+            name = languageCode ?? codecName
         }
         // AV_DISPOSITION_DEFAULT
         if mediaType == .subtitle {
@@ -153,13 +153,15 @@ public class FFmpegAssetTrack: MediaPlayerTrack {
         } else if codecpar.codec_type == AVMEDIA_TYPE_VIDEO {
             audioDescriptor = nil
             mediaType = .video
-            for i in 0 ..< codecpar.nb_coded_side_data {
-                let sideData = codecpar.coded_side_data[Int(i)]
-                if sideData.type == AV_PKT_DATA_DOVI_CONF {
-                    dovi = sideData.data.withMemoryRebound(to: DOVIDecoderConfigurationRecord.self, capacity: 1) { $0 }.pointee
-                } else if sideData.type == AV_PKT_DATA_DISPLAYMATRIX {
-                    let matrix = sideData.data.withMemoryRebound(to: Int32.self, capacity: 1) { $0 }
-                    rotation = Int16(Int(-av_display_rotation_get(matrix)) % 360)
+            if codecpar.nb_coded_side_data > 0, let sideDatas = codecpar.coded_side_data {
+                for i in 0 ..< codecpar.nb_coded_side_data {
+                    let sideData = sideDatas[Int(i)]
+                    if sideData.type == AV_PKT_DATA_DOVI_CONF {
+                        dovi = sideData.data.withMemoryRebound(to: DOVIDecoderConfigurationRecord.self, capacity: 1) { $0 }.pointee
+                    } else if sideData.type == AV_PKT_DATA_DISPLAYMATRIX {
+                        let matrix = sideData.data.withMemoryRebound(to: Int32.self, capacity: 1) { $0 }
+                        rotation = Int16(Int(-av_display_rotation_get(matrix)) % 360)
+                    }
                 }
             }
             let sar = codecpar.sample_aspect_ratio.size
@@ -238,8 +240,8 @@ public class FFmpegAssetTrack: MediaPlayerTrack {
         trackID = 0
     }
 
-    func ceateContext(options: KSOptions) throws -> UnsafeMutablePointer<AVCodecContext> {
-        try codecpar.ceateContext(options: options)
+    func createContext(options: KSOptions) throws -> UnsafeMutablePointer<AVCodecContext> {
+        try codecpar.createContext(options: options)
     }
 
     public var isEnabled: Bool {

@@ -212,6 +212,8 @@ extension KSVideoPlayer: UIViewRepresentable {
 
 extension KSVideoPlayer.Coordinator: KSPlayerLayerDelegate {
     public func player(layer: KSPlayerLayer, state: KSPlayerState) {
+        self.state = state
+        onStateChanged?(layer, state)
         if state == .readyToPlay {
             playbackRate = layer.player.playbackRate
             if let subtitleDataSouce = layer.player.subtitleDataSouce {
@@ -229,8 +231,6 @@ extension KSVideoPlayer.Coordinator: KSPlayerLayerDelegate {
         } else {
             isMaskShow = true
         }
-        self.state = state
-        onStateChanged?(layer, state)
     }
 
     public func player(layer _: KSPlayerLayer, currentTime: TimeInterval, totalTime: TimeInterval) {

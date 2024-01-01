@@ -283,6 +283,10 @@ extension KSMEPlayer: MEPlayerDelegate {
 }
 
 extension KSMEPlayer: MediaPlayerProtocol {
+    public var chapters: [Chapter] {
+        playerItem.chapters
+    }
+
     public var subtitleDataSouce: SubtitleDataSouce? { self }
     public var playbackVolume: Float {
         get {
@@ -555,5 +559,15 @@ extension KSMEPlayer: DisplayLayerDelegate {
             // 更改contentSource会直接crash
 //            pipController?.contentSource = contentSource
         }
+    }
+}
+
+public extension KSMEPlayer {
+    func startRecord(url: URL) {
+        playerItem.startRecord(url: url)
+    }
+
+    func stoptRecord() {
+        playerItem.stopRecord()
     }
 }

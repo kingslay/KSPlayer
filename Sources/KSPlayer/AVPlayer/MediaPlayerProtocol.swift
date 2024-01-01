@@ -17,6 +17,7 @@ public protocol MediaPlayback: AnyObject {
     var duration: TimeInterval { get }
     var fileSize: Double { get }
     var naturalSize: CGSize { get }
+    var chapters: [Chapter] { get }
     var currentPlaybackTime: TimeInterval { get }
     func prepareToPlay()
     func shutdown()
@@ -55,6 +56,12 @@ public class DynamicInfo: ObservableObject {
         audioBitrateBlock = audioBitrate
         videoBitrateBlock = videoBitrate
     }
+}
+
+public struct Chapter {
+    public let start: TimeInterval
+    public let end: TimeInterval
+    public let title: String
 }
 
 public protocol MediaPlayerProtocol: MediaPlayback {
@@ -109,9 +116,9 @@ public protocol MediaPlayerDelegate: AnyObject {
 public protocol MediaPlayerTrack: AnyObject, CustomStringConvertible {
     var trackID: Int32 { get }
     var name: String { get }
-    var language: String? { get }
+    var languageCode: String? { get }
     var mediaType: AVFoundation.AVMediaType { get }
-    var nominalFrameRate: Float { get }
+    var nominalFrameRate: Float { get set }
     var bitRate: Int64 { get }
     var isEnabled: Bool { get set }
     var isImageSubtitle: Bool { get }
@@ -142,14 +149,14 @@ public enum MediaLoadState: Int {
 
 // swiftlint:disable identifier_name
 public struct DOVIDecoderConfigurationRecord {
-    let dv_version_major: UInt8
-    let dv_version_minor: UInt8
-    let dv_profile: UInt8
-    let dv_level: UInt8
-    let rpu_present_flag: UInt8
-    let el_present_flag: UInt8
-    let bl_present_flag: UInt8
-    let dv_bl_signal_compatibility_id: UInt8
+    public let dv_version_major: UInt8
+    public let dv_version_minor: UInt8
+    public let dv_profile: UInt8
+    public let dv_level: UInt8
+    public let rpu_present_flag: UInt8
+    public let el_present_flag: UInt8
+    public let bl_present_flag: UInt8
+    public let dv_bl_signal_compatibility_id: UInt8
 }
 
 public enum FFmpegFieldOrder: UInt8 {
@@ -180,6 +187,12 @@ extension FFmpegFieldOrder: CustomStringConvertible {
 
 // swiftlint:enable identifier_name
 public extension MediaPlayerTrack {
+    var language: String? {
+        languageCode.flatMap {
+            Locale.current.localizedString(forLanguageCode: $0)
+        }
+    }
+
     var codecType: FourCharCode {
         mediaSubType.rawValue
     }

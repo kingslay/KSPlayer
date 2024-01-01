@@ -301,6 +301,9 @@ open class SubtitleModel: ObservableObject {
         didSet {
             oldValue?.isEnabled = false
             selectedSubtitleInfo?.isEnabled = true
+            if let url, let info = selectedSubtitleInfo as? URLSubtitleInfo, !info.downloadURL.isFileURL, let cache = subtitleDataSouces.first(where: { $0 is CacheSubtitleDataSouce }) as? CacheSubtitleDataSouce {
+                cache.addCache(fileURL: url, downloadURL: info.downloadURL)
+            }
         }
     }
 

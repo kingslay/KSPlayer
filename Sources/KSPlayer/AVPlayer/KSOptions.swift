@@ -6,7 +6,11 @@
 //
 
 import AVFoundation
+#if os(tvOS) || os(xrOS)
+import DisplayCriteria
+#endif
 import OSLog
+
 #if canImport(UIKit)
 import UIKit
 #endif
@@ -107,23 +111,27 @@ open class KSOptions {
     public internal(set) var decodeVideoTime = 0.0
     public init() {
         // 参数的配置可以参考protocols.texi 和 http.c
+        // 这个一定要，不然有的流就会判断不准FieldOrder
         formatContextOptions["scan_all_pmts"] = 1
-        formatContextOptions["auto_convert"] = 0
-        formatContextOptions["fps_probe_size"] = 3
+        // ts直播流需要加这个才能一直直播下去，不然播放一小段就会结束了。
+        formatContextOptions["reconnect"] = 1
+        formatContextOptions["reconnect_streamed"] = 1
+        // 这个是用来开启http的链接复用（keep-alive）。vlc默认是打开的，所以这边也默认打开。
+        formatContextOptions["multiple_requests"] = 1
+        // 下面是用来处理秒开的参数，有需要的自己打开。默认不开，不然在播放某些特殊的ts直播流会频繁卡顿。
+//        formatContextOptions["auto_convert"] = 0
+//        formatContextOptions["fps_probe_size"] = 3
+//        formatContextOptions["rw_timeout"] = 10_000_000
+//        formatContextOptions["max_analyze_duration"] = 300 * 1000
         // 默认情况下允许所有协议，只有嵌套协议才需要指定这个协议子集，例如m3u8里面有http。
 //        formatContextOptions["protocol_whitelist"] = "file,http,https,tcp,tls,crypto,async,cache,data,httpproxy"
-//        formatContextOptions["max_analyze_duration"] = 300 * 1000
-        formatContextOptions["reconnect"] = 1
         // 开启这个，纯ipv6地址会无法播放。并且有些视频结束了，但还会一直尝试重连。所以这个值默认不设置
 //        formatContextOptions["reconnect_at_eof"] = 1
-        formatContextOptions["reconnect_streamed"] = 1
-        formatContextOptions["multiple_requests"] = 1
         // 开启这个，会导致tcp Failed to resolve hostname 还会一直重试
 //        formatContextOptions["reconnect_on_network_error"] = 1
         // There is total different meaning for 'listen_timeout' option in rtmp
         // set 'listen_timeout' = -1 for rtmp、rtsp
 //        formatContextOptions["listen_timeout"] = 3
-        formatContextOptions["rw_timeout"] = 10_000_000
         decoderOptions["threads"] = "auto"
         decoderOptions["refcounted_frames"] = "1"
     }
@@ -311,11 +319,14 @@ open class KSOptions {
                 asynchronousDecompression = false
                 let yadif = hardwareDecode ? "yadif_videotoolbox" : "yadif"
                 videoFilters.append("\(yadif)=mode=\(KSOptions.yadifMode):parity=-1:deint=1")
+                if KSOptions.yadifMode == 1 || KSOptions.yadifMode == 3 {
+                    assetTrack.nominalFrameRate = assetTrack.nominalFrameRate * 2
+                }
             }
         }
     }
 
-    open func updateVideo(refreshRate: Float, isDovi _: Bool, formatDescription: CMFormatDescription?) {
+    open func updateVideo(refreshRate: Float, isDovi: Bool, formatDescription: CMFormatDescription?) {
         #if os(tvOS) || os(xrOS)
         guard let displayManager = UIApplication.shared.windows.first?.avDisplayManager,
               displayManager.isDisplayCriteriaMatchingEnabled
@@ -327,23 +338,21 @@ open class KSOptions {
             if KSOptions.displayCriteriaFormatDescriptionEnabled, #available(tvOS 17.0, *) {
                 displayManager.preferredDisplayCriteria = AVDisplayCriteria(refreshRate: refreshRate, formatDescription: formatDescription)
             } else {
-//                let dynamicRange = isDovi ? .dolbyVision : formatDescription.dynamicRange
-//                displayManager.preferredDisplayCriteria = AVDisplayCriteria(refreshRate: refreshRate, videoDynamicRange: dynamicRange.rawValue)
+                let dynamicRange = isDovi ? .dolbyVision : formatDescription.dynamicRange
+                displayManager.preferredDisplayCriteria = AVDisplayCriteria(refreshRate: refreshRate, videoDynamicRange: dynamicRange.rawValue)
             }
         }
         #endif
     }
 
-//    private var lastMediaTime = CACurrentMediaTime()
     open func videoClockSync(main: KSClock, nextVideoTime: TimeInterval, fps: Float, frameCount: Int) -> (Double, ClockProcessType) {
         var desire = main.getTime() - videoDelay
         #if !os(macOS)
         desire -= AVAudioSession.sharedInstance().outputLatency
         #endif
         let diff = nextVideoTime - desire
-//        print("[video] video diff \(diff) audio \(main.positionTime) interval \(CACurrentMediaTime() - main.lastMediaTime) render interval \(CACurrentMediaTime() - lastMediaTime)")
-        // 最大刷新率上限
-        if diff >= 1 / 120 {
+//        print("[video] video diff \(diff) nextVideoTime \(nextVideoTime) main \(main.time.seconds)")
+        if diff >= 1 / Double(fps * 2) {
             videoClockDelayCount = 0
             return (diff, .remain)
         } else {
@@ -378,8 +387,6 @@ open class KSOptions {
                 }
             } else {
                 videoClockDelayCount = 0
-//                print("[video] video interval \(CACurrentMediaTime() - lastMediaTime)")
-//                lastMediaTime = CACurrentMediaTime()
                 return (diff, .next)
             }
         }
@@ -402,8 +409,10 @@ open class KSOptions {
                 return availableHDRModes.dynamicRange
             }
         }
-        #endif
         return cotentRange
+        #else
+        return destinationDynamicRange ?? cotentRange
+        #endif
     }
 
     open func playerLayerDeinit() {
@@ -452,7 +461,8 @@ public extension KSOptions {
     /// seek完是否自动播放
     static var isSeekedAutoPlay = true
     static var hardwareDecode = true
-    static var asynchronousDecompression = true
+    // 默认不用自研的硬解，因为有些视频的AVPacket的pts顺序是不对的，只有解码后的AVFrame里面的pts是对的。
+    static var asynchronousDecompression = false
     static var isPipPopViewController = false
     static var displayCriteriaFormatDescriptionEnabled = false
     /// 日志级别
@@ -503,11 +513,15 @@ public extension KSOptions {
         var channelCount = channelCount
         if channelCount > 2 {
             let minChannels = min(maximumOutputNumberOfChannels, channelCount)
-            // iOS 有空间音频功能，所以不用处理
             #if os(tvOS) || targetEnvironment(simulator)
             if !(isUseAudioRenderer && isSpatialAudioEnabled) {
                 // 不要用maxRouteChannelsCount来判断，有可能会不准。导致多音道设备也返回2（一开始播放一个2声道，就容易出现），也不能用outputNumberOfChannels来判断，有可能会返回2
 //                channelCount = AVAudioChannelCount(min(AVAudioSession.sharedInstance().outputNumberOfChannels, maxRouteChannelsCount))
+                channelCount = minChannels
+            }
+            #else
+            // iOS 外放是会自动有空间音频功能，但是蓝牙耳机有可能没有空间音频功能或者把空间音频给关了，。所以还是需要处理。
+            if !isSpatialAudioEnabled {
                 channelCount = minChannels
             }
             #endif
@@ -635,13 +649,14 @@ public extension Array {
 
 public struct KSClock {
     public private(set) var lastMediaTime = CACurrentMediaTime()
-    public internal(set) var positionTime = CMTime.zero {
+    public internal(set) var position = Int64(0)
+    public internal(set) var time = CMTime.zero {
         didSet {
             lastMediaTime = CACurrentMediaTime()
         }
     }
 
     func getTime() -> TimeInterval {
-        positionTime.seconds + CACurrentMediaTime() - lastMediaTime
+        time.seconds + CACurrentMediaTime() - lastMediaTime
     }
 }

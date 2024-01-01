@@ -286,7 +286,9 @@ public class AudioEnginePlayer: AudioOutput {
             let bytesToCopy = Int(framesToCopy * sampleSize)
             let offset = Int(currentRenderReadOffset * sampleSize)
             for i in 0 ..< min(ioData.count, currentRender.data.count) {
-                (ioData[i].mData! + ioDataWriteOffset).copyMemory(from: currentRender.data[i]! + offset, byteCount: bytesToCopy)
+                if let source = currentRender.data[i], let destination = ioData[i].mData {
+                    (destination + ioDataWriteOffset).copyMemory(from: source + offset, byteCount: bytesToCopy)
+                }
             }
             numberOfSamples -= framesToCopy
             ioDataWriteOffset += bytesToCopy
@@ -303,9 +305,9 @@ public class AudioEnginePlayer: AudioOutput {
 
     private func audioPlayerDidRenderSample(sampleTimestamp _: AudioTimeStamp) {
         if let currentRender {
-            let currentPreparePosition = currentRender.position + currentRender.duration * Int64(currentRenderReadOffset) / Int64(currentRender.numberOfSamples)
+            let currentPreparePosition = currentRender.timestamp + currentRender.duration * Int64(currentRenderReadOffset) / Int64(currentRender.numberOfSamples)
             if currentPreparePosition > 0 {
-                renderSource?.setAudio(time: currentRender.timebase.cmtime(for: currentPreparePosition))
+                renderSource?.setAudio(time: currentRender.timebase.cmtime(for: currentPreparePosition), position: currentRender.position)
             }
         }
     }

@@ -19,7 +19,7 @@ public protocol VideoOutput: FrameOutput {
     var displayLayerDelegate: DisplayLayerDelegate? { get set }
     var options: KSOptions { get set }
     var displayLayer: AVSampleBufferDisplayLayer { get }
-    var pixelBuffer: CVPixelBuffer? { get }
+    var pixelBuffer: PixelBufferProtocol? { get }
     init(options: KSOptions)
     func invalidate()
     func play()
@@ -53,7 +53,7 @@ public final class MetalPlayView: UIView, VideoOutput {
         }
     }
 
-    public private(set) var pixelBuffer: CVPixelBuffer?
+    public private(set) var pixelBuffer: PixelBufferProtocol?
     /// 用displayLink会导致锁屏无法draw，
     /// 用DispatchSourceTimer的话，在播放4k视频的时候repeat的时间会变长,
     /// 用MTKView的draw(in:)也是不行，会卡顿
@@ -182,7 +182,7 @@ extension MetalPlayView {
             let cmtime = frame.cmtime
             let par = pixelBuffer.size
             let sar = pixelBuffer.aspectRatio
-            if options.isUseDisplayLayer() {
+            if let pixelBuffer = pixelBuffer.cvPixelBuffer, options.isUseDisplayLayer() {
                 if displayView.isHidden {
                     displayView.isHidden = false
                     metalView.isHidden = true
@@ -212,21 +212,18 @@ extension MetalPlayView {
                 checkFormatDescription(pixelBuffer: pixelBuffer)
                 metalView.draw(pixelBuffer: pixelBuffer, display: options.display, size: size)
             }
-            renderSource?.setVideo(time: cmtime)
+            renderSource?.setVideo(time: cmtime, position: frame.position)
         }
     }
 
-    private func checkFormatDescription(pixelBuffer: CVPixelBuffer) {
-        if formatDescription == nil || !CMVideoFormatDescriptionMatchesImageBuffer(formatDescription!, imageBuffer: pixelBuffer) {
+    private func checkFormatDescription(pixelBuffer: PixelBufferProtocol) {
+        if formatDescription == nil || !pixelBuffer.matche(formatDescription: formatDescription!) {
             if formatDescription != nil {
                 displayView.removeFromSuperview()
                 displayView = AVSampleBufferDisplayView()
                 addSubview(displayView)
             }
-            let err = CMVideoFormatDescriptionCreateForImageBuffer(allocator: nil, imageBuffer: pixelBuffer, formatDescriptionOut: &formatDescription)
-            if err != noErr {
-                KSLog("Error at CMVideoFormatDescriptionCreateForImageBuffer \(err)")
-            }
+            formatDescription = pixelBuffer.formatDescription
         }
     }
 
@@ -268,7 +265,7 @@ class MetalView: UIView {
         }
     }
 
-    func draw(pixelBuffer: CVPixelBuffer, display: DisplayEnum, size: CGSize) {
+    func draw(pixelBuffer: PixelBufferProtocol, display: DisplayEnum, size: CGSize) {
         metalLayer.drawableSize = size
         metalLayer.pixelFormat = KSOptions.colorPixelFormat(bitDepth: pixelBuffer.bitDepth)
         let colorspace = pixelBuffer.colorspace

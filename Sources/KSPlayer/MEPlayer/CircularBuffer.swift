@@ -57,7 +57,7 @@ public class CircularBuffer<Item: ObjectQueueItem> {
                     assertionFailure("value is nil of index: \((index - 1) & mask) headIndex: \(headIndex),tailIndex: \(tailIndex), bufferCount: \(_buffer.count),  mask: \(mask)")
                     break
                 }
-                if item.position <= _buffer[Int(index & mask)]!.position {
+                if item.timestamp <= _buffer[Int(index & mask)]!.timestamp {
                     break
                 }
                 _buffer.swapAt(Int((index - 1) & mask), Int(index & mask))

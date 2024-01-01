@@ -52,6 +52,13 @@ class MEFilter {
         guard ret >= 0 else { return false }
         ret = avfilter_link(bufferSrcContext, 0, inputs.pointee.filter_ctx, UInt32(inputs.pointee.pad_idx))
         guard ret >= 0 else { return false }
+        if let ctx = params.hw_frames_ctx {
+            let framesCtxData = UnsafeMutableRawPointer(ctx.pointee.data).bindMemory(to: AVHWFramesContext.self, capacity: 1)
+            inputs.pointee.filter_ctx.pointee.hw_device_ctx = framesCtxData.pointee.device_ref
+//                    outputs.pointee.filter_ctx.pointee.hw_device_ctx = framesCtxData.pointee.device_ref
+//                    bufferSrcContext?.pointee.hw_device_ctx = framesCtxData.pointee.device_ref
+//                    bufferSinkContext?.pointee.hw_device_ctx = framesCtxData.pointee.device_ref
+        }
         ret = avfilter_graph_config(graph, nil)
         guard ret >= 0 else { return false }
         return true
@@ -132,14 +139,15 @@ class MEFilter {
             completionHandler(inputFrame)
             return
         }
-        var ret = av_buffersrc_add_frame_flags(bufferSrcContext, inputFrame, 0)
-        while ret == 0 {
-            ret = av_buffersink_get_frame_flags(bufferSinkContext, inputFrame, 0)
-            if ret == 0 {
+        let ret = av_buffersrc_add_frame_flags(bufferSrcContext, inputFrame, 0)
+        if ret < 0 {
+            return
+        }
+        while av_buffersink_get_frame_flags(bufferSinkContext, inputFrame, 0) >= 0 {
 //                timebase = Timebase(av_buffersink_get_time_base(bufferSinkContext))
-                completionHandler(inputFrame)
-                av_frame_unref(inputFrame)
-            }
+            completionHandler(inputFrame)
+            // 一定要加av_frame_unref，不然会内存泄漏。
+            av_frame_unref(inputFrame)
         }
     }
 }

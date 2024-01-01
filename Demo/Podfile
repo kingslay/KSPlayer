@@ -3,6 +3,7 @@ workspace 'Demo.xcworkspace'
 install! 'cocoapods', :generate_multiple_pod_projects => true
 def common
   pod 'KSPlayer', :path => '../', :testspecs => ['Tests']
+  pod 'DisplayCriteria', :path => '../'
   pod 'Libass', :path => '../FFmpegKit'
   pod 'OpenSSL', :path => '../FFmpegKit'
   pod 'FFmpegKit', :path => '../FFmpegKit'

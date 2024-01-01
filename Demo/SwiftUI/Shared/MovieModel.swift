@@ -28,24 +28,6 @@ class MEOptions: KSOptions {
         super.process(assetTrack: assetTrack)
     }
 
-    override func updateVideo(refreshRate: Float, isDovi: Bool, formatDescription: CMFormatDescription?) {
-        #if os(tvOS) || os(xrOS)
-        guard let displayManager = UIApplication.shared.windows.first?.avDisplayManager,
-              displayManager.isDisplayCriteriaMatchingEnabled
-        else {
-            return
-        }
-        if let formatDescription {
-            if KSOptions.displayCriteriaFormatDescriptionEnabled, #available(tvOS 17.0, *) {
-                displayManager.preferredDisplayCriteria = AVDisplayCriteria(refreshRate: refreshRate, formatDescription: formatDescription)
-            } else {
-                let dynamicRange = isDovi ? .dolbyVision : formatDescription.dynamicRange
-                displayManager.preferredDisplayCriteria = AVDisplayCriteria(refreshRate: refreshRate, videoDynamicRange: dynamicRange.rawValue)
-            }
-        }
-        #endif
-    }
-
     override func isUseDisplayLayer() -> Bool {
         MEOptions.isUseDisplayLayer && display == .plane
     }
@@ -335,15 +317,6 @@ extension KSVideoPlayerView {
         }
         playmodel.save()
         model.save()
-        self.init(url: url, options: options, title: model.name) { layer in
-            if let layer {
-                playmodel.duration = Int16(layer.player.duration)
-                if playmodel.duration > 0 {
-                    playmodel.current = Int16(layer.player.currentPlaybackTime)
-                }
-                playmodel.save()
-                model.save()
-            }
-        }
+        self.init(url: url, options: options, title: model.name)
     }
 }

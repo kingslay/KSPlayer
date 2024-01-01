@@ -127,17 +127,22 @@ class SyncPlayerItemTrack<Frame: MEFrame>: PlayerItemTrackProtocol, CustomString
         }
         lastPacketBytes += packet.size
         let decoder = decoderMap.value(for: packet.assetTrack.trackID, default: makeDecode(assetTrack: packet.assetTrack))
+//        var startTime = CACurrentMediaTime()
         decoder.decodeFrame(from: packet) { [weak self] result in
             guard let self else {
                 return
             }
             do {
+//                if packet.assetTrack.mediaType == .video {
+//                    print("[video] decode time: \(CACurrentMediaTime()-startTime)")
+//                    startTime = CACurrentMediaTime()
+//                }
                 let frame = try result.get()
                 if self.state == .flush || self.state == .closed {
                     return
                 }
                 if self.seekTime > 0 {
-                    let timestamp = frame.position + frame.duration
+                    let timestamp = frame.timestamp + frame.duration
 //                    KSLog("seektime \(self.seekTime), frame \(frame.seconds), mediaType \(packet.assetTrack.mediaType)")
                     if timestamp <= 0 || frame.timebase.cmtime(for: timestamp).seconds < self.seekTime {
                         return
