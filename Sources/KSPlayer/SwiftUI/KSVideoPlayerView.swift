@@ -11,11 +11,10 @@ import SwiftUI
 @available(iOS 16.0, macOS 13.0, tvOS 16.0, *)
 public struct KSVideoPlayerView: View {
     private let subtitleDataSouce: SubtitleDataSouce?
-    private let onPlayerDisappear: ((ControllerTimeModel) -> Void)?
     @State
     private var title: String
     @StateObject
-    private var playerCoordinator = KSVideoPlayer.Coordinator()
+    private var playerCoordinator: KSVideoPlayer.Coordinator
     @Environment(\.dismiss)
     private var dismiss
     public let options: KSOptions
@@ -28,15 +27,15 @@ public struct KSVideoPlayerView: View {
         }
     }
 
-    public init(url: URL, options: KSOptions, title: String? = nil, subtitleDataSouce: SubtitleDataSouce? = nil, onPlayerDisappear: ((ControllerTimeModel) -> Void)? = nil) {
+    public init(coordinator: KSVideoPlayer.Coordinator = KSVideoPlayer.Coordinator(), url: URL, options: KSOptions, title: String? = nil, subtitleDataSouce: SubtitleDataSouce? = nil) {
         _url = .init(initialValue: url)
+        _playerCoordinator = .init(wrappedValue: coordinator)
         _title = .init(initialValue: title ?? url.lastPathComponent)
         #if os(macOS)
         NSDocumentController.shared.noteNewRecentDocumentURL(url)
         #endif
         self.options = options
         self.subtitleDataSouce = subtitleDataSouce
-        self.onPlayerDisappear = onPlayerDisappear
     }
 
     public var body: some View {
@@ -89,10 +88,6 @@ public struct KSVideoPlayerView: View {
 //                        return $0
 //                    }
 //                    #endif
-        }
-        .onDisappear {
-            // 在tvos，playerLayer已经为空了。所以改成用timemodel
-            onPlayerDisappear?(playerCoordinator.timemodel)
         }
         .preferredColorScheme(.dark)
         .tint(.white)

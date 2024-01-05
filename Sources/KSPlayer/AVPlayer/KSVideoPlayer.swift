@@ -147,10 +147,10 @@ extension KSVideoPlayer: UIViewRepresentable {
         }
 
         private var delayItem: DispatchWorkItem?
-        fileprivate var onPlay: ((TimeInterval, TimeInterval) -> Void)?
-        fileprivate var onFinish: ((KSPlayerLayer, Error?) -> Void)?
-        fileprivate var onStateChanged: ((KSPlayerLayer, KSPlayerState) -> Void)?
-        fileprivate var onBufferChanged: ((Int, TimeInterval) -> Void)?
+        public var onPlay: ((TimeInterval, TimeInterval) -> Void)?
+        public var onFinish: ((KSPlayerLayer, Error?) -> Void)?
+        public var onStateChanged: ((KSPlayerLayer, KSPlayerState) -> Void)?
+        public var onBufferChanged: ((Int, TimeInterval) -> Void)?
         #if canImport(UIKit)
         fileprivate var onSwipe: ((UISwipeGestureRecognizer.Direction) -> Void)?
         @objc fileprivate func swipeGestureAction(_ recognizer: UISwipeGestureRecognizer) {

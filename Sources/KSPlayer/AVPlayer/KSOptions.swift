@@ -91,7 +91,7 @@ open class KSOptions {
     public var hardwareDecode = KSOptions.hardwareDecode
     public var asynchronousDecompression = KSOptions.asynchronousDecompression
     public var videoDisable = false
-    public var canStartPictureInPictureAutomaticallyFromInline = true
+    public var canStartPictureInPictureAutomaticallyFromInline = KSOptions.canStartPictureInPictureAutomaticallyFromInline
     public var automaticWindowResize = true
     @Published
     public var videoInterlacingType: VideoInterlacingType?
@@ -464,6 +464,7 @@ public extension KSOptions {
     // 默认不用自研的硬解，因为有些视频的AVPacket的pts顺序是不对的，只有解码后的AVFrame里面的pts是对的。
     static var asynchronousDecompression = false
     static var isPipPopViewController = false
+    static var canStartPictureInPictureAutomaticallyFromInline = true
     static var displayCriteriaFormatDescriptionEnabled = false
     /// 日志级别
     static var logLevel = LogLevel.warning
