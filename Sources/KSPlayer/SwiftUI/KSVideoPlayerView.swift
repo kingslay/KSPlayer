@@ -135,13 +135,6 @@ public struct KSVideoPlayerView: View {
                 break
             }
         }
-        .onExitCommand {
-            if playerCoordinator.isMaskShow {
-                playerCoordinator.isMaskShow = false
-            } else {
-                dismiss()
-            }
-        }
         #else
         .onHover {
                 playerCoordinator.isMaskShow = $0
@@ -167,9 +160,6 @@ public struct KSVideoPlayerView: View {
         .onAppear {
             maskFocused = true
         }
-        .onExitCommand {
-            playerCoordinator.isMaskShow = false
-        }
         .padding()
     }
 
@@ -191,6 +181,13 @@ public struct KSVideoPlayerView: View {
                     playerCoordinator.playerLayer?.pause()
                 } else {
                     playerCoordinator.playerLayer?.play()
+                }
+            }
+            .onExitCommand {
+                if playerCoordinator.isMaskShow {
+                    playerCoordinator.isMaskShow = false
+                } else {
+                    dismiss()
                 }
             }
         #endif
