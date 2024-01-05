@@ -17,6 +17,8 @@ public struct KSVideoPlayerView: View {
     private var playerCoordinator: KSVideoPlayer.Coordinator
     @Environment(\.dismiss)
     private var dismiss
+    @FocusState
+    private var maskFocused: Bool
     public let options: KSOptions
     @State
     public var url: URL {
@@ -38,76 +40,61 @@ public struct KSVideoPlayerView: View {
         self.subtitleDataSouce = subtitleDataSouce
     }
 
-    public var body: some View {
-        ZStack {
-            KSVideoPlayer(coordinator: playerCoordinator, url: url, options: options)
-                .onStateChanged { playerLayer, state in
-                    if state == .readyToPlay {
-                        if let movieTitle = playerLayer.player.dynamicInfo?.metadata["title"] {
-                            title = movieTitle
-                        }
+    private var playView: some View {
+        KSVideoPlayer(coordinator: playerCoordinator, url: url, options: options)
+            .onStateChanged { playerLayer, state in
+                if state == .readyToPlay {
+                    if let movieTitle = playerLayer.player.dynamicInfo?.metadata["title"] {
+                        title = movieTitle
                     }
                 }
-                .onBufferChanged { bufferedCount, consumeTime in
-                    print("bufferedCount \(bufferedCount), consumeTime \(consumeTime)")
-                }
-            #if canImport(UIKit)
-                .onSwipe { _ in
-                    playerCoordinator.isMaskShow = true
-                }
-            #endif
-                .ignoresSafeArea()
-            #if os(iOS) || os(xrOS)
-                .navigationBarTitleDisplayMode(.inline)
-            #endif
-            VideoSubtitleView(model: playerCoordinator.subtitleModel)
-            VStack {
-                #if !os(tvOS)
-                VideoControllerView(config: playerCoordinator, subtitleModel: playerCoordinator.subtitleModel, title: $title)
-                #endif
-                if playerCoordinator.isMaskShow {
-                    // 控制界面没有显示的时候，按钮不能点击。隐藏没有用，所以只能这样了
-                    #if os(tvOS)
-                    VideoControllerView(config: playerCoordinator, subtitleModel: playerCoordinator.subtitleModel, title: $title)
-                    #endif
-                    // 设置opacity为0，还是会去更新View。所以只能这样了
-                    VideoTimeShowView(config: playerCoordinator, model: playerCoordinator.timemodel)
-                }
             }
-            .padding()
-            .opacity(playerCoordinator.isMaskShow ? 1 : 0)
-        }
-        .onAppear {
-            if let subtitleDataSouce {
-                playerCoordinator.subtitleModel.addSubtitle(dataSouce: subtitleDataSouce)
+            .onBufferChanged { bufferedCount, consumeTime in
+                print("bufferedCount \(bufferedCount), consumeTime \(consumeTime)")
             }
-            // 不要加这个，不然playerCoordinator无法释放，也可以在onDisappear调用removeMonitor释放
-//                    #if os(macOS)
-//                    NSEvent.addLocalMonitorForEvents(matching: [.mouseMoved]) {
-//                        isMaskShow = overView
-//                        return $0
-//                    }
-//                    #endif
-        }
-        .preferredColorScheme(.dark)
-        .tint(.white)
-        .persistentSystemOverlays(.hidden)
-        .toolbar(.hidden, for: .automatic)
-        #if !os(xrOS)
-            .onKeyPressLeftArrow {
-                playerCoordinator.skip(interval: -15)
-            }
-            .onKeyPressRightArrow {
-                playerCoordinator.skip(interval: 15)
-            }
-            .onKeyPressSapce {
-                if playerCoordinator.state.isPlaying {
-                    playerCoordinator.playerLayer?.pause()
-                } else {
-                    playerCoordinator.playerLayer?.play()
-                }
+        #if canImport(UIKit)
+            .onSwipe { _ in
+                playerCoordinator.isMaskShow = true
             }
         #endif
+            .ignoresSafeArea()
+            .onAppear {
+                if let subtitleDataSouce {
+                    playerCoordinator.subtitleModel.addSubtitle(dataSouce: subtitleDataSouce)
+                }
+                // 不要加这个，不然playerCoordinator无法释放，也可以在onDisappear调用removeMonitor释放
+                //                    #if os(macOS)
+                //                    NSEvent.addLocalMonitorForEvents(matching: [.mouseMoved]) {
+                //                        isMaskShow = overView
+                //                        return $0
+                //                    }
+                //                    #endif
+            }
+
+        #if os(iOS) || os(xrOS)
+            .navigationBarTitleDisplayMode(.inline)
+        #endif
+        #if !os(iOS)
+            .focusable(!playerCoordinator.isMaskShow)
+        #endif
+        #if !os(xrOS)
+            .onKeyPressLeftArrow {
+            playerCoordinator.skip(interval: -15)
+        }
+        .onKeyPressRightArrow {
+            playerCoordinator.skip(interval: 15)
+        }
+        .onKeyPressSapce {
+            if playerCoordinator.state.isPlaying {
+                playerCoordinator.playerLayer?.pause()
+            } else {
+                playerCoordinator.playerLayer?.play()
+            }
+        }
+        #endif
+        .onTapGesture {
+            playerCoordinator.isMaskShow.toggle()
+        }
         #if os(macOS)
         .onTapGesture(count: 2) {
             guard let view = playerCoordinator.playerLayer else {
@@ -120,7 +107,6 @@ public struct KSVideoPlayerView: View {
         .onExitCommand {
             playerCoordinator.playerLayer?.exitFullScreenMode()
         }
-        .focusable()
         .onMoveCommand { direction in
             switch direction {
             case .left:
@@ -136,15 +122,17 @@ public struct KSVideoPlayerView: View {
             }
         }
         #endif
-        .onTapGesture {
-            playerCoordinator.isMaskShow.toggle()
-        }
         #if os(tvOS)
-        .onPlayPauseCommand {
-            if playerCoordinator.state.isPlaying {
-                playerCoordinator.playerLayer?.pause()
-            } else {
-                playerCoordinator.playerLayer?.play()
+        .onMoveCommand { direction in
+            switch direction {
+            case .left:
+                playerCoordinator.skip(interval: -15)
+            case .right:
+                playerCoordinator.skip(interval: 15)
+            case .up, .down:
+                playerCoordinator.isMaskShow.toggle()
+            @unknown default:
+                break
             }
         }
         .onExitCommand {
@@ -165,6 +153,45 @@ public struct KSVideoPlayerView: View {
                     }
                 }
                 return true
+            }
+        #endif
+    }
+
+    private var controllerView: some View {
+        VStack {
+            // 设置opacity为0，还是会去更新View。所以只能这样了
+            VideoControllerView(config: playerCoordinator, subtitleModel: playerCoordinator.subtitleModel, title: $title)
+            VideoTimeShowView(config: playerCoordinator, model: playerCoordinator.timemodel)
+        }
+        .focused($maskFocused)
+        .onAppear {
+            maskFocused = true
+        }
+        .onExitCommand {
+            playerCoordinator.isMaskShow = false
+        }
+        .padding()
+    }
+
+    public var body: some View {
+        ZStack {
+            playView
+            VideoSubtitleView(model: playerCoordinator.subtitleModel)
+            if playerCoordinator.isMaskShow {
+                controllerView
+            }
+        }
+        .preferredColorScheme(.dark)
+        .tint(.white)
+        .persistentSystemOverlays(.hidden)
+        .toolbar(.hidden, for: .automatic)
+        #if os(tvOS)
+            .onPlayPauseCommand {
+                if playerCoordinator.state.isPlaying {
+                    playerCoordinator.playerLayer?.pause()
+                } else {
+                    playerCoordinator.playerLayer?.play()
+                }
             }
         #endif
     }
@@ -239,9 +266,14 @@ struct VideoControllerView: View {
 //                    Image(systemName: "x.circle.fill")
 //                }
                 Text(title)
+                    .lineLimit(2)
+                    .layoutPriority(2)
+                Spacer()
+                    .layoutPriority(1)
                 ProgressView()
                     .opacity(config.state == .buffering ? 1 : 0)
-                Spacer(minLength: 400)
+                Spacer()
+                    .layoutPriority(1)
                 if let audioTracks = config.playerLayer?.player.tracks(mediaType: .audio), !audioTracks.isEmpty {
                     audioButton(audioTracks: audioTracks)
                 }
