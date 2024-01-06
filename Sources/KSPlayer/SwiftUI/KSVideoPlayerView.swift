@@ -18,7 +18,7 @@ public struct KSVideoPlayerView: View {
     @Environment(\.dismiss)
     private var dismiss
     @FocusState
-    private var maskFocused: Bool
+    private var focusableField: FocusableField?
     public let options: KSOptions
     @State
     public var url: URL {
@@ -59,6 +59,7 @@ public struct KSVideoPlayerView: View {
         #endif
             .ignoresSafeArea()
             .onAppear {
+                focusableField = .play
                 if let subtitleDataSouce {
                     playerCoordinator.subtitleModel.addSubtitle(dataSouce: subtitleDataSouce)
                 }
@@ -76,6 +77,7 @@ public struct KSVideoPlayerView: View {
         #endif
         #if !os(iOS)
             .focusable(!playerCoordinator.isMaskShow)
+        .focused($focusableField, equals: .play)
         #endif
         #if !os(xrOS)
             .onKeyPressLeftArrow {
@@ -92,17 +94,14 @@ public struct KSVideoPlayerView: View {
             }
         }
         #endif
-        .onTapGesture {
-            playerCoordinator.isMaskShow.toggle()
-        }
         #if os(macOS)
-        .onTapGesture(count: 2) {
-            guard let view = playerCoordinator.playerLayer else {
-                return
-            }
-            view.window?.toggleFullScreen(nil)
-            view.needsLayout = true
-            view.layoutSubtreeIfNeeded()
+            .onTapGesture(count: 2) {
+                guard let view = playerCoordinator.playerLayer else {
+                    return
+                }
+                view.window?.toggleFullScreen(nil)
+                view.needsLayout = true
+                view.layoutSubtreeIfNeeded()
         }
         .onExitCommand {
             playerCoordinator.playerLayer?.exitFullScreenMode()
@@ -121,9 +120,13 @@ public struct KSVideoPlayerView: View {
                 break
             }
         }
+        #else
+        .onTapGesture {
+                playerCoordinator.isMaskShow.toggle()
+            }
         #endif
         #if os(tvOS)
-        .onMoveCommand { direction in
+            .onMoveCommand { direction in
             switch direction {
             case .left:
                 playerCoordinator.skip(interval: -15)
@@ -136,8 +139,8 @@ public struct KSVideoPlayerView: View {
             }
         }
         #else
-        .onHover {
-                playerCoordinator.isMaskShow = $0
+        .onHover { _ in
+                playerCoordinator.isMaskShow = true
             }
             .onDrop(of: ["public.file-url"], isTargeted: nil) { providers -> Bool in
                 providers.first?.loadDataRepresentation(forTypeIdentifier: "public.file-url") { data, _ in
@@ -156,9 +159,12 @@ public struct KSVideoPlayerView: View {
             VideoControllerView(config: playerCoordinator, subtitleModel: playerCoordinator.subtitleModel, title: $title)
             VideoTimeShowView(config: playerCoordinator, model: playerCoordinator.timemodel)
         }
-        .focused($maskFocused)
+        .focused($focusableField, equals: .controller)
         .onAppear {
-            maskFocused = true
+            focusableField = .controller
+        }
+        .onDisappear {
+            focusableField = .play
         }
         .padding()
     }
@@ -191,6 +197,10 @@ public struct KSVideoPlayerView: View {
                 }
             }
         #endif
+    }
+
+    fileprivate enum FocusableField {
+        case play, controller
     }
 
     public func openURL(_ url: URL) {
