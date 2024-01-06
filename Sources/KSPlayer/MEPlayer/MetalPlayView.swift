@@ -41,13 +41,12 @@ public final class MetalPlayView: UIView, VideoOutput {
     private var fps = Float(60) {
         didSet {
             if fps != oldValue {
-                let preferredFramesPerSecond = Int(ceil(fps))
-                displayLink.preferredFramesPerSecond = preferredFramesPerSecond << 1
-                #if os(iOS)
-                if #available(iOS 15.0, tvOS 15.0, *) {
-                    displayLink.preferredFrameRateRange = CAFrameRateRange(minimum: Float(preferredFramesPerSecond), maximum: Float(preferredFramesPerSecond << 1))
+                let preferredFramesPerSecond = ceil(fps)
+                if #available(iOS 15.0, tvOS 15.0, macOS 14.0, *) {
+                    displayLink.preferredFrameRateRange = CAFrameRateRange(minimum: preferredFramesPerSecond, maximum: 2 * preferredFramesPerSecond, __preferred: preferredFramesPerSecond)
+                } else {
+                    displayLink.preferredFramesPerSecond = Int(preferredFramesPerSecond) << 1
                 }
-                #endif
                 options.updateVideo(refreshRate: fps, isDovi: isDovi, formatDescription: formatDescription)
             }
         }
@@ -363,6 +362,14 @@ class CADisplayLink {
     private var runloop: RunLoop?
     private var mode = RunLoop.Mode.default
     public var preferredFramesPerSecond = 60
+    @available(macOS 12.0, *)
+    public var preferredFrameRateRange: CAFrameRateRange {
+        get {
+            CAFrameRateRange()
+        }
+        set {}
+    }
+
     public var timestamp: TimeInterval {
         var timeStamp = CVTimeStamp()
         if CVDisplayLinkGetCurrentTime(displayLink, &timeStamp) == kCVReturnSuccess, (timeStamp.flags & CVTimeStampFlags.hostTimeValid.rawValue) != 0 {
