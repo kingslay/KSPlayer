@@ -409,7 +409,7 @@ public extension Data {
         }
         let scanner = Scanner(string: string)
         var entrys = [(String, URL, [String: String])]()
-        guard scanner.scanString("#EXTM3U") != nil else {
+        guard let symbol = scanner.scanUpToCharacters(from: .newlines), symbol.hasSuffix("#EXTM3U") else {
             return []
         }
         while !scanner.isAtEnd {
