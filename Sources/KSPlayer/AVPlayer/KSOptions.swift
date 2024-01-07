@@ -475,6 +475,7 @@ public extension KSOptions {
     static var asynchronousDecompression = false
     static var isPipPopViewController = false
     static var canStartPictureInPictureAutomaticallyFromInline = true
+    static var preferredFrame = true
     static var displayCriteriaFormatDescriptionEnabled = false
     /// 日志级别
     static var logLevel = LogLevel.warning
