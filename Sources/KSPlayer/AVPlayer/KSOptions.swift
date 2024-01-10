@@ -466,8 +466,8 @@ public extension KSOptions {
     static var isAccurateSeek = false
     /// Applies to short videos only
     static var isLoopPlay = false
-    /// 是否自动播放，默认false
-    static var isAutoPlay = false
+    /// 是否自动播放，默认true
+    static var isAutoPlay = true
     /// seek完是否自动播放
     static var isSeekedAutoPlay = true
     static var hardwareDecode = true
