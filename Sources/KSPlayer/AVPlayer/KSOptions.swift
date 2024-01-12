@@ -319,15 +319,16 @@ open class KSOptions {
                 asynchronousDecompression = false
                 let yadif = hardwareDecode ? "yadif_videotoolbox" : "yadif"
                 var yadifMode = KSOptions.yadifMode
-                if let assetTrack = assetTrack as? FFmpegAssetTrack {
-                    if assetTrack.realFrameRate.num == 2 * assetTrack.avgFrameRate.num, assetTrack.realFrameRate.den == assetTrack.avgFrameRate.den {
-                        if yadifMode == 1 {
-                            yadifMode = 0
-                        } else if yadifMode == 3 {
-                            yadifMode = 2
-                        }
-                    }
-                }
+//                if let assetTrack = assetTrack as? FFmpegAssetTrack {
+//                    if assetTrack.realFrameRate.num == 2 * assetTrack.avgFrameRate.num, assetTrack.realFrameRate.den == assetTrack.avgFrameRate.den {
+//                        if yadifMode == 1 {
+//                            yadifMode = 0
+//                        } else if yadifMode == 3 {
+//                            yadifMode = 2
+//                        }
+//                    }
+//                }
+                videoFilters.append("idet")
                 videoFilters.append("\(yadif)=mode=\(yadifMode):parity=-1:deint=1")
                 if yadifMode == 1 || yadifMode == 3 {
                     assetTrack.nominalFrameRate = assetTrack.nominalFrameRate * 2
