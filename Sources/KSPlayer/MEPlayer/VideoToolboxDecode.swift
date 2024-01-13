@@ -9,6 +9,7 @@ import FFmpegKit
 import Libavformat
 #if canImport(VideoToolbox)
 import VideoToolbox
+
 class VideoToolboxDecode: DecodeProtocol {
     private var session: DecompressionSession {
         didSet {

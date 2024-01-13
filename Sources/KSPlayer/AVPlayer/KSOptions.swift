@@ -274,7 +274,7 @@ open class KSOptions {
     private var idetTypeMap = [VideoInterlacingType: Int]()
     open func filter(log: String) {
         if log.starts(with: "Repeated Field:") {
-            log.split(separator: ",").forEach { str in
+            for str in log.split(separator: ",") {
                 let map = str.split(separator: ":")
                 if map.count >= 2 {
                     if String(map[0].trimmingCharacters(in: .whitespaces)) == "Multi frame" {

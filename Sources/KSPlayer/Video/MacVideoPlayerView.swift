@@ -8,6 +8,7 @@
 
 import AppKit
 import AVFoundation
+
 public extension NSPasteboard.PasteboardType {
     static let nsURL = NSPasteboard.PasteboardType("NSURL")
     static let nsFilenames = NSPasteboard.PasteboardType("NSFilenamesPboardType")
@@ -43,8 +44,8 @@ open class MacVideoPlayerView: VideoPlayerView {
 
 extension MacVideoPlayerView {
     override open func updateTrackingAreas() {
-        trackingAreas.forEach {
-            removeTrackingArea($0)
+        for trackingArea in trackingAreas {
+            removeTrackingArea(trackingArea)
         }
         let trackingArea = NSTrackingArea(rect: bounds, options: [.mouseEnteredAndExited, .mouseMoved, .activeInKeyWindow], owner: self, userInfo: nil)
         addTrackingArea(trackingArea)

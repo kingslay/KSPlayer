@@ -118,7 +118,7 @@ extension M3UModel {
         if let array = try? context.fetch(request), array.isEmpty {
             let movieRequest = NSFetchRequest<MovieModel>(entityName: "MovieModel")
             movieRequest.predicate = NSPredicate(format: "m3uURL == %@", m3uURL.description)
-            try? context.fetch(movieRequest).forEach { model in
+            try? for model in context.fetch(movieRequest) {
                 context.delete(model)
             }
 //            let deleteRequest = NSBatchDeleteRequest(fetchRequest: movieRequest)
@@ -163,7 +163,7 @@ extension M3UModel {
         }
         return await viewContext.perform {
             var dic = [URL?: MovieModel]()
-            array.forEach { model in
+            for model in array {
                 if let oldModel = dic[model.url] {
                     if oldModel.playmodel == nil {
                         viewContext.delete(oldModel)

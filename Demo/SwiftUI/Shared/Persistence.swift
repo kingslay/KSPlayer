@@ -8,6 +8,7 @@
 import CloudKit
 import CoreData
 import KSPlayer
+
 struct PersistenceController {
     static let shared = PersistenceController()
 
@@ -31,7 +32,7 @@ struct PersistenceController {
             "https://raw.githubusercontent.com/kingslay/TestVideo/main/TestVideo.m3u",
             "https://raw.githubusercontent.com/kingslay/bulaoge/main/bulaoge.m3u",
         ]
-        urls.forEach { str in
+        for str in urls {
             if let url = URL(string: str) {
                 _ = M3UModel(context: viewContext, url: url)
             }

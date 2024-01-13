@@ -1,5 +1,6 @@
 @testable import KSPlayer
 import XCTest
+
 class KSPlayerLayerTest: XCTestCase {
     private var readyToPlayExpectation: XCTestExpectation?
     override func setUp() {

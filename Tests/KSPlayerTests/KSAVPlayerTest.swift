@@ -1,5 +1,6 @@
 @testable import KSPlayer
 import XCTest
+
 class KSAVPlayerTest: XCTestCase {
     private var readyToPlayExpectation: XCTestExpectation?
     func testPlayer() {

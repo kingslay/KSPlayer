@@ -12,6 +12,7 @@ import SwiftUI
 
 #if canImport(UIKit)
 import UIKit
+
 public extension KSOptions {
     static var windowScene: UIWindowScene? {
         UIApplication.shared.connectedScenes.first as? UIWindowScene
@@ -25,6 +26,7 @@ public extension KSOptions {
 #else
 import AppKit
 import SwiftUI
+
 public typealias UIView = NSView
 public typealias UIPasteboard = NSPasteboard
 public extension KSOptions {

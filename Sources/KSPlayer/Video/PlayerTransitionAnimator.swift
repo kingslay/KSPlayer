@@ -7,6 +7,7 @@
 
 #if canImport(UIKit)
 import UIKit
+
 class PlayerTransitionAnimator: NSObject, UIViewControllerAnimatedTransitioning {
     private let isDismiss: Bool
     private let containerView: UIView

@@ -8,6 +8,7 @@
 
 import KSPlayer
 import UIKit
+
 private class TableViewCell: UITableViewCell {
     var nameLabel: UILabel
     override public init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {

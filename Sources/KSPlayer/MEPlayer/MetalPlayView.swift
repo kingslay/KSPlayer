@@ -359,6 +359,7 @@ class AVSampleBufferDisplayView: UIView {
 
 #if os(macOS)
 import CoreVideo
+
 class CADisplayLink {
     private let displayLink: CVDisplayLink
     private var runloop: RunLoop?

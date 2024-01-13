@@ -3,6 +3,7 @@ import FFmpegKit
 import Libavcodec
 import Libavfilter
 import Libavformat
+
 func toDictionary(_ native: OpaquePointer?) -> [String: String] {
     var dict = [String: String]()
     if let native {

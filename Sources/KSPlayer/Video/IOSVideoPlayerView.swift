@@ -10,6 +10,7 @@ import Combine
 import CoreServices
 import MediaPlayer
 import UIKit
+
 open class IOSVideoPlayerView: VideoPlayerView {
     private weak var originalSuperView: UIView?
     private var originalframeConstraints: [NSLayoutConstraint]?

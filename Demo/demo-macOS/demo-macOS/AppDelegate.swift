@@ -7,6 +7,7 @@
 //
 
 import AppKit
+
 @main
 class AppDelegate: NSObject, NSApplicationDelegate {
     private lazy var openURLWindow = OpenURLWindowController()

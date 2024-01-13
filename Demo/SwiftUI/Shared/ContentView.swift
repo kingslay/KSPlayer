@@ -1,5 +1,6 @@
 import KSPlayer
 import SwiftUI
+
 struct ContentView: View {
     #if !os(tvOS)
     @Environment(\.openWindow) private var openWindow

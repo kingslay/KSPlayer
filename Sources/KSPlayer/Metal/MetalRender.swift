@@ -10,6 +10,7 @@ import Foundation
 import Metal
 import QuartzCore
 import simd
+
 class MetalRender {
     static let device = MTLCreateSystemDefaultDevice()!
     static let library: MTLLibrary = {

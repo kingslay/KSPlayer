@@ -297,21 +297,21 @@ extension MEPlayerItem {
         var audioIndex: Int?
         var videoIndex: Int?
         let formatName = outputFormatCtx.pointee.oformat.pointee.name.flatMap { String(cString: $0) }
-        (0 ..< Int(formatCtx.pointee.nb_streams)).forEach { i in
+        for i in 0 ..< Int(formatCtx.pointee.nb_streams) {
             if let inputStream = formatCtx.pointee.streams[i] {
                 let codecType = inputStream.pointee.codecpar.pointee.codec_type
                 if [AVMEDIA_TYPE_AUDIO, AVMEDIA_TYPE_VIDEO, AVMEDIA_TYPE_SUBTITLE].contains(codecType) {
                     if codecType == AVMEDIA_TYPE_AUDIO {
                         if let audioIndex {
                             streamMapping[i] = audioIndex
-                            return
+                            continue
                         } else {
                             audioIndex = index
                         }
                     } else if codecType == AVMEDIA_TYPE_VIDEO {
                         if let videoIndex {
                             streamMapping[i] = videoIndex
-                            return
+                            continue
                         } else {
                             videoIndex = index
                         }
