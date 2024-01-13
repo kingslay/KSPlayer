@@ -40,6 +40,40 @@ public struct KSVideoPlayerView: View {
         self.subtitleDataSouce = subtitleDataSouce
     }
 
+    public var body: some View {
+        ZStack {
+            playView
+            VideoSubtitleView(model: playerCoordinator.subtitleModel)
+            #if os(macOS)
+            controllerView.opacity(playerCoordinator.isMaskShow ? 1 : 0)
+            #else
+            if playerCoordinator.isMaskShow {
+                controllerView
+            }
+            #endif
+        }
+        .preferredColorScheme(.dark)
+        .tint(.white)
+        .persistentSystemOverlays(.hidden)
+        .toolbar(.hidden, for: .automatic)
+        #if os(tvOS)
+            .onPlayPauseCommand {
+                if playerCoordinator.state.isPlaying {
+                    playerCoordinator.playerLayer?.pause()
+                } else {
+                    playerCoordinator.playerLayer?.play()
+                }
+            }
+            .onExitCommand {
+                if playerCoordinator.isMaskShow {
+                    playerCoordinator.isMaskShow = false
+                } else {
+                    dismiss()
+                }
+            }
+        #endif
+    }
+
     private var playView: some View {
         KSVideoPlayer(coordinator: playerCoordinator, url: url, options: options)
             .onStateChanged { playerLayer, state in
@@ -167,36 +201,6 @@ public struct KSVideoPlayerView: View {
             focusableField = .play
         }
         .padding()
-    }
-
-    public var body: some View {
-        ZStack {
-            playView
-            VideoSubtitleView(model: playerCoordinator.subtitleModel)
-            if playerCoordinator.isMaskShow {
-                controllerView
-            }
-        }
-        .preferredColorScheme(.dark)
-        .tint(.white)
-        .persistentSystemOverlays(.hidden)
-        .toolbar(.hidden, for: .automatic)
-        #if os(tvOS)
-            .onPlayPauseCommand {
-                if playerCoordinator.state.isPlaying {
-                    playerCoordinator.playerLayer?.pause()
-                } else {
-                    playerCoordinator.playerLayer?.play()
-                }
-            }
-            .onExitCommand {
-                if playerCoordinator.isMaskShow {
-                    playerCoordinator.isMaskShow = false
-                } else {
-                    dismiss()
-                }
-            }
-        #endif
     }
 
     fileprivate enum FocusableField {
@@ -365,7 +369,7 @@ struct VideoControllerView: View {
                 infoButton
                 // iOS 模拟器加keyboardShortcut会导致KSVideoPlayer.Coordinator无法释放。真机不会有这个问题
                 #if !os(tvOS)
-                .keyboardShortcut("s", modifiers: [.command, .shift])
+                .keyboardShortcut("i", modifiers: [.command])
                 #endif
             }
             #endif
