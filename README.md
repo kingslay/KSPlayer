@@ -40,9 +40,11 @@ pod install
 - Open Demo/Demo.xcworkspace with Xcode.
 
 
-## Testflight
+## TestFlight
 
 https://testflight.apple.com/join/eNmYbmZN
+
+App Store https://apps.apple.com/app/tracyplayer/id6450770064
 
 ## Quick Start
 
@@ -282,6 +284,9 @@ Thanks to [skrew](https://github.com/skrew) and LillyPlayer community for sponso
 
 ## Communication
 
-![1](https://github.com/kingslay/KSPlayer/raw/develop/Documents/Sponsors.jpg)
+If you have a business cooperation project or want to initiate a paid consultation, you can contact me via email
 
 - Email : kingslay@icloud.com
+
+![1](https://github.com/kingslay/KSPlayer/raw/develop/Documents/Sponsors.jpg)
+
