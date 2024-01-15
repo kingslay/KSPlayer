@@ -61,13 +61,9 @@ open class KSOptions {
         }
     }
 
-    public var userAgent: String? {
+    public var userAgent: String = "KSPlayer" {
         didSet {
-            if let userAgent {
-                formatContextOptions["user_agent"] = userAgent
-            } else {
-                formatContextOptions["user_agent"] = nil
-            }
+            formatContextOptions["user_agent"] = userAgent
         }
     }
 
@@ -110,6 +106,7 @@ open class KSOptions {
     public internal(set) var decodeAudioTime = 0.0
     public internal(set) var decodeVideoTime = 0.0
     public init() {
+        formatContextOptions["user_agent"] = userAgent
         // 参数的配置可以参考protocols.texi 和 http.c
         // 这个一定要，不然有的流就会判断不准FieldOrder
         formatContextOptions["scan_all_pmts"] = 1

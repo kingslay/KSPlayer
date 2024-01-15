@@ -20,7 +20,6 @@ class MEOptions: KSOptions {
     #endif
     override init() {
         super.init()
-        formatContextOptions["reconnect_on_network_error"] = 1
         audioLocale = Locale(identifier: "en-US")
     }
 
@@ -293,27 +292,13 @@ extension KSVideoPlayerView {
         }
         #endif
         options.referer = model.httpReferer
-        options.userAgent = model.httpUserAgent
+        if let httpUserAgent = model.httpUserAgent {
+            options.userAgent = httpUserAgent
+        }
         let playmodel = model.getPlaymodel()
         playmodel.playTime = Date()
         if playmodel.duration > 0, playmodel.current > 0, playmodel.duration > playmodel.current + 120 {
             options.startPlayTime = TimeInterval(playmodel.current)
-        }
-        // There is total different meaning for 'listen_timeout' option in rtmp
-        // set 'listen_timeout' = -1 for rtmp、rtsp
-        if url.scheme == "rtmp" || url.scheme == "rtsp" {
-            options.formatContextOptions["listen_timeout"] = -1
-            options.formatContextOptions["fflags"] = ["nobuffer"]
-            // tcp or udp
-            options.formatContextOptions["rtsp_transport"] = "tcp"
-            options.probesize = 4096
-            options.maxAnalyzeDuration = 2_000_000
-            options.codecLowDelay = true
-            options.preferredForwardBufferDuration = 1
-            options.maxBufferDuration = 3600
-            options.hardwareDecode = false
-        } else {
-            options.formatContextOptions["listen_timeout"] = 3
         }
         playmodel.save()
         model.save()
