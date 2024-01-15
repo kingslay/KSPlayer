@@ -268,9 +268,9 @@ open class KSOptions {
         }
     }
 
-    private var idetTypeMap = [VideoInterlacingType: Int]()
+    private var idetTypeMap = [VideoInterlacingType: UInt]()
     open func filter(log: String) {
-        if log.starts(with: "Repeated Field:") {
+        if log.starts(with: "Repeated Field:"), autoDeInterlace {
             for str in log.split(separator: ",") {
                 let map = str.split(separator: ":")
                 if map.count >= 2 {
