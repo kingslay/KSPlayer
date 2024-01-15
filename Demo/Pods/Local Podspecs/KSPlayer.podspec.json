@@ -1,0 +1,126 @@
+{
+  "name": "KSPlayer",
+  "version": "1.1.0",
+  "summary": "Video Player Using Swift, based on AVPlayer,FFmpeg",
+  "description": "Video Player Using Swift, based on ffmpeg, support for the horizontal screen, vertical screen, the upper and lower slide to adjust the volume, the screen brightness, or so slide to adjust the playback progress.",
+  "homepage": "https://github.com/kingslay/KSPlayer",
+  "authors": {
+    "kintan": "kingslay@icloud.com"
+  },
+  "license": "MIT",
+  "source": {
+    "git": "https://github.com/kingslay/KSPlayer.git",
+    "tag": "1.1.0"
+  },
+  "platforms": {
+    "ios": "13.0",
+    "osx": "10.15",
+    "tvos": "13.0"
+  },
+  "static_framework": true,
+  "testspecs": [
+    {
+      "name": "Tests",
+      "test_type": "unit",
+      "source_files": "Tests/KSPlayerTests/*.swift",
+      "resources": "Tests/KSPlayerTests/Resources/*"
+    }
+  ],
+  "subspecs": [
+    {
+      "name": "Subtitle",
+      "source_files": "Sources/KSPlayer/Subtitle/*.{swift}",
+      "frameworks": "Foundation"
+    },
+    {
+      "name": "Metal",
+      "source_files": "Sources/KSPlayer/Metal/*.{swift,metal}",
+      "resource_bundles": {
+        "KSPlayer_KSPlayer": [
+          "Sources/KSPlayer/Metal/*.metal"
+        ]
+      },
+      "weak_frameworks": "MetalKit"
+    },
+    {
+      "name": "AVPlayer",
+      "source_files": "Sources/KSPlayer/AVPlayer/*.{swift}",
+      "frameworks": "AVFoundation",
+      "ios": {
+        "frameworks": "UIKit"
+      },
+      "tvos": {
+        "frameworks": "UIKit"
+      },
+      "osx": {
+        "frameworks": "AppKit"
+      },
+      "dependencies": {
+        "DisplayCriteria": [
+
+        ]
+      }
+    },
+    {
+      "name": "MEPlayer",
+      "source_files": "Sources/KSPlayer/MEPlayer/**/*.{swift}",
+      "frameworks": [
+        "AudioToolbox",
+        "VideoToolbox"
+      ],
+      "dependencies": {
+        "FFmpegKit": [
+
+        ],
+        "KSPlayer/AVPlayer": [
+
+        ],
+        "KSPlayer/Metal": [
+
+        ],
+        "KSPlayer/Subtitle": [
+
+        ]
+      }
+    },
+    {
+      "name": "Core",
+      "source_files": "Sources/KSPlayer/Core/*",
+      "dependencies": {
+        "KSPlayer/AVPlayer": [
+
+        ]
+      }
+    },
+    {
+      "name": "SwiftUI",
+      "source_files": "Sources/KSPlayer/SwiftUI/*.swift",
+      "dependencies": {
+        "KSPlayer/AVPlayer": [
+
+        ]
+      }
+    },
+    {
+      "name": "Audio",
+      "source_files": "Sources/KSPlayer/Audio/*.swift",
+      "dependencies": {
+        "KSPlayer/Core": [
+
+        ]
+      }
+    },
+    {
+      "name": "Video",
+      "source_files": "Sources/KSPlayer/Video/*.swift",
+      "dependencies": {
+        "KSPlayer/Core": [
+
+        ],
+        "KSPlayer/Subtitle": [
+
+        ]
+      }
+    }
+  ]
+}

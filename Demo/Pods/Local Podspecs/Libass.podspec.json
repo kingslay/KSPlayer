@@ -1,0 +1,33 @@
+{
+  "name": "Libass",
+  "version": "0.17.1",
+  "summary": "Libass",
+  "description": "Libass",
+  "homepage": "https://github.com/kingslay/FFmpegKit",
+  "authors": {
+    "kintan": "554398854@qq.com"
+  },
+  "license": "MIT",
+  "source": {
+    "git": "https://github.com/kingslay/FFmpegKit.git",
+    "tag": "0.17.1"
+  },
+  "platforms": {
+    "ios": "13.0",
+    "osx": "10.15",
+    "tvos": "13.0"
+  },
+  "default_subspecs": "Libass",
+  "static_framework": true,
+  "subspecs": [
+    {
+      "name": "Libass",
+      "vendored_frameworks": [
+        "Sources/libfreetype.xcframework",
+        "Sources/libfribidi.xcframework",
+        "Sources/libharfbuzz.xcframework",
+        "Sources/libass.xcframework"
+      ]
+    }
+  ]
+}

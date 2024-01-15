@@ -115,16 +115,16 @@ extension M3UModel {
         context.delete(self)
         let request = M3UModel.fetchRequest()
         request.predicate = NSPredicate(format: "m3uURL == %@", m3uURL.description)
-        if let array = try? context.fetch(request), array.isEmpty {
-            let movieRequest = NSFetchRequest<MovieModel>(entityName: "MovieModel")
-            movieRequest.predicate = NSPredicate(format: "m3uURL == %@", m3uURL.description)
-            try? for model in context.fetch(movieRequest) {
-                context.delete(model)
-            }
+        do {
+            if let array = try? context.fetch(request), array.isEmpty {
+                let movieRequest = NSFetchRequest<MovieModel>(entityName: "MovieModel")
+                movieRequest.predicate = NSPredicate(format: "m3uURL == %@", m3uURL.description)
+                for model in try context.fetch(movieRequest) {
+                    context.delete(model)
+                }
 //            let deleteRequest = NSBatchDeleteRequest(fetchRequest: movieRequest)
 //            _ = try? context.execute(deleteRequest)
-        }
-        do {
+            }
             try context.save()
         } catch {
             KSLog(level: .error, error.localizedDescription)

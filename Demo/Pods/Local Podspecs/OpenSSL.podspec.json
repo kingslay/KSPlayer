@@ -1,0 +1,31 @@
+{
+  "name": "OpenSSL",
+  "version": "3.1.4",
+  "summary": "OpenSSL",
+  "description": "OpenSSL",
+  "homepage": "https://github.com/kingslay/FFmpegKit",
+  "authors": {
+    "kintan": "554398854@qq.com"
+  },
+  "license": "MIT",
+  "source": {
+    "git": "https://github.com/kingslay/FFmpegKit.git",
+    "tag": "3.1.4"
+  },
+  "platforms": {
+    "ios": "13.0",
+    "osx": "10.15",
+    "tvos": "13.0"
+  },
+  "default_subspecs": "OpenSSL",
+  "static_framework": true,
+  "subspecs": [
+    {
+      "name": "OpenSSL",
+      "vendored_frameworks": [
+        "Sources/libssl.xcframework",
+        "Sources/libcrypto.xcframework"
+      ]
+    }
+  ]
+}

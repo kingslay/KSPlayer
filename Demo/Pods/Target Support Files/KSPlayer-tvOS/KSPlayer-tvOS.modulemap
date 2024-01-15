@@ -1,0 +1,6 @@
+framework module KSPlayer {
+  umbrella header "KSPlayer-tvOS-umbrella.h"
+
+  export *
+  module * { export * }
+}
