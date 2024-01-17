@@ -46,6 +46,12 @@ https://testflight.apple.com/join/eNmYbmZN
 
 App Store https://apps.apple.com/app/tracyplayer/id6450770064
 
+## License
+KSPlayer defaults to the GPL license (requires open-sourcing your own project code), and we hope everyone will consciously respect the licensing agreement of the KSPlayer project. Additionally, there is a paid version that adopts the LGPL license (contact us). 
+
+If due to commercial reasons, you prefer not to adhere to the GPL license  or the LGPL license, you can contact us. Through our authorization, you can obtain a more flexible licensing agreement.
+
+
 ## Quick Start
 
 #### CocoaPods
