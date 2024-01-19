@@ -344,12 +344,12 @@ open class VideoPlayerView: PlayerView {
     }
 
     open func set(resource: KSPlayerResource, definitionIndex: Int = 0, isSetUrl: Bool = true) {
-        self.resource = resource
         currentDefinition = definitionIndex >= resource.definitions.count ? resource.definitions.count - 1 : definitionIndex
         if isSetUrl {
             let asset = resource.definitions[currentDefinition]
             super.set(url: asset.url, options: asset.options)
         }
+        self.resource = resource
     }
 
     override open func set(url: URL, options: KSOptions) {
