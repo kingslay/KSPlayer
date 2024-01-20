@@ -20,6 +20,7 @@ public class FFmpegAssetTrack: MediaPlayerTrack {
     public private(set) var bitRate: Int64 = 0
     public let mediaType: AVFoundation.AVMediaType
     public let formatName: String?
+    public let bitDepth: Int32
     private var stream: UnsafeMutablePointer<AVStream>?
     var startTime = CMTime.zero
     var codecpar: AVCodecParameters
@@ -142,6 +143,7 @@ public class FFmpegAssetTrack: MediaPlayerTrack {
             mediaType = .audio
             audioDescriptor = AudioDescriptor(codecpar: codecpar)
             isConvertNALSize = false
+            bitDepth = 0
             let layout = codecpar.ch_layout
             let channelsPerFrame = UInt32(layout.nb_channels)
             let sampleFormat = AVSampleFormat(codecpar.format)
@@ -204,6 +206,7 @@ public class FFmpegAssetTrack: MediaPlayerTrack {
                 isConvertNALSize = false
             }
             let format = AVPixelFormat(rawValue: codecpar.format)
+            bitDepth = format.bitDepth
             let fullRange = codecpar.color_range == AVCOL_RANGE_JPEG
             let dic: NSMutableDictionary = [
                 kCVImageBufferChromaLocationBottomFieldKey: kCVImageBufferChromaLocation_Left,
@@ -233,9 +236,11 @@ public class FFmpegAssetTrack: MediaPlayerTrack {
             mediaType = .subtitle
             audioDescriptor = nil
             formatName = nil
+            bitDepth = 0
             isConvertNALSize = false
             _ = CMFormatDescriptionCreate(allocator: kCFAllocatorDefault, mediaType: kCMMediaType_Subtitle, mediaSubType: codecType.rawValue, extensions: nil, formatDescriptionOut: &formatDescriptionOut)
         } else {
+            bitDepth = 0
             return nil
         }
         formatDescription = formatDescriptionOut

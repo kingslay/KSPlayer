@@ -120,6 +120,7 @@ public protocol MediaPlayerTrack: AnyObject, CustomStringConvertible {
     var mediaType: AVFoundation.AVMediaType { get }
     var nominalFrameRate: Float { get set }
     var bitRate: Int64 { get }
+    var bitDepth: Int32 { get }
     var isEnabled: Bool { get set }
     var isImageSubtitle: Bool { get }
     var rotation: Int16 { get }
@@ -239,7 +240,7 @@ public extension CMFormatDescription {
         let cotentRange: DynamicRange
         if codecType.string == "dvhe" || codecType == kCMVideoCodecType_DolbyVisionHEVC {
             cotentRange = .dolbyVision
-        } else if codecType.bitDepth == 10 || transferFunction == kCVImageBufferTransferFunction_SMPTE_ST_2084_PQ as String { /// HDR
+        } else if bitDepth == 10 || transferFunction == kCVImageBufferTransferFunction_SMPTE_ST_2084_PQ as String { /// HDR
             cotentRange = .hdr10
         } else if transferFunction == kCVImageBufferTransferFunction_ITU_R_2100_HLG as String { /// HLG
             cotentRange = .hlg
@@ -247,6 +248,10 @@ public extension CMFormatDescription {
             cotentRange = .sdr
         }
         return cotentRange
+    }
+
+    var bitDepth: Int32 {
+        codecType.bitDepth
     }
 
     var codecType: FourCharCode {

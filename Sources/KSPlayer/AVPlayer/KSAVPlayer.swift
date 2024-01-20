@@ -517,6 +517,7 @@ class AVMediaPlayerTrack: MediaPlayerTrack {
     var nominalFrameRate: Float
     let trackID: Int32
     let rotation: Int16 = 0
+    let bitDepth: Int32
     let bitRate: Int64
     let name: String
     let languageCode: String?
@@ -553,6 +554,7 @@ class AVMediaPlayerTrack: MediaPlayerTrack {
         } else {
             formatDescription = nil
         }
+        bitDepth = formatDescription?.bitDepth ?? 0
         // swiftlint:enable force_cast
         description = (formatDescription?.mediaSubType ?? .boxed).rawValue.string
         #if os(xrOS)
