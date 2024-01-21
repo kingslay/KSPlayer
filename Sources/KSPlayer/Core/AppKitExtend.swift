@@ -437,8 +437,8 @@ public class KSButton: NSButton {
     }
 
     override open func updateTrackingAreas() {
-        trackingAreas.forEach {
-            removeTrackingArea($0)
+        for trackingArea in trackingAreas {
+            removeTrackingArea(trackingArea)
         }
         let trackingArea = NSTrackingArea(rect: bounds, options: [.mouseEnteredAndExited, .mouseMoved, .activeInKeyWindow], owner: self, userInfo: nil)
         addTrackingArea(trackingArea)

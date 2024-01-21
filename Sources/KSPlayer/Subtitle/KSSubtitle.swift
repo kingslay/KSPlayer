@@ -285,7 +285,7 @@ open class SubtitleModel: ObservableObject {
         didSet {
             subtitleInfos.removeAll()
             searchSubtitle(query: nil, languages: [])
-            subtitleDataSouces.forEach { datasouce in
+            for datasouce in subtitleDataSouces {
                 addSubtitle(dataSouce: datasouce)
             }
             // 要用async，不能在更新UI的时候，修改Publishe变量
@@ -328,7 +328,7 @@ open class SubtitleModel: ObservableObject {
         }
         // swiftUI不会判断是否相等。所以需要这边判断下。
         if newParts != parts {
-            newParts.forEach { part in
+            for part in newParts {
                 if let text = part.text as? NSMutableAttributedString {
                     text.addAttributes([.font: SubtitleModel.textFont],
                                        range: NSRange(location: 0, length: text.length))
@@ -342,7 +342,7 @@ open class SubtitleModel: ObservableObject {
     }
 
     public func searchSubtitle(query: String?, languages: [String]) {
-        subtitleDataSouces.forEach { dataSouce in
+        for dataSouce in subtitleDataSouces {
             if let dataSouce = dataSouce as? SearchSubtitleDataSouce {
                 subtitleInfos.removeAll { info in
                     dataSouce.infos.contains {

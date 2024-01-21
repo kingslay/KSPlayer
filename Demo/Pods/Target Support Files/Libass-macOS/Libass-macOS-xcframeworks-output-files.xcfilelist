@@ -1,0 +1,4 @@
+${PODS_XCFRAMEWORKS_BUILD_DIR}/Libass/Libass/libfreetype.framework
+${PODS_XCFRAMEWORKS_BUILD_DIR}/Libass/Libass/libfribidi.framework
+${PODS_XCFRAMEWORKS_BUILD_DIR}/Libass/Libass/libharfbuzz.framework
+${PODS_XCFRAMEWORKS_BUILD_DIR}/Libass/Libass/libass.framework

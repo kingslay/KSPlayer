@@ -8,6 +8,7 @@
 import Foundation
 import Libavfilter
 import Libavutil
+
 class MEFilter {
     private var graph: UnsafeMutablePointer<AVFilterGraph>?
     private var bufferSrcContext: UnsafeMutablePointer<AVFilterContext>?

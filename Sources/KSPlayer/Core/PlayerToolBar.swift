@@ -12,6 +12,7 @@ import UIKit
 import AppKit
 #endif
 import AVKit
+
 public class PlayerToolBar: UIStackView {
     public let srtButton = UIButton()
     public let timeLabel = UILabel()

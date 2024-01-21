@@ -31,8 +31,8 @@ class OpenURLWindowController: NSWindowController, NSTextFieldDelegate, NSContro
         window?.titleVisibility = .hidden
         urlStackView.setVisibilityPriority(.notVisible, for: httpPrefixTextField)
         urlField.delegate = self
-        ([.closeButton, .miniaturizeButton, .zoomButton] as [NSWindow.ButtonType]).forEach {
-            window?.standardWindowButton($0)?.isHidden = true
+        for item in [.closeButton, .miniaturizeButton, .zoomButton] as [NSWindow.ButtonType] {
+            window?.standardWindowButton(item)?.isHidden = true
         }
     }
 

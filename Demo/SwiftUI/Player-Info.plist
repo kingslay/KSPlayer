@@ -551,7 +551,7 @@
 			<key>NSMenuItem</key>
 			<dict>
 				<key>default</key>
-				<string>TracyPlayer: Open URL</string>
+				<string>Player: Open URL</string>
 			</dict>
 			<key>NSMessage</key>
 			<string>droppedText</string>

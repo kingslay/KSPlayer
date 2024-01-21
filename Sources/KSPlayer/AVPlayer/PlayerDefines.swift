@@ -12,6 +12,7 @@ import SwiftUI
 
 #if canImport(UIKit)
 import UIKit
+
 public extension KSOptions {
     static var windowScene: UIWindowScene? {
         UIApplication.shared.connectedScenes.first as? UIWindowScene
@@ -25,6 +26,7 @@ public extension KSOptions {
 #else
 import AppKit
 import SwiftUI
+
 public typealias UIView = NSView
 public typealias UIPasteboard = NSPasteboard
 public extension KSOptions {
@@ -409,7 +411,7 @@ public extension Data {
         }
         let scanner = Scanner(string: string)
         var entrys = [(String, URL, [String: String])]()
-        guard scanner.scanString("#EXTM3U") != nil else {
+        guard let symbol = scanner.scanUpToCharacters(from: .newlines), symbol.hasSuffix("#EXTM3U") else {
             return []
         }
         while !scanner.isAtEnd {

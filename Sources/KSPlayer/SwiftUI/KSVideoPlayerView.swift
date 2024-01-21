@@ -11,13 +11,14 @@ import SwiftUI
 @available(iOS 16.0, macOS 13.0, tvOS 16.0, *)
 public struct KSVideoPlayerView: View {
     private let subtitleDataSouce: SubtitleDataSouce?
-    private let onPlayerDisappear: ((ControllerTimeModel) -> Void)?
     @State
     private var title: String
     @StateObject
-    private var playerCoordinator = KSVideoPlayer.Coordinator()
+    private var playerCoordinator: KSVideoPlayer.Coordinator
     @Environment(\.dismiss)
     private var dismiss
+    @FocusState
+    private var focusableField: FocusableField?
     public let options: KSOptions
     @State
     public var url: URL {
@@ -28,104 +29,117 @@ public struct KSVideoPlayerView: View {
         }
     }
 
-    public init(url: URL, options: KSOptions, title: String? = nil, subtitleDataSouce: SubtitleDataSouce? = nil, onPlayerDisappear: ((ControllerTimeModel) -> Void)? = nil) {
+    public init(coordinator: KSVideoPlayer.Coordinator = KSVideoPlayer.Coordinator(), url: URL, options: KSOptions, title: String? = nil, subtitleDataSouce: SubtitleDataSouce? = nil) {
         _url = .init(initialValue: url)
+        _playerCoordinator = .init(wrappedValue: coordinator)
         _title = .init(initialValue: title ?? url.lastPathComponent)
         #if os(macOS)
         NSDocumentController.shared.noteNewRecentDocumentURL(url)
         #endif
         self.options = options
         self.subtitleDataSouce = subtitleDataSouce
-        self.onPlayerDisappear = onPlayerDisappear
     }
 
     public var body: some View {
         ZStack {
-            KSVideoPlayer(coordinator: playerCoordinator, url: url, options: options)
-                .onStateChanged { playerLayer, state in
-                    if state == .readyToPlay {
-                        if let movieTitle = playerLayer.player.dynamicInfo?.metadata["title"] {
-                            title = movieTitle
-                        }
-                    }
-                }
-                .onBufferChanged { bufferedCount, consumeTime in
-                    print("bufferedCount \(bufferedCount), consumeTime \(consumeTime)")
-                }
-            #if canImport(UIKit)
-                .onSwipe { _ in
-                    playerCoordinator.isMaskShow = true
-                }
-            #endif
-                .ignoresSafeArea()
-            #if os(iOS) || os(xrOS)
-                .navigationBarTitleDisplayMode(.inline)
-            #endif
+            playView
             VideoSubtitleView(model: playerCoordinator.subtitleModel)
-            VStack {
-                #if !os(tvOS)
-                VideoControllerView(config: playerCoordinator, subtitleModel: playerCoordinator.subtitleModel, title: $title)
-                #endif
-                if playerCoordinator.isMaskShow {
-                    // 控制界面没有显示的时候，按钮不能点击。隐藏没有用，所以只能这样了
-                    #if os(tvOS)
-                    VideoControllerView(config: playerCoordinator, subtitleModel: playerCoordinator.subtitleModel, title: $title)
-                    #endif
-                    // 设置opacity为0，还是会去更新View。所以只能这样了
-                    VideoTimeShowView(config: playerCoordinator, model: playerCoordinator.timemodel)
-                }
+            #if os(macOS)
+            controllerView.opacity(playerCoordinator.isMaskShow ? 1 : 0)
+            #else
+            if playerCoordinator.isMaskShow {
+                controllerView
             }
-            .padding()
-            .opacity(playerCoordinator.isMaskShow ? 1 : 0)
-        }
-        .onAppear {
-            if let subtitleDataSouce {
-                playerCoordinator.subtitleModel.addSubtitle(dataSouce: subtitleDataSouce)
-            }
-            // 不要加这个，不然playerCoordinator无法释放，也可以在onDisappear调用removeMonitor释放
-//                    #if os(macOS)
-//                    NSEvent.addLocalMonitorForEvents(matching: [.mouseMoved]) {
-//                        isMaskShow = overView
-//                        return $0
-//                    }
-//                    #endif
-        }
-        .onDisappear {
-            // 在tvos，playerLayer已经为空了。所以改成用timemodel
-            onPlayerDisappear?(playerCoordinator.timemodel)
+            #endif
         }
         .preferredColorScheme(.dark)
         .tint(.white)
         .persistentSystemOverlays(.hidden)
         .toolbar(.hidden, for: .automatic)
-        #if !os(xrOS)
-            .onKeyPressLeftArrow {
-                playerCoordinator.skip(interval: -15)
-            }
-            .onKeyPressRightArrow {
-                playerCoordinator.skip(interval: 15)
-            }
-            .onKeyPressSapce {
+        #if os(tvOS)
+            .onPlayPauseCommand {
                 if playerCoordinator.state.isPlaying {
                     playerCoordinator.playerLayer?.pause()
                 } else {
                     playerCoordinator.playerLayer?.play()
                 }
             }
+            .onExitCommand {
+                if playerCoordinator.isMaskShow {
+                    playerCoordinator.isMaskShow = false
+                } else {
+                    dismiss()
+                }
+            }
+        #endif
+    }
+
+    private var playView: some View {
+        KSVideoPlayer(coordinator: playerCoordinator, url: url, options: options)
+            .onStateChanged { playerLayer, state in
+                if state == .readyToPlay {
+                    if let movieTitle = playerLayer.player.dynamicInfo?.metadata["title"] {
+                        title = movieTitle
+                    }
+                }
+            }
+            .onBufferChanged { bufferedCount, consumeTime in
+                print("bufferedCount \(bufferedCount), consumeTime \(consumeTime)")
+            }
+        #if canImport(UIKit)
+            .onSwipe { _ in
+                playerCoordinator.isMaskShow = true
+            }
+        #endif
+            .ignoresSafeArea()
+            .onAppear {
+                focusableField = .play
+                if let subtitleDataSouce {
+                    playerCoordinator.subtitleModel.addSubtitle(dataSouce: subtitleDataSouce)
+                }
+                // 不要加这个，不然playerCoordinator无法释放，也可以在onDisappear调用removeMonitor释放
+                //                    #if os(macOS)
+                //                    NSEvent.addLocalMonitorForEvents(matching: [.mouseMoved]) {
+                //                        isMaskShow = overView
+                //                        return $0
+                //                    }
+                //                    #endif
+            }
+
+        #if os(iOS) || os(xrOS)
+            .navigationBarTitleDisplayMode(.inline)
+        #endif
+        #if !os(iOS)
+            .focusable(!playerCoordinator.isMaskShow)
+        .focused($focusableField, equals: .play)
+        #endif
+        #if !os(xrOS)
+            .onKeyPressLeftArrow {
+            playerCoordinator.skip(interval: -15)
+        }
+        .onKeyPressRightArrow {
+            playerCoordinator.skip(interval: 15)
+        }
+        .onKeyPressSapce {
+            if playerCoordinator.state.isPlaying {
+                playerCoordinator.playerLayer?.pause()
+            } else {
+                playerCoordinator.playerLayer?.play()
+            }
+        }
         #endif
         #if os(macOS)
-        .onTapGesture(count: 2) {
-            guard let view = playerCoordinator.playerLayer else {
-                return
-            }
-            view.window?.toggleFullScreen(nil)
-            view.needsLayout = true
-            view.layoutSubtreeIfNeeded()
+            .onTapGesture(count: 2) {
+                guard let view = playerCoordinator.playerLayer else {
+                    return
+                }
+                view.window?.toggleFullScreen(nil)
+                view.needsLayout = true
+                view.layoutSubtreeIfNeeded()
         }
         .onExitCommand {
             playerCoordinator.playerLayer?.exitFullScreenMode()
         }
-        .focusable()
         .onMoveCommand { direction in
             switch direction {
             case .left:
@@ -140,28 +154,27 @@ public struct KSVideoPlayerView: View {
                 break
             }
         }
-        #endif
+        #else
         .onTapGesture {
-            playerCoordinator.isMaskShow.toggle()
-        }
-        #if os(tvOS)
-        .onPlayPauseCommand {
-            if playerCoordinator.state.isPlaying {
-                playerCoordinator.playerLayer?.pause()
-            } else {
-                playerCoordinator.playerLayer?.play()
+                playerCoordinator.isMaskShow.toggle()
             }
-        }
-        .onExitCommand {
-            if playerCoordinator.isMaskShow {
-                playerCoordinator.isMaskShow = false
-            } else {
-                dismiss()
+        #endif
+        #if os(tvOS)
+            .onMoveCommand { direction in
+            switch direction {
+            case .left:
+                playerCoordinator.skip(interval: -15)
+            case .right:
+                playerCoordinator.skip(interval: 15)
+            case .up, .down:
+                playerCoordinator.isMaskShow.toggle()
+            @unknown default:
+                break
             }
         }
         #else
-        .onHover {
-                playerCoordinator.isMaskShow = $0
+        .onHover { _ in
+                playerCoordinator.isMaskShow = true
             }
             .onDrop(of: ["public.file-url"], isTargeted: nil) { providers -> Bool in
                 providers.first?.loadDataRepresentation(forTypeIdentifier: "public.file-url") { data, _ in
@@ -172,6 +185,26 @@ public struct KSVideoPlayerView: View {
                 return true
             }
         #endif
+    }
+
+    private var controllerView: some View {
+        VStack {
+            // 设置opacity为0，还是会去更新View。所以只能这样了
+            VideoControllerView(config: playerCoordinator, subtitleModel: playerCoordinator.subtitleModel, title: $title)
+            VideoTimeShowView(config: playerCoordinator, model: playerCoordinator.timemodel)
+        }
+        .focused($focusableField, equals: .controller)
+        .onAppear {
+            focusableField = .controller
+        }
+        .onDisappear {
+            focusableField = .play
+        }
+        .padding()
+    }
+
+    fileprivate enum FocusableField {
+        case play, controller
     }
 
     public func openURL(_ url: URL) {
@@ -244,9 +277,14 @@ struct VideoControllerView: View {
 //                    Image(systemName: "x.circle.fill")
 //                }
                 Text(title)
+                    .lineLimit(2)
+                    .layoutPriority(2)
+                Spacer()
+                    .layoutPriority(1)
                 ProgressView()
                     .opacity(config.state == .buffering ? 1 : 0)
-                Spacer(minLength: 400)
+                Spacer()
+                    .layoutPriority(1)
                 if let audioTracks = config.playerLayer?.player.tracks(mediaType: .audio), !audioTracks.isEmpty {
                     audioButton(audioTracks: audioTracks)
                 }
@@ -331,7 +369,7 @@ struct VideoControllerView: View {
                 infoButton
                 // iOS 模拟器加keyboardShortcut会导致KSVideoPlayer.Coordinator无法释放。真机不会有这个问题
                 #if !os(tvOS)
-                .keyboardShortcut("s", modifiers: [.command, .shift])
+                .keyboardShortcut("i", modifiers: [.command])
                 #endif
             }
             #endif

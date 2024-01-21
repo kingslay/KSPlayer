@@ -161,7 +161,7 @@ private extension KSMEPlayer {
 
     @objc private func spatialCapabilityChange(notification _: Notification) {
         KSLog("[audio] spatialCapabilityChange")
-        tracks(mediaType: .audio).forEach { track in
+        for track in tracks(mediaType: .audio) {
             (track as? FFmpegAssetTrack)?.audioDescriptor?.updateAudioFormat()
         }
     }
@@ -176,7 +176,7 @@ private extension KSMEPlayer {
         guard routeChangeReason == .newDeviceAvailable || routeChangeReason == .oldDeviceUnavailable else {
             return
         }
-        tracks(mediaType: .audio).forEach { track in
+        for track in tracks(mediaType: .audio) {
             (track as? FFmpegAssetTrack)?.audioDescriptor?.updateAudioFormat()
         }
         audioOutput.flush()

@@ -8,12 +8,15 @@
 import AVFoundation
 import FFmpegKit
 import Libavformat
+
 public class FFmpegAssetTrack: MediaPlayerTrack {
     public private(set) var trackID: Int32 = 0
     public let codecName: String
     public var name: String = ""
     public private(set) var languageCode: String?
     public var nominalFrameRate: Float = 0
+    public private(set) var avgFrameRate = Timebase.defaultValue
+    public private(set) var realFrameRate = Timebase.defaultValue
     public private(set) var bitRate: Int64 = 0
     public let mediaType: AVFoundation.AVMediaType
     public let formatName: String?
@@ -79,6 +82,8 @@ public class FFmpegAssetTrack: MediaPlayerTrack {
         }
         startTime = timebase.cmtime(for: stream.pointee.start_time)
         self.timebase = timebase
+        avgFrameRate = Timebase(stream.pointee.avg_frame_rate)
+        realFrameRate = Timebase(stream.pointee.r_frame_rate)
         if mediaType == .audio {
             var frameSize = codecpar.frame_size
             if frameSize < 1 {
@@ -86,11 +91,10 @@ public class FFmpegAssetTrack: MediaPlayerTrack {
             }
             nominalFrameRate = max(Float(codecpar.sample_rate / frameSize), 48)
         } else {
-            let frameRate = stream.pointee.avg_frame_rate
             if stream.pointee.duration > 0, stream.pointee.nb_frames > 0, stream.pointee.nb_frames != stream.pointee.duration {
                 nominalFrameRate = Float(stream.pointee.nb_frames) * Float(timebase.den) / Float(stream.pointee.duration) * Float(timebase.num)
-            } else if frameRate.den > 0, frameRate.num > 0 {
-                nominalFrameRate = Float(frameRate.num) / Float(frameRate.den)
+            } else if avgFrameRate.den > 0, avgFrameRate.num > 0 {
+                nominalFrameRate = Float(avgFrameRate.num) / Float(avgFrameRate.den)
             } else {
                 nominalFrameRate = 24
             }

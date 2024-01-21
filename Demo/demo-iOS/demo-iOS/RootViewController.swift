@@ -8,6 +8,7 @@
 
 import KSPlayer
 import UIKit
+
 private class TableViewCell: UITableViewCell {
     #if os(iOS)
     fileprivate let playerView = IOSVideoPlayerView()

@@ -72,8 +72,8 @@ class CustomVideoPlayerView: VideoPlayerView {
             print(layer.player.naturalSize)
             // list the all subtitles
             let subtitleInfos = srtControl.subtitleInfos
-            subtitleInfos.forEach {
-                print($0.name)
+            for subtitleInfo in subtitleInfos {
+                print(subtitleInfo.name)
             }
             srtControl.selectedSubtitleInfo = subtitleInfos.first
             for track in layer.player.tracks(mediaType: .audio) {

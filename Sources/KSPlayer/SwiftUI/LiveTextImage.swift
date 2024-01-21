@@ -8,6 +8,7 @@
 import SwiftUI
 #if canImport(VisionKit)
 import VisionKit
+
 @MainActor
 @available(iOS 16.0, macOS 13.0, macCatalyst 17.0, *)
 public struct LiveTextImage: UIViewRepresentable {

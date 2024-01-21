@@ -4,10 +4,12 @@ import AVKit
 import UIKit
 #else
 import AppKit
+
 public typealias UIImage = NSImage
 #endif
 import Combine
 import CoreGraphics
+
 public final class KSAVPlayerView: UIView {
     public let player = AVQueuePlayer()
     override public init(frame: CGRect) {

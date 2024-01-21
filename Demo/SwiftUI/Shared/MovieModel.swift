@@ -20,7 +20,6 @@ class MEOptions: KSOptions {
     #endif
     override init() {
         super.init()
-        formatContextOptions["reconnect_on_network_error"] = 1
         audioLocale = Locale(identifier: "en-US")
     }
 
@@ -115,16 +114,16 @@ extension M3UModel {
         context.delete(self)
         let request = M3UModel.fetchRequest()
         request.predicate = NSPredicate(format: "m3uURL == %@", m3uURL.description)
-        if let array = try? context.fetch(request), array.isEmpty {
-            let movieRequest = NSFetchRequest<MovieModel>(entityName: "MovieModel")
-            movieRequest.predicate = NSPredicate(format: "m3uURL == %@", m3uURL.description)
-            try? context.fetch(movieRequest).forEach { model in
-                context.delete(model)
-            }
+        do {
+            if let array = try? context.fetch(request), array.isEmpty {
+                let movieRequest = NSFetchRequest<MovieModel>(entityName: "MovieModel")
+                movieRequest.predicate = NSPredicate(format: "m3uURL == %@", m3uURL.description)
+                for model in try context.fetch(movieRequest) {
+                    context.delete(model)
+                }
 //            let deleteRequest = NSBatchDeleteRequest(fetchRequest: movieRequest)
 //            _ = try? context.execute(deleteRequest)
-        }
-        do {
+            }
             try context.save()
         } catch {
             KSLog(level: .error, error.localizedDescription)
@@ -163,7 +162,7 @@ extension M3UModel {
         }
         return await viewContext.perform {
             var dic = [URL?: MovieModel]()
-            array.forEach { model in
+            for model in array {
                 if let oldModel = dic[model.url] {
                     if oldModel.playmodel == nil {
                         viewContext.delete(oldModel)
@@ -293,27 +292,13 @@ extension KSVideoPlayerView {
         }
         #endif
         options.referer = model.httpReferer
-        options.userAgent = model.httpUserAgent
+        if let httpUserAgent = model.httpUserAgent {
+            options.userAgent = httpUserAgent
+        }
         let playmodel = model.getPlaymodel()
         playmodel.playTime = Date()
         if playmodel.duration > 0, playmodel.current > 0, playmodel.duration > playmodel.current + 120 {
             options.startPlayTime = TimeInterval(playmodel.current)
-        }
-        // There is total different meaning for 'listen_timeout' option in rtmp
-        // set 'listen_timeout' = -1 for rtmp、rtsp
-        if url.scheme == "rtmp" || url.scheme == "rtsp" {
-            options.formatContextOptions["listen_timeout"] = -1
-            options.formatContextOptions["fflags"] = ["nobuffer"]
-            // tcp or udp
-            options.formatContextOptions["rtsp_transport"] = "tcp"
-            options.probesize = 4096
-            options.maxAnalyzeDuration = 2_000_000
-            options.codecLowDelay = true
-            options.preferredForwardBufferDuration = 1
-            options.maxBufferDuration = 3600
-            options.hardwareDecode = false
-        } else {
-            options.formatContextOptions["listen_timeout"] = 3
         }
         playmodel.save()
         model.save()

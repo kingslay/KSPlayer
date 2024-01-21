@@ -1,5 +1,6 @@
 @testable import KSPlayer
 import XCTest
+
 class SubtitleTest: XCTestCase {
     func testSrt() {
         let string = """

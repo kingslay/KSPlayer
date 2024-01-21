@@ -1,5 +1,6 @@
 @testable import KSPlayer
 import XCTest
+
 class KSMEPlayerTest: XCTestCase {
     func testPlaying() {
         if let path = Bundle(for: type(of: self)).path(forResource: "h264", ofType: "mp4") {

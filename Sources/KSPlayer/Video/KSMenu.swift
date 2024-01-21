@@ -13,9 +13,9 @@ import AppKit
 
 extension UIMenu {
     func updateActionState(actionTitle: String? = nil) -> UIMenu {
-        children.forEach { action in
+        for action in children {
             guard let action = action as? UIAction else {
-                return
+                continue
             }
             action.state = action.title == actionTitle ? .on : .off
         }

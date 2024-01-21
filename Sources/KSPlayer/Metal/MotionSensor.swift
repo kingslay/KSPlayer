@@ -10,6 +10,7 @@ import CoreMotion
 import Foundation
 import simd
 import UIKit
+
 final class MotionSensor {
     static let shared = MotionSensor()
     private let manager = CMMotionManager()

@@ -9,6 +9,7 @@
 import CoreServices
 import KSPlayer
 import UIKit
+
 protocol DetailProtocol: UIViewController {
     var resource: KSPlayerResource? { get set }
 }

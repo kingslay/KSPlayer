@@ -1,0 +1,61 @@
+{
+  "name": "FFmpegKit",
+  "version": "6.1.0",
+  "summary": "FFmpegKit",
+  "description": "FFmpeg",
+  "homepage": "https://github.com/kingslay/FFmpegKit",
+  "authors": {
+    "kintan": "554398854@qq.com"
+  },
+  "license": "MIT",
+  "source": {
+    "git": "https://github.com/kingslay/FFmpegKit.git",
+    "tag": "6.1.0"
+  },
+  "platforms": {
+    "ios": "13.0",
+    "osx": "10.15",
+    "tvos": "13.0"
+  },
+  "default_subspecs": "FFmpegKit",
+  "static_framework": true,
+  "source_files": "Sources/FFmpegKit/**/*.{h,c,m}",
+  "subspecs": [
+    {
+      "name": "FFmpegKit",
+      "libraries": [
+        "bz2",
+        "c++",
+        "iconv",
+        "resolv",
+        "xml2",
+        "z"
+      ],
+      "vendored_frameworks": [
+        "Sources/Libavcodec.xcframework",
+        "Sources/Libavfilter.xcframework",
+        "Sources/Libavformat.xcframework",
+        "Sources/Libavutil.xcframework",
+        "Sources/Libswresample.xcframework",
+        "Sources/Libswscale.xcframework",
+        "Sources/libshaderc_combined.xcframework",
+        "Sources/MoltenVK.xcframework",
+        "Sources/lcms2.xcframework",
+        "Sources/libdav1d.xcframework",
+        "Sources/libplacebo.xcframework",
+        "Sources/gmp.xcframework",
+        "Sources/nettle.xcframework",
+        "Sources/hogweed.xcframework",
+        "Sources/gnutls.xcframework",
+        "Sources/libsmbclient.xcframework",
+        "Sources/libzvbi.xcframework",
+        "Sources/libsrt.xcframework"
+      ],
+      "dependencies": {
+        "Libass": [
+
+        ]
+      }
+    }
+  ]
+}

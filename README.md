@@ -40,9 +40,17 @@ pod install
 - Open Demo/Demo.xcworkspace with Xcode.
 
 
-## Testflight
+## TestFlight
 
 https://testflight.apple.com/join/eNmYbmZN
+
+App Store https://apps.apple.com/app/tracyplayer/id6450770064
+
+## License
+KSPlayer defaults to the GPL license (requires open-sourcing your own project code), and we hope everyone will consciously respect the licensing agreement of the KSPlayer project. Additionally, there is a paid version that adopts the LGPL license (contact us). 
+
+If due to commercial reasons, you prefer not to adhere to the GPL license  or the LGPL license, you can contact us. Through our authorization, you can obtain a more flexible licensing agreement.
+
 
 ## Quick Start
 
@@ -53,8 +61,8 @@ Make sure to use the latest version **cocoapods 1.10.1+**, which can be installe
 ```ruby
 target 'ProjectName' do
     use_frameworks!
-    pod 'KSPlayer',:git => 'https://github.com/kingslay/KSPlayer.git', :branch => 'develop'
-    pod 'DisplayCriteria',:git => 'https://github.com/kingslay/KSPlayer.git', :branch => 'develop'
+    pod 'KSPlayer',:git => 'https://github.com/kingslay/KSPlayer.git', :branch => 'main'
+    pod 'DisplayCriteria',:git => 'https://github.com/kingslay/KSPlayer.git', :branch => 'main'
     pod 'FFmpegKit',:git => 'https://github.com/kingslay/FFmpegKit.git', :branch => 'main'
     pod 'Libass',:git => 'https://github.com/kingslay/FFmpegKit.git', :branch => 'main'
 end
@@ -64,7 +72,7 @@ end
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/kingslay/KSPlayer.git", .branch("develop"))
+    .package(url: "https://github.com/kingslay/KSPlayer.git", .branch("main"))
 ]
 ```
 
@@ -272,7 +280,13 @@ Become a sponsor through [GitHub Sponsors](https://github.com/sponsors/kingslay/
 
 Your user icon or company logo shows up this with a link to your home page. 
 
-[UnknownCoder807](https://github.com/UnknownCoder807)   [skrew](https://github.com/skrew)   [Kimentanm](https://github.com/Kimentanm)   [nakiostudio](https://github.com/nakiostudio)    [byMohamedali](https://github.com/byMohamedali)
+[UnknownCoder807](https://github.com/UnknownCoder807)
+[skrew](https://github.com/skrew)   
+[Kimentanm](https://github.com/Kimentanm)
+[nakiostudio](https://github.com/nakiostudio)
+[byMohamedali](https://github.com/byMohamedali)
+[pcccccc](https://github.com/pcccccc) 
+[hippiefox](https://github.com/hippiefox)
 
 Thanks to [nightfall708](https://github.com/nightfall708) for sponsoring a mac mini
 
@@ -282,6 +296,9 @@ Thanks to [skrew](https://github.com/skrew) and LillyPlayer community for sponso
 
 ## Communication
 
-![1](https://github.com/kingslay/KSPlayer/raw/develop/Documents/Sponsors.jpg)
+If you have a business cooperation project or want to initiate a paid consultation, you can contact me via email
 
 - Email : kingslay@icloud.com
+
+![1](https://github.com/kingslay/KSPlayer/raw/develop/Documents/Sponsors.jpg)
+

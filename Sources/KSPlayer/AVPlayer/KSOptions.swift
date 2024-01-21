@@ -61,13 +61,9 @@ open class KSOptions {
         }
     }
 
-    public var userAgent: String? {
+    public var userAgent: String = "KSPlayer" {
         didSet {
-            if let userAgent {
-                formatContextOptions["user_agent"] = userAgent
-            } else {
-                formatContextOptions["user_agent"] = nil
-            }
+            formatContextOptions["user_agent"] = userAgent
         }
     }
 
@@ -91,7 +87,7 @@ open class KSOptions {
     public var hardwareDecode = KSOptions.hardwareDecode
     public var asynchronousDecompression = KSOptions.asynchronousDecompression
     public var videoDisable = false
-    public var canStartPictureInPictureAutomaticallyFromInline = true
+    public var canStartPictureInPictureAutomaticallyFromInline = KSOptions.canStartPictureInPictureAutomaticallyFromInline
     public var automaticWindowResize = true
     @Published
     public var videoInterlacingType: VideoInterlacingType?
@@ -110,6 +106,7 @@ open class KSOptions {
     public internal(set) var decodeAudioTime = 0.0
     public internal(set) var decodeVideoTime = 0.0
     public init() {
+        formatContextOptions["user_agent"] = userAgent
         // 参数的配置可以参考protocols.texi 和 http.c
         // 这个一定要，不然有的流就会判断不准FieldOrder
         formatContextOptions["scan_all_pmts"] = 1
@@ -271,10 +268,10 @@ open class KSOptions {
         }
     }
 
-    private var idetTypeMap = [VideoInterlacingType: Int]()
+    private var idetTypeMap = [VideoInterlacingType: UInt]()
     open func filter(log: String) {
-        if log.starts(with: "Repeated Field:") {
-            log.split(separator: ",").forEach { str in
+        if log.starts(with: "Repeated Field:"), autoDeInterlace {
+            for str in log.split(separator: ",") {
                 let map = str.split(separator: ":")
                 if map.count >= 2 {
                     if String(map[0].trimmingCharacters(in: .whitespaces)) == "Multi frame" {
@@ -318,8 +315,19 @@ open class KSOptions {
                 hardwareDecode = false
                 asynchronousDecompression = false
                 let yadif = hardwareDecode ? "yadif_videotoolbox" : "yadif"
-                videoFilters.append("\(yadif)=mode=\(KSOptions.yadifMode):parity=-1:deint=1")
-                if KSOptions.yadifMode == 1 || KSOptions.yadifMode == 3 {
+                var yadifMode = KSOptions.yadifMode
+//                if let assetTrack = assetTrack as? FFmpegAssetTrack {
+//                    if assetTrack.realFrameRate.num == 2 * assetTrack.avgFrameRate.num, assetTrack.realFrameRate.den == assetTrack.avgFrameRate.den {
+//                        if yadifMode == 1 {
+//                            yadifMode = 0
+//                        } else if yadifMode == 3 {
+//                            yadifMode = 2
+//                        }
+//                    }
+//                }
+                videoFilters.append("idet")
+                videoFilters.append("\(yadif)=mode=\(yadifMode):parity=-1:deint=1")
+                if yadifMode == 1 || yadifMode == 3 {
                     assetTrack.nominalFrameRate = assetTrack.nominalFrameRate * 2
                 }
             }
@@ -456,14 +464,16 @@ public extension KSOptions {
     static var isAccurateSeek = false
     /// Applies to short videos only
     static var isLoopPlay = false
-    /// 是否自动播放，默认false
-    static var isAutoPlay = false
+    /// 是否自动播放，默认true
+    static var isAutoPlay = true
     /// seek完是否自动播放
     static var isSeekedAutoPlay = true
     static var hardwareDecode = true
     // 默认不用自研的硬解，因为有些视频的AVPacket的pts顺序是不对的，只有解码后的AVFrame里面的pts是对的。
     static var asynchronousDecompression = false
     static var isPipPopViewController = false
+    static var canStartPictureInPictureAutomaticallyFromInline = true
+    static var preferredFrame = true
     static var displayCriteriaFormatDescriptionEnabled = false
     /// 日志级别
     static var logLevel = LogLevel.warning

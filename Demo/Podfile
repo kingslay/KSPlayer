@@ -10,7 +10,6 @@ def common
 #  pod 'Libass',:git => 'https://github.com/kingslay/FFmpegKit.git', :branch => 'main'
 #  pod 'FFmpegKit',:git => 'https://github.com/kingslay/FFmpegKit.git', :branch => 'main'
 #  pod 'OpenSSL',:git => 'https://github.com/kingslay/FFmpegKit.git', :branch => 'main'
-  pod 'SwiftLint'
 end
 target 'demo-iOS' do
   project 'demo-iOS/demo-iOS.xcodeproj'
@@ -29,7 +28,3 @@ target 'demo-tvOS' do
   platform :tvos, 13.0
   common
 end
-#target 'iOS' do
-#  project 'SwiftUI/SwiftUI.xcodeproj'
-#  platform :ios, 15.0
-#end

@@ -1,9 +1,10 @@
 import AVFoundation
 @testable import KSPlayer
 import XCTest
+
 class AudioTest: XCTestCase {
     func testChannelLayout() {
-        layoutMapTuple.forEach { tag, mask in
+        for (tag, mask) in layoutMapTuple {
             assert(tag: tag, mask: mask)
         }
     }

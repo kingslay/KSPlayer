@@ -117,7 +117,7 @@ extension AVAudioChannelLayout {
         var mask: UInt64?
         if layoutTag == kAudioChannelLayoutTag_UseChannelDescriptions {
             var newMask = UInt64(0)
-            layout.channelDescriptions.forEach { description in
+            for description in layout.channelDescriptions {
                 let label = description.mChannelLabel
                 KSLog("[audio] label: \(label)")
                 let channel = label.avChannel.rawValue

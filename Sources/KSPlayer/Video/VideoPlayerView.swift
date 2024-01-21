@@ -344,12 +344,12 @@ open class VideoPlayerView: PlayerView {
     }
 
     open func set(resource: KSPlayerResource, definitionIndex: Int = 0, isSetUrl: Bool = true) {
-        self.resource = resource
         currentDefinition = definitionIndex >= resource.definitions.count ? resource.definitions.count - 1 : definitionIndex
         if isSetUrl {
             let asset = resource.definitions[currentDefinition]
             super.set(url: asset.url, options: asset.options)
         }
+        self.resource = resource
     }
 
     override open func set(url: URL, options: KSOptions) {
@@ -531,7 +531,7 @@ public extension VideoPlayerView {
             disableAction.setValue(true, forKey: "checked")
         }
 
-        availableSubtitles.enumerated().forEach { _, srt in
+        for (_, srt) in availableSubtitles.enumerated() {
             let action = UIAlertAction(title: srt.name, style: .default) { [weak self] _ in
                 self?.srtControl.selectedSubtitleInfo = srt
             }
@@ -548,7 +548,7 @@ public extension VideoPlayerView {
 
     private func changePlaybackRate(button: UIButton) {
         let alertController = UIAlertController(title: NSLocalizedString("select speed", comment: ""), message: nil, preferredStyle: preferredStyle())
-        [0.75, 1.0, 1.25, 1.5, 2.0].forEach { rate in
+        for rate in [0.75, 1.0, 1.25, 1.5, 2.0] {
             let title = "\(rate) x"
             let action = UIAlertAction(title: title, style: .default) { [weak self] _ in
                 guard let self else { return }
@@ -557,7 +557,7 @@ public extension VideoPlayerView {
             }
             alertController.addAction(action)
 
-            if Float(rate) == self.playerLayer?.player.playbackRate {
+            if Float(rate) == playerLayer?.player.playbackRate {
                 alertController.preferredAction = action
                 action.setValue(true, forKey: "checked")
             }

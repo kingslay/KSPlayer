@@ -5,6 +5,7 @@
 //  Created by kintan on 2018/8/7.
 //
 import Foundation
+
 public class EmptySubtitleInfo: SubtitleInfo {
     public var isEnabled: Bool = true
     public let subtitleID: String = ""
@@ -248,7 +249,7 @@ public class AssrtSubtitleDataSouce: SearchSubtitleDataSouce {
             return infos
         }
         if let fileList = sub["filelist"] as? [[String: String]] {
-            fileList.forEach { dic in
+            for dic in fileList {
                 if let urlString = dic["url"], let filename = dic["f"], let url = URL(string: urlString) {
                     let info = URLSubtitleInfo(subtitleID: urlString, name: filename, url: url)
                     infos.append(info)

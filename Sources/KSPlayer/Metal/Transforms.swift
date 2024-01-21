@@ -7,6 +7,7 @@
 //
 
 import simd
+
 // swiftlint:disable identifier_name
 extension simd_float4x4 {
     static let identity = matrix_identity_float4x4

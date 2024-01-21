@@ -7,6 +7,7 @@
 #if canImport(UIKit) && !os(tvOS)
 
 import UIKit
+
 protocol PlayerViewFullScreenDelegate: AnyObject {
     func player(isMaskShow: Bool, isFullScreen: Bool)
 }
