@@ -173,6 +173,7 @@ open class PlayerView: UIView, KSPlayerLayerDelegate, KSSliderDelegate {
         if state == .readyToPlay {
             totalTime = layer.player.duration
             toolBar.isSeekable = layer.player.seekable
+            toolBar.playButton.isSelected = true
         } else if state == .playedToTheEnd || state == .paused || state == .error {
             toolBar.playButton.isSelected = false
         }

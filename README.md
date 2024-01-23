@@ -61,8 +61,8 @@ Make sure to use the latest version **cocoapods 1.10.1+**, which can be installe
 ```ruby
 target 'ProjectName' do
     use_frameworks!
-    pod 'KSPlayer',:git => 'https://github.com/kingslay/KSPlayer.git', :branch => 'develop'
-    pod 'DisplayCriteria',:git => 'https://github.com/kingslay/KSPlayer.git', :branch => 'develop'
+    pod 'KSPlayer',:git => 'https://github.com/kingslay/KSPlayer.git', :branch => 'main'
+    pod 'DisplayCriteria',:git => 'https://github.com/kingslay/KSPlayer.git', :branch => 'main'
     pod 'FFmpegKit',:git => 'https://github.com/kingslay/FFmpegKit.git', :branch => 'main'
     pod 'Libass',:git => 'https://github.com/kingslay/FFmpegKit.git', :branch => 'main'
 end
@@ -72,7 +72,7 @@ end
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/kingslay/KSPlayer.git", .branch("develop"))
+    .package(url: "https://github.com/kingslay/KSPlayer.git", .branch("main"))
 ]
 ```
 
