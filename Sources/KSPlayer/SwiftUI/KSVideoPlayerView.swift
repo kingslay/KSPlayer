@@ -18,8 +18,16 @@ public struct KSVideoPlayerView: View {
     @Environment(\.dismiss)
     private var dismiss
     @FocusState
-    private var focusableField: FocusableField?
+    private var focusableField: FocusableField? {
+        willSet {
+            isDropdownShow = newValue == .info
+            playerCoordinator.isMaskShow = newValue == .controller
+        }
+    }
+
     public let options: KSOptions
+    @State
+    private var isDropdownShow = false
     @State
     public var url: URL {
         didSet {
@@ -50,6 +58,12 @@ public struct KSVideoPlayerView: View {
             if playerCoordinator.isMaskShow {
                 controllerView
             }
+            #if os(tvOS)
+            if isDropdownShow {
+                VideoSettingView(config: playerCoordinator, subtitleModel: playerCoordinator.subtitleModel, subtitleTitle: title)
+                    .focused($focusableField, equals: .info)
+            }
+            #endif
             #endif
         }
         .preferredColorScheme(.dark)
@@ -65,10 +79,11 @@ public struct KSVideoPlayerView: View {
                 }
             }
             .onExitCommand {
-                if playerCoordinator.isMaskShow {
-                    playerCoordinator.isMaskShow = false
-                } else {
+                switch focusableField {
+                case .play:
                     dismiss()
+                default:
+                    focusableField = .play
                 }
             }
         #endif
@@ -166,8 +181,10 @@ public struct KSVideoPlayerView: View {
                 playerCoordinator.skip(interval: -15)
             case .right:
                 playerCoordinator.skip(interval: 15)
-            case .up, .down:
+            case .up:
                 playerCoordinator.isMaskShow.toggle()
+            case .down:
+                focusableField = .info
             @unknown default:
                 break
             }
@@ -204,7 +221,7 @@ public struct KSVideoPlayerView: View {
     }
 
     fileprivate enum FocusableField {
-        case play, controller
+        case play, controller, info
     }
 
     public func openURL(_ url: URL) {
