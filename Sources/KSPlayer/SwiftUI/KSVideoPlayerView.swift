@@ -21,7 +21,6 @@ public struct KSVideoPlayerView: View {
     private var focusableField: FocusableField? {
         willSet {
             isDropdownShow = newValue == .info
-            playerCoordinator.isMaskShow = newValue == .controller
         }
     }
 
@@ -79,11 +78,15 @@ public struct KSVideoPlayerView: View {
                 }
             }
             .onExitCommand {
-                switch focusableField {
-                case .play:
-                    dismiss()
-                default:
-                    focusableField = .play
+                if playerCoordinator.isMaskShow {
+                    playerCoordinator.isMaskShow = false
+                } else {
+                    switch focusableField {
+                    case .play:
+                        dismiss()
+                    default:
+                        focusableField = .play
+                    }
                 }
             }
         #endif
