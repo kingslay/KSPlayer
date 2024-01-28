@@ -51,18 +51,12 @@ public struct KSVideoPlayerView: View {
         ZStack {
             playView
             VideoSubtitleView(model: playerCoordinator.subtitleModel)
-            #if os(macOS)
-            controllerView.opacity(playerCoordinator.isMaskShow ? 1 : 0)
-            #else
-            if playerCoordinator.isMaskShow {
-                controllerView
-            }
+            controllerView
             #if os(tvOS)
             if isDropdownShow {
                 VideoSettingView(config: playerCoordinator, subtitleModel: playerCoordinator.subtitleModel, subtitleTitle: title)
                     .focused($focusableField, equals: .info)
             }
-            #endif
             #endif
         }
         .preferredColorScheme(.dark)
@@ -209,17 +203,20 @@ public struct KSVideoPlayerView: View {
 
     private var controllerView: some View {
         VStack {
-            // 设置opacity为0，还是会去更新View。所以只能这样了
             VideoControllerView(config: playerCoordinator, subtitleModel: playerCoordinator.subtitleModel, title: $title)
-            VideoTimeShowView(config: playerCoordinator, model: playerCoordinator.timemodel)
+            // 设置opacity为0，还是会去更新View。所以只能这样了
+            if playerCoordinator.isMaskShow {
+                VideoTimeShowView(config: playerCoordinator, model: playerCoordinator.timemodel)
+                    .onAppear {
+                        focusableField = .controller
+                    }
+                    .onDisappear {
+                        focusableField = .play
+                    }
+            }
         }
         .focused($focusableField, equals: .controller)
-        .onAppear {
-            focusableField = .controller
-        }
-        .onDisappear {
-            focusableField = .play
-        }
+        .opacity(playerCoordinator.isMaskShow ? 1 : 0)
         .padding()
     }
 
