@@ -14,10 +14,12 @@ import SwiftUI
 import UIKit
 
 public extension KSOptions {
+    @MainActor
     static var windowScene: UIWindowScene? {
         UIApplication.shared.connectedScenes.first as? UIWindowScene
     }
 
+    @MainActor
     static var sceneSize: CGSize {
         let window = windowScene?.windows.first
         return window?.bounds.size ?? .zero
@@ -139,6 +141,7 @@ public extension FourCharCode {
     }
 }
 
+@MainActor
 public enum DisplayEnum {
     case plane
     // swiftlint:disable identifier_name

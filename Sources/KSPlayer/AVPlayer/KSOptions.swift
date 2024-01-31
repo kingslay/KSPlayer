@@ -334,6 +334,7 @@ open class KSOptions {
         }
     }
 
+    @MainActor
     open func updateVideo(refreshRate: Float, isDovi: Bool, formatDescription: CMFormatDescription?) {
         #if os(tvOS) || os(xrOS)
         guard let displayManager = UIApplication.shared.windows.first?.avDisplayManager,
@@ -425,7 +426,9 @@ open class KSOptions {
 
     open func playerLayerDeinit() {
         #if os(tvOS) || os(xrOS)
-        UIApplication.shared.windows.first?.avDisplayManager.preferredDisplayCriteria = nil
+        Task { @MainActor in
+            UIApplication.shared.windows.first?.avDisplayManager.preferredDisplayCriteria = nil
+        }
         #endif
     }
 
