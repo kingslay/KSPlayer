@@ -61,7 +61,7 @@ open class KSOptions {
         }
     }
 
-    public var userAgent: String = "KSPlayer" {
+    public var userAgent: String? = "KSPlayer" {
         didSet {
             formatContextOptions["user_agent"] = userAgent
         }
