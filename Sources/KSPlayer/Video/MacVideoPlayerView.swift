@@ -15,6 +15,7 @@ public extension NSPasteboard.PasteboardType {
 }
 
 public extension NSDraggingInfo {
+    @MainActor
     func getUrl() -> URL? {
         guard let types = draggingPasteboard.types else { return nil }
 

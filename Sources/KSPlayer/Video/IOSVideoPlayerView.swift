@@ -402,6 +402,7 @@ extension IOSVideoPlayerView: UIDocumentPickerDelegate {
 #endif
 
 #if os(iOS)
+@MainActor
 public class MenuController {
     public init(with builder: UIMenuBuilder) {
         builder.remove(menu: .format)
@@ -455,6 +456,7 @@ public class MenuController {
             NSLocalizedString("\(rawValue)", comment: "")
         }
 
+        @MainActor
         var command: String {
             switch self {
             case .rightArrow:

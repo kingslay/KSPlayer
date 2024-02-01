@@ -65,6 +65,7 @@ public final class KSAVPlayerView: UIView {
     }
 }
 
+@MainActor
 public class KSAVPlayer {
     private var cancellable: AnyCancellable?
     private var options: KSOptions {
@@ -526,6 +527,7 @@ class AVMediaPlayerTrack: MediaPlayerTrack {
     var dovi: DOVIDecoderConfigurationRecord?
     let fieldOrder: FFmpegFieldOrder = .unknown
     var isPlayable: Bool
+    @MainActor
     var isEnabled: Bool {
         get {
             track.isEnabled

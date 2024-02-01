@@ -53,6 +53,7 @@ public enum KSPlayerState: CustomStringConvertible {
     public var isPlaying: Bool { self == .buffering || self == .bufferFinished }
 }
 
+@MainActor
 public protocol KSPlayerLayerDelegate: AnyObject {
     func player(layer: KSPlayerLayer, state: KSPlayerState)
     func player(layer: KSPlayerLayer, currentTime: TimeInterval, totalTime: TimeInterval)
@@ -87,9 +88,12 @@ open class KSPlayerLayer: UIView {
     }
 
     public private(set) var options: KSOptions
+
     public var player: MediaPlayerProtocol {
         didSet {
-            oldValue.view?.removeFromSuperview()
+            Task { @MainActor in
+                oldValue.view?.removeFromSuperview()
+            }
             KSLog("player is \(player)")
             player.playbackRate = oldValue.playbackRate
             player.playbackVolume = oldValue.playbackVolume

@@ -83,6 +83,7 @@ extension KSVideoPlayer: UIViewRepresentable {
         }
     }
 
+    @MainActor
     public final class Coordinator: ObservableObject {
         @Published
         public var state = KSPlayerState.prepareToPlay
@@ -108,6 +109,7 @@ extension KSVideoPlayer: UIViewRepresentable {
         }
 
         @Published
+        @MainActor
         public var isMaskShow = true {
             didSet {
                 if isMaskShow != oldValue {

@@ -26,7 +26,10 @@ let package = Package(
 //                .product(name: "Libmpv", package: "FFmpegKit"),
                 "DisplayCriteria",
             ],
-            resources: [.process("Metal/Shaders.metal")]
+            resources: [.process("Metal/Shaders.metal")],
+            swiftSettings: [
+                .enableExperimentalFeature("StrictConcurrency"),
+            ]
         ),
         .target(
             name: "DisplayCriteria"

@@ -36,7 +36,11 @@ public struct KSVideoPlayerView: View {
         }
     }
 
-    public init(coordinator: KSVideoPlayer.Coordinator = KSVideoPlayer.Coordinator(), url: URL, options: KSOptions, title: String? = nil, subtitleDataSouce: SubtitleDataSouce? = nil) {
+    public init(url: URL, options: KSOptions, title: String? = nil, subtitleDataSouce: SubtitleDataSouce? = nil) {
+        self.init(coordinator: KSVideoPlayer.Coordinator(), url: url, options: options, title: title, subtitleDataSouce: subtitleDataSouce)
+    }
+
+    public init(coordinator: KSVideoPlayer.Coordinator, url: URL, options: KSOptions, title: String? = nil, subtitleDataSouce: SubtitleDataSouce? = nil) {
         _url = .init(initialValue: url)
         _playerCoordinator = .init(wrappedValue: coordinator)
         _title = .init(initialValue: title ?? url.lastPathComponent)
@@ -577,6 +581,7 @@ struct VideoSubtitleView: View {
 
 private extension SubtitlePart {
     @available(iOS 16, tvOS 16, macOS 13, *)
+    @MainActor
     var subtitleView: some View {
         VStack {
             if let image {
@@ -714,7 +719,7 @@ public struct PlatformView<Content: View>: View {
 struct KSVideoPlayerView_Previews: PreviewProvider {
     static var previews: some View {
         let url = URL(string: "http://clips.vorwaerts-gmbh.de/big_buck_bunny.mp4")!
-        KSVideoPlayerView(url: url, options: KSOptions())
+        KSVideoPlayerView(coordinator: KSVideoPlayer.Coordinator(), url: url, options: KSOptions())
     }
 }
 

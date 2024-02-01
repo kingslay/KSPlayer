@@ -13,6 +13,7 @@ import UIKit
 import AppKit
 #endif
 
+@MainActor
 public class KSMEPlayer: NSObject {
     private var loopCount = 1
     private var playerItem: MEPlayerItem
@@ -22,9 +23,7 @@ public class KSMEPlayer: NSObject {
     public private(set) var videoOutput: (VideoOutput & UIView)? {
         didSet {
             oldValue?.invalidate()
-            runInMainqueue {
-                oldValue?.removeFromSuperview()
-            }
+            oldValue?.removeFromSuperview()
         }
     }
 
@@ -34,6 +33,7 @@ public class KSMEPlayer: NSObject {
         }
     }
 
+    @MainActor
     private lazy var _pipController: Any? = {
         if #available(iOS 15.0, tvOS 15.0, macOS 12.0, *), let videoOutput {
             let contentSource = AVPictureInPictureController.ContentSource(sampleBufferDisplayLayer: videoOutput.displayLayer, playbackDelegate: self)
@@ -44,6 +44,7 @@ public class KSMEPlayer: NSObject {
         }
     }()
 
+    @MainActor
     @available(tvOS 14.0, *)
     public var pipController: KSPictureInPictureController? {
         _pipController as? KSPictureInPictureController
@@ -298,7 +299,7 @@ extension KSMEPlayer: MediaPlayerProtocol {
     }
 
     public var isPlaying: Bool { playbackState == .playing }
-
+    @MainActor
     public var naturalSize: CGSize {
         options.display == .plane ? playerItem.naturalSize : KSOptions.sceneSize
     }
@@ -414,6 +415,7 @@ extension KSMEPlayer: MediaPlayerProtocol {
         options.decodeVideoTime = 0
     }
 
+    @MainActor
     public var contentMode: UIViewContentMode {
         get {
             view?.contentMode ?? .center
