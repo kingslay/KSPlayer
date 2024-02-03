@@ -146,7 +146,7 @@ public struct KSVideoPlayerView: View {
         #endif
         #if os(macOS)
             .onTapGesture(count: 2) {
-                guard let view = playerCoordinator.playerLayer else {
+                guard let view = playerCoordinator.playerLayer?.player.view else {
                     return
                 }
                 view.window?.toggleFullScreen(nil)
@@ -154,7 +154,7 @@ public struct KSVideoPlayerView: View {
                 view.layoutSubtreeIfNeeded()
         }
         .onExitCommand {
-            playerCoordinator.playerLayer?.exitFullScreenMode()
+            playerCoordinator.playerLayer?.player.view?.exitFullScreenMode()
         }
         .onMoveCommand { direction in
             switch direction {

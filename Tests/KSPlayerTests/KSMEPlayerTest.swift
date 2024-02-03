@@ -2,6 +2,7 @@
 import XCTest
 
 class KSMEPlayerTest: XCTestCase {
+    @MainActor
     func testPlaying() {
         if let path = Bundle(for: type(of: self)).path(forResource: "h264", ofType: "mp4") {
             let options = KSOptions()
@@ -16,6 +17,7 @@ class KSMEPlayerTest: XCTestCase {
         }
     }
 
+    @MainActor
     func testAutoPlay() {
         if let path = Bundle(for: type(of: self)).path(forResource: "h264", ofType: "mp4") {
             let options = KSOptions()

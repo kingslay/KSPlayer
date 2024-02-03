@@ -105,20 +105,19 @@ open class VideoPlayerView: PlayerView {
 
     override public var playerLayer: KSPlayerLayer? {
         didSet {
-            oldValue?.removeFromSuperview()
-            if let playerLayer {
+            oldValue?.player.view?.removeFromSuperview()
+            if let view = playerLayer?.player.view {
                 #if canImport(UIKit)
-                addSubview(playerLayer)
-                sendSubviewToBack(playerLayer)
+                insertSubview(view, belowSubview: contentOverlayView)
                 #else
-                addSubview(playerLayer, positioned: .below, relativeTo: contentOverlayView)
+                addSubview(view, positioned: .below, relativeTo: contentOverlayView)
                 #endif
-                playerLayer.translatesAutoresizingMaskIntoConstraints = false
+                view.translatesAutoresizingMaskIntoConstraints = false
                 NSLayoutConstraint.activate([
-                    playerLayer.topAnchor.constraint(equalTo: topAnchor),
-                    playerLayer.leadingAnchor.constraint(equalTo: leadingAnchor),
-                    playerLayer.bottomAnchor.constraint(equalTo: bottomAnchor),
-                    playerLayer.trailingAnchor.constraint(equalTo: trailingAnchor),
+                    view.topAnchor.constraint(equalTo: topAnchor),
+                    view.leadingAnchor.constraint(equalTo: leadingAnchor),
+                    view.bottomAnchor.constraint(equalTo: bottomAnchor),
+                    view.trailingAnchor.constraint(equalTo: trailingAnchor),
                 ])
             }
         }

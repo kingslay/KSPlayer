@@ -61,7 +61,7 @@ public protocol KSPlayerLayerDelegate: AnyObject {
     func player(layer: KSPlayerLayer, bufferedCount: Int, consumeTime: TimeInterval)
 }
 
-open class KSPlayerLayer: UIView {
+open class KSPlayerLayer: NSObject {
     public weak var delegate: KSPlayerLayerDelegate?
     @Published
     public var bufferingProgress: Int = 0
@@ -135,15 +135,16 @@ open class KSPlayerLayer: UIView {
     }
 
     /// 播发器的几种状态
+
     public private(set) var state = KSPlayerState.prepareToPlay {
-        didSet {
-            if state != oldValue {
-                runInMainqueue { [weak self] in
+        willSet {
+            if state != newValue {
+                Task { @MainActor [weak self] in
                     guard let self else {
                         return
                     }
-                    KSLog("playerStateDidChange - \(self.state)")
-                    self.delegate?.player(layer: self, state: self.state)
+                    KSLog("playerStateDidChange - \(newValue)")
+                    self.delegate?.player(layer: self, state: newValue)
                 }
             }
         }
@@ -183,9 +184,9 @@ open class KSPlayerLayer: UIView {
             firstPlayerType = KSOptions.firstPlayerType
         }
         player = firstPlayerType.init(url: url, options: options)
-        player.playbackRate = options.startPlayRate
         isAutoPlay = options.isAutoPlay
-        super.init(frame: .zero)
+        super.init()
+        player.playbackRate = options.startPlayRate
         if options.registerRemoteControll {
             registerRemoteControllEvent()
         }
@@ -193,8 +194,10 @@ open class KSPlayerLayer: UIView {
         player.contentMode = .scaleAspectFit
         prepareToPlay()
         #if canImport(UIKit)
-        NotificationCenter.default.addObserver(self, selector: #selector(enterBackground), name: UIApplication.didEnterBackgroundNotification, object: nil)
-        NotificationCenter.default.addObserver(self, selector: #selector(enterForeground), name: UIApplication.willEnterForegroundNotification, object: nil)
+        Task { @MainActor in
+            NotificationCenter.default.addObserver(self, selector: #selector(enterBackground), name: UIApplication.didEnterBackgroundNotification, object: nil)
+            NotificationCenter.default.addObserver(self, selector: #selector(enterForeground), name: UIApplication.willEnterForegroundNotification, object: nil)
+        }
         #if !os(xrOS)
         NotificationCenter.default.addObserver(self, selector: #selector(wirelessRouteActiveDidChange(notification:)), name: .MPVolumeViewWirelessRouteActiveDidChange, object: nil)
         #endif
@@ -251,7 +254,9 @@ open class KSPlayerLayer: UIView {
     }
 
     open func play() {
-        UIApplication.shared.isIdleTimerDisabled = true
+        Task { @MainActor in
+            UIApplication.shared.isIdleTimerDisabled = true
+        }
         isAutoPlay = true
         if state == .error {
             player.prepareToPlay()
@@ -283,8 +288,10 @@ open class KSPlayerLayer: UIView {
         player.pause()
         timer.fireDate = Date.distantFuture
         state = .paused
-        UIApplication.shared.isIdleTimerDisabled = false
         MPNowPlayingInfoCenter.default().playbackState = .paused
+        Task { @MainActor in
+            UIApplication.shared.isIdleTimerDisabled = false
+        }
     }
 
     public func resetPlayer() {
@@ -294,8 +301,10 @@ open class KSPlayerLayer: UIView {
         shouldSeekTo = 0
         player.playbackRate = 1
         player.playbackVolume = 1
-        UIApplication.shared.isIdleTimerDisabled = false
         MPNowPlayingInfoCenter.default().nowPlayingInfo = nil
+        Task { @MainActor in
+            UIApplication.shared.isIdleTimerDisabled = false
+        }
     }
 
     open func seek(time: TimeInterval, autoPlay: Bool, completion: @escaping ((Bool) -> Void)) {
@@ -316,19 +325,6 @@ open class KSPlayerLayer: UIView {
             completion(false)
         }
     }
-
-    override open func didAddSubview(_ subview: UIView) {
-        super.didAddSubview(subview)
-        if subview == player.view {
-            subview.translatesAutoresizingMaskIntoConstraints = false
-            NSLayoutConstraint.activate([
-                subview.leftAnchor.constraint(equalTo: leftAnchor),
-                subview.topAnchor.constraint(equalTo: topAnchor),
-                subview.bottomAnchor.constraint(equalTo: bottomAnchor),
-                subview.rightAnchor.constraint(equalTo: rightAnchor),
-            ])
-        }
-    }
 }
 
 // MARK: - MediaPlayerDelegate
@@ -336,15 +332,17 @@ open class KSPlayerLayer: UIView {
 extension KSPlayerLayer: MediaPlayerDelegate {
     public func readyToPlay(player: some MediaPlayerProtocol) {
         #if os(macOS)
-        if let window {
-            window.isMovableByWindowBackground = true
-            if options.automaticWindowResize {
-                let naturalSize = player.naturalSize
-                if naturalSize.width > 0, naturalSize.height > 0 {
-                    window.aspectRatio = naturalSize
-                    var frame = window.frame
-                    frame.size.height = frame.width * naturalSize.height / naturalSize.width
-                    window.setFrame(frame, display: true)
+        Task { @MainActor in
+            if let window = player.view?.window {
+                window.isMovableByWindowBackground = true
+                if options.automaticWindowResize {
+                    let naturalSize = player.naturalSize
+                    if naturalSize.width > 0, naturalSize.height > 0 {
+                        window.aspectRatio = naturalSize
+                        var frame = window.frame
+                        frame.size.height = frame.width * naturalSize.height / naturalSize.width
+                        window.setFrame(frame, display: true)
+                    }
                 }
             }
         }
@@ -375,7 +373,9 @@ extension KSPlayerLayer: MediaPlayerDelegate {
         guard player.playbackState != .seeking else { return }
         if player.loadState == .playable, startTime > 0 {
             let diff = CACurrentMediaTime() - startTime
-            delegate?.player(layer: self, bufferedCount: bufferedCount, consumeTime: diff)
+            Task { @MainActor in
+                delegate?.player(layer: self, bufferedCount: bufferedCount, consumeTime: diff)
+            }
             if bufferedCount == 0 {
                 var dic = ["firstTime": diff]
                 if options.tcpConnectedTime > 0 {
@@ -427,12 +427,16 @@ extension KSPlayerLayer: MediaPlayerDelegate {
             KSLog(error as CustomStringConvertible)
         } else {
             let duration = player.duration
-            delegate?.player(layer: self, currentTime: duration, totalTime: duration)
+            Task { @MainActor in
+                delegate?.player(layer: self, currentTime: duration, totalTime: duration)
+            }
             state = .playedToTheEnd
         }
         timer.fireDate = Date.distantFuture
         bufferedCount = 1
-        delegate?.player(layer: self, finish: error)
+        Task { @MainActor in
+            delegate?.player(layer: self, finish: error)
+        }
         if error == nil {
             nextPlayer()
         }
@@ -459,9 +463,6 @@ extension KSPlayerLayer {
         startTime = CACurrentMediaTime()
         bufferedCount = 0
         player.prepareToPlay()
-        if let view = player.view {
-            addSubview(view)
-        }
     }
 
     private func updateNowPlayingInfo() {
@@ -638,6 +639,7 @@ extension KSPlayerLayer {
     }
 
     #if canImport(UIKit) && !os(xrOS)
+    @MainActor
     @objc private func wirelessRouteActiveDidChange(notification: Notification) {
         guard let volumeView = notification.object as? MPVolumeView, isWirelessRouteActive != volumeView.isWirelessRouteActive else { return }
         if volumeView.isWirelessRouteActive {

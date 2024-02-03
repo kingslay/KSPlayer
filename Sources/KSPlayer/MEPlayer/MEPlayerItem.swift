@@ -11,7 +11,7 @@ import Libavcodec
 import Libavfilter
 import Libavformat
 
-final class MEPlayerItem {
+public final class MEPlayerItem: Sendable {
     private let url: URL
     private let options: KSOptions
     private let operationQueue = OperationQueue()
@@ -42,15 +42,15 @@ final class MEPlayerItem {
     private var seekByBytes = false
     private var lastVideoDisplayTime = CACurrentMediaTime()
     public private(set) var chapters: [Chapter] = []
-    var currentPlaybackTime: TimeInterval {
+    public var currentPlaybackTime: TimeInterval {
         state == .seeking ? seekTime : (mainClock().time - startTime).seconds
     }
 
     private var seekTime = TimeInterval(0)
     private var startTime = CMTime.zero
-    private(set) var duration: TimeInterval = 0
-    private(set) var fileSize: Double = 0
-    private(set) var naturalSize = CGSize.zero
+    public private(set) var duration: TimeInterval = 0
+    public private(set) var fileSize: Double = 0
+    public private(set) var naturalSize = CGSize.zero
     private var error: NSError? {
         didSet {
             if error != nil {
@@ -133,7 +133,7 @@ final class MEPlayerItem {
     }()
 
     weak var delegate: MEPlayerDelegate?
-    init(url: URL, options: KSOptions) {
+    public init(url: URL, options: KSOptions) {
         self.url = url
         self.options = options
         timer.fireDate = Date.distantFuture
@@ -623,7 +623,7 @@ extension MEPlayerItem: MediaPlayback {
         return seekable && duration > 0
     }
 
-    func prepareToPlay() {
+    public func prepareToPlay() {
         state = .opening
         openOperation = BlockOperation { [weak self] in
             guard let self else { return }
@@ -638,7 +638,7 @@ extension MEPlayerItem: MediaPlayback {
         }
     }
 
-    func shutdown() {
+    public func shutdown() {
         guard state != .closed else { return }
         state = .closed
         av_packet_free(&outputPacket)
@@ -681,7 +681,7 @@ extension MEPlayerItem: MediaPlayback {
         }
     }
 
-    func seek(time: TimeInterval, completion: @escaping ((Bool) -> Void)) {
+    public func seek(time: TimeInterval, completion: @escaping ((Bool) -> Void)) {
         if state == .reading || state == .paused {
             seekTime = time
             state = .seeking
@@ -779,7 +779,7 @@ extension MEPlayerItem: OutputRenderSourceDelegate {
         isAudioStalled ? videoClock : audioClock
     }
 
-    func setVideo(time: CMTime, position: Int64) {
+    public func setVideo(time: CMTime, position: Int64) {
 //        print("[video] video interval \(CACurrentMediaTime() - videoClock.lastMediaTime) video diff \(time.seconds - videoClock.time.seconds)")
         videoClock.time = time
         videoClock.position = position
@@ -792,12 +792,12 @@ extension MEPlayerItem: OutputRenderSourceDelegate {
         }
     }
 
-    func setAudio(time: CMTime, position: Int64) {
+    public func setAudio(time: CMTime, position: Int64) {
         audioClock.time = time
         audioClock.position = position
     }
 
-    func getVideoOutputRender(force: Bool) -> VideoVTBFrame? {
+    public func getVideoOutputRender(force: Bool) -> VideoVTBFrame? {
         guard let videoTrack else {
             return nil
         }
@@ -849,7 +849,7 @@ extension MEPlayerItem: OutputRenderSourceDelegate {
         return frame
     }
 
-    func getAudioOutputRender() -> AudioFrame? {
+    public func getAudioOutputRender() -> AudioFrame? {
         if let frame = audioTrack?.getOutputRender(where: nil) {
             audioRecognizer?.append(frame: frame)
             return frame

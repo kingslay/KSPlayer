@@ -104,6 +104,7 @@ public extension MediaPlayerProtocol {
     }
 }
 
+@MainActor
 public protocol MediaPlayerDelegate: AnyObject {
     func readyToPlay(player: some MediaPlayerProtocol)
     func changeLoadState(player: some MediaPlayerProtocol)

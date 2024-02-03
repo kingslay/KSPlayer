@@ -13,7 +13,6 @@ import UIKit
 import AppKit
 #endif
 
-@MainActor
 public class KSMEPlayer: NSObject {
     private var loopCount = 1
     private var playerItem: MEPlayerItem
@@ -23,17 +22,20 @@ public class KSMEPlayer: NSObject {
     public private(set) var videoOutput: (VideoOutput & UIView)? {
         didSet {
             oldValue?.invalidate()
-            oldValue?.removeFromSuperview()
+            Task { @MainActor in
+                oldValue?.removeFromSuperview()
+            }
         }
     }
 
     public private(set) var bufferingProgress = 0 {
-        didSet {
-            delegate?.changeBuffering(player: self, progress: bufferingProgress)
+        willSet {
+            Task { @MainActor in
+                delegate?.changeBuffering(player: self, progress: newValue)
+            }
         }
     }
 
-    @MainActor
     private lazy var _pipController: Any? = {
         if #available(iOS 15.0, tvOS 15.0, macOS 12.0, *), let videoOutput {
             let contentSource = AVPictureInPictureController.ContentSource(sampleBufferDisplayLayer: videoOutput.displayLayer, playbackDelegate: self)
@@ -44,7 +46,6 @@ public class KSMEPlayer: NSObject {
         }
     }()
 
-    @MainActor
     @available(tvOS 14.0, *)
     public var pipController: KSPictureInPictureController? {
         _pipController as? KSPictureInPictureController
@@ -103,7 +104,9 @@ public class KSMEPlayer: NSObject {
             if playbackState != oldValue {
                 playOrPause()
                 if playbackState == .finished {
-                    delegate?.finish(player: self, error: nil)
+                    Task { @MainActor in
+                        delegate?.finish(player: self, error: nil)
+                    }
                 }
             }
         }
@@ -146,7 +149,7 @@ public class KSMEPlayer: NSObject {
 
 private extension KSMEPlayer {
     func playOrPause() {
-        runInMainqueue { [weak self] in
+        Task { @MainActor [weak self] in
             guard let self else { return }
             let isPaused = !(self.playbackState == .playing && self.loadState == .playable)
             if isPaused {
@@ -196,28 +199,28 @@ extension KSMEPlayer: MEPlayerDelegate {
         let audioDescriptor = tracks(mediaType: .audio).first { $0.isEnabled }.flatMap {
             $0 as? FFmpegAssetTrack
         }?.audioDescriptor
-        runInMainqueue { [weak self] in
+        Task { @MainActor [weak self] in
             guard let self else { return }
             if let audioDescriptor {
-                KSLog("[audio] audio type: \(self.audioOutput) prepare audioFormat )")
-                self.audioOutput.prepare(audioFormat: audioDescriptor.audioFormat)
+                KSLog("[audio] audio type: \(audioOutput) prepare audioFormat )")
+                audioOutput.prepare(audioFormat: audioDescriptor.audioFormat)
             }
-            if let controlTimebase = videoOutput?.displayLayer.controlTimebase, self.options.startPlayTime > 1 {
-                CMTimebaseSetTime(controlTimebase, time: CMTimeMake(value: Int64(self.options.startPlayTime), timescale: 1))
+            if let controlTimebase = videoOutput?.displayLayer.controlTimebase, options.startPlayTime > 1 {
+                CMTimebaseSetTime(controlTimebase, time: CMTimeMake(value: Int64(options.startPlayTime), timescale: 1))
             }
-            self.delegate?.readyToPlay(player: self)
+            delegate?.readyToPlay(player: self)
         }
     }
 
     func sourceDidFailed(error: NSError?) {
-        runInMainqueue { [weak self] in
+        Task { @MainActor [weak self] in
             guard let self else { return }
             self.delegate?.finish(player: self, error: error)
         }
     }
 
     func sourceDidFinished() {
-        runInMainqueue { [weak self] in
+        Task { @MainActor [weak self] in
             guard let self else { return }
             if self.options.isLoopPlay {
                 self.loopCount += 1
@@ -299,6 +302,7 @@ extension KSMEPlayer: MediaPlayerProtocol {
     }
 
     public var isPlaying: Bool { playbackState == .playing }
+
     @MainActor
     public var naturalSize: CGSize {
         options.display == .plane ? playerItem.naturalSize : KSOptions.sceneSize
