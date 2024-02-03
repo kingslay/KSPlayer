@@ -263,12 +263,10 @@ open class KSPlayerLayer: NSObject {
         }
         if player.isReadyToPlay {
             if state == .playedToTheEnd {
-                Task {
-                    player.seek(time: 0) { [weak self] finished in
-                        guard let self else { return }
-                        if finished {
-                            self.player.play()
-                        }
+                player.seek(time: 0) { [weak self] finished in
+                    guard let self else { return }
+                    if finished {
+                        self.player.play()
                     }
                 }
             } else {
