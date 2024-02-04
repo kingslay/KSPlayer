@@ -42,9 +42,9 @@ pod install
 
 ## TestFlight
 
-https://testflight.apple.com/join/eNmYbmZN
+[APPStore](https://apps.apple.com/app/tracyplayer/id6450770064)
 
-App Store https://apps.apple.com/app/tracyplayer/id6450770064
+[TestFlight](https://testflight.apple.com/join/eNmYbmZN)
 
 ## License
 KSPlayer defaults to the GPL license (requires open-sourcing your own project code), and we hope everyone will consciously respect the licensing agreement of the KSPlayer project. Additionally, there is a paid version that adopts the LGPL license (contact us). 
