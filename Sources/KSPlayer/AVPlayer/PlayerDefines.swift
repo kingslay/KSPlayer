@@ -414,7 +414,7 @@ public extension Data {
         }
         let scanner = Scanner(string: string)
         var entrys = [(String, URL, [String: String])]()
-        guard let symbol = scanner.scanUpToCharacters(from: .newlines), symbol.hasSuffix("#EXTM3U") else {
+        guard let symbol = scanner.scanUpToCharacters(from: .newlines), symbol.contains("#EXTM3U") else {
             return []
         }
         while !scanner.isAtEnd {
@@ -452,12 +452,21 @@ extension Scanner {
             }
         }
         let title = scanUpToCharacters(from: .newlines)
-        if scanString("#EXTVLCOPT:") != nil {
-            let key = scanUpToString("=")
-            _ = scanString("=")
-            let value = scanUpToCharacters(from: .newlines)
-            if let key, let value {
-                extinf[key] = value
+        while scanString("#EXT") != nil {
+            if scanString("VLCOPT:") != nil {
+                let key = scanUpToString("=")
+                _ = scanString("=")
+                let value = scanUpToCharacters(from: .newlines)
+                if let key, let value {
+                    extinf[key] = value
+                }
+            } else {
+                let key = scanUpToString(":")
+                _ = scanString(":")
+                let value = scanUpToCharacters(from: .newlines)
+                if let key, let value {
+                    extinf[key] = value
+                }
             }
         }
         let urlString = scanUpToCharacters(from: .newlines)
