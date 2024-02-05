@@ -156,7 +156,7 @@ private extension KSMEPlayer {
                 self.audioOutput.pause()
                 self.videoOutput?.pause()
             } else {
-                self.audioOutput.play(time: self.playerItem.currentPlaybackTime)
+                self.audioOutput.play(time: self.playerItem.mainClock().time.seconds)
                 self.videoOutput?.play()
             }
             self.delegate?.changeLoadState(player: self)
