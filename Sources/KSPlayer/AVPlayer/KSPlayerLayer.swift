@@ -91,10 +91,20 @@ open class KSPlayerLayer: NSObject {
 
     public var player: MediaPlayerProtocol {
         didSet {
+            KSLog("player is \(player)")
             Task { @MainActor in
+                if let superview = oldValue.view?.superview, let view = player.view {
+                    superview.addSubview(view)
+                    view.translatesAutoresizingMaskIntoConstraints = false
+                    NSLayoutConstraint.activate([
+                        view.topAnchor.constraint(equalTo: superview.topAnchor),
+                        view.leadingAnchor.constraint(equalTo: superview.leadingAnchor),
+                        view.bottomAnchor.constraint(equalTo: superview.bottomAnchor),
+                        view.trailingAnchor.constraint(equalTo: superview.trailingAnchor),
+                    ])
+                }
                 oldValue.view?.removeFromSuperview()
             }
-            KSLog("player is \(player)")
             player.playbackRate = oldValue.playbackRate
             player.playbackVolume = oldValue.playbackVolume
             player.delegate = self
