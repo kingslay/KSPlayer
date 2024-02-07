@@ -92,7 +92,7 @@ public class AudioRendererPlayer: AudioOutput {
                 break
             }
             var array = [render]
-            let loopCount = Int32(render.audioFormat.sampleRate) / 20 / Int32(render.numberOfSamples) - 1
+            let loopCount = Int32(render.audioFormat.sampleRate) / 20 / Int32(render.numberOfSamples) - 2
             if loopCount > 0 {
                 for _ in 0 ..< loopCount {
                     if let render = renderSource?.getAudioOutputRender() {
