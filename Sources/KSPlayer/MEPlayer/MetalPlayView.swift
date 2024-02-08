@@ -270,7 +270,7 @@ class MetalView: UIView {
         metalLayer.drawableSize = size
         metalLayer.pixelFormat = KSOptions.colorPixelFormat(bitDepth: pixelBuffer.bitDepth)
         let colorspace = pixelBuffer.colorspace
-        if metalLayer.colorspace != colorspace {
+        if colorspace != nil, metalLayer.colorspace != colorspace {
             metalLayer.colorspace = colorspace
             KSLog("[video] CAMetalLayer colorspace \(String(describing: colorspace))")
             #if !os(tvOS)
