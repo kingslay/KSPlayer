@@ -64,11 +64,10 @@ public class AudioRendererPlayer: AudioOutput {
             }
             self.request()
         }
-        periodicTimeObserver = synchronizer.addPeriodicTimeObserver(forInterval: CMTime(seconds: 1, preferredTimescale: 100), queue: .main) { [weak self] time in
+        periodicTimeObserver = synchronizer.addPeriodicTimeObserver(forInterval: CMTime(seconds: 0.05, preferredTimescale: CMTimeScale(NSEC_PER_SEC)), queue: .main) { [weak self] time in
             guard let self else {
                 return
             }
-//            print("diff \((self.synchronizer.currentTime() - time).seconds)")
             self.renderSource?.setAudio(time: time, position: -1)
         }
     }
