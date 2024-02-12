@@ -93,8 +93,13 @@ open class KSPlayerLayer: NSObject {
         didSet {
             KSLog("player is \(player)")
             Task { @MainActor in
-                if let superview = oldValue.view?.superview, let view = player.view {
+                if let oldView = oldValue.view, let superview = oldView.superview, let view = player.view {
                     superview.addSubview(view)
+                    #if canImport(UIKit)
+                    superview.insertSubview(view, belowSubview: oldView)
+                    #else
+                    superview.addSubview(view, positioned: .below, relativeTo: oldView)
+                    #endif
                     view.translatesAutoresizingMaskIntoConstraints = false
                     NSLayoutConstraint.activate([
                         view.topAnchor.constraint(equalTo: superview.topAnchor),
