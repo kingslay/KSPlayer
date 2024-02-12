@@ -292,29 +292,34 @@ struct VideoControllerView: View {
             #if os(tvOS)
             Spacer()
             HStack {
-//                Button {
-//                    dismiss()
-//                } label: {
-//                    Image(systemName: "x.circle.fill")
-//                }
                 Text(title)
                     .lineLimit(2)
-                    .layoutPriority(2)
-                Spacer()
-                    .layoutPriority(1)
+                    .layoutPriority(3)
                 ProgressView()
                     .opacity(config.state == .buffering ? 1 : 0)
                 Spacer()
-                    .layoutPriority(1)
-                if let audioTracks = config.playerLayer?.player.tracks(mediaType: .audio), !audioTracks.isEmpty {
-                    audioButton(audioTracks: audioTracks)
+                    .layoutPriority(2)
+                HStack {
+                    Button {
+                        if config.state.isPlaying {
+                            config.playerLayer?.pause()
+                        } else {
+                            config.playerLayer?.play()
+                        }
+                    } label: {
+                        Image(systemName: config.state == .error ? "play.slash.fill" : (config.state.isPlaying ? "pause.circle.fill" : "play.circle.fill"))
+                    }
+                    if let audioTracks = config.playerLayer?.player.tracks(mediaType: .audio), !audioTracks.isEmpty {
+                        audioButton(audioTracks: audioTracks)
+                    }
+                    muteButton
+                    contentModeButton
+                    subtitleButton
+                    playbackRateButton
+                    //                pipButton
+                    infoButton
                 }
-                muteButton
-                contentModeButton
-                subtitleButton
-                playbackRateButton
-//                pipButton
-                infoButton
+                .font(.caption)
             }
             #else
             HStack {
