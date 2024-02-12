@@ -364,12 +364,15 @@ extension KSMEPlayer: MediaPlayerProtocol {
         } else {
             seekTime = time
         }
-        audioOutput.flush()
         playerItem.seek(time: seekTime) { [weak self] result in
             guard let self else { return }
             if result {
-                if let controlTimebase = self.videoOutput?.displayLayer.controlTimebase {
-                    CMTimebaseSetTime(controlTimebase, time: CMTimeMake(value: Int64(self.currentPlaybackTime), timescale: 1))
+                self.audioOutput.flush()
+                runInMainqueue { [weak self] in
+                    guard let self else { return }
+                    if let controlTimebase = self.videoOutput?.displayLayer.controlTimebase {
+                        CMTimebaseSetTime(controlTimebase, time: CMTimeMake(value: Int64(self.currentPlaybackTime), timescale: 1))
+                    }
                 }
             }
             completion(result)

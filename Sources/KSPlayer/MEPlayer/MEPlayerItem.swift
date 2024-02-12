@@ -455,6 +455,8 @@ extension MEPlayerItem {
                 let timestamp = startTime + CMTime(seconds: options.startPlayTime)
                 let flags = seekByBytes ? AVSEEK_FLAG_BYTE : 0
                 _ = avformat_seek_file(formatCtx, -1, Int64.min, timestamp.value, Int64.max, flags)
+                audioClock.time = timestamp
+                videoClock.time = timestamp
             }
             state = .reading
         }
