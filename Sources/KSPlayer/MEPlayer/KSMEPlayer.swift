@@ -22,7 +22,7 @@ public class KSMEPlayer: NSObject {
     public private(set) var videoOutput: (VideoOutput & UIView)? {
         didSet {
             oldValue?.invalidate()
-            Task { @MainActor in
+            runOnMainThread {
                 oldValue?.removeFromSuperview()
             }
         }
@@ -30,7 +30,8 @@ public class KSMEPlayer: NSObject {
 
     public private(set) var bufferingProgress = 0 {
         willSet {
-            Task { @MainActor in
+            runOnMainThread { [weak self] in
+                guard let self else { return }
                 delegate?.changeBuffering(player: self, progress: newValue)
             }
         }
@@ -104,7 +105,8 @@ public class KSMEPlayer: NSObject {
             if playbackState != oldValue {
                 playOrPause()
                 if playbackState == .finished {
-                    Task { @MainActor in
+                    runOnMainThread { [weak self] in
+                        guard let self else { return }
                         delegate?.finish(player: self, error: nil)
                     }
                 }
@@ -149,7 +151,7 @@ public class KSMEPlayer: NSObject {
 
 private extension KSMEPlayer {
     func playOrPause() {
-        Task { @MainActor [weak self] in
+        runOnMainThread { [weak self] in
             guard let self else { return }
             let isPaused = !(self.playbackState == .playing && self.loadState == .playable)
             if isPaused {
@@ -199,7 +201,7 @@ extension KSMEPlayer: MEPlayerDelegate {
         let audioDescriptor = tracks(mediaType: .audio).first { $0.isEnabled }.flatMap {
             $0 as? FFmpegAssetTrack
         }?.audioDescriptor
-        Task { @MainActor [weak self] in
+        runOnMainThread { [weak self] in
             guard let self else { return }
             if let audioDescriptor {
                 KSLog("[audio] audio type: \(audioOutput) prepare audioFormat )")
@@ -213,14 +215,14 @@ extension KSMEPlayer: MEPlayerDelegate {
     }
 
     func sourceDidFailed(error: NSError?) {
-        Task { @MainActor [weak self] in
+        runOnMainThread { [weak self] in
             guard let self else { return }
             self.delegate?.finish(player: self, error: error)
         }
     }
 
     func sourceDidFinished() {
-        Task { @MainActor [weak self] in
+        runOnMainThread { [weak self] in
             guard let self else { return }
             if self.options.isLoopPlay {
                 self.loopCount += 1
@@ -243,7 +245,7 @@ extension KSMEPlayer: MEPlayerDelegate {
             if !loadingState.isEndOfFile, loadingState.frameCount == 0, loadingState.packetCount == 0 {
                 loadState = .loading
                 if playbackState == .playing {
-                    runInMainqueue { [weak self] in
+                    runOnMainThread { [weak self] in
                         // 在主线程更新进度
                         self?.bufferingProgress = 0
                     }
@@ -268,7 +270,7 @@ extension KSMEPlayer: MEPlayerDelegate {
                 }
             }
             if playbackState == .playing {
-                runInMainqueue { [weak self] in
+                runOnMainThread { [weak self] in
                     // 在主线程更新进度
                     self?.bufferingProgress = progress
                 }
@@ -355,7 +357,7 @@ extension KSMEPlayer: MediaPlayerProtocol {
     public func seek(time: TimeInterval, completion: @escaping ((Bool) -> Void)) {
         let time = max(time, 0)
         playbackState = .seeking
-        runInMainqueue { [weak self] in
+        runOnMainThread { [weak self] in
             self?.bufferingProgress = 0
         }
         let seekTime: TimeInterval
@@ -368,7 +370,7 @@ extension KSMEPlayer: MediaPlayerProtocol {
             guard let self else { return }
             if result {
                 self.audioOutput.flush()
-                runInMainqueue { [weak self] in
+                runOnMainThread { [weak self] in
                     guard let self else { return }
                     if let controlTimebase = self.videoOutput?.displayLayer.controlTimebase {
                         CMTimebaseSetTime(controlTimebase, time: CMTimeMake(value: Int64(self.currentPlaybackTime), timescale: 1))

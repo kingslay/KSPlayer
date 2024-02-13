@@ -92,7 +92,8 @@ open class KSPlayerLayer: NSObject {
     public var player: MediaPlayerProtocol {
         didSet {
             KSLog("player is \(player)")
-            Task { @MainActor in
+            runOnMainThread { [weak self] in
+                guard let self else { return }
                 if let oldView = oldValue.view, let superview = oldView.superview, let view = player.view {
                     superview.addSubview(view)
                     #if canImport(UIKit)
@@ -154,10 +155,8 @@ open class KSPlayerLayer: NSObject {
     public private(set) var state = KSPlayerState.prepareToPlay {
         willSet {
             if state != newValue {
-                Task { @MainActor [weak self] in
-                    guard let self else {
-                        return
-                    }
+                runOnMainThread { [weak self] in
+                    guard let self else { return }
                     KSLog("playerStateDidChange - \(newValue)")
                     self.delegate?.player(layer: self, state: newValue)
                 }
@@ -209,7 +208,8 @@ open class KSPlayerLayer: NSObject {
         player.contentMode = .scaleAspectFit
         prepareToPlay()
         #if canImport(UIKit)
-        Task { @MainActor in
+        runOnMainThread { [weak self] in
+            guard let self else { return }
             NotificationCenter.default.addObserver(self, selector: #selector(enterBackground), name: UIApplication.didEnterBackgroundNotification, object: nil)
             NotificationCenter.default.addObserver(self, selector: #selector(enterForeground), name: UIApplication.willEnterForegroundNotification, object: nil)
         }
@@ -250,7 +250,7 @@ open class KSPlayerLayer: NSObject {
 
     public func set(url: URL, options: KSOptions) {
         self.options = options
-        runInMainqueue {
+        runOnMainThread {
             self.isAutoPlay = options.isAutoPlay
             self.url = url
         }
@@ -261,7 +261,7 @@ open class KSPlayerLayer: NSObject {
         self.urls.removeAll()
         self.urls.append(contentsOf: urls)
         if let first = urls.first {
-            runInMainqueue {
+            runOnMainThread {
                 self.isAutoPlay = options.isAutoPlay
                 self.url = first
             }
@@ -269,7 +269,7 @@ open class KSPlayerLayer: NSObject {
     }
 
     open func play() {
-        Task { @MainActor in
+        runOnMainThread {
             UIApplication.shared.isIdleTimerDisabled = true
         }
         isAutoPlay = true
@@ -302,7 +302,7 @@ open class KSPlayerLayer: NSObject {
         timer.fireDate = Date.distantFuture
         state = .paused
         MPNowPlayingInfoCenter.default().playbackState = .paused
-        Task { @MainActor in
+        runOnMainThread {
             UIApplication.shared.isIdleTimerDisabled = false
         }
     }
@@ -315,7 +315,7 @@ open class KSPlayerLayer: NSObject {
         player.playbackRate = 1
         player.playbackVolume = 1
         MPNowPlayingInfoCenter.default().nowPlayingInfo = nil
-        Task { @MainActor in
+        runOnMainThread {
             UIApplication.shared.isIdleTimerDisabled = false
         }
     }
@@ -345,7 +345,8 @@ open class KSPlayerLayer: NSObject {
 extension KSPlayerLayer: MediaPlayerDelegate {
     public func readyToPlay(player: some MediaPlayerProtocol) {
         #if os(macOS)
-        Task { @MainActor in
+        runOnMainThread { [weak self] in
+            guard let self else { return }
             if let window = player.view?.window {
                 window.isMovableByWindowBackground = true
                 if options.automaticWindowResize {
@@ -386,7 +387,8 @@ extension KSPlayerLayer: MediaPlayerDelegate {
         guard player.playbackState != .seeking else { return }
         if player.loadState == .playable, startTime > 0 {
             let diff = CACurrentMediaTime() - startTime
-            Task { @MainActor in
+            runOnMainThread { [weak self] in
+                guard let self else { return }
                 delegate?.player(layer: self, bufferedCount: bufferedCount, consumeTime: diff)
             }
             if bufferedCount == 0 {
@@ -440,14 +442,16 @@ extension KSPlayerLayer: MediaPlayerDelegate {
             KSLog(error as CustomStringConvertible)
         } else {
             let duration = player.duration
-            Task { @MainActor in
+            runOnMainThread { [weak self] in
+                guard let self else { return }
                 delegate?.player(layer: self, currentTime: duration, totalTime: duration)
             }
             state = .playedToTheEnd
         }
         timer.fireDate = Date.distantFuture
         bufferedCount = 1
-        Task { @MainActor in
+        runOnMainThread { [weak self] in
+            guard let self else { return }
             delegate?.player(layer: self, finish: error)
         }
         if error == nil {

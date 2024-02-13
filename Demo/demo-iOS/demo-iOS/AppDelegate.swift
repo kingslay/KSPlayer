@@ -102,7 +102,7 @@ class MEOptions: KSOptions {
                 asynchronousDecompression = false
             }
             #if os(tvOS) || os(xrOS)
-            runInMainqueue { [weak self] in
+            runOnMainThread { [weak self] in
                 guard let self else {
                     return
                 }

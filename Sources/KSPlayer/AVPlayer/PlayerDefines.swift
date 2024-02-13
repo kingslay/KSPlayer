@@ -334,11 +334,16 @@ func - (left: CGSize, right: CGSize) -> CGSize {
     CGSize(width: left.width - right.width, height: left.height - right.height)
 }
 
-public func runInMainqueue(block: @escaping () -> Void) {
+@inline(__always)
+@preconcurrency
+// @MainActor
+public func runOnMainThread(block: @escaping () -> Void) {
     if Thread.isMainThread {
         block()
     } else {
-        DispatchQueue.main.async(execute: block)
+        Task {
+            await MainActor.run(body: block)
+        }
     }
 }
 

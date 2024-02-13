@@ -27,7 +27,8 @@ public class KSPictureInPictureController: AVPictureInPictureController {
         KSPictureInPictureController.pipController = nil
         if restoreUserInterface {
             #if canImport(UIKit)
-            Task { @MainActor in
+            runOnMainThread { [weak self] in
+                guard let self else { return }
                 if let viewController, let originalViewController {
                     if let nav = viewController as? UINavigationController,
                        nav.viewControllers.isEmpty || (nav.viewControllers.count == 1 && nav.viewControllers[0] != originalViewController)
@@ -62,7 +63,7 @@ public class KSPictureInPictureController: AVPictureInPictureController {
         guard KSOptions.isPipPopViewController else {
             #if canImport(UIKit)
             // 直接退到后台
-            Task { @MainActor in
+            runOnMainThread {
                 UIControl().sendAction(#selector(URLSessionTask.suspend), to: UIApplication.shared, for: nil)
             }
             #endif
@@ -70,7 +71,8 @@ public class KSPictureInPictureController: AVPictureInPictureController {
         }
         self.view = view
         #if canImport(UIKit)
-        Task { @MainActor in
+        runOnMainThread { [weak self] in
+            guard let self else { return }
             if let viewController = view.player.view?.viewController {
                 originalViewController = viewController
                 if let navigationController = viewController.navigationController, navigationController.viewControllers.count == 1 {

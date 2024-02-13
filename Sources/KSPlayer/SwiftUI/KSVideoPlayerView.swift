@@ -229,7 +229,7 @@ public struct KSVideoPlayerView: View {
     }
 
     public func openURL(_ url: URL) {
-        runInMainqueue {
+        runOnMainThread {
             if url.isAudio || url.isMovie {
                 self.url = url
             } else {

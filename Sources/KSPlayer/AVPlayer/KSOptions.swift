@@ -426,7 +426,7 @@ open class KSOptions {
 
     open func playerLayerDeinit() {
         #if os(tvOS) || os(xrOS)
-        Task { @MainActor in
+        runOnMainThread {
             UIApplication.shared.windows.first?.avDisplayManager.preferredDisplayCriteria = nil
         }
         #endif
