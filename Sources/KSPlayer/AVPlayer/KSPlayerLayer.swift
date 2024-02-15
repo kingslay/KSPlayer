@@ -76,6 +76,7 @@ open class KSPlayerLayer: NSObject {
                 }
 
                 if isPipActive {
+                    // 一定要async才不会pip之后就暂停播放
                     DispatchQueue.main.async { [weak self] in
                         guard let self else { return }
                         pipController.start(view: self)

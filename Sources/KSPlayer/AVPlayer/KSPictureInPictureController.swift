@@ -11,7 +11,7 @@ import AVKit
 public class KSPictureInPictureController: AVPictureInPictureController {
     private static var pipController: KSPictureInPictureController?
     private var originalViewController: UIViewController?
-    private weak var view: KSPlayerLayer?
+    private var view: KSPlayerLayer?
     private weak var viewController: UIViewController?
     private weak var presentingViewController: UIViewController?
     #if canImport(UIKit)
@@ -55,6 +55,7 @@ public class KSPictureInPictureController: AVPictureInPictureController {
         }
 
         originalViewController = nil
+        view = nil
     }
 
     func start(view: KSPlayerLayer) {
