@@ -158,7 +158,7 @@ private extension KSMEPlayer {
                 self.audioOutput.pause()
                 self.videoOutput?.pause()
             } else {
-                self.audioOutput.play(time: self.playerItem.mainClock().time.seconds)
+                self.audioOutput.play()
                 self.videoOutput?.play()
             }
             self.delegate?.changeLoadState(player: self)
@@ -227,7 +227,7 @@ extension KSMEPlayer: MEPlayerDelegate {
             if self.options.isLoopPlay {
                 self.loopCount += 1
                 self.delegate?.playBack(player: self, loopCount: self.loopCount)
-                self.audioOutput.play(time: 0)
+                self.audioOutput.play()
                 self.videoOutput?.play()
             } else {
                 self.playbackState = .finished
@@ -463,7 +463,10 @@ extension KSMEPlayer: MediaPlayerProtocol {
     }
 
     public func select(track: some MediaPlayerTrack) {
-        playerItem.select(track: track)
+        let isSeek = playerItem.select(track: track)
+        if isSeek {
+            audioOutput.flush()
+        }
     }
 }
 

@@ -24,7 +24,7 @@ public final class AudioUnitPlayer: AudioOutput {
     }
 
     private var isPlaying = false
-    public func play(time _: TimeInterval) {
+    public func play() {
         if !isPlaying {
             isPlaying = true
             AudioOutputUnitStart(audioUnitForOutput)

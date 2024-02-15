@@ -30,7 +30,7 @@ public final class AudioGraphPlayer: AudioOutput, AudioDynamicsProcessor {
         }
     }
 
-    public func play(time _: TimeInterval) {
+    public func play() {
         AUGraphStart(graph)
     }
 

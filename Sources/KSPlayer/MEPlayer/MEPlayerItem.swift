@@ -148,29 +148,30 @@ public final class MEPlayerItem: Sendable {
         }
     }
 
-    func select(track: some MediaPlayerTrack) {
+    func select(track: some MediaPlayerTrack) -> Bool {
         if track.isEnabled {
-            return
+            return false
         }
         assetTracks.filter { $0.mediaType == track.mediaType }.forEach {
             $0.isEnabled = track === $0
         }
         guard let assetTrack = track as? FFmpegAssetTrack else {
-            return
+            return false
         }
         if assetTrack.mediaType == .video {
             findBestAudio(videoTrack: assetTrack)
         } else if assetTrack.mediaType == .subtitle {
             if assetTrack.isImageSubtitle {
                 if !options.isSeekImageSubtitle {
-                    return
+                    return false
                 }
             } else {
-                return
+                return false
             }
         }
         seek(time: currentPlaybackTime) { _ in
         }
+        return true
     }
 }
 
@@ -454,9 +455,11 @@ extension MEPlayerItem {
             if options.startPlayTime > 0 {
                 let timestamp = startTime + CMTime(seconds: options.startPlayTime)
                 let flags = seekByBytes ? AVSEEK_FLAG_BYTE : 0
-                _ = avformat_seek_file(formatCtx, -1, Int64.min, timestamp.value, Int64.max, flags)
+                let seekStartTime = CACurrentMediaTime()
+                let result = avformat_seek_file(formatCtx, -1, Int64.min, timestamp.value, Int64.max, flags)
                 audioClock.time = timestamp
                 videoClock.time = timestamp
+                KSLog("start PlayTime: \(timestamp.seconds) spend Time: \(CACurrentMediaTime() - seekStartTime)")
             }
             state = .reading
         }
@@ -795,6 +798,7 @@ extension MEPlayerItem: OutputRenderSourceDelegate {
     }
 
     public func setAudio(time: CMTime, position: Int64) {
+//        print("[audio] setAudio: \(time.seconds)")
         audioClock.time = time
         audioClock.position = position
     }
