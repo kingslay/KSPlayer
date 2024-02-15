@@ -85,7 +85,7 @@ public class AudioRendererPlayer: AudioOutput {
             }
             self.request()
         }
-        periodicTimeObserver = synchronizer.addPeriodicTimeObserver(forInterval: CMTime(seconds: 0.02), queue: .main) { [weak self] time in
+        periodicTimeObserver = synchronizer.addPeriodicTimeObserver(forInterval: CMTime(seconds: 0.01), queue: .main) { [weak self] time in
             guard let self else {
                 return
             }
