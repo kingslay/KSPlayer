@@ -47,6 +47,7 @@ open class KSOptions {
     public var probesize: Int64?
     public var maxAnalyzeDuration: Int64?
     public var lowres = UInt8(0)
+    public var nobuffer = false
     public var codecLowDelay = false
     public var startPlayTime: TimeInterval = 0
     public var startPlayRate: Float = 1.0
@@ -166,7 +167,7 @@ open class KSOptions {
         let frameCount = capacitys.map(\.frameCount).min() ?? 0
         let isEndOfFile = capacitys.allSatisfy(\.isEndOfFile)
         let loadedTime = capacitys.map(\.loadedTime).min() ?? 0
-        let progress = loadedTime * 100.0 / preferredForwardBufferDuration
+        let progress = preferredForwardBufferDuration == 0 ? 100 : loadedTime * 100.0 / preferredForwardBufferDuration
         let isPlayable = capacitys.allSatisfy { capacity in
             if capacity.isEndOfFile && capacity.packetCount == 0 {
                 return true
@@ -186,11 +187,11 @@ open class KSOptions {
                     if isFirst {
                         return true
                     } else {
-                        return capacity.loadedTime >= preferredForwardBufferDuration / 2
+                        return capacity.loadedTime >= self.preferredForwardBufferDuration / 2
                     }
                 }
             }
-            return capacity.loadedTime >= preferredForwardBufferDuration
+            return capacity.loadedTime >= self.preferredForwardBufferDuration
         }
         return LoadingState(loadedTime: loadedTime, progress: progress, packetCount: packetCount,
                             frameCount: frameCount, isEndOfFile: isEndOfFile, isPlayable: isPlayable,

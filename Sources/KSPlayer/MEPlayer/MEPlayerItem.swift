@@ -234,6 +234,9 @@ extension MEPlayerItem {
         }
         options.openTime = CACurrentMediaTime()
         formatCtx.pointee.flags |= AVFMT_FLAG_GENPTS
+        if options.nobuffer {
+            formatCtx.pointee.flags |= AVFMT_FLAG_NOBUFFER
+        }
         if let probesize = options.probesize {
             formatCtx.pointee.probesize = probesize
         }
