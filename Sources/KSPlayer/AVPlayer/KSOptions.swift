@@ -356,10 +356,7 @@ open class KSOptions {
     }
 
     open func videoClockSync(main: KSClock, nextVideoTime: TimeInterval, fps: Float, frameCount: Int) -> (Double, ClockProcessType) {
-        var desire = main.getTime() - videoDelay
-        #if !os(macOS)
-        desire -= AVAudioSession.sharedInstance().outputLatency
-        #endif
+        let desire = main.getTime() - videoDelay
         let diff = nextVideoTime - desire
 //        print("[video] video diff \(diff) nextVideoTime \(nextVideoTime) main \(main.time.seconds)")
         if diff >= 1 / Double(max(fps * 2, 100)) {

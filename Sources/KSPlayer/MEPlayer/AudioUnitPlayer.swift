@@ -188,7 +188,11 @@ extension AudioUnitPlayer {
         if let currentRender {
             let currentPreparePosition = currentRender.timestamp + currentRender.duration * Int64(currentRenderReadOffset) / Int64(currentRender.numberOfSamples)
             if currentPreparePosition > 0 {
-                renderSource?.setAudio(time: currentRender.timebase.cmtime(for: currentPreparePosition), position: currentRender.position)
+                var time = currentRender.timebase.cmtime(for: currentPreparePosition)
+                #if !os(macOS)
+                time = time - CMTime(seconds: AVAudioSession.sharedInstance().outputLatency, preferredTimescale: time.timescale)
+                #endif
+                renderSource?.setAudio(time: time, position: currentRender.position)
             }
         }
     }
