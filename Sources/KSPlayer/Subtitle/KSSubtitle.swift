@@ -243,7 +243,11 @@ open class SubtitleModel: ObservableObject {
                 #elseif os(macOS)
                 return 20
                 #else
-                return 12
+                if UIDevice.current.userInterfaceIdiom == .pad {
+                    return 20
+                } else {
+                    return 12
+                }
                 #endif
             case .standard:
                 #if os(tvOS)
@@ -251,7 +255,11 @@ open class SubtitleModel: ObservableObject {
                 #elseif os(macOS)
                 return 26
                 #else
-                return 16
+                if UIDevice.current.userInterfaceIdiom == .pad {
+                    return 26
+                } else {
+                    return 16
+                }
                 #endif
             case .large:
                 #if os(tvOS)
@@ -259,7 +267,11 @@ open class SubtitleModel: ObservableObject {
                 #elseif os(macOS)
                 return 32
                 #else
-                return 20
+                if UIDevice.current.userInterfaceIdiom == .pad {
+                    return 32
+                } else {
+                    return 20
+                }
                 #endif
             }
         }
