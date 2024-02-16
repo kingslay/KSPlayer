@@ -479,6 +479,7 @@ public extension KSOptions {
     static var canStartPictureInPictureAutomaticallyFromInline = true
     static var preferredFrame = true
     static var displayCriteriaFormatDescriptionEnabled = false
+    static var useSystemHTTPProxy = true
     /// 日志级别
     static var logLevel = LogLevel.warning
     static var logger: LogHandler = OSLog(lable: "KSPlayer")

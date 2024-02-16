@@ -319,6 +319,9 @@ public extension CMFormatDescription {
 }
 
 func setHttpProxy() {
+    guard KSOptions.useSystemHTTPProxy else {
+        return
+    }
     guard let proxySettings = CFNetworkCopySystemProxySettings()?.takeUnretainedValue() as? NSDictionary else {
         unsetenv("http_proxy")
         return
