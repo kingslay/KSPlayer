@@ -319,10 +319,15 @@ public extension CMFormatDescription {
 }
 
 func setHttpProxy() {
+    guard KSOptions.useSystemHTTPProxy else {
+        return
+    }
     guard let proxySettings = CFNetworkCopySystemProxySettings()?.takeUnretainedValue() as? NSDictionary else {
+        unsetenv("http_proxy")
         return
     }
     guard let proxyHost = proxySettings[kCFNetworkProxiesHTTPProxy] as? String, let proxyPort = proxySettings[kCFNetworkProxiesHTTPPort] as? Int else {
+        unsetenv("http_proxy")
         return
     }
     let httpProxy = "http://\(proxyHost):\(proxyPort)"
