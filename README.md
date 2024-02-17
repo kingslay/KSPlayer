@@ -19,6 +19,7 @@ English | [简体中文](./README_CN.md)
 - [x] Multiple audio/video tracks.
 - [x] hardware accelerator.
 - [x] 4k/HDR/HDR10/HDR10+/Dolby Vision
+- [x] show local and online subtitles.
 - [x] text subtitle/Closed Captions/image subtitle(dvbsub/dvdsub/pgssub)
 - [x] Picture in Picture
 - [x] Record video

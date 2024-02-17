@@ -54,7 +54,6 @@ struct SettingAudioView: View {
                 Text("AUGraph").tag(NSStringFromClass(AudioGraphPlayer.self))
                 Text("AudioUnit").tag(NSStringFromClass(AudioUnitPlayer.self))
                 Text("AVAudioEngine").tag(NSStringFromClass(AudioEnginePlayer.self))
-                Text("AVSampleBufferAudioRenderer").tag(NSStringFromClass(AudioRendererPlayer.self))
             }
         }
     }
