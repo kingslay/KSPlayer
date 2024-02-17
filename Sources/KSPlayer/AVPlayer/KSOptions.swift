@@ -38,6 +38,7 @@ open class KSOptions {
      */
     public var seekFlags = Int32(1)
     // ffmpeg only cache http
+    // 这个开关不能用，因为ff_tempfile: Cannot open temporary file
     public var cache = false
     //  record stream
     public var outputURL: URL?
