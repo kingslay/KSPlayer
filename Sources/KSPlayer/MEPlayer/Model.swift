@@ -67,6 +67,7 @@ public protocol FrameOutput: AnyObject {
     var renderSource: OutputRenderSourceDelegate? { get set }
     func pause()
     func flush()
+    func play()
 }
 
 protocol MEFrame: ObjectQueueItem {

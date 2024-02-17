@@ -14,7 +14,6 @@ public protocol AudioOutput: FrameOutput {
     var isMuted: Bool { get set }
     init()
     func prepare(audioFormat: AVAudioFormat)
-    func play()
 }
 
 public protocol AudioDynamicsProcessor {

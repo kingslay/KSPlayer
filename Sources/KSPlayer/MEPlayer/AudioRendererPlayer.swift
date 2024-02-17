@@ -129,8 +129,14 @@ public class AudioRendererPlayer: AudioOutput {
                 render = AudioFrame(array: array)
             }
             if let sampleBuffer = render.toCMSampleBuffer() {
-                renderer.audioTimePitchAlgorithm = render.audioFormat.channelCount > 2 ? .spectral : .timeDomain
+                let channelCount = render.audioFormat.channelCount
+                renderer.audioTimePitchAlgorithm = channelCount > 2 ? .spectral : .timeDomain
                 renderer.enqueue(sampleBuffer)
+                #if !os(macOS)
+                if AVAudioSession.sharedInstance().preferredInputNumberOfChannels != channelCount {
+                    try? AVAudioSession.sharedInstance().setPreferredOutputNumberOfChannels(Int(channelCount))
+                }
+                #endif
             }
         }
     }

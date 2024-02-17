@@ -22,7 +22,6 @@ public protocol VideoOutput: FrameOutput {
     var pixelBuffer: PixelBufferProtocol? { get }
     init(options: KSOptions)
     func invalidate()
-    func play()
     func readNextFrame()
 }
 
