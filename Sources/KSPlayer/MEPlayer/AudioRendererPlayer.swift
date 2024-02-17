@@ -54,7 +54,12 @@ public class AudioRendererPlayer: AudioOutput {
 //        }
     }
 
-    public func prepare(audioFormat _: AVAudioFormat) {}
+    public func prepare(audioFormat: AVAudioFormat) {
+        #if !os(macOS)
+        try? AVAudioSession.sharedInstance().setPreferredOutputNumberOfChannels(Int(audioFormat.channelCount))
+        KSLog("[audio] set preferredOutputNumberOfChannels: \(audioFormat.channelCount)")
+        #endif
+    }
 
     public func play() {
         let time: CMTime
