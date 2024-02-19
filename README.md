@@ -286,6 +286,7 @@ Your user icon or company logo shows up this with a link to your home page.
 [Kimentanm](https://github.com/Kimentanm)
 [nakiostudio](https://github.com/nakiostudio)
 [andrefmsilva](https://github.com/andrefmsilva)
+[CodingByJerez](https://github.com/CodingByJerez)
 
 Thanks to [nightfall708](https://github.com/nightfall708) for sponsoring a mac mini
 
