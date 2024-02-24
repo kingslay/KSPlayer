@@ -655,7 +655,8 @@ extension MEPlayerItem: MediaPlayback {
             Thread.current.name = (self.operationQueue.name ?? "") + "_close"
             self.allPlayerItemTracks.forEach { $0.shutdown() }
             KSLog("清空formatCtx")
-            if let opaque = self.formatCtx?.pointee.pb.pointee.opaque {
+            // 自定义的协议才会av_class为空
+            if self.formatCtx?.pointee.pb.pointee.av_class == nil, let opaque = self.formatCtx?.pointee.pb.pointee.opaque {
                 _ = Unmanaged<AbstractAVIOContext>.fromOpaque(opaque).takeRetainedValue()
             }
             self.formatCtx?.pointee.pb = nil
