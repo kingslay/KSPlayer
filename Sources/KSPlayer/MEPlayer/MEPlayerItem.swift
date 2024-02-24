@@ -209,17 +209,16 @@ extension MEPlayerItem {
 //        }
         setHttpProxy()
         var avOptions = options.formatContextOptions.avOptions
-        let urlString: String
-        if url.isFileURL {
-            urlString = url.path
-        } else {
-            if url.absoluteString.hasPrefix("https") || !options.cache {
-                urlString = url.absoluteString
-            } else {
-                urlString = "async:cache:" + url.absoluteString
-            }
+        let urlString: String?
+        let either = options.process(url: url)
+        switch either {
+        case let .left(left):
+            urlString = left
+        case let .right(right):
+            urlString = nil
+            // 如果要自定义协议的话，那就用avio_alloc_context，对formatCtx.pointee.pb赋值
+            formatCtx.pointee.pb = right.getContext()
         }
-        // 如果要自定义协议的话，那就用avio_alloc_context，对formatCtx.pointee.pb赋值
         var result = avformat_open_input(&self.formatCtx, urlString, nil, &avOptions)
         av_dict_free(&avOptions)
         if result == AVError.eof.code {
@@ -656,6 +655,10 @@ extension MEPlayerItem: MediaPlayback {
             Thread.current.name = (self.operationQueue.name ?? "") + "_close"
             self.allPlayerItemTracks.forEach { $0.shutdown() }
             KSLog("清空formatCtx")
+            if let opaque = self.formatCtx?.pointee.pb.pointee.opaque {
+                _ = Unmanaged<AbstractAVIOContext>.fromOpaque(opaque).takeRetainedValue()
+            }
+            self.formatCtx?.pointee.pb = nil
             self.formatCtx?.pointee.interrupt_callback.opaque = nil
             self.formatCtx?.pointee.interrupt_callback.callback = nil
             avformat_close_input(&self.formatCtx)
@@ -864,6 +867,27 @@ extension MEPlayerItem: OutputRenderSourceDelegate {
             return frame
         } else {
             return nil
+        }
+    }
+}
+
+extension AbstractAVIOContext {
+    func getContext() -> UnsafeMutablePointer<AVIOContext> {
+        // 需要持有ioContext，不然会被释放掉,等到shutdown在清空
+        avio_alloc_context(av_malloc(Int(bufferSize)), bufferSize, writable ? 1 : 0, Unmanaged.passRetained(self).toOpaque()) { opaque, buffer, size -> Int32 in
+            let value = Unmanaged<AbstractAVIOContext>.fromOpaque(opaque!).takeUnretainedValue()
+            let ret = value.read(buffer: buffer, size: size)
+            return Int32(ret)
+        } _: { opaque, buffer, size -> Int32 in
+            let value = Unmanaged<AbstractAVIOContext>.fromOpaque(opaque!).takeUnretainedValue()
+            let ret = value.write(buffer: buffer, size: size)
+            return Int32(ret)
+        } _: { opaque, offset, whence -> Int64 in
+            let value = Unmanaged<AbstractAVIOContext>.fromOpaque(opaque!).takeUnretainedValue()
+            if whence == AVSEEK_SIZE {
+                return value.fileSize()
+            }
+            return value.seek(offset: offset, whence: whence)
         }
     }
 }

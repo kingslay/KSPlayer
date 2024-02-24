@@ -444,6 +444,16 @@ open class KSOptions {
 //            return 1
 //        }
     }
+
+    open func process(url: URL) -> Either<String, AbstractAVIOContext> {
+        let urlString: String
+        if url.isFileURL {
+            urlString = url.path
+        } else {
+            urlString = url.absoluteString
+        }
+        return Either(urlString)
+    }
 }
 
 public enum VideoInterlacingType: String {

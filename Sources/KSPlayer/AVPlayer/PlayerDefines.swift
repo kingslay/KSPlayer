@@ -808,3 +808,54 @@ extension String: Identifiable {
 extension Float: Identifiable {
     public var id: Self { self }
 }
+
+public enum Either<Left, Right> {
+    case left(Left), right(Right)
+}
+
+public extension Either {
+    init(_ left: Left, or _: Right.Type) { self = .left(left) }
+    init(_ left: Left) { self = .left(left) }
+    init(_ right: Right) { self = .right(right) }
+}
+
+open class AbstractAVIOContext {
+    let bufferSize: Int32
+    let writable: Bool
+    public init(bufferSize: Int32 = 16 * 1024, writable: Bool = false) {
+        self.bufferSize = bufferSize
+        self.writable = writable
+    }
+
+    open func read(buffer _: UnsafeMutablePointer<UInt8>?, size: Int32) -> Int32 {
+        size
+    }
+
+    open func write(buffer _: UnsafeMutablePointer<UInt8>?, size: Int32) -> Int32 {
+        size
+    }
+
+    /**
+     #define SEEK_SET        0       /* set file offset to offset */
+     #define SEEK_CUR        1       /* set file offset to current plus offset */
+     #define SEEK_END        2       /* set file offset to EOF plus offset */
+     */
+    open func seek(offset: Int64, whence _: Int32) -> Int64 {
+        offset
+    }
+
+    open func fileSize() -> Int64 {
+        -1
+    }
+
+    deinit {}
+}
+
+/// Allows to "box" another value.
+final class Box<T> {
+    let value: T
+
+    init(_ value: T) {
+        self.value = value
+    }
+}
