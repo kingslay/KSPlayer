@@ -659,7 +659,8 @@ extension MEPlayerItem: MediaPlayback {
             if self.formatCtx?.pointee.pb.pointee.av_class == nil, let opaque = self.formatCtx?.pointee.pb.pointee.opaque {
                 _ = Unmanaged<AbstractAVIOContext>.fromOpaque(opaque).takeRetainedValue()
             }
-            self.formatCtx?.pointee.pb = nil
+            // 不要自己来释放pb。不然第二次播放同一个url会出问题
+//            self.formatCtx?.pointee.pb = nil
             self.formatCtx?.pointee.interrupt_callback.opaque = nil
             self.formatCtx?.pointee.interrupt_callback.callback = nil
             avformat_close_input(&self.formatCtx)
