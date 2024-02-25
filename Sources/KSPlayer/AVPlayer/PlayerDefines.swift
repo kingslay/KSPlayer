@@ -822,7 +822,7 @@ public extension Either {
 open class AbstractAVIOContext {
     let bufferSize: Int32
     let writable: Bool
-    public init(bufferSize: Int32 = 16 * 1024, writable: Bool = false) {
+    public init(bufferSize: Int32 = 32 * 1024, writable: Bool = false) {
         self.bufferSize = bufferSize
         self.writable = writable
     }
