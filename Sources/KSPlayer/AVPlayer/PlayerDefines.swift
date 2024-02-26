@@ -848,6 +848,7 @@ open class AbstractAVIOContext {
         -1
     }
 
+    open func close() {}
     deinit {}
 }
 
