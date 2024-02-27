@@ -201,9 +201,9 @@ extension MEPlayerItem {
         }
         formatCtx.pointee.interrupt_callback = interruptCB
         // avformat_close_input这个函数会调用io_close2。但是自定义协议是不会调用io_close2这个函数
-        formatCtx.pointee.io_close2 = { _, _ -> Int32 in
-            0
-        }
+//        formatCtx.pointee.io_close2 = { _, _ -> Int32 in
+//            0
+//        }
         setHttpProxy()
         var avOptions = options.formatContextOptions.avOptions
         let urlString: String?
@@ -653,7 +653,7 @@ extension MEPlayerItem: MediaPlayback {
             self.allPlayerItemTracks.forEach { $0.shutdown() }
             KSLog("清空formatCtx")
             // 自定义的协议才会av_class为空
-            if self.formatCtx?.pointee.pb.pointee.av_class == nil, let opaque = self.formatCtx?.pointee.pb.pointee.opaque {
+            if let formatCtx = self.formatCtx, (formatCtx.pointee.flags & AVFMT_FLAG_CUSTOM_IO) != 0, let opaque = formatCtx.pointee.pb.pointee.opaque {
                 let value = Unmanaged<AbstractAVIOContext>.fromOpaque(opaque).takeRetainedValue()
                 value.close()
             }
