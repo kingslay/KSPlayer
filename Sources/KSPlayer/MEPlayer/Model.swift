@@ -388,11 +388,69 @@ public final class VideoVTBFrame: MEFrame {
     public var size: Int32 = 0
     public let fps: Float
     public let isDovi: Bool
+    public var edrMetaData: EDRMetaData? = nil
     var corePixelBuffer: PixelBufferProtocol?
     init(fps: Float, isDovi: Bool) {
         self.fps = fps
         self.isDovi = isDovi
     }
+}
+
+extension VideoVTBFrame {
+    #if !os(tvOS)
+    @available(iOS 16, *)
+    var edrMetadata: CAEDRMetadata? {
+        if var contentData = edrMetaData?.contentData, var displayData = edrMetaData?.displayData {
+                let data = Data(bytes: &displayData, count: MemoryLayout<MasteringDisplayMetadata>.stride)
+                let data2 = Data(bytes: &contentData, count: MemoryLayout<ContentLightMetadata>.stride)
+                return CAEDRMetadata.hdr10(displayInfo: data, contentInfo: data2, opticalOutputScale: 10000)
+            }
+        if var ambientViewingEnvironment = edrMetaData?.ambientViewingEnvironment {
+            let data = Data(bytes: &ambientViewingEnvironment, count: MemoryLayout<AmbientViewingEnvironment>.stride)
+            if #available(macOS 14.0, iOS 17.0, *) {
+                return CAEDRMetadata.hlg(ambientViewingEnvironment: data)
+            } else {
+                return CAEDRMetadata.hlg
+            }
+        }
+        if corePixelBuffer?.transferFunction == kCVImageBufferTransferFunction_SMPTE_ST_2084_PQ {
+            return CAEDRMetadata.hdr10(minLuminance: 0.1, maxLuminance: 1000, opticalOutputScale: 10000)
+        } else if corePixelBuffer?.transferFunction == kCVImageBufferTransferFunction_ITU_R_2100_HLG {
+            return CAEDRMetadata.hlg
+        }
+        return nil
+    }
+    #endif
+}
+
+public struct EDRMetaData {
+    var displayData: MasteringDisplayMetadata?
+    var contentData: ContentLightMetadata?
+    var ambientViewingEnvironment: AmbientViewingEnvironment?
+}
+
+public struct MasteringDisplayMetadata {
+    let display_primaries_r_x: UInt16
+    let display_primaries_r_y: UInt16
+    let display_primaries_g_x: UInt16
+    let display_primaries_g_y: UInt16
+    let display_primaries_b_x: UInt16
+    let display_primaries_b_y: UInt16
+    let white_point_x: UInt16
+    let white_point_y: UInt16
+    let minLuminance: UInt32
+    let maxLuminance: UInt32
+}
+
+public struct ContentLightMetadata {
+    let MaxCLL: UInt16
+    let MaxFALL: UInt16
+}
+
+public struct AmbientViewingEnvironment {
+    let ambient_illuminance: UInt32
+    let ambient_light_x: UInt16
+    let ambient_light_y: UInt16
 }
 
 extension Array {
