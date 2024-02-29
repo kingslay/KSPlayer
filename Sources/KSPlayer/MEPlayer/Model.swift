@@ -401,10 +401,10 @@ extension VideoVTBFrame {
     @available(iOS 16, *)
     var edrMetadata: CAEDRMetadata? {
         if var contentData = edrMetaData?.contentData, var displayData = edrMetaData?.displayData {
-                let data = Data(bytes: &displayData, count: MemoryLayout<MasteringDisplayMetadata>.stride)
-                let data2 = Data(bytes: &contentData, count: MemoryLayout<ContentLightMetadata>.stride)
-                return CAEDRMetadata.hdr10(displayInfo: data, contentInfo: data2, opticalOutputScale: 10000)
-            }
+            let data = Data(bytes: &displayData, count: MemoryLayout<MasteringDisplayMetadata>.stride)
+            let data2 = Data(bytes: &contentData, count: MemoryLayout<ContentLightMetadata>.stride)
+            return CAEDRMetadata.hdr10(displayInfo: data, contentInfo: data2, opticalOutputScale: 10000)
+        }
         if var ambientViewingEnvironment = edrMetaData?.ambientViewingEnvironment {
             let data = Data(bytes: &ambientViewingEnvironment, count: MemoryLayout<AmbientViewingEnvironment>.stride)
             if #available(macOS 14.0, iOS 17.0, *) {
@@ -447,6 +447,7 @@ public struct ContentLightMetadata {
     let MaxFALL: UInt16
 }
 
+// https://developer.apple.com/documentation/technotes/tn3145-hdr-video-metadata
 public struct AmbientViewingEnvironment {
     let ambient_illuminance: UInt32
     let ambient_light_x: UInt16
