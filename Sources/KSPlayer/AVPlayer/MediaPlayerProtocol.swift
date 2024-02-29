@@ -236,17 +236,17 @@ public extension MediaPlayerTrack {
 
 public extension CMFormatDescription {
     var dynamicRange: DynamicRange {
-        let cotentRange: DynamicRange
+        let contentRange: DynamicRange
         if codecType.string == "dvhe" || codecType == kCMVideoCodecType_DolbyVisionHEVC {
-            cotentRange = .dolbyVision
+            contentRange = .dolbyVision
         } else if codecType.bitDepth == 10 || transferFunction == kCVImageBufferTransferFunction_SMPTE_ST_2084_PQ as String { /// HDR
-            cotentRange = .hdr10
+            contentRange = .hdr10
         } else if transferFunction == kCVImageBufferTransferFunction_ITU_R_2100_HLG as String { /// HLG
-            cotentRange = .hlg
+            contentRange = .hlg
         } else {
-            cotentRange = .sdr
+            contentRange = .sdr
         }
-        return cotentRange
+        return contentRange
     }
 
     var codecType: FourCharCode {
