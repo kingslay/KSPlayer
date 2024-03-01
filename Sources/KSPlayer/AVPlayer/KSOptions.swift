@@ -327,7 +327,9 @@ open class KSOptions {
 //                        }
 //                    }
 //                }
-                videoFilters.append("idet")
+                if KSOptions.deInterlaceAddIdet {
+                    videoFilters.append("idet")
+                }
                 videoFilters.append("\(yadif)=mode=\(yadifMode):parity=-1:deint=1")
                 if yadifMode == 1 || yadifMode == 3 {
                     assetTrack.nominalFrameRate = assetTrack.nominalFrameRate * 2
@@ -356,15 +358,15 @@ open class KSOptions {
         #endif
     }
 
-    open func videoClockSync(main: KSClock, nextVideoTime: TimeInterval, fps: Float, frameCount: Int) -> (Double, ClockProcessType) {
+    open func videoClockSync(main: KSClock, nextVideoTime: TimeInterval, fps: Double, frameCount: Int) -> (Double, ClockProcessType) {
         let desire = main.getTime() - videoDelay
         let diff = nextVideoTime - desire
-//        print("[video] video diff \(diff) nextVideoTime \(nextVideoTime) main \(main.time.seconds)")
-        if diff >= 1 / Double(max(fps * 2, 100)) {
+        print("[video] video diff \(diff) nextVideoTime \(nextVideoTime) main \(main.time.seconds)")
+        if diff >= 1 / fps / 2 {
             videoClockDelayCount = 0
             return (diff, .remain)
         } else {
-            if diff < -4 / Double(fps) {
+            if diff < -4 / fps {
                 videoClockDelayCount += 1
                 let log = "[video] video delay=\(diff), clock=\(desire), delay count=\(videoClockDelayCount), frameCount=\(frameCount)"
                 if frameCount == 1 {
