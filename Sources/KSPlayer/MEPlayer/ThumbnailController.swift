@@ -91,7 +91,7 @@ public class ThumbnailController {
         guard let frame else {
             throw NSError(description: "can not av_frame_alloc")
         }
-        for i in 0 ... thumbnailCount {
+        for i in 0 ..< thumbnailCount {
             let seek_pos = interval * Int64(i) + videoStream.pointee.start_time
             avcodec_flush_buffers(codecContext)
             result = av_seek_frame(formatCtx, Int32(videoStreamIndex), seek_pos, AVSEEK_FLAG_BACKWARD)
@@ -104,8 +104,13 @@ public class ThumbnailController {
                     if avcodec_send_packet(codecContext, &packet) < 0 {
                         break
                     }
-                    if avcodec_receive_frame(codecContext, frame) < 0 {
-                        break
+                    let ret = avcodec_receive_frame(codecContext, frame)
+                    if ret < 0 {
+                        if (ret == -(EAGAIN)) {
+                            continue
+                        } else {
+                            break
+                        }
                     }
                     let image = reScale.transfer(frame: frame.pointee)?.cgImage().map {
                         UIImage(cgImage: $0)
