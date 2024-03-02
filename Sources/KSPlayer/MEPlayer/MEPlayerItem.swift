@@ -805,8 +805,11 @@ extension MEPlayerItem: OutputRenderSourceDelegate {
 
     public func setAudio(time: CMTime, position: Int64) {
 //        print("[audio] setAudio: \(time.seconds)")
-        audioClock.time = time
-        audioClock.position = position
+        // 切换到主线程的话，那播放起来会更顺滑
+        runOnMainThread {
+            self.audioClock.time = time
+            self.audioClock.position = position
+        }
     }
 
     public func getVideoOutputRender(force: Bool) -> VideoVTBFrame? {
