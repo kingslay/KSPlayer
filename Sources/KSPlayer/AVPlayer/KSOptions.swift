@@ -361,7 +361,7 @@ open class KSOptions {
     open func videoClockSync(main: KSClock, nextVideoTime: TimeInterval, fps: Double, frameCount: Int) -> (Double, ClockProcessType) {
         let desire = main.getTime() - videoDelay
         let diff = nextVideoTime - desire
-        print("[video] video diff \(diff) nextVideoTime \(nextVideoTime) main \(main.time.seconds)")
+//        print("[video] video diff \(diff) nextVideoTime \(nextVideoTime) main \(main.time.seconds)")
         if diff >= 1 / fps / 2 {
             videoClockDelayCount = 0
             return (diff, .remain)
