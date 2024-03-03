@@ -26,7 +26,7 @@ English | [简体中文](./README_CN.md)
 - [x] De-interlace auto detect
 - [x] Dolby Atmos/Spatial Audio 
 - [x] 360° panorama video.
-- [x] libsmbclient protocol
+- [x] Custom url protocols such as smb nfs.
 
 ## Requirements
 
