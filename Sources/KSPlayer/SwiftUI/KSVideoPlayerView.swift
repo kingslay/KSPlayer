@@ -183,7 +183,7 @@ public struct KSVideoPlayerView: View {
             case .right:
                 playerCoordinator.skip(interval: 15)
             case .up:
-                playerCoordinator.isMaskShow.toggle()
+                playerCoordinator.mask(show: true, autoHide: false)
             case .down:
                 focusableField = .info
             @unknown default:

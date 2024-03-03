@@ -113,28 +113,7 @@ extension KSVideoPlayer: UIViewRepresentable {
         public var isMaskShow = true {
             didSet {
                 if isMaskShow != oldValue {
-                    if isMaskShow {
-                        delayItem?.cancel()
-                        // 播放的时候才自动隐藏
-                        guard state == .bufferFinished else { return }
-                        delayItem = DispatchWorkItem { [weak self] in
-                            self?.isMaskShow = false
-                        }
-                        DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + KSOptions.animateDelayTimeInterval,
-                                                      execute: delayItem!)
-                    }
-                    #if os(macOS)
-                    isMaskShow ? NSCursor.unhide() : NSCursor.setHiddenUntilMouseMoves(true)
-                    if let window = playerLayer?.player.view?.window {
-                        if !window.styleMask.contains(.fullScreen) {
-                            window.standardWindowButton(.closeButton)?.superview?.superview?.isHidden = !isMaskShow
-                            //                    window.standardWindowButton(.zoomButton)?.isHidden = !isMaskShow
-                            //                    window.standardWindowButton(.closeButton)?.isHidden = !isMaskShow
-                            //                    window.standardWindowButton(.miniaturizeButton)?.isHidden = !isMaskShow
-                            //                    window.titleVisibility = isMaskShow ? .visible : .hidden
-                        }
-                    }
-                    #endif
+                    mask(show: isMaskShow)
                 }
             }
         }
@@ -149,7 +128,7 @@ extension KSVideoPlayer: UIViewRepresentable {
             }
         }
 
-        private var delayItem: DispatchWorkItem?
+        private var delayHide: DispatchWorkItem?
         public var onPlay: ((TimeInterval, TimeInterval) -> Void)?
         public var onFinish: ((KSPlayerLayer, Error?) -> Void)?
         public var onStateChanged: ((KSPlayerLayer, KSPlayerState) -> Void)?
@@ -194,8 +173,8 @@ extension KSVideoPlayer: UIViewRepresentable {
             onSwipe = nil
             #endif
             playerLayer = nil
-            delayItem?.cancel()
-            delayItem = nil
+            delayHide?.cancel()
+            delayHide = nil
             DispatchQueue.main.async { [weak self] in
                 self?.subtitleModel.url = nil
             }
@@ -209,6 +188,38 @@ extension KSVideoPlayer: UIViewRepresentable {
 
         public func seek(time: TimeInterval) {
             playerLayer?.seek(time: TimeInterval(time))
+        }
+
+        @MainActor
+        public func mask(show: Bool, autoHide: Bool = true) {
+            isMaskShow = show
+            if show {
+                delayHide?.cancel()
+                // 播放的时候才自动隐藏
+                guard state == .bufferFinished else { return }
+                if autoHide {
+                    delayHide = DispatchWorkItem { [weak self] in
+                        guard let self else { return }
+                        if self.state == .bufferFinished {
+                            self.isMaskShow = false
+                        }
+                    }
+                    DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + KSOptions.animateDelayTimeInterval,
+                                                  execute: delayHide!)
+                }
+            }
+            #if os(macOS)
+            show ? NSCursor.unhide() : NSCursor.setHiddenUntilMouseMoves(true)
+            if let window = playerLayer?.player.view?.window {
+                if !window.styleMask.contains(.fullScreen) {
+                    window.standardWindowButton(.closeButton)?.superview?.superview?.isHidden = !show
+                    //                    window.standardWindowButton(.zoomButton)?.isHidden = !show
+                    //                    window.standardWindowButton(.closeButton)?.isHidden = !show
+                    //                    window.standardWindowButton(.miniaturizeButton)?.isHidden = !show
+                    //                    window.titleVisibility = show ? .visible : .hidden
+                }
+            }
+            #endif
         }
     }
 }
