@@ -504,12 +504,11 @@ public extension KSOptions {
         #if os(macOS)
 //        try? AVAudioSession.sharedInstance().setRouteSharingPolicy(.longFormAudio)
         #else
-        let category = AVAudioSession.sharedInstance().category
-        if category == .playback || category == .playAndRecord {
-            try? AVAudioSession.sharedInstance().setCategory(category, mode: .moviePlayback, policy: .longFormAudio)
-        } else {
-            try? AVAudioSession.sharedInstance().setCategory(.playback, mode: .moviePlayback, policy: .longFormAudio)
+        var category = AVAudioSession.sharedInstance().category
+        if category != .playAndRecord {
+            category = .playback
         }
+        try? AVAudioSession.sharedInstance().setCategory(category, mode: .moviePlayback, policy: .longFormAudio)
         try? AVAudioSession.sharedInstance().setActive(true)
         #endif
     }
