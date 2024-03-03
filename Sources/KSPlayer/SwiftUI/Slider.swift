@@ -12,34 +12,33 @@ import Combine
 
 @available(tvOS 15.0, *)
 public struct Slider: View {
-    private let process: Binding<Float>
+    private let value: Binding<Float>
+    private let bounds: ClosedRange<Float>
     private let onEditingChanged: (Bool) -> Void
     @FocusState
     private var isFocused: Bool
-    public init(value: Binding<Double>, in bounds: ClosedRange<Double> = 0 ... 1, onEditingChanged: @escaping (Bool) -> Void = { _ in }) {
-        process = Binding {
-            Float((value.wrappedValue - bounds.lowerBound) / (bounds.upperBound - bounds.lowerBound))
-        } set: { newValue in
-            value.wrappedValue = (bounds.upperBound - bounds.lowerBound) * Double(newValue) + bounds.lowerBound
-        }
+    public init(value: Binding<Float>, in bounds: ClosedRange<Float> = 0 ... 1, onEditingChanged: @escaping (Bool) -> Void = { _ in }) {
+        self.value = value
+        self.bounds = bounds
         self.onEditingChanged = onEditingChanged
     }
 
     public var body: some View {
-        TVOSSlide(process: process, isFocused: _isFocused, onEditingChanged: onEditingChanged)
+        TVOSSlide(value: value, bounds: bounds, isFocused: _isFocused, onEditingChanged: onEditingChanged)
             .focused($isFocused)
     }
 }
 
 @available(tvOS 15.0, *)
 public struct TVOSSlide: UIViewRepresentable {
-    public let process: Binding<Float>
+    fileprivate let value: Binding<Float>
+    fileprivate let bounds: ClosedRange<Float>
     @FocusState
     public var isFocused: Bool
     public let onEditingChanged: (Bool) -> Void
     public typealias UIViewType = TVSlide
     public func makeUIView(context _: Context) -> UIViewType {
-        TVSlide(process: process, onEditingChanged: onEditingChanged)
+        TVSlide(value: value, bounds: bounds, onEditingChanged: onEditingChanged)
     }
 
     public func updateUIView(_ view: UIViewType, context _: Context) {
@@ -50,34 +49,50 @@ public struct TVOSSlide: UIViewRepresentable {
         } else {
             view.processView.tintColor = .white
         }
-        view.process = process
+        // 要加这个才会触发进度条更新
+        view.value = value
     }
 }
 
 public class TVSlide: UIControl {
     fileprivate let processView = UIProgressView()
-    private var beganProgress = Float(0.0)
+    private var beganValue = Float(0.0)
     private let onEditingChanged: (Bool) -> Void
-    fileprivate var process: Binding<Float> {
+    fileprivate var value: Binding<Float> {
         willSet {
-            if newValue.wrappedValue != processView.progress {
-                processView.progress = newValue.wrappedValue
+            let process = (value.wrappedValue - ranges.lowerBound) / (ranges.upperBound - ranges.lowerBound)
+            if process != processView.progress {
+                processView.progress = process
             }
         }
     }
 
-    private var preMoveDirection: UISwipeGestureRecognizer.Direction?
-    private var preMoveTime = CACurrentMediaTime()
-    private lazy var timer: Timer = .scheduledTimer(withTimeInterval: 0.1, repeats: true) { [weak self] _ in
-        guard let self, let preMoveDirection = self.preMoveDirection, (preMoveDirection == .left && self.process.wrappedValue > 0.01) || (preMoveDirection == .right && self.process.wrappedValue < 0.99) else {
+    fileprivate let ranges: ClosedRange<Float>
+    private var moveDirection: UISwipeGestureRecognizer.Direction?
+    private var pressTime = CACurrentMediaTime()
+    private lazy var timer: Timer = .scheduledTimer(withTimeInterval: 0.15, repeats: true) { [weak self] _ in
+        guard let self, let moveDirection = self.moveDirection, (moveDirection == .left && self.value.wrappedValue > ranges.lowerBound + 20) || (moveDirection == .right && self.value.wrappedValue < ranges.upperBound - 20) else {
             return
         }
+        let rate: Float
+        if CACurrentMediaTime() - pressTime > 20 {
+            rate = 5
+        } else if CACurrentMediaTime() - pressTime > 15 {
+            rate = 4
+        } else if CACurrentMediaTime() - pressTime > 10 {
+            rate = 3
+        } else if CACurrentMediaTime() - pressTime > 5 {
+            rate = 2
+        } else {
+            rate = 1
+        }
+        value.wrappedValue += Float(moveDirection == .right ? 20 : -20) * rate
         self.onEditingChanged(true)
-        self.process.wrappedValue += Float(preMoveDirection == .right ? 0.01 : -0.01)
     }
 
-    public init(process: Binding<Float>, onEditingChanged: @escaping (Bool) -> Void) {
-        self.process = process
+    public init(value: Binding<Float>, bounds: ClosedRange<Float>, onEditingChanged: @escaping (Bool) -> Void) {
+        self.value = value
+        ranges = bounds
         self.onEditingChanged = onEditingChanged
         super.init(frame: .zero)
         processView.translatesAutoresizingMaskIntoConstraints = false
@@ -89,12 +104,8 @@ public class TVSlide: UIControl {
             processView.trailingAnchor.constraint(equalTo: trailingAnchor),
             processView.bottomAnchor.constraint(equalTo: bottomAnchor),
         ])
-        let swipeLeft = UISwipeGestureRecognizer(target: self, action: #selector(swipeGestureAction(_:)))
-        swipeLeft.direction = .left
-        addGestureRecognizer(swipeLeft)
-        let swipeRight = UISwipeGestureRecognizer(target: self, action: #selector(swipeGestureAction(_:)))
-        swipeRight.direction = .right
-        addGestureRecognizer(swipeRight)
+        let panGestureRecognizer = UIPanGestureRecognizer(target: self, action: #selector(actionPanGesture(sender:)))
+        addGestureRecognizer(panGestureRecognizer)
     }
 
     @available(*, unavailable)
@@ -108,10 +119,12 @@ public class TVSlide: UIControl {
         }
         switch presse.type {
         case .leftArrow:
-            preMoveDirection = .left
+            moveDirection = .left
+            pressTime = CACurrentMediaTime()
             timer.fireDate = Date.distantPast
         case .rightArrow:
-            preMoveDirection = .right
+            moveDirection = .right
+            pressTime = CACurrentMediaTime()
             timer.fireDate = Date.distantPast
         case .select:
             timer.fireDate = Date.distantFuture
@@ -124,31 +137,26 @@ public class TVSlide: UIControl {
         timer.fireDate = Date.distantFuture
     }
 
-    @objc fileprivate func swipeGestureAction(_ recognizer: UISwipeGestureRecognizer) {
-        switch recognizer.direction {
-        case .left:
-            onEditingChanged(true)
-            if preMoveDirection == .left, CACurrentMediaTime() - preMoveTime < 0.5 {
-                timer.fireDate = Date.distantPast
-                break
-            } else {
-                timer.fireDate = Date.distantFuture
-                process.wrappedValue -= Float(0.01)
+    @objc private func actionPanGesture(sender: UIPanGestureRecognizer) {
+        let translation = sender.translation(in: self)
+        if abs(translation.y) > abs(translation.x) {
+            return
+        }
+        switch sender.state {
+        case .began, .possible:
+            beganValue = value.wrappedValue
+        case .changed:
+            let wrappedValue = beganValue + Float(translation.x) / Float(frame.size.width) * (ranges.upperBound - ranges.lowerBound) / 5
+            if wrappedValue <= ranges.upperBound, wrappedValue >= ranges.lowerBound {
+                value.wrappedValue = wrappedValue
+                onEditingChanged(true)
             }
-            preMoveDirection = .left
-            preMoveTime = CACurrentMediaTime()
-        case .right:
-            onEditingChanged(true)
-            if preMoveDirection == .right, CACurrentMediaTime() - preMoveTime < 0.5 {
-                timer.fireDate = Date.distantPast
-                break
-            } else {
-                timer.fireDate = Date.distantFuture
-                process.wrappedValue += Float(0.01)
-            }
-            preMoveDirection = .right
-            preMoveTime = CACurrentMediaTime()
-        default:
+        case .ended:
+            break
+        case .cancelled, .failed:
+//            value.wrappedValue = beganValue
+            break
+        @unknown default:
             break
         }
     }

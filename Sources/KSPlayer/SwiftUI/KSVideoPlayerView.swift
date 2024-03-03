@@ -535,10 +535,10 @@ struct VideoTimeShowView: View {
             HStack {
                 Text(model.currentTime.toString(for: .minOrHour)).font(.caption2.monospacedDigit())
                 Slider(value: Binding {
-                    Double(model.currentTime)
+                    Float(model.currentTime)
                 } set: { newValue, _ in
                     model.currentTime = Int(newValue)
-                }, in: 0 ... Double(model.totalTime)) { onEditingChanged in
+                }, in: 0 ... Float(model.totalTime)) { onEditingChanged in
                     if onEditingChanged {
                         config.playerLayer?.pause()
                     } else {
