@@ -508,7 +508,11 @@ public extension KSOptions {
         if category != .playAndRecord {
             category = .playback
         }
+        #if os(tvOS)
         try? AVAudioSession.sharedInstance().setCategory(category, mode: .moviePlayback, policy: .longFormAudio)
+        #else
+        try? AVAudioSession.sharedInstance().setCategory(category, mode: .moviePlayback, policy: .longFormVideo)
+        #endif
         try? AVAudioSession.sharedInstance().setActive(true)
         #endif
     }
