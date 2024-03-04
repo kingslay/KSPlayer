@@ -133,7 +133,7 @@ public class TVSlide: UIControl {
             guard let self else { return }
             self.onEditingChanged(false)
         }
-        DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 3,
+        DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 1.5,
                                       execute: delayItem!)
     }
 
@@ -158,7 +158,7 @@ public class TVSlide: UIControl {
                 guard let self else { return }
                 self.onEditingChanged(false)
             }
-            DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 3,
+            DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 1.5,
                                           execute: delayItem!)
         case .cancelled, .failed:
 //            value.wrappedValue = beganValue

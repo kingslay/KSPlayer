@@ -56,14 +56,40 @@ public enum DynamicRange: Int32 {
         case .sdr:
             return AVPlayer.HDRMode(rawValue: 0)
         case .hdr10:
-            return .hdr10
+            return .hdr10 // 2
         case .hlg:
-            return .hlg
+            return .hlg // 1
         case .dolbyVision:
-            return .dolbyVision
+            return .dolbyVision // 4
         }
     }
     #endif
+    public static var availableHDRModes: [DynamicRange] {
+        #if os(macOS)
+        if NSScreen.main?.maximumPotentialExtendedDynamicRangeColorComponentValue ?? 1.0 > 1.0 {
+            return [.hdr10]
+        } else {
+            return [.sdr]
+        }
+        #else
+        let availableHDRModes = AVPlayer.availableHDRModes
+        if availableHDRModes == AVPlayer.HDRMode(rawValue: 0) {
+            return [.sdr]
+        } else {
+            var modes = [DynamicRange]()
+            if availableHDRModes.contains(.dolbyVision) {
+                modes.append(.dolbyVision)
+            }
+            if availableHDRModes.contains(.hdr10) {
+                modes.append(.hdr10)
+            }
+            if availableHDRModes.contains(.hlg) {
+                modes.append(.hlg)
+            }
+            return modes
+        }
+        #endif
+    }
 }
 
 extension DynamicRange: CustomStringConvertible {
@@ -74,7 +100,7 @@ extension DynamicRange: CustomStringConvertible {
         case .hdr10:
             return "HDR10"
         case .hlg:
-            return "HDR"
+            return "HLG"
         case .dolbyVision:
             return "Dolby Vision"
         }
