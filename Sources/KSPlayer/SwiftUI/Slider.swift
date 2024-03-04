@@ -50,7 +50,10 @@ public struct TVOSSlide: UIViewRepresentable {
             view.processView.tintColor = .white
         }
         // 要加这个才会触发进度条更新
-        view.value = value
+        let process = (value.wrappedValue - bounds.lowerBound) / (bounds.upperBound - bounds.lowerBound)
+        if process != view.processView.progress {
+            view.processView.progress = process
+        }
     }
 }
 
@@ -58,35 +61,21 @@ public class TVSlide: UIControl {
     fileprivate let processView = UIProgressView()
     private var beganValue = Float(0.0)
     private let onEditingChanged: (Bool) -> Void
-    fileprivate var value: Binding<Float> {
-        willSet {
-            let process = (value.wrappedValue - ranges.lowerBound) / (ranges.upperBound - ranges.lowerBound)
-            if process != processView.progress {
-                processView.progress = process
-            }
-        }
-    }
-
+    fileprivate var value: Binding<Float>
     fileprivate let ranges: ClosedRange<Float>
     private var moveDirection: UISwipeGestureRecognizer.Direction?
     private var pressTime = CACurrentMediaTime()
+    private var delayItem: DispatchWorkItem?
+
     private lazy var timer: Timer = .scheduledTimer(withTimeInterval: 0.15, repeats: true) { [weak self] _ in
-        guard let self, let moveDirection = self.moveDirection, (moveDirection == .left && self.value.wrappedValue > ranges.lowerBound + 20) || (moveDirection == .right && self.value.wrappedValue < ranges.upperBound - 20) else {
+        guard let self, let moveDirection = self.moveDirection else {
             return
         }
-        let rate: Float
-        if CACurrentMediaTime() - pressTime > 20 {
-            rate = 5
-        } else if CACurrentMediaTime() - pressTime > 15 {
-            rate = 4
-        } else if CACurrentMediaTime() - pressTime > 10 {
-            rate = 3
-        } else if CACurrentMediaTime() - pressTime > 5 {
-            rate = 2
-        } else {
-            rate = 1
+        let rate = min(10, Int((CACurrentMediaTime() - self.pressTime) / 2) + 1)
+        let wrappedValue = self.value.wrappedValue + Float((moveDirection == .right ? 10 : -10) * rate)
+        if wrappedValue >= self.ranges.lowerBound, wrappedValue <= self.ranges.upperBound {
+            self.value.wrappedValue = wrappedValue
         }
-        value.wrappedValue += Float(moveDirection == .right ? 20 : -20) * rate
         self.onEditingChanged(true)
     }
 
@@ -117,6 +106,8 @@ public class TVSlide: UIControl {
         guard let presse = presses.first else {
             return
         }
+        delayItem?.cancel()
+        delayItem = nil
         switch presse.type {
         case .leftArrow:
             moveDirection = .left
@@ -133,8 +124,17 @@ public class TVSlide: UIControl {
         }
     }
 
-    override open func pressesEnded(_: Set<UIPress>, with _: UIPressesEvent?) {
+    override open func pressesEnded(_ presses: Set<UIPress>, with _: UIPressesEvent?) {
         timer.fireDate = Date.distantFuture
+        guard let presse = presses.first, presse.type == .leftArrow || presse.type == .rightArrow else {
+            return
+        }
+        delayItem = DispatchWorkItem { [weak self] in
+            guard let self else { return }
+            self.onEditingChanged(false)
+        }
+        DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 3,
+                                      execute: delayItem!)
     }
 
     @objc private func actionPanGesture(sender: UIPanGestureRecognizer) {
@@ -144,6 +144,8 @@ public class TVSlide: UIControl {
         }
         switch sender.state {
         case .began, .possible:
+            delayItem?.cancel()
+            delayItem = nil
             beganValue = value.wrappedValue
         case .changed:
             let wrappedValue = beganValue + Float(translation.x) / Float(frame.size.width) * (ranges.upperBound - ranges.lowerBound) / 5
@@ -152,7 +154,12 @@ public class TVSlide: UIControl {
                 onEditingChanged(true)
             }
         case .ended:
-            break
+            delayItem = DispatchWorkItem { [weak self] in
+                guard let self else { return }
+                self.onEditingChanged(false)
+            }
+            DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 3,
+                                          execute: delayItem!)
         case .cancelled, .failed:
 //            value.wrappedValue = beganValue
             break
