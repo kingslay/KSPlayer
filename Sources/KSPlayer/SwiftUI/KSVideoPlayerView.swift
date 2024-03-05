@@ -316,7 +316,7 @@ struct VideoControllerView: View {
                     contentModeButton
                     subtitleButton
                     playbackRateButton
-                    //                pipButton
+                    pipButton
                     infoButton
                 }
                 .font(.caption)
