@@ -309,15 +309,23 @@ struct VideoControllerView: View {
                     } label: {
                         Image(systemName: config.state == .error ? "play.slash.fill" : (config.state.isPlaying ? "pause.circle.fill" : "play.circle.fill"))
                     }
+                    .frame(width: 50)
                     if let audioTracks = config.playerLayer?.player.tracks(mediaType: .audio), !audioTracks.isEmpty {
                         audioButton(audioTracks: audioTracks)
+                            .frame(width: 110)
                     }
                     muteButton
+                        .frame(width: 50)
                     contentModeButton
+                        .frame(width: 50)
                     subtitleButton
+                        .frame(width: 110)
                     playbackRateButton
+                        .frame(width: 110)
                     pipButton
+                        .frame(width: 50)
                     infoButton
+                        .frame(width: 50)
                 }
                 .font(.caption)
             }
