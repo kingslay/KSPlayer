@@ -341,19 +341,17 @@ open class KSOptions {
     @MainActor
     open func updateVideo(refreshRate: Float, isDovi: Bool, formatDescription: CMFormatDescription?) {
         #if os(tvOS) || os(xrOS)
+        /**
+         快速更改preferredDisplayCriteria，会导致isDisplayModeSwitchInProgress变成true。
+         例如退出一个视频，然后在3s内重新进入的话。所以不判断isDisplayModeSwitchInProgress了
+         */
         guard let displayManager = UIApplication.shared.windows.first?.avDisplayManager,
               displayManager.isDisplayCriteriaMatchingEnabled
         else {
             return
         }
-//        快速更改preferredDisplayCriteria，会导致isDisplayModeSwitchInProgress变成true，例如退出一个视频，然后在3s内重新进入的话，
-        if let formatDescription {
-            if KSOptions.displayCriteriaFormatDescriptionEnabled, #available(tvOS 17.0, *) {
-                displayManager.preferredDisplayCriteria = AVDisplayCriteria(refreshRate: refreshRate, formatDescription: formatDescription)
-            } else {
-                let dynamicRange = isDovi ? .dolbyVision : formatDescription.dynamicRange
-                displayManager.preferredDisplayCriteria = AVDisplayCriteria(refreshRate: refreshRate, videoDynamicRange: dynamicRange.rawValue)
-            }
+        if let dynamicRange = isDovi ? .dolbyVision : formatDescription?.dynamicRange {
+            displayManager.preferredDisplayCriteria = AVDisplayCriteria(refreshRate: refreshRate, videoDynamicRange: dynamicRange.rawValue)
         }
         #endif
     }
@@ -488,7 +486,6 @@ public extension KSOptions {
     static var isPipPopViewController = false
     static var canStartPictureInPictureAutomaticallyFromInline = true
     static var preferredFrame = true
-    static var displayCriteriaFormatDescriptionEnabled = false
     static var useSystemHTTPProxy = true
     /// 日志级别
     static var logLevel = LogLevel.warning

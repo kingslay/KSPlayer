@@ -159,13 +159,6 @@ public class Defaults: ObservableObject {
         }
     }
 
-    @AppStorage("displayCriteriaFormatDescriptionEnabled")
-    public var displayCriteriaFormatDescriptionEnabled = KSOptions.displayCriteriaFormatDescriptionEnabled {
-        didSet {
-            KSOptions.displayCriteriaFormatDescriptionEnabled = displayCriteriaFormatDescriptionEnabled
-        }
-    }
-
     @AppStorage("yadifMode")
     public var yadifMode = MEOptions.yadifMode {
         didSet {
