@@ -17,7 +17,6 @@ public typealias UIViewRepresentable = NSViewRepresentable
 #endif
 
 public struct KSVideoPlayer {
-    @ObservedObject
     public private(set) var coordinator: Coordinator
     public let url: URL
     public let options: KSOptions
@@ -77,6 +76,7 @@ extension KSVideoPlayer: UIViewRepresentable {
     }
     #endif
 
+    @MainActor
     private func updateView(_: UIView, context: Context) {
         if context.coordinator.playerLayer?.url != url {
             _ = context.coordinator.makeView(url: url, options: options)
@@ -279,6 +279,7 @@ extension KSVideoPlayer: Equatable {
     }
 }
 
+@MainActor
 public extension KSVideoPlayer {
     func onBufferChanged(_ handler: @escaping (Int, TimeInterval) -> Void) -> Self {
         coordinator.onBufferChanged = handler
