@@ -26,8 +26,6 @@ open class KSOptions {
     public var isAccurateSeek = KSOptions.isAccurateSeek
     /// Applies to short videos only
     public var isLoopPlay = KSOptions.isLoopPlay
-    /// 是否自动播放，默认false
-    public var isAutoPlay = KSOptions.isAutoPlay
     /// seek完是否自动播放
     public var isSeekedAutoPlay = KSOptions.isSeekedAutoPlay
     /*

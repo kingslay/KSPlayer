@@ -294,7 +294,7 @@ open class VideoPlayerView: PlayerView {
             if state == .playedToTheEnd {
                 replayButton.isSelected = true
             }
-        case .prepareToPlay:
+        case .initialized, .preparing:
             break
         }
     }
