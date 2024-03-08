@@ -226,6 +226,7 @@ extension MetalPlayView {
             if formatDescription != nil {
                 displayView.removeFromSuperview()
                 displayView = AVSampleBufferDisplayView()
+                displayView.frame = frame
                 addSubview(displayView)
             }
             formatDescription = pixelBuffer.formatDescription
