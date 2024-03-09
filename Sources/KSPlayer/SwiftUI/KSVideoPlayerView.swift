@@ -9,6 +9,7 @@ import MediaPlayer
 import SwiftUI
 
 @available(iOS 16.0, macOS 13.0, tvOS 16.0, *)
+@MainActor
 public struct KSVideoPlayerView: View {
     private let subtitleDataSouce: SubtitleDataSouce?
     @State
@@ -36,16 +37,20 @@ public struct KSVideoPlayerView: View {
         }
     }
 
-    public init(url: URL, options: KSOptions, title: String? = nil, subtitleDataSouce: SubtitleDataSouce? = nil) {
-        self.init(coordinator: KSVideoPlayer.Coordinator(), url: url, options: options, title: title, subtitleDataSouce: subtitleDataSouce)
+    public init(url: URL, options: KSOptions, title: String? = nil) {
+        self.init(coordinator: KSVideoPlayer.Coordinator(), url: url, options: options, title: title, subtitleDataSouce: nil)
     }
 
     public init(coordinator: KSVideoPlayer.Coordinator, url: URL, options: KSOptions, title: String? = nil, subtitleDataSouce: SubtitleDataSouce? = nil) {
-        _url = .init(initialValue: url)
+        self.init(coordinator: coordinator, url: .init(wrappedValue: url), options: options, title: .init(wrappedValue: title ?? url.lastPathComponent), subtitleDataSouce: subtitleDataSouce)
+    }
+
+    public init(coordinator: KSVideoPlayer.Coordinator, url: State<URL>, options: KSOptions, title: State<String>, subtitleDataSouce: SubtitleDataSouce?) {
+        _url = url
         _playerCoordinator = .init(wrappedValue: coordinator)
-        _title = .init(initialValue: title ?? url.lastPathComponent)
+        _title = title
         #if os(macOS)
-        NSDocumentController.shared.noteNewRecentDocumentURL(url)
+        NSDocumentController.shared.noteNewRecentDocumentURL(url.wrappedValue)
         #endif
         self.options = options
         self.subtitleDataSouce = subtitleDataSouce
@@ -232,6 +237,7 @@ public struct KSVideoPlayerView: View {
         runOnMainThread {
             if url.isAudio || url.isMovie {
                 self.url = url
+                title = url.lastPathComponent
             } else {
                 let info = URLSubtitleInfo(url: url)
                 playerCoordinator.subtitleModel.selectedSubtitleInfo = info
