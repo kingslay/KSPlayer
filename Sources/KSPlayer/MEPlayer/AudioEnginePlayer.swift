@@ -112,6 +112,7 @@ public class AudioEnginePlayer: AudioOutput {
     private let timePitch = AVAudioUnitTimePitch()
     private var sampleSize = UInt32(MemoryLayout<Float>.size)
     private var currentRenderReadOffset = UInt32(0)
+    private var outputLatency = TimeInterval(0)
     public weak var renderSource: OutputRenderSourceDelegate?
     private var currentRender: AudioFrame? {
         didSet {
@@ -223,6 +224,9 @@ public class AudioEnginePlayer: AudioOutput {
 
     public func flush() {
         currentRender = nil
+        #if !os(macOS)
+        outputLatency = AVAudioSession.sharedInstance().outputLatency
+        #endif
     }
 
     private func addRenderNotify(audioUnit: AudioUnit) {
@@ -307,10 +311,11 @@ public class AudioEnginePlayer: AudioOutput {
             let currentPreparePosition = currentRender.timestamp + currentRender.duration * Int64(currentRenderReadOffset) / Int64(currentRender.numberOfSamples)
             if currentPreparePosition > 0 {
                 var time = currentRender.timebase.cmtime(for: currentPreparePosition)
-                #if !os(macOS)
-                // AVSampleBufferAudioRenderer不需要处理outputLatency，其他音频输出的都要处理，没有蓝牙的话，outputLatency为0.015，有蓝牙耳机的话为0.176
-                time = time - CMTime(seconds: AVAudioSession.sharedInstance().outputLatency, preferredTimescale: time.timescale)
-                #endif
+                if outputLatency != 0 {
+                    /// AVSampleBufferAudioRenderer不需要处理outputLatency。其他音频输出的都要处理。
+                    /// 没有蓝牙的话，outputLatency为0.015，有蓝牙耳机的话为0.176
+                    time = time - CMTime(seconds: outputLatency, preferredTimescale: time.timescale)
+                }
                 renderSource?.setAudio(time: time, position: currentRender.position)
             }
         }
