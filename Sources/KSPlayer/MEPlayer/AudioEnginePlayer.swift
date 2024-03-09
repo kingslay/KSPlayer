@@ -225,6 +225,7 @@ public class AudioEnginePlayer: AudioOutput {
     public func flush() {
         currentRender = nil
         #if !os(macOS)
+        // 这个要在主线程执行，如果在音频的线程，那就会有中断杂音
         outputLatency = AVAudioSession.sharedInstance().outputLatency
         #endif
     }
