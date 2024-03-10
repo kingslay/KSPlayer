@@ -96,6 +96,7 @@ open class KSPlayerLayer: NSObject {
     public var player: MediaPlayerProtocol {
         didSet {
             KSLog("player is \(player)")
+            state = .initialized
             runOnMainThread { [weak self] in
                 guard let self else { return }
                 if let oldView = oldValue.view, let superview = oldView.superview, let view = player.view {

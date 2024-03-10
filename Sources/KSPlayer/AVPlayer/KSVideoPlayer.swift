@@ -35,20 +35,7 @@ extension KSVideoPlayer: UIViewRepresentable {
     #if canImport(UIKit)
     public typealias UIViewType = UIView
     public func makeUIView(context: Context) -> UIViewType {
-        let view = context.coordinator.makeView(url: url, options: options)
-        let swipeDown = UISwipeGestureRecognizer(target: context.coordinator, action: #selector(Coordinator.swipeGestureAction(_:)))
-        swipeDown.direction = .down
-        view.addGestureRecognizer(swipeDown)
-        let swipeLeft = UISwipeGestureRecognizer(target: context.coordinator, action: #selector(Coordinator.swipeGestureAction(_:)))
-        swipeLeft.direction = .left
-        view.addGestureRecognizer(swipeLeft)
-        let swipeRight = UISwipeGestureRecognizer(target: context.coordinator, action: #selector(Coordinator.swipeGestureAction(_:)))
-        swipeRight.direction = .right
-        view.addGestureRecognizer(swipeRight)
-        let swipeUp = UISwipeGestureRecognizer(target: context.coordinator, action: #selector(Coordinator.swipeGestureAction(_:)))
-        swipeUp.direction = .up
-        view.addGestureRecognizer(swipeUp)
-        return view
+        context.coordinator.makeView(url: url, options: options)
     }
 
     public func updateUIView(_ view: UIViewType, context: Context) {
@@ -245,6 +232,22 @@ extension KSVideoPlayer.Coordinator: KSPlayerLayerDelegate {
             isMaskShow = false
         } else {
             isMaskShow = true
+            #if canImport(UIKit)
+            if state == .preparing, let view = layer.player.view {
+                let swipeDown = UISwipeGestureRecognizer(target: self, action: #selector(swipeGestureAction(_:)))
+                swipeDown.direction = .down
+                view.addGestureRecognizer(swipeDown)
+                let swipeLeft = UISwipeGestureRecognizer(target: self, action: #selector(swipeGestureAction(_:)))
+                swipeLeft.direction = .left
+                view.addGestureRecognizer(swipeLeft)
+                let swipeRight = UISwipeGestureRecognizer(target: self, action: #selector(swipeGestureAction(_:)))
+                swipeRight.direction = .right
+                view.addGestureRecognizer(swipeRight)
+                let swipeUp = UISwipeGestureRecognizer(target: self, action: #selector(swipeGestureAction(_:)))
+                swipeUp.direction = .up
+                view.addGestureRecognizer(swipeUp)
+            }
+            #endif
         }
     }
 
