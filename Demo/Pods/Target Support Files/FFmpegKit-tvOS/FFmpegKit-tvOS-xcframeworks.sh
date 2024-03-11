@@ -188,9 +188,6 @@ variant_for_slice()
   "MoltenVK.xcframework/ios-arm64")
     echo ""
     ;;
-  "MoltenVK.xcframework/ios-arm64_x86_64-maccatalyst")
-    echo "maccatalyst"
-    ;;
   "MoltenVK.xcframework/ios-arm64_x86_64-simulator")
     echo "simulator"
     ;;
@@ -273,6 +270,30 @@ variant_for_slice()
     echo ""
     ;;
   "libplacebo.xcframework/xros-arm64-simulator")
+    echo "simulator"
+    ;;
+  "libfontconfig.xcframework/ios-arm64")
+    echo ""
+    ;;
+  "libfontconfig.xcframework/ios-arm64_x86_64-maccatalyst")
+    echo "maccatalyst"
+    ;;
+  "libfontconfig.xcframework/ios-arm64_x86_64-simulator")
+    echo "simulator"
+    ;;
+  "libfontconfig.xcframework/macos-arm64_x86_64")
+    echo ""
+    ;;
+  "libfontconfig.xcframework/tvos-arm64_arm64e")
+    echo ""
+    ;;
+  "libfontconfig.xcframework/tvos-arm64_x86_64-simulator")
+    echo "simulator"
+    ;;
+  "libfontconfig.xcframework/xros-arm64")
+    echo ""
+    ;;
+  "libfontconfig.xcframework/xros-arm64-simulator")
     echo "simulator"
     ;;
   "gmp.xcframework/ios-arm64")
@@ -371,30 +392,6 @@ variant_for_slice()
   "gnutls.xcframework/xros-arm64-simulator")
     echo "simulator"
     ;;
-  "libsmbclient.xcframework/ios-arm64")
-    echo ""
-    ;;
-  "libsmbclient.xcframework/ios-arm64_x86_64-maccatalyst")
-    echo "maccatalyst"
-    ;;
-  "libsmbclient.xcframework/ios-arm64_x86_64-simulator")
-    echo "simulator"
-    ;;
-  "libsmbclient.xcframework/macos-arm64_x86_64")
-    echo ""
-    ;;
-  "libsmbclient.xcframework/tvos-arm64_arm64e")
-    echo ""
-    ;;
-  "libsmbclient.xcframework/tvos-arm64_x86_64-simulator")
-    echo "simulator"
-    ;;
-  "libsmbclient.xcframework/xros-arm64")
-    echo ""
-    ;;
-  "libsmbclient.xcframework/xros-arm64-simulator")
-    echo "simulator"
-    ;;
   "libzvbi.xcframework/ios-arm64")
     echo ""
     ;;
@@ -404,7 +401,7 @@ variant_for_slice()
   "libzvbi.xcframework/macos-arm64_x86_64")
     echo ""
     ;;
-  "libzvbi.xcframework/tvos-arm64")
+  "libzvbi.xcframework/tvos-arm64_arm64e")
     echo ""
     ;;
   "libzvbi.xcframework/tvos-arm64_x86_64-simulator")
@@ -617,9 +614,6 @@ archs_for_slice()
   "MoltenVK.xcframework/ios-arm64")
     echo "arm64"
     ;;
-  "MoltenVK.xcframework/ios-arm64_x86_64-maccatalyst")
-    echo "arm64 x86_64"
-    ;;
   "MoltenVK.xcframework/ios-arm64_x86_64-simulator")
     echo "arm64 x86_64"
     ;;
@@ -702,6 +696,30 @@ archs_for_slice()
     echo "arm64"
     ;;
   "libplacebo.xcframework/xros-arm64-simulator")
+    echo "arm64"
+    ;;
+  "libfontconfig.xcframework/ios-arm64")
+    echo "arm64"
+    ;;
+  "libfontconfig.xcframework/ios-arm64_x86_64-maccatalyst")
+    echo "arm64 x86_64"
+    ;;
+  "libfontconfig.xcframework/ios-arm64_x86_64-simulator")
+    echo "arm64 x86_64"
+    ;;
+  "libfontconfig.xcframework/macos-arm64_x86_64")
+    echo "arm64 x86_64"
+    ;;
+  "libfontconfig.xcframework/tvos-arm64_arm64e")
+    echo "arm64 arm64e"
+    ;;
+  "libfontconfig.xcframework/tvos-arm64_x86_64-simulator")
+    echo "arm64 x86_64"
+    ;;
+  "libfontconfig.xcframework/xros-arm64")
+    echo "arm64"
+    ;;
+  "libfontconfig.xcframework/xros-arm64-simulator")
     echo "arm64"
     ;;
   "gmp.xcframework/ios-arm64")
@@ -800,30 +818,6 @@ archs_for_slice()
   "gnutls.xcframework/xros-arm64-simulator")
     echo "arm64"
     ;;
-  "libsmbclient.xcframework/ios-arm64")
-    echo "arm64"
-    ;;
-  "libsmbclient.xcframework/ios-arm64_x86_64-maccatalyst")
-    echo "arm64 x86_64"
-    ;;
-  "libsmbclient.xcframework/ios-arm64_x86_64-simulator")
-    echo "arm64 x86_64"
-    ;;
-  "libsmbclient.xcframework/macos-arm64_x86_64")
-    echo "arm64 x86_64"
-    ;;
-  "libsmbclient.xcframework/tvos-arm64_arm64e")
-    echo "arm64 arm64e"
-    ;;
-  "libsmbclient.xcframework/tvos-arm64_x86_64-simulator")
-    echo "arm64 x86_64"
-    ;;
-  "libsmbclient.xcframework/xros-arm64")
-    echo "arm64"
-    ;;
-  "libsmbclient.xcframework/xros-arm64-simulator")
-    echo "arm64"
-    ;;
   "libzvbi.xcframework/ios-arm64")
     echo "arm64"
     ;;
@@ -833,8 +827,8 @@ archs_for_slice()
   "libzvbi.xcframework/macos-arm64_x86_64")
     echo "arm64 x86_64"
     ;;
-  "libzvbi.xcframework/tvos-arm64")
-    echo "arm64"
+  "libzvbi.xcframework/tvos-arm64_arm64e")
+    echo "arm64 arm64e"
     ;;
   "libzvbi.xcframework/tvos-arm64_x86_64-simulator")
     echo "arm64 x86_64"
@@ -962,11 +956,11 @@ install_xcframework "${PODS_ROOT}/../../FFmpegKit/Sources/MoltenVK.xcframework" 
 install_xcframework "${PODS_ROOT}/../../FFmpegKit/Sources/lcms2.xcframework" "FFmpegKit/FFmpegKit" "framework" "tvos-arm64_arm64e" "tvos-arm64_x86_64-simulator"
 install_xcframework "${PODS_ROOT}/../../FFmpegKit/Sources/libdav1d.xcframework" "FFmpegKit/FFmpegKit" "framework" "tvos-arm64_arm64e" "tvos-arm64_x86_64-simulator"
 install_xcframework "${PODS_ROOT}/../../FFmpegKit/Sources/libplacebo.xcframework" "FFmpegKit/FFmpegKit" "framework" "tvos-arm64_arm64e" "tvos-arm64_x86_64-simulator"
+install_xcframework "${PODS_ROOT}/../../FFmpegKit/Sources/libfontconfig.xcframework" "FFmpegKit/FFmpegKit" "framework" "tvos-arm64_arm64e" "tvos-arm64_x86_64-simulator"
 install_xcframework "${PODS_ROOT}/../../FFmpegKit/Sources/gmp.xcframework" "FFmpegKit/FFmpegKit" "framework" "tvos-arm64_arm64e" "tvos-arm64_x86_64-simulator"
 install_xcframework "${PODS_ROOT}/../../FFmpegKit/Sources/nettle.xcframework" "FFmpegKit/FFmpegKit" "framework" "tvos-arm64_arm64e" "tvos-arm64_x86_64-simulator"
 install_xcframework "${PODS_ROOT}/../../FFmpegKit/Sources/hogweed.xcframework" "FFmpegKit/FFmpegKit" "framework" "tvos-arm64_arm64e" "tvos-arm64_x86_64-simulator"
 install_xcframework "${PODS_ROOT}/../../FFmpegKit/Sources/gnutls.xcframework" "FFmpegKit/FFmpegKit" "framework" "tvos-arm64_arm64e" "tvos-arm64_x86_64-simulator"
-install_xcframework "${PODS_ROOT}/../../FFmpegKit/Sources/libsmbclient.xcframework" "FFmpegKit/FFmpegKit" "framework" "tvos-arm64_arm64e" "tvos-arm64_x86_64-simulator"
-install_xcframework "${PODS_ROOT}/../../FFmpegKit/Sources/libzvbi.xcframework" "FFmpegKit/FFmpegKit" "framework" "tvos-arm64" "tvos-arm64_x86_64-simulator"
+install_xcframework "${PODS_ROOT}/../../FFmpegKit/Sources/libzvbi.xcframework" "FFmpegKit/FFmpegKit" "framework" "tvos-arm64_arm64e" "tvos-arm64_x86_64-simulator"
 install_xcframework "${PODS_ROOT}/../../FFmpegKit/Sources/libsrt.xcframework" "FFmpegKit/FFmpegKit" "framework" "tvos-arm64_arm64e" "tvos-arm64_x86_64-simulator"
 

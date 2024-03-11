@@ -89,6 +89,7 @@ class MetalRender {
         commandBuffer.waitUntilCompleted()
     }
 
+    @MainActor
     func draw(pixelBuffer: PixelBufferProtocol, display: DisplayEnum = .plane, drawable: CAMetalDrawable) {
         let inputTextures = pixelBuffer.textures()
         renderPassDescriptor.colorAttachments[0].texture = drawable.texture

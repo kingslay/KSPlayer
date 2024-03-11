@@ -104,6 +104,7 @@ public extension MediaPlayerProtocol {
     }
 }
 
+@MainActor
 public protocol MediaPlayerDelegate: AnyObject {
     func readyToPlay(player: some MediaPlayerProtocol)
     func changeLoadState(player: some MediaPlayerProtocol)
@@ -120,6 +121,7 @@ public protocol MediaPlayerTrack: AnyObject, CustomStringConvertible {
     var mediaType: AVFoundation.AVMediaType { get }
     var nominalFrameRate: Float { get set }
     var bitRate: Int64 { get }
+    var bitDepth: Int32 { get }
     var isEnabled: Bool { get set }
     var isImageSubtitle: Bool { get }
     var rotation: Int16 { get }
@@ -247,6 +249,10 @@ public extension CMFormatDescription {
             contentRange = .sdr
         }
         return contentRange
+    }
+
+    var bitDepth: Int32 {
+        codecType.bitDepth
     }
 
     var codecType: FourCharCode {

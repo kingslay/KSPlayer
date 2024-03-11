@@ -65,6 +65,7 @@ public final class KSAVPlayerView: UIView {
     }
 }
 
+@MainActor
 public class KSAVPlayer {
     private var cancellable: AnyCancellable?
     private var options: KSOptions {
@@ -399,7 +400,7 @@ extension KSAVPlayer: MediaPlayerProtocol {
         let time = max(time, 0)
         shouldSeekTo = time
         playbackState = .seeking
-        runInMainqueue { [weak self] in
+        runOnMainThread { [weak self] in
             self?.bufferingProgress = 0
         }
         let tolerance: CMTime = options.isAccurateSeek ? .zero : .positiveInfinity
@@ -414,7 +415,7 @@ extension KSAVPlayer: MediaPlayerProtocol {
     public func prepareToPlay() {
         KSLog("prepareToPlay \(self)")
         options.prepareTime = CACurrentMediaTime()
-        runInMainqueue { [weak self] in
+        runOnMainThread { [weak self] in
             guard let self else { return }
             self.bufferingProgress = 0
             let playerItem = AVPlayerItem(asset: self.urlAsset)
@@ -517,6 +518,7 @@ class AVMediaPlayerTrack: MediaPlayerTrack {
     var nominalFrameRate: Float
     let trackID: Int32
     let rotation: Int16 = 0
+    let bitDepth: Int32
     let bitRate: Int64
     let name: String
     let languageCode: String?
@@ -525,6 +527,7 @@ class AVMediaPlayerTrack: MediaPlayerTrack {
     var dovi: DOVIDecoderConfigurationRecord?
     let fieldOrder: FFmpegFieldOrder = .unknown
     var isPlayable: Bool
+    @MainActor
     var isEnabled: Bool {
         get {
             track.isEnabled
@@ -553,6 +556,7 @@ class AVMediaPlayerTrack: MediaPlayerTrack {
         } else {
             formatDescription = nil
         }
+        bitDepth = formatDescription?.bitDepth ?? 0
         // swiftlint:enable force_cast
         description = (formatDescription?.mediaSubType ?? .boxed).rawValue.string
         #if os(xrOS)

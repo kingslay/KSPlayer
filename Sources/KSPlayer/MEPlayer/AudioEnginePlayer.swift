@@ -14,7 +14,7 @@ public protocol AudioOutput: FrameOutput {
     var isMuted: Bool { get set }
     init()
     func prepare(audioFormat: AVAudioFormat)
-    func play(time: TimeInterval)
+    func play()
 }
 
 public protocol AudioDynamicsProcessor {
@@ -197,7 +197,7 @@ public class AudioEnginePlayer: AudioOutput {
             try? engine.start()
             // 从多声道切换到2声道马上调用start会不生效。需要异步主线程才可以
             DispatchQueue.main.async { [weak self] in
-                self?.play(time: 0)
+                self?.play()
             }
         }
     }
@@ -206,7 +206,7 @@ public class AudioEnginePlayer: AudioOutput {
         [timePitch, engine.mainMixerNode]
     }
 
-    public func play(time _: TimeInterval) {
+    public func play() {
         if !engine.isRunning {
             do {
                 try engine.start()
@@ -274,7 +274,7 @@ public class AudioEnginePlayer: AudioOutput {
                 continue
             }
             if sourceNodeAudioFormat != currentRender.audioFormat {
-                runInMainqueue { [weak self] in
+                runOnMainThread { [weak self] in
                     guard let self else {
                         return
                     }

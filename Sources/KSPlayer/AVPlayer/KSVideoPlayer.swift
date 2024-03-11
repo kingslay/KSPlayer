@@ -34,7 +34,7 @@ extension KSVideoPlayer: UIViewRepresentable {
     }
 
     #if canImport(UIKit)
-    public typealias UIViewType = KSPlayerLayer
+    public typealias UIViewType = UIView
     public func makeUIView(context: Context) -> UIViewType {
         let view = context.coordinator.makeView(url: url, options: options)
         let swipeDown = UISwipeGestureRecognizer(target: context.coordinator, action: #selector(Coordinator.swipeGestureAction(_:)))
@@ -61,7 +61,7 @@ extension KSVideoPlayer: UIViewRepresentable {
         coordinator.resetPlayer()
     }
     #else
-    public typealias NSViewType = KSPlayerLayer
+    public typealias NSViewType = UIView
     public func makeNSView(context: Context) -> NSViewType {
         context.coordinator.makeView(url: url, options: options)
     }
@@ -77,12 +77,13 @@ extension KSVideoPlayer: UIViewRepresentable {
     }
     #endif
 
-    private func updateView(_ view: KSPlayerLayer, context: Context) {
-        if view.url != url {
+    private func updateView(_: UIView, context: Context) {
+        if context.coordinator.playerLayer?.url != url {
             _ = context.coordinator.makeView(url: url, options: options)
         }
     }
 
+    @MainActor
     public final class Coordinator: ObservableObject {
         @Published
         public var state = KSPlayerState.prepareToPlay
@@ -108,6 +109,7 @@ extension KSVideoPlayer: UIViewRepresentable {
         }
 
         @Published
+        @MainActor
         public var isMaskShow = true {
             didSet {
                 if isMaskShow != oldValue {
@@ -123,7 +125,7 @@ extension KSVideoPlayer: UIViewRepresentable {
                     }
                     #if os(macOS)
                     isMaskShow ? NSCursor.unhide() : NSCursor.setHiddenUntilMouseMoves(true)
-                    if let window = playerLayer?.window {
+                    if let window = playerLayer?.player.view?.window {
                         if !window.styleMask.contains(.fullScreen) {
                             window.standardWindowButton(.closeButton)?.superview?.superview?.isHidden = !isMaskShow
                             //                    window.standardWindowButton(.zoomButton)?.isHidden = !isMaskShow
@@ -161,7 +163,7 @@ extension KSVideoPlayer: UIViewRepresentable {
 
         public init() {}
 
-        public func makeView(url: URL, options: KSOptions) -> KSPlayerLayer {
+        public func makeView(url: URL, options: KSOptions) -> UIView {
             defer {
                 DispatchQueue.main.async { [weak self] in
                     self?.subtitleModel.url = url
@@ -169,17 +171,17 @@ extension KSVideoPlayer: UIViewRepresentable {
             }
             if let playerLayer {
                 if playerLayer.url == url {
-                    return playerLayer
+                    return playerLayer.player.view ?? UIView()
                 }
                 playerLayer.delegate = nil
                 playerLayer.set(url: url, options: options)
                 playerLayer.delegate = self
-                return playerLayer
+                return playerLayer.player.view ?? UIView()
             } else {
                 let playerLayer = KSPlayerLayer(url: url, options: options)
                 playerLayer.delegate = self
                 self.playerLayer = playerLayer
-                return playerLayer
+                return playerLayer.player.view ?? UIView()
             }
         }
 

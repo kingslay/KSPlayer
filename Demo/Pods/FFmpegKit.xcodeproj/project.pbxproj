@@ -43,82 +43,83 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
-		0C9EBB720CA079594208CB415B2F9B98 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 18B3F456355835193C20FA0C19D94557 /* Libass.xcodeproj */;
-			proxyType = 1;
-			remoteGlobalIDString = 19326DCF0ABF89A6F47885A1FC666CCA;
-			remoteInfo = "Libass-iOS";
-		};
-		CC0F0B29147F73D027091676E6DC8D20 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 18B3F456355835193C20FA0C19D94557 /* Libass.xcodeproj */;
-			proxyType = 1;
-			remoteGlobalIDString = 3C79E5F82E86276CE05C24C8B1DEF619;
-			remoteInfo = "Libass-tvOS";
-		};
-		DD836B8CAF74B0FAA2D9198B4F855C4D /* PBXContainerItemProxy */ = {
+		2616FA2DA706888E4AADA5C2744BB50F /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 18B3F456355835193C20FA0C19D94557 /* Libass.xcodeproj */;
 			proxyType = 1;
 			remoteGlobalIDString = 9CB450B641767C72AE3FEED9D23A5B14;
 			remoteInfo = "Libass-macOS";
 		};
+		95ECD96303B2F1A42312F5BCD722B636 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 18B3F456355835193C20FA0C19D94557 /* Libass.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = 19326DCF0ABF89A6F47885A1FC666CCA;
+			remoteInfo = "Libass-iOS";
+		};
+		E4E390CD8F5E55BF2A0A6070C5602550 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 18B3F456355835193C20FA0C19D94557 /* Libass.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = 3C79E5F82E86276CE05C24C8B1DEF619;
+			remoteInfo = "Libass-tvOS";
+		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
 		0568A3832382EDDEDE9F108C169EB4C0 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/AppleTVOS.platform/Developer/SDKs/AppleTVOS14.0.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
 		0882989AC901BEA1616EA458555EB6CB /* FFmpegKit-macOS-prefix.pch */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = "FFmpegKit-macOS-prefix.pch"; path = "../FFmpegKit-macOS/FFmpegKit-macOS-prefix.pch"; sourceTree = "<group>"; };
-		0F3394BBBE1CD500366243818EED9209 /* MoltenVK.xcframework */ = {isa = PBXFileReference; includeInIndex = 1; name = MoltenVK.xcframework; path = Sources/MoltenVK.xcframework; sourceTree = "<group>"; };
-		10DC7178AABBC54176869B9E1BFAB385 /* lcms2.xcframework */ = {isa = PBXFileReference; includeInIndex = 1; name = lcms2.xcframework; path = Sources/lcms2.xcframework; sourceTree = "<group>"; };
+		12D2D4BB48D1CEE60B61189CD77771A3 /* hogweed.xcframework */ = {isa = PBXFileReference; includeInIndex = 1; name = hogweed.xcframework; path = Sources/hogweed.xcframework; sourceTree = "<group>"; };
 		18B3F456355835193C20FA0C19D94557 /* Libass */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = Libass; path = Libass.xcodeproj; sourceTree = "<group>"; };
-		1A17E9BCFE4E7C4B281E70DCA41D5219 /* libplacebo.xcframework */ = {isa = PBXFileReference; includeInIndex = 1; name = libplacebo.xcframework; path = Sources/libplacebo.xcframework; sourceTree = "<group>"; };
 		1B78F75B417CFDC23206E0A3FEA106E8 /* FFmpegKit-iOS-umbrella.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "FFmpegKit-iOS-umbrella.h"; sourceTree = "<group>"; };
+		1BF4E8E8CF7D12E3746C60905A9BE89A /* libplacebo.xcframework */ = {isa = PBXFileReference; includeInIndex = 1; name = libplacebo.xcframework; path = Sources/libplacebo.xcframework; sourceTree = "<group>"; };
+		1F9DA24B003FF6D01866DAB33C07B979 /* lcms2.xcframework */ = {isa = PBXFileReference; includeInIndex = 1; name = lcms2.xcframework; path = Sources/lcms2.xcframework; sourceTree = "<group>"; };
 		256C827DE6F02D47119266B67B9CDB1D /* FFmpegKit-iOS-prefix.pch */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "FFmpegKit-iOS-prefix.pch"; sourceTree = "<group>"; };
 		2671C58FF41299B748313C615A6E30DA /* FFmpegKit-iOS.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "FFmpegKit-iOS.release.xcconfig"; sourceTree = "<group>"; };
 		29A708F2643A24212ECB9B9573A13C92 /* avdevice_shim.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = avdevice_shim.h; sourceTree = "<group>"; };
 		2ACD24F71D972E391A2FE705193B2268 /* swscale_shim.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = swscale_shim.h; sourceTree = "<group>"; };
 		2B36ECDC6F895188C2CD05406169DCB5 /* FFmpegKit-iOS.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "FFmpegKit-iOS.debug.xcconfig"; sourceTree = "<group>"; };
 		2C0A810309A5E06063996A7D99409ED9 /* FFmpegKit-tvOS.modulemap */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.module; name = "FFmpegKit-tvOS.modulemap"; path = "../FFmpegKit-tvOS/FFmpegKit-tvOS.modulemap"; sourceTree = "<group>"; };
+		2E17A1569D3F94774F8CF95254E35FAB /* Libavfilter.xcframework */ = {isa = PBXFileReference; includeInIndex = 1; name = Libavfilter.xcframework; path = Sources/Libavfilter.xcframework; sourceTree = "<group>"; };
 		2FFF0996462D6F6C96E67C6EC1242071 /* FFmpegKit-tvOS-Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; name = "FFmpegKit-tvOS-Info.plist"; path = "../FFmpegKit-tvOS/FFmpegKit-tvOS-Info.plist"; sourceTree = "<group>"; };
 		30BD372CF4C7AD036C26057E8855C1E4 /* FFmpegKit-iOS-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "FFmpegKit-iOS-dummy.m"; sourceTree = "<group>"; };
-		32CB6B787A516A525A4713BE15EB44E1 /* gmp.xcframework */ = {isa = PBXFileReference; includeInIndex = 1; name = gmp.xcframework; path = Sources/gmp.xcframework; sourceTree = "<group>"; };
-		34FD0EC0B199DFC532C004787FAF7881 /* gnutls.xcframework */ = {isa = PBXFileReference; includeInIndex = 1; name = gnutls.xcframework; path = Sources/gnutls.xcframework; sourceTree = "<group>"; };
 		39370DDB30608B43812BFAE439D7F9A6 /* FFmpegKit-iOS.modulemap */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.module; path = "FFmpegKit-iOS.modulemap"; sourceTree = "<group>"; };
+		44DBC2E76F0211917F69DCE46998BD0C /* Libavutil.xcframework */ = {isa = PBXFileReference; includeInIndex = 1; name = Libavutil.xcframework; path = Sources/Libavutil.xcframework; sourceTree = "<group>"; };
 		4610ED5FCB2E018919CDB75AFF14DBBA /* FFmpegKit-iOS */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; name = "FFmpegKit-iOS"; path = FFmpegKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		4788D65E666D83F5363BD3958754E573 /* Libavcodec.xcframework */ = {isa = PBXFileReference; includeInIndex = 1; name = Libavcodec.xcframework; path = Sources/Libavcodec.xcframework; sourceTree = "<group>"; };
-		4C3E6D2E32FA42906F890CE4E4B9B72F /* Libavutil.xcframework */ = {isa = PBXFileReference; includeInIndex = 1; name = Libavutil.xcframework; path = Sources/Libavutil.xcframework; sourceTree = "<group>"; };
-		4D5E1384844977FC6C4752CD12FB8749 /* Libswresample.xcframework */ = {isa = PBXFileReference; includeInIndex = 1; name = Libswresample.xcframework; path = Sources/Libswresample.xcframework; sourceTree = "<group>"; };
-		522493FF969858A0220EB1E62457A099 /* Libavfilter.xcframework */ = {isa = PBXFileReference; includeInIndex = 1; name = Libavfilter.xcframework; path = Sources/Libavfilter.xcframework; sourceTree = "<group>"; };
-		544F6634F7446DBED778C31C32F60F06 /* libsrt.xcframework */ = {isa = PBXFileReference; includeInIndex = 1; name = libsrt.xcframework; path = Sources/libsrt.xcframework; sourceTree = "<group>"; };
+		56372B53C931579B026C631C9F988711 /* libshaderc_combined.xcframework */ = {isa = PBXFileReference; includeInIndex = 1; name = libshaderc_combined.xcframework; path = Sources/libshaderc_combined.xcframework; sourceTree = "<group>"; };
+		5D1A093293AB1833F69931212E7505CB /* libsrt.xcframework */ = {isa = PBXFileReference; includeInIndex = 1; name = libsrt.xcframework; path = Sources/libsrt.xcframework; sourceTree = "<group>"; };
 		5F2F3FBB668D3EFB4A4D6FE96FFCEDD8 /* avfilter_shim.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = avfilter_shim.h; sourceTree = "<group>"; };
+		624FF57E9553F1B37E10A2E6B80C4971 /* Libavcodec.xcframework */ = {isa = PBXFileReference; includeInIndex = 1; name = Libavcodec.xcframework; path = Sources/Libavcodec.xcframework; sourceTree = "<group>"; };
 		6305444CAAD8213D032C3C8D1CDCDDBD /* avformat_shim.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = avformat_shim.h; sourceTree = "<group>"; };
-		646CADFF188F7CB0CE7E036AED2DED28 /* hogweed.xcframework */ = {isa = PBXFileReference; includeInIndex = 1; name = hogweed.xcframework; path = Sources/hogweed.xcframework; sourceTree = "<group>"; };
 		66DC6B80C68FD7141781C929B00EF2FC /* FFmpegKit.c */ = {isa = PBXFileReference; includeInIndex = 1; name = FFmpegKit.c; path = Sources/FFmpegKit/FFmpegKit.c; sourceTree = "<group>"; };
-		6DCD77DB6167D37B47FE47E8573AC9BB /* Libswscale.xcframework */ = {isa = PBXFileReference; includeInIndex = 1; name = Libswscale.xcframework; path = Sources/Libswscale.xcframework; sourceTree = "<group>"; };
+		680A283CEB1A9C505554682639B38683 /* libzvbi.xcframework */ = {isa = PBXFileReference; includeInIndex = 1; name = libzvbi.xcframework; path = Sources/libzvbi.xcframework; sourceTree = "<group>"; };
+		7391D47496FD40BC60815D5F70B93942 /* MoltenVK.xcframework */ = {isa = PBXFileReference; includeInIndex = 1; name = MoltenVK.xcframework; path = Sources/MoltenVK.xcframework; sourceTree = "<group>"; };
 		76C6D1A528768995B23E81E02717A60D /* FFmpegKit-tvOS-xcframeworks.sh */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.script.sh; name = "FFmpegKit-tvOS-xcframeworks.sh"; path = "../FFmpegKit-tvOS/FFmpegKit-tvOS-xcframeworks.sh"; sourceTree = "<group>"; };
 		7A7F8C40738FDE18773B1DB40AD767D3 /* FFmpegKit-tvOS.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "FFmpegKit-tvOS.debug.xcconfig"; path = "../FFmpegKit-tvOS/FFmpegKit-tvOS.debug.xcconfig"; sourceTree = "<group>"; };
 		818DE8B6C36504559573E0282FC7B8C8 /* avcodec_shim.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = avcodec_shim.h; sourceTree = "<group>"; };
 		83B08EAF2118AEF386428DFF8E2C8C5F /* FFmpegKit-tvOS-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = "FFmpegKit-tvOS-dummy.m"; path = "../FFmpegKit-tvOS/FFmpegKit-tvOS-dummy.m"; sourceTree = "<group>"; };
 		87ECDD1AA56CEA8BF17A7A1C64A6B456 /* FFmpegKit-tvOS */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; name = "FFmpegKit-tvOS"; path = FFmpegKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		89652A01E26E279D152D341EAF504CAF /* libsmbclient.xcframework */ = {isa = PBXFileReference; includeInIndex = 1; name = libsmbclient.xcframework; path = Sources/libsmbclient.xcframework; sourceTree = "<group>"; };
+		8E75A76FB925598208183B153054746D /* Libswresample.xcframework */ = {isa = PBXFileReference; includeInIndex = 1; name = Libswresample.xcframework; path = Sources/Libswresample.xcframework; sourceTree = "<group>"; };
+		92FCBF34BBC392C11EEF98653E0E915A /* libbluray.xcframework */ = {isa = PBXFileReference; includeInIndex = 1; name = libbluray.xcframework; path = Sources/libbluray.xcframework; sourceTree = "<group>"; };
 		94134D9CEF6B77FF5571F53839FCEAA2 /* avutil_shim.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = avutil_shim.h; sourceTree = "<group>"; };
 		A1A73955ED1D3AD761803E4F80C1401E /* FFmpegKit-macOS */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; name = "FFmpegKit-macOS"; path = FFmpegKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		A50CE3FC631DD0C0F288DE80FB871A2C /* libzvbi.xcframework */ = {isa = PBXFileReference; includeInIndex = 1; name = libzvbi.xcframework; path = Sources/libzvbi.xcframework; sourceTree = "<group>"; };
+		A92E677A77C8E8679AC88A9F071D6C0D /* Libswscale.xcframework */ = {isa = PBXFileReference; includeInIndex = 1; name = Libswscale.xcframework; path = Sources/Libswscale.xcframework; sourceTree = "<group>"; };
 		AB1401A73D353DF936E3AE89CC40445F /* FFmpegKit-macOS.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "FFmpegKit-macOS.release.xcconfig"; path = "../FFmpegKit-macOS/FFmpegKit-macOS.release.xcconfig"; sourceTree = "<group>"; };
 		AD9DB225C2673D438B255369B2F2030F /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS14.0.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
 		B247FD5DB9C7A73D7AC5D7FF1596917B /* FFmpegKit-macOS-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = "FFmpegKit-macOS-dummy.m"; path = "../FFmpegKit-macOS/FFmpegKit-macOS-dummy.m"; sourceTree = "<group>"; };
 		B776E5AFBC8D92344D1049917C9B8CBD /* swresample_shim.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = swresample_shim.h; sourceTree = "<group>"; };
-		C91956A5F327BDFF91602BFC4BD1BAF1 /* nettle.xcframework */ = {isa = PBXFileReference; includeInIndex = 1; name = nettle.xcframework; path = Sources/nettle.xcframework; sourceTree = "<group>"; };
+		C97B8CB285BC8D2B20E385BB863F01BA /* libfontconfig.xcframework */ = {isa = PBXFileReference; includeInIndex = 1; name = libfontconfig.xcframework; path = Sources/libfontconfig.xcframework; sourceTree = "<group>"; };
+		CD892CBDB2DFD6F69AC288D68E6CF19F /* gnutls.xcframework */ = {isa = PBXFileReference; includeInIndex = 1; name = gnutls.xcframework; path = Sources/gnutls.xcframework; sourceTree = "<group>"; };
 		CE489C3E72DB38F0D0A2AC0AECA2C0DF /* FFmpegKit-iOS-xcframeworks.sh */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.script.sh; path = "FFmpegKit-iOS-xcframeworks.sh"; sourceTree = "<group>"; };
 		D077B65A8CD8B820F6D4834796DF1299 /* FFmpegKit-macOS-umbrella.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = "FFmpegKit-macOS-umbrella.h"; path = "../FFmpegKit-macOS/FFmpegKit-macOS-umbrella.h"; sourceTree = "<group>"; };
+		D188E5926254CDBC2D4C321A7A83579B /* nettle.xcframework */ = {isa = PBXFileReference; includeInIndex = 1; name = nettle.xcframework; path = Sources/nettle.xcframework; sourceTree = "<group>"; };
 		D6D5EFBE7CBBE1FF03D2E7C917600AE2 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk/System/Library/Frameworks/Cocoa.framework; sourceTree = DEVELOPER_DIR; };
 		D88242ECC2C7D205C4B4CBFBA446891A /* FFmpegKit-tvOS-umbrella.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = "FFmpegKit-tvOS-umbrella.h"; path = "../FFmpegKit-tvOS/FFmpegKit-tvOS-umbrella.h"; sourceTree = "<group>"; };
+		D8864805CB334D6E08B7E35D51CE8A76 /* libdav1d.xcframework */ = {isa = PBXFileReference; includeInIndex = 1; name = libdav1d.xcframework; path = Sources/libdav1d.xcframework; sourceTree = "<group>"; };
+		DA18C0580AE71E78235A2059E2EEC54F /* Libavformat.xcframework */ = {isa = PBXFileReference; includeInIndex = 1; name = Libavformat.xcframework; path = Sources/Libavformat.xcframework; sourceTree = "<group>"; };
 		DA298A1247987116C46D21FFD0C1418C /* FFmpegKit.podspec */ = {isa = PBXFileReference; explicitFileType = text.script.ruby; includeInIndex = 1; indentWidth = 2; lastKnownFileType = text; path = FFmpegKit.podspec; sourceTree = "<group>"; tabWidth = 2; xcLanguageSpecificationIdentifier = xcode.lang.ruby; };
-		DF56E3E4338632DD3041BA63CD6A96CC /* libshaderc_combined.xcframework */ = {isa = PBXFileReference; includeInIndex = 1; name = libshaderc_combined.xcframework; path = Sources/libshaderc_combined.xcframework; sourceTree = "<group>"; };
-		E5EFB4F6E3BA905A02AE6DD8D48CE38D /* libdav1d.xcframework */ = {isa = PBXFileReference; includeInIndex = 1; name = libdav1d.xcframework; path = Sources/libdav1d.xcframework; sourceTree = "<group>"; };
 		E8EB33D6CDCFC0FD5FAE3D82F8EFE36D /* FFmpegKit-macOS-Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; name = "FFmpegKit-macOS-Info.plist"; path = "../FFmpegKit-macOS/FFmpegKit-macOS-Info.plist"; sourceTree = "<group>"; };
-		EAF13AD09F7F57A19219184B828572EC /* Libavformat.xcframework */ = {isa = PBXFileReference; includeInIndex = 1; name = Libavformat.xcframework; path = Sources/Libavformat.xcframework; sourceTree = "<group>"; };
+		E9022741D6A931F8ADADC28510071DB6 /* gmp.xcframework */ = {isa = PBXFileReference; includeInIndex = 1; name = gmp.xcframework; path = Sources/gmp.xcframework; sourceTree = "<group>"; };
 		EBE452D3A1EFC71924414D42A681BCF0 /* FFmpegKit-tvOS.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "FFmpegKit-tvOS.release.xcconfig"; path = "../FFmpegKit-tvOS/FFmpegKit-tvOS.release.xcconfig"; sourceTree = "<group>"; };
 		EBE967C70F77986004C5B623827068E4 /* FFmpegKit-macOS.modulemap */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.module; name = "FFmpegKit-macOS.modulemap"; path = "../FFmpegKit-macOS/FFmpegKit-macOS.modulemap"; sourceTree = "<group>"; };
 		EF1A7E4E2DD157B6A457BE4D8AACE7C8 /* FFmpegKit-tvOS-prefix.pch */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = "FFmpegKit-tvOS-prefix.pch"; path = "../FFmpegKit-tvOS/FFmpegKit-tvOS-prefix.pch"; sourceTree = "<group>"; };
@@ -260,38 +261,13 @@
 			isa = PBXGroup;
 			children = (
 				66DC6B80C68FD7141781C929B00EF2FC /* FFmpegKit.c */,
-				B8F235E7D44F6E11FBCE88A9FBAC5050 /* FFmpegKit */,
+				CDFD7B1D9F00139D20F81A0E896F1F04 /* FFmpegKit */,
 				1EAEA9D2EB8053EAFD2964DCE715EEBF /* include */,
 				431F72409D62565FAD01E1790192BF97 /* Pod */,
 				3C80CF001C8464E7466CD170F47975D1 /* Support Files */,
 			);
 			name = FFmpegKit;
 			path = ../../FFmpegKit;
-			sourceTree = "<group>";
-		};
-		8019F92B0C93072590208E1294DF61CF /* Frameworks */ = {
-			isa = PBXGroup;
-			children = (
-				32CB6B787A516A525A4713BE15EB44E1 /* gmp.xcframework */,
-				34FD0EC0B199DFC532C004787FAF7881 /* gnutls.xcframework */,
-				646CADFF188F7CB0CE7E036AED2DED28 /* hogweed.xcframework */,
-				10DC7178AABBC54176869B9E1BFAB385 /* lcms2.xcframework */,
-				4788D65E666D83F5363BD3958754E573 /* Libavcodec.xcframework */,
-				522493FF969858A0220EB1E62457A099 /* Libavfilter.xcframework */,
-				EAF13AD09F7F57A19219184B828572EC /* Libavformat.xcframework */,
-				4C3E6D2E32FA42906F890CE4E4B9B72F /* Libavutil.xcframework */,
-				E5EFB4F6E3BA905A02AE6DD8D48CE38D /* libdav1d.xcframework */,
-				1A17E9BCFE4E7C4B281E70DCA41D5219 /* libplacebo.xcframework */,
-				DF56E3E4338632DD3041BA63CD6A96CC /* libshaderc_combined.xcframework */,
-				89652A01E26E279D152D341EAF504CAF /* libsmbclient.xcframework */,
-				544F6634F7446DBED778C31C32F60F06 /* libsrt.xcframework */,
-				4D5E1384844977FC6C4752CD12FB8749 /* Libswresample.xcframework */,
-				6DCD77DB6167D37B47FE47E8573AC9BB /* Libswscale.xcframework */,
-				A50CE3FC631DD0C0F288DE80FB871A2C /* libzvbi.xcframework */,
-				0F3394BBBE1CD500366243818EED9209 /* MoltenVK.xcframework */,
-				C91956A5F327BDFF91602BFC4BD1BAF1 /* nettle.xcframework */,
-			);
-			name = Frameworks;
 			sourceTree = "<group>";
 		};
 		AEDF5468676A1226859A70378CB19587 /* OS X */ = {
@@ -302,12 +278,30 @@
 			name = "OS X";
 			sourceTree = "<group>";
 		};
-		B8F235E7D44F6E11FBCE88A9FBAC5050 /* FFmpegKit */ = {
+		B78DF6C44ACAE78F757237310BC305A8 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				8019F92B0C93072590208E1294DF61CF /* Frameworks */,
+				E9022741D6A931F8ADADC28510071DB6 /* gmp.xcframework */,
+				CD892CBDB2DFD6F69AC288D68E6CF19F /* gnutls.xcframework */,
+				12D2D4BB48D1CEE60B61189CD77771A3 /* hogweed.xcframework */,
+				1F9DA24B003FF6D01866DAB33C07B979 /* lcms2.xcframework */,
+				624FF57E9553F1B37E10A2E6B80C4971 /* Libavcodec.xcframework */,
+				2E17A1569D3F94774F8CF95254E35FAB /* Libavfilter.xcframework */,
+				DA18C0580AE71E78235A2059E2EEC54F /* Libavformat.xcframework */,
+				44DBC2E76F0211917F69DCE46998BD0C /* Libavutil.xcframework */,
+				92FCBF34BBC392C11EEF98653E0E915A /* libbluray.xcframework */,
+				D8864805CB334D6E08B7E35D51CE8A76 /* libdav1d.xcframework */,
+				C97B8CB285BC8D2B20E385BB863F01BA /* libfontconfig.xcframework */,
+				1BF4E8E8CF7D12E3746C60905A9BE89A /* libplacebo.xcframework */,
+				56372B53C931579B026C631C9F988711 /* libshaderc_combined.xcframework */,
+				5D1A093293AB1833F69931212E7505CB /* libsrt.xcframework */,
+				8E75A76FB925598208183B153054746D /* Libswresample.xcframework */,
+				A92E677A77C8E8679AC88A9F071D6C0D /* Libswscale.xcframework */,
+				680A283CEB1A9C505554682639B38683 /* libzvbi.xcframework */,
+				7391D47496FD40BC60815D5F70B93942 /* MoltenVK.xcframework */,
+				D188E5926254CDBC2D4C321A7A83579B /* nettle.xcframework */,
 			);
-			name = FFmpegKit;
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 		BF1CA0862DC8A908A78F34543CAD7839 /* iOS */ = {
@@ -316,6 +310,14 @@
 				AD9DB225C2673D438B255369B2F2030F /* Foundation.framework */,
 			);
 			name = iOS;
+			sourceTree = "<group>";
+		};
+		CDFD7B1D9F00139D20F81A0E896F1F04 /* FFmpegKit */ = {
+			isa = PBXGroup;
+			children = (
+				B78DF6C44ACAE78F757237310BC305A8 /* Frameworks */,
+			);
+			name = FFmpegKit;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -382,7 +384,7 @@
 			buildRules = (
 			);
 			dependencies = (
-				F5105986D5C5B891478318B32CCBC272 /* PBXTargetDependency */,
+				1E74C8CC53D9AC7D0750F30D07045EB0 /* PBXTargetDependency */,
 			);
 			name = "FFmpegKit-tvOS";
 			productName = FFmpegKit;
@@ -402,7 +404,7 @@
 			buildRules = (
 			);
 			dependencies = (
-				17A8E544C2A44DB0CC11C724F61F2E27 /* PBXTargetDependency */,
+				EB46A242FD7B41D5EADAEEDA5861A92C /* PBXTargetDependency */,
 			);
 			name = "FFmpegKit-iOS";
 			productName = FFmpegKit;
@@ -422,7 +424,7 @@
 			buildRules = (
 			);
 			dependencies = (
-				CCCD199025FA81487EDAD02B315D1039 /* PBXTargetDependency */,
+				F16BD67332C1AD0875E8B1F83E8F4938 /* PBXTargetDependency */,
 			);
 			name = "FFmpegKit-macOS";
 			productName = FFmpegKit;
@@ -572,20 +574,20 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
-		17A8E544C2A44DB0CC11C724F61F2E27 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			name = "Libass-iOS";
-			targetProxy = 0C9EBB720CA079594208CB415B2F9B98 /* PBXContainerItemProxy */;
-		};
-		CCCD199025FA81487EDAD02B315D1039 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			name = "Libass-macOS";
-			targetProxy = DD836B8CAF74B0FAA2D9198B4F855C4D /* PBXContainerItemProxy */;
-		};
-		F5105986D5C5B891478318B32CCBC272 /* PBXTargetDependency */ = {
+		1E74C8CC53D9AC7D0750F30D07045EB0 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			name = "Libass-tvOS";
-			targetProxy = CC0F0B29147F73D027091676E6DC8D20 /* PBXContainerItemProxy */;
+			targetProxy = E4E390CD8F5E55BF2A0A6070C5602550 /* PBXContainerItemProxy */;
+		};
+		EB46A242FD7B41D5EADAEEDA5861A92C /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = "Libass-iOS";
+			targetProxy = 95ECD96303B2F1A42312F5BCD722B636 /* PBXContainerItemProxy */;
+		};
+		F16BD67332C1AD0875E8B1F83E8F4938 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = "Libass-macOS";
+			targetProxy = 2616FA2DA706888E4AADA5C2744BB50F /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 

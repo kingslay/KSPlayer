@@ -119,6 +119,7 @@ private class PlaneDisplayModel {
     }
 }
 
+@MainActor
 private class SphereDisplayModel {
     private lazy var yuv = MetalRender.makePipelineState(fragmentFunction: "displayYUVTexture", isSphere: true)
     private lazy var yuvp010LE = MetalRender.makePipelineState(fragmentFunction: "displayYUVTexture", isSphere: true, bitDepth: 10)
@@ -134,6 +135,7 @@ private class SphereDisplayModel {
     let indexBuffer: MTLBuffer
     let posBuffer: MTLBuffer?
     let uvBuffer: MTLBuffer?
+    @MainActor
     fileprivate init() {
         let (indices, positions, uvs) = SphereDisplayModel.genSphere()
         let device = MetalRender.device
@@ -159,6 +161,7 @@ private class SphereDisplayModel {
         #endif
     }
 
+    @MainActor
     func touchesMoved(touch: UITouch) {
         #if canImport(UIKit)
         let view = touch.view
@@ -247,6 +250,7 @@ private class SphereDisplayModel {
 
 private class VRDisplayModel: SphereDisplayModel {
     private let modelViewProjectionMatrix: simd_float4x4
+
     override required init() {
         let size = KSOptions.sceneSize
         let aspect = Float(size.width / size.height)

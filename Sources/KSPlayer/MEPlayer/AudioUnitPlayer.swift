@@ -24,7 +24,7 @@ public final class AudioUnitPlayer: AudioOutput {
     }
 
     private var isPlaying = false
-    public func play(time _: TimeInterval) {
+    public func play() {
         if !isPlaying {
             isPlaying = true
             AudioOutputUnitStart(audioUnitForOutput)
@@ -151,7 +151,7 @@ extension AudioUnitPlayer {
                 continue
             }
             if sourceNodeAudioFormat != currentRender.audioFormat {
-                runInMainqueue { [weak self] in
+                runOnMainThread { [weak self] in
                     guard let self else {
                         return
                     }

@@ -44,21 +44,30 @@
 		2FF78A133605C3AABB9FE8D017768D0F /* OpenSSL-iOS-xcframeworks.sh */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.script.sh; path = "OpenSSL-iOS-xcframeworks.sh"; sourceTree = "<group>"; };
 		4D85AA83CA980ECA6D43F3198BAC7E64 /* OpenSSL.podspec */ = {isa = PBXFileReference; explicitFileType = text.script.ruby; includeInIndex = 1; indentWidth = 2; lastKnownFileType = text; path = OpenSSL.podspec; sourceTree = "<group>"; tabWidth = 2; xcLanguageSpecificationIdentifier = xcode.lang.ruby; };
 		52289D13664954EF34C8502A132DFFAF /* OpenSSL-tvOS-xcframeworks.sh */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.script.sh; name = "OpenSSL-tvOS-xcframeworks.sh"; path = "../OpenSSL-tvOS/OpenSSL-tvOS-xcframeworks.sh"; sourceTree = "<group>"; };
-		533D71AC36D59194FF56259443BD550E /* libcrypto.xcframework */ = {isa = PBXFileReference; includeInIndex = 1; name = libcrypto.xcframework; path = Sources/libcrypto.xcframework; sourceTree = "<group>"; };
+		6C4EDECE86B16073D387D887B9B8D344 /* Libssl.xcframework */ = {isa = PBXFileReference; includeInIndex = 1; name = Libssl.xcframework; path = Sources/Libssl.xcframework; sourceTree = "<group>"; };
+		6F08466FBDB005C1DCA9227E9B35CCA4 /* Libcrypto.xcframework */ = {isa = PBXFileReference; includeInIndex = 1; name = Libcrypto.xcframework; path = Sources/Libcrypto.xcframework; sourceTree = "<group>"; };
 		C15D3BD9E7CC09FFE8F99770F8019A91 /* OpenSSL-tvOS.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "OpenSSL-tvOS.debug.xcconfig"; path = "../OpenSSL-tvOS/OpenSSL-tvOS.debug.xcconfig"; sourceTree = "<group>"; };
 		D17B68B7CF99A28727011ACE81FBF00E /* OpenSSL-iOS.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "OpenSSL-iOS.debug.xcconfig"; sourceTree = "<group>"; };
 		DB3DE92B8A89A56388CD175E202AEE66 /* OpenSSL-macOS.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "OpenSSL-macOS.debug.xcconfig"; path = "../OpenSSL-macOS/OpenSSL-macOS.debug.xcconfig"; sourceTree = "<group>"; };
 		E79EF786AD0C115689A5458FB3AC02CF /* OpenSSL-iOS.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "OpenSSL-iOS.release.xcconfig"; sourceTree = "<group>"; };
 		EAD92E13A80C25E5B1EADE3FBA0BA530 /* OpenSSL-macOS.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "OpenSSL-macOS.release.xcconfig"; path = "../OpenSSL-macOS/OpenSSL-macOS.release.xcconfig"; sourceTree = "<group>"; };
 		EB40431FA6DA0A668F5DD41A4686EBBA /* OpenSSL-macOS-xcframeworks.sh */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.script.sh; name = "OpenSSL-macOS-xcframeworks.sh"; path = "../OpenSSL-macOS/OpenSSL-macOS-xcframeworks.sh"; sourceTree = "<group>"; };
-		FB5964463A93B03FC4B584D98EDF41E6 /* libssl.xcframework */ = {isa = PBXFileReference; includeInIndex = 1; name = libssl.xcframework; path = Sources/libssl.xcframework; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
+		159333BDD92A11B6F653D83959803467 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				6F08466FBDB005C1DCA9227E9B35CCA4 /* Libcrypto.xcframework */,
+				6C4EDECE86B16073D387D887B9B8D344 /* Libssl.xcframework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		551BD16915882ED086B9554A8B86F72D /* OpenSSL */ = {
 			isa = PBXGroup;
 			children = (
-				CA7D6EE23A1DC98B8A59D434CA1A3099 /* Frameworks */,
+				159333BDD92A11B6F653D83959803467 /* Frameworks */,
 			);
 			name = OpenSSL;
 			sourceTree = "<group>";
@@ -110,15 +119,6 @@
 		CA3A86144F06B61FC7614A6692CFF9D7 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-			);
-			name = Frameworks;
-			sourceTree = "<group>";
-		};
-		CA7D6EE23A1DC98B8A59D434CA1A3099 /* Frameworks */ = {
-			isa = PBXGroup;
-			children = (
-				533D71AC36D59194FF56259443BD550E /* libcrypto.xcframework */,
-				FB5964463A93B03FC4B584D98EDF41E6 /* libssl.xcframework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";

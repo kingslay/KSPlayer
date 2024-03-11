@@ -30,7 +30,7 @@ public final class AudioGraphPlayer: AudioOutput, AudioDynamicsProcessor {
         }
     }
 
-    public func play(time _: TimeInterval) {
+    public func play() {
         AUGraphStart(graph)
     }
 
@@ -252,7 +252,7 @@ extension AudioGraphPlayer {
                 continue
             }
             if sourceNodeAudioFormat != currentRender.audioFormat {
-                runInMainqueue { [weak self] in
+                runOnMainThread { [weak self] in
                     guard let self else {
                         return
                     }

@@ -47,6 +47,7 @@ open class KSOptions {
     public var probesize: Int64?
     public var maxAnalyzeDuration: Int64?
     public var lowres = UInt8(0)
+    public var nobuffer = false
     public var codecLowDelay = false
     public var startPlayTime: TimeInterval = 0
     public var startPlayRate: Float = 1.0
@@ -61,7 +62,7 @@ open class KSOptions {
         }
     }
 
-    public var userAgent: String = "KSPlayer" {
+    public var userAgent: String? = "KSPlayer" {
         didSet {
             formatContextOptions["user_agent"] = userAgent
         }
@@ -166,7 +167,7 @@ open class KSOptions {
         let frameCount = capacitys.map(\.frameCount).min() ?? 0
         let isEndOfFile = capacitys.allSatisfy(\.isEndOfFile)
         let loadedTime = capacitys.map(\.loadedTime).min() ?? 0
-        let progress = loadedTime * 100.0 / preferredForwardBufferDuration
+        let progress = preferredForwardBufferDuration == 0 ? 100 : loadedTime * 100.0 / preferredForwardBufferDuration
         let isPlayable = capacitys.allSatisfy { capacity in
             if capacity.isEndOfFile && capacity.packetCount == 0 {
                 return true
@@ -186,11 +187,11 @@ open class KSOptions {
                     if isFirst {
                         return true
                     } else {
-                        return capacity.loadedTime >= preferredForwardBufferDuration / 2
+                        return capacity.loadedTime >= self.preferredForwardBufferDuration / 2
                     }
                 }
             }
-            return capacity.loadedTime >= preferredForwardBufferDuration
+            return capacity.loadedTime >= self.preferredForwardBufferDuration
         }
         return LoadingState(loadedTime: loadedTime, progress: progress, packetCount: packetCount,
                             frameCount: frameCount, isEndOfFile: isEndOfFile, isPlayable: isPlayable,
@@ -334,6 +335,7 @@ open class KSOptions {
         }
     }
 
+    @MainActor
     open func updateVideo(refreshRate: Float, isDovi: Bool, formatDescription: CMFormatDescription?) {
         #if os(tvOS) || os(xrOS)
         guard let displayManager = UIApplication.shared.windows.first?.avDisplayManager,
@@ -425,7 +427,9 @@ open class KSOptions {
 
     open func playerLayerDeinit() {
         #if os(tvOS) || os(xrOS)
-        UIApplication.shared.windows.first?.avDisplayManager.preferredDisplayCriteria = nil
+        runOnMainThread {
+            UIApplication.shared.windows.first?.avDisplayManager.preferredDisplayCriteria = nil
+        }
         #endif
     }
 
@@ -538,6 +542,7 @@ public extension KSOptions {
         } else {
             channelCount = 2
         }
+        // 不在这里设置setPreferredOutputNumberOfChannels,因为这个方法会在获取音轨信息的时候，进行调用。
         KSLog("[audio] outputNumberOfChannels: \(AVAudioSession.sharedInstance().outputNumberOfChannels) output channelCount: \(channelCount)")
         return channelCount
     }

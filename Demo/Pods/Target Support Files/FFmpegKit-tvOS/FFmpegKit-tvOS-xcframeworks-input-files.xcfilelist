@@ -10,10 +10,10 @@ ${PODS_ROOT}/../../FFmpegKit/Sources/MoltenVK.xcframework
 ${PODS_ROOT}/../../FFmpegKit/Sources/lcms2.xcframework
 ${PODS_ROOT}/../../FFmpegKit/Sources/libdav1d.xcframework
 ${PODS_ROOT}/../../FFmpegKit/Sources/libplacebo.xcframework
+${PODS_ROOT}/../../FFmpegKit/Sources/libfontconfig.xcframework
 ${PODS_ROOT}/../../FFmpegKit/Sources/gmp.xcframework
 ${PODS_ROOT}/../../FFmpegKit/Sources/nettle.xcframework
 ${PODS_ROOT}/../../FFmpegKit/Sources/hogweed.xcframework
 ${PODS_ROOT}/../../FFmpegKit/Sources/gnutls.xcframework
-${PODS_ROOT}/../../FFmpegKit/Sources/libsmbclient.xcframework
 ${PODS_ROOT}/../../FFmpegKit/Sources/libzvbi.xcframework
 ${PODS_ROOT}/../../FFmpegKit/Sources/libsrt.xcframework

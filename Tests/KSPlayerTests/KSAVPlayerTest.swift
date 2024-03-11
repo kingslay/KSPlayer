@@ -3,6 +3,7 @@ import XCTest
 
 class KSAVPlayerTest: XCTestCase {
     private var readyToPlayExpectation: XCTestExpectation?
+    @MainActor
     func testPlayer() {
         if let path = Bundle(for: type(of: self)).path(forResource: "h264", ofType: "MP4") {
             set(path: path)
@@ -18,6 +19,7 @@ class KSAVPlayerTest: XCTestCase {
         }
     }
 
+    @MainActor
     func set(path: String) {
         let play = KSAVPlayer(url: URL(fileURLWithPath: path), options: KSOptions())
         play.delegate = self

@@ -14,10 +14,12 @@ import SwiftUI
 import UIKit
 
 public extension KSOptions {
+    @MainActor
     static var windowScene: UIWindowScene? {
         UIApplication.shared.connectedScenes.first as? UIWindowScene
     }
 
+    @MainActor
     static var sceneSize: CGSize {
         let window = windowScene?.windows.first
         return window?.bounds.size ?? .zero
@@ -139,6 +141,7 @@ public extension FourCharCode {
     }
 }
 
+@MainActor
 public enum DisplayEnum {
     case plane
     // swiftlint:disable identifier_name
@@ -331,11 +334,16 @@ func - (left: CGSize, right: CGSize) -> CGSize {
     CGSize(width: left.width - right.width, height: left.height - right.height)
 }
 
-public func runInMainqueue(block: @escaping () -> Void) {
+@inline(__always)
+@preconcurrency
+// @MainActor
+public func runOnMainThread(block: @escaping () -> Void) {
     if Thread.isMainThread {
         block()
     } else {
-        DispatchQueue.main.async(execute: block)
+        Task {
+            await MainActor.run(body: block)
+        }
     }
 }
 
@@ -411,7 +419,7 @@ public extension Data {
         }
         let scanner = Scanner(string: string)
         var entrys = [(String, URL, [String: String])]()
-        guard let symbol = scanner.scanUpToCharacters(from: .newlines), symbol.hasSuffix("#EXTM3U") else {
+        guard let symbol = scanner.scanUpToCharacters(from: .newlines), symbol.contains("#EXTM3U") else {
             return []
         }
         while !scanner.isAtEnd {
@@ -449,12 +457,21 @@ extension Scanner {
             }
         }
         let title = scanUpToCharacters(from: .newlines)
-        if scanString("#EXTVLCOPT:") != nil {
-            let key = scanUpToString("=")
-            _ = scanString("=")
-            let value = scanUpToCharacters(from: .newlines)
-            if let key, let value {
-                extinf[key] = value
+        while scanString("#EXT") != nil {
+            if scanString("VLCOPT:") != nil {
+                let key = scanUpToString("=")
+                _ = scanString("=")
+                let value = scanUpToCharacters(from: .newlines)
+                if let key, let value {
+                    extinf[key] = value
+                }
+            } else {
+                let key = scanUpToString(":")
+                _ = scanString(":")
+                let value = scanUpToCharacters(from: .newlines)
+                if let key, let value {
+                    extinf[key] = value
+                }
             }
         }
         let urlString = scanUpToCharacters(from: .newlines)
