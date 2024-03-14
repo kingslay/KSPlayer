@@ -288,7 +288,8 @@ extension AVPixelFormat {
         case AV_PIX_FMT_RGB555LE: return kCVPixelFormatType_16LE555
         case AV_PIX_FMT_RGB565BE: return kCVPixelFormatType_16BE565
         case AV_PIX_FMT_RGB565LE: return kCVPixelFormatType_16LE565
-        case AV_PIX_FMT_BGR24: return kCVPixelFormatType_24BGR
+//             PixelBufferPool 无法支持24BGR
+//        case AV_PIX_FMT_BGR24: return kCVPixelFormatType_24BGR
         case AV_PIX_FMT_RGB24: return kCVPixelFormatType_24RGB
         case AV_PIX_FMT_0RGB: return kCVPixelFormatType_32ARGB
         case AV_PIX_FMT_ARGB: return kCVPixelFormatType_32ARGB
