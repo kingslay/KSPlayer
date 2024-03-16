@@ -33,7 +33,6 @@ public final class MEPlayerItem: Sendable {
     private var allPlayerItemTracks = [PlayerItemTrackProtocol]()
     private var maxFrameDuration = 10.0
     private var videoAudioTracks = [CapacityProtocol]()
-    private var audioRecognizer: AudioRecognizer?
     private var videoTrack: SyncPlayerItemTrack<VideoVTBFrame>?
     private var audioTrack: SyncPlayerItemTrack<AudioFrame>?
     private(set) var assetTracks = [FFmpegAssetTrack]()
@@ -141,11 +140,6 @@ public final class MEPlayerItem: Sendable {
         operationQueue.maxConcurrentOperationCount = 1
         operationQueue.qualityOfService = .userInteractive
         _ = MEPlayerItem.onceInitial
-        if let locale = options.audioLocale {
-            audioRecognizer = AudioRecognizer(locale: locale) { text in
-                print(text)
-            }
-        }
     }
 
     func select(track: some MediaPlayerTrack) -> Bool {
@@ -866,7 +860,9 @@ extension MEPlayerItem: OutputRenderSourceDelegate {
 
     public func getAudioOutputRender() -> AudioFrame? {
         if let frame = audioTrack?.getOutputRender(where: nil) {
-            audioRecognizer?.append(frame: frame)
+            SubtitleModel.audioRecognizes.first {
+                $0.isEnabled
+            }?.append(frame: frame)
             return frame
         } else {
             return nil

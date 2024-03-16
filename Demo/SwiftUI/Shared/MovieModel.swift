@@ -20,7 +20,6 @@ class MEOptions: KSOptions {
     #endif
     override init() {
         super.init()
-        audioLocale = Locale(identifier: "en-US")
     }
 
     override func process(assetTrack: some MediaPlayerTrack) {

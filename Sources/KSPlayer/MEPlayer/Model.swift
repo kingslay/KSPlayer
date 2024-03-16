@@ -243,15 +243,15 @@ final class SubtitleFrame: MEFrame {
 }
 
 public final class AudioFrame: MEFrame {
-    let dataSize: Int
-    let audioFormat: AVAudioFormat
-    public var timebase = Timebase.defaultValue
+    public let dataSize: Int
+    public let audioFormat: AVAudioFormat
+    public internal(set) var timebase = Timebase.defaultValue
     public var timestamp: Int64 = 0
     public var duration: Int64 = 0
     public var position: Int64 = 0
     public var size: Int32 = 0
-    var numberOfSamples: UInt32 = 0
-    var data: [UnsafeMutablePointer<UInt8>?]
+    public var data: [UnsafeMutablePointer<UInt8>?]
+    public var numberOfSamples: UInt32 = 0
     public init(dataSize: Int, audioFormat: AVAudioFormat) {
         self.dataSize = dataSize
         self.audioFormat = audioFormat
@@ -295,7 +295,38 @@ public final class AudioFrame: MEFrame {
         data.removeAll()
     }
 
-    func toPCMBuffer() -> AVAudioPCMBuffer? {
+    public func toFloat() -> [UnsafePointer<Float>] {
+        var array = [UnsafePointer<Float>]()
+        for i in 0 ..< data.count {
+            switch audioFormat.commonFormat {
+            case .pcmFormatInt16:
+                let capacity = dataSize / MemoryLayout<Int16>.size
+                data[i]?.withMemoryRebound(to: Int16.self, capacity: capacity) { src in
+                    let des = UnsafeMutablePointer<Float>.allocate(capacity: capacity)
+                    for i in 0 ..< capacity {
+                        des[i] = Float(src[i]) / 32767.0
+                    }
+                    array.append(des)
+                }
+            case .pcmFormatInt32:
+                let capacity = dataSize / MemoryLayout<Int32>.size
+                data[i]?.withMemoryRebound(to: Int32.self, capacity: capacity) { src in
+                    let des = UnsafeMutablePointer<Float>.allocate(capacity: capacity)
+                    for i in 0 ..< capacity {
+                        des[i] = Float(src[i]) / 2_147_483_647.0
+                    }
+                    array.append(des)
+                }
+            default:
+                data[i]?.withMemoryRebound(to: Float.self, capacity: dataSize / MemoryLayout<Float>.size) { src in
+                    array.append(src)
+                }
+            }
+        }
+        return array
+    }
+
+    public func toPCMBuffer() -> AVAudioPCMBuffer? {
         guard let pcmBuffer = AVAudioPCMBuffer(pcmFormat: audioFormat, frameCapacity: numberOfSamples) else {
             return nil
         }
@@ -320,7 +351,7 @@ public final class AudioFrame: MEFrame {
         return pcmBuffer
     }
 
-    func toCMSampleBuffer() -> CMSampleBuffer? {
+    public func toCMSampleBuffer() -> CMSampleBuffer? {
         var outBlockListBuffer: CMBlockBuffer?
         CMBlockBufferCreateEmpty(allocator: kCFAllocatorDefault, capacity: UInt32(data.count), flags: 0, blockBufferOut: &outBlockListBuffer)
         guard let outBlockListBuffer else {

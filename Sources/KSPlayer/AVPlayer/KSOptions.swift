@@ -70,8 +70,6 @@ open class KSOptions {
     // audio
     public var audioFilters = [String]()
     public var syncDecodeAudio = false
-    // Locale(identifier: "en-US") Locale(identifier: "zh-CN")
-    public var audioLocale: Locale?
     // sutile
     public var autoSelectEmbedSubtitle = true
     public var isSeekImageSubtitle = false
