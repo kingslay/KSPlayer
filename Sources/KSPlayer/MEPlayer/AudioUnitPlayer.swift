@@ -50,6 +50,7 @@ public final class AudioUnitPlayer: AudioOutput {
         descriptionForOutput.componentSubType = kAudioUnitSubType_HALOutput
         #else
         descriptionForOutput.componentSubType = kAudioUnitSubType_RemoteIO
+        outputLatency = AVAudioSession.sharedInstance().outputLatency
         #endif
         let nodeForOutput = AudioComponentFindNext(nil, &descriptionForOutput)
         AudioComponentInstanceNew(nodeForOutput!, &audioUnitForOutput)

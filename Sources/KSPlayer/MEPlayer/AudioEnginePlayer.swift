@@ -154,6 +154,9 @@ public class AudioEnginePlayer: AudioOutput {
         if let audioUnit = engine.outputNode.audioUnit {
             addRenderNotify(audioUnit: audioUnit)
         }
+        #if !os(macOS)
+        outputLatency = AVAudioSession.sharedInstance().outputLatency
+        #endif
     }
 
     public func prepare(audioFormat: AVAudioFormat) {
