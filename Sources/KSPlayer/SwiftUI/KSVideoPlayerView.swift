@@ -55,7 +55,16 @@ public struct KSVideoPlayerView: View {
         ZStack {
             GeometryReader { proxy in
                 playView
+                #if os(xrOS)
+                HStack {
+                    Spacer()
+                    VideoSubtitleView(model: playerCoordinator.subtitleModel)
+                    Spacer()
+                }
+                .padding()
+                #else
                 VideoSubtitleView(model: playerCoordinator.subtitleModel)
+                #endif
                 controllerView(playerWidth: proxy.size.width)
                 #if os(tvOS)
                 if isDropdownShow {
