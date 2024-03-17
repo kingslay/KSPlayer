@@ -259,7 +259,9 @@ public struct KSVideoPlayerView: View {
         .buttonStyle(.plain)
         .padding(.vertical, 24)
         .padding(.horizontal, 36)
+        #if os(xrOS)
         .glassBackgroundEffect()
+        #endif
     }
     
     private func ornamentControlsView(playerWidth: Double) -> some View {
