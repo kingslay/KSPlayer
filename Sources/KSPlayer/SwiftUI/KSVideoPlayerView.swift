@@ -391,7 +391,9 @@ struct VideoControllerView: View {
                     .opacity(config.state == .buffering ? 1 : 0)
                 Spacer()
                 playbackRateButton
+                #if !os(xrOS)
                 pipButton
+                #endif
                 infoButton
                 // iOS 模拟器加keyboardShortcut会导致KSVideoPlayer.Coordinator无法释放。真机不会有这个问题
                 #if !os(tvOS)
