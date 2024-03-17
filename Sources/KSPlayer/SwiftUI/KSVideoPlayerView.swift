@@ -225,23 +225,34 @@ public struct KSVideoPlayerView: View {
         }
         #if os(xrOS)
         .ornament(visibility: playerCoordinator.isMaskShow ? .visible : .hidden, attachmentAnchor: .scene(.bottom)) {
-            HStack {
-                KSVideoPlayerViewBuilder.playbackControlView(config: playerCoordinator, spacing: 16)
-                VideoTimeShowView(config: playerCoordinator, model: playerCoordinator.timemodel)
-                KSVideoPlayerViewBuilder.contentModeButton(config: playerCoordinator)
-                KSVideoPlayerViewBuilder.subtitleButton(config: playerCoordinator)
-                KSVideoPlayerViewBuilder.playbackRateButton(playbackRate: $playerCoordinator.playbackRate)
-            }
-            .frame(width: playerWidth / 1.5)
-            .buttonStyle(.plain)
-            .padding([.all], 24)
-            .font(.largeTitle)
-            .glassBackgroundEffect()
+            ornamentView(playerWidth: playerWidth)
         }
         #endif
         .focused($focusableField, equals: .controller)
         .opacity(playerCoordinator.isMaskShow ? 1 : 0)
         .padding()
+    }
+    
+    private func ornamentView(playerWidth: Double) -> some View {
+        VStack {
+            KSVideoPlayerViewBuilder.titleView(title: title, config: playerCoordinator)
+            ornamentControlsView(playerWidth: playerWidth)
+        }
+        .frame(width: playerWidth / 1.5)
+        .buttonStyle(.plain)
+        .padding([.all], 24)
+        .font(.largeTitle)
+        .glassBackgroundEffect()
+    }
+    
+    private func ornamentControlsView(playerWidth: Double) -> some View {
+        HStack {
+            KSVideoPlayerViewBuilder.playbackControlView(config: playerCoordinator, spacing: 16)
+            VideoTimeShowView(config: playerCoordinator, model: playerCoordinator.timemodel)
+            KSVideoPlayerViewBuilder.contentModeButton(config: playerCoordinator)
+            KSVideoPlayerViewBuilder.subtitleButton(config: playerCoordinator)
+            KSVideoPlayerViewBuilder.playbackRateButton(playbackRate: $playerCoordinator.playbackRate)
+        }
     }
 
     fileprivate enum FocusableField {
@@ -371,12 +382,9 @@ struct VideoControllerView: View {
             Spacer()
             #endif
             HStack {
-                Text(title)
-                    .font(.title3)
-                ProgressView()
-                    .opacity(config.state == .buffering ? 1 : 0)
-                Spacer()
                 #if !os(xrOS)
+                KSVideoPlayerViewBuilder.titleView(title: title, config: config)
+                Spacer()
                 playbackRateButton
                 pipButton
                 #endif
