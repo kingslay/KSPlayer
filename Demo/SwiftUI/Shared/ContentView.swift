@@ -121,6 +121,7 @@ enum TabBarItem: Int {
         }
     }
 
+    @MainActor
     @ViewBuilder
     func destination(appModel: APPModel) -> some View {
         switch self {
@@ -139,6 +140,7 @@ enum TabBarItem: Int {
 }
 
 public extension View {
+    @MainActor
     @ViewBuilder
     func navigationPlay() -> some View {
         navigationDestination(for: URL.self) { url in
@@ -154,6 +156,7 @@ public extension View {
 }
 
 private extension MovieModel {
+    @MainActor
     var view: some View {
         KSVideoPlayerView(model: self)
         #if !os(macOS)

@@ -84,6 +84,13 @@ extension KSVideoPlayer: UIViewRepresentable {
         }
 
         @Published
+        public var playbackVolume: Float = 1.0 {
+            didSet {
+                playerLayer?.player.playbackVolume = playbackVolume
+            }
+        }
+
+        @Published
         public var isScaleAspectFill = false {
             didSet {
                 playerLayer?.player.contentMode = isScaleAspectFill ? .scaleAspectFill : .scaleAspectFit

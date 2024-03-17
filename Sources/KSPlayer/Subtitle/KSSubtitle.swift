@@ -238,7 +238,7 @@ open class SubtitleModel: ObservableObject {
         public var rawValue: CGFloat {
             switch self {
             case .smaller:
-                #if os(tvOS)
+                #if os(tvOS) || os(xrOS)
                 return 48
                 #elseif os(macOS) || os(xrOS)
                 return 20
@@ -250,7 +250,7 @@ open class SubtitleModel: ObservableObject {
                 }
                 #endif
             case .standard:
-                #if os(tvOS)
+                #if os(tvOS) || os(xrOS)
                 return 58
                 #elseif os(macOS) || os(xrOS)
                 return 26
@@ -262,7 +262,7 @@ open class SubtitleModel: ObservableObject {
                 }
                 #endif
             case .large:
-                #if os(tvOS)
+                #if os(tvOS) || os(xrOS)
                 return 68
                 #elseif os(macOS) || os(xrOS)
                 return 32
