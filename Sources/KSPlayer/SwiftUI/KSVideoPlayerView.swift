@@ -28,6 +28,8 @@ public struct KSVideoPlayerView: View {
     @State
     private var isDropdownShow = false
     @State
+    private var showVideoSetting = false
+    @State
     public var url: URL {
         didSet {
             #if os(macOS)
@@ -236,6 +238,12 @@ public struct KSVideoPlayerView: View {
         .ornament(visibility: playerCoordinator.isMaskShow ? .visible : .hidden, attachmentAnchor: .scene(.bottom)) {
             ornamentView(playerWidth: playerWidth)
         }
+        .sheet(isPresented: $showVideoSetting) {
+            NavigationStack {
+                VideoSettingView(config: playerCoordinator, subtitleModel: playerCoordinator.subtitleModel, subtitleTitle: title)
+            }
+            .buttonStyle(.plain)
+        }
         #endif
         .focused($focusableField, equals: .controller)
         .opacity(playerCoordinator.isMaskShow ? 1 : 0)
@@ -243,7 +251,7 @@ public struct KSVideoPlayerView: View {
     }
     
     private func ornamentView(playerWidth: Double) -> some View {
-        VStack {
+        VStack(alignment: .leading) {
             KSVideoPlayerViewBuilder.titleView(title: title, config: playerCoordinator)
             ornamentControlsView(playerWidth: playerWidth)
         }
@@ -264,6 +272,7 @@ public struct KSVideoPlayerView: View {
                 KSVideoPlayerViewBuilder.contentModeButton(config: playerCoordinator)
                 KSVideoPlayerViewBuilder.subtitleButton(config: playerCoordinator)
                 KSVideoPlayerViewBuilder.playbackRateButton(playbackRate: $playerCoordinator.playbackRate)
+                KSVideoPlayerViewBuilder.infoButton(showVideoSetting: $showVideoSetting)
             }
             .font(.largeTitle)
         }
@@ -399,20 +408,14 @@ struct VideoControllerView: View {
             #if !os(xrOS)
             KSVideoPlayerViewBuilder.playbackControlView(config: config)
             Spacer()
-            #endif
             HStack {
-                #if !os(xrOS)
                 KSVideoPlayerViewBuilder.titleView(title: title, config: config)
                 Spacer()
                 playbackRateButton
                 pipButton
-                #endif
                 infoButton
-                // iOS 模拟器加keyboardShortcut会导致KSVideoPlayer.Coordinator无法释放。真机不会有这个问题
-                #if !os(tvOS)
-                .keyboardShortcut("i", modifiers: [.command])
-                #endif
             }
+            #endif
             #endif
         }
         #if !os(tvOS)
@@ -432,6 +435,7 @@ struct VideoControllerView: View {
                 config.isMuted = newValue == 0
             })
             .frame(width: volumeSliderSize ?? 100)
+            .tint(.white.opacity(0.8))
             .padding(.leading, 16)
             KSVideoPlayerViewBuilder.muteButton(config: config)
         }
@@ -483,11 +487,7 @@ struct VideoControllerView: View {
     }
 
     private var infoButton: some View {
-        Button {
-            showVideoSetting.toggle()
-        } label: {
-            Image(systemName: "info.circle.fill")
-        }
+        KSVideoPlayerViewBuilder.infoButton(showVideoSetting: $showVideoSetting)
     }
 }
 
@@ -547,6 +547,9 @@ struct VideoTimeShowView: View {
                     }
                 }
                 .frame(maxHeight: 20)
+                #if os(xrOS)
+                .tint(.white.opacity(0.8))
+                #endif
                 Text((model.totalTime).toString(for: .minOrHour)).font(timeFont ?? .caption2.monospacedDigit())
             }
             .font(.system(.title2))
@@ -671,7 +674,7 @@ struct VideoSettingView: View {
                 LabeledContent("File Size", value: fileSize.kmFormatted + "B")
             }
         }
-        #if os(macOS) || targetEnvironment(macCatalyst)
+        #if os(macOS) || targetEnvironment(macCatalyst) || os(xrOS)
         .toolbar {
             Button("Done") {
                 dismiss()

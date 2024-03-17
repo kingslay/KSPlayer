@@ -91,6 +91,18 @@ enum KSVideoPlayerViewBuilder {
         }
         .shadow(color: .black, radius: 1)
     }
+    
+    static func infoButton(showVideoSetting: Binding<Bool>) -> some View {
+        Button {
+            showVideoSetting.wrappedValue.toggle()
+        } label: {
+            Image(systemName: "info.circle.fill")
+        }
+        // iOS 模拟器加keyboardShortcut会导致KSVideoPlayer.Coordinator无法释放。真机不会有这个问题
+        #if !os(tvOS)
+        .keyboardShortcut("i", modifiers: [.command])
+        #endif
+    }
 }
 
 private extension KSVideoPlayerViewBuilder {
