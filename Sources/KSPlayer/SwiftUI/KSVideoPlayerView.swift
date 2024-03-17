@@ -240,18 +240,23 @@ public struct KSVideoPlayerView: View {
         }
         .frame(width: playerWidth / 1.5)
         .buttonStyle(.plain)
-        .padding([.all], 24)
-        .font(.largeTitle)
+        .padding(.vertical, 24)
+        .padding(.horizontal, 36)
         .glassBackgroundEffect()
     }
     
     private func ornamentControlsView(playerWidth: Double) -> some View {
         HStack {
             KSVideoPlayerViewBuilder.playbackControlView(config: playerCoordinator, spacing: 16)
-            VideoTimeShowView(config: playerCoordinator, model: playerCoordinator.timemodel)
-            KSVideoPlayerViewBuilder.contentModeButton(config: playerCoordinator)
-            KSVideoPlayerViewBuilder.subtitleButton(config: playerCoordinator)
-            KSVideoPlayerViewBuilder.playbackRateButton(playbackRate: $playerCoordinator.playbackRate)
+            Spacer()
+            VideoTimeShowView(config: playerCoordinator, model: playerCoordinator.timemodel, timeFont: .title3.monospacedDigit())
+            Spacer()
+            Group {
+                KSVideoPlayerViewBuilder.contentModeButton(config: playerCoordinator)
+                KSVideoPlayerViewBuilder.subtitleButton(config: playerCoordinator)
+                KSVideoPlayerViewBuilder.playbackRateButton(playbackRate: $playerCoordinator.playbackRate)
+            }
+            .font(.largeTitle)
         }
     }
 
@@ -496,12 +501,13 @@ struct VideoTimeShowView: View {
     fileprivate var config: KSVideoPlayer.Coordinator
     @ObservedObject
     fileprivate var model: ControllerTimeModel
+    fileprivate var timeFont: Font?
     public var body: some View {
         if config.timemodel.totalTime == 0 {
             Text("Live Streaming")
         } else {
             HStack {
-                Text(model.currentTime.toString(for: .minOrHour)).font(.caption2.monospacedDigit())
+                Text(model.currentTime.toString(for: .minOrHour)).font(timeFont ?? .caption2.monospacedDigit())
                 Slider(value: Binding {
                     Double(model.currentTime)
                 } set: { newValue, _ in
@@ -514,7 +520,7 @@ struct VideoTimeShowView: View {
                     }
                 }
                 .frame(maxHeight: 20)
-                Text((model.totalTime).toString(for: .minOrHour)).font(.caption2.monospacedDigit())
+                Text((model.totalTime).toString(for: .minOrHour)).font(timeFont ?? .caption2.monospacedDigit())
             }
             .font(.system(.title2))
         }
