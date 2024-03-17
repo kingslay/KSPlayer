@@ -105,7 +105,7 @@ private extension KSVideoPlayerViewBuilder {
 
     static var pauseSystemName: String {
         #if os(xrOS)
-        "pause"
+        "pause.fill"
         #else
         "pause.circle.fill"
         #endif
@@ -172,6 +172,9 @@ private extension KSVideoPlayerViewBuilder {
             Image(systemName: config.state == .error ? "play.slash.fill" : (config.state.isPlaying ? pauseSystemName : playSystemName))
                 .font(.largeTitle)
         }
+        #if os(xrOS)
+           .contentTransition(.symbolEffect(.replace))
+        #endif
         #if !os(tvOS)
         .keyboardShortcut(.space, modifiers: .none)
         #endif
