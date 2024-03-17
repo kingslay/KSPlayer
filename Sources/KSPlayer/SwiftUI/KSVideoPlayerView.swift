@@ -229,6 +229,7 @@ public struct KSVideoPlayerView: View {
                 KSVideoPlayerViewBuilder.playbackControlView(config: playerCoordinator)
                 VideoTimeShowView(config: playerCoordinator, model: playerCoordinator.timemodel)
                     .frame(width: playerWidth / 2)
+                KSVideoPlayerViewBuilder.contentModeButton(config: playerCoordinator)
             }
             .buttonStyle(.plain)
             .padding([.all], 24)
@@ -356,7 +357,9 @@ struct VideoControllerView: View {
                     audioButton(audioTracks: audioTracks)
                 }
                 muteButton
+                #if !os(xrOS)
                 contentModeButton
+                #endif
                 subtitleButton
             }
             Spacer()
@@ -401,11 +404,7 @@ struct VideoControllerView: View {
     }
 
     private var contentModeButton: some View {
-        Button {
-            config.isScaleAspectFill.toggle()
-        } label: {
-            Image(systemName: config.isScaleAspectFill ? "rectangle.arrowtriangle.2.inward" : "rectangle.arrowtriangle.2.outward")
-        }
+        KSVideoPlayerViewBuilder.contentModeButton(config: config)
     }
 
     private func audioButton(audioTracks: [MediaPlayerTrack]) -> some View {

@@ -32,7 +32,7 @@ enum KSVideoPlayerViewBuilder {
                     config.playerLayer?.play()
                 }
             } label: {
-                Image(systemName: config.state == .error ? playSlashSystemName : (config.state.isPlaying ? pauseSystemName : playSystemName))
+                Image(systemName: config.state == .error ? "play.slash.fill" : (config.state.isPlaying ? pauseSystemName : playSystemName))
                     .font(.largeTitle)
             }
             #if !os(tvOS)
@@ -53,27 +53,28 @@ enum KSVideoPlayerViewBuilder {
             Spacer()
         }
     }
+    
+    @MainActor
+    static func contentModeButton(config: KSVideoPlayer.Coordinator) -> some View {
+        Button {
+            config.isScaleAspectFill.toggle()
+        } label: {
+            Image(systemName: config.isScaleAspectFill ? "rectangle.arrowtriangle.2.inward" : "rectangle.arrowtriangle.2.outward")
+        }
+    }
 }
 
 private extension KSVideoPlayerViewBuilder {
-    
-    private static var playSlashSystemName: String {
-        #if os(xrOS)
-        "play.slash"
-        #else
-        "play.slash.fill"
-        #endif
-    }
 
-    private static var playSystemName: String {
+    static var playSystemName: String {
         #if os(xrOS)
-        "play"
+        "play.fill"
         #else
         "play.circle.fill"
         #endif
     }
 
-    private static var pauseSystemName: String {
+    static var pauseSystemName: String {
         #if os(xrOS)
         "pause"
         #else
