@@ -218,7 +218,7 @@ public struct KSVideoPlayerView: View {
 
     private func controllerView(playerWidth: Double) -> some View {
         VStack {
-            VideoControllerView(config: playerCoordinator, subtitleModel: playerCoordinator.subtitleModel, title: $title)
+            VideoControllerView(config: playerCoordinator, subtitleModel: playerCoordinator.subtitleModel, title: $title, volumeSliderSize: playerWidth / 4)
             #if !os(xrOS)
             // 设置opacity为0，还是会去更新View。所以只能这样了
             if playerCoordinator.isMaskShow {
@@ -328,6 +328,7 @@ struct VideoControllerView: View {
     fileprivate var subtitleModel: SubtitleModel
     @Binding
     fileprivate var title: String
+    fileprivate var volumeSliderSize: Double?
     @State
     private var showVideoSetting = false
     @Environment(\.dismiss)
@@ -379,8 +380,8 @@ struct VideoControllerView: View {
                     AirPlayView().fixedSize()
                 }
                 #endif
-                Spacer()
                 #endif
+                Spacer()
                 if let audioTracks = config.playerLayer?.player.tracks(mediaType: .audio), !audioTracks.isEmpty {
                     audioButton(audioTracks: audioTracks)
                 }
@@ -420,12 +421,21 @@ struct VideoControllerView: View {
     }
 
     private var muteButton: some View {
-        Button {
-            config.isMuted.toggle()
-        } label: {
-            Image(systemName: config.isMuted ? "speaker.slash.circle.fill" : "speaker.wave.2.circle.fill")
+        #if os(xrOS)
+        HStack {
+            Slider(value: $config.playbackVolume, in: 0...1)
+                .onChange(of: config.playbackVolume, { _, newValue in
+                config.isMuted = newValue == 0
+            })
+            .frame(width: volumeSliderSize ?? 100)
+            .padding(.leading, 16)
+            KSVideoPlayerViewBuilder.muteButton(config: config)
         }
-        .shadow(color: .black, radius: 1)
+        .padding(16)
+        .glassBackgroundEffect()
+        #else
+        KSVideoPlayerViewBuilder.muteButton(config: config)
+        #endif
     }
 
     private var contentModeButton: some View {

@@ -81,6 +81,16 @@ enum KSVideoPlayerViewBuilder {
                 .opacity(config.state == .buffering ? 1 : 0)
         }
     }
+    
+    @MainActor
+    static func muteButton(config: KSVideoPlayer.Coordinator) -> some View {
+        Button {
+            config.isMuted.toggle()
+        } label: {
+            Image(systemName: config.isMuted ? speakerDisabledSystemName : speakerSystemName)
+        }
+        .shadow(color: .black, radius: 1)
+    }
 }
 
 private extension KSVideoPlayerViewBuilder {
@@ -98,6 +108,23 @@ private extension KSVideoPlayerViewBuilder {
         "pause"
         #else
         "pause.circle.fill"
+        #endif
+    }
+    
+    
+    static var speakerSystemName: String {
+        #if os(xrOS)
+        "speaker.fill"
+        #else
+        "speaker.wave.2.circle.fill"
+        #endif
+    }
+
+    static var speakerDisabledSystemName: String {
+        #if os(xrOS)
+        "speaker.slash.fill"
+        #else
+        "speaker.slash.circle.fill"
         #endif
     }
     
