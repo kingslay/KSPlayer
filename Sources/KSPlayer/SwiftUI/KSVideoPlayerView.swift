@@ -225,10 +225,14 @@ public struct KSVideoPlayerView: View {
         }
         #if os(xrOS)
         .ornament(visibility: playerCoordinator.isMaskShow ? .visible : .hidden, attachmentAnchor: .scene(.bottom)) {
-            VideoTimeShowView(config: playerCoordinator, model: playerCoordinator.timemodel)
-                .frame(width: playerWidth / 2)
-                .padding([.all], 24)
-                .glassBackgroundEffect()
+            HStack {
+                KSVideoPlayerViewBuilder.playbackControlView(config: playerCoordinator)
+                VideoTimeShowView(config: playerCoordinator, model: playerCoordinator.timemodel)
+                    .frame(width: playerWidth / 2)
+            }
+            .buttonStyle(.plain)
+            .padding([.all], 24)
+            .glassBackgroundEffect()
         }
         #endif
         .focused($focusableField, equals: .controller)
@@ -335,17 +339,19 @@ struct VideoControllerView: View {
             }
             #else
             HStack {
+                #if !os(xrOS)
                 Button {
                     dismiss()
                 } label: {
                     Image(systemName: "x.circle.fill")
                 }
-                #if !os(tvOS) && !os(xrOS)
+                #if !os(tvOS)
                 if config.playerLayer?.player.allowsExternalPlayback == true {
                     AirPlayView().fixedSize()
                 }
                 #endif
                 Spacer()
+                #endif
                 if let audioTracks = config.playerLayer?.player.tracks(mediaType: .audio), !audioTracks.isEmpty {
                     audioButton(audioTracks: audioTracks)
                 }
@@ -354,48 +360,10 @@ struct VideoControllerView: View {
                 subtitleButton
             }
             Spacer()
-            HStack {
-                Spacer()
-                if config.playerLayer?.player.seekable ?? false {
-                    Button {
-                        config.skip(interval: -15)
-                    } label: {
-                        Image(systemName: "gobackward.15")
-                            .font(.largeTitle)
-                    }
-                    #if !os(tvOS)
-                    .keyboardShortcut(.leftArrow, modifiers: .none)
-                    #endif
-                }
-                Spacer()
-                Button {
-                    if config.state.isPlaying {
-                        config.playerLayer?.pause()
-                    } else {
-                        config.playerLayer?.play()
-                    }
-                } label: {
-                    Image(systemName: config.state == .error ? "play.slash.fill" : (config.state.isPlaying ? "pause.circle.fill" : "play.circle.fill"))
-                        .font(.largeTitle)
-                }
-                #if !os(tvOS)
-                .keyboardShortcut(.space, modifiers: .none)
-                #endif
-                Spacer()
-                if config.playerLayer?.player.seekable ?? false {
-                    Button {
-                        config.skip(interval: 15)
-                    } label: {
-                        Image(systemName: "goforward.15")
-                            .font(.largeTitle)
-                    }
-                    #if !os(tvOS)
-                    .keyboardShortcut(.rightArrow, modifiers: .none)
-                    #endif
-                }
-                Spacer()
-            }
+            #if !os(xrOS)
+            KSVideoPlayerViewBuilder.playbackControlView(config: config)
             Spacer()
+            #endif
             HStack {
                 Text(title)
                     .font(.title3)
