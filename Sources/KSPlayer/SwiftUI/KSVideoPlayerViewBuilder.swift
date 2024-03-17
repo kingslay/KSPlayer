@@ -7,8 +7,8 @@
 
 import SwiftUI
 
+@available(iOS 16.0, macOS 13.0, tvOS 16.0, *)
 enum KSVideoPlayerViewBuilder {
-    
     @MainActor
     static func playbackControlView(config: KSVideoPlayer.Coordinator, spacing: CGFloat? = nil) -> some View {
         HStack(spacing: spacing) {
@@ -28,7 +28,7 @@ enum KSVideoPlayerViewBuilder {
             #endif
         }
     }
-    
+
     @MainActor
     static func contentModeButton(config: KSVideoPlayer.Coordinator) -> some View {
         Button {
@@ -37,7 +37,7 @@ enum KSVideoPlayerViewBuilder {
             Image(systemName: config.isScaleAspectFill ? "rectangle.arrowtriangle.2.inward" : "rectangle.arrowtriangle.2.outward")
         }
     }
-    
+
     @MainActor
     static func subtitleButton(config: KSVideoPlayer.Coordinator) -> some View {
         MenuView(selection: Binding {
@@ -58,7 +58,7 @@ enum KSVideoPlayerViewBuilder {
             Image(systemName: "text.bubble.fill")
         }
     }
-    
+
     @MainActor
     static func playbackRateButton(playbackRate: Binding<Float>) -> some View {
         MenuView(selection: playbackRate) {
@@ -71,7 +71,7 @@ enum KSVideoPlayerViewBuilder {
             Image(systemName: "gauge.with.dots.needle.67percent")
         }
     }
-    
+
     @MainActor
     static func titleView(title: String, config: KSVideoPlayer.Coordinator) -> some View {
         HStack {
@@ -81,7 +81,7 @@ enum KSVideoPlayerViewBuilder {
                 .opacity(config.state == .buffering ? 1 : 0)
         }
     }
-    
+
     @MainActor
     static func muteButton(config: KSVideoPlayer.Coordinator) -> some View {
         Button {
@@ -91,7 +91,7 @@ enum KSVideoPlayerViewBuilder {
         }
         .shadow(color: .black, radius: 1)
     }
-    
+
     static func infoButton(showVideoSetting: Binding<Bool>) -> some View {
         Button {
             showVideoSetting.wrappedValue.toggle()
@@ -105,8 +105,8 @@ enum KSVideoPlayerViewBuilder {
     }
 }
 
+@available(iOS 16.0, macOS 13.0, tvOS 16.0, *)
 private extension KSVideoPlayerViewBuilder {
-
     static var playSystemName: String {
         #if os(xrOS)
         "play.fill"
@@ -122,8 +122,7 @@ private extension KSVideoPlayerViewBuilder {
         "pause.circle.fill"
         #endif
     }
-    
-    
+
     static var speakerSystemName: String {
         #if os(xrOS)
         "speaker.fill"
@@ -139,7 +138,7 @@ private extension KSVideoPlayerViewBuilder {
         "speaker.slash.circle.fill"
         #endif
     }
-    
+
     @MainActor
     @ViewBuilder
     static func backwardButton(config: KSVideoPlayer.Coordinator) -> some View {
@@ -155,7 +154,7 @@ private extension KSVideoPlayerViewBuilder {
             #endif
         }
     }
-    
+
     @MainActor
     @ViewBuilder
     static func forwardButton(config: KSVideoPlayer.Coordinator) -> some View {
@@ -171,7 +170,7 @@ private extension KSVideoPlayerViewBuilder {
             #endif
         }
     }
-    
+
     @MainActor
     static func playButton(config: KSVideoPlayer.Coordinator) -> some View {
         Button {
@@ -185,7 +184,7 @@ private extension KSVideoPlayerViewBuilder {
                 .font(.largeTitle)
         }
         #if os(xrOS)
-           .contentTransition(.symbolEffect(.replace))
+        .contentTransition(.symbolEffect(.replace))
         #endif
         #if !os(tvOS)
         .keyboardShortcut(.space, modifiers: .none)

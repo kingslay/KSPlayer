@@ -249,7 +249,7 @@ public struct KSVideoPlayerView: View {
         .opacity(playerCoordinator.isMaskShow ? 1 : 0)
         .padding()
     }
-    
+
     private func ornamentView(playerWidth: Double) -> some View {
         VStack(alignment: .leading) {
             KSVideoPlayerViewBuilder.titleView(title: title, config: playerCoordinator)
@@ -259,10 +259,12 @@ public struct KSVideoPlayerView: View {
         .buttonStyle(.plain)
         .padding(.vertical, 24)
         .padding(.horizontal, 36)
-        .glassBackgroundEffect()
+        #if os(xrOS)
+            .glassBackgroundEffect()
+        #endif
     }
-    
-    private func ornamentControlsView(playerWidth: Double) -> some View {
+
+    private func ornamentControlsView(playerWidth _: Double) -> some View {
         HStack {
             KSVideoPlayerViewBuilder.playbackControlView(config: playerCoordinator, spacing: 16)
             Spacer()
@@ -430,13 +432,13 @@ struct VideoControllerView: View {
     private var muteButton: some View {
         #if os(xrOS)
         HStack {
-            Slider(value: $config.playbackVolume, in: 0...1)
-                .onChange(of: config.playbackVolume, { _, newValue in
-                config.isMuted = newValue == 0
-            })
-            .frame(width: volumeSliderSize ?? 100)
-            .tint(.white.opacity(0.8))
-            .padding(.leading, 16)
+            Slider(value: $config.playbackVolume, in: 0 ... 1)
+                .onChange(of: config.playbackVolume) { _, newValue in
+                    config.isMuted = newValue == 0
+                }
+                .frame(width: volumeSliderSize ?? 100)
+                .tint(.white.opacity(0.8))
+                .padding(.leading, 16)
             KSVideoPlayerViewBuilder.muteButton(config: config)
         }
         .padding(16)
@@ -548,7 +550,7 @@ struct VideoTimeShowView: View {
                 }
                 .frame(maxHeight: 20)
                 #if os(xrOS)
-                .tint(.white.opacity(0.8))
+                    .tint(.white.opacity(0.8))
                 #endif
                 Text((model.totalTime).toString(for: .minOrHour)).font(timeFont ?? .caption2.monospacedDigit())
             }

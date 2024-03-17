@@ -93,7 +93,7 @@ extension KSVideoPlayer: UIViewRepresentable {
                 playerLayer?.player.isMuted = isMuted
             }
         }
-        
+
         @Published
         public var playbackVolume: Float = 1.0 {
             didSet {
