@@ -37,6 +37,27 @@ enum KSVideoPlayerViewBuilder {
             Image(systemName: config.isScaleAspectFill ? "rectangle.arrowtriangle.2.inward" : "rectangle.arrowtriangle.2.outward")
         }
     }
+    
+    @MainActor
+    static func subtitleButton(config: KSVideoPlayer.Coordinator) -> some View {
+        MenuView(selection: Binding {
+            config.subtitleModel.selectedSubtitleInfo?.subtitleID
+        } set: { value in
+            let info = config.subtitleModel.subtitleInfos.first { $0.subtitleID == value }
+            config.subtitleModel.selectedSubtitleInfo = info
+            if let info = info as? MediaPlayerTrack {
+                // 因为图片字幕想要实时的显示，那就需要seek。所以需要走select track
+                config.playerLayer?.player.select(track: info)
+            }
+        }) {
+            Text("Off").tag(nil as String?)
+            ForEach(config.subtitleModel.subtitleInfos, id: \.subtitleID) { track in
+                Text(track.name).tag(track.subtitleID as String?)
+            }
+        } label: {
+            Image(systemName: "text.bubble.fill")
+        }
+    }
 }
 
 private extension KSVideoPlayerViewBuilder {

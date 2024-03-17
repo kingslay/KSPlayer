@@ -229,10 +229,12 @@ public struct KSVideoPlayerView: View {
                 KSVideoPlayerViewBuilder.playbackControlView(config: playerCoordinator, spacing: 16)
                 VideoTimeShowView(config: playerCoordinator, model: playerCoordinator.timemodel)
                 KSVideoPlayerViewBuilder.contentModeButton(config: playerCoordinator)
+                KSVideoPlayerViewBuilder.subtitleButton(config: playerCoordinator)
             }
-            .frame(width: playerWidth / 2)
+            .frame(width: playerWidth / 1.5)
             .buttonStyle(.plain)
             .padding([.all], 24)
+            .font(.largeTitle)
             .glassBackgroundEffect()
         }
         #endif
@@ -359,8 +361,8 @@ struct VideoControllerView: View {
                 muteButton
                 #if !os(xrOS)
                 contentModeButton
-                #endif
                 subtitleButton
+                #endif
             }
             Spacer()
             #if !os(xrOS)
@@ -424,23 +426,7 @@ struct VideoControllerView: View {
     }
 
     private var subtitleButton: some View {
-        MenuView(selection: Binding {
-            subtitleModel.selectedSubtitleInfo?.subtitleID
-        } set: { value in
-            let info = subtitleModel.subtitleInfos.first { $0.subtitleID == value }
-            subtitleModel.selectedSubtitleInfo = info
-            if let info = info as? MediaPlayerTrack {
-                // 因为图片字幕想要实时的显示，那就需要seek。所以需要走select track
-                config.playerLayer?.player.select(track: info)
-            }
-        }) {
-            Text("Off").tag(nil as String?)
-            ForEach(subtitleModel.subtitleInfos, id: \.subtitleID) { track in
-                Text(track.name).tag(track.subtitleID as String?)
-            }
-        } label: {
-            Image(systemName: "text.bubble.fill")
-        }
+        KSVideoPlayerViewBuilder.subtitleButton(config: config)
     }
 
     private var playbackRateButton: some View {
