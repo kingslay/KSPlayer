@@ -10,47 +10,22 @@ import SwiftUI
 enum KSVideoPlayerViewBuilder {
     
     @MainActor
-    static func playbackControlView(config: KSVideoPlayer.Coordinator) -> some View {
-        HStack {
+    static func playbackControlView(config: KSVideoPlayer.Coordinator, spacing: CGFloat? = nil) -> some View {
+        HStack(spacing: spacing) {
+            // Playback controls don't need spacers for visionOS, since the controls are laid out in a HStack.
+            #if os(xrOS)
+            backwardButton(config: config)
+            playButton(config: config)
+            forwardButton(config: config)
+            #else
             Spacer()
-            if config.playerLayer?.player.seekable ?? false {
-                Button {
-                    config.skip(interval: -15)
-                } label: {
-                    Image(systemName: "gobackward.15")
-                        .font(.largeTitle)
-                }
-                #if !os(tvOS)
-                .keyboardShortcut(.leftArrow, modifiers: .none)
-                #endif
-            }
+            backwardButton(config: config)
             Spacer()
-            Button {
-                if config.state.isPlaying {
-                    config.playerLayer?.pause()
-                } else {
-                    config.playerLayer?.play()
-                }
-            } label: {
-                Image(systemName: config.state == .error ? "play.slash.fill" : (config.state.isPlaying ? pauseSystemName : playSystemName))
-                    .font(.largeTitle)
-            }
-            #if !os(tvOS)
-            .keyboardShortcut(.space, modifiers: .none)
+            playButton(config: config)
+            Spacer()
+            forwardButton(config: config)
+            Spacer()
             #endif
-            Spacer()
-            if config.playerLayer?.player.seekable ?? false {
-                Button {
-                    config.skip(interval: 15)
-                } label: {
-                    Image(systemName: "goforward.15")
-                        .font(.largeTitle)
-                }
-                #if !os(tvOS)
-                .keyboardShortcut(.rightArrow, modifiers: .none)
-                #endif
-            }
-            Spacer()
         }
     }
     
@@ -79,6 +54,55 @@ private extension KSVideoPlayerViewBuilder {
         "pause"
         #else
         "pause.circle.fill"
+        #endif
+    }
+    
+    @MainActor
+    @ViewBuilder
+    static func backwardButton(config: KSVideoPlayer.Coordinator) -> some View {
+        if config.playerLayer?.player.seekable ?? false {
+            Button {
+                config.skip(interval: -15)
+            } label: {
+                Image(systemName: "gobackward.15")
+                    .font(.largeTitle)
+            }
+            #if !os(tvOS)
+            .keyboardShortcut(.leftArrow, modifiers: .none)
+            #endif
+        }
+    }
+    
+    @MainActor
+    @ViewBuilder
+    static func forwardButton(config: KSVideoPlayer.Coordinator) -> some View {
+        if config.playerLayer?.player.seekable ?? false {
+            Button {
+                config.skip(interval: 15)
+            } label: {
+                Image(systemName: "goforward.15")
+                    .font(.largeTitle)
+            }
+            #if !os(tvOS)
+            .keyboardShortcut(.rightArrow, modifiers: .none)
+            #endif
+        }
+    }
+    
+    @MainActor
+    static func playButton(config: KSVideoPlayer.Coordinator) -> some View {
+        Button {
+            if config.state.isPlaying {
+                config.playerLayer?.pause()
+            } else {
+                config.playerLayer?.play()
+            }
+        } label: {
+            Image(systemName: config.state == .error ? "play.slash.fill" : (config.state.isPlaying ? pauseSystemName : playSystemName))
+                .font(.largeTitle)
+        }
+        #if !os(tvOS)
+        .keyboardShortcut(.space, modifiers: .none)
         #endif
     }
 }

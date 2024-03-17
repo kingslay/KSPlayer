@@ -226,11 +226,11 @@ public struct KSVideoPlayerView: View {
         #if os(xrOS)
         .ornament(visibility: playerCoordinator.isMaskShow ? .visible : .hidden, attachmentAnchor: .scene(.bottom)) {
             HStack {
-                KSVideoPlayerViewBuilder.playbackControlView(config: playerCoordinator)
+                KSVideoPlayerViewBuilder.playbackControlView(config: playerCoordinator, spacing: 16)
                 VideoTimeShowView(config: playerCoordinator, model: playerCoordinator.timemodel)
-                    .frame(width: playerWidth / 2)
                 KSVideoPlayerViewBuilder.contentModeButton(config: playerCoordinator)
             }
+            .frame(width: playerWidth / 2)
             .buttonStyle(.plain)
             .padding([.all], 24)
             .glassBackgroundEffect()
