@@ -53,15 +53,17 @@ public struct KSVideoPlayerView: View {
 
     public var body: some View {
         ZStack {
-            playView
-            VideoSubtitleView(model: playerCoordinator.subtitleModel)
-            controllerView
-            #if os(tvOS)
-            if isDropdownShow {
-                VideoSettingView(config: playerCoordinator, subtitleModel: playerCoordinator.subtitleModel, subtitleTitle: title)
-                    .focused($focusableField, equals: .info)
+            GeometryReader { proxy in
+                playView
+                VideoSubtitleView(model: playerCoordinator.subtitleModel)
+                controllerView(playerWidth: proxy.size.width)
+                #if os(tvOS)
+                if isDropdownShow {
+                    VideoSettingView(config: playerCoordinator, subtitleModel: playerCoordinator.subtitleModel, subtitleTitle: title)
+                        .focused($focusableField, equals: .info)
+                }
+                #endif
             }
-            #endif
         }
         .preferredColorScheme(.dark)
         .tint(.white)
@@ -205,9 +207,10 @@ public struct KSVideoPlayerView: View {
         #endif
     }
 
-    private var controllerView: some View {
+    private func controllerView(playerWidth: Double) -> some View {
         VStack {
             VideoControllerView(config: playerCoordinator, subtitleModel: playerCoordinator.subtitleModel, title: $title)
+            #if !os(xrOS)
             // 设置opacity为0，还是会去更新View。所以只能这样了
             if playerCoordinator.isMaskShow {
                 VideoTimeShowView(config: playerCoordinator, model: playerCoordinator.timemodel)
@@ -218,7 +221,16 @@ public struct KSVideoPlayerView: View {
                         focusableField = .play
                     }
             }
+            #endif
         }
+        #if os(xrOS)
+        .ornament(visibility: playerCoordinator.isMaskShow ? .visible : .hidden, attachmentAnchor: .scene(.bottom)) {
+            VideoTimeShowView(config: playerCoordinator, model: playerCoordinator.timemodel)
+                .frame(width: playerWidth / 2)
+                .padding([.all], 24)
+                .glassBackgroundEffect()
+        }
+        #endif
         .focused($focusableField, equals: .controller)
         .opacity(playerCoordinator.isMaskShow ? 1 : 0)
         .padding()
