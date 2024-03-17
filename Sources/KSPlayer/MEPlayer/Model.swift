@@ -295,31 +295,36 @@ public final class AudioFrame: MEFrame {
         data.removeAll()
     }
 
-    public func toFloat() -> [UnsafePointer<Float>] {
-        var array = [UnsafePointer<Float>]()
+    public func toFloat() -> [ContiguousArray<Float>] {
+        var array = [ContiguousArray<Float>]()
         for i in 0 ..< data.count {
             switch audioFormat.commonFormat {
             case .pcmFormatInt16:
                 let capacity = dataSize / MemoryLayout<Int16>.size
                 data[i]?.withMemoryRebound(to: Int16.self, capacity: capacity) { src in
-                    let des = UnsafeMutablePointer<Float>.allocate(capacity: capacity)
-                    for i in 0 ..< capacity {
-                        des[i] = Float(src[i]) / 32767.0
+                    var des = ContiguousArray<Float>.init(repeating: 0, count: Int(capacity))
+                    for j in 0 ..< capacity {
+                        des[j] = max(-1.0, min(Float(src[j]) / 32767.0, 1.0))
                     }
                     array.append(des)
                 }
             case .pcmFormatInt32:
                 let capacity = dataSize / MemoryLayout<Int32>.size
                 data[i]?.withMemoryRebound(to: Int32.self, capacity: capacity) { src in
-                    let des = UnsafeMutablePointer<Float>.allocate(capacity: capacity)
-                    for i in 0 ..< capacity {
-                        des[i] = Float(src[i]) / 2_147_483_647.0
+                    var des = ContiguousArray<Float>.init(repeating: 0, count: Int(capacity))
+                    for j in 0 ..< capacity {
+                        des[j] = max(-1.0, min(Float(src[j]) / 2_147_483_647.0, 1.0))
                     }
                     array.append(des)
                 }
             default:
-                data[i]?.withMemoryRebound(to: Float.self, capacity: dataSize / MemoryLayout<Float>.size) { src in
-                    array.append(src)
+                let capacity = dataSize / MemoryLayout<Float>.size
+                data[i]?.withMemoryRebound(to: Float.self, capacity: capacity) { src in
+                    var des = ContiguousArray<Float>.init(repeating: 0, count: Int(capacity))
+                    for j in 0 ..< capacity {
+                        des[j] = src[j]
+                    }
+                    array.append(ContiguousArray<Float>(des))
                 }
             }
         }
@@ -331,18 +336,20 @@ public final class AudioFrame: MEFrame {
             return nil
         }
         pcmBuffer.frameLength = pcmBuffer.frameCapacity
-        let capacity = Int(pcmBuffer.frameCapacity)
         for i in 0 ..< min(Int(pcmBuffer.format.channelCount), data.count) {
             switch audioFormat.commonFormat {
             case .pcmFormatInt16:
+                let capacity = dataSize / MemoryLayout<Int16>.size
                 data[i]?.withMemoryRebound(to: Int16.self, capacity: capacity) { src in
                     pcmBuffer.int16ChannelData?[i].update(from: src, count: capacity)
                 }
             case .pcmFormatInt32:
+                let capacity = dataSize / MemoryLayout<Int32>.size
                 data[i]?.withMemoryRebound(to: Int32.self, capacity: capacity) { src in
                     pcmBuffer.int32ChannelData?[i].update(from: src, count: capacity)
                 }
             default:
+                let capacity = dataSize / MemoryLayout<Float>.size
                 data[i]?.withMemoryRebound(to: Float.self, capacity: capacity) { src in
                     pcmBuffer.floatChannelData?[i].update(from: src, count: capacity)
                 }

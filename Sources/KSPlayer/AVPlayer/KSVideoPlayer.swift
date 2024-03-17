@@ -165,9 +165,6 @@ extension KSVideoPlayer: UIViewRepresentable {
             delayHide?.cancel()
             delayHide = nil
             subtitleModel.selectedSubtitleInfo?.isEnabled = false
-            DispatchQueue.main.async { [weak self] in
-                self?.subtitleModel.url = nil
-            }
         }
 
         public func skip(interval: Int) {
