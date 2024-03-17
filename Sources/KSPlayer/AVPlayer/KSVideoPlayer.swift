@@ -146,8 +146,7 @@ extension KSVideoPlayer: UIViewRepresentable {
                 playerLayer.delegate = self
                 return playerLayer.player.view ?? UIView()
             } else {
-                let playerLayer = KSPlayerLayer(url: url, options: options)
-                playerLayer.delegate = self
+                let playerLayer = KSPlayerLayer(url: url, options: options, delegate: self)
                 self.playerLayer = playerLayer
                 return playerLayer.player.view ?? UIView()
             }
