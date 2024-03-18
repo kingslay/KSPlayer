@@ -9,7 +9,7 @@ on:
 jobs:
   buidJob:
     name: buid
-    runs-on: macos-14-arm64
+    runs-on: macos-14
     steps:
       - uses: actions/checkout@main
         with:
