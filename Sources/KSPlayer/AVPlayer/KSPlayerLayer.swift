@@ -486,7 +486,7 @@ extension KSPlayerLayer: AVPictureInPictureControllerDelegate {
 // MARK: - private functions
 
 extension KSPlayerLayer {
-    private func prepareToPlay() {
+    open func prepareToPlay() {
         state = .preparing
         startTime = CACurrentMediaTime()
         bufferedCount = 0
