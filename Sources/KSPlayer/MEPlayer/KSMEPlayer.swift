@@ -331,9 +331,6 @@ extension KSMEPlayer: MediaPlayerProtocol {
         audioOutput.renderSource = playerItem
         videoOutput?.renderSource = playerItem
         videoOutput?.options = options
-        if KSOptions.isClearVideoWhereReplace {
-            videoOutput?.flush()
-        }
     }
 
     public var currentPlaybackTime: TimeInterval {
@@ -423,6 +420,9 @@ extension KSMEPlayer: MediaPlayerProtocol {
         options.readVideoTime = 0
         options.decodeAudioTime = 0
         options.decodeVideoTime = 0
+        if KSOptions.isClearVideoWhereReplace {
+            videoOutput?.flush()
+        }
     }
 
     @MainActor
