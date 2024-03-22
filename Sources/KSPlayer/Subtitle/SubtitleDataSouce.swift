@@ -402,12 +402,3 @@ extension URL {
         return hash
     }
 }
-
-import CryptoKit
-
-public extension Data {
-    func md5() -> String {
-        let digestData = Insecure.MD5.hash(data: self)
-        return String(digestData.map { String(format: "%02hhx", $0) }.joined().prefix(32))
-    }
-}
