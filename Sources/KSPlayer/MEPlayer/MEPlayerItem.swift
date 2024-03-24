@@ -618,7 +618,7 @@ extension MEPlayerItem: MediaPlayback {
         if let ioContext = formatCtx.pointee.pb {
             seekable = ioContext.pointee.seekable > 0
         }
-        return seekable && duration > 0
+        return seekable
     }
 
     public func prepareToPlay() {

@@ -542,9 +542,7 @@ struct VideoTimeShowView: View {
     fileprivate var model: ControllerTimeModel
     fileprivate var timeFont: Font?
     public var body: some View {
-        if config.timemodel.totalTime == 0 {
-            Text("Live Streaming")
-        } else {
+        if config.playerLayer?.player.seekable ?? false {
             HStack {
                 Text(model.currentTime.toString(for: .minOrHour)).font(timeFont ?? .caption2.monospacedDigit())
                 Slider(value: Binding {
@@ -565,6 +563,8 @@ struct VideoTimeShowView: View {
                 Text((model.totalTime).toString(for: .minOrHour)).font(timeFont ?? .caption2.monospacedDigit())
             }
             .font(.system(.title2))
+        } else {
+            Text("Live Streaming")
         }
     }
 }
