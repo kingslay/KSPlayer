@@ -441,14 +441,8 @@ open class KSOptions {
 //        }
     }
 
-    open func process(url: URL) -> Either<String, AbstractAVIOContext> {
-        let urlString: String
-        if url.isFileURL {
-            urlString = url.path
-        } else {
-            urlString = url.absoluteString
-        }
-        return Either(urlString)
+    open func process(url _: URL) -> AbstractAVIOContext? {
+        nil
     }
 }
 

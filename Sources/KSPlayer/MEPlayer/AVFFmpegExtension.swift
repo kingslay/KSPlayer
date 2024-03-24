@@ -444,7 +444,7 @@ public struct AVError: Error, Equatable {
     }
 }
 
-extension Dictionary where Key == String {
+public extension Dictionary where Key == String {
     var avOptions: OpaquePointer? {
         var avOptions: OpaquePointer?
         forEach { key, value in
@@ -475,7 +475,7 @@ extension String {
     }
 }
 
-extension NSError {
+public extension NSError {
     convenience init(errorCode: KSPlayerErrorCode, avErrorCode: Int32) {
         let underlyingError = AVError(code: avErrorCode)
         self.init(errorCode: errorCode, userInfo: [NSUnderlyingErrorKey: underlyingError])

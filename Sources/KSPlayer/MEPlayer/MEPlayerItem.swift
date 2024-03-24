@@ -200,15 +200,15 @@ extension MEPlayerItem {
 //        }
         setHttpProxy()
         var avOptions = options.formatContextOptions.avOptions
-        let urlString: String?
-        let either = options.process(url: url)
-        switch either {
-        case let .left(left):
-            urlString = left
-        case let .right(right):
-            urlString = nil
+        if let pb = options.process(url: url) {
             // 如果要自定义协议的话，那就用avio_alloc_context，对formatCtx.pointee.pb赋值
-            formatCtx.pointee.pb = right.getContext()
+            formatCtx.pointee.pb = pb.getContext()
+        }
+        let urlString: String
+        if url.isFileURL {
+            urlString = url.path
+        } else {
+            urlString = url.absoluteString
         }
         var result = avformat_open_input(&self.formatCtx, urlString, nil, &avOptions)
         av_dict_free(&avOptions)
