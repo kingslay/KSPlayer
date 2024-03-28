@@ -383,23 +383,20 @@ struct VideoControllerView: View {
                     } label: {
                         Image(systemName: config.state == .error ? "play.slash.fill" : (config.state.isPlaying ? "pause.circle.fill" : "play.circle.fill"))
                     }
-                    .frame(width: 50)
+                    .frame(width: 56)
                     if let audioTracks = config.playerLayer?.player.tracks(mediaType: .audio), !audioTracks.isEmpty {
                         audioButton(audioTracks: audioTracks)
-                            .frame(width: 110)
                     }
                     muteButton
-                        .frame(width: 50)
+                        .frame(width: 56)
                     contentModeButton
-                        .frame(width: 50)
+                        .frame(width: 56)
                     subtitleButton
-                        .frame(width: 110)
                     playbackRateButton
-                        .frame(width: 110)
                     pipButton
-                        .frame(width: 50)
+                        .frame(width: 56)
                     infoButton
-                        .frame(width: 50)
+                        .frame(width: 56)
                 }
                 .font(.caption)
             }
@@ -546,6 +543,9 @@ public struct MenuView<Label, SelectionValue, Content>: View where Label: View, 
                 .pickerStyle(.navigationLink)
             #endif
                 .frame(height: 50)
+            #if os(tvOS)
+                .frame(width: 110)
+            #endif
         }
     }
 }
