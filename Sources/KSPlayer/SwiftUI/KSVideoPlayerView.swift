@@ -514,7 +514,6 @@ public struct MenuView<Label, SelectionValue, Content>: View where Label: View, 
     @State
     private var showMenu = false
     public var body: some View {
-        #if os(tvOS)
         if #available(tvOS 17, *) {
             Menu {
                 Picker(selection: selection) {
@@ -526,25 +525,14 @@ public struct MenuView<Label, SelectionValue, Content>: View where Label: View, 
             } label: {
                 label()
             }
+            .menuIndicator(.hidden)
         } else {
             Picker(selection: selection, content: content, label: label)
+            #if !os(macOS)
                 .pickerStyle(.navigationLink)
+            #endif
                 .frame(height: 50)
         }
-        #else
-        Menu {
-            Picker(selection: selection) {
-                content()
-            } label: {
-                EmptyView()
-            }
-            .pickerStyle(.inline)
-        } label: {
-            // menu 里面的label无法调整大小
-            label()
-        }
-        .menuIndicator(.hidden)
-        #endif
     }
 }
 
