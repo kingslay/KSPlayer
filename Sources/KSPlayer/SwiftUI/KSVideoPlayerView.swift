@@ -500,9 +500,22 @@ public struct MenuView<Label, SelectionValue, Content>: View where Label: View, 
     private var showMenu = false
     public var body: some View {
         #if os(tvOS)
-        Picker(selection: selection, content: content, label: label)
-            .pickerStyle(.navigationLink)
-            .frame(height: 50)
+        if #available(tvOS 17, *) {
+            Menu {
+                Picker(selection: selection) {
+                    content()
+                } label: {
+                    EmptyView()
+                }
+                .pickerStyle(.inline)
+            } label: {
+                label()
+            }
+        } else {
+            Picker(selection: selection, content: content, label: label)
+                .pickerStyle(.navigationLink)
+                .frame(height: 50)
+        }
         #else
         Menu {
             Picker(selection: selection) {
