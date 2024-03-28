@@ -65,6 +65,9 @@ public struct KSVideoPlayerView: View {
                 .padding()
                 controllerView(playerWidth: proxy.size.width)
                 #if os(tvOS)
+                    .ignoresSafeArea()
+                #endif
+                #if os(tvOS)
                 if isDropdownShow {
                     VideoSettingView(config: playerCoordinator, subtitleModel: playerCoordinator.subtitleModel, subtitleTitle: title)
                         .focused($focusableField, equals: .info)
@@ -240,12 +243,24 @@ public struct KSVideoPlayerView: View {
             }
             .buttonStyle(.plain)
         }
+        #elseif os(tvOS)
+        .padding(.horizontal, 80)
+        .padding(.bottom, 80)
+        .background(overlayGradient)
         #endif
         .focused($focusableField, equals: .controller)
         .opacity(playerCoordinator.isMaskShow ? 1 : 0)
         .padding()
     }
 
+    private let overlayGradient = LinearGradient(
+        stops: [
+            Gradient.Stop(color: .black.opacity(0), location: 0.22),
+            Gradient.Stop(color: .black.opacity(0.7), location: 1),
+        ],
+        startPoint: .top,
+        endPoint: .bottom
+    )
     private func ornamentView(playerWidth: Double) -> some View {
         VStack(alignment: .leading) {
             KSVideoPlayerViewBuilder.titleView(title: title, config: playerCoordinator)
@@ -500,9 +515,22 @@ public struct MenuView<Label, SelectionValue, Content>: View where Label: View, 
     private var showMenu = false
     public var body: some View {
         #if os(tvOS)
-        Picker(selection: selection, content: content, label: label)
-            .pickerStyle(.navigationLink)
-            .frame(height: 50)
+        if #available(tvOS 17, *) {
+            Menu {
+                Picker(selection: selection) {
+                    content()
+                } label: {
+                    EmptyView()
+                }
+                .pickerStyle(.inline)
+            } label: {
+                label()
+            }
+        } else {
+            Picker(selection: selection, content: content, label: label)
+                .pickerStyle(.navigationLink)
+                .frame(height: 50)
+        }
         #else
         Menu {
             Picker(selection: selection) {
