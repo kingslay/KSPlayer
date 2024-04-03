@@ -622,6 +622,9 @@ extension MEPlayerItem: MediaPlayback {
     }
 
     public func prepareToPlay() {
+        guard state == .idle else {
+            return
+        }
         state = .opening
         openOperation = BlockOperation { [weak self] in
             guard let self else { return }
