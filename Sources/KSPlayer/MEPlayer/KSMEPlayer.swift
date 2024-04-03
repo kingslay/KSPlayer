@@ -315,10 +315,15 @@ extension KSMEPlayer: MediaPlayerProtocol {
     public var view: UIView? { videoOutput }
 
     public func replace(url: URL, options: KSOptions) {
-        KSLog("replaceUrl \(self)")
+        replace(item: MEPlayerItem(url: url, options: options))
+    }
+
+    public func replace(item: MEPlayerItem) {
+        KSLog("replace item \(item)")
         shutdown()
         playerItem.delegate = nil
-        playerItem = MEPlayerItem(url: url, options: options)
+        let options = item.options
+        playerItem = item
         if options.videoDisable {
             videoOutput = nil
         } else if videoOutput == nil {

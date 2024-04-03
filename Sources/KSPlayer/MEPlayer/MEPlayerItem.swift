@@ -13,7 +13,7 @@ import Libavformat
 
 public final class MEPlayerItem: Sendable {
     private let url: URL
-    private let options: KSOptions
+    let options: KSOptions
     private let operationQueue = OperationQueue()
     private let condition = NSCondition()
     private var formatCtx: UnsafeMutablePointer<AVFormatContext>?
