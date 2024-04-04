@@ -622,7 +622,7 @@ extension MEPlayerItem: MediaPlayback {
     }
 
     public func prepareToPlay() {
-        guard state == .idle else {
+        guard [MESourceState.idle, .closed, .failed].contains(state) else {
             return
         }
         state = .opening
