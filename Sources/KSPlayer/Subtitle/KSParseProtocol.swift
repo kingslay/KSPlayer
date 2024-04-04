@@ -368,17 +368,16 @@ public class VTTParse: KSParseProtocol {
      简中封装 by Q66
      */
     public func parsePart(scanner: Scanner) -> SubtitlePart? {
-        var decimal: String?
+        var timeStrs: String?
         repeat {
-            decimal = scanner.scanUpToCharacters(from: .newlines)
+            timeStrs = scanner.scanUpToCharacters(from: .newlines)
             _ = scanner.scanCharacters(from: .newlines)
-        } while decimal.flatMap(Int.init) == nil
-        let startString = scanner.scanUpToString("-->")
-        // skip spaces and newlines by default.
-        _ = scanner.scanString("-->")
-        if let startString,
-           let endString = scanner.scanUpToCharacters(from: .newlines)
-        {
+        } while !(timeStrs?.contains("-->") ?? false) && !scanner.isAtEnd
+        guard let timeStrs else { return nil }
+        let timeArray: [String] = timeStrs.components(separatedBy: "-->")
+        if timeArray.count == 2{
+            let startString = timeArray[0]
+            let endString = timeArray[1]
             _ = scanner.scanCharacters(from: .newlines)
             var text = ""
             var newLine: String? = nil
