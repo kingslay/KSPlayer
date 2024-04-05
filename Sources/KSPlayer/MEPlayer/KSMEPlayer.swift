@@ -128,7 +128,6 @@ public class KSMEPlayer: NSObject {
         playerItem.delegate = self
         audioOutput.renderSource = playerItem
         videoOutput?.renderSource = playerItem
-        videoOutput?.displayLayerDelegate = self
         #if !os(macOS)
         NotificationCenter.default.addObserver(self, selector: #selector(audioRouteChange), name: AVAudioSession.routeChangeNotification, object: AVAudioSession.sharedInstance())
         if #available(tvOS 15.0, iOS 15.0, *) {
@@ -328,7 +327,6 @@ extension KSMEPlayer: MediaPlayerProtocol {
             videoOutput = nil
         } else if videoOutput == nil {
             videoOutput = KSOptions.videoPlayerType.init(options: options)
-            videoOutput?.displayLayerDelegate = self
         }
         self.options = options
         playerItem.delegate = self
@@ -567,17 +565,6 @@ extension KSMEPlayer: AVPlaybackCoordinatorPlaybackControlDelegate {
             self.bufferingCountDownTimer = Timer(timeInterval: countDown, repeats: false) { _ in
                 completionHandler()
             }
-        }
-    }
-}
-
-extension KSMEPlayer: DisplayLayerDelegate {
-    public func change(displayLayer: AVSampleBufferDisplayLayer) {
-        if #available(iOS 15.0, tvOS 15.0, macOS 12.0, *) {
-            let contentSource = AVPictureInPictureController.ContentSource(sampleBufferDisplayLayer: displayLayer, playbackDelegate: self)
-            _pipController = KSPictureInPictureController(contentSource: contentSource)
-            // 更改contentSource会直接crash
-//            pipController?.contentSource = contentSource
         }
     }
 }
