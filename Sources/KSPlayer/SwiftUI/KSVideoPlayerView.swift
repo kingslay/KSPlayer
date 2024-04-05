@@ -161,13 +161,14 @@ public struct KSVideoPlayerView: View {
         }
         #endif
         #if os(macOS)
-            .onTapGesture(count: 2) {
-                guard let view = playerCoordinator.playerLayer?.player.view else {
-                    return
-                }
-                view.window?.toggleFullScreen(nil)
-                view.needsLayout = true
-                view.layoutSubtreeIfNeeded()
+            .navigationTitle(title)
+        .onTapGesture(count: 2) {
+            guard let view = playerCoordinator.playerLayer?.player.view else {
+                return
+            }
+            view.window?.toggleFullScreen(nil)
+            view.needsLayout = true
+            view.layoutSubtreeIfNeeded()
         }
         .onExitCommand {
             playerCoordinator.playerLayer?.player.view?.exitFullScreenMode()
@@ -186,13 +187,12 @@ public struct KSVideoPlayerView: View {
                 break
             }
         }
-        #else
-        .onTapGesture {
-                playerCoordinator.isMaskShow.toggle()
-            }
         #endif
+        .onTapGesture {
+            playerCoordinator.isMaskShow.toggle()
+        }
         #if os(tvOS)
-            .onMoveCommand { direction in
+        .onMoveCommand { direction in
             switch direction {
             case .left:
                 playerCoordinator.skip(interval: -15)
@@ -222,39 +222,10 @@ public struct KSVideoPlayerView: View {
     }
 
     private func controllerView(playerWidth: Double) -> some View {
-        VStack {
-            VideoControllerView(config: playerCoordinator, subtitleModel: playerCoordinator.subtitleModel, title: $title, playerWidth: playerWidth)
-            #if !os(xrOS)
-            // 设置opacity为0，还是会去更新View。所以只能这样了
-            if playerCoordinator.isMaskShow {
-                VideoTimeShowView(config: playerCoordinator, model: playerCoordinator.timemodel, timeFont: .caption2)
-                    .onAppear {
-                        focusableField = .controller
-                    }
-                    .onDisappear {
-                        focusableField = .play
-                    }
-            }
-            #endif
-        }
-        #if os(tvOS)
-        .padding(.horizontal, 80)
-        .padding(.bottom, 80)
-        .background(overlayGradient)
-        #endif
-        .focused($focusableField, equals: .controller)
-        .opacity(playerCoordinator.isMaskShow ? 1 : 0)
-        .padding()
+        VideoControllerView(config: playerCoordinator, subtitleModel: playerCoordinator.subtitleModel, title: $title, playerWidth: playerWidth, focusableField: $focusableField)
+            .focused($focusableField, equals: .controller)
+            .opacity(playerCoordinator.isMaskShow ? 1 : 0)
     }
-
-    private let overlayGradient = LinearGradient(
-        stops: [
-            Gradient.Stop(color: .black.opacity(0), location: 0.22),
-            Gradient.Stop(color: .black.opacity(0.7), location: 1),
-        ],
-        startPoint: .top,
-        endPoint: .bottom
-    )
 
     fileprivate enum FocusableField {
         case play, controller, info
@@ -317,6 +288,8 @@ struct VideoControllerView: View {
     @Binding
     fileprivate var title: String
     fileprivate var playerWidth: Double
+    @FocusState.Binding
+    fileprivate var focusableField: KSVideoPlayerView.FocusableField?
     @State
     private var showVideoSetting = false
     @Environment(\.dismiss)
@@ -350,6 +323,51 @@ struct VideoControllerView: View {
                 }
                 .font(.caption)
             }
+            if config.isMaskShow {
+                VideoTimeShowView(config: config, model: config.timemodel, timeFont: .caption2)
+                    .onAppear {
+                        focusableField = .controller
+                    }
+                    .onDisappear {
+                        focusableField = .play
+                    }
+            }
+            #elseif os(macOS)
+            Spacer()
+            VStack(spacing: 10) {
+                HStack {
+                    KSVideoPlayerViewBuilder.muteButton(config: config)
+                    volumeSlider
+                        .frame(width: 100)
+                    Spacer()
+                    KSVideoPlayerViewBuilder.backwardButton(config: config)
+                        .font(.largeTitle)
+                    KSVideoPlayerViewBuilder.playButton(config: config)
+                        .font(.largeTitle)
+                    KSVideoPlayerViewBuilder.forwardButton(config: config)
+                        .font(.largeTitle)
+                    Spacer()
+                    KSVideoPlayerViewBuilder.contentModeButton(config: config)
+                    KSVideoPlayerViewBuilder.subtitleButton(config: config)
+                    KSVideoPlayerViewBuilder.playbackRateButton(playbackRate: $config.playbackRate)
+                    KSVideoPlayerViewBuilder.infoButton(showVideoSetting: $showVideoSetting)
+                }
+                // 设置opacity为0，还是会去更新View。所以只能这样了
+                if config.isMaskShow {
+                    VideoTimeShowView(config: config, model: config.timemodel, timeFont: .caption2)
+                        .onAppear {
+                            focusableField = .controller
+                        }
+                        .onDisappear {
+                            focusableField = .play
+                        }
+                }
+            }
+            .padding()
+            .background(.black.opacity(0.35))
+            .cornerRadius(10)
+            .padding(.horizontal, playerWidth * 0.15)
+            .padding(.vertical, 24)
             #else
             HStack {
                 Button {
@@ -373,19 +391,11 @@ struct VideoControllerView: View {
                         .glassBackgroundEffect()
                     #endif
                 }
-                Slider(value: $config.playbackVolume, in: 0 ... 1)
-                    .onChange(of: config.playbackVolume) { newValue in
-                        config.isMuted = newValue == 0
-                    }
-                #if os(xrOS)
-                    .frame(width: playerWidth / 4)
-                    .glassBackgroundEffect()
-                #else
+                KSVideoPlayerViewBuilder.muteButton(config: config)
+                volumeSlider
                     .frame(width: 100)
-                #endif
                     .tint(.white.opacity(0.8))
                     .padding(.leading, 16)
-                KSVideoPlayerViewBuilder.muteButton(config: config)
                 #if os(xrOS)
                     .glassBackgroundEffect()
                 #endif
@@ -413,8 +423,23 @@ struct VideoControllerView: View {
                 pipButton
                 infoButton
             }
+            if config.isMaskShow {
+                VideoTimeShowView(config: config, model: config.timemodel, timeFont: .caption2)
+                    .onAppear {
+                        focusableField = .controller
+                    }
+                    .onDisappear {
+                        focusableField = .play
+                    }
+            }
             #endif
             #endif
+        }
+        .sheet(isPresented: $showVideoSetting) {
+            NavigationStack {
+                VideoSettingView(config: config, subtitleModel: config.subtitleModel, subtitleTitle: title)
+            }
+            .buttonStyle(.plain)
         }
         #if os(xrOS)
         .ornament(visibility: config.isMaskShow ? .visible : .hidden, attachmentAnchor: .scene(.bottom)) {
@@ -440,16 +465,31 @@ struct VideoControllerView: View {
             .glassBackgroundEffect()
         }
         #endif
-        #if !os(tvOS)
+        #if os(tvOS)
+        .padding(.horizontal, 80)
+        .padding(.bottom, 80)
+        #else
         .font(.title)
         .buttonStyle(.borderless)
+        .padding()
         #endif
-        .sheet(isPresented: $showVideoSetting) {
-            NavigationStack {
-                VideoSettingView(config: config, subtitleModel: config.subtitleModel, subtitleTitle: title)
+        #if os(tvOS)
+        .background(LinearGradient(
+            stops: [
+                Gradient.Stop(color: .black.opacity(0), location: 0.22),
+                Gradient.Stop(color: .black.opacity(0.7), location: 1),
+            ],
+            startPoint: .top,
+            endPoint: .bottom
+        ))
+        #endif
+    }
+
+    private var volumeSlider: some View {
+        Slider(value: $config.playbackVolume, in: 0 ... 1)
+            .onChange(of: config.playbackVolume) { newValue in
+                config.isMuted = newValue == 0
             }
-            .buttonStyle(.plain)
-        }
     }
 
     private var contentModeButton: some View {
