@@ -37,8 +37,12 @@ public struct KSVideoPlayerView: View {
         }
     }
 
-    @MainActor
-    public init(coordinator: KSVideoPlayer.Coordinator = KSVideoPlayer.Coordinator(), url: URL, options: KSOptions, title: String? = nil, subtitleDataSouce: SubtitleDataSouce? = nil) {
+    public init(url: URL, options: KSOptions, title: String? = nil) {
+        self.init(coordinator: KSVideoPlayer.Coordinator(), url: url, options: options, title: title, subtitleDataSouce: nil)
+    }
+
+    // xcode 15.2还不支持对MainActor参数设置默认值
+    public init(coordinator: KSVideoPlayer.Coordinator, url: URL, options: KSOptions, title: String? = nil, subtitleDataSouce: SubtitleDataSouce? = nil) {
         self.init(coordinator: coordinator, url: .init(wrappedValue: url), options: options, title: .init(wrappedValue: title ?? url.lastPathComponent), subtitleDataSouce: subtitleDataSouce)
     }
 
