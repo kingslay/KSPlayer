@@ -29,8 +29,6 @@ public struct KSVideoPlayerView: View {
     @State
     private var isDropdownShow = false
     @State
-    private var showVideoSetting = false
-    @State
     public var url: URL {
         didSet {
             #if os(macOS)
@@ -221,11 +219,11 @@ public struct KSVideoPlayerView: View {
 
     private func controllerView(playerWidth: Double) -> some View {
         VStack {
-            VideoControllerView(config: playerCoordinator, subtitleModel: playerCoordinator.subtitleModel, title: $title, volumeSliderSize: playerWidth / 4)
+            VideoControllerView(config: playerCoordinator, subtitleModel: playerCoordinator.subtitleModel, title: $title, playerWidth: playerWidth)
             #if !os(xrOS)
             // 设置opacity为0，还是会去更新View。所以只能这样了
             if playerCoordinator.isMaskShow {
-                VideoTimeShowView(config: playerCoordinator, model: playerCoordinator.timemodel)
+                VideoTimeShowView(config: playerCoordinator, model: playerCoordinator.timemodel, timeFont: .caption2)
                     .onAppear {
                         focusableField = .controller
                     }
@@ -235,17 +233,7 @@ public struct KSVideoPlayerView: View {
             }
             #endif
         }
-        #if os(xrOS)
-        .ornament(visibility: playerCoordinator.isMaskShow ? .visible : .hidden, attachmentAnchor: .scene(.bottom)) {
-            ornamentView(playerWidth: playerWidth)
-        }
-        .sheet(isPresented: $showVideoSetting) {
-            NavigationStack {
-                VideoSettingView(config: playerCoordinator, subtitleModel: playerCoordinator.subtitleModel, subtitleTitle: title)
-            }
-            .buttonStyle(.plain)
-        }
-        #elseif os(tvOS)
+        #if os(tvOS)
         .padding(.horizontal, 80)
         .padding(.bottom, 80)
         .background(overlayGradient)
@@ -263,35 +251,6 @@ public struct KSVideoPlayerView: View {
         startPoint: .top,
         endPoint: .bottom
     )
-    private func ornamentView(playerWidth: Double) -> some View {
-        VStack(alignment: .leading) {
-            KSVideoPlayerViewBuilder.titleView(title: title, config: playerCoordinator)
-            ornamentControlsView(playerWidth: playerWidth)
-        }
-        .frame(width: playerWidth / 1.5)
-        .buttonStyle(.plain)
-        .padding(.vertical, 24)
-        .padding(.horizontal, 36)
-        #if os(xrOS)
-            .glassBackgroundEffect()
-        #endif
-    }
-
-    private func ornamentControlsView(playerWidth _: Double) -> some View {
-        HStack {
-            KSVideoPlayerViewBuilder.playbackControlView(config: playerCoordinator, spacing: 16)
-            Spacer()
-            VideoTimeShowView(config: playerCoordinator, model: playerCoordinator.timemodel, timeFont: .title3.monospacedDigit())
-            Spacer()
-            Group {
-                KSVideoPlayerViewBuilder.contentModeButton(config: playerCoordinator)
-                KSVideoPlayerViewBuilder.subtitleButton(config: playerCoordinator)
-                KSVideoPlayerViewBuilder.playbackRateButton(playbackRate: $playerCoordinator.playbackRate)
-                KSVideoPlayerViewBuilder.infoButton(showVideoSetting: $showVideoSetting)
-            }
-            .font(.largeTitle)
-        }
-    }
 
     fileprivate enum FocusableField {
         case play, controller, info
@@ -353,7 +312,7 @@ struct VideoControllerView: View {
     fileprivate var subtitleModel: SubtitleModel
     @Binding
     fileprivate var title: String
-    fileprivate var volumeSliderSize: Double?
+    fileprivate var playerWidth: Double
     @State
     private var showVideoSetting = false
     @Environment(\.dismiss)
@@ -363,28 +322,18 @@ struct VideoControllerView: View {
             #if os(tvOS)
             Spacer()
             HStack {
-                Text(title)
+                KSVideoPlayerViewBuilder.titleView(title: title, config: config)
                     .lineLimit(2)
                     .layoutPriority(3)
-                ProgressView()
-                    .opacity(config.state == .buffering ? 1 : 0)
                 Spacer()
                     .layoutPriority(2)
                 HStack {
-                    Button {
-                        if config.state.isPlaying {
-                            config.playerLayer?.pause()
-                        } else {
-                            config.playerLayer?.play()
-                        }
-                    } label: {
-                        Image(systemName: config.state == .error ? "play.slash.fill" : (config.state.isPlaying ? "pause.circle.fill" : "play.circle.fill"))
-                    }
-                    .frame(width: 56)
+                    KSVideoPlayerViewBuilder.playButton(config: config)
+                        .frame(width: 56)
                     if let audioTracks = config.playerLayer?.player.tracks(mediaType: .audio), !audioTracks.isEmpty {
                         audioButton(audioTracks: audioTracks)
                     }
-                    muteButton
+                    KSVideoPlayerViewBuilder.muteButton(config: config)
                         .frame(width: 56)
                     contentModeButton
                         .frame(width: 56)
@@ -399,17 +348,18 @@ struct VideoControllerView: View {
             }
             #else
             HStack {
-                #if !os(xrOS)
                 Button {
                     dismiss()
                 } label: {
                     Image(systemName: "x.circle.fill")
                 }
-                #if !os(tvOS)
+                #if os(xrOS)
+                .glassBackgroundEffect()
+                #endif
+                #if !os(tvOS) && !os(xrOS)
                 if config.playerLayer?.player.allowsExternalPlayback == true {
                     AirPlayView().fixedSize()
                 }
-                #endif
                 #endif
                 Spacer()
                 if let audioTracks = config.playerLayer?.player.tracks(mediaType: .audio), !audioTracks.isEmpty {
@@ -419,7 +369,22 @@ struct VideoControllerView: View {
                         .glassBackgroundEffect()
                     #endif
                 }
-                muteButton
+                Slider(value: $config.playbackVolume, in: 0 ... 1)
+                    .onChange(of: config.playbackVolume) { newValue in
+                        config.isMuted = newValue == 0
+                    }
+                #if os(xrOS)
+                    .frame(width: playerWidth / 4)
+                    .glassBackgroundEffect()
+                #else
+                    .frame(width: 100)
+                #endif
+                    .tint(.white.opacity(0.8))
+                    .padding(.leading, 16)
+                KSVideoPlayerViewBuilder.muteButton(config: config)
+                #if os(xrOS)
+                    .glassBackgroundEffect()
+                #endif
                 #if !os(xrOS)
                 contentModeButton
                 subtitleButton
@@ -427,7 +392,15 @@ struct VideoControllerView: View {
             }
             Spacer()
             #if !os(xrOS)
-            KSVideoPlayerViewBuilder.playbackControlView(config: config)
+            HStack {
+                Spacer()
+                KSVideoPlayerViewBuilder.backwardButton(config: config)
+                Spacer()
+                KSVideoPlayerViewBuilder.playButton(config: config)
+                Spacer()
+                KSVideoPlayerViewBuilder.forwardButton(config: config)
+                Spacer()
+            }
             Spacer()
             HStack {
                 KSVideoPlayerViewBuilder.titleView(title: title, config: config)
@@ -439,32 +412,40 @@ struct VideoControllerView: View {
             #endif
             #endif
         }
+        #if os(xrOS)
+        .ornament(visibility: config.isMaskShow ? .visible : .hidden, attachmentAnchor: .scene(.bottom)) {
+            VStack(alignment: .leading) {
+                HStack {
+                    KSVideoPlayerViewBuilder.titleView(title: title, config: config)
+                }
+                HStack(spacing: 16) {
+                    KSVideoPlayerViewBuilder.backwardButton(config: config)
+                    KSVideoPlayerViewBuilder.playButton(config: config)
+                    KSVideoPlayerViewBuilder.forwardButton(config: config)
+                    VideoTimeShowView(config: config, model: config.timemodel, timeFont: .title3)
+                    KSVideoPlayerViewBuilder.contentModeButton(config: config)
+                    KSVideoPlayerViewBuilder.subtitleButton(config: config)
+                    KSVideoPlayerViewBuilder.playbackRateButton(playbackRate: $config.playbackRate)
+                    KSVideoPlayerViewBuilder.infoButton(showVideoSetting: $showVideoSetting)
+                }
+            }
+            .frame(width: playerWidth / 1.5)
+            .buttonStyle(.plain)
+            .padding(.vertical, 24)
+            .padding(.horizontal, 36)
+            .glassBackgroundEffect()
+        }
+        #endif
         #if !os(tvOS)
         .font(.title)
         .buttonStyle(.borderless)
         #endif
         .sheet(isPresented: $showVideoSetting) {
-            VideoSettingView(config: config, subtitleModel: config.subtitleModel, subtitleTitle: title)
+            NavigationStack {
+                VideoSettingView(config: config, subtitleModel: config.subtitleModel, subtitleTitle: title)
+            }
+            .buttonStyle(.plain)
         }
-    }
-
-    private var muteButton: some View {
-        #if os(xrOS)
-        HStack {
-            Slider(value: $config.playbackVolume, in: 0 ... 1)
-                .onChange(of: config.playbackVolume) { _, newValue in
-                    config.isMuted = newValue == 0
-                }
-                .frame(width: volumeSliderSize ?? 100)
-                .tint(.white.opacity(0.8))
-                .padding(.leading, 16)
-            KSVideoPlayerViewBuilder.muteButton(config: config)
-        }
-        .padding(16)
-        .glassBackgroundEffect()
-        #else
-        KSVideoPlayerViewBuilder.muteButton(config: config)
-        #endif
     }
 
     private var contentModeButton: some View {
@@ -553,18 +534,19 @@ struct VideoTimeShowView: View {
     fileprivate var config: KSVideoPlayer.Coordinator
     @ObservedObject
     fileprivate var model: ControllerTimeModel
-    fileprivate var timeFont: Font?
+    fileprivate var timeFont: Font
     public var body: some View {
-        if config.playerLayer?.player.seekable ?? false {
+        if let playerLayer = config.playerLayer, playerLayer.player.seekable {
             HStack {
-                Text(model.currentTime.toString(for: .minOrHour)).font(timeFont ?? .caption2.monospacedDigit())
+                Text(model.currentTime.toString(for: .minOrHour))
+                    .font(timeFont.monospacedDigit())
                 Slider(value: Binding {
                     Float(model.currentTime)
                 } set: { newValue, _ in
                     model.currentTime = Int(newValue)
                 }, in: 0 ... Float(model.totalTime)) { onEditingChanged in
                     if onEditingChanged {
-                        config.playerLayer?.pause()
+                        playerLayer.pause()
                     } else {
                         config.seek(time: TimeInterval(model.currentTime))
                     }
@@ -573,7 +555,8 @@ struct VideoTimeShowView: View {
                 #if os(xrOS)
                     .tint(.white.opacity(0.8))
                 #endif
-                Text((model.totalTime).toString(for: .minOrHour)).font(timeFont ?? .caption2.monospacedDigit())
+                Text((model.totalTime).toString(for: .minOrHour))
+                    .font(timeFont.monospacedDigit())
             }
             .font(.system(.title2))
         } else {
