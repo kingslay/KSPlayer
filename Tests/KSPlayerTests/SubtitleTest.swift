@@ -99,4 +99,29 @@ class SubtitleTest: XCTestCase {
         let parts = parse.parse(scanner: scanner)
         XCTAssertEqual(parts.count, 7)
     }
+
+    func testVtt2() {
+        let string = """
+        WEBVTT
+        Kind: captions
+        Language: en
+
+        00:00:13.240 --> 00:00:15.800
+        A few years ago,
+        I broke into my own house.
+
+        00:00:16.880 --> 00:00:18.096
+        I had just driven home,
+
+        00:00:18.120 --> 00:00:20.656
+        it was around midnight
+        in the dead of Montreal winter,
+
+        """
+        let scanner = Scanner(string: string)
+        let parse = VTTParse()
+        XCTAssertEqual(parse.canParse(scanner: scanner), true)
+        let parts = parse.parse(scanner: scanner)
+        XCTAssertEqual(parts.count, 3)
+    }
 }
