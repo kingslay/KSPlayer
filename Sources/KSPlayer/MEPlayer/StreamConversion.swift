@@ -19,9 +19,6 @@ public class StreamConversion: ObservableObject {
     public init(url: String, options: [String: Any], outputURL: String, inFormat: String? = nil, outFormat: String? = nil) throws {
         avdevice_register_all()
         formatCtx = avformat_alloc_context()
-        defer {
-            avformat_close_input(&formatCtx)
-        }
         var avOptions = options.avOptions
         let inputFormat: UnsafePointer<AVInputFormat>?
         if let inFormat {
@@ -38,14 +35,6 @@ public class StreamConversion: ObservableObject {
         guard result == 0 else {
             throw NSError(errorCode: .formatFindStreamInfo, avErrorCode: result)
         }
-        var videoStreamIndex = -1
-        for i in 0 ..< Int32(formatCtx.pointee.nb_streams) {
-            if formatCtx.pointee.streams[Int(i)]?.pointee.codecpar.pointee.codec_type == AVMEDIA_TYPE_VIDEO {
-                videoStreamIndex = Int(i)
-                break
-            }
-        }
-        let outputURL = outputURL
         var ret = avformat_alloc_output_context2(&outputFormatCtx, nil, outFormat, outputURL)
         guard let outputFormatCtx else {
             throw NSError(errorCode: .formatOutputCreate, avErrorCode: ret)
@@ -61,7 +50,7 @@ public class StreamConversion: ObservableObject {
                 }
             }
         }
-        avio_open(&(outputFormatCtx.pointee.pb), outputURL, AVIO_FLAG_WRITE)
+        avio_open(&outputFormatCtx.pointee.pb, outputURL, AVIO_FLAG_WRITE)
         ret = avformat_write_header(outputFormatCtx, nil)
         guard ret >= 0 else {
             avformat_close_input(&self.outputFormatCtx)
