@@ -356,7 +356,7 @@ open class AbstractAVIOContext {
         size
     }
 
-    open func write(buffer _: UnsafeMutablePointer<UInt8>?, size: Int32) -> Int32 {
+    open func write(buffer _: UnsafePointer<UInt8>?, size: Int32) -> Int32 {
         size
     }
 

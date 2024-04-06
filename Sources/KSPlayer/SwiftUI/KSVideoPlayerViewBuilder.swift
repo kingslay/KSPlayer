@@ -87,7 +87,7 @@ public enum KSVideoPlayerViewBuilder {
 @available(iOS 16.0, macOS 13.0, tvOS 16.0, *)
 public extension KSVideoPlayerViewBuilder {
     static var playSystemName: String {
-        #if os(xrOS)
+        #if os(xrOS) || os(macOS)
         "play.fill"
         #else
         "play.circle.fill"
@@ -95,7 +95,7 @@ public extension KSVideoPlayerViewBuilder {
     }
 
     static var pauseSystemName: String {
-        #if os(xrOS)
+        #if os(xrOS) || os(macOS)
         "pause.fill"
         #else
         "pause.circle.fill"
@@ -103,7 +103,7 @@ public extension KSVideoPlayerViewBuilder {
     }
 
     static var speakerSystemName: String {
-        #if os(xrOS)
+        #if os(xrOS) || os(macOS)
         "speaker.fill"
         #else
         "speaker.wave.2.circle.fill"
@@ -111,7 +111,7 @@ public extension KSVideoPlayerViewBuilder {
     }
 
     static var speakerDisabledSystemName: String {
-        #if os(xrOS)
+        #if os(xrOS) || os(macOS)
         "speaker.slash.fill"
         #else
         "speaker.slash.circle.fill"

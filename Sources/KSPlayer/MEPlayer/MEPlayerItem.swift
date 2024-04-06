@@ -10,6 +10,7 @@ import FFmpegKit
 import Libavcodec
 import Libavfilter
 import Libavformat
+import Libavutil
 
 public final class MEPlayerItem: Sendable {
     private let url: URL
@@ -102,9 +103,10 @@ public final class MEPlayerItem: Sendable {
             if let arguments {
                 log = NSString(format: log, arguments: arguments) as String
             }
-            if let ptr {
+            if let ptr, let namePtr = av_default_item_name(ptr) {
+                let name = String(cString: namePtr)
                 let avclass = ptr.assumingMemoryBound(to: UnsafePointer<AVClass>.self).pointee
-                if avclass == &ffurl_context_class {
+                if name == "URLContext" {
                     let context = ptr.assumingMemoryBound(to: URLContext.self).pointee
                     if let opaque = context.interrupt_callback.opaque {
                         let playerItem = Unmanaged<MEPlayerItem>.fromOpaque(opaque).takeUnretainedValue()
