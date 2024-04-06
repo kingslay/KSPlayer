@@ -16,7 +16,9 @@ class MEFilter {
     private var filters: String?
     let timebase: Timebase
     private let isAudio: Bool
-    private var params = AVBufferSrcParameters()
+    private var format = Int32(0)
+    private var height = Int32(0)
+    private var width = Int32(0)
     private let nominalFrameRate: Float
     deinit {
         graph?.pointee.opaque = nil
@@ -31,7 +33,7 @@ class MEFilter {
         self.nominalFrameRate = nominalFrameRate
     }
 
-    private func setup(filters: String) -> Bool {
+    private func setup(filters: String, params: UnsafeMutablePointer<AVBufferSrcParameters>?) -> Bool {
         var inputs = avfilter_inout_alloc()
         var outputs = avfilter_inout_alloc()
         var ret = avfilter_graph_parse2(graph, filters, &inputs, &outputs)
@@ -48,31 +50,31 @@ class MEFilter {
         let buffer = avfilter_get_by_name(isAudio ? "abuffer" : "buffer")
         bufferSrcContext = avfilter_graph_alloc_filter(graph, buffer, "in")
         guard bufferSrcContext != nil else { return false }
-        av_buffersrc_parameters_set(bufferSrcContext, &params)
+        av_buffersrc_parameters_set(bufferSrcContext, params)
         ret = avfilter_init_str(bufferSrcContext, nil)
         guard ret >= 0 else { return false }
         ret = avfilter_link(bufferSrcContext, 0, inputs.pointee.filter_ctx, UInt32(inputs.pointee.pad_idx))
         guard ret >= 0 else { return false }
-        if let ctx = params.hw_frames_ctx {
-            let framesCtxData = UnsafeMutableRawPointer(ctx.pointee.data).bindMemory(to: AVHWFramesContext.self, capacity: 1)
-            inputs.pointee.filter_ctx.pointee.hw_device_ctx = framesCtxData.pointee.device_ref
+//        if let ctx = params?.pointee.hw_frames_ctx {
+//            let framesCtxData = UnsafeMutableRawPointer(ctx.pointee.data).bindMemory(to: AVHWFramesContext.self, capacity: 1)
+//            inputs.pointee.filter_ctx.pointee.hw_device_ctx = framesCtxData.pointee.device_ref
 //                    outputs.pointee.filter_ctx.pointee.hw_device_ctx = framesCtxData.pointee.device_ref
 //                    bufferSrcContext?.pointee.hw_device_ctx = framesCtxData.pointee.device_ref
 //                    bufferSinkContext?.pointee.hw_device_ctx = framesCtxData.pointee.device_ref
-        }
+//        }
         ret = avfilter_graph_config(graph, nil)
         guard ret >= 0 else { return false }
         return true
     }
 
-    private func setup2(filters: String) -> Bool {
+    private func setup2(filters: String, params: UnsafeMutablePointer<AVBufferSrcParameters>?) -> Bool {
         guard let graph else {
             return false
         }
         let bufferName = isAudio ? "abuffer" : "buffer"
         let bufferSrc = avfilter_get_by_name(bufferName)
-        var ret = avfilter_graph_create_filter(&bufferSrcContext, bufferSrc, "ksplayer_\(bufferName)", params.arg, nil, graph)
-        av_buffersrc_parameters_set(bufferSrcContext, &params)
+        var ret = avfilter_graph_create_filter(&bufferSrcContext, bufferSrc, "ksplayer_\(bufferName)", params?.pointee.arg, nil, graph)
+        av_buffersrc_parameters_set(bufferSrcContext, params)
         let bufferSink = avfilter_get_by_name(bufferName + "sink")
         ret = avfilter_graph_create_filter(&bufferSinkContext, bufferSink, "ksplayer_\(bufferName)sink", nil, nil, graph)
         guard ret >= 0 else { return false }
@@ -116,22 +118,26 @@ class MEFilter {
             completionHandler(inputFrame)
             return
         }
-        var params = AVBufferSrcParameters()
-        params.format = inputFrame.pointee.format
-        params.time_base = timebase.rational
-        params.width = inputFrame.pointee.width
-        params.height = inputFrame.pointee.height
-        params.sample_aspect_ratio = inputFrame.pointee.sample_aspect_ratio
-        params.frame_rate = AVRational(num: 1, den: Int32(nominalFrameRate))
-        if let ctx = inputFrame.pointee.hw_frames_ctx {
-            params.hw_frames_ctx = av_buffer_ref(ctx)
-        }
-        params.sample_rate = inputFrame.pointee.sample_rate
-        params.ch_layout = inputFrame.pointee.ch_layout
-        if self.params != params || self.filters != filters {
-            self.params = params
+        if format != inputFrame.pointee.format || height != inputFrame.pointee.height || width != inputFrame.pointee.width || self.filters != filters {
+            format = inputFrame.pointee.format
+            width = inputFrame.pointee.width
+            height = inputFrame.pointee.height
             self.filters = filters
-            if !setup(filters: filters) {
+            var params = av_buffersrc_parameters_alloc()
+            params?.pointee.format = inputFrame.pointee.format
+            params?.pointee.time_base = timebase.rational
+            params?.pointee.width = inputFrame.pointee.width
+            params?.pointee.height = inputFrame.pointee.height
+            params?.pointee.sample_aspect_ratio = inputFrame.pointee.sample_aspect_ratio
+            params?.pointee.frame_rate = AVRational(num: 1, den: Int32(nominalFrameRate))
+            params?.pointee.sample_rate = inputFrame.pointee.sample_rate
+            params?.pointee.ch_layout = inputFrame.pointee.ch_layout
+            if let ctx = inputFrame.pointee.hw_frames_ctx {
+                params?.pointee.hw_frames_ctx = ctx
+            }
+            let result = setup(filters: filters, params: params)
+            av_freep(&params)
+            if !result {
                 completionHandler(inputFrame)
                 return
             }

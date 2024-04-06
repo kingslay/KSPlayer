@@ -24,27 +24,12 @@ extension UnsafeMutablePointer where Pointee == AVCodecContext {
             }
             var i = 0
             while fmt[i] != AV_PIX_FMT_NONE {
-                if fmt[i] == AV_PIX_FMT_VIDEOTOOLBOX {
-                    let deviceCtx = av_hwdevice_ctx_alloc(AV_HWDEVICE_TYPE_VIDEOTOOLBOX)
-                    if deviceCtx == nil {
-                        break
-                    }
+                if fmt[i] == AV_PIX_FMT_VIDEOTOOLBOX, let deviceCtx = av_hwdevice_ctx_alloc(AV_HWDEVICE_TYPE_VIDEOTOOLBOX) {
                     // 只要有hw_device_ctx就可以了。不需要hw_frames_ctx
                     ctx.pointee.hw_device_ctx = deviceCtx
-//                    var framesCtx = av_hwframe_ctx_alloc(deviceCtx)
-//                    if let framesCtx {
-//                        let framesCtxData = UnsafeMutableRawPointer(framesCtx.pointee.data)
-//                            .bindMemory(to: AVHWFramesContext.self, capacity: 1)
-//                        framesCtxData.pointee.format = AV_PIX_FMT_VIDEOTOOLBOX
-//                        framesCtxData.pointee.sw_format = ctx.pointee.pix_fmt.bestPixelFormat
-//                        framesCtxData.pointee.width = ctx.pointee.width
-//                        framesCtxData.pointee.height = ctx.pointee.height
-//                    }
-//                    if av_hwframe_ctx_init(framesCtx) != 0 {
-//                        av_buffer_unref(&framesCtx)
-//                        break
-//                    }
-//                    ctx.pointee.hw_frames_ctx = framesCtx
+                    return fmt[i]
+                } else if fmt[i] == AV_PIX_FMT_VULKAN, let deviceCtx = av_hwdevice_ctx_alloc(AV_HWDEVICE_TYPE_VULKAN) {
+                    ctx.pointee.hw_device_ctx = deviceCtx
                     return fmt[i]
                 }
                 i += 1
