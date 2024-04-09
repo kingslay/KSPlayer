@@ -471,7 +471,7 @@ extension MEPlayerItem {
                 let timeStamp: Int64
                 if seekByBytes {
                     seekFlags |= AVSEEK_FLAG_BYTE
-                    if let bitRate = formatCtx?.pointee.bit_rate {
+                    if let bitRate = formatCtx?.pointee.bit_rate, bitRate != 0 {
                         increase = increase * bitRate / 8
                     } else {
                         increase *= 180_000
