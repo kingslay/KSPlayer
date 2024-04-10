@@ -260,13 +260,17 @@ extension KSVideoPlayer.Coordinator: KSPlayerLayerDelegate {
         if currentTime >= Double(Int.max) || currentTime <= Double(Int.min) || totalTime >= Double(Int.max) || totalTime <= Double(Int.min) {
             return
         }
-        let current = Int(currentTime)
+        let current = Int(max(0, currentTime))
         let total = Int(max(0, totalTime))
         if timemodel.currentTime != current {
             timemodel.currentTime = current
         }
-        if timemodel.totalTime != total {
-            timemodel.totalTime = total
+        if total == 0 {
+            timemodel.totalTime = timemodel.currentTime
+        } else {
+            if timemodel.totalTime != total {
+                timemodel.totalTime = total
+            }
         }
         _ = subtitleModel.subtitle(currentTime: currentTime)
     }

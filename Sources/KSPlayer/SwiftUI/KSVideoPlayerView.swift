@@ -339,6 +339,9 @@ struct VideoControllerView: View {
                     KSVideoPlayerViewBuilder.muteButton(config: config)
                     volumeSlider
                         .frame(width: 100)
+                    if let audioTracks = config.playerLayer?.player.tracks(mediaType: .audio), !audioTracks.isEmpty {
+                        audioButton(audioTracks: audioTracks)
+                    }
                     Spacer()
                     KSVideoPlayerViewBuilder.backwardButton(config: config)
                         .font(.largeTitle)
