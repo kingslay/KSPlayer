@@ -215,6 +215,9 @@ public class KSAVPlayer {
         KSOptions.setAudioSession()
         urlAsset = AVURLAsset(url: url, options: options.avOptions)
         self.options = options
+        if let customResourceLoader = self.options.customResourceLoader {
+            urlAsset.resourceLoader.setDelegate(customResourceLoader, queue: DispatchQueue(label: "customResourceLoader"))
+        }
         itemObservation = player.observe(\.currentItem) { [weak self] player, _ in
             guard let self else { return }
             self.observer(playerItem: player.currentItem)
