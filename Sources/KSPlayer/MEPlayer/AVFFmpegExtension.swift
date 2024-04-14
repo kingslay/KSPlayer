@@ -17,24 +17,14 @@ func toDictionary(_ native: OpaquePointer?) -> [String: String] {
 }
 
 extension UnsafeMutablePointer where Pointee == AVCodecContext {
-    func getFormat() {
-        pointee.get_format = { ctx, fmt -> AVPixelFormat in
-            guard let fmt, let ctx else {
-                return AV_PIX_FMT_NONE
-            }
-            var i = 0
-            while fmt[i] != AV_PIX_FMT_NONE {
-                if fmt[i] == AV_PIX_FMT_VIDEOTOOLBOX, let deviceCtx = av_hwdevice_ctx_alloc(AV_HWDEVICE_TYPE_VIDEOTOOLBOX) {
-                    // 只要有hw_device_ctx就可以了。不需要hw_frames_ctx
-                    ctx.pointee.hw_device_ctx = deviceCtx
-                    return fmt[i]
-                } else if fmt[i] == AV_PIX_FMT_VULKAN, let deviceCtx = av_hwdevice_ctx_alloc(AV_HWDEVICE_TYPE_VULKAN) {
-                    ctx.pointee.hw_device_ctx = deviceCtx
-                    return fmt[i]
-                }
-                i += 1
-            }
-            return fmt[0]
+    func createHwaccel(name: String) {
+        let type = av_hwdevice_find_type_by_name(name)
+        if type == AV_HWDEVICE_TYPE_NONE {
+            return
+        }
+        var ret = av_hwdevice_ctx_create_derived(&pointee.hw_device_ctx, type, nil, 0)
+        if ret != 0 {
+            ret = av_hwdevice_ctx_create(&pointee.hw_device_ctx, type, nil, nil, 0)
         }
     }
 }
@@ -72,9 +62,6 @@ extension AVCodecParameters {
             avcodec_free_context(&codecContextOption)
             throw NSError(errorCode: .codecContextSetParam, avErrorCode: result)
         }
-        if codec_type == AVMEDIA_TYPE_VIDEO, options?.hardwareDecode ?? false {
-            codecContext.getFormat()
-        }
         guard let codec = avcodec_find_decoder(codecContext.pointee.codec_id) else {
             avcodec_free_context(&codecContextOption)
             throw NSError(errorCode: .codecContextFindDecoder, avErrorCode: result)
@@ -94,6 +81,10 @@ extension AVCodecParameters {
             if lowres > 0 {
                 av_dict_set_int(&avOptions, "lowres", Int64(lowres), 0)
             }
+        }
+        if codec_type == AVMEDIA_TYPE_VIDEO, options?.hardwareDecode ?? false {
+            //        "videotoolbox" "vulkan"
+            codecContext.createHwaccel(name: "videotoolbox")
         }
         result = avcodec_open2(codecContext, codec, &avOptions)
         av_dict_free(&avOptions)
