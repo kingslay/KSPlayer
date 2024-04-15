@@ -240,26 +240,38 @@ open class SubtitleModel: ObservableObject {
             case .smaller:
                 #if os(tvOS) || os(xrOS)
                 return 48
-                #elseif os(macOS)
+                #elseif os(macOS) || os(xrOS)
                 return 20
                 #else
-                return 12
+                if UI_USER_INTERFACE_IDIOM() == .phone {
+                    return 12
+                } else {
+                    return 20
+                }
                 #endif
             case .standard:
                 #if os(tvOS) || os(xrOS)
                 return 58
-                #elseif os(macOS)
+                #elseif os(macOS) || os(xrOS)
                 return 26
                 #else
-                return 16
+                if UI_USER_INTERFACE_IDIOM() == .phone {
+                    return 16
+                } else {
+                    return 26
+                }
                 #endif
             case .large:
                 #if os(tvOS) || os(xrOS)
                 return 68
-                #elseif os(macOS)
+                #elseif os(macOS) || os(xrOS)
                 return 32
                 #else
-                return 20
+                if UI_USER_INTERFACE_IDIOM() == .phone {
+                    return 20
+                } else {
+                    return 32
+                }
                 #endif
             }
         }

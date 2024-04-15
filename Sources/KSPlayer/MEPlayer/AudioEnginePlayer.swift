@@ -14,7 +14,6 @@ public protocol AudioOutput: FrameOutput {
     var isMuted: Bool { get set }
     init()
     func prepare(audioFormat: AVAudioFormat)
-    func play()
 }
 
 public protocol AudioDynamicsProcessor {
@@ -307,7 +306,12 @@ public class AudioEnginePlayer: AudioOutput {
         if let currentRender {
             let currentPreparePosition = currentRender.timestamp + currentRender.duration * Int64(currentRenderReadOffset) / Int64(currentRender.numberOfSamples)
             if currentPreparePosition > 0 {
-                renderSource?.setAudio(time: currentRender.timebase.cmtime(for: currentPreparePosition), position: currentRender.position)
+                var time = currentRender.timebase.cmtime(for: currentPreparePosition)
+                #if !os(macOS)
+                // AVSampleBufferAudioRenderer不需要处理outputLatency，其他音频输出的都要处理，没有蓝牙的话，outputLatency为0.015，有蓝牙耳机的话为0.176
+                time = time - CMTime(seconds: AVAudioSession.sharedInstance().outputLatency, preferredTimescale: time.timescale)
+                #endif
+                renderSource?.setAudio(time: time, position: currentRender.position)
             }
         }
     }

@@ -54,7 +54,12 @@ public class AudioRendererPlayer: AudioOutput {
 //        }
     }
 
-    public func prepare(audioFormat _: AVAudioFormat) {}
+    public func prepare(audioFormat: AVAudioFormat) {
+        #if !os(macOS)
+        try? AVAudioSession.sharedInstance().setPreferredOutputNumberOfChannels(Int(audioFormat.channelCount))
+        KSLog("[audio] set preferredOutputNumberOfChannels: \(audioFormat.channelCount)")
+        #endif
+    }
 
     public func play() {
         let time: CMTime
@@ -85,7 +90,7 @@ public class AudioRendererPlayer: AudioOutput {
             }
             self.request()
         }
-        periodicTimeObserver = synchronizer.addPeriodicTimeObserver(forInterval: CMTime(seconds: 0.02), queue: .main) { [weak self] time in
+        periodicTimeObserver = synchronizer.addPeriodicTimeObserver(forInterval: CMTime(seconds: 0.01), queue: .main) { [weak self] time in
             guard let self else {
                 return
             }
@@ -124,8 +129,14 @@ public class AudioRendererPlayer: AudioOutput {
                 render = AudioFrame(array: array)
             }
             if let sampleBuffer = render.toCMSampleBuffer() {
-                renderer.audioTimePitchAlgorithm = render.audioFormat.channelCount > 2 ? .spectral : .timeDomain
+                let channelCount = render.audioFormat.channelCount
+                renderer.audioTimePitchAlgorithm = channelCount > 2 ? .spectral : .timeDomain
                 renderer.enqueue(sampleBuffer)
+                #if !os(macOS)
+                if AVAudioSession.sharedInstance().preferredInputNumberOfChannels != channelCount {
+                    try? AVAudioSession.sharedInstance().setPreferredOutputNumberOfChannels(Int(channelCount))
+                }
+                #endif
             }
         }
     }

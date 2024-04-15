@@ -67,6 +67,7 @@ public protocol FrameOutput: AnyObject {
     var renderSource: OutputRenderSourceDelegate? { get set }
     func pause()
     func flush()
+    func play()
 }
 
 protocol MEFrame: ObjectQueueItem {
@@ -81,7 +82,6 @@ public extension KSOptions {
     static var enableSensor = true
     static var stackSize = 65536
     static var isClearVideoWhereReplace = true
-    /// true: AVSampleBufferAudioRenderer false: AVAudioEngine
     static var audioPlayerType: AudioOutput.Type = AudioEnginePlayer.self
     static var videoPlayerType: (VideoOutput & UIView).Type = MetalPlayView.self
     static var yadifMode = 1
