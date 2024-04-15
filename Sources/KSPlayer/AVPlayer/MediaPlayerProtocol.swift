@@ -48,6 +48,7 @@ public class DynamicInfo: ObservableObject {
     @Published
     public var displayFPS = 0.0
     public var audioVideoSyncDiff = 0.0
+    public var byteRate = Int64(0)
     public var droppedVideoFrameCount = UInt32(0)
     public var droppedVideoPacketCount = UInt32(0)
     init(metadata: @escaping () -> [String: String], bytesRead: @escaping () -> Int64, audioBitrate: @escaping () -> Int, videoBitrate: @escaping () -> Int) {

@@ -40,7 +40,7 @@ public final class MEPlayerItem: Sendable {
     private var videoAdaptation: VideoAdaptationState?
     private var videoDisplayCount = UInt8(0)
     private var seekByBytes = false
-    private var lastVideoDisplayTime = CACurrentMediaTime()
+    private var lastVideoClock = KSClock()
     public private(set) var chapters: [Chapter] = []
     public var currentPlaybackTime: TimeInterval {
         state == .seeking ? seekTime : (mainClock().time - startTime).seconds
@@ -254,7 +254,8 @@ extension MEPlayerItem {
             audioClock.time = startTime
         }
         duration = TimeInterval(max(formatCtx.pointee.duration, 0) / Int64(AV_TIME_BASE))
-        fileSize = Double(formatCtx.pointee.bit_rate) * duration / 8
+        dynamicInfo.byteRate = formatCtx.pointee.bit_rate / 8
+        fileSize = Double(dynamicInfo.byteRate) * duration
         createCodec(formatCtx: formatCtx)
         if formatCtx.pointee.nb_chapters > 0 {
             chapters.removeAll()
@@ -471,11 +472,7 @@ extension MEPlayerItem {
                 let timeStamp: Int64
                 if seekByBytes {
                     seekFlags |= AVSEEK_FLAG_BYTE
-                    if let bitRate = formatCtx?.pointee.bit_rate, bitRate != 0 {
-                        increase = increase * bitRate / 8
-                    } else {
-                        increase *= 180_000
-                    }
+                    increase *= dynamicInfo.byteRate
                     var position = Int64(-1)
                     if position < 0 {
                         position = videoClock.position
@@ -794,11 +791,12 @@ extension MEPlayerItem: OutputRenderSourceDelegate {
         videoClock.time = time
         videoClock.position = position
         videoDisplayCount += 1
-        let diff = videoClock.lastMediaTime - lastVideoDisplayTime
+        let diff = videoClock.lastMediaTime - lastVideoClock.lastMediaTime
         if diff > 1 {
+            dynamicInfo.byteRate = Int64(Double(videoClock.position - lastVideoClock.position) / (videoClock.time - lastVideoClock.time).seconds)
             dynamicInfo.displayFPS = Double(videoDisplayCount) / diff
             videoDisplayCount = 0
-            lastVideoDisplayTime = videoClock.lastMediaTime
+            lastVideoClock = videoClock
         }
     }
 
