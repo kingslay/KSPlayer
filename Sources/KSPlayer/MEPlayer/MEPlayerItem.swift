@@ -793,7 +793,10 @@ extension MEPlayerItem: OutputRenderSourceDelegate {
         videoDisplayCount += 1
         let diff = videoClock.lastMediaTime - lastVideoClock.lastMediaTime
         if diff > 1 {
-            dynamicInfo.byteRate = Int64(Double(videoClock.position - lastVideoClock.position) / (videoClock.time - lastVideoClock.time).seconds)
+            let timeDiff = (videoClock.time - lastVideoClock.time).seconds
+            if timeDiff != 0 {
+                dynamicInfo.byteRate = Int64(Double(videoClock.position - lastVideoClock.position) / timeDiff)
+            }
             dynamicInfo.displayFPS = Double(videoDisplayCount) / diff
             videoDisplayCount = 0
             lastVideoClock = videoClock
