@@ -60,6 +60,7 @@ public struct KSVideoPlayerView: View {
                 HStack {
                     Spacer()
                     VideoSubtitleView(model: playerCoordinator.subtitleModel)
+                        .allowsHitTesting(false)//禁止字幕视图交互，以免抢占视图的点击事件或其它手势事件
                     Spacer()
                 }
                 .padding()
