@@ -122,11 +122,11 @@ class AppDelegate: NSObject, UIApplicationDelegate {
 
     func application(_: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
         let tokenString = deviceToken.reduce("") { $0 + String(format: "%02x", $1) }
-        print("Device push notification token - \(tokenString)")
+        KSLog("Device push notification token - \(tokenString)")
     }
 
     func application(_: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: Error) {
-        print("Failed to register for remote notification. Error \(error)")
+        KSLog("Failed to register for remote notification. Error \(error)")
     }
 
     private func requestNotification() {
@@ -136,9 +136,9 @@ class AppDelegate: NSObject, UIApplicationDelegate {
                 DispatchQueue.main.async {
                     UIApplication.shared.registerForRemoteNotifications()
                 }
-                print("Push notification allowed by user")
+                KSLog("Push notification allowed by user")
             } else {
-                print("Error while requesting push notification permission. Error \(String(describing: error))")
+                KSLog("Error while requesting push notification permission. Error \(String(describing: error))")
             }
         }
     }

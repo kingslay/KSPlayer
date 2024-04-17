@@ -64,7 +64,7 @@ public struct KSVideoPlayerView: View {
                 HStack {
                     Spacer()
                     VideoSubtitleView(model: playerCoordinator.subtitleModel)
-                        .allowsHitTesting(false)//禁止字幕视图交互，以免抢占视图的点击事件或其它手势事件
+                        .allowsHitTesting(false) // 禁止字幕视图交互，以免抢占视图的点击事件或其它手势事件
                     Spacer()
                 }
                 .padding()
@@ -117,7 +117,7 @@ public struct KSVideoPlayerView: View {
                 }
             }
             .onBufferChanged { bufferedCount, consumeTime in
-                print("bufferedCount \(bufferedCount), consumeTime \(consumeTime)")
+                KSLog("bufferedCount \(bufferedCount), consumeTime \(consumeTime)")
             }
         #if canImport(UIKit)
             .onSwipe { _ in

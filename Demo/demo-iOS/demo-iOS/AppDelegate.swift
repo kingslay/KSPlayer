@@ -69,18 +69,18 @@ class CustomVideoPlayerView: VideoPlayerView {
     override open func player(layer: KSPlayerLayer, state: KSPlayerState) {
         super.player(layer: layer, state: state)
         if state == .readyToPlay {
-            print(layer.player.naturalSize)
+            KSLog(layer.player.naturalSize)
             // list the all subtitles
             let subtitleInfos = srtControl.subtitleInfos
             for subtitleInfo in subtitleInfos {
-                print(subtitleInfo.name)
+                KSLog(subtitleInfo.name)
             }
             srtControl.selectedSubtitleInfo = subtitleInfos.first
             for track in layer.player.tracks(mediaType: .audio) {
-                print("audio name: \(track.name) language: \(track.language ?? "")")
+                KSLog("audio name: \(track.name) language: \(track.language ?? "")")
             }
             for track in layer.player.tracks(mediaType: .video) {
-                print("video name: \(track.name) bitRate: \(track.bitRate) fps: \(track.nominalFrameRate) colorPrimaries: \(track.colorPrimaries ?? "") colorPrimaries: \(track.transferFunction ?? "") yCbCrMatrix: \(track.yCbCrMatrix ?? "") codecType:  \(track.mediaSubType.rawValue.string)")
+                KSLog("video name: \(track.name) bitRate: \(track.bitRate) fps: \(track.nominalFrameRate) colorPrimaries: \(track.colorPrimaries ?? "") colorPrimaries: \(track.transferFunction ?? "") yCbCrMatrix: \(track.yCbCrMatrix ?? "") codecType:  \(track.mediaSubType.rawValue.string)")
             }
         }
     }

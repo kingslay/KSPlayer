@@ -134,7 +134,7 @@ class SyncPlayerItemTrack<Frame: MEFrame>: PlayerItemTrackProtocol, CustomString
             }
             do {
 //                if packet.assetTrack.mediaType == .video {
-//                    print("[video] decode time: \(CACurrentMediaTime()-startTime)")
+//                    KSLog("[video] decode time: \(CACurrentMediaTime()-startTime)")
 //                    startTime = CACurrentMediaTime()
 //                }
                 let frame = try result.get()

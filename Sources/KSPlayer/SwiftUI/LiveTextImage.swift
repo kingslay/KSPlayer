@@ -59,7 +59,7 @@ public struct LiveTextImage: UIViewRepresentable {
                 interaction.preferredInteractionTypes = .textSelection
                 interaction.analysis = analysis
             } catch {
-                print(error.localizedDescription)
+                KSLog(error.localizedDescription)
             }
         }
     }

@@ -137,7 +137,7 @@ class UIActivityIndicatorView: UIView {
     private let progressLabel = UILabel()
     public var progress: Double = 0 {
         didSet {
-            print("new progress: \(progress)")
+            KSLog("new progress: \(progress)")
             progressLabel.stringValue = "\(Int(progress * 100))%"
         }
     }

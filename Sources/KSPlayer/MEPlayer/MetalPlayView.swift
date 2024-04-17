@@ -150,7 +150,7 @@ public final class MetalPlayView: UIView, VideoOutput {
     }
 
 //    deinit {
-//        print()
+//        KSLog()
 //    }
 }
 

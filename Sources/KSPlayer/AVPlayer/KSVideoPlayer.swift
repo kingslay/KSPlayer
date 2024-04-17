@@ -17,11 +17,12 @@ public typealias UIViewRepresentable = NSViewRepresentable
 #endif
 
 public struct KSVideoPlayer {
-    public private(set) var coordinator: Coordinator
+    @ObservedObject
+    public var coordinator: Coordinator
     public let url: URL
     public let options: KSOptions
     public init(coordinator: Coordinator, url: URL, options: KSOptions) {
-        self.coordinator = coordinator
+        _coordinator = .init(wrappedValue: coordinator)
         self.url = url
         self.options = options
     }

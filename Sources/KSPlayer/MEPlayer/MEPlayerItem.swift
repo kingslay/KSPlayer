@@ -787,7 +787,7 @@ extension MEPlayerItem: OutputRenderSourceDelegate {
     }
 
     public func setVideo(time: CMTime, position: Int64) {
-//        print("[video] video interval \(CACurrentMediaTime() - videoClock.lastMediaTime) video diff \(time.seconds - videoClock.time.seconds)")
+//        KSLog("[video] video interval \(CACurrentMediaTime() - videoClock.lastMediaTime) video diff \(time.seconds - videoClock.time.seconds)")
         videoClock.time = time
         videoClock.position = position
         videoDisplayCount += 1
@@ -804,7 +804,7 @@ extension MEPlayerItem: OutputRenderSourceDelegate {
     }
 
     public func setAudio(time: CMTime, position: Int64) {
-//        print("[audio] setAudio: \(time.seconds)")
+//        KSLog("[audio] setAudio: \(time.seconds)")
         // 切换到主线程的话，那播放起来会更顺滑
         runOnMainThread {
             self.audioClock.time = time
