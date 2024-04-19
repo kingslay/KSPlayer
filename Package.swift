@@ -65,6 +65,6 @@ if FileManager.default.fileExists(atPath: ffmpegKitPath + "/Package.swift") {
     ]
 } else {
     package.dependencies += [
-        .package(url: "https://github.com/Tinuv-Dev/FFmpegKit.git", .branch("main")),
+        .package(url: "https://github.com/Tinuv-Dev/FFmpegKit.git", .exact("6.1.3.wav"))
     ]
 }
