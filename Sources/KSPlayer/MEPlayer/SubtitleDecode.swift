@@ -62,7 +62,10 @@ class SubtitleDecode: DecodeProtocol {
             preSubtitleFrame.part.end = start
         }
         preSubtitleFrame = nil
-        let parts = text(subtitle: subtitle)
+        var parts = text(subtitle: subtitle)
+        if parts.count == 0{
+            parts.append(SubtitlePart(0, 0, attributedString: nil))
+        }
         for part in parts {
             part.start = start
             part.end = start + duration
