@@ -433,16 +433,22 @@ public extension Data {
             return []
         }
         let scanner = Scanner(string: string)
-        var entrys = [(String, URL, [String: String])]()
-        guard let symbol = scanner.scanUpToCharacters(from: .newlines), symbol.contains("#EXTM3U") else {
+        guard let symbol = scanner.scanUpToCharacters(from: .newlines) else {
             return []
         }
-        while !scanner.isAtEnd {
-            if let entry = scanner.parseM3U() {
-                entrys.append(entry)
+        if symbol.contains("#EXTM3U") {
+            var entrys = [(String, URL, [String: String])]()
+            while !scanner.isAtEnd {
+                if let entry = scanner.parseM3U() {
+                    entrys.append(entry)
+                }
             }
+            return entrys
         }
-        return entrys
+        if symbol.contains("[playlist]") {
+            return scanner.parsePls()
+        }
+        return []
     }
 
     func md5() -> String {
@@ -499,6 +505,60 @@ extension Scanner {
             return (title ?? url.lastPathComponent, url, extinf)
         }
         return nil
+    }
+
+    /*
+     [playlist]
+
+     File1=https://e20.yesstreaming.net:8279/
+     Length1=-1
+
+     File2=example2.mp3
+     Title2=Just some local audio that is 2mins long
+     Length2=120
+
+     File3=F:\Music\whatever.m4a
+     Title3=absolute path on Windows
+
+     File4=%UserProfile%\Music\short.ogg
+     Title4=example for an Environment variable
+     Length4=5
+
+     NumberOfEntries=4
+     Version=2
+     */
+    func parsePls() -> [(String, URL, [String: String])] {
+        var entrys = [(String, URL, [String: String])]()
+        var urlMap = [Int: URL]()
+        var titleMap = [Int: String]()
+        var durationMap = [Int: String]()
+        while !isAtEnd {
+            if scanString("File") != nil {
+                if let key = scanInt(), scanString("=") != nil, let value = scanUpToCharacters(from: .newlines), let url = URL(string: value) {
+                    urlMap[key] = url
+                }
+            } else if scanString("Title") != nil {
+                if let key = scanInt(), scanString("=") != nil, let value = scanUpToCharacters(from: .newlines) {
+                    titleMap[key] = value
+                }
+            } else if scanString("Length") != nil {
+                if let key = scanInt(), scanString("=") != nil, let value = scanUpToCharacters(from: .newlines) {
+                    durationMap[key] = value
+                }
+            } else if scanString("NumberOfEntries") != nil || scanString("Version") != nil {
+                break
+            }
+        }
+        return urlMap.keys.sorted().compactMap { key in
+            if let url = urlMap[key] {
+                let title = titleMap[key]
+                var extinf = [String: String]()
+                extinf["duration"] = durationMap[key]
+                return (title ?? url.lastPathComponent, url, extinf)
+            } else {
+                return nil
+            }
+        }
     }
 }
 
