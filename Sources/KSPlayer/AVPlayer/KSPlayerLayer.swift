@@ -71,6 +71,7 @@ open class KSPlayerLayer: NSObject {
     @Published
     public var loopCount: Int = 0
     @Published
+    @MainActor
     public var isPipActive = false {
         didSet {
             if #available(tvOS 14.0, *) {
@@ -474,10 +475,12 @@ extension KSPlayerLayer: MediaPlayerDelegate {
 
 @available(tvOS 14.0, *)
 extension KSPlayerLayer: AVPictureInPictureControllerDelegate {
+    @MainActor
     public func pictureInPictureControllerDidStopPictureInPicture(_: AVPictureInPictureController) {
         player.pipController?.stop(restoreUserInterface: false)
     }
 
+    @MainActor
     public func pictureInPictureController(_: AVPictureInPictureController, restoreUserInterfaceForPictureInPictureStopWithCompletionHandler _: @escaping (Bool) -> Void) {
         isPipActive = false
     }

@@ -17,7 +17,7 @@ public class KSPictureInPictureController: AVPictureInPictureController {
     #if canImport(UIKit)
     private weak var navigationController: UINavigationController?
     #endif
-
+    @MainActor
     func start(view: KSPlayerLayer) {
         startPictureInPicture()
         delegate = view
@@ -63,6 +63,7 @@ public class KSPictureInPictureController: AVPictureInPictureController {
         KSPictureInPictureController.pipController = self
     }
 
+    @MainActor
     func stop(restoreUserInterface: Bool) {
         stopPictureInPicture()
         delegate = nil
