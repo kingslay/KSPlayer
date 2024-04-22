@@ -373,9 +373,11 @@ public class VTTParse: KSParseProtocol {
             timeStrs = scanner.scanUpToCharacters(from: .newlines)
             _ = scanner.scanCharacters(from: .newlines)
         } while !(timeStrs?.contains("-->") ?? false) && !scanner.isAtEnd
-        guard let timeStrs else { return nil }
+        guard let timeStrs else {
+            return nil
+        }
         let timeArray: [String] = timeStrs.components(separatedBy: "-->")
-        if timeArray.count == 2{
+        if timeArray.count == 2 {
             let startString = timeArray[0]
             let endString = timeArray[1]
             _ = scanner.scanCharacters(from: .newlines)
