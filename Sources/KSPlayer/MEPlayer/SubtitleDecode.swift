@@ -59,7 +59,7 @@ class SubtitleDecode: DecodeProtocol {
             duration = packet.assetTrack.timebase.cmtime(for: packet.duration).seconds
         }
         if let preSubtitleFrame, preSubtitleFrame.part.end == preSubtitleFrame.part.start {
-            if start == preSubtitleFrame.part.end {
+            if preSubtitleFrame.part.end >= start {
                 return
             } else {
                 preSubtitleFrame.part.end = start
