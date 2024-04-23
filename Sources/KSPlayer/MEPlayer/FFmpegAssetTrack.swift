@@ -81,7 +81,9 @@ public class FFmpegAssetTrack: MediaPlayerTrack {
         if timebase.num <= 0 || timebase.den <= 0 {
             timebase = Timebase(num: 1, den: 1000)
         }
-        startTime = timebase.cmtime(for: stream.pointee.start_time)
+        if stream.pointee.start_time != Int64.min {
+            startTime = timebase.cmtime(for: stream.pointee.start_time)
+        }
         self.timebase = timebase
         avgFrameRate = Timebase(stream.pointee.avg_frame_rate)
         realFrameRate = Timebase(stream.pointee.r_frame_rate)
