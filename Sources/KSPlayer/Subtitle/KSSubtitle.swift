@@ -334,7 +334,7 @@ open class SubtitleModel: ObservableObject {
             newParts = subtile.search(for: currentTime)
             if newParts.isEmpty {
                 newParts = parts.filter { part in
-                    part.end <= part.start || part == currentTime
+                    part == currentTime
                 }
             }
         }

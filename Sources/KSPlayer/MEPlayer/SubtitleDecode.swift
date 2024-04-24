@@ -58,18 +58,18 @@ class SubtitleDecode: DecodeProtocol {
         if duration == 0, packet.duration != 0 {
             duration = packet.assetTrack.timebase.cmtime(for: packet.duration).seconds
         }
-        if let preSubtitleFrame, preSubtitleFrame.part.end == preSubtitleFrame.part.start {
-            if preSubtitleFrame.part.end >= start {
-                return
-            } else {
-                preSubtitleFrame.part.end = start
-            }
+        if let preSubtitleFrame, preSubtitleFrame.part.end == .infinity {
+            preSubtitleFrame.part.end = start
         }
         preSubtitleFrame = nil
         let parts = text(subtitle: subtitle)
         for part in parts {
             part.start = start
-            part.end = start + duration
+            if duration == 0 {
+                part.end = .infinity
+            } else {
+                part.end = start + duration
+            }
             let frame = SubtitleFrame(part: part, timebase: packet.assetTrack.timebase)
             frame.timestamp = timestamp
             preSubtitleFrame = frame
