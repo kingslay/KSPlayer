@@ -17,7 +17,7 @@ extension FFmpegAssetTrack: SubtitleInfo {
 extension FFmpegAssetTrack: KSSubtitleProtocol {
     public func search(for time: TimeInterval) -> [SubtitlePart] {
         subtitle?.outputRenderQueue.search { item -> Bool in
-            item.part < time || item.part == time
+            item.part == time
         }.map(\.part) ?? []
     }
 }
