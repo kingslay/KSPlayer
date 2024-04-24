@@ -641,6 +641,9 @@ private extension SubtitlePart {
                 if textPosition.verticalAlign == .top || textPosition.verticalAlign == .center {
                     Spacer()
                 }
+            } else {
+                // 需要加这个，不然图片无法清空。感觉是 swiftUI的bug。
+                Text("")
             }
         }
     }
