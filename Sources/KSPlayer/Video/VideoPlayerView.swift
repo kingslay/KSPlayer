@@ -238,9 +238,7 @@ open class VideoPlayerView: PlayerView {
         if srtControl.subtitle(currentTime: currentTime) {
             if let part = srtControl.parts.first {
                 subtitleBackView.image = part.image
-                if let text = part.text {
-                    subtitleLabel.attributedText = text
-                }
+                subtitleLabel.attributedText = part.text
                 subtitleBackView.isHidden = false
             } else {
                 subtitleBackView.image = nil

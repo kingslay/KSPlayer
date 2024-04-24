@@ -59,7 +59,8 @@ class SyncPlayerItemTrack<Frame: MEFrame>: PlayerItemTrackProtocol, CustomString
         } else if mediaType == .video {
             outputRenderQueue = CircularBuffer(initialCapacity: Int(frameCapacity), sorted: true, expanding: false)
         } else {
-            outputRenderQueue = CircularBuffer(initialCapacity: Int(frameCapacity))
+            // 有的图片字幕不按顺序来输出，所以要排序下。
+            outputRenderQueue = CircularBuffer(initialCapacity: Int(frameCapacity), sorted: true)
         }
     }
 
