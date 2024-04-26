@@ -121,9 +121,10 @@ extension KSVideoPlayer: UIViewRepresentable {
         public var playerLayer: KSPlayerLayer? {
             didSet {
                 oldValue?.delegate = nil
-                if oldValue?.player.pipController?.isPictureInPictureActive != true {
-                    oldValue?.pause()
+                if #available(tvOS 14.0, *), oldValue?.player.pipController?.isPictureInPictureActive == true {
+                    return
                 }
+                oldValue?.pause()
             }
         }
 
