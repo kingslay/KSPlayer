@@ -78,13 +78,9 @@ open class KSPlayerLayer: NSObject {
                 guard let pipController = player.pipController else {
                     return
                 }
-
+                pipController.delegate = self
                 if isPipActive {
-                    // 一定要async才不会pip之后就暂停播放
-                    DispatchQueue.main.async { [weak self] in
-                        guard let self else { return }
-                        pipController.start(view: self)
-                    }
+                    pipController.start(layer: self)
                 } else {
                     pipController.stop(restoreUserInterface: true)
                 }
@@ -349,6 +345,13 @@ open class KSPlayerLayer: NSObject {
             completion(false)
         }
     }
+
+    open func prepareToPlay() {
+        state = .preparing
+        startTime = CACurrentMediaTime()
+        bufferedCount = 0
+        player.prepareToPlay()
+    }
 }
 
 // MARK: - MediaPlayerDelegate
@@ -475,6 +478,15 @@ extension KSPlayerLayer: MediaPlayerDelegate {
 
 @available(tvOS 14.0, *)
 extension KSPlayerLayer: AVPictureInPictureControllerDelegate {
+    public func pictureInPictureControllerDidStartPictureInPicture(_: AVPictureInPictureController) {
+        if !KSOptions.isPipPopViewController {
+            #if canImport(UIKit)
+            // 直接退到后台
+            UIControl().sendAction(#selector(URLSessionTask.suspend), to: UIApplication.shared, for: nil)
+            #endif
+        }
+    }
+
     @MainActor
     public func pictureInPictureControllerDidStopPictureInPicture(_: AVPictureInPictureController) {
         player.pipController?.stop(restoreUserInterface: false)
@@ -489,13 +501,6 @@ extension KSPlayerLayer: AVPictureInPictureControllerDelegate {
 // MARK: - private functions
 
 extension KSPlayerLayer {
-    open func prepareToPlay() {
-        state = .preparing
-        startTime = CACurrentMediaTime()
-        bufferedCount = 0
-        player.prepareToPlay()
-    }
-
     private func updateNowPlayingInfo() {
         if MPNowPlayingInfoCenter.default().nowPlayingInfo == nil {
             MPNowPlayingInfoCenter.default().nowPlayingInfo = [MPMediaItemPropertyPlaybackDuration: player.duration]

@@ -10,29 +10,22 @@ import AVKit
 @available(tvOS 14.0, *)
 public class KSPictureInPictureController: AVPictureInPictureController {
     private static var pipController: KSPictureInPictureController?
-    private var originalViewController: UIViewController?
-    private var view: KSPlayerLayer?
+    private var layer: KSPlayerLayer?
+    private weak var originalViewController: UIViewController?
     private weak var viewController: UIViewController?
     private weak var presentingViewController: UIViewController?
     #if canImport(UIKit)
     private weak var navigationController: UINavigationController?
     #endif
     @MainActor
-    func start(view: KSPlayerLayer) {
+    func start(layer: KSPlayerLayer) {
         startPictureInPicture()
-        delegate = view
+        self.layer = layer
         guard KSOptions.isPipPopViewController else {
-            #if canImport(UIKit)
-            // 直接退到后台
-            runOnMainThread {
-                UIControl().sendAction(#selector(URLSessionTask.suspend), to: UIApplication.shared, for: nil)
-            }
-            #endif
             return
         }
-        self.view = view
         #if canImport(UIKit)
-        guard let viewController = view.player.view?.viewController else { return }
+        guard let viewController = layer.player.view?.viewController else { return }
         originalViewController = viewController
         if let navigationController = viewController.navigationController, navigationController.viewControllers.count == 1 {
             self.viewController = navigationController
@@ -41,24 +34,22 @@ public class KSPictureInPictureController: AVPictureInPictureController {
         }
         navigationController = self.viewController?.navigationController
         if let pre = KSPictureInPictureController.pipController {
-            view.player.isMuted = true
-            pre.view?.isPipActive = false
+            layer.player.isMuted = true
+            pre.layer?.isPipActive = false
         } else {
             if let navigationController {
                 navigationController.popViewController(animated: true)
-                #if os(iOS)
-                if navigationController.tabBarController != nil, navigationController.viewControllers.count == 1 {
-                    DispatchQueue.main.async { [weak self] in
-                        self?.navigationController?.setToolbarHidden(false, animated: true)
-                    }
-                }
-                #endif
+                navigationController.pushViewController(viewController, animated: true)
+//                #if os(iOS)
+//                if navigationController.tabBarController != nil, navigationController.viewControllers.count == 1 {
+//                    navigationController.setToolbarHidden(false, animated: true)
+//                }
+//                #endif
             } else {
                 presentingViewController = originalViewController?.presentingViewController
                 originalViewController?.dismiss(animated: true)
             }
         }
-        navigationController?.topViewController?.addChild(viewController)
         #endif
         KSPictureInPictureController.pipController = self
     }
@@ -66,8 +57,8 @@ public class KSPictureInPictureController: AVPictureInPictureController {
     @MainActor
     func stop(restoreUserInterface: Bool) {
         stopPictureInPicture()
-        delegate = nil
         guard KSOptions.isPipPopViewController else {
+            layer = nil
             return
         }
         KSPictureInPictureController.pipController = nil
@@ -94,15 +85,15 @@ public class KSPictureInPictureController: AVPictureInPictureController {
             }
 
             #endif
-            view?.player.isMuted = false
-            view?.play()
+            layer?.player.isMuted = false
+            layer?.play()
         }
 
         originalViewController = nil
-        view = nil
+        layer = nil
     }
 
     static func mute() {
-        pipController?.view?.player.isMuted = true
+        pipController?.layer?.player.isMuted = true
     }
 }
