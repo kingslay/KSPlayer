@@ -14,7 +14,6 @@ jobs:
       - uses: actions/checkout@main
         with:
           submodules: recursive
-          token: ${{ secrets.ACCESS_TOKEN }}
 #      https://github.com/actions/runner-images/blob/main/images/macos/macos-13-Readme.md#xcode
       - name: Set up Xcode
         run: |

@@ -302,7 +302,7 @@ public final class AudioFrame: MEFrame {
             case .pcmFormatInt16:
                 let capacity = dataSize / MemoryLayout<Int16>.size
                 data[i]?.withMemoryRebound(to: Int16.self, capacity: capacity) { src in
-                    var des = ContiguousArray<Float>.init(repeating: 0, count: Int(capacity))
+                    var des = ContiguousArray<Float>(repeating: 0, count: Int(capacity))
                     for j in 0 ..< capacity {
                         des[j] = max(-1.0, min(Float(src[j]) / 32767.0, 1.0))
                     }
@@ -311,7 +311,7 @@ public final class AudioFrame: MEFrame {
             case .pcmFormatInt32:
                 let capacity = dataSize / MemoryLayout<Int32>.size
                 data[i]?.withMemoryRebound(to: Int32.self, capacity: capacity) { src in
-                    var des = ContiguousArray<Float>.init(repeating: 0, count: Int(capacity))
+                    var des = ContiguousArray<Float>(repeating: 0, count: Int(capacity))
                     for j in 0 ..< capacity {
                         des[j] = max(-1.0, min(Float(src[j]) / 2_147_483_647.0, 1.0))
                     }
@@ -320,7 +320,7 @@ public final class AudioFrame: MEFrame {
             default:
                 let capacity = dataSize / MemoryLayout<Float>.size
                 data[i]?.withMemoryRebound(to: Float.self, capacity: capacity) { src in
-                    var des = ContiguousArray<Float>.init(repeating: 0, count: Int(capacity))
+                    var des = ContiguousArray<Float>(repeating: 0, count: Int(capacity))
                     for j in 0 ..< capacity {
                         des[j] = src[j]
                     }
