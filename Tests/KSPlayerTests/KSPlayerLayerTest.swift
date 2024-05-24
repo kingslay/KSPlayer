@@ -28,27 +28,24 @@ class KSPlayerLayerTest: XCTestCase {
         let options = KSOptions()
         let playerLayer = KSPlayerLayer(url: URL(fileURLWithPath: path), options: options)
         playerLayer.delegate = self
-        XCTAssertEqual(playerLayer.state, .prepareToPlay)
+        XCTAssertEqual(playerLayer.state, .preparing)
         readyToPlayExpectation = expectation(description: "openVideo")
         waitForExpectations(timeout: 2) { _ in
             XCTAssert(playerLayer.player.isReadyToPlay == true)
             XCTAssertEqual(playerLayer.state, .readyToPlay)
             playerLayer.play()
-            XCTAssert(options.isAutoPlay)
             playerLayer.pause()
-            XCTAssert(!options.isAutoPlay)
             XCTAssertEqual(playerLayer.state, .paused)
             let seekExpectation = self.expectation(description: "seek")
             playerLayer.seek(time: 2, autoPlay: true) { _ in
-                XCTAssert(options.isAutoPlay)
                 seekExpectation.fulfill()
             }
             XCTAssertEqual(playerLayer.state, .buffering)
             self.waitForExpectations(timeout: 1000) { _ in
                 playerLayer.finish(player: playerLayer.player, error: nil)
                 XCTAssertEqual(playerLayer.state, .playedToTheEnd)
-                playerLayer.resetPlayer()
-                XCTAssertEqual(playerLayer.state, .prepareToPlay)
+                playerLayer.stop()
+                XCTAssertEqual(playerLayer.state, .initialized)
             }
         }
     }

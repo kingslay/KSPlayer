@@ -178,10 +178,10 @@ private extension KSMEPlayer {
         guard let reason = notification.userInfo?[AVAudioSessionRouteChangeReasonKey] as? UInt else {
             return
         }
-        let routeChangeReason = AVAudioSession.RouteChangeReason(rawValue: reason)
-        guard routeChangeReason == .newDeviceAvailable || routeChangeReason == .oldDeviceUnavailable else {
-            return
-        }
+//        let routeChangeReason = AVAudioSession.RouteChangeReason(rawValue: reason)
+//        guard [AVAudioSession.RouteChangeReason.newDeviceAvailable, .oldDeviceUnavailable, .routeConfigurationChange].contains(routeChangeReason) else {
+//            return
+//        }
         for track in tracks(mediaType: .audio) {
             (track as? FFmpegAssetTrack)?.audioDescriptor?.updateAudioFormat()
         }

@@ -210,6 +210,11 @@ extension MetalPlayView {
                     size = KSOptions.sceneSize
                 }
                 checkFormatDescription(pixelBuffer: pixelBuffer)
+                #if !os(tvOS)
+                if #available(iOS 16, *) {
+                    metalView.metalLayer.edrMetadata = frame.edrMetadata
+                }
+                #endif
                 metalView.draw(pixelBuffer: pixelBuffer, display: options.display, size: size)
             }
             renderSource?.setVideo(time: cmtime, position: frame.position)
@@ -221,6 +226,7 @@ extension MetalPlayView {
             if formatDescription != nil {
                 displayView.removeFromSuperview()
                 displayView = AVSampleBufferDisplayView()
+                displayView.frame = frame
                 addSubview(displayView)
             }
             formatDescription = pixelBuffer.formatDescription

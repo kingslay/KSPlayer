@@ -17,7 +17,6 @@ public typealias UIViewRepresentable = NSViewRepresentable
 #endif
 
 public struct KSVideoPlayer {
-    @ObservedObject
     public private(set) var coordinator: Coordinator
     public let url: URL
     public let options: KSOptions
@@ -36,20 +35,7 @@ extension KSVideoPlayer: UIViewRepresentable {
     #if canImport(UIKit)
     public typealias UIViewType = UIView
     public func makeUIView(context: Context) -> UIViewType {
-        let view = context.coordinator.makeView(url: url, options: options)
-        let swipeDown = UISwipeGestureRecognizer(target: context.coordinator, action: #selector(Coordinator.swipeGestureAction(_:)))
-        swipeDown.direction = .down
-        view.addGestureRecognizer(swipeDown)
-        let swipeLeft = UISwipeGestureRecognizer(target: context.coordinator, action: #selector(Coordinator.swipeGestureAction(_:)))
-        swipeLeft.direction = .left
-        view.addGestureRecognizer(swipeLeft)
-        let swipeRight = UISwipeGestureRecognizer(target: context.coordinator, action: #selector(Coordinator.swipeGestureAction(_:)))
-        swipeRight.direction = .right
-        view.addGestureRecognizer(swipeRight)
-        let swipeUp = UISwipeGestureRecognizer(target: context.coordinator, action: #selector(Coordinator.swipeGestureAction(_:)))
-        swipeUp.direction = .up
-        view.addGestureRecognizer(swipeUp)
-        return view
+        context.coordinator.makeView(url: url, options: options)
     }
 
     public func updateUIView(_ view: UIViewType, context: Context) {
@@ -77,6 +63,7 @@ extension KSVideoPlayer: UIViewRepresentable {
     }
     #endif
 
+    @MainActor
     private func updateView(_: UIView, context: Context) {
         if context.coordinator.playerLayer?.url != url {
             _ = context.coordinator.makeView(url: url, options: options)
@@ -85,8 +72,10 @@ extension KSVideoPlayer: UIViewRepresentable {
 
     @MainActor
     public final class Coordinator: ObservableObject {
-        @Published
-        public var state = KSPlayerState.prepareToPlay
+        public var state: KSPlayerState {
+            playerLayer?.state ?? .initialized
+        }
+
         @Published
         public var isMuted: Bool = false {
             didSet {
@@ -120,28 +109,7 @@ extension KSVideoPlayer: UIViewRepresentable {
         public var isMaskShow = true {
             didSet {
                 if isMaskShow != oldValue {
-                    if isMaskShow {
-                        delayItem?.cancel()
-                        // 播放的时候才自动隐藏
-                        guard state == .bufferFinished else { return }
-                        delayItem = DispatchWorkItem { [weak self] in
-                            self?.isMaskShow = false
-                        }
-                        DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + KSOptions.animateDelayTimeInterval,
-                                                      execute: delayItem!)
-                    }
-                    #if os(macOS)
-                    isMaskShow ? NSCursor.unhide() : NSCursor.setHiddenUntilMouseMoves(true)
-                    if let window = playerLayer?.player.view?.window {
-                        if !window.styleMask.contains(.fullScreen) {
-                            window.standardWindowButton(.closeButton)?.superview?.superview?.isHidden = !isMaskShow
-                            //                    window.standardWindowButton(.zoomButton)?.isHidden = !isMaskShow
-                            //                    window.standardWindowButton(.closeButton)?.isHidden = !isMaskShow
-                            //                    window.standardWindowButton(.miniaturizeButton)?.isHidden = !isMaskShow
-                            //                    window.titleVisibility = isMaskShow ? .visible : .hidden
-                        }
-                    }
-                    #endif
+                    mask(show: isMaskShow)
                 }
             }
         }
@@ -156,7 +124,7 @@ extension KSVideoPlayer: UIViewRepresentable {
             }
         }
 
-        private var delayItem: DispatchWorkItem?
+        private var delayHide: DispatchWorkItem?
         public var onPlay: ((TimeInterval, TimeInterval) -> Void)?
         public var onFinish: ((KSPlayerLayer, Error?) -> Void)?
         public var onStateChanged: ((KSPlayerLayer, KSPlayerState) -> Void)?
@@ -185,8 +153,7 @@ extension KSVideoPlayer: UIViewRepresentable {
                 playerLayer.delegate = self
                 return playerLayer.player.view ?? UIView()
             } else {
-                let playerLayer = KSPlayerLayer(url: url, options: options)
-                playerLayer.delegate = self
+                let playerLayer = KSPlayerLayer(url: url, options: options, delegate: self)
                 self.playerLayer = playerLayer
                 return playerLayer.player.view ?? UIView()
             }
@@ -201,11 +168,9 @@ extension KSVideoPlayer: UIViewRepresentable {
             onSwipe = nil
             #endif
             playerLayer = nil
-            delayItem?.cancel()
-            delayItem = nil
-            DispatchQueue.main.async { [weak self] in
-                self?.subtitleModel.url = nil
-            }
+            delayHide?.cancel()
+            delayHide = nil
+            subtitleModel.selectedSubtitleInfo?.isEnabled = false
         }
 
         public func skip(interval: Int) {
@@ -217,12 +182,43 @@ extension KSVideoPlayer: UIViewRepresentable {
         public func seek(time: TimeInterval) {
             playerLayer?.seek(time: TimeInterval(time))
         }
+
+        @MainActor
+        public func mask(show: Bool, autoHide: Bool = true) {
+            isMaskShow = show
+            if show {
+                delayHide?.cancel()
+                // 播放的时候才自动隐藏
+                guard state == .bufferFinished else { return }
+                if autoHide {
+                    delayHide = DispatchWorkItem { [weak self] in
+                        guard let self else { return }
+                        if self.state == .bufferFinished {
+                            self.isMaskShow = false
+                        }
+                    }
+                    DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + KSOptions.animateDelayTimeInterval,
+                                                  execute: delayHide!)
+                }
+            }
+            #if os(macOS)
+            show ? NSCursor.unhide() : NSCursor.setHiddenUntilMouseMoves(true)
+            if let window = playerLayer?.player.view?.window {
+                if !window.styleMask.contains(.fullScreen) {
+                    window.standardWindowButton(.closeButton)?.superview?.superview?.isHidden = !show
+                    //                    window.standardWindowButton(.zoomButton)?.isHidden = !show
+                    //                    window.standardWindowButton(.closeButton)?.isHidden = !show
+                    //                    window.standardWindowButton(.miniaturizeButton)?.isHidden = !show
+                    //                    window.titleVisibility = show ? .visible : .hidden
+                }
+            }
+            #endif
+        }
     }
 }
 
 extension KSVideoPlayer.Coordinator: KSPlayerLayerDelegate {
     public func player(layer: KSPlayerLayer, state: KSPlayerState) {
-        self.state = state
         onStateChanged?(layer, state)
         if state == .readyToPlay {
             playbackRate = layer.player.playbackRate
@@ -240,6 +236,22 @@ extension KSVideoPlayer.Coordinator: KSPlayerLayerDelegate {
             isMaskShow = false
         } else {
             isMaskShow = true
+            #if canImport(UIKit)
+            if state == .preparing, let view = layer.player.view {
+                let swipeDown = UISwipeGestureRecognizer(target: self, action: #selector(swipeGestureAction(_:)))
+                swipeDown.direction = .down
+                view.addGestureRecognizer(swipeDown)
+                let swipeLeft = UISwipeGestureRecognizer(target: self, action: #selector(swipeGestureAction(_:)))
+                swipeLeft.direction = .left
+                view.addGestureRecognizer(swipeLeft)
+                let swipeRight = UISwipeGestureRecognizer(target: self, action: #selector(swipeGestureAction(_:)))
+                swipeRight.direction = .right
+                view.addGestureRecognizer(swipeRight)
+                let swipeUp = UISwipeGestureRecognizer(target: self, action: #selector(swipeGestureAction(_:)))
+                swipeUp.direction = .up
+                view.addGestureRecognizer(swipeUp)
+            }
+            #endif
         }
     }
 
@@ -274,6 +286,7 @@ extension KSVideoPlayer: Equatable {
     }
 }
 
+@MainActor
 public extension KSVideoPlayer {
     func onBufferChanged(_ handler: @escaping (Int, TimeInterval) -> Void) -> Self {
         coordinator.onBufferChanged = handler

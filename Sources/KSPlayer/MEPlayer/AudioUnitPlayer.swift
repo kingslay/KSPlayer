@@ -41,7 +41,7 @@ public final class AudioUnitPlayer: AudioOutput {
     public var playbackRate: Float = 1
     public var volume: Float = 1
     public var isMuted: Bool = false
-    public var latency = Float64(0)
+    private var outputLatency = TimeInterval(0)
     public init() {
         var descriptionForOutput = AudioComponentDescription()
         descriptionForOutput.componentType = kAudioUnitType_Output
@@ -50,6 +50,7 @@ public final class AudioUnitPlayer: AudioOutput {
         descriptionForOutput.componentSubType = kAudioUnitSubType_HALOutput
         #else
         descriptionForOutput.componentSubType = kAudioUnitSubType_RemoteIO
+        outputLatency = AVAudioSession.sharedInstance().outputLatency
         #endif
         let nodeForOutput = AudioComponentFindNext(nil, &descriptionForOutput)
         AudioComponentInstanceNew(nodeForOutput!, &audioUnitForOutput)
@@ -91,16 +92,13 @@ public final class AudioUnitPlayer: AudioOutput {
                              UInt32(MemoryLayout<AURenderCallbackStruct>.size))
         addRenderNotify(audioUnit: audioUnitForOutput)
         AudioUnitInitialize(audioUnitForOutput)
-        var size = UInt32(MemoryLayout<Float64>.size)
-        AudioUnitGetProperty(audioUnitForOutput,
-                             kAudioUnitProperty_Latency,
-                             kAudioUnitScope_Global, 0,
-                             &latency,
-                             &size)
     }
 
     public func flush() {
         currentRender = nil
+        #if !os(macOS)
+        outputLatency = AVAudioSession.sharedInstance().outputLatency
+        #endif
     }
 
     deinit {
@@ -189,9 +187,9 @@ extension AudioUnitPlayer {
             let currentPreparePosition = currentRender.timestamp + currentRender.duration * Int64(currentRenderReadOffset) / Int64(currentRender.numberOfSamples)
             if currentPreparePosition > 0 {
                 var time = currentRender.timebase.cmtime(for: currentPreparePosition)
-                #if !os(macOS)
-                time = time - CMTime(seconds: AVAudioSession.sharedInstance().outputLatency, preferredTimescale: time.timescale)
-                #endif
+                if outputLatency != 0 {
+                    time = time - CMTime(seconds: outputLatency, preferredTimescale: time.timescale)
+                }
                 renderSource?.setAudio(time: time, position: currentRender.position)
             }
         }

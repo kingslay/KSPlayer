@@ -21,6 +21,7 @@ public final class AudioGraphPlayer: AudioOutput, AudioDynamicsProcessor {
     #if os(macOS)
     private var volumeBeforeMute: Float = 0.0
     #endif
+    private var outputLatency = TimeInterval(0)
     public weak var renderSource: OutputRenderSourceDelegate?
     private var currentRender: AudioFrame? {
         didSet {
@@ -146,6 +147,9 @@ public final class AudioGraphPlayer: AudioOutput, AudioDynamicsProcessor {
                              kAudioUnitScope_Output, 0,
                              &value,
                              UInt32(MemoryLayout<UInt32>.size))
+        #if !os(macOS)
+        outputLatency = AVAudioSession.sharedInstance().outputLatency
+        #endif
     }
 
     public func prepare(audioFormat: AVAudioFormat) {
@@ -199,6 +203,9 @@ public final class AudioGraphPlayer: AudioOutput, AudioDynamicsProcessor {
 
     public func flush() {
         currentRender = nil
+        #if !os(macOS)
+        outputLatency = AVAudioSession.sharedInstance().outputLatency
+        #endif
     }
 
     deinit {
@@ -286,9 +293,9 @@ extension AudioGraphPlayer {
             let currentPreparePosition = currentRender.timestamp + currentRender.duration * Int64(currentRenderReadOffset) / Int64(currentRender.numberOfSamples)
             if currentPreparePosition > 0 {
                 var time = currentRender.timebase.cmtime(for: currentPreparePosition)
-                #if !os(macOS)
-                time = time - CMTime(seconds: AVAudioSession.sharedInstance().outputLatency, preferredTimescale: time.timescale)
-                #endif
+                if outputLatency != 0 {
+                    time = time - CMTime(seconds: outputLatency, preferredTimescale: time.timescale)
+                }
                 renderSource?.setAudio(time: time, position: currentRender.position)
             }
         }

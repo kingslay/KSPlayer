@@ -287,6 +287,7 @@ open class SubtitleModel: ObservableObject {
     public static var textBold = false
     public static var textItalic = false
     public static var textPosition = TextPosition()
+    public static var audioRecognizes = [any AudioRecognize]()
     private var subtitleDataSouces: [SubtitleDataSouce] = KSOptions.subtitleDataSouces
     @Published
     public private(set) var subtitleInfos = [any SubtitleInfo]()
@@ -297,6 +298,9 @@ open class SubtitleModel: ObservableObject {
         didSet {
             subtitleInfos.removeAll()
             searchSubtitle(query: nil, languages: [])
+            if url != nil {
+                subtitleInfos.append(contentsOf: SubtitleModel.audioRecognizes)
+            }
             for datasouce in subtitleDataSouces {
                 addSubtitle(dataSouce: datasouce)
             }
