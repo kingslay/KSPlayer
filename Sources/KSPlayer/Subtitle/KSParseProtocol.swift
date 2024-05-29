@@ -20,29 +20,7 @@ public extension KSOptions {
     static var subtitleParses: [KSParseProtocol] = [AssParse(), VTTParse(), SrtParse()]
 }
 
-public extension String {
-    /// 把字符串时间转为对应的秒
-    /// - Parameter fromStr: srt 00:02:52,184 ass 0:30:11.56 vtt 00:00.430
-    /// - Returns: 秒
-    func parseDuration() -> TimeInterval {
-        let scanner = Scanner(string: self)
-
-        var hour: Double = 0
-        if split(separator: ":").count > 2 {
-            hour = scanner.scanDouble() ?? 0.0
-            _ = scanner.scanString(":")
-        }
-
-        let min = scanner.scanDouble() ?? 0.0
-        _ = scanner.scanString(":")
-        let sec = scanner.scanDouble() ?? 0.0
-        if scanner.scanString(",") == nil {
-            _ = scanner.scanString(".")
-        }
-        let millisecond = scanner.scanDouble() ?? 0.0
-        return (hour * 3600.0) + (min * 60.0) + sec + (millisecond / 1000.0)
-    }
-}
+public extension String {}
 
 public extension KSParseProtocol {
     func parse(scanner: Scanner) -> [SubtitlePart] {
@@ -53,7 +31,6 @@ public extension KSParseProtocol {
                 groups.append(group)
             }
         }
-        // 归并排序才是稳定排序。系统默认是快排
         groups = groups.mergeSortBottomUp { $0 < $1 }
         return groups
     }
@@ -373,9 +350,11 @@ public class VTTParse: KSParseProtocol {
             timeStrs = scanner.scanUpToCharacters(from: .newlines)
             _ = scanner.scanCharacters(from: .newlines)
         } while !(timeStrs?.contains("-->") ?? false) && !scanner.isAtEnd
-        guard let timeStrs else { return nil }
+        guard let timeStrs else {
+            return nil
+        }
         let timeArray: [String] = timeStrs.components(separatedBy: "-->")
-        if timeArray.count == 2{
+        if timeArray.count == 2 {
             let startString = timeArray[0]
             let endString = timeArray[1]
             _ = scanner.scanCharacters(from: .newlines)
@@ -439,52 +418,5 @@ public class SrtParse: KSParseProtocol {
             return SubtitlePart(startString.parseDuration(), endString.parseDuration(), attributedString: text.build(textPosition: &textPosition))
         }
         return nil
-    }
-}
-
-private extension Array {
-    func mergeSortBottomUp(isOrderedBefore: (Element, Element) -> Bool) -> [Element] {
-        let n = count
-        var z = [self, self] // the two working arrays
-        var d = 0 // z[d] is used for reading, z[1 - d] for writing
-        var width = 1
-        while width < n {
-            var i = 0
-            while i < n {
-                var j = i
-                var l = i
-                var r = i + width
-
-                let lmax = Swift.min(l + width, n)
-                let rmax = Swift.min(r + width, n)
-
-                while l < lmax, r < rmax {
-                    if isOrderedBefore(z[d][l], z[d][r]) {
-                        z[1 - d][j] = z[d][l]
-                        l += 1
-                    } else {
-                        z[1 - d][j] = z[d][r]
-                        r += 1
-                    }
-                    j += 1
-                }
-                while l < lmax {
-                    z[1 - d][j] = z[d][l]
-                    j += 1
-                    l += 1
-                }
-                while r < rmax {
-                    z[1 - d][j] = z[d][r]
-                    j += 1
-                    r += 1
-                }
-
-                i += width * 2
-            }
-
-            width *= 2 // in each step, the subarray to merge becomes larger
-            d = 1 - d // swap active array
-        }
-        return z[d]
     }
 }

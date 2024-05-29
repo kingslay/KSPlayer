@@ -67,6 +67,7 @@ public protocol FrameOutput: AnyObject {
     var renderSource: OutputRenderSourceDelegate? { get set }
     func pause()
     func flush()
+    func play()
 }
 
 protocol MEFrame: ObjectQueueItem {
@@ -81,10 +82,10 @@ public extension KSOptions {
     static var enableSensor = true
     static var stackSize = 65536
     static var isClearVideoWhereReplace = true
-    /// true: AVSampleBufferAudioRenderer false: AVAudioEngine
     static var audioPlayerType: AudioOutput.Type = AudioEnginePlayer.self
     static var videoPlayerType: (VideoOutput & UIView).Type = MetalPlayView.self
     static var yadifMode = 1
+    static var deInterlaceAddIdet = false
     static func colorSpace(ycbcrMatrix: CFString?, transferFunction: CFString?) -> CGColorSpace? {
         switch ycbcrMatrix {
         case kCVImageBufferYCbCrMatrix_ITU_R_709_2:
@@ -242,15 +243,15 @@ final class SubtitleFrame: MEFrame {
 }
 
 public final class AudioFrame: MEFrame {
-    let dataSize: Int
-    let audioFormat: AVAudioFormat
-    public var timebase = Timebase.defaultValue
+    public let dataSize: Int
+    public let audioFormat: AVAudioFormat
+    public internal(set) var timebase = Timebase.defaultValue
     public var timestamp: Int64 = 0
     public var duration: Int64 = 0
     public var position: Int64 = 0
     public var size: Int32 = 0
-    var numberOfSamples: UInt32 = 0
-    var data: [UnsafeMutablePointer<UInt8>?]
+    public var data: [UnsafeMutablePointer<UInt8>?]
+    public var numberOfSamples: UInt32 = 0
     public init(dataSize: Int, audioFormat: AVAudioFormat) {
         self.dataSize = dataSize
         self.audioFormat = audioFormat
@@ -294,23 +295,61 @@ public final class AudioFrame: MEFrame {
         data.removeAll()
     }
 
-    func toPCMBuffer() -> AVAudioPCMBuffer? {
+    public func toFloat() -> [ContiguousArray<Float>] {
+        var array = [ContiguousArray<Float>]()
+        for i in 0 ..< data.count {
+            switch audioFormat.commonFormat {
+            case .pcmFormatInt16:
+                let capacity = dataSize / MemoryLayout<Int16>.size
+                data[i]?.withMemoryRebound(to: Int16.self, capacity: capacity) { src in
+                    var des = ContiguousArray<Float>(repeating: 0, count: Int(capacity))
+                    for j in 0 ..< capacity {
+                        des[j] = max(-1.0, min(Float(src[j]) / 32767.0, 1.0))
+                    }
+                    array.append(des)
+                }
+            case .pcmFormatInt32:
+                let capacity = dataSize / MemoryLayout<Int32>.size
+                data[i]?.withMemoryRebound(to: Int32.self, capacity: capacity) { src in
+                    var des = ContiguousArray<Float>(repeating: 0, count: Int(capacity))
+                    for j in 0 ..< capacity {
+                        des[j] = max(-1.0, min(Float(src[j]) / 2_147_483_647.0, 1.0))
+                    }
+                    array.append(des)
+                }
+            default:
+                let capacity = dataSize / MemoryLayout<Float>.size
+                data[i]?.withMemoryRebound(to: Float.self, capacity: capacity) { src in
+                    var des = ContiguousArray<Float>(repeating: 0, count: Int(capacity))
+                    for j in 0 ..< capacity {
+                        des[j] = src[j]
+                    }
+                    array.append(ContiguousArray<Float>(des))
+                }
+            }
+        }
+        return array
+    }
+
+    public func toPCMBuffer() -> AVAudioPCMBuffer? {
         guard let pcmBuffer = AVAudioPCMBuffer(pcmFormat: audioFormat, frameCapacity: numberOfSamples) else {
             return nil
         }
         pcmBuffer.frameLength = pcmBuffer.frameCapacity
-        let capacity = Int(pcmBuffer.frameCapacity)
         for i in 0 ..< min(Int(pcmBuffer.format.channelCount), data.count) {
             switch audioFormat.commonFormat {
             case .pcmFormatInt16:
+                let capacity = dataSize / MemoryLayout<Int16>.size
                 data[i]?.withMemoryRebound(to: Int16.self, capacity: capacity) { src in
                     pcmBuffer.int16ChannelData?[i].update(from: src, count: capacity)
                 }
             case .pcmFormatInt32:
+                let capacity = dataSize / MemoryLayout<Int32>.size
                 data[i]?.withMemoryRebound(to: Int32.self, capacity: capacity) { src in
                     pcmBuffer.int32ChannelData?[i].update(from: src, count: capacity)
                 }
             default:
+                let capacity = dataSize / MemoryLayout<Float>.size
                 data[i]?.withMemoryRebound(to: Float.self, capacity: capacity) { src in
                     pcmBuffer.floatChannelData?[i].update(from: src, count: capacity)
                 }
@@ -319,7 +358,7 @@ public final class AudioFrame: MEFrame {
         return pcmBuffer
     }
 
-    func toCMSampleBuffer() -> CMSampleBuffer? {
+    public func toCMSampleBuffer() -> CMSampleBuffer? {
         var outBlockListBuffer: CMBlockBuffer?
         CMBlockBufferCreateEmpty(allocator: kCFAllocatorDefault, capacity: UInt32(data.count), flags: 0, blockBufferOut: &outBlockListBuffer)
         guard let outBlockListBuffer else {
@@ -388,6 +427,7 @@ public final class VideoVTBFrame: MEFrame {
     public var size: Int32 = 0
     public let fps: Float
     public let isDovi: Bool
+    public var edrMetaData: EDRMetaData? = nil
     var corePixelBuffer: PixelBufferProtocol?
     init(fps: Float, isDovi: Bool) {
         self.fps = fps
@@ -395,20 +435,60 @@ public final class VideoVTBFrame: MEFrame {
     }
 }
 
-extension Array {
-    init(tuple: (Element, Element, Element, Element, Element, Element, Element, Element)) {
-        self.init([tuple.0, tuple.1, tuple.2, tuple.3, tuple.4, tuple.5, tuple.6, tuple.7])
+extension VideoVTBFrame {
+    #if !os(tvOS)
+    @available(iOS 16, *)
+    var edrMetadata: CAEDRMetadata? {
+        if var contentData = edrMetaData?.contentData, var displayData = edrMetaData?.displayData {
+            let data = Data(bytes: &displayData, count: MemoryLayout<MasteringDisplayMetadata>.stride)
+            let data2 = Data(bytes: &contentData, count: MemoryLayout<ContentLightMetadata>.stride)
+            return CAEDRMetadata.hdr10(displayInfo: data, contentInfo: data2, opticalOutputScale: 10000)
+        }
+        if var ambientViewingEnvironment = edrMetaData?.ambientViewingEnvironment {
+            let data = Data(bytes: &ambientViewingEnvironment, count: MemoryLayout<AmbientViewingEnvironment>.stride)
+            if #available(macOS 14.0, iOS 17.0, *) {
+                return CAEDRMetadata.hlg(ambientViewingEnvironment: data)
+            } else {
+                return CAEDRMetadata.hlg
+            }
+        }
+        if corePixelBuffer?.transferFunction == kCVImageBufferTransferFunction_SMPTE_ST_2084_PQ {
+            return CAEDRMetadata.hdr10(minLuminance: 0.1, maxLuminance: 1000, opticalOutputScale: 10000)
+        } else if corePixelBuffer?.transferFunction == kCVImageBufferTransferFunction_ITU_R_2100_HLG {
+            return CAEDRMetadata.hlg
+        }
+        return nil
     }
+    #endif
+}
 
-    init(tuple: (Element, Element, Element, Element)) {
-        self.init([tuple.0, tuple.1, tuple.2, tuple.3])
-    }
+public struct EDRMetaData {
+    var displayData: MasteringDisplayMetadata?
+    var contentData: ContentLightMetadata?
+    var ambientViewingEnvironment: AmbientViewingEnvironment?
+}
 
-    var tuple8: (Element, Element, Element, Element, Element, Element, Element, Element) {
-        (self[0], self[1], self[2], self[3], self[4], self[5], self[6], self[7])
-    }
+public struct MasteringDisplayMetadata {
+    let display_primaries_r_x: UInt16
+    let display_primaries_r_y: UInt16
+    let display_primaries_g_x: UInt16
+    let display_primaries_g_y: UInt16
+    let display_primaries_b_x: UInt16
+    let display_primaries_b_y: UInt16
+    let white_point_x: UInt16
+    let white_point_y: UInt16
+    let minLuminance: UInt32
+    let maxLuminance: UInt32
+}
 
-    var tuple4: (Element, Element, Element, Element) {
-        (self[0], self[1], self[2], self[3])
-    }
+public struct ContentLightMetadata {
+    let MaxCLL: UInt16
+    let MaxFALL: UInt16
+}
+
+// https://developer.apple.com/documentation/technotes/tn3145-hdr-video-metadata
+public struct AmbientViewingEnvironment {
+    let ambient_illuminance: UInt32
+    let ambient_light_x: UInt16
+    let ambient_light_y: UInt16
 }

@@ -18,7 +18,6 @@ class SubtitleDecode: DecodeProtocol {
     private let scale = VideoSwresample(dstFormat: AV_PIX_FMT_ARGB, isDovi: false)
     private var subtitle = AVSubtitle()
     private var startTime = TimeInterval(0)
-    private var preSubtitleFrame: SubtitleFrame?
     private let assParse = AssParse()
     required init(assetTrack: FFmpegAssetTrack, options: KSOptions) {
         startTime = assetTrack.startTime.seconds
@@ -33,9 +32,7 @@ class SubtitleDecode: DecodeProtocol {
         }
     }
 
-    func decode() {
-        preSubtitleFrame = nil
-    }
+    func decode() {}
 
     func decodeFrame(from packet: Packet, completionHandler: @escaping (Result<MEFrame, Error>) -> Void) {
         guard let codecContext else {
@@ -58,25 +55,27 @@ class SubtitleDecode: DecodeProtocol {
         if duration == 0, packet.duration != 0 {
             duration = packet.assetTrack.timebase.cmtime(for: packet.duration).seconds
         }
-        if let preSubtitleFrame, preSubtitleFrame.part.end == preSubtitleFrame.part.start {
-            preSubtitleFrame.part.end = start
+        var parts = text(subtitle: subtitle)
+        /// 不用preSubtitleFrame来进行更新end。而是插入一个空的字幕来更新字幕。
+        /// 因为字幕有可能不按顺序解码。这样就会导致end比start小，然后这个字幕就不会被清空了。
+        if parts.isEmpty {
+            parts.append(SubtitlePart(0, 0, attributedString: nil))
         }
-        preSubtitleFrame = nil
-        let parts = text(subtitle: subtitle)
         for part in parts {
             part.start = start
-            part.end = start + duration
+            if duration == 0 {
+                part.end = .infinity
+            } else {
+                part.end = start + duration
+            }
             let frame = SubtitleFrame(part: part, timebase: packet.assetTrack.timebase)
             frame.timestamp = timestamp
-            preSubtitleFrame = frame
             completionHandler(.success(frame))
         }
         avsubtitle_free(&subtitle)
     }
 
-    func doFlushCodec() {
-        preSubtitleFrame = nil
-    }
+    func doFlushCodec() {}
 
     func shutdown() {
         scale.shutdown()

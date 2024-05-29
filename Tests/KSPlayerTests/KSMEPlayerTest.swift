@@ -7,7 +7,6 @@ class KSMEPlayerTest: XCTestCase {
         if let path = Bundle(for: type(of: self)).path(forResource: "h264", ofType: "mp4") {
             let options = KSOptions()
             let player = KSMEPlayer(url: URL(fileURLWithPath: path), options: options)
-            options.isAutoPlay = false
             player.delegate = self
             XCTAssertEqual(player.isPlaying, false)
             player.play()
@@ -22,7 +21,6 @@ class KSMEPlayerTest: XCTestCase {
         if let path = Bundle(for: type(of: self)).path(forResource: "h264", ofType: "mp4") {
             let options = KSOptions()
             let player = KSMEPlayer(url: URL(fileURLWithPath: path), options: options)
-            options.isAutoPlay = true
             player.delegate = self
             XCTAssertEqual(player.isPlaying, false)
             player.play()

@@ -94,36 +94,7 @@ class CustomVideoPlayerView: VideoPlayerView {
     }
 }
 
-class MEOptions: KSOptions {
-    override func process(assetTrack: some MediaPlayerTrack) {
-        if assetTrack.mediaType == .video {
-            if [FFmpegFieldOrder.bb, .bt, .tt, .tb].contains(assetTrack.fieldOrder) {
-                videoFilters.append("yadif_videotoolbox=mode=0:parity=-1:deint=1")
-                asynchronousDecompression = false
-            }
-            #if os(tvOS) || os(xrOS)
-            runOnMainThread { [weak self] in
-                guard let self else {
-                    return
-                }
-                if let displayManager = UIApplication.shared.windows.first?.avDisplayManager,
-                   displayManager.isDisplayCriteriaMatchingEnabled
-                {
-                    let refreshRate = assetTrack.nominalFrameRate
-                    if KSOptions.displayCriteriaFormatDescriptionEnabled, let formatDescription = assetTrack.formatDescription, #available(tvOS 17.0, *) {
-                        displayManager.preferredDisplayCriteria = AVDisplayCriteria(refreshRate: refreshRate, formatDescription: formatDescription)
-                    } else {
-                        if let dynamicRange = assetTrack.dynamicRange {
-                            let videoDynamicRange = self.availableDynamicRange(dynamicRange) ?? dynamicRange
-                            displayManager.preferredDisplayCriteria = AVDisplayCriteria(refreshRate: refreshRate, videoDynamicRange: videoDynamicRange.rawValue)
-                        }
-                    }
-                }
-            }
-            #endif
-        }
-    }
-}
+class MEOptions: KSOptions {}
 
 var testObjects: [KSPlayerResource] = {
     var objects = [KSPlayerResource]()

@@ -24,7 +24,8 @@ import AppKit
  - error:          error with playing
  */
 public enum KSPlayerState: CustomStringConvertible {
-    case prepareToPlay
+    case initialized
+    case preparing
     case readyToPlay
     case buffering
     case bufferFinished
@@ -33,8 +34,10 @@ public enum KSPlayerState: CustomStringConvertible {
     case error
     public var description: String {
         switch self {
-        case .prepareToPlay:
-            return "prepareToPlay"
+        case .initialized:
+            return "initialized"
+        case .preparing:
+            return "preparing"
         case .readyToPlay:
             return "readyToPlay"
         case .buffering:
@@ -93,6 +96,7 @@ open class KSPlayerLayer: NSObject {
     public var player: MediaPlayerProtocol {
         didSet {
             KSLog("player is \(player)")
+            state = .initialized
             runOnMainThread { [weak self] in
                 guard let self else { return }
                 if let oldView = oldValue.view, let superview = oldView.superview, let view = player.view {
@@ -116,7 +120,9 @@ open class KSPlayerLayer: NSObject {
             player.playbackVolume = oldValue.playbackVolume
             player.delegate = self
             player.contentMode = .scaleAspectFit
-            prepareToPlay()
+            if isAutoPlay {
+                prepareToPlay()
+            }
         }
     }
 
@@ -136,16 +142,18 @@ open class KSPlayerLayer: NSObject {
             }
             if type(of: player) == firstPlayerType {
                 if url == oldValue {
-                    if options.isAutoPlay {
+                    if isAutoPlay {
                         play()
                     }
                 } else {
-                    resetPlayer()
+                    stop()
                     player.replace(url: url, options: options)
-                    prepareToPlay()
+                    if isAutoPlay {
+                        prepareToPlay()
+                    }
                 }
             } else {
-                resetPlayer()
+                stop()
                 player = firstPlayerType.init(url: url, options: options)
             }
         }
@@ -153,7 +161,7 @@ open class KSPlayerLayer: NSObject {
 
     /// 播发器的几种状态
 
-    public private(set) var state = KSPlayerState.prepareToPlay {
+    public private(set) var state = KSPlayerState.initialized {
         willSet {
             if state != newValue {
                 runOnMainThread { [weak self] in
@@ -185,7 +193,7 @@ open class KSPlayerLayer: NSObject {
     private var bufferedCount = 0
     private var shouldSeekTo: TimeInterval = 0
     private var startTime: TimeInterval = 0
-    public init(url: URL, options: KSOptions, delegate: KSPlayerLayerDelegate? = nil) {
+    public init(url: URL, isAutoPlay: Bool = KSOptions.isAutoPlay, options: KSOptions, delegate: KSPlayerLayerDelegate? = nil) {
         self.url = url
         self.options = options
         self.delegate = delegate
@@ -199,7 +207,7 @@ open class KSPlayerLayer: NSObject {
             firstPlayerType = KSOptions.firstPlayerType
         }
         player = firstPlayerType.init(url: url, options: options)
-        isAutoPlay = options.isAutoPlay
+        self.isAutoPlay = isAutoPlay
         super.init()
         player.playbackRate = options.startPlayRate
         if options.registerRemoteControll {
@@ -207,7 +215,9 @@ open class KSPlayerLayer: NSObject {
         }
         player.delegate = self
         player.contentMode = .scaleAspectFit
-        prepareToPlay()
+        if isAutoPlay {
+            prepareToPlay()
+        }
         #if canImport(UIKit)
         runOnMainThread { [weak self] in
             guard let self else { return }
@@ -252,7 +262,6 @@ open class KSPlayerLayer: NSObject {
     public func set(url: URL, options: KSOptions) {
         self.options = options
         runOnMainThread {
-            self.isAutoPlay = options.isAutoPlay
             self.url = url
         }
     }
@@ -263,7 +272,6 @@ open class KSPlayerLayer: NSObject {
         self.urls.append(contentsOf: urls)
         if let first = urls.first {
             runOnMainThread {
-                self.isAutoPlay = options.isAutoPlay
                 self.url = first
             }
         }
@@ -274,8 +282,8 @@ open class KSPlayerLayer: NSObject {
             UIApplication.shared.isIdleTimerDisabled = true
         }
         isAutoPlay = true
-        if state == .error {
-            player.prepareToPlay()
+        if state == .error || state == .initialized {
+            prepareToPlay()
         }
         if player.isReadyToPlay {
             if state == .playedToTheEnd {
@@ -308,9 +316,10 @@ open class KSPlayerLayer: NSObject {
         }
     }
 
-    public func resetPlayer() {
-        KSLog("resetPlayer")
-        state = .prepareToPlay
+    public func stop() {
+        KSLog("stop Player")
+        state = .initialized
+        player.shutdown()
         bufferedCount = 0
         shouldSeekTo = 0
         player.playbackRate = 1
@@ -345,6 +354,7 @@ open class KSPlayerLayer: NSObject {
 
 extension KSPlayerLayer: MediaPlayerDelegate {
     public func readyToPlay(player: some MediaPlayerProtocol) {
+        state = .readyToPlay
         #if os(macOS)
         runOnMainThread { [weak self] in
             guard let self else { return }
@@ -362,15 +372,14 @@ extension KSPlayerLayer: MediaPlayerDelegate {
             }
         }
         #endif
-        updateNowPlayingInfo()
-        state = .readyToPlay
-        #if os(iOS)
+        #if !os(macOS) && !os(tvOS)
         if #available(iOS 14.2, *) {
             if options.canStartPictureInPictureAutomaticallyFromInline {
                 player.pipController?.canStartPictureInPictureAutomaticallyFromInline = true
             }
         }
         #endif
+        updateNowPlayingInfo()
         if isAutoPlay {
             if shouldSeekTo > 0 {
                 seek(time: shouldSeekTo, autoPlay: true) { [weak self] _ in
@@ -477,7 +486,8 @@ extension KSPlayerLayer: AVPictureInPictureControllerDelegate {
 // MARK: - private functions
 
 extension KSPlayerLayer {
-    private func prepareToPlay() {
+    open func prepareToPlay() {
+        state = .preparing
         startTime = CACurrentMediaTime()
         bufferedCount = 0
         player.prepareToPlay()

@@ -26,8 +26,6 @@ open class KSOptions {
     public var isAccurateSeek = KSOptions.isAccurateSeek
     /// Applies to short videos only
     public var isLoopPlay = KSOptions.isLoopPlay
-    /// 是否自动播放，默认false
-    public var isAutoPlay = KSOptions.isAutoPlay
     /// seek完是否自动播放
     public var isSeekedAutoPlay = KSOptions.isSeekedAutoPlay
     /*
@@ -38,6 +36,7 @@ open class KSOptions {
      */
     public var seekFlags = Int32(1)
     // ffmpeg only cache http
+    // 这个开关不能用，因为ff_tempfile: Cannot open temporary file
     public var cache = false
     //  record stream
     public var outputURL: URL?
@@ -71,8 +70,6 @@ open class KSOptions {
     // audio
     public var audioFilters = [String]()
     public var syncDecodeAudio = false
-    // Locale(identifier: "en-US") Locale(identifier: "zh-CN")
-    public var audioLocale: Locale?
     // sutile
     public var autoSelectEmbedSubtitle = true
     public var isSeekImageSubtitle = false
@@ -117,8 +114,8 @@ open class KSOptions {
         formatContextOptions["reconnect"] = 1
         formatContextOptions["reconnect_streamed"] = 1
         // 这个是用来开启http的链接复用（keep-alive）。vlc默认是打开的，所以这边也默认打开。
-        //开启这个，百度网盘的视频链接无法播放
-        //formatContextOptions["multiple_requests"] = 1
+        // 开启这个，百度网盘的视频链接无法播放
+        // formatContextOptions["multiple_requests"] = 1
         // 下面是用来处理秒开的参数，有需要的自己打开。默认不开，不然在播放某些特殊的ts直播流会频繁卡顿。
 //        formatContextOptions["auto_convert"] = 0
 //        formatContextOptions["fps_probe_size"] = 3
@@ -329,7 +326,9 @@ open class KSOptions {
 //                        }
 //                    }
 //                }
-                videoFilters.append("idet")
+                if KSOptions.deInterlaceAddIdet {
+                    videoFilters.append("idet")
+                }
                 videoFilters.append("\(yadif)=mode=\(yadifMode):parity=-1:deint=1")
                 if yadifMode == 1 || yadifMode == 3 {
                     assetTrack.nominalFrameRate = assetTrack.nominalFrameRate * 2
@@ -341,35 +340,30 @@ open class KSOptions {
     @MainActor
     open func updateVideo(refreshRate: Float, isDovi: Bool, formatDescription: CMFormatDescription?) {
         #if os(tvOS) || os(xrOS)
+        /**
+         快速更改preferredDisplayCriteria，会导致isDisplayModeSwitchInProgress变成true。
+         例如退出一个视频，然后在3s内重新进入的话。所以不判断isDisplayModeSwitchInProgress了
+         */
         guard let displayManager = UIApplication.shared.windows.first?.avDisplayManager,
               displayManager.isDisplayCriteriaMatchingEnabled
         else {
             return
         }
-//        快速更改preferredDisplayCriteria，会导致isDisplayModeSwitchInProgress变成true，例如退出一个视频，然后在3s内重新进入的话，
-        if let formatDescription {
-            if KSOptions.displayCriteriaFormatDescriptionEnabled, #available(tvOS 17.0, *) {
-                displayManager.preferredDisplayCriteria = AVDisplayCriteria(refreshRate: refreshRate, formatDescription: formatDescription)
-            } else {
-                let dynamicRange = isDovi ? .dolbyVision : formatDescription.dynamicRange
-                displayManager.preferredDisplayCriteria = AVDisplayCriteria(refreshRate: refreshRate, videoDynamicRange: dynamicRange.rawValue)
-            }
+        if let dynamicRange = isDovi ? .dolbyVision : formatDescription?.dynamicRange {
+            displayManager.preferredDisplayCriteria = AVDisplayCriteria(refreshRate: refreshRate, videoDynamicRange: dynamicRange.rawValue)
         }
         #endif
     }
 
-    open func videoClockSync(main: KSClock, nextVideoTime: TimeInterval, fps: Float, frameCount: Int) -> (Double, ClockProcessType) {
-        var desire = main.getTime() - videoDelay
-        #if !os(macOS)
-        desire -= AVAudioSession.sharedInstance().outputLatency
-        #endif
+    open func videoClockSync(main: KSClock, nextVideoTime: TimeInterval, fps: Double, frameCount: Int) -> (Double, ClockProcessType) {
+        let desire = main.getTime() - videoDelay
         let diff = nextVideoTime - desire
 //        print("[video] video diff \(diff) nextVideoTime \(nextVideoTime) main \(main.time.seconds)")
-        if diff >= 1 / Double(fps * 2) {
+        if diff >= 1 / fps / 2 {
             videoClockDelayCount = 0
             return (diff, .remain)
         } else {
-            if diff < -4 / Double(fps) {
+            if diff < -4 / fps {
                 videoClockDelayCount += 1
                 let log = "[video] video delay=\(diff), clock=\(desire), delay count=\(videoClockDelayCount), frameCount=\(frameCount)"
                 if frameCount == 1 {
@@ -449,6 +443,10 @@ open class KSOptions {
 //            return 1
 //        }
     }
+
+    open func process(url _: URL) -> AbstractAVIOContext? {
+        nil
+    }
 }
 
 public enum VideoInterlacingType: String {
@@ -481,7 +479,7 @@ public extension KSOptions {
     static var isPipPopViewController = false
     static var canStartPictureInPictureAutomaticallyFromInline = true
     static var preferredFrame = true
-    static var displayCriteriaFormatDescriptionEnabled = false
+    static var useSystemHTTPProxy = true
     /// 日志级别
     static var logLevel = LogLevel.warning
     static var logger: LogHandler = OSLog(lable: "KSPlayer")
@@ -496,12 +494,15 @@ public extension KSOptions {
         #if os(macOS)
 //        try? AVAudioSession.sharedInstance().setRouteSharingPolicy(.longFormAudio)
         #else
-        let category = AVAudioSession.sharedInstance().category
-        if category == .playback || category == .playAndRecord {
-            try? AVAudioSession.sharedInstance().setCategory(category, mode: .moviePlayback, policy: .longFormAudio)
-        } else {
-            try? AVAudioSession.sharedInstance().setCategory(.playback, mode: .moviePlayback, policy: .longFormAudio)
+        var category = AVAudioSession.sharedInstance().category
+        if category != .playAndRecord {
+            category = .playback
         }
+        #if os(tvOS)
+        try? AVAudioSession.sharedInstance().setCategory(category, mode: .moviePlayback, policy: .longFormAudio)
+        #else
+        try? AVAudioSession.sharedInstance().setCategory(category, mode: .moviePlayback, policy: .longFormVideo)
+        #endif
         try? AVAudioSession.sharedInstance().setActive(true)
         #endif
     }

@@ -90,26 +90,6 @@ class VideoSwresample: FrameChange {
         } else {
             frame.corePixelBuffer = transfer(frame: avframe.pointee)
         }
-        if avframe.pointee.nb_side_data > 0 {
-            for i in 0 ..< avframe.pointee.nb_side_data {
-                if let sideData = avframe.pointee.side_data[Int(i)]?.pointee {
-                    if sideData.type == AV_FRAME_DATA_DOVI_RPU_BUFFER {
-                        let rpuBuff = sideData.data.withMemoryRebound(to: [UInt8].self, capacity: 1) { $0 }
-                    } else if sideData.type == AV_FRAME_DATA_DOVI_METADATA { // AVDOVIMetadata
-                        let doviMeta = sideData.data.withMemoryRebound(to: AVDOVIMetadata.self, capacity: 1) { $0 }
-                        let header = av_dovi_get_header(doviMeta)
-                        let mapping = av_dovi_get_mapping(doviMeta)
-                        let color = av_dovi_get_color(doviMeta)
-                        frame.corePixelBuffer?.transferFunction = kCVImageBufferTransferFunction_ITU_R_2020
-                    } else if sideData.type == AV_FRAME_DATA_DYNAMIC_HDR_PLUS { // AVDynamicHDRPlus
-                        let hdrPlus = sideData.data.withMemoryRebound(to: AVDynamicHDRPlus.self, capacity: 1) { $0 }.pointee
-
-                    } else if sideData.type == AV_FRAME_DATA_DYNAMIC_HDR_VIVID { // AVDynamicHDRVivid
-                        let hdrVivid = sideData.data.withMemoryRebound(to: AVDynamicHDRVivid.self, capacity: 1) { $0 }.pointee
-                    }
-                }
-            }
-        }
         return frame
     }
 

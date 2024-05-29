@@ -33,7 +33,6 @@ public final class MEPlayerItem: Sendable {
     private var allPlayerItemTracks = [PlayerItemTrackProtocol]()
     private var maxFrameDuration = 10.0
     private var videoAudioTracks = [CapacityProtocol]()
-    private var audioRecognizer: AudioRecognizer?
     private var videoTrack: SyncPlayerItemTrack<VideoVTBFrame>?
     private var audioTrack: SyncPlayerItemTrack<AudioFrame>?
     private(set) var assetTracks = [FFmpegAssetTrack]()
@@ -141,11 +140,6 @@ public final class MEPlayerItem: Sendable {
         operationQueue.maxConcurrentOperationCount = 1
         operationQueue.qualityOfService = .userInteractive
         _ = MEPlayerItem.onceInitial
-        if let locale = options.audioLocale {
-            audioRecognizer = AudioRecognizer(locale: locale) { text in
-                print(text)
-            }
-        }
     }
 
     func select(track: some MediaPlayerTrack) -> Bool {
@@ -200,26 +194,22 @@ extension MEPlayerItem {
             }
         }
         formatCtx.pointee.interrupt_callback = interruptCB
-//        formatCtx.pointee.io_close2 = { formatCtx, pb -> Int32 in
-//            return 0
-//
-//        }
-//        formatCtx.pointee.io_open = { formatCtx, context, url, flags, options -> Int32 in
-//            return 0
+        // avformat_close_input这个函数会调用io_close2。但是自定义协议是不会调用io_close2这个函数
+//        formatCtx.pointee.io_close2 = { _, _ -> Int32 in
+//            0
 //        }
         setHttpProxy()
         var avOptions = options.formatContextOptions.avOptions
+        if let pb = options.process(url: url) {
+            // 如果要自定义协议的话，那就用avio_alloc_context，对formatCtx.pointee.pb赋值
+            formatCtx.pointee.pb = pb.getContext()
+        }
         let urlString: String
         if url.isFileURL {
             urlString = url.path
         } else {
-            if url.absoluteString.hasPrefix("https") || !options.cache {
-                urlString = url.absoluteString
-            } else {
-                urlString = "async:cache:" + url.absoluteString
-            }
+            urlString = url.absoluteString
         }
-        // 如果要自定义协议的话，那就用avio_alloc_context，对formatCtx.pointee.pb赋值
         var result = avformat_open_input(&self.formatCtx, urlString, nil, &avOptions)
         av_dict_free(&avOptions)
         if result == AVError.eof.code {
@@ -628,7 +618,7 @@ extension MEPlayerItem: MediaPlayback {
         if let ioContext = formatCtx.pointee.pb {
             seekable = ioContext.pointee.seekable > 0
         }
-        return seekable && duration > 0
+        return seekable
     }
 
     public func prepareToPlay() {
@@ -656,6 +646,13 @@ extension MEPlayerItem: MediaPlayback {
             Thread.current.name = (self.operationQueue.name ?? "") + "_close"
             self.allPlayerItemTracks.forEach { $0.shutdown() }
             KSLog("清空formatCtx")
+            // 自定义的协议才会av_class为空
+            if let formatCtx = self.formatCtx, (formatCtx.pointee.flags & AVFMT_FLAG_CUSTOM_IO) != 0, let opaque = formatCtx.pointee.pb.pointee.opaque {
+                let value = Unmanaged<AbstractAVIOContext>.fromOpaque(opaque).takeRetainedValue()
+                value.close()
+            }
+            // 不要自己来释放pb。不然第二次播放同一个url会出问题
+//            self.formatCtx?.pointee.pb = nil
             self.formatCtx?.pointee.interrupt_callback.opaque = nil
             self.formatCtx?.pointee.interrupt_callback.callback = nil
             avformat_close_input(&self.formatCtx)
@@ -802,8 +799,11 @@ extension MEPlayerItem: OutputRenderSourceDelegate {
 
     public func setAudio(time: CMTime, position: Int64) {
 //        print("[audio] setAudio: \(time.seconds)")
-        audioClock.time = time
-        audioClock.position = position
+        // 切换到主线程的话，那播放起来会更顺滑
+        runOnMainThread {
+            self.audioClock.time = time
+            self.audioClock.position = position
+        }
     }
 
     public func getVideoOutputRender(force: Bool) -> VideoVTBFrame? {
@@ -813,7 +813,7 @@ extension MEPlayerItem: OutputRenderSourceDelegate {
         var type: ClockProcessType = force ? .next : .remain
         let predicate: ((VideoVTBFrame, Int) -> Bool)? = force ? nil : { [weak self] frame, count -> Bool in
             guard let self else { return true }
-            (self.dynamicInfo.audioVideoSyncDiff, type) = self.options.videoClockSync(main: self.mainClock(), nextVideoTime: frame.seconds, fps: frame.fps, frameCount: count)
+            (self.dynamicInfo.audioVideoSyncDiff, type) = self.options.videoClockSync(main: self.mainClock(), nextVideoTime: frame.seconds, fps: Double(frame.fps), frameCount: count)
             return type != .remain
         }
         let frame = videoTrack.getOutputRender(where: predicate)
@@ -860,10 +860,33 @@ extension MEPlayerItem: OutputRenderSourceDelegate {
 
     public func getAudioOutputRender() -> AudioFrame? {
         if let frame = audioTrack?.getOutputRender(where: nil) {
-            audioRecognizer?.append(frame: frame)
+            SubtitleModel.audioRecognizes.first {
+                $0.isEnabled
+            }?.append(frame: frame)
             return frame
         } else {
             return nil
+        }
+    }
+}
+
+extension AbstractAVIOContext {
+    func getContext() -> UnsafeMutablePointer<AVIOContext> {
+        // 需要持有ioContext，不然会被释放掉,等到shutdown在清空
+        avio_alloc_context(av_malloc(Int(bufferSize)), bufferSize, writable ? 1 : 0, Unmanaged.passRetained(self).toOpaque()) { opaque, buffer, size -> Int32 in
+            let value = Unmanaged<AbstractAVIOContext>.fromOpaque(opaque!).takeUnretainedValue()
+            let ret = value.read(buffer: buffer, size: size)
+            return Int32(ret)
+        } _: { opaque, buffer, size -> Int32 in
+            let value = Unmanaged<AbstractAVIOContext>.fromOpaque(opaque!).takeUnretainedValue()
+            let ret = value.write(buffer: buffer, size: size)
+            return Int32(ret)
+        } _: { opaque, offset, whence -> Int64 in
+            let value = Unmanaged<AbstractAVIOContext>.fromOpaque(opaque!).takeUnretainedValue()
+            if whence == AVSEEK_SIZE {
+                return value.fileSize()
+            }
+            return value.seek(offset: offset, whence: whence)
         }
     }
 }
