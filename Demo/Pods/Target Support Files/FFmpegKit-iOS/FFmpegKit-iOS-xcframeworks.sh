@@ -161,6 +161,30 @@ variant_for_slice()
   "Libswscale.xcframework/xros-arm64-simulator")
     echo "simulator"
     ;;
+  "Libavdevice.xcframework/ios-arm64")
+    echo ""
+    ;;
+  "Libavdevice.xcframework/ios-arm64_x86_64-maccatalyst")
+    echo "maccatalyst"
+    ;;
+  "Libavdevice.xcframework/ios-arm64_x86_64-simulator")
+    echo "simulator"
+    ;;
+  "Libavdevice.xcframework/macos-arm64_x86_64")
+    echo ""
+    ;;
+  "Libavdevice.xcframework/tvos-arm64_arm64e")
+    echo ""
+    ;;
+  "Libavdevice.xcframework/tvos-arm64_x86_64-simulator")
+    echo "simulator"
+    ;;
+  "Libavdevice.xcframework/xros-arm64")
+    echo ""
+    ;;
+  "Libavdevice.xcframework/xros-arm64-simulator")
+    echo "simulator"
+    ;;
   "libshaderc_combined.xcframework/ios-arm64")
     echo ""
     ;;
@@ -188,6 +212,9 @@ variant_for_slice()
   "MoltenVK.xcframework/ios-arm64")
     echo ""
     ;;
+  "MoltenVK.xcframework/ios-arm64_x86_64-maccatalyst")
+    echo "maccatalyst"
+    ;;
   "MoltenVK.xcframework/ios-arm64_x86_64-simulator")
     echo "simulator"
     ;;
@@ -198,6 +225,12 @@ variant_for_slice()
     echo ""
     ;;
   "MoltenVK.xcframework/tvos-arm64_x86_64-simulator")
+    echo "simulator"
+    ;;
+  "MoltenVK.xcframework/xros-arm64")
+    echo ""
+    ;;
+  "MoltenVK.xcframework/xros-arm64_x86_64-simulator")
     echo "simulator"
     ;;
   "lcms2.xcframework/ios-arm64")
@@ -390,6 +423,30 @@ variant_for_slice()
     echo ""
     ;;
   "gnutls.xcframework/xros-arm64-simulator")
+    echo "simulator"
+    ;;
+  "libsmbclient.xcframework/ios-arm64")
+    echo ""
+    ;;
+  "libsmbclient.xcframework/ios-arm64_x86_64-maccatalyst")
+    echo "maccatalyst"
+    ;;
+  "libsmbclient.xcframework/ios-arm64_x86_64-simulator")
+    echo "simulator"
+    ;;
+  "libsmbclient.xcframework/macos-arm64_x86_64")
+    echo ""
+    ;;
+  "libsmbclient.xcframework/tvos-arm64_arm64e")
+    echo ""
+    ;;
+  "libsmbclient.xcframework/tvos-arm64_x86_64-simulator")
+    echo "simulator"
+    ;;
+  "libsmbclient.xcframework/xros-arm64")
+    echo ""
+    ;;
+  "libsmbclient.xcframework/xros-arm64-simulator")
     echo "simulator"
     ;;
   "libzvbi.xcframework/ios-arm64")
@@ -587,6 +644,30 @@ archs_for_slice()
   "Libswscale.xcframework/xros-arm64-simulator")
     echo "arm64"
     ;;
+  "Libavdevice.xcframework/ios-arm64")
+    echo "arm64"
+    ;;
+  "Libavdevice.xcframework/ios-arm64_x86_64-maccatalyst")
+    echo "arm64 x86_64"
+    ;;
+  "Libavdevice.xcframework/ios-arm64_x86_64-simulator")
+    echo "arm64 x86_64"
+    ;;
+  "Libavdevice.xcframework/macos-arm64_x86_64")
+    echo "arm64 x86_64"
+    ;;
+  "Libavdevice.xcframework/tvos-arm64_arm64e")
+    echo "arm64 arm64e"
+    ;;
+  "Libavdevice.xcframework/tvos-arm64_x86_64-simulator")
+    echo "arm64 x86_64"
+    ;;
+  "Libavdevice.xcframework/xros-arm64")
+    echo "arm64"
+    ;;
+  "Libavdevice.xcframework/xros-arm64-simulator")
+    echo "arm64"
+    ;;
   "libshaderc_combined.xcframework/ios-arm64")
     echo "arm64"
     ;;
@@ -614,6 +695,9 @@ archs_for_slice()
   "MoltenVK.xcframework/ios-arm64")
     echo "arm64"
     ;;
+  "MoltenVK.xcframework/ios-arm64_x86_64-maccatalyst")
+    echo "arm64 x86_64"
+    ;;
   "MoltenVK.xcframework/ios-arm64_x86_64-simulator")
     echo "arm64 x86_64"
     ;;
@@ -624,6 +708,12 @@ archs_for_slice()
     echo "arm64 arm64e"
     ;;
   "MoltenVK.xcframework/tvos-arm64_x86_64-simulator")
+    echo "arm64 x86_64"
+    ;;
+  "MoltenVK.xcframework/xros-arm64")
+    echo "arm64"
+    ;;
+  "MoltenVK.xcframework/xros-arm64_x86_64-simulator")
     echo "arm64 x86_64"
     ;;
   "lcms2.xcframework/ios-arm64")
@@ -818,6 +908,30 @@ archs_for_slice()
   "gnutls.xcframework/xros-arm64-simulator")
     echo "arm64"
     ;;
+  "libsmbclient.xcframework/ios-arm64")
+    echo "arm64"
+    ;;
+  "libsmbclient.xcframework/ios-arm64_x86_64-maccatalyst")
+    echo "arm64 x86_64"
+    ;;
+  "libsmbclient.xcframework/ios-arm64_x86_64-simulator")
+    echo "arm64 x86_64"
+    ;;
+  "libsmbclient.xcframework/macos-arm64_x86_64")
+    echo "arm64 x86_64"
+    ;;
+  "libsmbclient.xcframework/tvos-arm64_arm64e")
+    echo "arm64 arm64e"
+    ;;
+  "libsmbclient.xcframework/tvos-arm64_x86_64-simulator")
+    echo "arm64 x86_64"
+    ;;
+  "libsmbclient.xcframework/xros-arm64")
+    echo "arm64"
+    ;;
+  "libsmbclient.xcframework/xros-arm64-simulator")
+    echo "arm64"
+    ;;
   "libzvbi.xcframework/ios-arm64")
     echo "arm64"
     ;;
@@ -951,8 +1065,9 @@ install_xcframework "${PODS_ROOT}/../../FFmpegKit/Sources/Libavformat.xcframewor
 install_xcframework "${PODS_ROOT}/../../FFmpegKit/Sources/Libavutil.xcframework" "FFmpegKit/FFmpegKit" "framework" "ios-arm64" "ios-arm64_x86_64-maccatalyst" "ios-arm64_x86_64-simulator"
 install_xcframework "${PODS_ROOT}/../../FFmpegKit/Sources/Libswresample.xcframework" "FFmpegKit/FFmpegKit" "framework" "ios-arm64" "ios-arm64_x86_64-maccatalyst" "ios-arm64_x86_64-simulator"
 install_xcframework "${PODS_ROOT}/../../FFmpegKit/Sources/Libswscale.xcframework" "FFmpegKit/FFmpegKit" "framework" "ios-arm64" "ios-arm64_x86_64-maccatalyst" "ios-arm64_x86_64-simulator"
+install_xcframework "${PODS_ROOT}/../../FFmpegKit/Sources/Libavdevice.xcframework" "FFmpegKit/FFmpegKit" "framework" "ios-arm64" "ios-arm64_x86_64-maccatalyst" "ios-arm64_x86_64-simulator"
 install_xcframework "${PODS_ROOT}/../../FFmpegKit/Sources/libshaderc_combined.xcframework" "FFmpegKit/FFmpegKit" "framework" "ios-arm64" "ios-arm64_x86_64-maccatalyst" "ios-arm64_x86_64-simulator"
-install_xcframework "${PODS_ROOT}/../../FFmpegKit/Sources/MoltenVK.xcframework" "FFmpegKit/FFmpegKit" "library" "ios-arm64" "ios-arm64_x86_64-simulator"
+install_xcframework "${PODS_ROOT}/../../FFmpegKit/Sources/MoltenVK.xcframework" "FFmpegKit/FFmpegKit" "library" "ios-arm64" "ios-arm64_x86_64-maccatalyst" "ios-arm64_x86_64-simulator"
 install_xcframework "${PODS_ROOT}/../../FFmpegKit/Sources/lcms2.xcframework" "FFmpegKit/FFmpegKit" "framework" "ios-arm64" "ios-arm64_x86_64-maccatalyst" "ios-arm64_x86_64-simulator"
 install_xcframework "${PODS_ROOT}/../../FFmpegKit/Sources/libdav1d.xcframework" "FFmpegKit/FFmpegKit" "framework" "ios-arm64" "ios-arm64_x86_64-maccatalyst" "ios-arm64_x86_64-simulator"
 install_xcframework "${PODS_ROOT}/../../FFmpegKit/Sources/libplacebo.xcframework" "FFmpegKit/FFmpegKit" "framework" "ios-arm64" "ios-arm64_x86_64-maccatalyst" "ios-arm64_x86_64-simulator"
@@ -961,6 +1076,7 @@ install_xcframework "${PODS_ROOT}/../../FFmpegKit/Sources/gmp.xcframework" "FFmp
 install_xcframework "${PODS_ROOT}/../../FFmpegKit/Sources/nettle.xcframework" "FFmpegKit/FFmpegKit" "framework" "ios-arm64" "ios-arm64_x86_64-maccatalyst" "ios-arm64_x86_64-simulator"
 install_xcframework "${PODS_ROOT}/../../FFmpegKit/Sources/hogweed.xcframework" "FFmpegKit/FFmpegKit" "framework" "ios-arm64" "ios-arm64_x86_64-maccatalyst" "ios-arm64_x86_64-simulator"
 install_xcframework "${PODS_ROOT}/../../FFmpegKit/Sources/gnutls.xcframework" "FFmpegKit/FFmpegKit" "framework" "ios-arm64" "ios-arm64_x86_64-maccatalyst" "ios-arm64_x86_64-simulator"
+install_xcframework "${PODS_ROOT}/../../FFmpegKit/Sources/libsmbclient.xcframework" "FFmpegKit/FFmpegKit" "framework" "ios-arm64" "ios-arm64_x86_64-maccatalyst" "ios-arm64_x86_64-simulator"
 install_xcframework "${PODS_ROOT}/../../FFmpegKit/Sources/libzvbi.xcframework" "FFmpegKit/FFmpegKit" "framework" "ios-arm64" "ios-arm64_x86_64-simulator"
 install_xcframework "${PODS_ROOT}/../../FFmpegKit/Sources/libsrt.xcframework" "FFmpegKit/FFmpegKit" "framework" "ios-arm64" "ios-arm64_x86_64-maccatalyst" "ios-arm64_x86_64-simulator"
 

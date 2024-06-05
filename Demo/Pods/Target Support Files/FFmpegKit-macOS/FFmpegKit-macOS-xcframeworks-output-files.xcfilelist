@@ -4,6 +4,7 @@ ${PODS_XCFRAMEWORKS_BUILD_DIR}/FFmpegKit/FFmpegKit/Libavformat.framework
 ${PODS_XCFRAMEWORKS_BUILD_DIR}/FFmpegKit/FFmpegKit/Libavutil.framework
 ${PODS_XCFRAMEWORKS_BUILD_DIR}/FFmpegKit/FFmpegKit/Libswresample.framework
 ${PODS_XCFRAMEWORKS_BUILD_DIR}/FFmpegKit/FFmpegKit/Libswscale.framework
+${PODS_XCFRAMEWORKS_BUILD_DIR}/FFmpegKit/FFmpegKit/Libavdevice.framework
 ${PODS_XCFRAMEWORKS_BUILD_DIR}/FFmpegKit/FFmpegKit/libshaderc_combined.framework
 ${PODS_XCFRAMEWORKS_BUILD_DIR}/FFmpegKit/FFmpegKit/MoltenVK.framework
 ${PODS_XCFRAMEWORKS_BUILD_DIR}/FFmpegKit/FFmpegKit/lcms2.framework
@@ -14,6 +15,7 @@ ${PODS_XCFRAMEWORKS_BUILD_DIR}/FFmpegKit/FFmpegKit/gmp.framework
 ${PODS_XCFRAMEWORKS_BUILD_DIR}/FFmpegKit/FFmpegKit/nettle.framework
 ${PODS_XCFRAMEWORKS_BUILD_DIR}/FFmpegKit/FFmpegKit/hogweed.framework
 ${PODS_XCFRAMEWORKS_BUILD_DIR}/FFmpegKit/FFmpegKit/gnutls.framework
+${PODS_XCFRAMEWORKS_BUILD_DIR}/FFmpegKit/FFmpegKit/libsmbclient.framework
 ${PODS_XCFRAMEWORKS_BUILD_DIR}/FFmpegKit/FFmpegKit/libzvbi.framework
 ${PODS_XCFRAMEWORKS_BUILD_DIR}/FFmpegKit/FFmpegKit/libsrt.framework
 ${PODS_XCFRAMEWORKS_BUILD_DIR}/FFmpegKit/FFmpegKit/libbluray.framework

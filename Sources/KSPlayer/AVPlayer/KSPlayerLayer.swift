@@ -100,7 +100,6 @@ open class KSPlayerLayer: NSObject {
             runOnMainThread { [weak self] in
                 guard let self else { return }
                 if let oldView = oldValue.view, let superview = oldView.superview, let view = player.view {
-                    superview.addSubview(view)
                     #if canImport(UIKit)
                     superview.insertSubview(view, belowSubview: oldView)
                     #else

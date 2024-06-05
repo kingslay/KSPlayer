@@ -193,7 +193,7 @@ class APPModel: ObservableObject {
         }
         KSOptions.logger = FileLog(fileHandle: fileHandle)
         #endif
-        KSOptions.firstPlayerType = KSMEPlayer.self
+//        KSOptions.firstPlayerType = KSMEPlayer.self
         KSOptions.secondPlayerType = KSMEPlayer.self
         _ = Defaults.shared
         KSOptions.subtitleDataSouces = [DirectorySubtitleDataSouce(), ShooterSubtitleDataSouce(), AssrtSubtitleDataSouce(token: "5IzWrb2J099vmA96ECQXwdRSe9xdoBUv"), OpenSubtitleDataSouce(apiKey: "0D0gt8nV6SFHVVejdxAMpvOT0wByfKE5")]

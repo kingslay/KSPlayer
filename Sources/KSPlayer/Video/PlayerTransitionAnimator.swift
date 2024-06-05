@@ -27,7 +27,9 @@ class PlayerTransitionAnimator: NSObject, UIViewControllerAnimatedTransitioning 
 
     func animateTransition(using transitionContext: UIViewControllerContextTransitioning) {
         let animationSuperView = animationView.superview
+        let animationViewIndex = animationSuperView?.subviews.firstIndex(of: animationView) ?? 0
         let initSize = animationView.frame.size
+        let animationFrameConstraints = animationView.frameConstraints
         guard let presentedView = transitionContext.view(forKey: isDismiss ? .from : .to) else {
             return
         }
@@ -54,7 +56,11 @@ class PlayerTransitionAnimator: NSObject, UIViewControllerAnimatedTransitioning 
             self.animationView.transform = .identity
             self.animationView.center = self.isDismiss ? fromCenter : toCenter
         } completion: { _ in
-            animationSuperView?.addSubview(self.animationView)
+            animationSuperView?.insertSubview(self.animationView, at: animationViewIndex)
+            if !animationFrameConstraints.isEmpty {
+                self.animationView.translatesAutoresizingMaskIntoConstraints = false
+                NSLayoutConstraint.activate(animationFrameConstraints)
+            }
             if !self.isDismiss {
                 transitionContext.containerView.addSubview(presentedView)
             }

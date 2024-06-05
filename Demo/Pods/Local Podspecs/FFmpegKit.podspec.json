@@ -26,13 +26,21 @@
       "libraries": [
         "bz2",
         "c++",
-        "expat",
         "iconv",
         "resolv",
         "xml2",
         "z"
       ],
-      "frameworks": "VideoToolbox",
+      "osx": {
+        "libraries": "expat",
+        "vendored_frameworks": "Sources/libbluray.xcframework"
+      },
+      "frameworks": [
+        "AudioToolbox",
+        "AVFoundation",
+        "CoreMedia",
+        "VideoToolbox"
+      ],
       "vendored_frameworks": [
         "Sources/Libavcodec.xcframework",
         "Sources/Libavfilter.xcframework",
@@ -40,6 +48,7 @@
         "Sources/Libavutil.xcframework",
         "Sources/Libswresample.xcframework",
         "Sources/Libswscale.xcframework",
+        "Sources/Libavdevice.xcframework",
         "Sources/libshaderc_combined.xcframework",
         "Sources/MoltenVK.xcframework",
         "Sources/lcms2.xcframework",
@@ -50,12 +59,10 @@
         "Sources/nettle.xcframework",
         "Sources/hogweed.xcframework",
         "Sources/gnutls.xcframework",
+        "Sources/libsmbclient.xcframework",
         "Sources/libzvbi.xcframework",
         "Sources/libsrt.xcframework"
       ],
-      "osx": {
-        "vendored_frameworks": "Sources/libbluray.xcframework"
-      },
       "dependencies": {
         "Libass": [
 
