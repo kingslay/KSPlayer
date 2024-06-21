@@ -290,6 +290,7 @@ Your user icon or company logo shows up this with a link to your home page.
 [byMohamedali](https://github.com/byMohamedali)
 [romaingyh](https://github.com/romaingyh)
 [FantasyKingdom](https://github.com/FantasyKingdom)
+[solidusex](https://github.com/solidusex)
 
 Thanks to [nightfall708](https://github.com/nightfall708) for sponsoring a mac mini
 
