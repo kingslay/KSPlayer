@@ -218,16 +218,21 @@ extension AVAsset {
             return nil
         }
         exportSession.shouldOptimizeForNetworkUse = true
+        #if !os(xrOS)
         exportSession.outputFileType = .mp4
+        #endif
         return exportSession
     }
 
+    #if !os(xrOS)
     func exportMp4(beginTime: TimeInterval, endTime: TimeInterval, outputURL: URL, progress: @escaping (Double) -> Void, completion: @escaping (Result<URL, Error>) -> Void) throws {
         try FileManager.default.removeItem(at: outputURL)
         Task {
             guard let exportSession = try await ceateExportSession(beginTime: beginTime, endTime: endTime) else { return }
+
             exportSession.outputURL = outputURL
             await exportSession.export()
+
             switch exportSession.status {
             case .exporting:
                 progress(Double(exportSession.progress))
@@ -242,19 +247,50 @@ extension AVAsset {
                 exportSession.cancelExport()
             case .cancelled:
                 exportSession.cancelExport()
-            case .unknown, .waiting:
+            case .unknown,
+                 .waiting:
                 break
             @unknown default:
                 break
             }
         }
     }
+    #else
 
-    func exportMp4(beginTime: TimeInterval, endTime: TimeInterval, progress: @escaping (Double) -> Void, completion: @escaping (Result<URL, Error>) -> Void) throws {
-        guard var exportURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first else { return }
-        exportURL = exportURL.appendingPathExtension("Export.mp4")
-        try exportMp4(beginTime: beginTime, endTime: endTime, outputURL: exportURL, progress: progress, completion: completion)
+    func exportMp4(beginTime: TimeInterval, endTime: TimeInterval, outputURL: URL, progress: @escaping (Double) -> Void, completion: @escaping (Result<URL, Error>) -> Void) throws {
+        guard #available(visionOS 2.0, *) else {
+            completion(.failure(NSError(domain: "UnsupportedVersion", code: -1, userInfo: nil)))
+            return
+        }
+        try exportMp4Monitor(beginTime: beginTime, endTime: endTime, outputURL: outputURL, progress: progress, completion: completion)
     }
+
+    @available(visionOS 2.0, *)
+    func exportMp4Monitor(beginTime: TimeInterval, endTime: TimeInterval, outputURL: URL, progress: @escaping (Double) -> Void, completion: @escaping (Result<URL, Error>) -> Void) throws {
+        try FileManager.default.removeItem(at: outputURL)
+        Task {
+            guard let exportSession = try await ceateExportSession(beginTime: beginTime, endTime: endTime) else { return }
+            try await exportSession.export(to: outputURL, as: .mp4)
+            exportSession.states()
+            for await state in exportSession.states() {
+                switch state {
+                case .exporting(let p):
+                    if p.isCancelled {
+                        completion(.failure(NSError(domain: "ExportCancelled", code: -1, userInfo: nil)))
+                    } else if p.isFinished {
+                        progress(1)
+                        completion(.success(outputURL))
+                    } else {
+                        progress(p.fractionCompleted)
+                    }
+                case .waiting,
+                     .pending:
+                    break
+                }
+            }
+        }
+    }
+    #endif
 }
 
 extension UIImageView {
