@@ -7,26 +7,45 @@ KSPlayer is a powerful media play framework for iOS, tvOS, macOS, xrOS, visionOS
 
 English | [简体中文](./README_CN.md)
 
-## Based On
-
-- FFmpeg
-- Metal
-- AVAudioEngine
-
 ## Features
+Functional differences between GPL version and LGPL version
+Feature       | LGPL      | GPL     |
+| ----------- | ----------- | ----------- |
+|AV1 hardware decoding|✅|❌|
+|All demuxers, All decoders|✅|❌|
+|Smoothly Play 120 FPS Video|✅|❌|
+|Dovi P5 displays HDR (not overheating)|✅|❌|
+|Picture in Picture supports subtitle display|✅|❌|
+|Annex-B async hardware decoding(Live Stream)|✅|❌|
+|Use memory cache for fast seek in short time range|✅|❌|
+|Cache data to Hard Drive,Preload data to Hard Drive|✅|❌|
+|Full display of ass subtitles effect(Render as image using libass)|✅|❌|
+|FFmpeg version|7.0.2|6.1.0|
+|Record video|✅|✅|
+|360° panorama video|✅|✅|
+|Hardware accelerator|✅|✅|
+|De-interlace auto detect|✅|✅|
+|4k/HDR/HDR10/HDR10+/Dolby Vision|✅|✅|
+|Custom url protocols such as nfs/smb/UPnP |✅|✅|
+|Multichannel Audio/Dolby Atmos/Spatial Audio|✅|✅|
+|Text subtitle/Image subtitle/Closed Captions|✅|✅|
+|Search Online Subtitles(shooter/assrt/opensubtitles)|✅|✅|
 
-- [x] iOS, tvOS, macOS, visionOS, Mac Catalyst, Apple Silicon M1, SwiftUI.
-- [x] Multiple audio/video tracks.
-- [x] hardware accelerator.
-- [x] 4k/HDR/HDR10/HDR10+/Dolby Vision
-- [x] show local and online subtitles(shooter/assrt/opensubtitles).
-- [x] text subtitle(srt/vtt/ass)/Closed Captions/image subtitle(dvbsub/dvdsub/pgssub)
-- [x] Picture in Picture
-- [x] Record video
-- [x] De-interlace auto detect
-- [x] Dolby Atmos/Spatial Audio 
-- [x] 360° panorama video.
-- [x] Custom url protocols such as smb nfs.
+## The list of App using this SDK
+App Store Link| TestFlight Link |
+| ----------- | ----------- |
+|[Alplayer](https://apps.apple.com/us/app/alplayer/id1660917007)||
+|[APTV](https://apps.apple.com//app/aptv/id1630403500)||
+|[SenPlayer](https://apps.apple.com/app/senplayer-hdr-media-player/id6443975850)||
+|[Snappier](https://apps.apple.com/app/snappier-iptv/id1579702567)||
+|[TracyPlayer](https://apps.apple.com/app/tracyplayer/id6450770064)|[TracyPlayer](https://testflight.apple.com/join/eNmYbmZN)|
+|[UHF](https://apps.apple.com/app/uhf-love-your-iptv/id6443751726)||
+
+
+## License
+KSPlayer defaults to the GPL license (requires open-sourcing your own project code), and we hope everyone will consciously respect the licensing agreement of the KSPlayer project. Additionally, there is a paid version that adopts the LGPL license (contact us). 
+
+If due to commercial reasons, you prefer not to adhere to the GPL license  or the LGPL license, you can contact us. Through our authorization, you can obtain a more flexible licensing agreement.
 
 ## Requirements
 
@@ -39,19 +58,6 @@ cd Demo
 pod install
 ```
 - Open Demo/Demo.xcworkspace with Xcode.
-
-
-## TestFlight
-
-[APPStore](https://apps.apple.com/app/tracyplayer/id6450770064)
-
-[TestFlight](https://testflight.apple.com/join/eNmYbmZN)
-
-## License
-KSPlayer defaults to the GPL license (requires open-sourcing your own project code), and we hope everyone will consciously respect the licensing agreement of the KSPlayer project. Additionally, there is a paid version that adopts the LGPL license (contact us). 
-
-If due to commercial reasons, you prefer not to adhere to the GPL license  or the LGPL license, you can contact us. Through our authorization, you can obtain a more flexible licensing agreement.
-
 
 ## Quick Start
 
@@ -76,8 +82,6 @@ dependencies: [
     .package(url: "https://github.com/kingslay/KSPlayer.git", .branch("main"))
 ]
 ```
-
-
 
 ## Usage
 
@@ -290,7 +294,6 @@ Your user icon or company logo shows up this with a link to your home page.
 [byMohamedali](https://github.com/byMohamedali)
 [romaingyh](https://github.com/romaingyh)
 [FantasyKingdom](https://github.com/FantasyKingdom)
-[solidusex](https://github.com/solidusex)
 
 Thanks to [nightfall708](https://github.com/nightfall708) for sponsoring a mac mini
 
