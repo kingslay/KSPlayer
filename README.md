@@ -37,9 +37,11 @@ App Store Link| TestFlight Link |
 |[Alplayer](https://apps.apple.com/us/app/alplayer/id1660917007)||
 |[APTV](https://apps.apple.com//app/aptv/id1630403500)||
 |[SenPlayer](https://apps.apple.com/app/senplayer-hdr-media-player/id6443975850)||
-|[Snappier](https://apps.apple.com/app/snappier-iptv/id1579702567)||
+|[Snappier IPTV](https://apps.apple.com/app/snappier-iptv/id1579702567)||
 |[TracyPlayer](https://apps.apple.com/app/tracyplayer/id6450770064)|[TracyPlayer](https://testflight.apple.com/join/eNmYbmZN)|
-|[UHF](https://apps.apple.com/app/uhf-love-your-iptv/id6443751726)||
+|[UHF - Love your IPTV](https://apps.apple.com/app/uhf-love-your-iptv/id6443751726)||
+|[Zen IPTV](https://apps.apple.com/fr/app/zen-iptv/id6458223193)||
+
 
 
 ## License
