@@ -14,9 +14,11 @@ Feature       | LGPL      | GPL     |
 |AV1 hardware decoding|✅|❌|
 |All demuxers, All decoders|✅|❌|
 |Smoothly Play 120 FPS Video|✅|❌|
+|Record video clips at any time|✅|❌|
 |Dovi P5 displays HDR (not overheating)|✅|❌|
 |Picture in Picture supports subtitle display|✅|❌|
 |Annex-B async hardware decoding(Live Stream)|✅|❌|
+|Use the fonts in the video to render subtitles|✅|❌|
 |Use memory cache for fast seek in short time range|✅|❌|
 |Cache data to Hard Drive,Preload data to Hard Drive|✅|❌|
 |Full display of ass subtitles effect(Render as image using libass)|✅|❌|
@@ -30,12 +32,14 @@ Feature       | LGPL      | GPL     |
 |Multichannel Audio/Dolby Atmos/Spatial Audio|✅|✅|
 |Text subtitle/Image subtitle/Closed Captions|✅|✅|
 |Search Online Subtitles(shooter/assrt/opensubtitles)|✅|✅|
+|Automatically switch to multi-bitrate streams based on network|✅|✅|
 
 ## The list of App using this SDK
 App Store Link| TestFlight Link |
 | ----------- | ----------- |
 |[Alplayer](https://apps.apple.com/us/app/alplayer/id1660917007)||
-|[APTV](https://apps.apple.com//app/aptv/id1630403500)||
+|[APTV](https://apps.apple.com/app/aptv/id1630403500)||
+|[LillyPlayer Video Player](https://apps.apple.com/app/lillyplayer-video-player/id1446967273)||
 |[SenPlayer](https://apps.apple.com/app/senplayer-hdr-media-player/id6443975850)||
 |[Snappier IPTV](https://apps.apple.com/app/snappier-iptv/id1579702567)||
 |[TracyPlayer](https://apps.apple.com/app/tracyplayer/id6450770064)|[TracyPlayer](https://testflight.apple.com/join/eNmYbmZN)|
@@ -51,7 +55,7 @@ If due to commercial reasons, you prefer not to adhere to the GPL license  or th
 
 ## Requirements
 
-- iOS 13 +,  macOS 10.15 +, tvOS 13 +, xrOS 1 +
+- iOS 13+, macOS 10.15+, tvOS 13+, xrOS 1+
 
 ## Demo
 
