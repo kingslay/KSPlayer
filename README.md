@@ -41,6 +41,7 @@ App Store Link| TestFlight Link |
 |[APTV](https://apps.apple.com/app/aptv/id1630403500)||
 |[LillyPlayer Video Player](https://apps.apple.com/app/lillyplayer-video-player/id1446967273)||
 |[SenPlayer](https://apps.apple.com/app/senplayer-hdr-media-player/id6443975850)||
+|[Smart IPTV](https://apps.apple.com/app/smart-iptv-tv-and-movies-ott/id1492738910)||
 |[Snappier IPTV](https://apps.apple.com/app/snappier-iptv/id1579702567)||
 |[TracyPlayer](https://apps.apple.com/app/tracyplayer/id6450770064)|[TracyPlayer](https://testflight.apple.com/join/eNmYbmZN)|
 |[UHF - Love your IPTV](https://apps.apple.com/app/uhf-love-your-iptv/id6443751726)||
@@ -51,7 +52,8 @@ App Store Link| TestFlight Link |
 ## License
 KSPlayer defaults to the GPL license (requires open-sourcing your own project code), and we hope everyone will consciously respect the licensing agreement of the KSPlayer project. Additionally, there is a paid version that adopts the LGPL license (contact us). 
 
-If due to commercial reasons, you prefer not to adhere to the GPL license  or the LGPL license, you can contact us. Through our authorization, you can obtain a more flexible licensing agreement.
+If due to commercial reasons, you prefer not to adhere to the GPL license  or the LGPL license, you can contact us. Through our authorization, you can obtain a more flexible licensing agreement. Email: kingslay@icloud.com
+
 
 ## Requirements
 
