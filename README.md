@@ -25,13 +25,16 @@ Feature       | LGPL      | GPL     |
 |FFmpeg version|7.0.2|6.1.0|
 |Record video|✅|✅|
 |360° panorama video|✅|✅|
+|Picture in Picture|✅|✅|
 |Hardware accelerator|✅|✅|
+|Seamless loop playback|✅|✅|
 |De-interlace auto detect|✅|✅|
 |4k/HDR/HDR10/HDR10+/Dolby Vision|✅|✅|
 |Custom url protocols such as nfs/smb/UPnP |✅|✅|
 |Multichannel Audio/Dolby Atmos/Spatial Audio|✅|✅|
 |Text subtitle/Image subtitle/Closed Captions|✅|✅|
 |Search Online Subtitles(shooter/assrt/opensubtitles)|✅|✅|
+|Low latency 4K live video streaming (less than 200ms on LAN)|✅|✅|
 |Automatically switch to multi-bitrate streams based on network|✅|✅|
 
 ## The list of App using this SDK
