@@ -397,7 +397,7 @@ open class KSOptions {
         }
     }
 
-    open func availableDynamicRange(_ cotentRange: DynamicRange?) -> DynamicRange? {
+    open func availableDynamicRange(_ contentRange: DynamicRange?) -> DynamicRange? {
         #if canImport(UIKit)
         let availableHDRModes = AVPlayer.availableHDRModes
         if let preferedDynamicRange = destinationDynamicRange {
@@ -406,17 +406,17 @@ open class KSOptions {
                 return .sdr
             } else if availableHDRModes.contains(preferedDynamicRange.hdrMode) {
                 return preferedDynamicRange
-            } else if let cotentRange,
-                      availableHDRModes.contains(cotentRange.hdrMode)
+            } else if let contentRange,
+                      availableHDRModes.contains(contentRange.hdrMode)
             {
-                return cotentRange
+                return contentRange
             } else if preferedDynamicRange != .sdr { // trying update to HDR mode
                 return availableHDRModes.dynamicRange
             }
         }
-        return cotentRange
+        return contentRange
         #else
-        return destinationDynamicRange ?? cotentRange
+        return destinationDynamicRange ?? contentRange
         #endif
     }
 
