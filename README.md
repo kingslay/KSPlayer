@@ -16,11 +16,13 @@ Feature       | LGPL      | GPL     |
 |Smoothly Play 120 FPS Video|✅|❌|
 |Record video clips at any time|✅|❌|
 |Dovi P5 displays HDR (not overheating)|✅|❌|
+|Live streaming supports rewind viewing|✅|❌|
+|Preload video on hard disk(supports size control)|✅|❌|
+|Support short video hard disk persistence, play from hard disk next time|✅|❌|
 |Picture in Picture supports subtitle display|✅|❌|
 |Annex-B async hardware decoding(Live Stream)|✅|❌|
 |Use the fonts in the video to render subtitles|✅|❌|
 |Use memory cache for fast seek in short time range|✅|❌|
-|Cache data to Hard Drive,Preload data to Hard Drive|✅|❌|
 |Full display of ass subtitles effect(Render as image using libass)|✅|❌|
 |FFmpeg version|7.0.2|6.1.0|
 |Record video|✅|✅|
