@@ -44,6 +44,7 @@ App Store Link| TestFlight Link |
 | ----------- | ----------- |
 |[Alplayer](https://apps.apple.com/us/app/alplayer/id1660917007)||
 |[APTV](https://apps.apple.com/app/aptv/id1630403500)||
+|[homeTV IPTV Player](https://apps.apple.com/app/hometv-iptv-player/id1636701357)||
 |[IPTV +](https://apps.apple.com/app/iptv-my-smart-iptv-player/id1525121231)||
 |[LillyPlayer Video Player](https://apps.apple.com/app/lillyplayer-video-player/id1446967273)||
 |[SenPlayer](https://apps.apple.com/app/senplayer-hdr-media-player/id6443975850)||
