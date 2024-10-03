@@ -50,6 +50,7 @@ App Store Link| TestFlight Link |
 |[SenPlayer](https://apps.apple.com/app/senplayer-hdr-media-player/id6443975850)||
 |[Smart IPTV](https://apps.apple.com/app/smart-iptv-tv-and-movies-ott/id1492738910)||
 |[Snappier IPTV](https://apps.apple.com/app/snappier-iptv/id1579702567)||
+|[Spatial Video Studio](https://apps.apple.com/app/id6523429904)||
 |[TracyPlayer](https://apps.apple.com/app/tracyplayer/id6450770064)|[TracyPlayer](https://testflight.apple.com/join/eNmYbmZN)|
 |[UHF - Love your IPTV](https://apps.apple.com/app/uhf-love-your-iptv/id6443751726)||
 |[Zen IPTV](https://apps.apple.com/fr/app/zen-iptv/id6458223193)||

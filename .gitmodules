@@ -1,4 +1,4 @@
 [submodule "FFmpegKit"]
 	path = FFmpegKit
-	url = git@github.com:kingslay/FFmpegKit.git
-	branch = lgpl
+	url = https://github.com/kingslay/FFmpegKit.git
+	branch = main
