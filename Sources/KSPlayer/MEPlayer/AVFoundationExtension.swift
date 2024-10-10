@@ -22,7 +22,7 @@ extension OSType {
 }
 
 extension CVPixelBufferPool {
-    static func ceate(width: Int32, height: Int32, bytesPerRowAlignment: Int32, pixelFormatType: OSType, bufferCount: Int = 24) -> CVPixelBufferPool? {
+    static func create(width: Int32, height: Int32, bytesPerRowAlignment: Int32, pixelFormatType: OSType, bufferCount: Int = 24) -> CVPixelBufferPool? {
         let sourcePixelBufferOptions: NSMutableDictionary = [
             kCVPixelBufferPixelFormatTypeKey: pixelFormatType,
             kCVPixelBufferWidthKey: width,

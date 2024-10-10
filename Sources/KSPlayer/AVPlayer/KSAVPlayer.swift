@@ -570,7 +570,7 @@ class AVMediaPlayerTrack: MediaPlayerTrack {
 }
 
 public extension AVAsset {
-    func ceateImageGenerator() -> AVAssetImageGenerator {
+    func createImageGenerator() -> AVAssetImageGenerator {
         let imageGenerator = AVAssetImageGenerator(asset: self)
         imageGenerator.requestedTimeToleranceBefore = .zero
         imageGenerator.requestedTimeToleranceAfter = .zero
@@ -578,7 +578,7 @@ public extension AVAsset {
     }
 
     func thumbnailImage(currentTime: CMTime, handler: @escaping (CGImage?) -> Void) {
-        let imageGenerator = ceateImageGenerator()
+        let imageGenerator = createImageGenerator()
         imageGenerator.requestedTimeToleranceBefore = .zero
         imageGenerator.requestedTimeToleranceAfter = .zero
         imageGenerator.generateCGImagesAsynchronously(forTimes: [NSValue(time: currentTime)]) { _, cgImage, _, _, _ in
