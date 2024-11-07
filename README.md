@@ -101,7 +101,7 @@ dependencies: [
 
 ## Usage
 
-#### initialize
+#### Initialization
 
 ```swift
 KSOptions.secondPlayerType = KSMEPlayer.self
