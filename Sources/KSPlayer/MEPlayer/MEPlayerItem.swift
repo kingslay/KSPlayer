@@ -104,18 +104,7 @@ public final class MEPlayerItem: Sendable {
             }
             if let ptr {
                 let avclass = ptr.assumingMemoryBound(to: UnsafePointer<AVClass>.self).pointee
-                if avclass == &ffurl_context_class {
-                    let context = ptr.assumingMemoryBound(to: URLContext.self).pointee
-                    if let opaque = context.interrupt_callback.opaque {
-                        let playerItem = Unmanaged<MEPlayerItem>.fromOpaque(opaque).takeUnretainedValue()
-                        playerItem.options.urlIO(log: String(log))
-                        if log.starts(with: "Will reconnect at") {
-                            let seconds = playerItem.mainClock().time.seconds
-                            playerItem.videoTrack?.seekTime = seconds
-                            playerItem.audioTrack?.seekTime = seconds
-                        }
-                    }
-                } else if avclass == avfilter_get_class() {
+                if avclass == avfilter_get_class() {
                     let context = ptr.assumingMemoryBound(to: AVFilterContext.self).pointee
                     if let opaque = context.graph?.pointee.opaque {
                         let options = Unmanaged<KSOptions>.fromOpaque(opaque).takeUnretainedValue()

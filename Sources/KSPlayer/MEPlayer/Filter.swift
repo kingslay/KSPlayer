@@ -136,10 +136,6 @@ class MEFilter {
                 return
             }
         }
-        if graph?.pointee.sink_links_count == 0 {
-            completionHandler(inputFrame)
-            return
-        }
         let ret = av_buffersrc_add_frame_flags(bufferSrcContext, inputFrame, 0)
         if ret < 0 {
             return
