@@ -110,7 +110,6 @@ public extension KSOptions {
             } else {
                 return CGColorSpace(name: CGColorSpace.itur_2020)
             }
-
         default:
             return CGColorSpace(name: CGColorSpace.sRGB)
         }

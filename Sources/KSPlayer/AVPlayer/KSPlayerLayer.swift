@@ -689,6 +689,7 @@ extension KSPlayerLayer {
         switch type {
         case .began:
             pause()
+
         case .ended:
             // An interruption ended. Resume playback, if appropriate.
 

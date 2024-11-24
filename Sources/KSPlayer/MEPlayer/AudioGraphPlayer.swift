@@ -165,8 +165,8 @@ public final class AudioGraphPlayer: AudioOutput, AudioDynamicsProcessor {
         var audioStreamBasicDescription = audioFormat.formatDescription.audioStreamBasicDescription
         let audioStreamBasicDescriptionSize = UInt32(MemoryLayout<AudioStreamBasicDescription>.size)
         let channelLayout = audioFormat.channelLayout?.layout
-        [audioUnitForTimePitch, audioUnitForDynamicsProcessor, audioUnitForMixer, audioUnitForOutput].forEach { unit in
-            guard let unit else { return }
+        for unit in [audioUnitForTimePitch, audioUnitForDynamicsProcessor, audioUnitForMixer, audioUnitForOutput] {
+            guard let unit else { continue }
             AudioUnitSetProperty(unit,
                                  kAudioUnitProperty_StreamFormat,
                                  kAudioUnitScope_Input, 0,

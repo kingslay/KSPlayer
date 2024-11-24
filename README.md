@@ -23,6 +23,7 @@ Feature       | LGPL      | GPL     |
 |Annex-B async hardware decoding(Live Stream)|✅|❌|
 |Use the fonts in the video to render subtitles|✅|❌|
 |Use memory cache for fast seek in short time range|✅|❌|
+|Offline AI real-time subtitle generation and translation|✅|❌|
 |Full display of ass subtitles effect(Render as image using libass)|✅|❌|
 |Play videos in a small window in the App (resumable, supports tvos and ios)|✅|❌|
 |FFmpeg version|7.0.2|6.1.0|
