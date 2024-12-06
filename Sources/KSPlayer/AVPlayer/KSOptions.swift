@@ -141,14 +141,25 @@ open class KSOptions {
      ```
      */
     public func appendHeader(_ header: [String: String]) {
-        var oldValue = avOptions["AVURLAssetHTTPHeaderFieldsKey"] as? [String: String] ?? [
-            String: String
-        ]()
-        oldValue.merge(header) { _, new in new }
+        // 獲取舊的標頭，並確保它是可變的
+        var oldValue = avOptions["AVURLAssetHTTPHeaderFieldsKey"] as? [String: String] ?? [String: String]()
+        
+        // 合併新標頭，避免重複鍵
+        for (key, newValue) in header {
+            if oldValue[key] == nil { // 如果舊標頭中沒有這個鍵
+                oldValue[key] = newValue // 添加新鍵值對
+            }
+            // 如果需要，可以在這裡選擇保留舊值或新值
+            // 例如：oldValue[key] = newValue // 如果想要用新值替換舊值
+        }
+        
+        // 更新 avOptions
         avOptions["AVURLAssetHTTPHeaderFieldsKey"] = oldValue
+        
+        // 更新 formatContextOptions 的 headers 字串
         var str = formatContextOptions["headers"] as? String ?? ""
-        for (key, value) in header {
-            str.append("\(key):\(value)\r\n")
+        for (key, value) in oldValue { // 使用合併後的 oldValue
+            str.append("\(key): \(value)\r\n")
         }
         formatContextOptions["headers"] = str
     }
