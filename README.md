@@ -11,18 +11,18 @@ English | [简体中文](./README_CN.md)
 Functional differences between GPL version and LGPL version
 Feature       | LGPL      | GPL     |
 | ----------- | ----------- | ----------- |
+|Dolby AC-4|✅|❌|
 |AV1 hardware decoding|✅|❌|
 |All demuxers, All decoders|✅|❌|
 |Smoothly Play 120 FPS Video|✅|❌|
 |Record video clips at any time|✅|❌|
 |Dovi P5 displays HDR (not overheating)|✅|❌|
 |Live streaming supports rewind viewing|✅|❌|
-|Preload video on hard disk(supports size control)|✅|❌|
-|Support short video hard disk persistence, play from hard disk next time|✅|❌|
 |Picture in Picture supports subtitle display|✅|❌|
 |Annex-B async hardware decoding(Live Stream)|✅|❌|
 |Use the fonts in the video to render subtitles|✅|❌|
 |Use memory cache for fast seek in short time range|✅|❌|
+|Cache data to Hard Drive,Preload data to Hard Drive|✅|❌|
 |Offline AI real-time subtitle generation and translation|✅|❌|
 |Full display of ass subtitles effect(Render as image using libass)|✅|❌|
 |Play videos in a small window in the App (resumable, supports tvos and ios)|✅|❌|
@@ -35,7 +35,7 @@ Feature       | LGPL      | GPL     |
 |De-interlace auto detect|✅|✅|
 |4k/HDR/HDR10/HDR10+/Dolby Vision|✅|✅|
 |Custom url protocols such as nfs/smb/UPnP |✅|✅|
-|Multichannel Audio/Dolby Atmos/Spatial Audio|✅|✅|
+|Multichannel Audio/Spatial Audio|✅|✅|
 |Text subtitle/Image subtitle/Closed Captions|✅|✅|
 |Search Online Subtitles(shooter/assrt/opensubtitles)|✅|✅|
 |Low latency 4K live video streaming (less than 200ms on LAN)|✅|✅|

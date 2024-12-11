@@ -456,7 +456,7 @@ public enum VideoInterlacingType: String {
 
 public extension KSOptions {
     static var firstPlayerType: MediaPlayerProtocol.Type = KSAVPlayer.self
-    static var secondPlayerType: MediaPlayerProtocol.Type?
+    static var secondPlayerType: MediaPlayerProtocol.Type? = KSMEPlayer.self
     /// 最低缓存视频时间
     static var preferredForwardBufferDuration = 3.0
     /// 最大缓存视频时间
