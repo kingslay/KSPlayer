@@ -42,7 +42,7 @@ Feature       | LGPL      | GPL     |
 |Automatically switch to multi-bitrate streams based on network|✅|✅|
 
 ## The list of App using this SDK
-App Store Link| TestFlight Link |
+App Store Link| Logo |
 | ----------- | ----------- |
 |[Alplayer](https://apps.apple.com/us/app/alplayer/id1660917007)||
 |[APTV](https://apps.apple.com/app/aptv/id1630403500)||
@@ -53,8 +53,8 @@ App Store Link| TestFlight Link |
 |[Smart IPTV](https://apps.apple.com/app/smart-iptv-tv-and-movies-ott/id1492738910)||
 |[Snappier IPTV](https://apps.apple.com/app/snappier-iptv/id1579702567)||
 |[Spatial Video Studio](https://apps.apple.com/app/id6523429904)||
-|[TracyPlayer](https://apps.apple.com/app/tracyplayer/id6450770064)|[TracyPlayer](https://testflight.apple.com/join/eNmYbmZN)|
-|[UHF - Love your IPTV](https://apps.apple.com/app/uhf-love-your-iptv/id6443751726)||
+|[TracyPlayer](https://apps.apple.com/app/tracyplayer/id6450770064)||
+|[UHF - Love your IPTV](https://apps.apple.com/app/uhf-love-your-iptv/id6443751726)|![logo](https://uhf-web.vercel.app/uhfsponsor.png)|
 |[Zen IPTV](https://apps.apple.com/fr/app/zen-iptv/id6458223193)||
 
 
@@ -302,16 +302,22 @@ project by becoming a sponsor.
 Become a sponsor through [GitHub Sponsors](https://github.com/sponsors/kingslay/). :heart:
 
 Your user icon or company logo shows up this with a link to your home page. 
+Name| Logo |
+| ----------- | ----------- |
+|[UnknownCoder807](https://github.com/UnknownCoder807)||
+|[skrew](https://github.com/skrew)||
+|[Kimentanm](https://github.com/Kimentanm)||
+|[byMohamedali](https://github.com/byMohamedali)||
+|[nakiostudio](https://github.com/nakiostudio)|![logo](https://uhf-web.vercel.app/uhfsponsor.png)|
+|[CodingByJerez](https://github.com/CodingByJerez)||
+|[andrefmsilva](https://github.com/andrefmsilva)||
+|[romaingyh](https://github.com/romaingyh)||
+|[FantasyKingdom](https://github.com/FantasyKingdom)||
+|[aart-rainey](https://github.com/aart-rainey)||
+|[SergeiMeza](https://github.com/SergeiMeza)||
+|[nihalahmed](https://github.com/nihalahmed)||
+|[HatimDa](https://github.com/HatimDa)||
 
-[UnknownCoder807](https://github.com/UnknownCoder807)
-[skrew](https://github.com/skrew)   
-[Kimentanm](https://github.com/Kimentanm)
-[nakiostudio](https://github.com/nakiostudio)
-[andrefmsilva](https://github.com/andrefmsilva)
-[CodingByJerez](https://github.com/CodingByJerez)
-[byMohamedali](https://github.com/byMohamedali)
-[romaingyh](https://github.com/romaingyh)
-[FantasyKingdom](https://github.com/FantasyKingdom)
 
 Thanks to [nightfall708](https://github.com/nightfall708) for sponsoring a mac mini
 
