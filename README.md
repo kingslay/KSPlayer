@@ -53,6 +53,7 @@ App Store Link| Logo |
 |[Smart IPTV](https://apps.apple.com/app/smart-iptv-tv-and-movies-ott/id1492738910)||
 |[Snappier IPTV](https://apps.apple.com/app/snappier-iptv/id1579702567)||
 |[Spatial Video Studio](https://apps.apple.com/app/id6523429904)||
+|[SWIPTV - IPTV Smart Player](https://apps.apple.com/app/swiptv-iptv-smart-player/id1658538188)||
 |[TracyPlayer](https://apps.apple.com/app/tracyplayer/id6450770064)||
 |[UHF - Love your IPTV](https://apps.apple.com/app/uhf-love-your-iptv/id6443751726)|![logo](https://uhf-web.vercel.app/uhfsponsor.png)|
 |[Zen IPTV](https://apps.apple.com/fr/app/zen-iptv/id6458223193)||
@@ -317,6 +318,7 @@ Name| Logo |
 |[SergeiMeza](https://github.com/SergeiMeza)||
 |[nihalahmed](https://github.com/nihalahmed)||
 |[HatimDa](https://github.com/HatimDa)||
+|[johnil](https://github.com/johnil)||
 
 
 Thanks to [nightfall708](https://github.com/nightfall708) for sponsoring a mac mini
