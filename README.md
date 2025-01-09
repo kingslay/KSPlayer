@@ -14,8 +14,8 @@ Feature       | LGPL      | GPL     |
 |Dolby AC-4|✅|❌|
 |AV1 hardware decoding|✅|❌|
 |All demuxers, All decoders|✅|❌|
-|Smoothly Play 120 FPS Video|✅|❌|
 |Record video clips at any time|✅|❌|
+|Smoothly Play 8K or 120 FPS Video|✅|❌|
 |Dovi P5 displays HDR (not overheating)|✅|❌|
 |Live streaming supports rewind viewing|✅|❌|
 |Picture in Picture supports subtitle display|✅|❌|
