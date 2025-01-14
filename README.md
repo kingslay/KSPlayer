@@ -19,10 +19,12 @@ Feature       | LGPL      | GPL     |
 |Dovi P5 displays HDR (not overheating)|✅|❌|
 |Live streaming supports rewind viewing|✅|❌|
 |Picture in Picture supports subtitle display|✅|❌|
+|Blu-ray disc playback on all Apple platforms|✅|❌|
 |Annex-B async hardware decoding(Live Stream)|✅|❌|
 |Use the fonts in the video to render subtitles|✅|❌|
 |Use memory cache for fast seek in short time range|✅|❌|
 |Cache data to Hard Drive,Preload data to Hard Drive|✅|❌|
+|Play videos in a small window in the app (iOS, tvOS)|✅|❌|
 |Offline AI real-time subtitle generation and translation|✅|❌|
 |Full display of ass subtitles effect(Render as image using libass)|✅|❌|
 |Play videos in a small window in the App (resumable, supports tvos and ios)|✅|❌|
