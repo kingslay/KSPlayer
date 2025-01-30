@@ -317,7 +317,6 @@ Name| Logo |
 |[romaingyh](https://github.com/romaingyh)||
 |[FantasyKingdom](https://github.com/FantasyKingdom)||
 |[aart-rainey](https://github.com/aart-rainey)||
-|[SergeiMeza](https://github.com/SergeiMeza)||
 |[nihalahmed](https://github.com/nihalahmed)||
 |[HatimDa](https://github.com/HatimDa)||
 |[johnil](https://github.com/johnil)||
