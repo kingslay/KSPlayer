@@ -103,6 +103,22 @@ open class VideoPlayerView: PlayerView {
         }
     }
 
+    public let longPressGesture = UILongPressGestureRecognizer()
+    private var originalPlaybackRate: Float = 1.0
+
+    public let speedTipLabel: UILabel = {
+        let label = UILabel()
+        label.textAlignment = .center
+        label.textColor = .green
+        label.font = .systemFont(ofSize: 16, weight: .medium)
+        label.alpha = 0
+        label.backgroundColor = UIColor.black.withAlphaComponent(0.5)
+        label.layer.cornerRadius = 4
+        label.clipsToBounds = true
+        label.isHidden = true
+        return label
+    }()
+
     override public var playerLayer: KSPlayerLayer? {
         didSet {
             oldValue?.player.view?.removeFromSuperview()
@@ -209,6 +225,14 @@ open class VideoPlayerView: PlayerView {
         controllerView.addSubview(lockButton)
         controllerView.addSubview(topMaskView)
         controllerView.addSubview(bottomMaskView)
+        controllerView.addSubview(speedTipLabel)
+        speedTipLabel.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            speedTipLabel.topAnchor.constraint(equalTo: safeTopAnchor, constant: 50),
+            speedTipLabel.centerXAnchor.constraint(equalTo: centerXAnchor),
+            speedTipLabel.widthAnchor.constraint(greaterThanOrEqualToConstant: 80),
+            speedTipLabel.heightAnchor.constraint(equalToConstant: 30)
+        ])
         addConstraint()
         customizeUIComponents()
         setupSrtControl()
@@ -227,6 +251,9 @@ open class VideoPlayerView: PlayerView {
         doubleTapGesture.numberOfTapsRequired = 2
         tapGesture.require(toFail: doubleTapGesture)
         controllerView.addGestureRecognizer(doubleTapGesture)
+        longPressGesture.addTarget(self, action: #selector(longPressGestureAction(_:)))
+        longPressGesture.minimumPressDuration = 0.5
+        controllerView.addGestureRecognizer(longPressGesture)
         #if canImport(UIKit)
         addRemoteControllerGestures()
         #endif
@@ -403,6 +430,46 @@ open class VideoPlayerView: PlayerView {
             slider(value: Double(tmpPanValue), event: .touchUpInside)
             tmpPanValue = 0.0
         }
+    }
+
+    @objc open func longPressGestureAction(_ gesture: UILongPressGestureRecognizer) {
+        guard let playerLayer = playerLayer else { return }
+
+        switch gesture.state {
+        case .began:
+            originalPlaybackRate = playerLayer.player.playbackRate
+            playerLayer.player.playbackRate = 2.0
+            showSpeedTip("2x")
+
+        case .ended, .cancelled:
+            playerLayer.player.playbackRate = originalPlaybackRate
+            showSpeedTip("1x")
+
+        default:
+            break
+        }
+    }
+
+    private func showSpeedTip(_ text: String) {
+        speedTipLabel.text = text
+        speedTipLabel.isHidden = false
+
+        // 显示动画
+        UIView.animate(withDuration: 0.2) {
+            self.speedTipLabel.alpha = 1
+        }
+
+        // 延迟后隐藏
+        delayItem?.cancel()
+        delayItem = DispatchWorkItem { [weak self] in
+            guard let self = self else { return }
+            UIView.animate(withDuration: 0.2) {
+                self.speedTipLabel.alpha = 0
+            } completion: { _ in
+                self.speedTipLabel.isHidden = true
+            }
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1, execute: delayItem!)
     }
 }
 
