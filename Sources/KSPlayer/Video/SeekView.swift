@@ -46,6 +46,21 @@ class SeekView: UIView {
     required init?(coder _: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
+
+    #if canImport(AppKit)
+    var backgroundColor: UIColor? {
+        get {
+            if let layer, let cgColor = layer.backgroundColor {
+                return UIColor(cgColor: cgColor)
+            } else {
+                return nil
+            }
+        }
+        set {
+            backingLayer?.backgroundColor = newValue?.cgColor
+        }
+    }
+    #endif
 }
 
 extension SeekView: SeekViewProtocol {

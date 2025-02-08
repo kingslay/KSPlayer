@@ -107,19 +107,6 @@ public extension NSView {
         }
     }
 
-    var backgroundColor: UIColor? {
-        get {
-            if let layer, let cgColor = layer.backgroundColor {
-                return UIColor(cgColor: cgColor)
-            } else {
-                return nil
-            }
-        }
-        set {
-            backingLayer?.backgroundColor = newValue?.cgColor
-        }
-    }
-
     var clipsToBounds: Bool {
         get {
             if let layer {
@@ -185,6 +172,34 @@ extension NSButton {
         }
         set {
             contentTintColor = newValue
+        }
+    }
+
+    var backgroundColor: UIColor? {
+        get {
+            if let layer, let cgColor = layer.backgroundColor {
+                return UIColor(cgColor: cgColor)
+            } else {
+                return nil
+            }
+        }
+        set {
+            backingLayer?.backgroundColor = newValue?.cgColor
+        }
+    }
+}
+
+extension NSImageView {
+    var backgroundColor: UIColor? {
+        get {
+            if let layer, let cgColor = layer.backgroundColor {
+                return UIColor(cgColor: cgColor)
+            } else {
+                return nil
+            }
+        }
+        set {
+            backingLayer?.backgroundColor = newValue?.cgColor
         }
     }
 }

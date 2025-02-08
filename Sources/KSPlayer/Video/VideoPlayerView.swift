@@ -103,7 +103,6 @@ open class VideoPlayerView: PlayerView {
         }
     }
 
-    public let longPressGesture = UILongPressGestureRecognizer()
     private var originalPlaybackRate: Float = 1.0
 
     public let speedTipLabel: UILabel = {
@@ -113,7 +112,7 @@ open class VideoPlayerView: PlayerView {
         label.font = .systemFont(ofSize: 16, weight: .medium)
         label.alpha = 0
         label.backgroundColor = UIColor.black.withAlphaComponent(0.5)
-        label.layer.cornerRadius = 4
+        label.backingLayer?.cornerRadius = 4
         label.clipsToBounds = true
         label.isHidden = true
         return label
@@ -231,7 +230,7 @@ open class VideoPlayerView: PlayerView {
             speedTipLabel.topAnchor.constraint(equalTo: safeTopAnchor, constant: 50),
             speedTipLabel.centerXAnchor.constraint(equalTo: centerXAnchor),
             speedTipLabel.widthAnchor.constraint(greaterThanOrEqualToConstant: 80),
-            speedTipLabel.heightAnchor.constraint(equalToConstant: 30)
+            speedTipLabel.heightAnchor.constraint(equalToConstant: 30),
         ])
         addConstraint()
         customizeUIComponents()
@@ -251,10 +250,10 @@ open class VideoPlayerView: PlayerView {
         doubleTapGesture.numberOfTapsRequired = 2
         tapGesture.require(toFail: doubleTapGesture)
         controllerView.addGestureRecognizer(doubleTapGesture)
+        #if canImport(UIKit)
         longPressGesture.addTarget(self, action: #selector(longPressGestureAction(_:)))
         longPressGesture.minimumPressDuration = 0.5
         controllerView.addGestureRecognizer(longPressGesture)
-        #if canImport(UIKit)
         addRemoteControllerGestures()
         #endif
     }
@@ -432,8 +431,10 @@ open class VideoPlayerView: PlayerView {
         }
     }
 
+    #if canImport(UIKit)
+    public let longPressGesture = UILongPressGestureRecognizer()
     @objc open func longPressGestureAction(_ gesture: UILongPressGestureRecognizer) {
-        guard let playerLayer = playerLayer else { return }
+        guard let playerLayer else { return }
 
         switch gesture.state {
         case .began:
@@ -449,6 +450,7 @@ open class VideoPlayerView: PlayerView {
             break
         }
     }
+    #endif
 
     private func showSpeedTip(_ text: String) {
         speedTipLabel.text = text
@@ -462,7 +464,7 @@ open class VideoPlayerView: PlayerView {
         // 延迟后隐藏
         delayItem?.cancel()
         delayItem = DispatchWorkItem { [weak self] in
-            guard let self = self else { return }
+            guard let self else { return }
             UIView.animate(withDuration: 0.2) {
                 self.speedTipLabel.alpha = 0
             } completion: { _ in
