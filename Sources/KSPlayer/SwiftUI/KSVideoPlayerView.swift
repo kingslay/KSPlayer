@@ -303,12 +303,12 @@ public struct KSVideoPlayerView: View {
 
     public func openURL(_ url: URL) {
         runOnMainThread {
-            if url.isAudio || url.isMovie {
-                self.url = url
-                title = url.lastPathComponent
-            } else {
+            if url.isSubtitle {
                 let info = URLSubtitleInfo(url: url)
                 playerCoordinator.subtitleModel.selectedSubtitleInfo = info
+            } else if url.isAudio || url.isMovie {
+                self.url = url
+                title = url.lastPathComponent
             }
         }
     }
