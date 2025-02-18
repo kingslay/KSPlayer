@@ -346,8 +346,11 @@ open class SubtitleModel: ObservableObject {
         if newParts != parts {
             for part in newParts {
                 if let text = part.text as? NSMutableAttributedString {
-                    text.addAttributes([.font: SubtitleModel.textFont],
-                                       range: NSRange(location: 0, length: text.length))
+                    let fullRange = NSRange(location: 0, length: text.length)
+
+                    text.removeAttribute(.obliqueness, range: fullRange)
+                    text.removeAttribute(.font, range: fullRange)
+                    text.addAttributes([.font: SubtitleModel.textFont], range: fullRange)
                 }
             }
             parts = newParts
