@@ -79,6 +79,28 @@ public final class MEPlayerItem: Sendable {
     private lazy var timer: Timer = .scheduledTimer(withTimeInterval: 0.05, repeats: true) { [weak self] _ in
         self?.codecDidChangeCapacity()
     }
+    // 新增属性，用于实时计算下载速度
+    private var lastBytesRead: Int64 = 0
+    private var lastSpeedUpdateTime: CFTimeInterval = CACurrentMediaTime()
+
+    @Published
+    public private(set) var currentDownloadSpeed: Double = 0   // 单位：字节/秒
+
+    private lazy var timer: Timer = Timer.scheduledTimer(withTimeInterval: 0.05, repeats: true) { [weak self] _ in
+        guard let self = self else { return }
+        self.codecDidChangeCapacity()
+
+        // 每隔 1 秒更新一次下载速度
+        let now = CACurrentMediaTime()
+        let elapsed = now - self.lastSpeedUpdateTime
+        if elapsed >= 1.0 {
+            let currentBytes = Int64(self.formatCtx?.pointee.pb?.pointee.bytes_read ?? 0)
+            let speed = Double(currentBytes - self.lastBytesRead) / elapsed
+            self.currentDownloadSpeed = speed
+            self.lastBytesRead = currentBytes
+            self.lastSpeedUpdateTime = now
+        }
+    }
 
     lazy var dynamicInfo = DynamicInfo { [weak self] in
         // metadata可能会实时变化。所以把它放在DynamicInfo里面

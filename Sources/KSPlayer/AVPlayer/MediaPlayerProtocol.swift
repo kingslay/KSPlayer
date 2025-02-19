@@ -112,6 +112,8 @@ public protocol MediaPlayerDelegate: AnyObject {
     func changeBuffering(player: some MediaPlayerProtocol, progress: Int)
     func playBack(player: some MediaPlayerProtocol, loopCount: Int)
     func finish(player: some MediaPlayerProtocol, error: Error?)
+    func changeBufferedTime(player: some MediaPlayerProtocol, bufferedTime: TimeInterval)
+    func changeNetworkSpeed(player _: some KSPlayer.MediaPlayerProtocol, speed _: Double)
 }
 
 public protocol MediaPlayerTrack: AnyObject, CustomStringConvertible {

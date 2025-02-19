@@ -69,6 +69,10 @@ open class KSPlayerLayer: NSObject {
     @Published
     public var bufferingProgress: Int = 0
     @Published
+    public var bufferedTime: TimeInterval = 0.0
+    @Published
+    public var networkSpeed: Double = 0
+    @Published
     public var loopCount: Int = 0
     @Published
     public var isPipActive = false {
@@ -435,6 +439,14 @@ extension KSPlayerLayer: MediaPlayerDelegate {
 
     public func changeBuffering(player _: some MediaPlayerProtocol, progress: Int) {
         bufferingProgress = progress
+    }
+
+    public func changeBufferedTime(player _: some MediaPlayerProtocol, bufferedTime: TimeInterval) {
+        self.bufferedTime = bufferedTime
+    }
+
+    public func changeNetworkSpeed(player _: some MediaPlayerProtocol, speed: Double) {
+        self.networkSpeed = speed
     }
 
     public func playBack(player _: some MediaPlayerProtocol, loopCount: Int) {

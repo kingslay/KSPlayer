@@ -7,6 +7,7 @@
 
 import AVFoundation
 import AVKit
+import Combine
 #if canImport(UIKit)
 import UIKit
 #else
@@ -27,12 +28,31 @@ public class KSMEPlayer: NSObject {
             }
         }
     }
-
+    // 用于订阅 playerItem.currentDownloadSpeed
+    private var downloadSpeedCancellable: AnyCancellable?
     public private(set) var bufferingProgress = 0 {
         willSet {
             runOnMainThread { [weak self] in
                 guard let self else { return }
                 delegate?.changeBuffering(player: self, progress: newValue)
+            }
+        }
+    }
+
+    public private(set) var bufferedTime: TimeInterval = 0 {
+        willSet {
+            runOnMainThread { [weak self] in
+                guard let self else { return }
+                delegate?.changeBufferedTime(player: self, bufferedTime: newValue)
+            }
+        }
+    }
+
+    public private(set) var networkSpeed: Double = 0.0 {
+        willSet {
+            runOnMainThread { [weak self] in
+                guard let self else { return }
+                delegate?.changeNetworkSpeed(player: self, speed: newValue)
             }
         }
     }
@@ -129,6 +149,12 @@ public class KSMEPlayer: NSObject {
         audioOutput.renderSource = playerItem
         videoOutput?.renderSource = playerItem
         videoOutput?.displayLayerDelegate = self
+        // 订阅 playerItem.currentDownloadSpeed 的变化，更新 networkSpeed
+        downloadSpeedCancellable = playerItem.$currentDownloadSpeed
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] speed in
+                 self?.networkSpeed = speed
+            }
         #if !os(macOS)
         NotificationCenter.default.addObserver(self, selector: #selector(audioRouteChange), name: AVAudioSession.routeChangeNotification, object: AVAudioSession.sharedInstance())
         if #available(tvOS 15.0, iOS 15.0, *) {
@@ -248,6 +274,9 @@ extension KSMEPlayer: MEPlayerDelegate {
                     runOnMainThread { [weak self] in
                         // 在主线程更新进度
                         self?.bufferingProgress = 0
+                        if let playableTime = self?.playableTime {
+                            self?.bufferedTime = playableTime
+                        }
                     }
                 }
             }
@@ -273,6 +302,9 @@ extension KSMEPlayer: MEPlayerDelegate {
                 runOnMainThread { [weak self] in
                     // 在主线程更新进度
                     self?.bufferingProgress = progress
+                    if let playableTime = self?.playableTime {
+                        self?.bufferedTime = playableTime
+                    }
                 }
             }
         }

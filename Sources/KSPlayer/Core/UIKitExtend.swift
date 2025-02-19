@@ -13,6 +13,19 @@ public class KSSlider: UXSlider {
     weak var delegate: KSSliderDelegate?
     public var trackHeigt = CGFloat(2)
     public var isPlayable = false
+    /// 新增属性，用于表示缓冲进度（缓存加载完成的时间），取值范围为 minimumValue ... maximumValue
+    public var bufferedValue: TimeInterval = 0.0 {
+        didSet {
+            setNeedsLayout()
+        }
+    }
+    /// 一个用于显示缓冲进度的视图，颜色可根据需要调整
+    private let bufferProgressView: UIView = {
+        let view = UIView()
+        view.backgroundColor = UIColor.lightGray.withAlphaComponent(1) // 合适的颜色标记缓冲进度
+        view.clipsToBounds = true
+        return view
+    }()
     override public init(frame: CGRect) {
         super.init(frame: frame)
         tapGesture = UITapGestureRecognizer(target: self, action: #selector(actionTapGesture(sender:)))
@@ -22,6 +35,8 @@ public class KSSlider: UXSlider {
         addTarget(self, action: #selector(progressSliderTouchBegan(_:)), for: .touchDown)
         addTarget(self, action: #selector(progressSliderValueChanged(_:)), for: .valueChanged)
         addTarget(self, action: #selector(progressSliderTouchEnded(_:)), for: [.touchUpInside, .touchCancel, .touchUpOutside, .primaryActionTriggered])
+        // 将缓冲进度视图插入到最底层，使其显示在进度条背景中
+        self.insertSubview(bufferProgressView, at: 0)
     }
 
     @available(*, unavailable)
@@ -88,6 +103,21 @@ public class KSSlider: UXSlider {
         } else {
             delegate?.slider(value: Double(value), event: .valueChanged)
         }
+    }
+    // 重写 layoutSubviews，根据 bufferedValue 更新 bufferProgressView 的 frame
+    override open func layoutSubviews() {
+        super.layoutSubviews()
+        let trackFrame = self.trackRect(forBounds: self.bounds)
+        let totalRange = maximumValue - minimumValue
+        guard totalRange > 0 else {
+            bufferProgressView.frame = CGRect.zero
+            return
+        }
+        // 将 bufferedValue 限制在有效范围内
+        let clampedBuffered = min(max(Float(bufferedValue), minimumValue), maximumValue)
+        let progress = (clampedBuffered - minimumValue) / totalRange
+        let bufferWidth = trackFrame.width * CGFloat(progress)
+        bufferProgressView.frame = CGRect(x: trackFrame.origin.x, y: trackFrame.origin.y, width: bufferWidth, height: trackFrame.height)
     }
 }
 

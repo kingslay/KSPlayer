@@ -125,6 +125,18 @@ public class KSAVPlayer {
         }
     }
 
+    public private(set) var bufferedTime = 0.0 {
+        didSet {
+            delegate?.changeBufferedTime(player: self, bufferedTime: bufferedTime)
+        }
+    }
+
+    public private(set) var networkSpeed = 0.0 {
+        didSet {
+            delegate?.changeNetworkSpeed(player: self, speed: networkSpeed)
+        }
+    }
+
     public weak var delegate: MediaPlayerDelegate?
     public private(set) var duration: TimeInterval = 0
     public private(set) var fileSize: Double = 0
@@ -210,7 +222,9 @@ public class KSAVPlayer {
         player.isExternalPlaybackActive
     }
     #endif
-
+    private var lastBytesTransferred: Int64 = 0
+    private var lastSpeedUpdateTime: CFTimeInterval = CACurrentMediaTime()
+    private var speedTimer: Timer?
     public required init(url: URL, options: KSOptions) {
         KSOptions.setAudioSession()
         urlAsset = AVURLAsset(url: url, options: options.avOptions)
@@ -219,6 +233,31 @@ public class KSAVPlayer {
             guard let self else { return }
             self.observer(playerItem: player.currentItem)
         }
+    }
+
+    // 启动速度采样定时器
+    private func startSpeedTimer() {
+       speedTimer?.invalidate()
+       lastBytesTransferred = self.numberOfBytesTransferred
+       lastSpeedUpdateTime = CACurrentMediaTime()
+       speedTimer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: true) { [weak self] _ in
+            guard let self = self else { return }
+            let now = CACurrentMediaTime()
+            let elapsed = now - self.lastSpeedUpdateTime
+            if elapsed >= 1.0 {
+                let currentBytes = self.numberOfBytesTransferred
+                let diff = currentBytes - self.lastBytesTransferred
+                self.networkSpeed = Double(diff) / elapsed
+                self.lastBytesTransferred = currentBytes
+                self.lastSpeedUpdateTime = now
+            }
+        }
+    }
+
+    // 停止速度采样定时器
+    private func stopSpeedTimer() {
+        speedTimer?.invalidate()
+        speedTimer = nil
     }
 }
 
@@ -279,6 +318,7 @@ extension KSAVPlayer {
             let loadedTime = playableTime - currentPlaybackTime
             guard loadedTime > 0 else { return }
             bufferingProgress = Int(min(loadedTime * 100 / item.preferredForwardBufferDuration, 100))
+            bufferedTime = playableTime
             if bufferingProgress >= 100 {
                 loadState = .playable
             }
@@ -423,6 +463,7 @@ extension KSAVPlayer: MediaPlayerProtocol {
             self.replaceCurrentItem(playerItem: playerItem)
             self.player.actionAtItemEnd = .pause
             self.player.volume = self.playbackVolume
+            self.startSpeedTimer()
         }
     }
 
@@ -443,6 +484,7 @@ extension KSAVPlayer: MediaPlayerProtocol {
         loadState = .idle
         urlAsset.cancelLoading()
         replaceCurrentItem(playerItem: nil)
+        self.stopSpeedTimer()
     }
 
     public func replace(url: URL, options: KSOptions) {

@@ -118,6 +118,47 @@ open class VideoPlayerView: PlayerView {
         return label
     }()
 
+    public let bufferingProgressLabel: UILabel = {
+        let label = UILabel()
+        label.textAlignment = .center
+        label.textColor = .white
+        label.font = .systemFont(ofSize: 20, weight: .bold)
+        label.isHidden = true
+        return label
+    }()
+
+    public var bufferingProgress: Int = 0 {
+        didSet {
+            bufferingProgressLabel.text = "\(bufferingProgress)%"
+        }
+    }
+
+    public var bufferedTime: TimeInterval = 0 {
+        didSet {
+            toolBar.timeSlider.bufferedValue = bufferedTime
+        }
+    }
+
+    public var currentDownloadSpeed: Double = 0 {
+        didSet {
+            let formattedSpeed = formatSpeed(currentDownloadSpeed)
+            self.downloadSpeedLabel.text = "\(formattedSpeed)"
+
+        }
+    }
+
+    public let downloadSpeedLabel: UILabel = {
+        let label = UILabel()
+        label.textAlignment = .center
+        label.textColor = .white
+        label.font = .systemFont(ofSize: 16, weight: .regular)
+        label.text = ""
+        label.isHidden = true
+        return label
+    }()
+
+    private var downloadSpeedCancellable: AnyCancellable?
+
     override public var playerLayer: KSPlayerLayer? {
         didSet {
             oldValue?.player.view?.removeFromSuperview()
@@ -135,6 +176,23 @@ open class VideoPlayerView: PlayerView {
                     view.trailingAnchor.constraint(equalTo: trailingAnchor),
                 ])
             }
+
+            // 订阅 playerLayer.bufferingProgress 的变化，自动更新 VideoPlayerView 的 bufferingProgress
+            bufferingCancellable = playerLayer?.$bufferingProgress
+                .receive(on: DispatchQueue.main)
+                .sink { [weak self] progress in
+                    self?.bufferingProgress = progress
+                }
+            bufferedTimeCancellable = playerLayer?.$bufferedTime
+                .receive(on: DispatchQueue.main)
+                .sink { [weak self] bufferedTime in
+                    self?.bufferedTime = bufferedTime
+                }
+            downloadSpeedCancellable = playerLayer?.$networkSpeed
+                .receive(on: DispatchQueue.main)
+                .sink { [weak self] networkSpeed in
+                    self?.currentDownloadSpeed = networkSpeed
+                }
         }
     }
 
@@ -193,6 +251,20 @@ open class VideoPlayerView: PlayerView {
 
         loadingIndector.isHidden = true
         controllerView.addSubview(loadingIndector)
+        // 添加加载进度 label，置于 loadingIndector 正中
+        controllerView.addSubview(bufferingProgressLabel)
+        bufferingProgressLabel.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            bufferingProgressLabel.centerXAnchor.constraint(equalTo: loadingIndector.centerXAnchor),
+            bufferingProgressLabel.centerYAnchor.constraint(equalTo: loadingIndector.centerYAnchor)
+        ])
+        // 添加 downloadSpeedLabel 到 controllerView
+        controllerView.addSubview(downloadSpeedLabel)
+        downloadSpeedLabel.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            downloadSpeedLabel.topAnchor.constraint(equalTo: loadingIndector.bottomAnchor, constant: 8),
+            downloadSpeedLabel.centerXAnchor.constraint(equalTo: loadingIndector.centerXAnchor)
+        ])
         // Top views
         topMaskView.addSubview(navigationBar)
         navigationBar.addArrangedSubview(titleLabel)
@@ -733,11 +805,21 @@ extension VideoPlayerView {
     private func showLoader() {
         loadingIndector.isHidden = false
         loadingIndector.startAnimating()
+        bufferingProgressLabel.isHidden = false
+
+        // 开启下载速度显示
+        downloadSpeedLabel.isHidden = false
     }
 
     private func hideLoader() {
         loadingIndector.isHidden = true
         loadingIndector.stopAnimating()
+        bufferingProgressLabel.isHidden = true
+
+        // 隐藏下载速度显示并取消订阅
+        downloadSpeedLabel.isHidden = true
+        downloadSpeedCancellable?.cancel()
+        downloadSpeedCancellable = nil
     }
 
     private func addConstraint() {
@@ -938,6 +1020,22 @@ extension VideoPlayerView {
         }
     }
     #endif
+
+    // 在 VideoPlayerView 内部添加一个辅助方法，用于格式化下载速度
+    private func formatSpeed(_ speed: Double) -> String {
+        if speed < 1024 {
+            return "\(Int(speed)) B/s"
+        } else if speed < 1024 * 1024 {
+            let kb = speed / 1024.0
+            return String(format: "%.1f KB/s", kb)
+        } else if speed < 1024 * 1024 * 1024 {
+            let mb = speed / (1024 * 1024)
+            return String(format: "%.1f MB/s", mb)
+        } else {
+            let gb = speed / (1024 * 1024 * 1024)
+            return String(format: "%.1f GB/s", gb)
+        }
+    }
 }
 
 public enum KSPlayerTopBarShowCase {
