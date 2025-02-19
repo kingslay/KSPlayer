@@ -349,6 +349,12 @@ open class SubtitleModel: ObservableObject {
                     text.addAttributes([.font: SubtitleModel.textFont],
                                        range: NSRange(location: 0, length: text.length))
                 }
+                // 如果存在图片字幕，通过 scale 调整图片大小
+                if let image = part.image {
+                    let targetSize = CGSize(width: image.size.width * SubtitleModel.imageSubtitleScale,
+                                            height: image.size.height * SubtitleModel.imageSubtitleScale)
+                    part.image = image.scaled(to: targetSize)
+                }
             }
             parts = newParts
             return true
@@ -383,4 +389,20 @@ open class SubtitleModel: ObservableObject {
             subtitleInfos.append(contentsOf: dataSouce.infos)
         }
     }
+}
+
+public extension UIImage {
+    /// 返回一个指定尺寸的缩放后的图片
+    func scaled(to size: CGSize) -> UIImage {
+        UIGraphicsBeginImageContextWithOptions(size, false, self.scale)
+        self.draw(in: CGRect(origin: .zero, size: size))
+        let scaledImage = UIGraphicsGetImageFromCurrentImageContext()
+        UIGraphicsEndImageContext()
+        return scaledImage ?? self
+    }
+}
+
+public extension SubtitleModel {
+    /// 图片字幕缩放比例，默认1.0代表不缩放
+    static var imageSubtitleScale: CGFloat = 1.0
 }
