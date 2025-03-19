@@ -58,7 +58,7 @@ dependencies: [
 ## License
 KSPlayer默认采用 GPL 协议(需开源自己的项目代码)，希望大家能自觉尊重 KSPlayer 项目的授权协议。另外有一个付费版本是采用LGPL协议。(联系我们)
 
-如果由于商业原因，不希望遵守 GPL 协议或 LGPL 协议，那你可以联系我们，经过我们的授权，你可以拥有更加宽松的授权协议。
+如果由于商业原因，不希望遵守 GPL 协议或 LGPL 协议，那你可以联系我们，经过我们的授权，你可以拥有更加宽松的授权协议。邮箱: kingslay@icloud.com
 
 ## 五、使用
 
@@ -200,7 +200,4 @@ public protocol PlayerControllerDelegate: class {
 ## 七、效果:
 
 ![gif](./Demo/demo.gif)
-
-## 八、参考：
-本项目参考了 [ZFPlayer](https://github.com/renzifeng/ZFPlayer)、**[SGPlayer](https://github.com/libobjc/SGPlayer)**
 
