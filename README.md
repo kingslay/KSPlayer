@@ -319,6 +319,8 @@ Name| Logo |
 |[nihalahmed](https://github.com/nihalahmed)||
 |[HatimDa](https://github.com/HatimDa)||
 |[johnil](https://github.com/johnil)||
+|[scorebreak](https://github.com/scorebreak)||
+|[nsplay1990](https://github.com/nsplay1990)||
 
 
 Thanks to [nightfall708](https://github.com/nightfall708) for sponsoring a mac mini
