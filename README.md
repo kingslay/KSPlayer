@@ -9,43 +9,42 @@ English | [简体中文](./README_CN.md)
 
 ## Features
 Functional differences between GPL version and LGPL version
-Feature       | LGPL      | GPL     |
-| ----------- | ----------- | ----------- |
-|Dolby AC-4|✅|❌|
-|AV1 hardware decoding|✅|❌|
-|All demuxers, All decoders|✅|❌|
-|Record video clips at any time|✅|❌|
-|Smoothly Play 8K or 120 FPS Video|✅|❌|
-|Dovi P5 displays HDR (not overheating)|✅|❌|
-|Live streaming supports rewind viewing|✅|❌|
-|Picture in Picture supports subtitle display|✅|❌|
-|Annex-B async hardware decoding(Live Stream)|✅|❌|
-|Use the fonts in the video to render subtitles|✅|❌|
-|ISO Blu-ray disc playback on all Apple platforms|✅|❌|
-|Use memory cache for fast seek in short time range|✅|❌|
-|Cache data to Hard Drive,Preload data to Hard Drive|✅|❌|
-|Offline AI real-time subtitle generation and translation|✅|❌|
-|Full display of ass subtitles effect(Render as image using libass)|✅|❌|
-|Play videos in a small window in the App (resumable, supports tvos and ios)|✅|❌|
-|FFmpeg version|7.0.2|6.1.0|
-|Record video|✅|✅|
-|360° panorama video|✅|✅|
-|Picture in Picture|✅|✅|
-|Hardware accelerator|✅|✅|
-|Seamless loop playback|✅|✅|
-|De-interlace auto detect|✅|✅|
-|4k/HDR/HDR10/HDR10+/Dolby Vision|✅|✅|
-|Custom url protocols such as nfs/smb/UPnP |✅|✅|
-|Multichannel Audio/Spatial Audio|✅|✅|
-|Text subtitle/Image subtitle/Closed Captions|✅|✅|
-|Search Online Subtitles(shooter/assrt/opensubtitles)|✅|✅|
-|Low latency 4K live video streaming (less than 200ms on LAN)|✅|✅|
-|Automatically switch to multi-bitrate streams based on network|✅|✅|
+| Feature     | LGPL      | GPL    |  Paid |
+| ----------- | --------- | ------ | ----- |
+|Dolby AC-4|✅|❌|❌|
+|AV1 hardware decoding|✅|❌|❌|
+|All demuxers, All decoders|✅|❌|❌|
+|Record video clips at any time|✅|❌|❌|
+|Smoothly Play 8K or 120 FPS Video|✅|❌|❌|
+|Dovi P5 displays HDR (not overheating)|✅|❌|✅|
+|Live streaming supports rewind viewing|✅|❌|✅|
+|Picture in Picture supports subtitle display|✅|❌|❌|
+|Use the fonts in the video to render subtitles|✅|❌|❌|
+|ISO Blu-ray disc playback on all Apple platforms|✅|❌|✅|
+|Annex-B async hardware decoding(Live Stream)|✅|❌|❌|
+|Use memory cache for fast seek in short time range|✅|❌|❌|
+|Cache data to Hard Drive,Preload data to Hard Drive|✅|❌|✅|
+|Offline AI real-time subtitle generation and translation|✅|❌|✅|
+|Full display of ass subtitles effect(Render as image using libass)|✅|❌|❌|
+|Play videos in a small window in the App (resumable, supports tvos and ios)|✅|❌|✅|
+|FFmpeg version|7.1.1|6.1.0|
+|Record video|✅|✅|❌|
+|360° panorama video|✅|✅|❌|
+|Picture in Picture|✅|✅|❌|
+|Hardware accelerator|✅|✅|❌|
+|Seamless loop playback|✅|✅|❌|
+|De-interlace auto detect|✅|✅|❌|
+|Multichannel Audio/Spatial Audio|✅|✅|❌|
+|4k/HDR/HDR10/HDR10+/Dolby Vision|✅|✅|❌|
+|Custom url protocols such as nfs/smb/UPnP |✅|✅|❌|
+|Text subtitle/Image subtitle/Closed Captions|✅|✅|❌|
+|Search Online Subtitles(shooter/assrt/opensubtitles)|✅|✅|❌|
+|Low latency 4K live video streaming (less than 200ms on LAN)|✅|✅|❌|
+|Automatically switch to multi-bitrate streams based on network|✅|✅|❌|
 
 ## The list of App using this SDK
 App Store Link| Logo |
 | ----------- | ----------- |
-|[Alplayer](https://apps.apple.com/us/app/alplayer/id1660917007)||
 |[APTV](https://apps.apple.com/app/aptv/id1630403500)||
 |[homeTV IPTV Player](https://apps.apple.com/app/hometv-iptv-player/id1636701357)||
 |[IPTV +](https://apps.apple.com/app/iptv-my-smart-iptv-player/id1525121231)||
