@@ -3,9 +3,20 @@
 ![License](https://img.shields.io/badge/license-GPL-blue.svg)
 # KSPlayer 
 
-KSPlayer is a powerful media play framework for iOS, tvOS, macOS, xrOS, visionOS, Mac Catalyst, SwiftUI, Apple Silicon M1 .
+KSPlayer is a powerful media play framework for iOS, tvOS, macOS, xrOS, visionOS, Mac Catalyst. based on AVPlayer and FFmpeg, support AppKit/UIKit/SwiftUI.
 
 English | [简体中文](./README_CN.md)
+
+## Communication
+
+If you have a commercial project that requires a custom player, or would like to receive a paid consultation, please email me.
+
+- Email : kingslay@icloud.com
+
+## License
+KSPlayer defaults to the GPL license (requires open-sourcing your own project code), and we hope everyone will consciously respect the licensing agreement of the KSPlayer project. Additionally, there is a paid version that adopts the LGPL license (contact us). 
+
+If due to commercial reasons, you prefer not to adhere to the GPL license  or the LGPL license, you can contact us. Through our authorization, you can obtain a more flexible licensing agreement. 
 
 ## Features
 Functional differences between GPL version and LGPL version
@@ -42,9 +53,14 @@ Functional differences between GPL version and LGPL version
 |Low latency 4K live video streaming (less than 200ms on LAN)|✅|✅|❌|
 |Automatically switch to multi-bitrate streams based on network|✅|✅|❌|
 
+
+## Requirements
+
+- iOS 13+, macOS 10.15+, tvOS 13+, xrOS 1+
+
 ## The list of App using this SDK
-App Store Link| Logo |
-| ----------- | ----------- |
+| App Store Link | Logo |
+| -------------- | ---- |
 |[APTV](https://apps.apple.com/app/aptv/id1630403500)||
 |[homeTV IPTV Player](https://apps.apple.com/app/hometv-iptv-player/id1636701357)||
 |[IPTV +](https://apps.apple.com/app/iptv-my-smart-iptv-player/id1525121231)||
@@ -58,17 +74,6 @@ App Store Link| Logo |
 |[UHF - Love your IPTV](https://apps.apple.com/app/uhf-love-your-iptv/id6443751726)|![logo](https://uhf-web.vercel.app/uhfsponsor.png)|
 |[Zen IPTV](https://apps.apple.com/fr/app/zen-iptv/id6458223193)||
 
-
-
-## License
-KSPlayer defaults to the GPL license (requires open-sourcing your own project code), and we hope everyone will consciously respect the licensing agreement of the KSPlayer project. Additionally, there is a paid version that adopts the LGPL license (contact us). 
-
-If due to commercial reasons, you prefer not to adhere to the GPL license  or the LGPL license, you can contact us. Through our authorization, you can obtain a more flexible licensing agreement. Email: kingslay@icloud.com
-
-
-## Requirements
-
-- iOS 13+, macOS 10.15+, tvOS 13+, xrOS 1+
 
 ## Demo
 
@@ -330,11 +335,6 @@ Thanks to [cdguy](https://github.com/cdguy) [UnknownCoder807](https://github.com
 
 Thanks to [skrew](https://github.com/skrew) and LillyPlayer community for sponsoring a 2022 Apple TV 4K
 
-## Communication
-
-If you have a business cooperation project or want to initiate a paid consultation, you can contact me via email
-
-- Email : kingslay@icloud.com
 
 ![1](./Documents/Sponsors.jpg)
 
