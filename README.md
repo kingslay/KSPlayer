@@ -31,18 +31,19 @@ Some features of the LGPL version require a one-time payment, which I have used 
 |Smoothly Play 8K or 120 FPS Video|✅|❌|
 |External image subtitles, such as SUP|✅|❌|
 |Main subtitles and Secondary subtitles|✅|❌|
+|Picture in Picture supports subtitle display|✅|❌|
+|Annex-B async hardware decoding(Live Stream)|✅|❌|
+|Use the fonts in the video to render subtitles|✅|❌|
+|Use memory cache for fast seek in short time range|✅|❌|
+|Full display of ass subtitles effect(Render as image using libass)|✅|❌|
+|FFmpeg version|8.0.0|6.1.0|
 |Dovi P5 displays HDR (not overheating)|💰|❌|
 |Live streaming supports rewind viewing|💰|❌|
-|Picture in Picture supports subtitle display|✅|❌|
-|Use the fonts in the video to render subtitles|✅|❌|
 |ISO Blu-ray disc playback on all Apple platforms|💰|❌|
-|Annex-B async hardware decoding(Live Stream)|✅|❌|
-|Use memory cache for fast seek in short time range|✅|❌|
 |Cache data to Hard Drive,Preload data to Hard Drive|💰|❌|
+|Simultaneous playback of separate audio and video URLs|💰|❌|
 |Offline AI real-time subtitle generation and translation|💰|❌|
-|Full display of ass subtitles effect(Render as image using libass)|✅|❌|
 |Play videos in a small window in the App (resumable, supports macOS、iOS and tvOS)|💰|❌|
-|FFmpeg version|7.1.1|6.1.0|
 |Record video|✅|✅|
 |360° panorama video|✅|✅|
 |Picture in Picture|✅|✅|
@@ -312,25 +313,26 @@ project by becoming a sponsor.
 Become a sponsor through [GitHub Sponsors](https://github.com/sponsors/kingslay/). :heart:
 
 Your user icon or company logo shows up this with a link to your home page. 
-Name| Logo |
-| ----------- | ----------- |
-|[UnknownCoder807](https://github.com/UnknownCoder807)||
+Name| App name | App Logo |
+| ----------- | ----------- |----------- |
+|[UnknownCoder807](https://github.com/UnknownCoder807)|[Snappier](https://apps.apple.com/app/snappier-iptv/id1579702567)||
 |[skrew](https://github.com/skrew)||
 |[Kimentanm](https://github.com/Kimentanm)||
 |[byMohamedali](https://github.com/byMohamedali)||
-|[nakiostudio](https://github.com/nakiostudio)|![logo](https://uhf-web.vercel.app/uhfsponsor.png)|
+|[nakiostudio](https://github.com/nakiostudio)|[UHF](https://apps.apple.com/app/uhf-love-your-iptv/id6443751726)||
 |[CodingByJerez](https://github.com/CodingByJerez)||
 |[andrefmsilva](https://github.com/andrefmsilva)||
-|[romaingyh](https://github.com/romaingyh)||
-|[FantasyKingdom](https://github.com/FantasyKingdom)||
+|[romaingyh](https://github.com/romaingyh)|[Zen IPTV](https://apps.apple.com/fr/app/zen-iptv/id6458223193)||
+|[FantasyKingdom](https://github.com/FantasyKingdom)|[Senplayer](https://apps.apple.com/us/app/senplayer-hdr-media-player/id6443975850)||
 |[aart-rainey](https://github.com/aart-rainey)||
 |[nihalahmed](https://github.com/nihalahmed)||
-|[HatimDa](https://github.com/HatimDa)||
 |[johnil](https://github.com/johnil)||
 |[MeloDreek](https://github.com/MeloDreek)||
 |[nsplay1990](https://github.com/nsplay1990)||
 |[AppleChillVibez](https://github.com/AppleChillVibez)||
-|[alibusut](https://github.com/alibusut)||
+|[stekc](https://github.com/stekc)||
+
+
 
 
 Thanks to [nightfall708](https://github.com/nightfall708) for sponsoring a mac mini
