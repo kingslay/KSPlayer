@@ -37,6 +37,7 @@ Some features of the LGPL version require a one-time payment, which I have used 
 |Use memory cache for fast seek in short time range|✅|❌|
 |Full display of ass subtitles effect(Render as image using libass)|✅|❌|
 |FFmpeg version|8.0.0|6.1.0|
+|Video upscaling |💰|❌|
 |Dovi P5 displays HDR (not overheating)|💰|❌|
 |Live streaming supports rewind viewing|💰|❌|
 |ISO Blu-ray disc playback on all Apple platforms|💰|❌|
@@ -331,9 +332,8 @@ Name| App name | App Logo |
 |[nsplay1990](https://github.com/nsplay1990)||
 |[AppleChillVibez](https://github.com/AppleChillVibez)||
 |[stekc](https://github.com/stekc)||
-
-
-
+|[AstroChivs](https://github.com/AstroChivs)||
+|[bmob222](https://github.com/bmob222)||
 
 Thanks to [nightfall708](https://github.com/nightfall708) for sponsoring a mac mini
 
