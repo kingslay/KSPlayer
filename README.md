@@ -1,7 +1,7 @@
 ![Build Status](https://img.shields.io/badge/build-%20passing%20-blue.svg)
 ![Platform](https://img.shields.io/badge/Platform-%20iOS%20macOS%20tvOS%20visionOS%20-blue.svg)
 ![License](https://img.shields.io/badge/license-GPL-blue.svg)
-# KSPlayer 
+# KSPlayer
 
 KSPlayer is a powerful media play framework for iOS, tvOS, macOS, xrOS, visionOS, Mac Catalyst. based on AVPlayer and FFmpeg, support AppKit/UIKit/SwiftUI.
 
@@ -14,15 +14,15 @@ If you have a commercial project that requires a custom player, or would like to
 - Email : kingslay@icloud.com
 
 ## License
-KSPlayer defaults to the GPL license (requires open-sourcing your own project code), and we hope everyone will consciously respect the licensing agreement of the KSPlayer project. Additionally, there is a paid version that adopts the LGPL license (contact us). 
+KSPlayer defaults to the GPL license (requires open-sourcing your own project code), and we hope everyone will consciously respect the licensing agreement of the KSPlayer project. Additionally, there is a paid version that adopts the LGPL license (contact us).
 
-If due to commercial reasons, you prefer not to adhere to the GPL license  or the LGPL license, you can contact us. Through our authorization, you can obtain a more flexible licensing agreement. 
+If due to commercial reasons, you prefer not to adhere to the GPL license  or the LGPL license, you can contact us. Through our authorization, you can obtain a more flexible licensing agreement.
 
 ## Features
 Functional differences between GPL version and LGPL version
 Some features of the LGPL version require a one-time payment, which I have used 💰 to mark them out.
 
-| Feature     | LGPL      | GPL    | 
+| Feature     | LGPL      | GPL    |
 | ----------- | --------- | ------ |
 |Dolby AC-4|✅|❌|
 |AV1 hardware decoding|✅|❌|
@@ -151,7 +151,7 @@ let res0 = KSPlayerResourceDefinition(url: URL(string: "http://clips.vorwaerts-g
                                       definition: "高清")
 let res1 = KSPlayerResourceDefinition(url: URL(string: "http://clips.vorwaerts-gmbh.de/big_buck_bunny.mp4")!,
                                       definition: "标清")
-   
+
 let asset = KSPlayerResource(name: "Big Buck Bunny",
                              definitions: [res0, res1],
                              cover: URL(string: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c5/Big_buck_bunny_poster_big.jpg/848px-Big_buck_bunny_poster_big.jpg"))
@@ -201,7 +201,7 @@ public protocol PlayerControllerDelegate: class {
           super.updateUI(isLandscape: isLandscape)
           toolBar.playbackRateButton.isHidden = true
       }
-  
+
       override func onButtonPressed(type: PlayerButtonType, button: UIButton) {
           if type == .landscape {
               // Your own button press behaviour here
@@ -212,7 +212,7 @@ public protocol PlayerControllerDelegate: class {
   }
   ```
 
-  
+
 
 - ### Selecting Tracks
 
@@ -308,18 +308,17 @@ Any contributing and pull requests are warmly welcome. However, before you plan 
 
 ## Backers & Sponsors
 
-Open-source projects cannot live long without your help. If you find KSPlayer to be useful, please consider supporting this 
-project by becoming a sponsor. 
+Open-source projects cannot live long without your help. If you find KSPlayer to be useful, please consider supporting this
+project by becoming a sponsor.
 
 Become a sponsor through [GitHub Sponsors](https://github.com/sponsors/kingslay/). :heart:
 
-Your user icon or company logo shows up this with a link to your home page. 
-Name| App name | App Logo |
+Your user icon or company logo shows up this with a link to your home page.
+|Name| App name | App Logo |
 | ----------- | ----------- |----------- |
 |[UnknownCoder807](https://github.com/UnknownCoder807)|[Snappier](https://apps.apple.com/app/snappier-iptv/id1579702567)||
 |[skrew](https://github.com/skrew)||
 |[Kimentanm](https://github.com/Kimentanm)||
-|[byMohamedali](https://github.com/byMohamedali)||
 |[nakiostudio](https://github.com/nakiostudio)|[UHF](https://apps.apple.com/app/uhf-love-your-iptv/id6443751726)||
 |[CodingByJerez](https://github.com/CodingByJerez)||
 |[andrefmsilva](https://github.com/andrefmsilva)||
@@ -337,10 +336,10 @@ Name| App name | App Logo |
 
 Thanks to [nightfall708](https://github.com/nightfall708) for sponsoring a mac mini
 
-Thanks to [cdguy](https://github.com/cdguy) [UnknownCoder807](https://github.com/UnknownCoder807) [skrew](https://github.com/skrew) and LillyPlayer community for sponsoring a LG S95QR Sound Bar 
+Thanks to [cdguy](https://github.com/cdguy) [UnknownCoder807](https://github.com/UnknownCoder807) [skrew](https://github.com/skrew) and LillyPlayer community for sponsoring a LG S95QR Sound Bar
 
 Thanks to [skrew](https://github.com/skrew) and LillyPlayer community for sponsoring a 2022 Apple TV 4K
 
+Thanks to [bgoncal](https://github.com/bgoncal) for sponsoring a HomePod mini
 
 ![1](./Documents/Sponsors.jpg)
-
