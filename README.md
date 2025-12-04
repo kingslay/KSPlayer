@@ -36,7 +36,7 @@ Some features of the LGPL version require a one-time payment, which I have used 
 |Use the fonts in the video to render subtitles|✅|❌|
 |Use memory cache for fast seek in short time range|✅|❌|
 |Full display of ass subtitles effect(Render as image using libass)|✅|❌|
-|FFmpeg version|8.0.0|6.1.0|
+|FFmpeg version|8.1.0|6.1.0|
 |Video upscaling |💰|❌|
 |Dovi P5 displays HDR (not overheating)|💰|❌|
 |Live streaming supports rewind viewing|💰|❌|
@@ -333,6 +333,9 @@ Your user icon or company logo shows up this with a link to your home page.
 |[stekc](https://github.com/stekc)||
 |[AstroChivs](https://github.com/AstroChivs)||
 |[bmob222](https://github.com/bmob222)||
+|[pateltejas](https://github.com/pateltejas)||
+|[ewanl2001](https://github.com/ewanl2001)||
+|[themisterholliday](https://github.com/themisterholliday)||
 
 Thanks to [nightfall708](https://github.com/nightfall708) for sponsoring a mac mini
 
