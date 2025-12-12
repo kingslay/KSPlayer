@@ -25,10 +25,13 @@ Some features of the LGPL version require a one-time payment, which I have used 
 | Feature     | LGPL      | GPL    |
 | ----------- | --------- | ------ |
 |Dolby AC-4|✅|❌|
+|Swift Concurrency|✅|❌|
 |AV1 hardware decoding|✅|❌|
 |All demuxers, All decoders|✅|❌|
+|Use System Caption Appearance|✅|❌|
 |Record video clips at any time|✅|❌|
 |Smoothly Play 8K or 120 FPS Video|✅|❌|
+|Video download and format conversion|✅|❌|
 |External image subtitles, such as SUP|✅|❌|
 |Main subtitles and Secondary subtitles|✅|❌|
 |Picture in Picture supports subtitle display|✅|❌|
@@ -36,7 +39,7 @@ Some features of the LGPL version require a one-time payment, which I have used 
 |Use the fonts in the video to render subtitles|✅|❌|
 |Use memory cache for fast seek in short time range|✅|❌|
 |Full display of ass subtitles effect(Render as image using libass)|✅|❌|
-|FFmpeg version|8.1.0|6.1.0|
+|FFmpeg version|8.0.1|6.1.0|
 |Video upscaling |💰|❌|
 |Dovi P5 displays HDR (not overheating)|💰|❌|
 |Live streaming supports rewind viewing|💰|❌|
