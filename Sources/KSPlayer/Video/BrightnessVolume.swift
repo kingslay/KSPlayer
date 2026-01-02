@@ -15,6 +15,7 @@ open class BrightnessVolume {
     init() {
         #if !os(tvOS) && !os(xrOS)
         brightnessObservation = UIScreen.main.observe(\.brightness, options: .new) { [weak self] _, change in
+            guard KSOptions.enableBrightnessGestures else { return }
             if let self, let value = change.newValue {
                 self.appearView()
                 self.progressView.setProgress(Float(value), type: 0)
@@ -31,6 +32,7 @@ open class BrightnessVolume {
     }
 
     @objc private func volumeIsChanged(notification: NSNotification) {
+        guard KSOptions.enableVolumeGestures else { return }
         if let changeReason = notification.userInfo?["AVSystemController_AudioVolumeChangeReasonNotificationParameter"] as? String, changeReason == "ExplicitVolumeChange" {
             if let volume = notification.userInfo?["AVSystemController_AudioVolumeNotificationParameter"] as? CGFloat {
                 appearView()
