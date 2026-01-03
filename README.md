@@ -27,6 +27,7 @@ Some features of the LGPL version require a one-time payment, which I have used 
 |Dolby AC-4|✅|❌|
 |Swift Concurrency|✅|❌|
 |AV1 hardware decoding|✅|❌|
+|Word-by-word subtitles|✅|❌|
 |All demuxers, All decoders|✅|❌|
 |Use System Caption Appearance|✅|❌|
 |Record video clips at any time|✅|❌|
@@ -41,10 +42,11 @@ Some features of the LGPL version require a one-time payment, which I have used 
 |Full display of ass subtitles effect(Render as image using libass)|✅|❌|
 |FFmpeg version|8.0.1|6.1.0|
 |Video upscaling |💰|❌|
+|Precache data to Hard Drive|💰|❌|
+|Video switching with zero delay|💰|❌|
 |Dovi P5 displays HDR (not overheating)|💰|❌|
 |Live streaming supports rewind viewing|💰|❌|
 |ISO Blu-ray disc playback on all Apple platforms|💰|❌|
-|Cache data to Hard Drive,Preload data to Hard Drive|💰|❌|
 |Simultaneous playback of separate audio and video URLs|💰|❌|
 |Offline AI real-time subtitle generation and translation|💰|❌|
 |Play videos in a small window in the App (resumable, supports macOS、iOS and tvOS)|💰|❌|
@@ -339,6 +341,11 @@ Your user icon or company logo shows up this with a link to your home page.
 |[pateltejas](https://github.com/pateltejas)||
 |[ewanl2001](https://github.com/ewanl2001)||
 |[themisterholliday](https://github.com/themisterholliday)||
+|[JulienDev](https://github.com/JulienDev)||
+|[Sheinices](https://github.com/Sheinices)||
+|[Etheirystech](https://github.com/Etheirystech)||
+|[loicleser](https://github.com/loicleser)||
+
 
 Thanks to [nightfall708](https://github.com/nightfall708) for sponsoring a mac mini
 
