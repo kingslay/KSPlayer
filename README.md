@@ -19,8 +19,11 @@ KSPlayer defaults to the GPL license (requires open-sourcing your own project co
 If due to commercial reasons, you prefer not to adhere to the GPL license  or the LGPL license, you can contact us. Through our authorization, you can obtain a more flexible licensing agreement.
 
 ## Features
-Functional differences between GPL version and LGPL version
+Functional differences between GPL version and LGPL version.
 Some features of the LGPL version require a one-time payment, which I have used 💰 to mark them out.
+
+To experience the powerful features of the LGPL version, you can download the app from the App Store. [App Store Link](https://apps.apple.com/app/tracyplayer/id6450770064)
+
 
 | Feature     | LGPL      | GPL    |
 | ----------- | --------- | ------ |
