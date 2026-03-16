@@ -49,9 +49,9 @@ public class AudioRendererPlayer: AudioOutput {
         if #available(macOS 11.3, iOS 14.5, tvOS 14.5, *) {
             synchronizer.delaysRateChangeUntilHasSufficientMediaData = false
         }
-//        if #available(tvOS 15.0, iOS 15.0, macOS 12.0, *) {
-//            renderer.allowedAudioSpatializationFormats = .monoStereoAndMultichannel
-//        }
+        if #available(tvOS 15.0, iOS 15.0, macOS 12.0, *) {
+            renderer.allowedAudioSpatializationFormats = .monoStereoAndMultichannel
+        }
     }
 
     public func prepare(audioFormat: AVAudioFormat) {
