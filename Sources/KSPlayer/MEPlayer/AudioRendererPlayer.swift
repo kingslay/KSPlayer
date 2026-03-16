@@ -133,7 +133,7 @@ public class AudioRendererPlayer: AudioOutput {
                 renderer.audioTimePitchAlgorithm = channelCount > 2 ? .spectral : .timeDomain
                 renderer.enqueue(sampleBuffer)
                 #if !os(macOS)
-                if AVAudioSession.sharedInstance().preferredInputNumberOfChannels != channelCount {
+                if AVAudioSession.sharedInstance().preferredOutputNumberOfChannels != channelCount {
                     try? AVAudioSession.sharedInstance().setPreferredOutputNumberOfChannels(Int(channelCount))
                 }
                 #endif
