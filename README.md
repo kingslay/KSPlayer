@@ -27,6 +27,17 @@ To experience the powerful features of the LGPL version, you can download the ap
 
 | Feature     | LGPL      | GPL    |
 | ----------- | --------- | ------ |
+|Video upscaling |💰|❌|
+|Precache data to Hard Drive|💰|❌|
+|Video switching with zero delay|💰|❌|
+|Audio Passthrough Output by Wi-Fi|💰|❌|
+|Dovi P5 displays HDR (not overheating)|💰|❌|
+|Live streaming supports rewind viewing|💰|❌|
+|ISO Blu-ray disc playback on all Apple platforms|💰|❌|
+|Simultaneous playback of separate audio and video URLs|💰|❌|
+|Offline AI real-time subtitle generation and translation|💰|❌|
+|ProAVPlayer supports MKV, native Dolby Vision and Dolby Atmos.|💰|❌|
+|Play videos in a small window in the App (resumable, supports iOS and tvOS)|💰|❌|
 |Dolby AC-4|✅|❌|
 |Swift Concurrency|✅|❌|
 |AV1 hardware decoding|✅|❌|
@@ -44,17 +55,6 @@ To experience the powerful features of the LGPL version, you can download the ap
 |KSMEPlayer supports all demuxing and decoding formats|✅|❌|
 |Full display of ass subtitles effect(Render as image using libass)|✅|❌|
 |FFmpeg version|8.1.0|6.1.0|
-|Video upscaling |💰|❌|
-|Precache data to Hard Drive|💰|❌|
-|Video switching with zero delay|💰|❌|
-|Audio Passthrough Output by Wi-Fi|💰|❌|
-|Dovi P5 displays HDR (not overheating)|💰|❌|
-|Live streaming supports rewind viewing|💰|❌|
-|ISO Blu-ray disc playback on all Apple platforms|💰|❌|
-|Simultaneous playback of separate audio and video URLs|💰|❌|
-|Offline AI real-time subtitle generation and translation|💰|❌|
-|ProAVPlayer supports MKV, native Dolby Vision and Dolby Atmos.|💰|❌|
-|Play videos in a small window in the App (resumable, supports iOS and tvOS)|💰|❌|
 |Record video|✅|✅|
 |360° panorama video|✅|✅|
 |Picture in Picture|✅|✅|
@@ -74,7 +74,9 @@ To experience the powerful features of the LGPL version, you can download the ap
 
 - iOS 13+, macOS 10.15+, tvOS 13+, xrOS 1+
 
-## The list of App using this SDK
+## List of Apps Licensed to Use this SDK
+
+This table does not list all licensed apps. If you would like to have your app listed above, please send me an email.
 | App Store Link | Logo |
 | -------------- | ---- |
 |[APTV](https://apps.apple.com/app/aptv/id1630403500)||
@@ -87,7 +89,7 @@ To experience the powerful features of the LGPL version, you can download the ap
 |[Spatial Video Studio](https://apps.apple.com/app/id6523429904)||
 |[SWIPTV - IPTV Smart Player](https://apps.apple.com/app/swiptv-iptv-smart-player/id1658538188)||
 |[TracyPlayer](https://apps.apple.com/app/tracyplayer/id6450770064)||
-|[UHF - Love your IPTV](https://apps.apple.com/app/uhf-love-your-iptv/id6443751726)|![logo](https://uhf-web.vercel.app/uhfsponsor.png)|
+|[UHF - Love your IPTV](https://apps.apple.com/app/uhf-love-your-iptv/id6443751726)||
 |[Zen IPTV](https://apps.apple.com/fr/app/zen-iptv/id6458223193)||
 
 
