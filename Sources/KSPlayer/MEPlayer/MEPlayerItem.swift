@@ -645,7 +645,8 @@ extension MEPlayerItem: MediaPlayback {
             self.formatCtx?.pointee.interrupt_callback.opaque = nil
             self.formatCtx?.pointee.interrupt_callback.callback = nil
             avformat_close_input(&self.formatCtx)
-            avformat_close_input(&self.outputFormatCtx)
+            // ✅ outputFormatCtx 已在 stopRecord() 中釋放，不需重複清理
+            // avformat_close_input(&self.outputFormatCtx)
             self.duration = 0
             self.closeOperation = nil
             self.operationQueue.cancelAllOperations()
@@ -670,9 +671,24 @@ extension MEPlayerItem: MediaPlayback {
     }
 
     func stopRecord() {
-        if let outputFormatCtx {
-            av_write_trailer(outputFormatCtx)
+        // ✅ 先把 outputFormatCtx 設為 nil，讓 reading() 立刻停止寫入
+        // reading() 在寫入前會 `if let outputFormatCtx` 檢查，nil 後就不再寫入
+        guard let ctx = outputFormatCtx else { return }
+        outputFormatCtx = nil
+        streamMapping.removeAll()
+
+        // 釋放 outputPacket（避免 shutdown 時重複釋放）
+        av_packet_free(&outputPacket)
+
+        // 寫入結尾並關閉 avio
+        av_write_trailer(ctx)
+        if ctx.pointee.pb != nil {
+            avio_closep(&ctx.pointee.pb)
         }
+        // 釋放 context
+        var mutableCtx: UnsafeMutablePointer<AVFormatContext>? = ctx
+        avformat_free_context(mutableCtx)
+        mutableCtx = nil
     }
 
     public func seek(time: TimeInterval, completion: @escaping ((Bool) -> Void)) {
