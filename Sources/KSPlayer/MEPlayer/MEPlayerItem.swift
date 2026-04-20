@@ -12,6 +12,10 @@ import Libavfilter
 import Libavformat
 
 public final class MEPlayerItem: Sendable {
+    
+    // 關鍵修正 1：引入鎖來保護錄影相關的指標 (避免多執行緒崩潰)
+    private let recordLock = NSLock()
+    
     private let url: URL
     private let options: KSOptions
     private let operationQueue = OperationQueue()
@@ -183,14 +187,9 @@ extension MEPlayerItem {
             }
         }
         formatCtx.pointee.interrupt_callback = interruptCB
-        // avformat_close_input这个函数会调用io_close2。但是自定义协议是不会调用io_close2这个函数
-//        formatCtx.pointee.io_close2 = { _, _ -> Int32 in
-//            0
-//        }
         setHttpProxy()
         var avOptions = options.formatContextOptions.avOptions
         if let pb = options.process(url: url) {
-            // 如果要自定义协议的话，那就用avio_alloc_context，对formatCtx.pointee.pb赋值
             formatCtx.pointee.pb = pb.getContext()
         }
         let urlString: String
@@ -228,7 +227,6 @@ extension MEPlayerItem {
             avformat_close_input(&self.formatCtx)
             return
         }
-        // FIXME: hack, ffplay maybe should not use avio_feof() to test for the end
         formatCtx.pointee.pb?.pointee.eof_reached = 0
         let flags = formatCtx.pointee.iformat.pointee.flags
         maxFrameDuration = flags & AVFMT_TS_DISCONT == AVFMT_TS_DISCONT ? 10.0 : 3600.0
@@ -269,10 +267,14 @@ extension MEPlayerItem {
     }
 
     func startRecord(url: URL) {
-        stopRecord()
+        stopRecord() // 確保先停止舊的錄影
+        
+        recordLock.lock()
+        defer { recordLock.unlock() }
+        
         let filename = url.isFileURL ? url.path : url.absoluteString
         var ret = avformat_alloc_output_context2(&outputFormatCtx, nil, nil, filename)
-        guard let outputFormatCtx, let formatCtx else {
+        guard let outputFormatCtx = outputFormatCtx, let formatCtx = formatCtx else {
             KSLog(NSError(errorCode: .formatOutputCreate, avErrorCode: ret))
             return
         }
@@ -319,10 +321,34 @@ extension MEPlayerItem {
         ret = avformat_write_header(outputFormatCtx, nil)
         guard ret >= 0 else {
             KSLog(NSError(errorCode: .formatWriteHeader, avErrorCode: ret))
-            avformat_close_input(&self.outputFormatCtx)
+            var tempCtx: UnsafeMutablePointer<AVFormatContext>? = self.outputFormatCtx
+            avformat_free_context(tempCtx)
+            self.outputFormatCtx = nil
             return
         }
         outputPacket = av_packet_alloc()
+    }
+    
+    // 關鍵修正 2：安全關閉寫入資源，防止指標殘留
+    func stopRecord() {
+        recordLock.lock()
+        defer { recordLock.unlock() }
+        
+        if let outCtx = outputFormatCtx {
+            av_write_trailer(outCtx)
+            if (outCtx.pointee.oformat.pointee.flags & AVFMT_NOFILE) == 0 {
+                avio_closep(&outCtx.pointee.pb)
+            }
+            var tempCtx: UnsafeMutablePointer<AVFormatContext>? = outCtx
+            avformat_free_context(tempCtx)
+            outputFormatCtx = nil
+            KSLog("Record context freed safely.")
+        }
+        
+        if var pkt = outputPacket {
+            av_packet_free(&pkt)
+            outputPacket = nil
+        }
     }
 
     private func createCodec(formatCtx: UnsafeMutablePointer<AVFormatContext>) {
@@ -406,7 +432,6 @@ extension MEPlayerItem {
         }), first.codecpar.codec_id != AV_CODEC_ID_NONE {
             first.isEnabled = true
             options.process(assetTrack: first)
-            // 音频要比较所有的音轨，因为truehd的fps是1200，跟其他的音轨差距太大了
             let fps = audios.map(\.nominalFrameRate).max() ?? 44
             let frameCapacity = options.audioFrameMaxCount(fps: fps, channelCount: Int(first.audioDescriptor?.audioFormat.channelCount ?? 2))
             let track = options.syncDecodeAudio ? SyncPlayerItemTrack<AudioFrame>(mediaType: .audio, frameCapacity: frameCapacity, options: options) : AsyncPlayerItemTrack<AudioFrame>(mediaType: .audio, frameCapacity: frameCapacity, options: options)
@@ -480,13 +505,8 @@ extension MEPlayerItem {
                 }
                 let seekMin = increase > 0 ? timeStamp - increase + 2 : Int64.min
                 let seekMax = increase < 0 ? timeStamp - increase - 2 : Int64.max
-                // can not seek to key frame
                 let seekStartTime = CACurrentMediaTime()
                 var result = avformat_seek_file(formatCtx, -1, seekMin, timeStamp, seekMax, seekFlags)
-//                var result = av_seek_frame(formatCtx, -1, timeStamp, seekFlags)
-                // When seeking before the beginning of the file, and seeking fails,
-                // try again without the backwards flag to make it seek to the
-                // beginning.
                 if result < 0, seekFlags & AVSEEK_FLAG_BACKWARD == AVSEEK_FLAG_BACKWARD {
                     KSLog("seek to \(seekToTime) failed. seekFlags remove BACKWARD")
                     options.seekFlags &= ~AVSEEK_FLAG_BACKWARD
@@ -528,23 +548,35 @@ extension MEPlayerItem {
             return 0
         }
         if readResult == 0 {
-            if let outputFormatCtx, let formatCtx {
+            
+            // 關鍵修正 3：錄影寫入防護與時戳校正
+            recordLock.lock()
+            if let outputFormatCtx = self.outputFormatCtx, let formatCtx = self.formatCtx, let outputPacket = self.outputPacket {
                 let index = Int(corePacket.pointee.stream_index)
                 if let outputIndex = streamMapping[index],
                    let inputTb = formatCtx.pointee.streams[index]?.pointee.time_base,
-                   let outputTb = outputFormatCtx.pointee.streams[outputIndex]?.pointee.time_base,
-                   let outputPacket
+                   let outputTb = outputFormatCtx.pointee.streams[outputIndex]?.pointee.time_base
                 {
+                    av_packet_unref(outputPacket) // 確保上一個資料已清除
                     av_packet_ref(outputPacket, corePacket)
+                    
                     outputPacket.pointee.stream_index = Int32(outputIndex)
                     av_packet_rescale_ts(outputPacket, inputTb, outputTb)
                     outputPacket.pointee.pos = -1
+                    
+                    // 防崩潰檢查：修正錯誤的時序
+                    if outputPacket.pointee.pts < outputPacket.pointee.dts {
+                        outputPacket.pointee.pts = outputPacket.pointee.dts
+                    }
+                    
                     let ret = av_interleaved_write_frame(outputFormatCtx, outputPacket)
                     if ret < 0 {
-                        KSLog("can not av_interleaved_write_frame")
+                        KSLog("Write frame error: \(ret)")
                     }
                 }
             }
+            recordLock.unlock()
+            
             if corePacket.pointee.size <= 0 {
                 return 0
             }
@@ -575,7 +607,6 @@ extension MEPlayerItem {
                     state = .finished
                 }
             } else {
-                //                        if IS_AVERROR_INVALIDDATA(readResult)
                 error = .init(errorCode: .readFrame, avErrorCode: readResult)
             }
         }
@@ -628,25 +659,21 @@ extension MEPlayerItem: MediaPlayback {
     public func shutdown() {
         guard state != .closed else { return }
         state = .closed
-        av_packet_free(&outputPacket)
+        
+        // 關鍵修正 4：正確的關閉順序，先停錄影以鎖住並清空指標
         stopRecord()
-        // 故意循环引用。等结束了。才释放
+        
         let closeOperation = BlockOperation {
             Thread.current.name = (self.operationQueue.name ?? "") + "_close"
             self.allPlayerItemTracks.forEach { $0.shutdown() }
             KSLog("清空formatCtx")
-            // 自定义的协议才会av_class为空
             if let formatCtx = self.formatCtx, (formatCtx.pointee.flags & AVFMT_FLAG_CUSTOM_IO) != 0, let opaque = formatCtx.pointee.pb.pointee.opaque {
                 let value = Unmanaged<AbstractAVIOContext>.fromOpaque(opaque).takeRetainedValue()
                 value.close()
             }
-            // 不要自己来释放pb。不然第二次播放同一个url会出问题
-//            self.formatCtx?.pointee.pb = nil
             self.formatCtx?.pointee.interrupt_callback.opaque = nil
             self.formatCtx?.pointee.interrupt_callback.callback = nil
             avformat_close_input(&self.formatCtx)
-            // ✅ outputFormatCtx 已在 stopRecord() 中釋放，不需重複清理
-            // avformat_close_input(&self.outputFormatCtx)
             self.duration = 0
             self.closeOperation = nil
             self.operationQueue.cancelAllOperations()
@@ -668,27 +695,6 @@ extension MEPlayerItem: MediaPlayback {
             }
         }
         self.closeOperation = closeOperation
-    }
-
-    func stopRecord() {
-        // ✅ 先把 outputFormatCtx 設為 nil，讓 reading() 立刻停止寫入
-        // reading() 在寫入前會 `if let outputFormatCtx` 檢查，nil 後就不再寫入
-        guard let ctx = outputFormatCtx else { return }
-        outputFormatCtx = nil
-        streamMapping.removeAll()
-
-        // 釋放 outputPacket（避免 shutdown 時重複釋放）
-        av_packet_free(&outputPacket)
-
-        // 寫入結尾並關閉 avio
-        av_write_trailer(ctx)
-        if ctx.pointee.pb != nil {
-            avio_closep(&ctx.pointee.pb)
-        }
-        // 釋放 context
-        var mutableCtx: UnsafeMutablePointer<AVFormatContext>? = ctx
-        avformat_free_context(mutableCtx)
-        mutableCtx = nil
     }
 
     public func seek(time: TimeInterval, completion: @escaping ((Bool) -> Void)) {
@@ -790,7 +796,6 @@ extension MEPlayerItem: OutputRenderSourceDelegate {
     }
 
     public func setVideo(time: CMTime, position: Int64) {
-//        print("[video] video interval \(CACurrentMediaTime() - videoClock.lastMediaTime) video diff \(time.seconds - videoClock.time.seconds)")
         videoClock.time = time
         videoClock.position = position
         videoDisplayCount += 1
@@ -803,8 +808,6 @@ extension MEPlayerItem: OutputRenderSourceDelegate {
     }
 
     public func setAudio(time: CMTime, position: Int64) {
-//        print("[audio] setAudio: \(time.seconds)")
-        // 切换到主线程的话，那播放起来会更顺滑
         runOnMainThread {
             self.audioClock.time = time
             self.audioClock.position = position
@@ -877,7 +880,6 @@ extension MEPlayerItem: OutputRenderSourceDelegate {
 
 extension AbstractAVIOContext {
     func getContext() -> UnsafeMutablePointer<AVIOContext> {
-        // 需要持有ioContext，不然会被释放掉,等到shutdown在清空
         avio_alloc_context(av_malloc(Int(bufferSize)), bufferSize, writable ? 1 : 0, Unmanaged.passRetained(self).toOpaque()) { opaque, buffer, size -> Int32 in
             let value = Unmanaged<AbstractAVIOContext>.fromOpaque(opaque!).takeUnretainedValue()
             let ret = value.read(buffer: buffer, size: size)
