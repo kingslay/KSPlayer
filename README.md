@@ -47,9 +47,11 @@ To experience the powerful features of the LGPL version, you can download the ap
 |Use System Caption Appearance|✅|❌|
 |Record video clips at any time|✅|❌|
 |Smoothly Play 8K or 120 FPS Video|✅|❌|
+|Display Subtitles with HDR Effects|✅|❌|
 |Video download and format conversion|✅|❌|
 |External image subtitles, such as SUP|✅|❌|
 |Main subtitles and Secondary subtitles|✅|❌|
+|Adjust Saturation, Brightness, and Contrast|✅|❌|
 |Picture in Picture supports subtitle display|✅|❌|
 |Annex-B async hardware decoding(Live Stream)|✅|❌|
 |Use the fonts in the video to render subtitles|✅|❌|
