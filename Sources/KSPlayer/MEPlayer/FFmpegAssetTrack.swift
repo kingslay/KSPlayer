@@ -168,7 +168,14 @@ public class FFmpegAssetTrack: MediaPlayerTrack {
                         dovi = sideData.data.withMemoryRebound(to: DOVIDecoderConfigurationRecord.self, capacity: 1) { $0 }.pointee
                     } else if sideData.type == AV_PKT_DATA_DISPLAYMATRIX {
                         let matrix = sideData.data.withMemoryRebound(to: Int32.self, capacity: 1) { $0 }
-                        rotation = Int16(Int(-av_display_rotation_get(matrix)) % 360)
+                        let rawRotation = -av_display_rotation_get(matrix)
+                        if rawRotation.isFinite {
+                            let degrees = Int(rawRotation.rounded())
+                            let normalized = ((degrees % 360) + 360) % 360
+                            rotation = Int16(normalized)
+                        } else {
+                            rotation = 0
+                        }                        
                     }
                 }
             }
