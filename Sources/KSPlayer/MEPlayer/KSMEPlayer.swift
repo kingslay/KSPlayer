@@ -342,6 +342,10 @@ extension KSMEPlayer: MediaPlayerProtocol {
         }
     }
 
+    /// 见 `MEPlayerItem.displayedVideoTime`——最近一帧绘制到 display layer 的 PTS，
+    /// 适合驱动需要与画面严格同步的视图（audioClock 因 buffer prefill 跑在画面之前不适用）。
+    public var displayedVideoTime: TimeInterval { playerItem.displayedVideoTime }
+
     public var duration: TimeInterval { playerItem.duration }
 
     public var fileSize: Double { playerItem.fileSize }
