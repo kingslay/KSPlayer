@@ -45,6 +45,14 @@ public final class MEPlayerItem: Sendable {
         state == .seeking ? seekTime : (mainClock().time - startTime).seconds
     }
 
+    /// 最近一帧绘制到 display layer 的 PTS——即画面上正在显示的那一帧。每次
+    /// `setVideo(time:position:)` 渲染时更新；暂停 / stall 时无新帧绘制即冻结在最后一帧。
+    /// 与 `currentPlaybackTime` 的差别：后者跟 audioClock，而 audioClock 在 prefill /
+    /// cold-start / seek 后会瞬间被推到音频 buffer 头，跑在画面之前。
+    public var displayedVideoTime: TimeInterval {
+        state == .seeking ? seekTime : (videoClock.time - startTime).seconds
+    }
+
     private var seekTime = TimeInterval(0)
     private var startTime = CMTime.zero
     public private(set) var duration: TimeInterval = 0
@@ -550,6 +558,31 @@ extension MEPlayerItem {
             }
             let first = assetTracks.first { $0.trackID == corePacket.pointee.stream_index }
             if let first, first.isEnabled {
+                // 区间无缝循环触发（与下方 isLoopPlay EOF 触发平行）：
+                // packet PTS 越过 loopRange.upperBound 即把 audio/video track 切到 loopModel，
+                // av_seek_frame 回 lowerBound——后续 packet 进 loopPacketQueue，等当前
+                // packetQueue 播完由 codecDidFinished swap，实现区间无 decode-forward 循环。
+                //
+                // 触发判断只看 audio/video 的 isLoopModel：subtitle 用 SyncPlayerItemTrack，
+                // 没有 loopPacketQueue 与 swap，其 isLoopModel 一旦被置 true 也没有路径翻回 false——
+                // 用 allPlayerItemTracks.allSatisfy 会让带内嵌字幕的视频在第二圈无法重触发。
+                if let loopRange = options.loopRange,
+                   !options.isLoopPlay,
+                   first.mediaType == .video || first.mediaType == .audio,
+                   corePacket.pointee.pts != .min,  // AV_NOPTS_VALUE
+                   audioTrack?.isLoopModel != true,
+                   videoTrack?.isLoopModel != true
+                {
+                    let tb = first.timebase
+                    let pktPlaybackSec = Double(corePacket.pointee.pts) * Double(tb.num) / Double(tb.den) - startTime.seconds
+                    if pktPlaybackSec > loopRange.upperBound {
+                        audioTrack?.isLoopModel = true
+                        videoTrack?.isLoopModel = true
+                        let target = startTime + CMTime(seconds: loopRange.lowerBound, preferredTimescale: CMTimeScale(AV_TIME_BASE))
+                        _ = av_seek_frame(formatCtx, -1, target.value, AVSEEK_FLAG_BACKWARD)
+                        return readResult  // 当前 packet 已越界，丢弃；下一次 read 从 lowerBound 关键帧开始
+                    }
+                }
                 packet.assetTrack = first
                 if first.mediaType == .video {
                     if options.readVideoTime == 0 {
@@ -720,6 +753,34 @@ extension MEPlayerItem: CodecCapacityDelegate {
         }
         let allSatisfy = videoAudioTracks.allSatisfy { $0.isEndOfFile && $0.frameCount == 0 && $0.packetCount == 0 }
         if allSatisfy {
+            // 区间循环 swap：当前 iteration 的 packet/frame 全播完，把 loopPacketQueue 切换为活动 queue。
+            // 与 isLoopPlay 整文件循环的差异：
+            // 1. 不调 delegate?.sourceDidFinished()——避免上层把 playbackState 翻成 .finished
+            // 2. 不停 capacity timer（timer.fireDate = .distantFuture）——下一圈仍要继续工作
+            // 3. 设 track.seekTime 让 decoder 丢弃 loopPacketQueue 头部不需要的预滚帧
+            //
+            // 判断条件用 audioTrack?.isLoopModel / videoTrack?.isLoopModel 而非 options.loopRange != nil：
+            // 调用方中途清空 loopRange 时，若刚好处于"trigger 已发生 swap 还没发生"窗口内，
+            // tracks 仍处 loopModel——此时若不走本分支，会掉到下方 delegate?.sourceDidFinished()
+            // 把 playbackState 置为 .finished，且无法通过 play() 恢复（所有 track 已 EOF 无帧可解）。
+            if !options.isLoopPlay && (audioTrack?.isLoopModel == true || videoTrack?.isLoopModel == true) {
+                isAudioStalled = audioTrack == nil
+                let trimSec: TimeInterval
+                if let loopRange = options.loopRange {
+                    // 仍在循环：trim 到 lowerBound（AVSEEK_FLAG_BACKWARD 落到 ≤ lowerBound 的关键帧，
+                    // 不设 seekTime decoder 会把 lowerBound 之前的内容也播出来）
+                    trimSec = loopRange.lowerBound + startTime.seconds
+                } else {
+                    // 已退出循环：trim 到当前播放点，让 decoder 跳过 loopPacketQueue 里
+                    // lowerBound→当前位置 的预读，从当前位置接续往后播（避免回跳到 lowerBound）
+                    trimSec = currentPlaybackTime + startTime.seconds
+                }
+                audioTrack?.seekTime = trimSec
+                videoTrack?.seekTime = trimSec
+                audioTrack?.isLoopModel = false
+                videoTrack?.isLoopModel = false
+                return
+            }
             delegate?.sourceDidFinished()
             timer.fireDate = Date.distantFuture
             if options.isLoopPlay {
