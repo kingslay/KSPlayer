@@ -43,5 +43,5 @@ let package = Package(
 )
 
 package.dependencies += [
-    .package(url: "https://github.com/kingslay/FFmpegKit.git", from: "6.1.3"),
+    .package(url: "https://github.com/kingslay/FFmpegKit.git", from: "6.1.4"),
 ]
