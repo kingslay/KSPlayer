@@ -14,7 +14,7 @@ If you have a commercial project that requires a custom player, or would like to
 - Email : kingslay@icloud.com
 
 ## License
-KSPlayer defaults to the GPL license (requires open-sourcing your own project code), and we hope everyone will consciously respect the licensing agreement of the KSPlayer project. Additionally, there is a paid version that adopts the LGPL license (contact us).
+KSPlayer defaults to the GPL license (requires open-sourcing your own project code), and we hope everyone will consciously respect the licensing agreement of the KSPlayer project. Additionally, There is a paid version available under the LGPL license. You can check [this post](https://github.com/kingslay/KSPlayer/issues/731) for details on the licensing options or send me an email. If I don't reply to your email, feel free to @mention me in this post.
 
 If due to commercial reasons, you prefer not to adhere to the GPL license  or the LGPL license, you can contact us. Through our authorization, you can obtain a more flexible licensing agreement.
 
