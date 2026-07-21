@@ -26,6 +26,12 @@ open class KSOptions {
     public var isAccurateSeek = KSOptions.isAccurateSeek
     /// Applies to short videos only
     public var isLoopPlay = KSOptions.isLoopPlay
+    /// 区间无缝循环 [lowerBound, upperBound]，单位秒（相对 file 内播放时间，不含 startTime offset）。
+    /// 非 nil 时 read thread 读到 PTS > upperBound 的 packet 即把 audio/video track 切到
+    /// `isLoopModel = true`（后续 packet 进 `loopPacketQueue`），并 `av_seek_frame` 回 lowerBound。
+    /// 当前 `packetQueue` 播完触发 `codecDidFinished` 时 swap，实现区间无 decode-forward 循环。
+    /// 复用 `isLoopPlay` 的 packet queue 双缓冲；若同时设 `isLoopPlay = true`，以 isLoopPlay 为准。
+    public var loopRange: ClosedRange<TimeInterval>?
     /// seek完是否自动播放
     public var isSeekedAutoPlay = KSOptions.isSeekedAutoPlay
     /*
