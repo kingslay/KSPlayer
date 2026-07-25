@@ -290,7 +290,10 @@ extension MEPlayerItem {
         let formatName = outputFormatCtx.pointee.oformat.pointee.name.flatMap { String(cString: $0) }
         for i in 0 ..< Int(formatCtx.pointee.nb_streams) {
             if let inputStream = formatCtx.pointee.streams[i] {
-                let codecType = inputStream.pointee.codecpar.pointee.codec_type
+                // Same NULL-codecpar hazard as FFmpegAssetTrack.init(stream:);
+                // this loop also visits every stream in the container.
+                guard let inputCodecpar = inputStream.pointee.codecpar else { continue }
+                let codecType = inputCodecpar.pointee.codec_type
                 if [AVMEDIA_TYPE_AUDIO, AVMEDIA_TYPE_VIDEO, AVMEDIA_TYPE_SUBTITLE].contains(codecType) {
                     if codecType == AVMEDIA_TYPE_AUDIO {
                         if let audioIndex {
