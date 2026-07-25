@@ -69,7 +69,12 @@ public class FFmpegAssetTrack: MediaPlayerTrack {
     }
 
     convenience init?(stream: UnsafeMutablePointer<AVStream>) {
-        let codecpar = stream.pointee.codecpar.pointee
+        // `codecpar` is imported as an implicitly unwrapped optional, but
+        // FFmpeg leaves it NULL for streams it has no parser for (e.g. the
+        // `bin_data` streams present in many DVB/MPEG-TS muxes). This
+        // initialiser is already failable, so skip the stream rather than
+        // trapping — createCodec's compactMap drops it.
+        guard let codecpar = stream.pointee.codecpar?.pointee else { return nil }
         self.init(codecpar: codecpar)
         self.stream = stream
         let metadata = toDictionary(stream.pointee.metadata)
