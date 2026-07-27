@@ -3,7 +3,7 @@
 ![License](https://img.shields.io/badge/license-GPL-blue.svg)
 # KSPlayer
 
-KSPlayer is a powerful media play framework for iOS, tvOS, macOS, xrOS, visionOS, Mac Catalyst. based on AVPlayer and FFmpeg, support HLG、HDR10、 HDR10+、Dolby Vision、Dolby Atmos、Text/Image subtitle.
+KSPlayer is a powerful media play framework for iOS, macCatalyst, macOS, tvOS, xrOS, visionOS. based on AVPlayer and FFmpeg, support HLG、HDR10、 HDR10+、Dolby Vision、Dolby Atmos、Text/Image subtitle.
 
 English | [简体中文](./README_CN.md)
 
@@ -22,7 +22,7 @@ If due to commercial reasons, you prefer not to adhere to the GPL license  or th
 Functional differences between GPL version and LGPL version.
 Some features of the LGPL version require a one-time payment, which I have used 💰 to mark them out.
 
-To experience the powerful features of the LGPL version, you can download the app from the App Store. [App Store Link](https://apps.apple.com/app/tracyplayer/id6450770064)
+To experience the powerful features of the LGPL version, you can download the app from the App Store. [App Store Link](https://apps.apple.com/app/tracyplayer/id6450770064) [Test Flight Link](https://testflight.apple.com/join/eNmYbmZN)
 
 
 | Feature     | LGPL      | GPL    |
@@ -34,12 +34,13 @@ To experience the powerful features of the LGPL version, you can download the ap
 |Video switching with zero delay|💰|❌|
 |Audio Passthrough Output by Wi-Fi|💰|❌|
 |Live streaming supports rewind viewing|💰|❌|
+|Offline AI real-time subtitle generation|💰|❌|
 |Blu-ray disc(ISO、DVD) playback on all Apple platforms|💰|❌|
 |Simultaneous playback of separate audio and video URLs|💰|❌|
-|Offline AI real-time subtitle generation and translation|💰|❌|
-|ProAVPlayer supports MKV, native Dolby Vision and Dolby Atmos.|💰|❌|
-|Native Dolby Vision dynamic metadata. P5、P8、P7(show single-layer)|💰|❌|
 |Play videos in a small window in the App (resumable, supports iOS and tvOS)|💰|❌|
+|AVPlayer supports MKV|💰|❌|
+|Native Dolby Atmos(eac3) |💰|❌|
+|Native Dolby Vision dynamic metadata. P5、P8、P7(show single-layer)|💰|❌|
 |Dolby AC-4|✅|❌|
 |Swift Concurrency|✅|❌|
 |Hardware De-interlace|✅|❌|
@@ -54,6 +55,7 @@ To experience the powerful features of the LGPL version, you can download the ap
 |Video download and format conversion|✅|❌|
 |External image subtitles, such as SUP|✅|❌|
 |Main subtitles and Secondary subtitles|✅|❌|
+|Offline AI real-time subtitle translation|✅|❌|
 |Adjust Saturation, Brightness, and Contrast|✅|❌|
 |Picture in Picture supports subtitle display|✅|❌|
 |Annex-B async hardware decoding(Live Stream)|✅|❌|
@@ -61,17 +63,17 @@ To experience the powerful features of the LGPL version, you can download the ap
 |Use memory cache for fast seek in short time range|✅|❌|
 |KSMEPlayer supports all demuxing and decoding formats|✅|❌|
 |Full display of ass subtitles effect(Render as image using libass)|✅|❌|
-|FFmpeg version|8.1.1|6.1.0|
+|FFmpeg version|8.1.2|6.1.0|
 |Record video|✅|✅|
 |4k/HDR/HDR10|✅|✅|
 |360° panorama video|✅|✅|
 |Picture in Picture|✅|✅|
 |Hardware accelerator|✅|✅|
-|Seamless loop playback|✅|✅|
 |De-interlace auto detect|✅|✅|
 |Multichannel Audio/Spatial Audio|✅|✅|
-|Custom url protocols such as nfs/smb/UPnP |✅|✅|
+|Custom url protocols such as nfs/smb |✅|✅|
 |Text subtitle/Image subtitle/Closed Captions|✅|✅|
+|Seamless loop playback within a specific range|✅|✅|
 |Search Online Subtitles(shooter/assrt/opensubtitles)|✅|✅|
 |Low latency 4K live video streaming (less than 200ms on LAN)|✅|✅|
 |Automatically switch to multi-bitrate streams based on network|✅|✅|
@@ -79,7 +81,7 @@ To experience the powerful features of the LGPL version, you can download the ap
 
 ## Requirements
 
-- iOS 13+, macOS 10.15+, tvOS 13+, xrOS 1+
+- iOS 13+, macCatalyst 14+, macOS 10.15+, tvOS 13+, xrOS 1+
 
 ## List of Apps Licensed to Use this SDK
 
@@ -95,10 +97,8 @@ This table does not list all licensed apps. If you would like to have your app l
 |[Snappier IPTV](https://apps.apple.com/app/snappier-iptv/id1579702567)||
 |[Spatial Video Studio](https://apps.apple.com/app/id6523429904)||
 |[SWIPTV - IPTV Smart Player](https://apps.apple.com/app/swiptv-iptv-smart-player/id1658538188)||
-|[TracyPlayer](https://apps.apple.com/app/tracyplayer/id6450770064)||
 |[UHF - Love your IPTV](https://apps.apple.com/app/uhf-love-your-iptv/id6443751726)||
 |[Zen IPTV](https://apps.apple.com/fr/app/zen-iptv/id6458223193)||
-
 
 ## Demo
 
@@ -109,6 +109,14 @@ pod install
 - Open Demo/Demo.xcworkspace with Xcode.
 
 ## Quick Start
+
+### Swift Package Manager
+
+```swift
+dependencies: [
+    .package(url: "https://github.com/kingslay/KSPlayer.git", .branch("main"))
+]
+```
 
 #### CocoaPods
 
@@ -122,14 +130,6 @@ target 'ProjectName' do
     pod 'FFmpegKit',:git => 'https://github.com/kingslay/FFmpegKit.git', :branch => 'main'
     pod 'Libass',:git => 'https://github.com/kingslay/FFmpegKit.git', :branch => 'main'
 end
-```
-
-### Swift Package Manager
-
-```swift
-dependencies: [
-    .package(url: "https://github.com/kingslay/KSPlayer.git", .branch("main"))
-]
 ```
 
 ## Usage
@@ -350,11 +350,9 @@ Your user icon or company logo shows up this with a link to your home page.
 |[nsplay1990](https://github.com/nsplay1990)||
 |[AppleChillVibez](https://github.com/AppleChillVibez)||
 |[stekc](https://github.com/stekc)||
-|[AstroChivs](https://github.com/AstroChivs)||
 |[bmob222](https://github.com/bmob222)||
 |[pateltejas](https://github.com/pateltejas)||
 |[ewanl2001](https://github.com/ewanl2001)||
-|[themisterholliday](https://github.com/themisterholliday)||
 |[JulienDev](https://github.com/JulienDev)||
 |[Sheinices](https://github.com/Sheinices)||
 |[Etheirystech](https://github.com/Etheirystech)||
