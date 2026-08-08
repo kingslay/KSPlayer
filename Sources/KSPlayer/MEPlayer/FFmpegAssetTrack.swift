@@ -93,11 +93,11 @@ public class FFmpegAssetTrack: MediaPlayerTrack {
         avgFrameRate = Timebase(stream.pointee.avg_frame_rate)
         realFrameRate = Timebase(stream.pointee.r_frame_rate)
         if mediaType == .audio {
-            var frameSize = codecpar.frame_size
-            if frameSize < 1 {
-                frameSize = timebase.den / timebase.num
-            }
-            nominalFrameRate = max(Float(codecpar.sample_rate / frameSize), 48)
+            nominalFrameRate = Self.audioNominalFrameRate(
+                sampleRate: codecpar.sample_rate,
+                frameSize: codecpar.frame_size,
+                timebase: timebase
+            )
         } else {
             if stream.pointee.duration > 0, stream.pointee.nb_frames > 0, stream.pointee.nb_frames != stream.pointee.duration {
                 nominalFrameRate = Float(stream.pointee.nb_frames) * Float(timebase.den) / Float(stream.pointee.duration) * Float(timebase.num)
@@ -127,6 +127,28 @@ public class FFmpegAssetTrack: MediaPlayerTrack {
         }
         //        var buf = [Int8](repeating: 0, count: 256)
         //        avcodec_string(&buf, buf.count, codecpar, 0)
+    }
+
+    /// Audio `nominalFrameRate` derived from `sample_rate` / `frame_size`.
+    ///
+    /// `AVCodecParameters.frame_size` is audio-only and left at `0` by most
+    /// demuxers (AAC/MP3/Opus/FLAC/Vorbis) until the first frame is decoded,
+    /// and the `timebase.den / timebase.num` fallback integer-divides to `0`
+    /// whenever `den < num` (e.g. a valid `AVRational{num:3,den:1}`). Swift
+    /// traps on integer divide-by-zero, so fall back to the existing `48`
+    /// floor rather than crashing — mirroring `AudioDescriptor`'s own
+    /// `sampleRate <= 0` guard (`Resample.swift`).
+    static func audioNominalFrameRate(sampleRate: Int32, frameSize: Int32, timebase: Timebase) -> Float {
+        var frameSize = frameSize
+        // `timebase.num` is guaranteed > 0 by `convenience init?(stream:)`, but
+        // guard it here too so this helper can never trap on a zero divisor.
+        if frameSize < 1, timebase.num > 0 {
+            frameSize = timebase.den / timebase.num
+        }
+        guard frameSize > 0, sampleRate > 0 else {
+            return 48
+        }
+        return max(Float(sampleRate / frameSize), 48)
     }
 
     init?(codecpar: AVCodecParameters) {
