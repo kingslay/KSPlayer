@@ -248,7 +248,7 @@ extension MEPlayerItem {
             videoClock.time = startTime
             audioClock.time = startTime
         }
-        duration = TimeInterval(max(formatCtx.pointee.duration, 0) / Int64(AV_TIME_BASE))
+        duration = TimeInterval(max(formatCtx.pointee.duration, 0)) / TimeInterval(AV_TIME_BASE)
         fileSize = Double(formatCtx.pointee.bit_rate) * duration / 8
         createCodec(formatCtx: formatCtx)
         if formatCtx.pointee.nb_chapters > 0 {
