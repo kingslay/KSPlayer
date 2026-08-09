@@ -452,6 +452,10 @@ public extension Data {
 }
 
 extension Scanner {
+    /// Characters that terminate an unquoted `#EXTINF` attribute value: the next
+    /// attribute (whitespace separator) or the title comma.
+    private static let unquotedExtInfValueSeparators = CharacterSet(charactersIn: ",").union(.whitespaces)
+
     /*
      #EXTINF:-1 tvg-id="ExampleTV.ua" tvg-logo="https://image.com" group-title="test test", Example TV (720p) [Not 24/7]
      #EXTVLCOPT:http-referrer=http://example.com/
@@ -469,11 +473,21 @@ extension Scanner {
         }
         while scanString(",") == nil {
             let key = scanUpToString("=")
-            _ = scanString("=\"")
-            let value = scanUpToString("\"")
-            _ = scanString("\"")
-            if let key, let value {
-                extinf[key] = value
+            if scanString("=\"") != nil {
+                // Quoted attribute value: read up to the closing quote.
+                let value = scanUpToString("\"")
+                _ = scanString("\"")
+                if let key, let value {
+                    extinf[key] = value
+                }
+            } else {
+                // Unquoted attribute value: a bare scalar terminated by the next
+                // whitespace, the title comma, or the end of the attributes.
+                _ = scanString("=")
+                let value = scanUpToCharacters(from: Scanner.unquotedExtInfValueSeparators)
+                if let key, let value {
+                    extinf[key] = value
+                }
             }
         }
         let title = scanUpToCharacters(from: .newlines)
