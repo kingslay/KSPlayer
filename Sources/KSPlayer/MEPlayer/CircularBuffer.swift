@@ -123,8 +123,23 @@ public class CircularBuffer<Item: ObjectQueueItem> {
             if let item = _buffer[Int(i & mask)] {
                 if predicate(item) {
                     result.append(item)
-                    _buffer[Int(i & mask)] = nil
-                    headIndex = i + 1
+                    // Free every slot the head advances over, not only the match.
+                    //
+                    // Skipped items end up *behind* `headIndex`, so nothing reads
+                    // them again — but leaving them non-nil permanently occupies
+                    // their ring slot. After `initialCapacity` such leaks
+                    // `tailIndex` wraps onto a still-occupied slot and `push`
+                    // trips its "value is not nil" assertion.
+                    //
+                    // Reachable from ordinary playback: `FFmpegAssetTrack.search(for:)`
+                    // matches only the subtitle cues due at the polled instant, so
+                    // every cue stepped over leaks a slot. On a film with embedded
+                    // subtitles the 255-slot queue fills within 10-15 minutes and
+                    // the app traps on KSPlayer_MEPlayerItem_read.
+                    while headIndex <= i {
+                        _buffer[Int(headIndex & mask)] = nil
+                        headIndex &+= 1
+                    }
                 }
             } else {
                 assertionFailure("value is nil of index: \(i) headIndex: \(headIndex), tailIndex: \(tailIndex), bufferCount: \(_buffer.count), mask: \(mask)")
