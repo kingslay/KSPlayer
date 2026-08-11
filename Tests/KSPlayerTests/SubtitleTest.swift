@@ -124,4 +124,34 @@ class SubtitleTest: XCTestCase {
         let parts = parse.parse(scanner: scanner)
         XCTAssertEqual(parts.count, 7)
     }
+
+    /// An ASS file whose `[Script Info]` section has no `Format:` line (a truncated
+    /// header, or one whose `[V4+ Styles]` section was stripped) used to put
+    /// `AssParse.canParse` into an infinite loop. The `while scanString("Format:") == nil`
+    /// line-skip calls `scanUpToCharacters(from: .newlines)`, which returns `nil`
+    /// without advancing once the scanner reaches EOF, so the loop span forever. The
+    /// fix bails out with `return false` when the scanner is at end. Without the fix
+    /// this test would hang (never return).
+    func testAssWithoutFormatLineDoesNotHang() {
+        let malformed = """
+        [Script Info]
+        ScriptType: v4.00+
+        PlayResX: 1920
+        PlayResY: 1080
+        Title: header only, styles section missing
+        """
+        XCTAssertFalse(AssParse().canParse(scanner: Scanner(string: malformed)))
+
+        // Happy path is unaffected: a header that does contain a `Format:` line still parses.
+        let valid = """
+        [Script Info]
+        ScriptType: v4.00+
+        PlayResX: 1920
+        PlayResY: 1080
+
+        [V4+ Styles]
+        Format: Name, Fontname, Fontsize, PrimaryColour
+        """
+        XCTAssertTrue(AssParse().canParse(scanner: Scanner(string: valid)))
+    }
 }
