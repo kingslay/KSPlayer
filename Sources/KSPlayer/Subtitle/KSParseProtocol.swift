@@ -53,6 +53,13 @@ public class AssParse: KSParseProtocol {
             } else {
                 _ = scanner.scanUpToCharacters(from: .newlines)
             }
+            // A [Script Info] block with no `Format:` line (truncated/malformed header,
+            // or a file whose Styles section was stripped). At EOF neither the
+            // `scanString("Format:")` test above nor the line skip advances the scanner,
+            // so without this guard the loop would spin forever.
+            if scanner.isAtEnd {
+                return false
+            }
         }
         guard var keys = scanner.scanUpToCharacters(from: .newlines)?.components(separatedBy: ",") else {
             return false
