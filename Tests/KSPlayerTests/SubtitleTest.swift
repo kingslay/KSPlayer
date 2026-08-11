@@ -58,6 +58,31 @@ class SubtitleTest: XCTestCase {
         XCTAssertEqual(parts[8].end, 3601.14)
     }
 
+    /// An SRT cue whose trailing content is not a numeric sequence line used to put
+    /// `SrtParse.parsePart` into an infinite loop: the sequence-number scan repeats
+    /// `scanUpToCharacters(from: .newlines)` / `scanCharacters(from: .newlines)` and,
+    /// once the scanner reaches a non-numeric line at end of input, neither call
+    /// advances the position nor returns an `Int`, so the loop span forever. The fix
+    /// adds `!scanner.isAtEnd` to the loop guard. This test would hang (never return)
+    /// without it.
+    func testSrtTrailingJunkDoesNotHang() {
+        let string = """
+        1
+        00:00:01,000 --> 00:00:02,000
+        Hello
+
+        SOME JUNK WITHOUT A SEQUENCE NUMBER
+        """
+        let scanner = Scanner(string: string)
+        let parse = SrtParse()
+        XCTAssertTrue(parse.canParse(scanner: scanner))
+        // Must terminate: the lone valid cue is parsed, the trailing junk is skipped.
+        let parts = parse.parse(scanner: scanner)
+        XCTAssertEqual(parts.count, 1)
+        XCTAssertEqual(parts[0].start, 1.0)
+        XCTAssertEqual(parts[0].end, 2.0)
+    }
+
     func testVtt() {
         let string = """
         WEBVTT

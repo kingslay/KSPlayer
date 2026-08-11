@@ -395,7 +395,11 @@ public class SrtParse: KSParseProtocol {
         repeat {
             decimal = scanner.scanUpToCharacters(from: .newlines)
             _ = scanner.scanCharacters(from: .newlines)
-        } while decimal.flatMap(Int.init) == nil
+            // Stop once the sequence number is found, or once the scanner can no longer
+            // advance. Without the `!scanner.isAtEnd` guard a non-numeric trailing line
+            // (or a truncated cue) makes both scans return nil without advancing, so the
+            // loop would spin forever.
+        } while decimal.flatMap(Int.init) == nil && !scanner.isAtEnd
         let startString = scanner.scanUpToString("-->")
         // skip spaces and newlines by default.
         _ = scanner.scanString("-->")
