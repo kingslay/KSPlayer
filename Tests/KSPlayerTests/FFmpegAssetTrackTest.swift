@@ -5,36 +5,49 @@
 //
 
 @testable import KSPlayer
+import FFmpegKit
 import XCTest
 
 final class FFmpegAssetTrackTest: XCTestCase {
     /// `AVCodecParameters.frame_size == 0` (left at 0 by most audio demuxers —
-    /// AAC/MP3/Opus/FLAC/Vorbis — until the first frame is decoded) combined
-    /// with a valid `AVRational{num:3,den:1}`: the `timebase.den / timebase.num`
-    /// fallback integer-divides to `0`, so the old inline arithmetic on
-    /// `FFmpegAssetTrack.swift:100` did `sample_rate / 0` and trapped with
-    /// `Fatal error: Division by zero`. The helper must return the `48` floor.
-    func testAudioNominalFrameRateFallbackDividesToZero() {
+    /// AAC/MP3/Opus/FLAC/Vorbis — until the first frame is decoded): the old
+    /// inline arithmetic on `FFmpegAssetTrack.swift:100` derived a fallback
+    /// from `timebase.den / timebase.num`, which integer-divides to `0`
+    /// whenever `den < num` (a valid `AVRational{num:3,den:1}`), so
+    /// `sample_rate / 0` trapped with `Fatal error: Division by zero`. The
+    /// helper must never trap; with `frame_size` unset it now falls back to
+    /// codec-aware constants instead of timebase arithmetic.
+    func testAudioNominalFrameRateFallbackDoesNotTrap() {
+        // Non-TRUEHD codec: fallback frame size 1000 -> 48000 / 1000 == 48.
         let rate = FFmpegAssetTrack.audioNominalFrameRate(
             sampleRate: 48000,
             frameSize: 0,
-            timebase: Timebase(num: 3, den: 1)
+            codecID: AV_CODEC_ID_AAC
         )
         XCTAssertEqual(rate, 48, accuracy: 0.001)
     }
 
-    /// `sample_rate == 0` (also common pre-decode). Two sub-cases:
-    /// - a usable fallback (`den >= num`): historically `0 / 1000 == 0` -> 48;
-    /// - a zero fallback (`den < num`): historically `0 / 0` -> trap.
-    /// Both must now return the `48` floor.
+    /// TRUEHD with `frame_size == 0` uses the codec-specific fallback 48
+    /// (the maintainer's suggested constant): `48000 / 48 == 1000`.
+    func testAudioNominalFrameRateTrueHDFallbackUses48() {
+        let rate = FFmpegAssetTrack.audioNominalFrameRate(
+            sampleRate: 48000,
+            frameSize: 0,
+            codecID: AV_CODEC_ID_TRUEHD
+        )
+        XCTAssertEqual(rate, 1000, accuracy: 0.001)
+    }
+
+    /// `sample_rate == 0` (also common pre-decode): must return the `48`
+    /// floor rather than `0 / fallback`.
     func testAudioNominalFrameRateZeroSampleRate() {
         XCTAssertEqual(
-            FFmpegAssetTrack.audioNominalFrameRate(sampleRate: 0, frameSize: 0, timebase: Timebase(num: 1, den: 1000)),
+            FFmpegAssetTrack.audioNominalFrameRate(sampleRate: 0, frameSize: 0, codecID: AV_CODEC_ID_AAC),
             48,
             accuracy: 0.001
         )
         XCTAssertEqual(
-            FFmpegAssetTrack.audioNominalFrameRate(sampleRate: 0, frameSize: 0, timebase: Timebase(num: 3, den: 1)),
+            FFmpegAssetTrack.audioNominalFrameRate(sampleRate: 0, frameSize: 1024, codecID: AV_CODEC_ID_AAC),
             48,
             accuracy: 0.001
         )
@@ -46,7 +59,7 @@ final class FFmpegAssetTrackTest: XCTestCase {
         let rate = FFmpegAssetTrack.audioNominalFrameRate(
             sampleRate: 48000,
             frameSize: 1024,
-            timebase: Timebase(num: 1, den: 1)
+            codecID: AV_CODEC_ID_AAC
         )
         XCTAssertEqual(rate, 48, accuracy: 0.001)
     }
@@ -60,31 +73,18 @@ final class FFmpegAssetTrackTest: XCTestCase {
         let rate = FFmpegAssetTrack.audioNominalFrameRate(
             sampleRate: 48000,
             frameSize: 700,
-            timebase: Timebase(num: 1, den: 1)
+            codecID: AV_CODEC_ID_MP3
         )
         XCTAssertEqual(rate, 68, accuracy: 0.001)
     }
 
-    /// `frame_size == 0` but the `time_base` fallback is usable (`den >= num`):
-    /// `den / num == 1000`, then `48000 / 1000 == 48` -> floor `48`.
-    func testAudioNominalFrameRateUsesTimebaseFallback() {
+    /// A zero `frame_size` on an arbitrary codec uses the generic fallback
+    /// 1000: `44100 / 1000 == 44` -> floor `48`.
+    func testAudioNominalFrameRateGenericFallbackClampsToFloor() {
         let rate = FFmpegAssetTrack.audioNominalFrameRate(
-            sampleRate: 48000,
+            sampleRate: 44100,
             frameSize: 0,
-            timebase: Timebase(num: 1, den: 1000)
-        )
-        XCTAssertEqual(rate, 48, accuracy: 0.001)
-    }
-
-    /// `timebase.num == 0`: the helper's `den / num` fallback must be skipped
-    /// (it would divide by zero) and the `48` floor returned. The production
-    /// caller pre-guards `num > 0`, but the helper is exercised directly here,
-    /// so pin that it can never trap on its own.
-    func testAudioNominalFrameRateZeroTimebaseNumDoesNotTrap() {
-        let rate = FFmpegAssetTrack.audioNominalFrameRate(
-            sampleRate: 48000,
-            frameSize: 0,
-            timebase: Timebase(num: 0, den: 1000)
+            codecID: AV_CODEC_ID_OPUS
         )
         XCTAssertEqual(rate, 48, accuracy: 0.001)
     }
@@ -95,7 +95,7 @@ final class FFmpegAssetTrackTest: XCTestCase {
         let rate = FFmpegAssetTrack.audioNominalFrameRate(
             sampleRate: -48000,
             frameSize: 960,
-            timebase: Timebase(num: 1, den: 1)
+            codecID: AV_CODEC_ID_AAC
         )
         XCTAssertEqual(rate, 48, accuracy: 0.001)
     }
