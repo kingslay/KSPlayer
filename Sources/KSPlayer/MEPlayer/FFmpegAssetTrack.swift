@@ -93,11 +93,11 @@ public class FFmpegAssetTrack: MediaPlayerTrack {
         avgFrameRate = Timebase(stream.pointee.avg_frame_rate)
         realFrameRate = Timebase(stream.pointee.r_frame_rate)
         if mediaType == .audio {
-            var frameSize = codecpar.frame_size
-            if frameSize < 1 {
-                frameSize = timebase.den / timebase.num
-            }
-            nominalFrameRate = max(Float(codecpar.sample_rate / frameSize), 48)
+            nominalFrameRate = Self.audioNominalFrameRate(
+                sampleRate: codecpar.sample_rate,
+                frameSize: codecpar.frame_size,
+                codecID: codecpar.codec_id
+            )
         } else {
             if stream.pointee.duration > 0, stream.pointee.nb_frames > 0, stream.pointee.nb_frames != stream.pointee.duration {
                 nominalFrameRate = Float(stream.pointee.nb_frames) * Float(timebase.den) / Float(stream.pointee.duration) * Float(timebase.num)
@@ -127,6 +127,25 @@ public class FFmpegAssetTrack: MediaPlayerTrack {
         }
         //        var buf = [Int8](repeating: 0, count: 256)
         //        avcodec_string(&buf, buf.count, codecpar, 0)
+    }
+
+    /// Audio `nominalFrameRate` derived from `sample_rate` / `frame_size`.
+    ///
+    /// `AVCodecParameters.frame_size` is audio-only and left at `0` by most
+    /// demuxers (AAC/MP3/Opus/FLAC/Vorbis) until the first frame is decoded,
+    /// and a `0` divisor traps Swift with a divide-by-zero. When it is unset,
+    /// fall back to codec-aware constants (TRUEHD: 48, everything else: 1000)
+    /// instead of deriving a frame size arithmetically. `sample_rate` can also
+    /// be `0` pre-decode, so guard both before dividing — mirroring
+    /// `AudioDescriptor`'s own `sampleRate <= 0` guard (`Resample.swift`).
+    static func audioNominalFrameRate(sampleRate: Int32, frameSize: Int32, codecID: AVCodecID) -> Float {
+        // Suggested by the maintainer: codec-aware fallbacks instead of deriving a
+        // frame size from the stream timebase (whose den/num can integer-divide to 0).
+        let effectiveFrameSize = frameSize > 0 ? frameSize : codecID == AV_CODEC_ID_TRUEHD ? 48 : 1000
+        guard sampleRate > 0, effectiveFrameSize > 0 else {
+            return 48
+        }
+        return max(Float(sampleRate / effectiveFrameSize), 48)
     }
 
     init?(codecpar: AVCodecParameters) {
