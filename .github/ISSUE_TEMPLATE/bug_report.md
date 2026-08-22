@@ -2,7 +2,7 @@
 name: Bug report
 about: Create a report to help us improve
 title: ''
-labels: bug
+labels: bug, enhancement
 assignees: ''
 
 ---
@@ -29,7 +29,7 @@ If applicable, add screenshots to help explain your problem.
  - Version [e.g. 22]
 
 **Additional context**
-Add any other context about the problem here. or Using FFmpeg to extract problematic video segments and upload them to GitHub.(ffmpeg -i http://xxx.com/123.mkv -map 0 -c copy -ss 00:00:50 -to 00:04:10 1.mkv)
+Add any other context about the problem here. or Using FFmpeg to extract problematic video segments and upload them to GitHub.(ffmpeg -ss 00:00:50  -i http://xxx.com/123.mkv -map 0 -c copy  -t 300 1.mkv)
 <!--
 If you want your raised issues to be addressed more promptly, you might consider making a donation. 
 -->
