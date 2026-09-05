@@ -192,7 +192,7 @@ public class FFmpegAssetTrack: MediaPlayerTrack {
                         dovi = sideData.data.withMemoryRebound(to: DOVIDecoderConfigurationRecord.self, capacity: 1) { $0 }.pointee
                     } else if sideData.type == AV_PKT_DATA_DISPLAYMATRIX {
                         let matrix = sideData.data.withMemoryRebound(to: Int32.self, capacity: 1) { $0 }
-                        let rawRotation = -av_display_rotation_get(matrix)
+                        guard let rawRotation = FFmpegAssetTrack.displayRotation(sideDataSize: Int(sideData.size), matrix: matrix) else { continue }
                         if rawRotation.isFinite {
                             let degrees = Int(rawRotation.rounded())
                             let normalized = ((degrees % 360) + 360) % 360
@@ -301,6 +301,20 @@ public class FFmpegAssetTrack: MediaPlayerTrack {
 }
 
 extension FFmpegAssetTrack {
+    /// Decodes the display-matrix rotation, returning `nil` when the side-data
+    /// allocation is too short to hold a full 3×3 matrix.
+    ///
+    /// `av_display_rotation_get` dereferences a 3×3 matrix of 9 × `Int32`
+    /// (36 bytes). FFmpeg emits exactly that for `AV_PKT_DATA_DISPLAYMATRIX`,
+    /// but a malformed/cropped container can hand us a shorter allocation, so
+    /// the length must be validated before the read to avoid over-reading
+    /// adjacent heap. (`withMemoryRebound(capacity:)` is only a typing hint,
+    /// not a bound.)
+    static func displayRotation(sideDataSize: Int, matrix: UnsafePointer<Int32>) -> Double? {
+        guard sideDataSize >= 9 * MemoryLayout<Int32>.size else { return nil }
+        return -av_display_rotation_get(matrix)
+    }
+
     var pixelFormatType: OSType? {
         let format = AVPixelFormat(codecpar.format)
         return format.osType(fullRange: formatDescription?.fullRangeVideo ?? false)
