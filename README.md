@@ -35,18 +35,18 @@ To experience the powerful features of the LGPL version, you can download the ap
 |Audio Passthrough Output by Wi-Fi|💰|❌|
 |Live streaming supports rewind viewing|💰|❌|
 |Offline AI real-time subtitle generation|💰|❌|
-|Blu-ray disc(ISO、DVD) playback on all Apple platforms|💰|❌|
 |Simultaneous playback of separate audio and video URLs|💰|❌|
+|Blu-ray disc(ISO、BDMV、DVD) playback on all Apple platforms|💰|❌|
 |Play videos in a small window in the App (resumable, supports iOS and tvOS)|💰|❌|
 |AVPlayer supports MKV|💰|❌|
 |Native Dolby Atmos(eac3) |💰|❌|
-|Native Dolby Vision dynamic metadata. P5、P8、P7(show single-layer)|💰|❌|
+|Native Dolby Vision dynamic metadata(P5、P8)|💰|❌|
 |Dolby AC-4|✅|❌|
 |Swift Concurrency|✅|❌|
 |Hardware De-interlace|✅|❌|
 |AV1 hardware decoding|✅|❌|
 |Word-by-word subtitles|✅|❌|
-|HDR10+(dynamic metadata)|✅|❌|
+|HDR10+ dynamic metadata|✅|❌|
 |Text subtitle translation|✅|❌|
 |Use System Caption Appearance|✅|❌|
 |Record video clips at any time|✅|❌|
