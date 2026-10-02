@@ -97,6 +97,7 @@ This table does not list all licensed apps. If you would like to have your app l
 |[SenPlayer](https://apps.apple.com/app/senplayer-hdr-media-player/id6443975850)||
 |[Smart IPTV](https://apps.apple.com/app/smart-iptv-tv-and-movies-ott/id1492738910)||
 |[Snappier IPTV](https://apps.apple.com/app/snappier-iptv/id1579702567)||
+|[StreamX](https://apps.apple.com/us/app/streamx-iptv-player-m3u/id6755919340)||
 |[SWIPTV - IPTV Smart Player](https://apps.apple.com/app/swiptv-iptv-smart-player/id1658538188)||
 |[UHF - Love your IPTV](https://apps.apple.com/app/uhf-love-your-iptv/id6443751726)||
 |[Zen IPTV](https://apps.apple.com/fr/app/zen-iptv/id6458223193)||
