@@ -514,6 +514,26 @@ public extension KSOptions {
         #endif
     }
 
+    /// Re-activates the audio session without touching its category.
+    ///
+    /// `setAudioSession()` runs once, when a player is constructed, and that was
+    /// the only place the session was ever activated. iOS deactivates an app's
+    /// audio session when it interrupts the app - an incoming call - and when it
+    /// suspends the process, which is what a call does to a backgrounded player.
+    /// Nothing re-activated it afterwards, so playback that resumed after an
+    /// interruption rendered picture with no sound until the player was torn down
+    /// and rebuilt, which is why leaving the player and resuming from the detail
+    /// screen appeared to fix it.
+    ///
+    /// Activating an already-active session is a no-op, so this is safe to call
+    /// on every play. The category is deliberately left alone: re-setting it on a
+    /// live session can glitch the audio, and it survives deactivation unchanged.
+    static func activateAudioSession() {
+        #if !os(macOS)
+        try? AVAudioSession.sharedInstance().setActive(true)
+        #endif
+    }
+
     #if !os(macOS)
     static func isSpatialAudioEnabled(channelCount _: AVAudioChannelCount) -> Bool {
         if #available(tvOS 15.0, iOS 15.0, *) {

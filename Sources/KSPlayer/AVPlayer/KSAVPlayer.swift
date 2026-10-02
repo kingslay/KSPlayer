@@ -428,6 +428,9 @@ extension KSAVPlayer: MediaPlayerProtocol {
 
     public func play() {
         KSLog("play \(self)")
+        // The session is deactivated by iOS on an interruption or a process
+        // suspension, and this is the one place every resume passes through.
+        KSOptions.activateAudioSession()
         playbackState = .playing
     }
 
