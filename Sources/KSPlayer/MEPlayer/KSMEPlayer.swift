@@ -392,6 +392,9 @@ extension KSMEPlayer: MediaPlayerProtocol {
 
     public func play() {
         KSLog("play \(self)")
+        // Same reason as `KSAVPlayer.play()`: iOS deactivates the session on an
+        // interruption or a suspension, and only construction re-activated it.
+        KSOptions.activateAudioSession()
         playbackState = .playing
         if #available(iOS 15.0, tvOS 15.0, macOS 12.0, *) {
             pipController?.invalidatePlaybackState()
