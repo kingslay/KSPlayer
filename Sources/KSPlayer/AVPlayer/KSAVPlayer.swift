@@ -278,7 +278,21 @@ extension KSAVPlayer {
             guard playableTime > 0 else { return }
             let loadedTime = playableTime - currentPlaybackTime
             guard loadedTime > 0 else { return }
-            bufferingProgress = Int(min(loadedTime * 100 / item.preferredForwardBufferDuration, 100))
+            // The same trap as `bitRate` above, one call over: the division is
+            // infinity whenever `preferredForwardBufferDuration` is zero, and
+            // `Int(_: Double)` traps on a non-finite value. Clamp before the
+            // conversion instead of after it, and keep the old answer for every
+            // finite input.
+            let progress = loadedTime * 100 / item.preferredForwardBufferDuration
+            if progress.isFinite {
+                bufferingProgress = Int(min(progress, 100))
+            } else if progress > 0 {
+                // Infinite: more is buffered than the target asked for.
+                bufferingProgress = 100
+            } else {
+                // NaN: the measurement itself is meaningless.
+                bufferingProgress = 0
+            }
             if bufferingProgress >= 100 {
                 loadState = .playable
             }
@@ -544,7 +558,16 @@ class AVMediaPlayerTrack: MediaPlayerTrack {
         name = track.assetTrack?.languageCode ?? ""
         languageCode = track.assetTrack?.languageCode
         nominalFrameRate = track.assetTrack?.nominalFrameRate ?? 24.0
-        bitRate = Int64(track.assetTrack?.estimatedDataRate ?? 0)
+        // `estimatedDataRate` is a non-optional Float, and AVFoundation really
+        // does return it as NaN or infinity for ordinary files - a track whose
+        // data rate is simply not declared in the container, which progressive
+        // MP4s served over HTTP routinely are. The `?? 0` here only covers nil,
+        // so a non-finite value goes straight into `Int64(_: Float)`, which
+        // traps: EXC_BREAKPOINT, signal 5, seen by the viewer as a crash at the
+        // instant the item becomes ready to play. Zero is the honest reading -
+        // an unmeasurable bitrate, not a missing track.
+        let estimatedDataRate = track.assetTrack?.estimatedDataRate ?? 0
+        bitRate = estimatedDataRate.isFinite ? Int64(estimatedDataRate) : 0
         #if os(xrOS)
         isPlayable = false
         #else
