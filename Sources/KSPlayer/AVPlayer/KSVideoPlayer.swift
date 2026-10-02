@@ -257,7 +257,13 @@ extension KSVideoPlayer.Coordinator: KSPlayerLayerDelegate {
 
     public func player(layer _: KSPlayerLayer, currentTime: TimeInterval, totalTime: TimeInterval) {
         onPlay?(currentTime, totalTime)
-        if currentTime >= Double(Int.max) || currentTime <= Double(Int.min) || totalTime >= Double(Int.max) || totalTime <= Double(Int.min) {
+        // `isFinite` has to be tested first: NaN compares false against every
+        // bound below, so a NaN time slips through the range check and traps in
+        // `Int(_:)`. Infinity is caught either way.
+        if !currentTime.isFinite || !totalTime.isFinite
+            || currentTime >= Double(Int.max) || currentTime <= Double(Int.min)
+            || totalTime >= Double(Int.max) || totalTime <= Double(Int.min)
+        {
             return
         }
         let current = Int(currentTime)
