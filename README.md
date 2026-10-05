@@ -90,6 +90,7 @@ This table does not list all licensed apps. If you would like to have your app l
 | -------------- | ---- |
 |[APTV](https://apps.apple.com/app/aptv/id1630403500)||
 |[homeTV IPTV Player](https://apps.apple.com/app/hometv-iptv-player/id1636701357)||
+|[Interlace Player](https://apps.apple.com/app/id6789244498)||
 |[IPTV +](https://apps.apple.com/app/iptv-my-smart-iptv-player/id1525121231)||
 |[LillyPlayer Video Player](https://apps.apple.com/app/lillyplayer-video-player/id1446967273)||
 |[MyKroko](https://apps.apple.com/cn/app/mykroko/id6758295863)||
