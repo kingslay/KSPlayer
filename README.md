@@ -22,7 +22,7 @@ If due to commercial reasons, you prefer not to adhere to the GPL license  or th
 Differences between GPL version and LGPL version.
 | Module | GPL Version | LGPL Version |
 |---|---|---|
-| **KSPlayer** | Dynamic Binary, macOS only | Source code, all Apple platforms |
+| **KSPlayer** | Dynamic Binary, only macOS、iSimulator、tvOS | Source code, all Apple platforms |
 | **KSPlayerUI** | Source code, all Apple platforms | Source code, all Apple platforms |
 | **MPVPlayer** | Source code, all Apple platforms | Source code, all Apple platforms |
 
