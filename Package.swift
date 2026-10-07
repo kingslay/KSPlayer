@@ -1,47 +1,96 @@
-// swift-tools-version:5.9
+// swift-tools-version:6.2
 import Foundation
 import PackageDescription
 
 let package = Package(
     name: "KSPlayer",
     defaultLocalization: "en",
-    platforms: [.macOS(.v10_15), .macCatalyst(.v14), .iOS(.v13), .tvOS(.v13),
-                .visionOS(.v1)],
+    platforms: [
+        .iOS(.v13), .macCatalyst(.v14), .macOS(.v10_15), .tvOS(.v13), .visionOS(.v1),
+//        .watchOS(.v9),
+    ],
     products: [
         // Products define the executables and libraries produced by a package, and make them visible to other packages.
         .library(
             name: "KSPlayer",
-            // todo clang: warning: using sysroot for 'iPhoneSimulator' but targeting 'MacOSX' [-Wincompatible-sysroot]
-//            type: .dynamic,
             targets: ["KSPlayer"]
+        ),
+        .library(
+            name: "KSPlayerUI",
+            // todo clang: warning: using sysroot for 'iPhoneSimulator' but targeting 'MacOSX' [-Wincompatible-sysroot]
+            type: ProcessInfo.processInfo.environment["dynamicFrameWork"] == nil ? .static : .dynamic,
+            targets: ["KSPlayerUI"]
+        ),
+        .library(
+            name: "MPVPlayer",
+            type: ProcessInfo.processInfo.environment["dynamicFrameWork"] == nil ? .static : .dynamic,
+            targets: ["MPVPlayer"]
         ),
     ],
     targets: [
-        // Targets are the basic building blocks of a package. A target can define a module or a test suite.
         .target(
-            name: "KSPlayer",
+            name: "MPVPlayer",
             dependencies: [
-                .product(name: "FFmpegKit", package: "FFmpegKit"),
-//                .product(name: "Libass", package: "FFmpegKit"),
-//                .product(name: "Libmpv", package: "FFmpegKit"),
-                "DisplayCriteria",
+                "KSPlayer",
+                .product(name: "libmpv", package: "FFmpegKit"),
             ],
-            resources: [.process("Metal/Shaders.metal")],
             swiftSettings: [
-                .enableExperimentalFeature("StrictConcurrency"),
+                .unsafeFlags([
+                    "-experimental-package-interface-load",
+                ]),
+            ]
+        ),
+        .binaryTarget(
+            name: "KSPlayer",
+            path: "Sources/KSPlayer.xcframework"
+        ),
+        .target(
+            name: "KSPlayerUI",
+            dependencies: [
+                "KSPlayer",
+            ],
+            resources: [
+                .process("Localizable.xcstrings"),
+            ],
+            swiftSettings: [
+                .unsafeFlags([
+                    "-experimental-package-interface-load",
+                ]),
             ]
         ),
         .target(
-            name: "DisplayCriteria"
+            name: "DisplayCriteria",
+            dependencies: [
+                "FFmpegKit",
+            ]
         ),
         .testTarget(
-            name: "KSPlayerTests",
-            dependencies: ["KSPlayer"],
-            resources: [.process("Resources")]
+            name: "KSPlayerUITests",
+            dependencies: ["KSPlayerUI"]
         ),
+    ],
+    swiftLanguageModes: [
+        .v5,
+        .v6,
     ]
 )
 
-package.dependencies += [
-    .package(url: "https://github.com/kingslay/FFmpegKit.git", from: "6.1.4"),
-]
+var ffmpegKitPath = FileManager.default.currentDirectoryPath + "/../FFmpegKit"
+// spm FileManager.default.currentDirectoryPath返回的空字符，spm6.0#file返回的不是当前的目录。要改成用#filePath
+if !FileManager.default.fileExists(atPath: ffmpegKitPath), let url = URL(string: #filePath) {
+    let path = url.deletingLastPathComponent().path
+    // 解决用xcode引入spm的时候，依赖关系出错的问题
+    if !path.contains("/checkouts/") {
+        ffmpegKitPath = path + "/../FFmpegKit"
+    }
+}
+
+if FileManager.default.fileExists(atPath: ffmpegKitPath + "/Package.swift") {
+    package.dependencies += [
+        .package(path: ffmpegKitPath),
+    ]
+} else {
+    package.dependencies += [
+        .package(url: "https://github.com/kingslay/FFmpegKit.git", from: "9.0.2"),
+    ]
+}

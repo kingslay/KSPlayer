@@ -1,6 +1,0 @@
-framework module FFmpegKit {
-  umbrella header "FFmpegKit-tvOS-umbrella.h"
-
-  export *
-  module * { export * }
-}

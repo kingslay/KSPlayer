@@ -3,26 +3,34 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 54;
+	objectVersion = 70;
 	objects = {
 
 /* Begin PBXBuildFile section */
+		8004D9222C4648B9001936E9 /* ImmersiveView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8004D9212C4648AF001936E9 /* ImmersiveView.swift */; };
+		8004D9352C464F8D001936E9 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AC77DFB226402329001351AE /* Assets.xcassets */; };
 		AC43F6412A5172830026ECF2 /* FavoriteView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC43F6402A5172830026ECF2 /* FavoriteView.swift */; };
 		AC43F6442A51916F0026ECF2 /* Model.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = AC43F6422A51916F0026ECF2 /* Model.xcdatamodeld */; };
 		AC43F6662A519D400026ECF2 /* Persistence.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC43F6652A519D400026ECF2 /* Persistence.swift */; };
 		AC43F6682A52E86B0026ECF2 /* FilesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC43F6672A52E86B0026ECF2 /* FilesView.swift */; };
 		AC44E0FC29290CBC00617BD3 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC44E0FA29290CBC00617BD3 /* ContentView.swift */; };
 		AC44E0FD29290CF800617BD3 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC44E0F929290CBB00617BD3 /* HomeView.swift */; };
+		AC67EBD63076B04300642B68 /* KSPlayerUI in Frameworks */ = {isa = PBXBuildFile; productRef = AC67EBD53076B04300642B68 /* KSPlayerUI */; };
+		AC67EBD83076B04400642B68 /* MPVPlayer in Frameworks */ = {isa = PBXBuildFile; productRef = AC67EBD73076B04400642B68 /* MPVPlayer */; };
 		AC77DFC326402329001351AE /* TracyApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC77DFB026402327001351AE /* TracyApp.swift */; };
 		AC77DFC526402329001351AE /* URLImportView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC77DFB126402327001351AE /* URLImportView.swift */; };
 		AC77DFC726402329001351AE /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AC77DFB226402329001351AE /* Assets.xcassets */; };
 		ACB965472A42EDCD00378A4C /* SettingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACB965462A42EDCD00378A4C /* SettingView.swift */; };
-		ACD2F772275F735C0006D16F /* KSPlayer in Frameworks */ = {isa = PBXBuildFile; productRef = ACD2F771275F735C0006D16F /* KSPlayer */; };
 		ACD786492A6A8648004A0220 /* Defaults.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACD786482A6A8648004A0220 /* Defaults.swift */; };
+		ACDEF3D13076B3210048F326 /* MPVPlayer in Frameworks */ = {isa = PBXBuildFile; productRef = AC6A55412EAE5DAF00DFD5CB /* MPVPlayer */; };
+		ACDEF3D23076B3210048F326 /* KSPlayer in Frameworks */ = {isa = PBXBuildFile; productRef = AC107B3E306FDB6F0068A9FD /* KSPlayer */; };
+		ACDEF3D33076B3210048F326 /* KSPlayerUI in Frameworks */ = {isa = PBXBuildFile; productRef = AC107B40306FDB6F0068A9FD /* KSPlayerUI */; };
 		ACEA9FEB298BFC8800FBA74B /* MovieModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACEA9FEA298BFC8800FBA74B /* MovieModel.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		8004D9212C4648AF001936E9 /* ImmersiveView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImmersiveView.swift; sourceTree = "<group>"; };
+		8004D9392C464F8D001936E9 /* SimplePlayer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SimplePlayer.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		AC43F6402A5172830026ECF2 /* FavoriteView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FavoriteView.swift; sourceTree = "<group>"; };
 		AC43F6432A51916F0026ECF2 /* Model.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = Model.xcdatamodel; sourceTree = "<group>"; };
 		AC43F6652A519D400026ECF2 /* Persistence.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Persistence.swift; sourceTree = "<group>"; };
@@ -35,30 +43,62 @@
 		AC77DFB726402329001351AE /* Player.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Player.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		ACADA07528EDC067001B76D1 /* Player.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Player.entitlements; sourceTree = "<group>"; };
 		ACB965462A42EDCD00378A4C /* SettingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingView.swift; sourceTree = "<group>"; };
-		ACD2F747275F6E860006D16F /* KSPlayer */ = {isa = PBXFileReference; lastKnownFileType = folder; name = KSPlayer; path = ../..; sourceTree = "<group>"; };
 		ACD786482A6A8648004A0220 /* Defaults.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Defaults.swift; sourceTree = "<group>"; };
 		ACE3619328EB689F00F234EB /* Player-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "Player-Info.plist"; sourceTree = "<group>"; };
 		ACEA9FEA298BFC8800FBA74B /* MovieModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MovieModel.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		AC168CC82E2B617A0059B080 /* PBXFileSystemSynchronizedBuildFileExceptionSet */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				SwiftUIView.swift,
+			);
+			target = 8004D9232C464F8D001936E9 /* SimplePlayer */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		AC168CC52E2B61440059B080 /* APP2 */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (AC168CC82E2B617A0059B080 /* PBXFileSystemSynchronizedBuildFileExceptionSet */, ); explicitFileTypes = {}; explicitFolders = (); path = APP2; sourceTree = "<group>"; };
+/* End PBXFileSystemSynchronizedRootGroup section */
+
 /* Begin PBXFrameworksBuildPhase section */
+		8004D9322C464F8D001936E9 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				AC67EBD63076B04300642B68 /* KSPlayerUI in Frameworks */,
+				AC67EBD83076B04400642B68 /* MPVPlayer in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		AC77DFB426402329001351AE /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				ACD2F772275F735C0006D16F /* KSPlayer in Frameworks */,
+				ACDEF3D33076B3210048F326 /* KSPlayerUI in Frameworks */,
+				ACDEF3D23076B3210048F326 /* KSPlayer in Frameworks */,
+				ACDEF3D13076B3210048F326 /* MPVPlayer in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		8004D9202C464899001936E9 /* Immersive */ = {
+			isa = PBXGroup;
+			children = (
+				8004D9212C4648AF001936E9 /* ImmersiveView.swift */,
+			);
+			path = Immersive;
+			sourceTree = "<group>";
+		};
 		AC77DFAA26402327001351AE = {
 			isa = PBXGroup;
 			children = (
+				AC168CC52E2B61440059B080 /* APP2 */,
 				ACADA07528EDC067001B76D1 /* Player.entitlements */,
 				ACE3619328EB689F00F234EB /* Player-Info.plist */,
-				ACD2F743275F6D7A0006D16F /* Packages */,
 				AC77DFAF26402327001351AE /* Shared */,
 				AC77DFB826402329001351AE /* Products */,
 				ACD2F74C275F6EE60006D16F /* Frameworks */,
@@ -68,6 +108,7 @@
 		AC77DFAF26402327001351AE /* Shared */ = {
 			isa = PBXGroup;
 			children = (
+				8004D9202C464899001936E9 /* Immersive */,
 				ACEA9FEA298BFC8800FBA74B /* MovieModel.swift */,
 				AC44E0F929290CBB00617BD3 /* HomeView.swift */,
 				AC44E0FA29290CBC00617BD3 /* ContentView.swift */,
@@ -88,16 +129,9 @@
 			isa = PBXGroup;
 			children = (
 				AC77DFB726402329001351AE /* Player.app */,
+				8004D9392C464F8D001936E9 /* SimplePlayer.app */,
 			);
 			name = Products;
-			sourceTree = "<group>";
-		};
-		ACD2F743275F6D7A0006D16F /* Packages */ = {
-			isa = PBXGroup;
-			children = (
-				ACD2F747275F6E860006D16F /* KSPlayer */,
-			);
-			name = Packages;
 			sourceTree = "<group>";
 		};
 		ACD2F74C275F6EE60006D16F /* Frameworks */ = {
@@ -110,6 +144,27 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		8004D9232C464F8D001936E9 /* SimplePlayer */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 8004D9362C464F8D001936E9 /* Build configuration list for PBXNativeTarget "SimplePlayer" */;
+			buildPhases = (
+				8004D9252C464F8D001936E9 /* Sources */,
+				8004D9322C464F8D001936E9 /* Frameworks */,
+				8004D9342C464F8D001936E9 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = SimplePlayer;
+			packageProductDependencies = (
+				AC67EBD53076B04300642B68 /* KSPlayerUI */,
+				AC67EBD73076B04400642B68 /* MPVPlayer */,
+			);
+			productName = "demo-SPM (iOS)";
+			productReference = 8004D9392C464F8D001936E9 /* SimplePlayer.app */;
+			productType = "com.apple.product-type.application";
+		};
 		AC77DFB626402329001351AE /* Player */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = AC77DFCB26402329001351AE /* Build configuration list for PBXNativeTarget "Player" */;
@@ -125,6 +180,12 @@
 			name = Player;
 			packageProductDependencies = (
 				ACD2F771275F735C0006D16F /* KSPlayer */,
+				AC6A55412EAE5DAF00DFD5CB /* MPVPlayer */,
+				AC107B3E306FDB6F0068A9FD /* KSPlayer */,
+				AC107B40306FDB6F0068A9FD /* KSPlayerUI */,
+				AC67EBA130767CC200642B68 /* KSPlayer */,
+				AC67EBA330767CC200642B68 /* KSPlayerUI */,
+				AC67EBA530767CC200642B68 /* MPVPlayer */,
 			);
 			productName = "demo-SPM (iOS)";
 			productReference = AC77DFB726402329001351AE /* Player.app */;
@@ -140,6 +201,9 @@
 				LastSwiftUpdateCheck = 1310;
 				LastUpgradeCheck = 1500;
 				TargetAttributes = {
+					8004D9232C464F8D001936E9 = {
+						LastSwiftMigration = 1640;
+					};
 					AC77DFB626402329001351AE = {
 						CreatedOnToolsVersion = 12.4;
 					};
@@ -152,18 +216,31 @@
 			knownRegions = (
 				en,
 				Base,
+				de,
 			);
 			mainGroup = AC77DFAA26402327001351AE;
+			packageReferences = (
+				AC67EBA030767CC200642B68 /* XCLocalSwiftPackageReference "../../../KSPlayer" */,
+			);
 			productRefGroup = AC77DFB826402329001351AE /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
+				8004D9232C464F8D001936E9 /* SimplePlayer */,
 				AC77DFB626402329001351AE /* Player */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		8004D9342C464F8D001936E9 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				8004D9352C464F8D001936E9 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		AC77DFB526402329001351AE /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -175,12 +252,20 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		8004D9252C464F8D001936E9 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		AC77DFB326402329001351AE /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 				AC43F6662A519D400026ECF2 /* Persistence.swift in Sources */,
 				AC77DFC526402329001351AE /* URLImportView.swift in Sources */,
+				8004D9222C4648B9001936E9 /* ImmersiveView.swift in Sources */,
 				AC43F6412A5172830026ECF2 /* FavoriteView.swift in Sources */,
 				AC44E0FD29290CF800617BD3 /* HomeView.swift in Sources */,
 				AC43F6682A52E86B0026ECF2 /* FilesView.swift in Sources */,
@@ -196,6 +281,94 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin XCBuildConfiguration section */
+		8004D9372C464F8D001936E9 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				"ASSETCATALOG_COMPILER_APPICON_NAME[sdk=appletvos*]" = AppIconTVOS;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
+				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_ENTITLEMENTS = Player.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 20102;
+				DEVELOPMENT_TEAM = 3RVHT92X9D;
+				ENABLE_HARDENED_RUNTIME = YES;
+				"ENABLE_HARDENED_RUNTIME[sdk=macosx*]" = YES;
+				ENABLE_PREVIEWS = YES;
+				INFOPLIST_FILE = "Player-Vision.plist";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.video";
+				INFOPLIST_KEY_LSSupportsOpeningDocumentsInPlace = YES;
+				INFOPLIST_KEY_UILaunchStoryboardName = " ";
+				INFOPLIST_KEY_UIRequiresFullScreen = YES;
+				INFOPLIST_KEY_UIStatusBarStyle = UIStatusBarStyleDarkContent;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 2.1.2;
+				PRODUCT_BUNDLE_IDENTIFIER = com.kintan.player;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				"PROVISIONING_PROFILE_SPECIFIER[sdk=macosx*]" = "";
+				SUPPORTED_PLATFORMS = "appletvos appletvsimulator iphoneos iphonesimulator macosx xros xrsimulator";
+				SUPPORTS_MACCATALYST = YES;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2,3,6,7";
+			};
+			name = Debug;
+		};
+		8004D9382C464F8D001936E9 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				"ASSETCATALOG_COMPILER_APPICON_NAME[sdk=appletvos*]" = AppIconTVOS;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
+				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_ENTITLEMENTS = Player.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 20102;
+				DEVELOPMENT_TEAM = 3RVHT92X9D;
+				ENABLE_HARDENED_RUNTIME = YES;
+				"ENABLE_HARDENED_RUNTIME[sdk=macosx*]" = YES;
+				ENABLE_PREVIEWS = YES;
+				INFOPLIST_FILE = "Player-Vision.plist";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.video";
+				INFOPLIST_KEY_LSSupportsOpeningDocumentsInPlace = YES;
+				INFOPLIST_KEY_UILaunchStoryboardName = " ";
+				INFOPLIST_KEY_UIRequiresFullScreen = YES;
+				INFOPLIST_KEY_UIStatusBarStyle = UIStatusBarStyleDarkContent;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 2.1.2;
+				PRODUCT_BUNDLE_IDENTIFIER = com.kintan.player;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				"PROVISIONING_PROFILE_SPECIFIER[sdk=macosx*]" = "";
+				SUPPORTED_PLATFORMS = "appletvos appletvsimulator iphoneos iphonesimulator macosx xros xrsimulator";
+				SUPPORTS_MACCATALYST = YES;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2,3,6,7";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
 		AC77DFC926402329001351AE /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -260,6 +433,7 @@
 				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_NAME = Player;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_ENABLE_EXPLICIT_MODULES = YES;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				TVOS_DEPLOYMENT_TARGET = 16.0;
 			};
@@ -322,6 +496,7 @@
 				MTL_FAST_MATH = YES;
 				PRODUCT_NAME = Player;
 				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_ENABLE_EXPLICIT_MODULES = YES;
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
 				TVOS_DEPLOYMENT_TARGET = 16.0;
 			};
@@ -415,6 +590,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		8004D9362C464F8D001936E9 /* Build configuration list for PBXNativeTarget "SimplePlayer" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				8004D9372C464F8D001936E9 /* Debug */,
+				8004D9382C464F8D001936E9 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		AC77DFAE26402327001351AE /* Build configuration list for PBXProject "Player" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
@@ -435,7 +619,48 @@
 		};
 /* End XCConfigurationList section */
 
+/* Begin XCLocalSwiftPackageReference section */
+		AC67EBA030767CC200642B68 /* XCLocalSwiftPackageReference "../../../KSPlayer" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = ../../../KSPlayer;
+		};
+/* End XCLocalSwiftPackageReference section */
+
 /* Begin XCSwiftPackageProductDependency section */
+		AC107B3E306FDB6F0068A9FD /* KSPlayer */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = KSPlayer;
+		};
+		AC107B40306FDB6F0068A9FD /* KSPlayerUI */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = KSPlayerUI;
+		};
+		AC67EBA130767CC200642B68 /* KSPlayer */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = KSPlayer;
+		};
+		AC67EBA330767CC200642B68 /* KSPlayerUI */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = KSPlayerUI;
+		};
+		AC67EBA530767CC200642B68 /* MPVPlayer */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = MPVPlayer;
+		};
+		AC67EBD53076B04300642B68 /* KSPlayerUI */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = AC67EBA030767CC200642B68 /* XCLocalSwiftPackageReference "../../../KSPlayer" */;
+			productName = KSPlayerUI;
+		};
+		AC67EBD73076B04400642B68 /* MPVPlayer */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = AC67EBA030767CC200642B68 /* XCLocalSwiftPackageReference "../../../KSPlayer" */;
+			productName = MPVPlayer;
+		};
+		AC6A55412EAE5DAF00DFD5CB /* MPVPlayer */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = MPVPlayer;
+		};
 		ACD2F771275F735C0006D16F /* KSPlayer */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = KSPlayer;

@@ -9,25 +9,72 @@ import CoreData
 import CoreMedia
 import Foundation
 import KSPlayer
+import KSPlayerUI
+import SwiftUI
 #if canImport(UIKit)
 import UIKit
 #endif
 class MEOptions: KSOptions {
-    #if os(iOS)
-    static var isUseDisplayLayer = true
-    #else
-    static var isUseDisplayLayer = false
-    #endif
-    override init() {
+    private let fileIOContextType: String
+    private let saveCacheVideo: Bool
+    private let isSelectMaxBitRateTrack: Bool
+    private let isLowDelay: Bool
+    private let isQuickOpen: Bool
+    private let isForceISO: Bool
+    private let preLoadMaxFileSize: UInt64
+    private let isRecordVideo: Bool
+
+    required init() {
+        fileIOContextType = UnsafeDefaults.shared.fileIOContextType
+        saveCacheVideo = UnsafeDefaults.shared.saveCacheVideo
+        preLoadMaxFileSize = UInt64(UnsafeDefaults.shared.preLoadMaxFileSize)
+        isSelectMaxBitRateTrack = UnsafeDefaults.shared.isSelectMaxBitRateTrack
+        isLowDelay = UnsafeDefaults.shared.isLowDelay
+        isQuickOpen = UnsafeDefaults.shared.isQuickOpen
+        isForceISO = UnsafeDefaults.shared.isForceISO
+        isRecordVideo = UnsafeDefaults.shared.isRecordVideo
         super.init()
+        playbackTimeInterval = UnsafeDefaults.shared.playbackTimeInterval
+        renderUseDispatchSourceTimer = UnsafeDefaults.shared.renderUseDispatchSourceTimer
+        isSeekImageSubtitle = UnsafeDefaults.shared.isSeekImageSubtitle
+        seekUsePacketCache = UnsafeDefaults.shared.seekUsePacketCache
+        isDoubleRefreshRate = UnsafeDefaults.shared.isDoubleRefreshRate
+        if !UnsafeDefaults.shared.videoFilters.isEmpty {
+            videoFilters = [UnsafeDefaults.shared.videoFilters]
+        }
+        if !UnsafeDefaults.shared.audioFilters.isEmpty {
+            audioFilters = [UnsafeDefaults.shared.audioFilters]
+        }
+        if UnsafeDefaults.shared.isKeepAlive {
+            formatContextOptions["multiple_requests"] = 1
+        }
+    }
+
+    override open func wantedVideo(tracks: [MediaPlayerTrack]) -> MediaPlayerTrack? {
+        isSelectMaxBitRateTrack ? tracks.max { left, right in
+            left.bitRate < right.bitRate
+        } : super.wantedVideo(tracks: tracks)
+    }
+
+    override func wantedAudio(tracks: [any MediaPlayerTrack]) -> (any MediaPlayerTrack)? {
+        isSelectMaxBitRateTrack ? tracks.max { left, right in
+            left.bitRate < right.bitRate
+        } : nil
+    }
+
+    override func isUseDisplayLayer(frame: VideoVTBFrame, isHDRScreen: Bool) -> Bool {
+        Defaults.shared.isUseDisplayLayer && super.isUseDisplayLayer(frame: frame, isHDRScreen: isHDRScreen)
     }
 
     override func process(assetTrack: some MediaPlayerTrack) {
         super.process(assetTrack: assetTrack)
-    }
-
-    override func isUseDisplayLayer() -> Bool {
-        MEOptions.isUseDisplayLayer && display == .plane
+        if assetTrack.mediaType == .video {
+            videoDecodeType = UnsafeDefaults.shared.videoDecodeType
+            if !UnsafeDefaults.shared.videoFilters.isEmpty {
+                videoFilters = [UnsafeDefaults.shared.videoFilters]
+                videoDecodeType = .software
+            }
+        }
     }
 }
 
@@ -154,7 +201,7 @@ extension M3UModel {
         guard let m3uURL else {
             return []
         }
-        let result = try await m3uURL.parsePlaylist()
+        let (_, result) = try await m3uURL.parsePlaylist()
         guard result.count > 0 else {
             delete()
             return []
@@ -270,17 +317,12 @@ extension KSVideoPlayerView {
         let options = MEOptions()
         #if DEBUG
         if url.lastPathComponent == "h264.mp4" {
-//            options.videoFilters = ["hflip", "vflip"]
-//            options.hardwareDecode = false
             options.startPlayTime = 13
         } else if url.lastPathComponent == "vr.mp4" {
-            options.display = .vr
+            options.display = KSOptions.displayEnumVR
         } else if url.lastPathComponent == "mjpeg.flac" {
 //            options.videoDisable = true
             options.syncDecodeAudio = true
-        } else if url.lastPathComponent == "subrip.mkv" {
-            options.asynchronousDecompression = false
-            options.videoFilters.append("yadif_videotoolbox=mode=\(MEOptions.yadifMode):parity=-1:deint=1")
         } else if url.lastPathComponent == "big_buck_bunny.mp4" {
             options.startPlayTime = 25
         } else if url.lastPathComponent == "bipbopall.m3u8" {
@@ -304,3 +346,13 @@ extension KSVideoPlayerView {
         self.init(url: url, options: options, title: model.name)
     }
 }
+
+#if DEBUG
+@available(iOS 16.0, macOS 13.0, tvOS 16.0, watchOS 9.0, *)
+struct KSVideoPlayerView2_Previews: PreviewProvider {
+    static var previews: some View {
+        let url = URL(string: "https://raw.githubusercontent.com/kingslay/TestVideo/main/subrip.mkv")!
+        KSVideoPlayerView(url: url)
+    }
+}
+#endif

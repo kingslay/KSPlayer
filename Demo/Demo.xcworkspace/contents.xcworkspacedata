@@ -4,16 +4,4 @@
    <FileRef
       location = "group:SwiftUI/Player.xcodeproj">
    </FileRef>
-   <FileRef
-      location = "group:demo-iOS/demo-iOS.xcodeproj">
-   </FileRef>
-   <FileRef
-      location = "group:demo-macOS/demo-macOS.xcodeproj">
-   </FileRef>
-   <FileRef
-      location = "group:demo-tvOS/demo-tvOS.xcodeproj">
-   </FileRef>
-   <FileRef
-      location = "group:Pods/Pods.xcodeproj">
-   </FileRef>
 </Workspace>

@@ -4,8 +4,8 @@
 //  Trap guard + regression tests for FFmpegAssetTrack.audioNominalFrameRate.
 //
 
-@testable import KSPlayer
 import FFmpegKit
+@testable import KSPlayer
 import XCTest
 
 final class FFmpegAssetTrackTest: XCTestCase {

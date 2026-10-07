@@ -68,7 +68,7 @@ class M3UParseTest: XCTestCase {
         http://stream/2
         """.data(using: .utf8)!
         let result = data.parsePlaylist()
-        XCTAssertEqual(result.count, 2, "got \(result.count) entries: \(result.map { $0.1.absoluteString })")
+        XCTAssertEqual(result.count, 2, "got \(result.count) entries: \(result.map(\.1.absoluteString))")
         XCTAssertEqual(result[0].2["tvg-id"], "chan1", "entry0 extinf: \(result[0].2)")
         XCTAssertEqual(result[0].2["tvg-name"], "Channel One", "entry0 extinf: \(result[0].2)")
         XCTAssertEqual(result[0].0, "Channel One")
@@ -79,7 +79,7 @@ class M3UParseTest: XCTestCase {
         XCTAssertEqual(result[1].1.absoluteString, "http://stream/2")
     }
 
-    func testURLParse() async {
+    func testURLParse() {
 //        let url = Bundle(for: M3UParseTest.self).url(forResource: "test.m3u", withExtension: nil)!
 //        if let result = try? await url.parsePlaylist() {
 //            XCTAssertEqual(result.count > 0, true)

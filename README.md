@@ -19,65 +19,69 @@ KSPlayer defaults to the GPL license (requires open-sourcing your own project co
 If due to commercial reasons, you prefer not to adhere to the GPL license  or the LGPL license, you can contact us. Through our authorization, you can obtain a more flexible licensing agreement.
 
 ## Features
-Functional differences between GPL version and LGPL version.
-Some features of the LGPL version require a one-time payment, which I have used 💰 to mark them out.
+Differences between GPL version and LGPL version.
+| Module | GPL Version | LGPL Version |
+|---|---|---|
+| **KSPlayer** | Dynamic Binary, macOS only | Source code, all Apple platforms |
+| **KSPlayerUI** | Source code, all Apple platforms | Source code, all Apple platforms |
+| **MPVPlayer** | Source code, all Apple platforms | Source code, all Apple platforms |
 
-To experience the powerful features of the LGPL version, you can download the app from the App Store. [App Store Link](https://apps.apple.com/app/tracyplayer/id6450770064) [Test Flight Link](https://testflight.apple.com/join/eNmYbmZN)
+### One-time Paid Features
 
+- Video upscaling
+- ProgressBar Preview
+- Precache data to Hard Drive
+- Video output to another screen
+- Video switching with zero delay
+- Audio Passthrough Output by Wi-Fi
+- Live streaming supports rewind viewing
+- Offline AI real-time subtitle generation
+- Simultaneous playback of separate audio and video URLs
+- Blu-ray disc (ISO, BDMV, DVD) playback on all Apple platforms
+- Play videos in a small window in the App (resumable, supports iOS and tvOS)
+- AVPlayer supports MKV
+- Native Dolby Atmos (E-AC-3)
+- Native Dolby Vision dynamic metadata (P5, P8)
 
-| Feature     | LGPL      | GPL    |
-| ----------- | --------- | ------ |
-|Video upscaling |💰|❌|
-|ProgressBar Preview |💰|❌|
-|Precache data to Hard Drive|💰|❌|
-|Video output to another screen|💰|❌|
-|Video switching with zero delay|💰|❌|
-|Audio Passthrough Output by Wi-Fi|💰|❌|
-|Live streaming supports rewind viewing|💰|❌|
-|Offline AI real-time subtitle generation|💰|❌|
-|Simultaneous playback of separate audio and video URLs|💰|❌|
-|Blu-ray disc(ISO、BDMV、DVD) playback on all Apple platforms|💰|❌|
-|Play videos in a small window in the App (resumable, supports iOS and tvOS)|💰|❌|
-|AVPlayer supports MKV|💰|❌|
-|Native Dolby Atmos(eac3) |💰|❌|
-|Native Dolby Vision dynamic metadata(P5、P8)|💰|❌|
-|Dolby AC-4|✅|❌|
-|Swift Concurrency|✅|❌|
-|Hardware De-interlace|✅|❌|
-|AV1 hardware decoding|✅|❌|
-|Word-by-word subtitles|✅|❌|
-|HDR10+ dynamic metadata|✅|❌|
-|Text subtitle translation|✅|❌|
-|Use System Caption Appearance|✅|❌|
-|Record video clips at any time|✅|❌|
-|Smoothly Play 8K or 120 FPS Video|✅|❌|
-|Display Subtitles with HDR Effects|✅|❌|
-|Video download and format conversion|✅|❌|
-|External image subtitles, such as SUP|✅|❌|
-|Main subtitles and Secondary subtitles|✅|❌|
-|Offline AI real-time subtitle translation|✅|❌|
-|Adjust Saturation, Brightness, and Contrast|✅|❌|
-|Picture in Picture supports subtitle display|✅|❌|
-|Annex-B async hardware decoding(Live Stream)|✅|❌|
-|Use the fonts in the video to render subtitles|✅|❌|
-|Use memory cache for fast seek in short time range|✅|❌|
-|KSMEPlayer supports all demuxing and decoding formats|✅|❌|
-|Full display of ass subtitles effect(Render as image using libass)|✅|❌|
-|FFmpeg version|9.0.2|6.1.0|
-|Record video|✅|✅|
-|4k/HDR/HDR10|✅|✅|
-|360° panorama video|✅|✅|
-|Picture in Picture|✅|✅|
-|Hardware accelerator|✅|✅|
-|De-interlace auto detect|✅|✅|
-|Multichannel Audio/Spatial Audio|✅|✅|
-|Custom url protocols such as nfs/smb |✅|✅|
-|Text subtitle/Image subtitle/Closed Captions|✅|✅|
-|Seamless loop playback within a specific range|✅|✅|
-|Search Online Subtitles(shooter/assrt/opensubtitles)|✅|✅|
-|Low latency 4K live video streaming (less than 200ms on LAN)|✅|✅|
-|Automatically switch to multi-bitrate streams based on network|✅|✅|
+To experience the paid features, you can download the app from the App Store. [App Store Link](https://apps.apple.com/app/tracyplayer/id6450770064) [Test Flight Link](https://testflight.apple.com/join/eNmYbmZN)
 
+### Free Features
+
+- Dolby AC-4
+- Swift Concurrency
+- Hardware De-interlace
+- AV1 hardware decoding
+- Word-by-word subtitles
+- HDR10+ dynamic metadata
+- Text subtitle translation
+- Use System Caption Appearance
+- Record video clips at any time
+- Smoothly Play 8K or 120 FPS Video
+- Display Subtitles with HDR Effects
+- Video download and format conversion
+- External image subtitles, such as SUP
+- Main subtitles and Secondary subtitles
+- Offline AI real-time subtitle translation
+- Adjust Saturation, Brightness, and Contrast
+- Picture in Picture supports subtitle display
+- Annex-B async hardware decoding (Live Stream)
+- Use the fonts in the video to render subtitles
+- Use memory cache for fast seek in short time range
+- KSMEPlayer supports all demuxing and decoding formats
+- Full display of ASS subtitle effects (rendered as images using libass)
+- Record video
+- 4K / HDR / HDR10
+- 360° panorama video
+- Picture in Picture
+- Hardware accelerator
+- Automatic de-interlace detection
+- Multichannel Audio / Spatial Audio
+- Custom URL protocols such as NFS / SMB
+- Text subtitles / Image subtitles / Closed Captions
+- Seamless loop playback within a specific range
+- Search online subtitles (Shooter / ASSRT / OpenSubtitles)
+- Low-latency 4K live video streaming (less than 200 ms on LAN)
+- Automatically switch to multi-bitrate streams based on network conditions
 
 ## Requirements
 
@@ -105,10 +109,6 @@ This table does not list all licensed apps. If you would like to have your app l
 
 ## Demo
 
-```bash
-cd Demo
-pod install
-```
 - Open Demo/Demo.xcworkspace with Xcode.
 
 ## Quick Start
@@ -121,25 +121,14 @@ dependencies: [
 ]
 ```
 
-#### CocoaPods
-
-Make sure to use the latest version **cocoapods 1.10.1+**, which can be installed using the command `brew install cocoapods`
-
-```ruby
-target 'ProjectName' do
-    use_frameworks!
-    pod 'KSPlayer',:git => 'https://github.com/kingslay/KSPlayer.git', :branch => 'main'
-    pod 'DisplayCriteria',:git => 'https://github.com/kingslay/KSPlayer.git', :branch => 'main'
-    pod 'FFmpegKit',:git => 'https://github.com/kingslay/FFmpegKit.git', :branch => 'main'
-    pod 'Libass',:git => 'https://github.com/kingslay/FFmpegKit.git', :branch => 'main'
-end
-```
-
 ## Usage
 
 #### Initialization
 
 ```swift
+import KSPlayer
+import KSPlayerUI
+
 KSOptions.secondPlayerType = KSMEPlayer.self
 playerView = IOSVideoPlayerView()
 view.addSubview(playerView)
@@ -162,6 +151,9 @@ playerView.backBlock = { [unowned self] in
 #### Setting up a regular video
 
 ```swift
+import KSPlayer
+import KSPlayerUI
+
 playerView.set(url:URL(string: "http://baobab.wdjcdn.com/14525705791193.mp4")!)
 playerView.set(resource: KSPlayerResource(url: url, name: name!, cover: URL(string: "http://img.wdjimg.com/image/video/447f973848167ee5e44b67c8d4df9839_0_0.jpeg"), subtitleURL: URL(string: "http://example.ksplay.subtitle")))
 ```
@@ -169,6 +161,9 @@ playerView.set(resource: KSPlayerResource(url: url, name: name!, cover: URL(stri
 #### Multi-definition, with cover video
 
 ```swift
+import KSPlayer
+import KSPlayerUI
+
 let res0 = KSPlayerResourceDefinition(url: URL(string: "http://clips.vorwaerts-gmbh.de/big_buck_bunny.mp4")!,
                                       definition: "高清")
 let res1 = KSPlayerResourceDefinition(url: URL(string: "http://clips.vorwaerts-gmbh.de/big_buck_bunny.mp4")!,
@@ -183,6 +178,9 @@ playerView.set(resource: asset)
 #### Setting up an HTTP header
 
 ```swift
+import KSPlayer
+import KSPlayerUI
+
 let options = KSOptions()
 options.appendHeader(["Referer":"https:www.xxx.com"])
 let definition = KSPlayerResourceDefinition(url: URL(string: "http://clips.vorwaerts-gmbh.de/big_buck_bunny.mp4")!,
@@ -196,6 +194,9 @@ playerView.set(resource: asset)
 #### Listening status change
 
 ```swift
+import KSPlayer
+import KSPlayerUI
+
 // Listen to play time change
 playerView.playTimeDidChange = { (currentTime: TimeInterval, totalTime: TimeInterval) in
     print("playTimeDidChange currentTime: \(currentTime) totalTime: \(totalTime)")
@@ -215,9 +216,12 @@ public protocol PlayerControllerDelegate: class {
 
 ## Advanced Usage
 
-- ### Inherits PlayerView's custom play logic and UI.
+### Inherits PlayerView's custom play logic and UI.
 
-  ```swift
+```swift
+import KSPlayer
+import KSPlayerUI
+
   class CustomVideoPlayerView: IOSVideoPlayerView {
       override func updateUI(isLandscape: Bool) {
           super.updateUI(isLandscape: isLandscape)
@@ -232,13 +236,16 @@ public protocol PlayerControllerDelegate: class {
           }
       }
   }
-  ```
+```
 
 
 
-- ### Selecting Tracks
+### Selecting Tracks
 
-  ```swift
+```swift
+import KSPlayer
+import KSPlayerUI
+
      override open func player(layer: KSPlayerLayer, state: KSPlayerState) {
           super.player(layer: layer, state: state)
           if state == .readyToPlay, let player = layer.player {
@@ -252,71 +259,7 @@ public protocol PlayerControllerDelegate: class {
               player.select(track: track)
           }
      }
-  ```
-
-- ### Set the properties in KSOptions
-
-  ```swift
-  open class KSOptions {
-    /// 最低缓存视频时间
-    @Published
-    public var preferredForwardBufferDuration = KSOptions.preferredForwardBufferDuration
-    /// 最大缓存视频时间
-    public var maxBufferDuration = KSOptions.maxBufferDuration
-    /// 是否开启秒开
-    public var isSecondOpen = KSOptions.isSecondOpen
-    /// 开启精确seek
-    public var isAccurateSeek = KSOptions.isAccurateSeek
-    /// Applies to short videos only
-    public var isLoopPlay = KSOptions.isLoopPlay
-    /// 是否自动播放，默认false
-    public var isAutoPlay = KSOptions.isAutoPlay
-    /// seek完是否自动播放
-    public var isSeekedAutoPlay = KSOptions.isSeekedAutoPlay
-    /*
-     AVSEEK_FLAG_BACKWARD: 1
-     AVSEEK_FLAG_BYTE: 2
-     AVSEEK_FLAG_ANY: 4
-     AVSEEK_FLAG_FRAME: 8
-     */
-    public var seekFlags = Int32(0)
-    // ffmpeg only cache http
-    public var cache = false
-    public var outputURL: URL?
-    public var display = DisplayEnum.plane
-    public var avOptions = [String: Any]()
-    public var formatContextOptions = [String: Any]()
-    public var decoderOptions = [String: Any]()
-    public var probesize: Int64?
-    public var maxAnalyzeDuration: Int64?
-    public var lowres = UInt8(0)
-    public var startPlayTime: TimeInterval = 0
-    public var startPlayRate: Float = 1.0
-    public var registerRemoteControll: Bool = true // 默认支持来自系统控制中心的控制
-    public var referer: String?
-    public var userAgent: String?
-      // audio
-    public var audioFilters = [String]()
-    public var syncDecodeAudio = false
-    // sutile
-    public var autoSelectEmbedSubtitle = true
-    public var subtitleDisable = false
-    public var isSeekImageSubtitle = false
-    // video
-    public var videoDelay = 0.0 // s
-    public var autoDeInterlace = false
-    public var autoRotate = true
-    public var destinationDynamicRange: DynamicRange?
-    public var videoAdaptable = true
-    public var videoFilters = [String]()
-    public var syncDecodeVideo = false
-    public var hardwareDecode = KSOptions.hardwareDecode
-    public var asynchronousDecompression = true
-    public var videoDisable = false
-    public var canStartPictureInPictureAutomaticallyFromInline = true
-  }
-
-  ```
+```
 
 
 ## Effect
