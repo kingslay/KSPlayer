@@ -28,6 +28,10 @@ let package = Package(
         ),
     ],
     targets: [
+        .binaryTarget(
+            name: "KSPlayer",
+            path: "Sources/KSPlayer.xcframework"
+        ),
         .target(
             name: "MPVPlayer",
             dependencies: [
@@ -39,10 +43,6 @@ let package = Package(
                     "-experimental-package-interface-load",
                 ]),
             ]
-        ),
-        .binaryTarget(
-            name: "KSPlayer",
-            path: "Sources/KSPlayer.xcframework"
         ),
         .target(
             name: "KSPlayerUI",
@@ -58,15 +58,14 @@ let package = Package(
                 ]),
             ]
         ),
-        .target(
-            name: "DisplayCriteria",
-            dependencies: [
-                "FFmpegKit",
-            ]
-        ),
         .testTarget(
             name: "KSPlayerUITests",
-            dependencies: ["KSPlayerUI"]
+            dependencies: ["KSPlayerUI"],
+            swiftSettings: [
+                .unsafeFlags([
+                    "-experimental-package-interface-load",
+                ]),
+            ]
         ),
     ],
     swiftLanguageModes: [
