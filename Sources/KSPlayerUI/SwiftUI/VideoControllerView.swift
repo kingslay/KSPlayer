@@ -760,9 +760,9 @@ private extension DynamicInfo {
         var log = String(localized: "Display FPS", bundle: .module) + ": \(displayFPS)\n"
             + String(localized: "Dropped Frames", bundle: .module) + ": \(droppedVideoFrameCount)\n"
             + String(localized: "Audio Video sync", bundle: .module) + ": \(audioVideoSyncDiff)\n"
-            + String(localized: "Network Speed", bundle: .module) + ": \(networkSpeed.kmFormatted)B/s\n"
+        log += String(localized: "Network Speed", bundle: .module) + ": \(networkSpeed.kmFormatted)B/s\n"
         #if DEBUG
-//        log += String(localized: "Average Audio Video sync", bundle: .module) + ": \(averageAudioVideoSyncDiff)\n"
+        log += String(localized: "Average Audio Video sync", bundle: .module) + ": \(averageAudioVideoSyncDiff)\n"
         #endif
         return log
     }

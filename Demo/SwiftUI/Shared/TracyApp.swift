@@ -196,6 +196,7 @@ class APPModel: ObservableObject {
 
     init() {
         #if DEBUG
+        KSOptions.logLevel = .warning
 //        KSOptions.logLevel = .debug
         #else
         var fileHandle = FileHandle.standardOutput

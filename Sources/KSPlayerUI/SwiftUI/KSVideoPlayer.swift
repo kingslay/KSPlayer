@@ -233,7 +233,18 @@ extension KSVideoPlayer: UIViewRepresentable {
             state = playerLayer.state
         }
 
-        public init() {}
+        public init() {
+        #if DEBUG
+            KSLog("KSVideoPlayer.Coordinator init")
+        #endif
+        }
+
+        #if DEBUG
+        /// macOS会在第一次退出播放器界面就销毁对象，tvOS要在第二次退出销毁，iOS要在第三次调用才会销毁
+        deinit {
+            KSLog("KSVideoPlayer.Coordinator deinit")
+        }
+         #endif
 
         public func makeView(url: URL, options: KSOptions) -> UIView {
             // 不要addLocalMonitorForEvents(matching: [.mouseMoved])不然光标在外面移动的时候，也会调用updateNSView
@@ -296,13 +307,6 @@ extension KSVideoPlayer: UIViewRepresentable {
             // 不要在这里隐藏状态栏，因为业务会把播放器嵌入到某个view里面，可能需要一直显示状态栏
             #endif
         }
-
-        #if DEBUG
-        /// macOS会在第一次退出播放器界面就销毁对象，tvOS要在第二次退出销毁，iOS要在第三次调用才会销毁
-        deinit {
-            KSLog("KSVideoPlayer.Coordinator deinit")
-        }
-        #endif
     }
 }
 

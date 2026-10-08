@@ -45,12 +45,12 @@ public struct KSVideoPlayerView: View {
                     // onChange不会马上就回调，会少一些状态的回调。要用onReceive才不会有这个问题
                     .onReceive(model.config.$state) { state in
                         if state == .readyToPlay {
-                            #if os(iOS)
+#if os(iOS)
                             if let playerLayer = model.config.playerLayer, playerLayer.player.naturalSize.isHorizonal == true, !UIApplication.isLandscape {
                                 KSOptions.supportedInterfaceOrientations = .landscapeRight
                                 UIViewController.attemptRotationToDeviceOrientation()
                             }
-                            #endif
+#endif
                         }
                     }
 #if os(macOS) || os(iOS) || os(visionOS)
@@ -68,7 +68,7 @@ public struct KSVideoPlayerView: View {
                     HUDLogView(dynamicInfo: playerLayer.player.dynamicInfo)
                 }
                 // 需要放在这里才能生效
-                #if canImport(UIKit)
+#if canImport(UIKit)
                 GestureView { direction in
                     switch direction {
                     case .left:
@@ -98,7 +98,7 @@ public struct KSVideoPlayerView: View {
                 }
                 .isFocused($model.focusableView, equals: .play)
                 .opacity(!model.config.isMaskShow ? 1 : 0)
-                #endif
+#endif
                 controllerView
                     .sheet(isPresented: $model.showVideoSetting) {
                         VideoSettingView(model: model)
@@ -111,7 +111,7 @@ public struct KSVideoPlayerView: View {
             .preferredColorScheme(.dark)
             .persistentSystemOverlays(.hidden)
             .toolbar(.hidden, for: .automatic)
-            #if os(macOS)
+#if os(macOS)
             .toolbar(model.config.isMaskShow ? .visible : .hidden, for: .windowToolbar)
             // onHover在view里面移动光标，onHover不会在回调
             // 要放在最上面的view。这样才不会被controllerView盖住
@@ -126,12 +126,12 @@ public struct KSVideoPlayerView: View {
                     model.config.isMaskShow = false
                 }
             }
-            #else
+#else
             .toolbar(.hidden, for: .tabBar)
-            #endif
-            #if os(iOS)
+#endif
+#if os(iOS)
             .statusBar(hidden: !model.config.isMaskShow)
-            #endif
+#endif
             .focusedObject(model.config)
             .onChange(of: model.config.isMaskShow) { newValue in
                 if newValue {
@@ -140,7 +140,7 @@ public struct KSVideoPlayerView: View {
                     model.focusableView = .play
                 }
             }
-            #if os(tvOS)
+#if os(tvOS)
             // 要放在最上层才不会有焦点丢失问题
             .onPlayPauseCommand {
                 if model.config.state.isPlaying {
@@ -161,7 +161,7 @@ public struct KSVideoPlayerView: View {
                     }
                 }
             }
-            #endif
+#endif
         } else {
             controllerView
         }
@@ -183,19 +183,19 @@ public struct KSVideoPlayerView: View {
 
     private var controllerView: some View {
         VideoControllerView(model: model)
-        #if !os(tvOS)
+#if !os(tvOS)
         // 要放在最上面才能修改url
-        .onDrop(of: ["public.file-url"], isTargeted: nil) { providers -> Bool in
-            providers.first?.loadDataRepresentation(forTypeIdentifier: "public.file-url") { data, _ in
-                if let data, let path = NSString(data: data, encoding: 4), let url = URL(string: path as String) {
-                    Task { @MainActor in
-                        openURL(url)
+            .onDrop(of: ["public.file-url"], isTargeted: nil) { providers -> Bool in
+                providers.first?.loadDataRepresentation(forTypeIdentifier: "public.file-url") { data, _ in
+                    if let data, let path = NSString(data: data, encoding: 4), let url = URL(string: path as String) {
+                        Task { @MainActor in
+                            openURL(url)
+                        }
                     }
                 }
+                return true
             }
-            return true
-        }
-        #endif
+#endif
     }
 }
 
@@ -207,13 +207,15 @@ public extension KSVideoPlayerView {
 
     /// xcode 15.2还不支持对MainActor参数设置默认值
     init(coordinator: KSVideoPlayer.Coordinator? = nil, url: URL, options: KSOptions, title: String? = nil, subtitleDataSource: SubtitleDataSource? = nil, liftCycleBlock: ((KSVideoPlayer.Coordinator, Bool) -> Void)? = nil) {
-        self.init(model: StateObject(wrappedValue: KSVideoPlayerModel(title: title ?? url.lastPathComponent, config: coordinator, options: options, url: url)),
-                  subtitleDataSource: subtitleDataSource,
-                  liftCycleBlock: liftCycleBlock)
+        _model = StateObject(wrappedValue: KSVideoPlayerModel(title: title ?? url.lastPathComponent, config: coordinator, options: options, url: url))
+        self.subtitleDataSource = subtitleDataSource
+        self.liftCycleBlock = liftCycleBlock
     }
 
     init(playerLayer: KSPlayerLayer) {
-        self.init(model: StateObject(wrappedValue: KSVideoPlayerModel(playerLayer: playerLayer)))
+        _model = StateObject(wrappedValue: KSVideoPlayerModel(playerLayer: playerLayer))
+        subtitleDataSource = nil
+        liftCycleBlock = nil
     }
 }
 
@@ -236,11 +238,11 @@ open class KSVideoPlayerModel: ObservableObject, URLSubtitleDataSource, @uncheck
                     subtitleURLs = []
                     extensionInfos = [:]
                 }
-                #if os(macOS)
+#if os(macOS)
                 runOnMainThread {
                     NSDocumentController.shared.noteNewRecentDocumentURL(url)
                 }
-                #endif
+#endif
             }
         }
     }
@@ -277,11 +279,11 @@ open class KSVideoPlayerModel: ObservableObject, URLSubtitleDataSource, @uncheck
             self?.url = url
         }
 
-        #if os(macOS)
+#if os(macOS)
         if let url {
             NSDocumentController.shared.noteNewRecentDocumentURL(url)
         }
-        #endif
+#endif
     }
 
     @MainActor
