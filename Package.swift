@@ -48,6 +48,7 @@ let package = Package(
             name: "KSPlayerUI",
             dependencies: [
                 "KSPlayer",
+                "FFmpegKit",
             ],
             resources: [
                 .process("Localizable.xcstrings"),
